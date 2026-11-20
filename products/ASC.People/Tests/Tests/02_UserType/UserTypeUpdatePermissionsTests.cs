@@ -159,6 +159,40 @@ public class UserTypeUpdatePermissionsTests(AspireAppFixture fixture) : BaseTest
         progress.Error.Should().Be("You don't have enough permission to perform the operation");
     }
 
+    /// <summary>
+    /// A Room admin cannot demote another Room admin to User: the synchronous endpoint answers 403, the job
+    /// endpoint accepts the request but the job ends with a permission error, and the type stays Room admin.
+    /// </summary>
+    [Fact]
+    public async Task UserTypeUpdate_RoomAdminDemotesRoomAdmin_RefusedAndTypeUnchanged()
+    {
+        var target = await InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+
+        await _peopleClient.Authenticate(roomAdmin);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _userTypeApi.UpdateUserTypeAsync(
+                EmployeeType.User,
+                new UpdateMembersRequestDto([target.Id]),
+                TestContext.Current.CancellationToken));
+        exception.ErrorCode.Should().Be(403);
+
+        await _userTypeApi.StartUserTypeUpdateAsync(
+            new StartUpdateUserTypeDto(EmployeeType.User, target.Id),
+            TestContext.Current.CancellationToken);
+
+        await _peopleClient.Authenticate(Owner);
+
+        var progress = await UserTypeUpdatePolling.WaitForCompletionAsync(_userTypeApi, target.Id);
+
+        progress.IsCompleted.Should().BeTrue();
+        progress.Error.Should().Be("You don't have enough permission to perform the operation");
+
+        var profile = (await _profilesApi.GetProfileByUserIdAsync(target.Id.ToString(), TestContext.Current.CancellationToken)).Response;
+        profile.IsRoomAdmin.Should().BeTrue();
+    }
+
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "80669")]

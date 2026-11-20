@@ -59,12 +59,20 @@ public class LicenseReaderConfig
 
 public record LicenseValidationResult(bool IsValid, string ErrorMessage);
 
+/// <summary>
+/// The trial the editing service runs while it has no license file, as it reports it in its answer to the license
+/// command.
+/// </summary>
+/// <param name="DueDate">The UTC day the trial ends; only the date part is kept.</param>
+public record DocsTrialLicense(DateTime DueDate);
+
 [Scope]
 public class LicenseReader(
     TenantManager tenantManager,
     ITariffService tariffService,
     CoreSettings coreSettings,
     LicenseReaderConfig licenseReaderConfig,
+    IDistributedLockProvider distributedLockProvider,
     ILogger<LicenseReader> logger)
 {
     public readonly string LicensePath = licenseReaderConfig.LicensePath;
@@ -73,6 +81,46 @@ public class LicenseReader(
     private readonly LicenseType _licenseType = licenseReaderConfig.LicenseType;
 
     public const string CustomerIdKey = "CustomerId";
+
+    // The license quota and the tariff are written by the accept call and the setup wizard (Web.Api) and by the
+    // background refresh (Files.Worker): one writer at a time, so a trial never overwrites a license just accepted.
+    // That holds across processes only with a distributed lock provider (Redis or ZooKeeper); without one the lock is
+    // per process, and the check of the license file under it only narrows the race between Web.Api and the worker.
+    // Two writers stay outside this lock. The first read of the tariff creates the 30-day trial under the lock of the
+    // tariff read; both writers above read the tariff first under this lock, so that creation ends before their writes.
+    // That too holds across processes only with a distributed lock provider: without one each process has its own lock
+    // of the tariff read and its own tariff cache, and a first read already running in another process can still write
+    // its 30 days after them. The trial activated on request (an endpoint outside the published contract) refuses once
+    // any tariff end is set, so it can only run before the writers above have written
+    private static readonly string _licenseLockKey = $"{Tenant.DefaultTenant}_license";
+
+    /// <summary>The id of the quota that carries the license of a self-hosted Enterprise installation.</summary>
+    public const int LicenseQuotaId = -1000;
+
+    /// <summary>The name of the license quota written from a license file.</summary>
+    public const string LicenseQuotaName = "license";
+
+    /// <summary>
+    /// The name of the license quota of the trial an Enterprise installation runs while no license file is in force.
+    /// </summary>
+    public const string StartTrialQuotaName = "start_trial";
+
+    /// <summary>
+    /// Creates the license quota of the trial an Enterprise installation runs while no license file is in force: the
+    /// default quota, marked as a trial.
+    /// </summary>
+    public static TenantQuota CreateStartTrialQuota(TenantQuota defaultQuota)
+    {
+        return new TenantQuota(defaultQuota) { Name = StartTrialQuotaName, Trial = true, TenantId = LicenseQuotaId };
+    }
+
+    /// <summary>
+    /// Returns whether a license file is on disk, either the one in force or one uploaded and not yet accepted.
+    /// </summary>
+    public bool HasLicenseFile()
+    {
+        return !string.IsNullOrEmpty(LicensePath) && (File.Exists(LicensePath) || File.Exists(_licensePathTemp));
+    }
 
     public async Task SetCustomerIdAsync(string value)
     {
@@ -133,6 +181,12 @@ public class LicenseReader(
         var temp = applyStaged && File.Exists(_licensePathTemp);
         var bcp = temp && File.Exists(LicensePath);
 
+        // What has been done to the files so far: any failure before the license is applied puts them back, whatever
+        // it is (a refused license, an editing service that cannot be asked, the lock of the license writers)
+        var backedUp = false;
+        var written = false;
+        var applied = false;
+
         try
         {
             await using (var licenseStream = GetLicenseStream(temp))
@@ -144,10 +198,12 @@ public class LicenseReader(
                 if (bcp)
                 {
                     File.Move(LicensePath, _licensePathBcp, true);
+                    backedUp = true;
                 }
 
                 if (temp)
                 {
+                    written = true;
                     await SaveLicenseAsync(licenseStream, LicensePath);
                 }
 
@@ -158,6 +214,7 @@ public class LicenseReader(
                 }
 
                 await LicenseToDBAsync(license);
+                applied = true;
             }
 
             if (temp)
@@ -170,24 +227,35 @@ public class LicenseReader(
                 File.Delete(_licensePathBcp);
             }
         }
-        catch (BillingException ex) when (ex is BillingNotConfiguredException or BillingLicenseTypeException)
+        catch (Exception ex)
         {
-            if (bcp)
+            if (!applied)
             {
-                File.Move(_licensePathBcp, LicensePath, true);
-            }
-            else if (temp)
-            {
-                File.Delete(LicensePath);
+                RestoreLicenseFiles(backedUp, written);
             }
 
             LogError(ex);
             throw;
         }
+    }
+
+    private void RestoreLicenseFiles(bool backedUp, bool written)
+    {
+        try
+        {
+            if (backedUp)
+            {
+                File.Move(_licensePathBcp, LicensePath, true);
+            }
+            else if (written)
+            {
+                File.Delete(LicensePath);
+            }
+        }
         catch (Exception ex)
         {
-            LogError(ex);
-            throw;
+            // The failure that led here is the one the caller gets; this one is only logged
+            logger.ErrorWithException(ex);
         }
     }
 
@@ -261,13 +329,11 @@ public class LicenseReader(
     {
         Validate(license);
 
-        await SetCustomerIdAsync(license.CustomerId);
-
         var defaultQuota = await tenantManager.GetTenantQuotaAsync(Tenant.DefaultTenant);
 
-        var quota = new TenantQuota(-1000)
+        var quota = new TenantQuota(LicenseQuotaId)
         {
-            Name = "license",
+            Name = LicenseQuotaName,
             Trial = license.Trial,
             Audit = true,
             Ldap = true,
@@ -285,15 +351,233 @@ public class LicenseReader(
             Statistic = true
         };
 
-        await tenantManager.SaveTenantQuotaAsync(quota);
-
-        var tariff = new Tariff
+        // The quota and the tariff are two writes: if the tariff write fails after the quota one, the quota describes the
+        // new license and the tariff the previous one until the next refresh rewrites both from the file in force. When
+        // the failure leaves no file in force (an accept whose staged file had no active one to back up deletes it), no
+        // refresh rewrites them: they stay as written until a license is accepted. The customer id is written last, so
+        // it never names a license whose tariff is not in force.
+        await using (await distributedLockProvider.TryAcquireLockAsync(_licenseLockKey))
         {
-            Quotas = [new Quota(quota.TenantId, 1)],
-            DueDate = license.DueDate
-        };
+            // The tariff is read first, as the trial write does: on an installation without a tariff that read creates
+            // the 30-day trial, under the same quota id, and it has to end before the license is written over it
+            await tariffService.GetTariffAsync(Tenant.DefaultTenant, withRequestToPaymentSystem: false);
 
-        await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
+            await tenantManager.SaveTenantQuotaAsync(quota);
+
+            var tariff = new Tariff
+            {
+                Quotas = [new Quota(quota.TenantId, 1)],
+                DueDate = license.DueDate
+            };
+
+            await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
+
+            await SetCustomerIdAsync(license.CustomerId);
+        }
+    }
+
+    /// <summary>
+    /// Puts the installation's trial in force while neither the editing service nor this installation has a license
+    /// file, bringing its end closer to the end of the editing service's trial, never later.
+    /// </summary>
+    /// <remarks>
+    /// The license quota stays the installation's own trial quota (<see cref="StartTrialQuotaName"/>), created first
+    /// when it is missing or another trial is in force; the end is chosen by <see cref="ChooseTrialDueDate"/>, so an
+    /// editing service reinstalled with a fresh trial does not extend the portal's. Never replaces a license put in
+    /// force from a file: nothing is written while the license file is on disk or while the license quota was written
+    /// from a file, and the check runs under the lock the writers of a license from a file take too (across processes
+    /// only with a distributed lock provider). The tariff is read first under that lock, so on an installation without
+    /// a tariff the 30-day trial of the first read is created before this write and then brought closer, not written
+    /// over it by a read that started earlier (across processes, again, only with a distributed lock provider). That read
+    /// waits for the lock of the tariff read; when it is not acquired in time, the write fails with the lock's exception,
+    /// as it does when the lock of the license writers is not. Nothing is written when the trial in force already ends on the chosen
+    /// date. The chosen date is written even when it has passed, so the background refresh ends a trial the editing
+    /// service ended.
+    /// </remarks>
+    /// <returns>
+    /// <c>true</c> when the chosen end has not passed; <c>false</c> when no license path is configured, a license
+    /// from a file prevented the write, or the chosen end has already passed. A tariff write the tariff service drops without an error (it swallows a
+    /// conflicting concurrent insert) is not seen here.
+    /// </returns>
+    public async Task<bool> DocsTrialToDBAsync(DocsTrialLicense trial)
+    {
+        ArgumentNullException.ThrowIfNull(trial);
+
+        if (string.IsNullOrEmpty(LicensePath))
+        {
+            return false;
+        }
+
+        DateTime dueDate;
+
+        await using (await distributedLockProvider.TryAcquireLockAsync(_licenseLockKey))
+        {
+            if (File.Exists(LicensePath))
+            {
+                logger.InfoDocsTrialSkippedLicenseFile();
+                return false;
+            }
+
+            // The tariff is read first: on an installation without a tariff that read creates the 30-day trial under
+            // the lock of the tariff read, and it has to end before this write. Started later, it would find no tariff
+            // and write the 30 days over the end chosen here
+            await tariffService.GetTariffAsync(Tenant.DefaultTenant, withRequestToPaymentSystem: false);
+
+            // The other license quotas are trials DocSpace starts by itself: the 30-day one of an Enterprise
+            // installation without a license, or the one activated on request
+            var quota = await GetLicenseQuotaAsync();
+            if (quota?.Name == LicenseQuotaName)
+            {
+                logger.InfoDocsTrialSkippedLicenseQuota(quota.Name);
+                return false;
+            }
+
+            var (current, currentDueDate) = await GetTrialTariffAsync(quota);
+
+            dueDate = ChooseTrialDueDate(currentDueDate, trial.DueDate);
+
+            if (quota?.Name == StartTrialQuotaName && currentDueDate == dueDate)
+            {
+                return IsInForce(dueDate);
+            }
+
+            if (quota?.Name != StartTrialQuotaName)
+            {
+                quota = await tenantManager.SaveTenantQuotaAsync(CreateStartTrialQuota(await tenantManager.GetTenantQuotaAsync(Tenant.DefaultTenant)));
+            }
+
+            var tariff = new Tariff
+            {
+                Quotas = [new Quota(quota.TenantId, 1)],
+                DueDate = dueDate,
+                // The stored tariff reads back an empty customer, not null; a null one would never compare equal and
+                // every call would rewrite the tariff
+                CustomerId = current?.CustomerId ?? ""
+            };
+
+            await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
+        }
+
+        logger.InfoDocsTrialSaved(dueDate);
+        return IsInForce(dueDate);
+    }
+
+    /// <summary>
+    /// Returns whether the installation's trial would be in force if the editing service's trial were applied now:
+    /// no license file is on disk, no license from a file is in force, and the end <see cref="ChooseTrialDueDate"/>
+    /// would choose has not passed. Writes nothing of its own.
+    /// </summary>
+    /// <remarks>
+    /// The setup wizard page asks this without authentication, so the tariff is read through the cache of the tariff
+    /// service, as any page of the portal reads it. On a miss that read goes to the database, and on an Enterprise
+    /// installation without a tariff it creates the 30-day trial, as the first read of any page does. A write of the
+    /// tariff clears the cache, but the cached end can lag behind the stored one: until the cache expires when the
+    /// write comes from another process and there is no Redis, and when a read that started before the write fills
+    /// the cache after it. The wizard checks the stored tariff again before it writes.
+    /// </remarks>
+    public async Task<bool> WillDocsTrialBeInForceAsync(DocsTrialLicense trial)
+    {
+        ArgumentNullException.ThrowIfNull(trial);
+
+        if (string.IsNullOrEmpty(LicensePath) || File.Exists(LicensePath))
+        {
+            return false;
+        }
+
+        var quota = await GetLicenseQuotaAsync();
+        if (quota?.Name == LicenseQuotaName)
+        {
+            return false;
+        }
+
+        var (_, currentDueDate) = await GetTrialTariffAsync(quota, cached: true);
+
+        return WillTrialBeInForce(currentDueDate, trial.DueDate, DateTime.UtcNow);
+    }
+
+    /// <summary>
+    /// Returns whether a trial ending on the date <see cref="ChooseTrialDueDate"/> chooses is still in force on
+    /// <paramref name="utcNow"/>: a trial is in force through the whole day it ends on.
+    /// </summary>
+    /// <param name="currentDueDate">The end of the trial in force, or <c>null</c> when none is.</param>
+    /// <param name="docsDueDate">The end of the editing service's trial.</param>
+    /// <param name="utcNow">The current UTC time.</param>
+    public static bool WillTrialBeInForce(DateTime? currentDueDate, DateTime docsDueDate, DateTime utcNow)
+    {
+        return ChooseTrialDueDate(currentDueDate, docsDueDate).Date >= utcNow.Date;
+    }
+
+    /// <summary>
+    /// Chooses the end of the installation's trial from the end of the trial in force and the end of the editing
+    /// service's trial: the editing service's day, unless the trial in force ends on that day or earlier, which is then
+    /// kept as it is. The trial is only ever brought closer, and one ending later on the same day is not cut to its
+    /// start.
+    /// </summary>
+    /// <param name="currentDueDate">The end of the trial in force, or <c>null</c> when none is.</param>
+    /// <param name="docsDueDate">The end of the editing service's trial; only its date counts.</param>
+    public static DateTime ChooseTrialDueDate(DateTime? currentDueDate, DateTime docsDueDate)
+    {
+        var docsDay = docsDueDate.Date;
+
+        return currentDueDate.HasValue && currentDueDate.Value.Date <= docsDay ? currentDueDate.Value : docsDay;
+    }
+
+    /// <summary>
+    /// Returns whether the license quota is the trial an Enterprise installation creates on the first read of its
+    /// tariff (<see cref="StartTrialQuotaName"/>). Says nothing about its end, which may have passed.
+    /// </summary>
+    public async Task<bool> IsStartTrialQuotaAsync()
+    {
+        return (await GetLicenseQuotaAsync())?.Name == StartTrialQuotaName;
+    }
+
+    /// <summary>
+    /// Returns the end of the installation's own trial as stored: the tariff end of a license quota that was not
+    /// written from a license file and is a trial (the one of an installation without a license, or the one activated
+    /// on request); <c>null</c> when no such trial is in the tariff. The end may have passed. Writes nothing.
+    /// </summary>
+    public async Task<DateTime?> GetOwnTrialEndAsync()
+    {
+        if (await GetLicenseQuotaAsync() is not { Trial: true } quota || quota.Name == LicenseQuotaName)
+        {
+            return null;
+        }
+
+        var (_, dueDate) = await GetTrialTariffAsync(quota);
+
+        return dueDate;
+    }
+
+    /// <summary>
+    /// Reads the tariff of the installation and the end of the license quota's trial in it, if the license quota is
+    /// in the tariff.
+    /// </summary>
+    /// <param name="quota">The license quota; with none, nothing is read.</param>
+    /// <param name="cached">
+    /// Whether the cached tariff will do; otherwise the stored one is read, as a writer of the tariff needs it.
+    /// </param>
+    private async Task<(Tariff Tariff, DateTime? DueDate)> GetTrialTariffAsync(TenantQuota quota, bool cached = false)
+    {
+        if (quota == null)
+        {
+            return (null, null);
+        }
+
+        var current = cached
+            ? await tariffService.GetTariffAsync(Tenant.DefaultTenant, withRequestToPaymentSystem: false)
+            : await tariffService.GetBillingInfoAsync(Tenant.DefaultTenant);
+
+        return (current, current != null && current.Quotas.Exists(q => q.Id == LicenseQuotaId) ? current.DueDate : null);
+    }
+
+    private static bool IsInForce(DateTime dueDate)
+    {
+        return dueDate.Date >= DateTime.UtcNow.Date;
+    }
+
+    private async Task<TenantQuota> GetLicenseQuotaAsync()
+    {
+        return (await tenantManager.GetTenantQuotasAsync(all: true)).FirstOrDefault(q => q.TenantId == LicenseQuotaId);
     }
 
     private void LogError(Exception error)

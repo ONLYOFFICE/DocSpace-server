@@ -129,6 +129,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-tariff", (req, res) => {
+    files.changeTariff(req.body);
+    res.end();
+  });
+
   router.post("/change-service-limits", (req, res) => {
     files.changeServiceLimits(req.body);
     res.end();

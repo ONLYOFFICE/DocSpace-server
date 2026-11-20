@@ -7,12 +7,12 @@ paths:
 # Failure paths and the order of side effects
 
 Code gets written for the success path. Most review findings are about what it leaves behind when a
-step fails halfway or two requests race. Answer the questions below while writing the code, not
+step fails halfway, two requests race, or time passes. Answer the questions below while writing the code, not
 after the review: the answer usually changes the order of a few lines, sometimes adds a
 `try/finally` or a test. This is not a call for defensive code. An exception of the primary action
 still reaches the caller: never catch it just to keep going. Each section names the test that proves
-it. Reviewers ask the same questions (`review-branch` lenses B and G, matrices M2, M4, M5) and cite
-them as `[failure-paths.md §N]`.
+it. Reviewers ask the same questions (`review-branch` lenses B and G, matrices M2, M4, M5, M9, M10)
+and cite them as `[failure-paths.md §N]`.
 
 ## 1. Order: check → action → record → best-effort
 
@@ -100,9 +100,44 @@ them as `[failure-paths.md §N]`.
 - Two instances run the same loop at the same moment, so claim rows atomically. Details:
   `review-branch` lens G.
 
+## 9. A state that ends is checked by its end
+
+- A trial, a lease, a grace period, a token, a quota or a tariff "in force" has an end. Every place
+  that decides on such a state — "is it in force", "is a file still required", "may the wizard
+  complete" — checks the end against now, not only the kind of the state.
+- Find those places by the date, not by the state's name: `findReferences` on the end property
+  (`DueDate`, `ExpiresAt`), and every writer that can move the end into the past (a background
+  re-read that shortens it). Each decision is checked at three points: ends later, ends today, ended
+  yesterday.
+- Seen in review: a setup wizard completed on an installation's own trial after that trial had
+  ended. Three places decided on the trial without comparing its end with today; the re-check found
+  one of them, the next review all three.
+- Guard: a unit test of the decision with the end yesterday (see `tests.md`, "A decision the stand
+  cannot reach").
+
+## 10. A multi-step operation: one table, every step
+
+- An operation of several steps that cannot all be undone — money moved, an external call, a claim
+  held across them — gets a table before the code and before each fix of it: one row per step, one
+  column per interruption — the step throws, the answer is unknown (§4), the process stops right
+  after the step, another instance takes the item over (the lease ran out, §8). Each cell names what
+  is on record at that moment and what the next run does with it.
+- A fix of one cell is checked against its whole row and the row of the next step. A fix that keeps
+  a claim, adds a fallback or moves a record changes other cells.
+- Seen in review: a subscription renewal paid from a wallet went through five re-checks, each
+  round's fix of one cell opening the next. The claim on the renewal was released although its
+  pending record was not written; keeping the claim instead let another instance resume it a minute
+  after the payment call timed out, with a second payment possible; the claim's age limit covered
+  the payment call but not the top-up loop before it.
+- Guard: one test per cell the stand can reach (a stub that times out, a second call with the same
+  claim). A cell it cannot reach gets a unit test of the decision behind it, moved where a unit test
+  reaches it (`tests.md`, "A decision the stand cannot reach"); only the wiring left after that goes
+  into the commit message as "not proven".
+
 ## Before handing the change back
 
-Walk your own diff once. For every new mark or lock, external call, effect after the action, `catch`
-and loop, name the section that applies and the test that proves it, or say in the commit message
-why there is none. A fix for a review finding is new code too: the marks, retries and fallbacks it
-adds go through the same walk (`fixing-findings.md`).
+Walk your own diff once. For every new mark or lock, external call, effect after the action, `catch`,
+loop, state that ends (§9) and multi-step operation (§10), name the section that applies and the
+test that proves it, or say in the commit message why there is none — for a path the stand cannot
+reach, after the decision on it has a unit test (`tests.md`). A fix for a review finding is new code
+too: the marks, retries and fallbacks it adds go through the same walk (`fixing-findings.md`).

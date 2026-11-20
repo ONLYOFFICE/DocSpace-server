@@ -396,12 +396,22 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// (clients scoped via the <c>Origin</c> header, plus the portal's own owner).
     /// Each test owns its own bundle, which is what makes the tests safe to run in parallel.
     /// </summary>
-    public async Task<TClients> CreatePortalAsync(CancellationToken cancellationToken = default)
+    public Task<TClients> CreatePortalAsync(CancellationToken cancellationToken = default)
+    {
+        return CreatePortalAsync(null, cancellationToken);
+    }
+
+    /// <summary>
+    /// Registers a brand-new portal like <see cref="CreatePortalAsync(CancellationToken)"/>, letting
+    /// <paramref name="configure"/> change the registration first - e.g. drop the password, which leaves the
+    /// first-run wizard of a server installation pending. The bundle's owner keeps the suite's credentials.
+    /// </summary>
+    public async Task<TClients> CreatePortalAsync(Action<RegisterPortalModel>? configure, CancellationToken cancellationToken = default)
     {
         // Lowercase, starts with a letter, 13 chars (> 6) — a valid portal alias and Origin host.
         var portalName = "t" + Guid.NewGuid().ToString("N")[..12];
 
-        var registration = await Timing.Measure("portal.register", () => RegisterPortalAsync(new RegisterPortalModel
+        var model = new RegisterPortalModel
         {
             PortalName = portalName,
             FirstName = "Portal",
@@ -411,7 +421,11 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
             Language = "en-US",
             TimeZoneName = "UTC",
             SkipWelcome = true
-        }, cancellationToken));
+        };
+
+        configure?.Invoke(model);
+
+        var registration = await Timing.Measure("portal.register", () => RegisterPortalAsync(model, cancellationToken));
 
         // A SaaS ApiSystem ignores the requested name and picks one of its own.
         if (!Standalone)
@@ -428,6 +442,25 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
         return CreateClients(new PortalContext(
             portalName, registration.Tenant.TenantId, owner, _baseAddresses, CreateRawClient));
+    }
+
+    /// <summary>
+    /// A raw client of ASC.ApiSystem, which has no SDK. Without <paramref name="portal"/> it is anonymous; with
+    /// it, it is bound to that portal and carries the sign-in of its Web.Api client (the <c>auth:portal</c>
+    /// scheme), as the server-only methods (<c>portal/status</c>, <c>portal/remove</c>, <c>portal/get</c>) need.
+    /// The caller disposes it.
+    /// </summary>
+    public HttpClient CreateApiSystemClient(PortalClientsBase? portal = null)
+    {
+        if (portal is null)
+        {
+            return CreateRawClient(_baseAddresses[ResourceNames.ApiSystem], origin: null);
+        }
+
+        var client = CreateRawClient(_baseAddresses[ResourceNames.ApiSystem], $"http://{portal.PortalName}");
+        client.DefaultRequestHeaders.Authorization = portal.WebApiHttpClient.DefaultRequestHeaders.Authorization;
+
+        return client;
     }
 
     /// <summary>
@@ -532,6 +565,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     protected HttpClient CreateHttpClient(string resourceName, string endpointName)
     {
         return _app.CreateHttpClient(resourceName, endpointName);
+    }
+
+    /// <summary>
+    /// A client for a service a test drives directly, outside the portals — a third-party storage's own
+    /// API, such as the Nextcloud provisioning API. It runs on the fixture's shared connection pool, so
+    /// disposing it leaves the pool in place, and it sends no <c>Origin</c>.
+    /// </summary>
+    public HttpClient CreateExternalClient(Uri baseAddress)
+    {
+        return CreateRawClient(baseAddress, origin: null);
     }
 
     /// <summary>

@@ -54,6 +54,13 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return await accountingApi.GetCustomerBalanceAsync(portalId, cancellationToken);
     }
 
+    public async Task<GoodwillBalance> GetCustomerGoodwillAsync(string portalId, CancellationToken cancellationToken = default)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetCustomerGoodwillAsync(portalId, cancellationToken);
+    }
+
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
         int quantity, int duration)
     {
@@ -409,7 +416,10 @@ public enum OperationType
     BankDeposit,
     [Description("BankWithdrawal")]
     BankWithdrawal,
-    [Description("GoodwillCredit")]
+    /// <summary>
+    /// Bonus money credited to the portal's goodwill account, by a promo code or by the service itself.
+    /// </summary>
+    [Description("Bonus money credited to the bonus balance, by a promo code or by the service itself")]
     GoodwillCredit,
     [Description("WriteOffProfit")]
     WriteOffProfit,
@@ -418,7 +428,12 @@ public enum OperationType
     [Description("AiDebit")]
     AiDebit,
     [Description("AiCredit")]
-    AiCredit
+    AiCredit,
+    /// <summary>
+    /// The unspent rest of a bonus credit written off the goodwill account when the credit expires.
+    /// </summary>
+    [Description("The unspent rest of a bonus credit written off when the credit expires")]
+    GoodwillExpiration
 }
 
 /// <summary>
@@ -435,6 +450,64 @@ public enum OperationStatus
     Rejected,
     [Description("Canceled")]
     Canceled
+}
+
+// The accounting service decides the initiator by whether the top-up names a customer participant, and sends and
+// filters it by name.
+/// <summary>
+/// Who started a wallet top-up: a portal user or the portal itself.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum DepositInitiator
+{
+    /// <summary>
+    /// A portal user started the top-up, including one made to pay for a purchase.
+    /// </summary>
+    [Description("Manual")]
+    Manual,
+
+    /// <summary>
+    /// The portal topped up the wallet on its own, by the automatic top-up or to renew a subscription.
+    /// </summary>
+    [Description("Automatic")]
+    Automatic
+}
+
+/// <summary>
+/// Reads <see cref="DepositInitiator"/> from the accounting answer. The field is for display only, so anything but
+/// the exact name of a member (in any case) reads as null instead of failing the whole page. The silence is
+/// deliberate: a kind the accounting service adds later shows as no initiator until this enum learns it.
+/// </summary>
+internal sealed class TolerantDepositInitiatorConverter : JsonConverter<DepositInitiator?>
+{
+    public override DepositInitiator? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            // Enum.TryParse would also take numbers and comma lists ("Manual,Automatic"), so only a name matches.
+            var text = reader.GetString();
+
+            foreach (var name in Enum.GetNames<DepositInitiator>())
+            {
+                if (string.Equals(name, text, StringComparison.OrdinalIgnoreCase))
+                {
+                    return Enum.Parse<DepositInitiator>(name);
+                }
+            }
+
+            return null;
+        }
+
+        reader.Skip();
+
+        return null;
+    }
+
+    // Deposit is only ever read from the accounting answer; the serializer writes a null itself.
+    public override void Write(Utf8JsonWriter writer, DepositInitiator? value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value!.Value.ToString());
+    }
 }
 
 public class DateRangeFilter
@@ -470,6 +543,16 @@ public class PagedFilter : DateRangeFilter
     /// </summary>
     /// <remarks>For the paged methods this is the page size of every request.</remarks>
     public int? Limit { get; set; }
+
+    // The API documents a metadata pair with an empty or blank value as ignored. Query binding turns such a value
+    // into null, which the request leaves out, but a JSON body (the usage report) keeps it, so it is dropped here
+    // for every caller.
+    protected static Dictionary<string, string> WithoutBlankValues(Dictionary<string, string> metadata)
+    {
+        return metadata?
+            .Where(pair => !string.IsNullOrWhiteSpace(pair.Value))
+            .ToDictionary(pair => pair.Key, pair => pair.Value, metadata.Comparer);
+    }
 
     /// <summary>
     /// The field to order by.
@@ -524,7 +607,7 @@ public class OperationFilter : PagedFilter
     /// <summary>
     /// The operation type to filter by.
     /// </summary>
-    [AliasAs("types")]
+    [AliasAs("operationTypes")]
     public OperationType? Type { get; init; }
     /// <summary>
     /// The operation status to filter by.
@@ -563,9 +646,13 @@ public class UsageFilter : PagedFilter
     /// </summary>
     public OperationStatus? Status { get; init; }
     /// <summary>
-    /// Metadata key-value pairs to filter by.
+    /// Metadata key-value pairs to filter by. A pair with an empty or blank value is dropped.
     /// </summary>
-    public Dictionary<string, string> Metadata { get; init; }
+    public Dictionary<string, string> Metadata
+    {
+        get;
+        init => field = WithoutBlankValues(value);
+    }
 }
 
 /// <summary>
@@ -577,6 +664,21 @@ public class DepositFilter : PagedFilter
     /// The operation status to filter by.
     /// </summary>
     public OperationStatus? Status { get; init; }
+
+    /// <summary>
+    /// Who started the top-up, to filter by.
+    /// </summary>
+    public DepositInitiator? Initiator { get; init; }
+
+    /// <summary>
+    /// Metadata key-value pairs to filter by: a top-up matches when its metadata contains all of them. A pair with
+    /// an empty or blank value is dropped.
+    /// </summary>
+    public Dictionary<string, string> Metadata
+    {
+        get;
+        init => field = WithoutBlankValues(value);
+    }
 }
 
 /// <summary>
@@ -713,6 +815,81 @@ public class TransactionInfo : CurrencyAmount
 /// </summary>
 public class SubAccount : CurrencyAmount
 {
+}
+
+/// <summary>
+/// The goodwill balance of a customer: the goodwill account with its sub-accounts, and the goodwill credits on it not
+/// spent in full.
+/// </summary>
+public class GoodwillBalance : Balance
+{
+    /// <summary>
+    /// The goodwill credits not spent in full, in the order they are spent. One whose end has passed may stay here until
+    /// the accounting service writes it off.
+    /// </summary>
+    public List<GoodwillLot> Lots { get; init; }
+
+    /// <summary>
+    /// The bonus the portal can pay with in <paramref name="currency"/> at <paramref name="utcNow"/>: the rest of the
+    /// credits in that currency whose end is later than <paramref name="utcNow"/> or that never end, at most the
+    /// sub-account amount, and never below zero. The accounting service may write an ended credit off only later, so
+    /// the sub-account alone can still hold money it will not spend. Without <see cref="Lots"/> in the answer there is
+    /// no end to compare, and the sub-account amount counts. An end without an offset is read as UTC, as the accounting
+    /// service gives its times.
+    /// </summary>
+    public decimal SpendableAmount(string currency, DateTime utcNow)
+    {
+        var account = Math.Max(SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount ?? 0, 0);
+
+        if (Lots == null)
+        {
+            return account;
+        }
+
+        var lots = Lots
+            .Where(lot => lot.Currency == currency && (lot.ExpiresAt == null || BillingTime.AsUtc(lot.ExpiresAt.Value) > utcNow))
+            .Sum(lot => Math.Max(lot.Remaining, 0));
+
+        return Math.Min(account, lots);
+    }
+
+    /// <summary>
+    /// Whether a purchase from the wallet in <paramref name="currency"/> has anything to be paid with: a wallet
+    /// sub-account in that currency, whatever its amount, or a bonus in it that has not ended at
+    /// <paramref name="utcNow"/>. A customer who has never topped up the wallet has no wallet sub-account, also with a
+    /// bonus credited; the accounting service spends the bonus on the purchase all the same. When the bonus could not be
+    /// read (<paramref name="goodwillUnknown"/>), the answer is true: an unknown bonus is not a refusal, and billing
+    /// decides whether the purchase is paid.
+    /// </summary>
+    public static bool CanPayFromWallet(Balance wallet, GoodwillBalance goodwill, bool goodwillUnknown, string currency, DateTime utcNow)
+    {
+        return wallet?.SubAccounts?.Any(x => x.Currency == currency) == true
+            || goodwillUnknown
+            || goodwill?.SpendableAmount(currency, utcNow) > 0;
+    }
+
+}
+
+/// <summary>
+/// A goodwill credit not spent in full. <see cref="CurrencyAmount.Amount"/> is the credited amount and
+/// <see cref="TransactionInfo.Date"/> the date of the credit.
+/// </summary>
+public class GoodwillLot : TransactionInfo
+{
+    /// <summary>
+    /// The ID of the goodwill credit operation.
+    /// </summary>
+    public long OperationId { get; init; }
+
+    /// <summary>
+    /// The part of the credited amount left to spend.
+    /// </summary>
+    public decimal Remaining { get; init; }
+
+    /// <summary>
+    /// The moment the rest of the credit expires, or <c>null</c> for a credit that never expires.
+    /// </summary>
+    public DateTime? ExpiresAt { get; init; }
 }
 
 /// <summary>
@@ -1073,6 +1250,11 @@ public class CustomerServiceUsage : CurrencyTotalAmount
     /// Number of individual purchase operations.
     /// </summary>
     public int OperationCount { get; init; }
+
+    /// <summary>
+    /// The total amount split by the sub-accounts of the customer it was taken from.
+    /// </summary>
+    public List<OperationSource> Sources { get; init; }
 }
 
 /// <summary>
@@ -1136,6 +1318,12 @@ public class Deposit
     /// </summary>
     /// <remarks>A Stripe payment intent (<c>pi_…</c>) or invoice (<c>in_…</c>) has an invoice behind it.</remarks>
     public string PaymentRef { get; init; }
+
+    /// <summary>
+    /// Who started the top-up; null when the accounting service did not say or sent a value this version does not know.
+    /// </summary>
+    [JsonConverter(typeof(TolerantDepositInitiatorConverter))]
+    public DepositInitiator? Initiator { get; init; }
 
     /// <summary>
     /// The additional metadata of the top-up.
@@ -1254,10 +1442,66 @@ public class Operation
     public OperationTokenUsage TokenUsage { get; set; }
 
     /// <summary>
+    /// The amount of the operation split by the sub-accounts of the customer it was taken from or put on.
+    /// </summary>
+    public List<OperationSource> Sources { get; set; }
+
+    /// <summary>
     /// Metadata of the operation.
     /// </summary>
     /// <example>{}</example>
     public Dictionary<string, string> Metadata { get; set; }
+}
+
+/// <summary>
+/// The part of an amount - of an operation, or of a usage total - that falls on one sub-account of the customer.
+/// </summary>
+public class OperationSource
+{
+    /// <summary>
+    /// The number of the sub-account the accounting service keeps the bonuses of a customer on.
+    /// </summary>
+    public const int BonusSubAccount = 53;
+
+    /// <summary>
+    /// The sub-account of the customer: 0 for the money paid into the wallet, <see cref="BonusSubAccount"/> for bonuses.
+    /// </summary>
+    public int SubAccount { get; init; }
+
+    /// <summary>
+    /// The part of the amount on the sub-account.
+    /// </summary>
+    public decimal Amount { get; init; }
+
+    /// <summary>
+    /// Whether the part fell on the bonuses rather than on the money paid into the wallet.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsBonus
+    {
+        get => SubAccount == BonusSubAccount;
+    }
+
+    /// <summary>
+    /// The part of an amount that fell on the bonuses, as a magnitude whatever sign the accounting service gives it;
+    /// 0 when <paramref name="sources"/> is null or has no bonus part.
+    /// </summary>
+    public static decimal BonusAmountOf(IEnumerable<OperationSource> sources)
+    {
+        return Math.Abs(sources?.Where(x => x.IsBonus).Sum(x => x.Amount) ?? 0);
+    }
+
+    /// <summary>
+    /// The bonus part of a movement split by its direction, as the operations report shows it next to the credit and
+    /// the debit: the bonus part goes to each side above 0, and a side of 0 gets 0. A movement of the accounting
+    /// service is either a credit or a debit, so one side gets it; the product owner confirmed this for the bonus.
+    /// </summary>
+    public static (decimal Credit, decimal Debit) BonusPartsOf(decimal credit, decimal debit, IEnumerable<OperationSource> sources)
+    {
+        var bonusAmount = BonusAmountOf(sources);
+
+        return (credit > 0 ? bonusAmount : 0, debit > 0 ? bonusAmount : 0);
+    }
 }
 
 /// <summary>
@@ -1805,7 +2049,7 @@ public static class AccountingHttpClientExtension
             return new AccountingServiceLimitExceededException(detail);
         }
 
-        // A second limit of the same scope, or for the same user; elsewhere a 409 stays a plain failure, as before.
+        // A second limit of the same scope or for the same user; elsewhere a 409 stays a plain failure, as before.
         if (response.StatusCode == HttpStatusCode.Conflict && serviceLimitRequest)
         {
             return new AccountingConflictException(detail);

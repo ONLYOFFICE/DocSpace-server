@@ -57,6 +57,8 @@ public class RoomShareAccessLevelTests(
         { RoomType.FillingFormsRoom, FileShare.Editing, false },
         { RoomType.FillingFormsRoom, FileShare.Read, false },
         { RoomType.FillingFormsRoom, FileShare.RoomManager, false },
+        { RoomType.FillingFormsRoom, FileShare.Review, false },
+        { RoomType.FillingFormsRoom, FileShare.Comment, false },
 
         // EditingRoom (Collaboration room)
         { RoomType.EditingRoom, FileShare.Read, true },

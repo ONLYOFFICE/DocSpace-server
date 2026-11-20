@@ -808,9 +808,13 @@ public class FileStorageService //: IFileStorageService
                     {
                         folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing, denyDownload: denyDownload, color: color, cover: cover, names: tags, logo: logo);
                     }
-                    catch
+                    // a full storage keeps its own reason instead of "this folder cannot be used":
+                    // the folder is fine, the user only has to free space in the storage
+                    catch (Exception ex) when (ex is not ThirdPartyStorageQuotaException)
                     {
-                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
+                        // the user reads only that the folder cannot be used; the cause rides along as the inner
+                        // exception, whose message the error handler logs (the response shows only this message)
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder, ex);
                     }
                 }
 
@@ -6736,12 +6740,12 @@ public class FileStorageService //: IFileStorageService
     /// </summary>
     private static bool IsOwnRefusal(Exception e)
     {
-        return e is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException or HttpException;
+        return e is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or ThirdPartyStorageQuotaException or InvalidOperationException or HttpException;
     }
 
     private Exception GenerateException<T>(T error, bool warning = false) where T : Exception
     {
-        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
+        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or ThirdPartyStorageQuotaException or InvalidOperationException)
         {
             _logger.Information(error.ToString());
         }

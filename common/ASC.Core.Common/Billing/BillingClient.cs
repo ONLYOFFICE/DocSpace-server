@@ -287,6 +287,27 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
             new BillingProductRequestDto { PortalId = [portalId], ProductId = [productId] });
     }
 
+    /// <summary>
+    /// Redeems a promo code for the portal; the billing service credits its bonus to the customer, at once or later,
+    /// and returns what it credits. A code it refuses comes back as a <see cref="BillingPromoCodeException"/>.
+    /// </summary>
+    /// <param name="portalId">The portal the code is redeemed for.</param>
+    /// <param name="promoCode">The promo code as the user entered it.</param>
+    /// <param name="initiator">The e-mail of the user who redeems the code, kept in the billing audit.</param>
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(string portalId, string promoCode, string initiator)
+    {
+        EnsureConfigured();
+
+        var requestDto = new PromoCodeRequestDto
+        {
+            PortalId = [portalId],
+            Code = [promoCode],
+            Initiator = Optional(initiator)
+        };
+
+        return await billingApi.ApplyPromoCodeAsync(requestDto);
+    }
+
     public async Task<bool> GetDocsCloudTrialAsync(string portalId, DocsCloudTrialCustomer customer)
     {
         EnsureConfigured();
@@ -460,6 +481,16 @@ public class DepositRequestDto : BillingPortalRequestDto
     public List<string> Metadata { get; set; }
 }
 
+/// <summary>Request to redeem a promo code for the portal.</summary>
+public class PromoCodeRequestDto : BillingPortalRequestDto
+{
+    /// <summary>The promo code as the user entered it, without surrounding spaces.</summary>
+    public List<string> Code { get; set; }
+
+    /// <summary>The e-mail of the user who redeems the code, kept in the billing audit.</summary>
+    public List<string> Initiator { get; set; }
+}
+
 /// <summary>Request to change (up/downgrade) the current subscription quantities.</summary>
 public class ChangeSubscriptionRequestDto : BillingPortalRequestDto
 {
@@ -523,6 +554,14 @@ public static class BillingHttpClientExtension
 
     private const string ErrorMarker = "{\"Message\":\"error";
     private const string NotFoundMarker = "{\"Message\":\"error: cannot find ";
+    private const string PromoCodeErrorMarker = "{\"Message\":\"error: promo_";
+
+    // A failure of the billing service itself, reported in the shape of a refusal: whether the code was redeemed and the
+    // bonus credited is unknown, so it is no refusal.
+    private const string PromoCodeFailedReason = "promo_failed";
+
+    // The reason codes of a refused promo code: promo_ and lower-case words.
+    private static readonly Regex _promoCodeReason = new("promo_[a-z_]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     public static void AddBillingHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
@@ -618,6 +657,16 @@ public static class BillingHttpClientExtension
             return new BillingNotConfiguredException("Billing response is null");
         }
 
+        // Only a successful answer refuses a code: a failing status or promo_failed leaves the outcome unknown, and it stays
+        // an ordinary billing failure below.
+        if (response.IsSuccessStatusCode &&
+            content.StartsWith(PromoCodeErrorMarker, StringComparison.OrdinalIgnoreCase) &&
+            GetPromoCodeReason(content) is { } reason &&
+            reason != PromoCodeFailedReason)
+        {
+            return new BillingPromoCodeException(reason);
+        }
+
         if (content.StartsWith(ErrorMarker, StringComparison.OrdinalIgnoreCase))
         {
             return content.Contains(NotFoundMarker)
@@ -631,6 +680,38 @@ public static class BillingHttpClientExtension
         }
 
         return null;
+    }
+
+    // A refused promo code is answered as {"Message":"error: promo_not_found"}, possibly with the reason in "Code" as well.
+    // Only the reason code itself is returned, never the rest of the body: it reaches the client of the API as the
+    // message. Null when the body names no reason, or does not parse: a body cut short may have named promo_failed, so
+    // what it would have said is unknown and is no refusal.
+    private static string GetPromoCodeReason(string content)
+    {
+        string text = null;
+
+        try
+        {
+            using var document = JsonDocument.Parse(content);
+            var root = document.RootElement;
+
+            if (root.TryGetProperty("Code", out var code) && code.ValueKind == JsonValueKind.String)
+            {
+                text = code.GetString();
+            }
+            else if (root.TryGetProperty("Message", out var message) && message.ValueKind == JsonValueKind.String)
+            {
+                text = message.GetString();
+            }
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+
+        var match = text is null ? Match.Empty : _promoCodeReason.Match(text);
+
+        return match.Success ? match.Value : null;
     }
 }
 
@@ -646,6 +727,14 @@ public class BillingException : Exception
 }
 
 public class BillingNotFoundException(string message) : BillingException(message);
+
+/// <summary>
+/// The billing service refused a promo code; <see cref="Code"/> says why, e.g. <c>promo_not_found</c>.
+/// </summary>
+public class BillingPromoCodeException(string code) : BillingException($"Promo code refused: {code}")
+{
+    public string Code { get; } = code;
+}
 
 /// <summary>
 /// The billing service gave no answer (DNS, connect, TLS, timeout). Unlike an error response, this does not

@@ -35,11 +35,15 @@ namespace ASC.People.Extensions;
 
 public static class PeopleServiceExtensions
 {
-    public static IServiceCollection AddPeopleServices(this IServiceCollection services)
+    public static IServiceCollection AddPeopleServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddAiIntegrationServices();
         services.RegisterQuotaFeature();
+
+        // UpdateUserTypeProgressItem changes room owners and roles, which drops a user who loses access from an open
+        // editor through a command to the document server
+        services.AddDocumentServiceHttpClient(configuration);
 
         services.RegisterQueue<UsersQuotaSyncJob>();
         services.RegisterQueue<RemoveProgressItem>();

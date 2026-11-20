@@ -206,7 +206,7 @@ public class FilesModuleSpecificsTests
     /// The internal id of a third-party link is unset, and the archive can present that as a missing
     /// value, an empty string or <see cref="DBNull"/> — all three must be treated the same.
     /// </summary>
-    public static TheoryData<object?> UnsetInternalRoomIds => [null, "", DBNull.Value];
+    public static TheoryData<object?> UnsetInternalRoomIds => [(object?)null, "", DBNull.Value];
 
     [Theory]
     [MemberData(nameof(UnsetInternalRoomIds))]

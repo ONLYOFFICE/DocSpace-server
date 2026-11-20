@@ -36,4 +36,7 @@ internal static partial class FileMarkerLogger
 {
     [LoggerMessage(LogLevel.Error, "ExecMarkFileAsNew")]
     public static partial void ErrorExecMarkFileAsNew(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Could not notify the new-items badge of section {section} for user {userId}")]
+    public static partial void WarningSectionNotice(this ILogger logger, FolderType section, Guid userId, Exception exception);
 }

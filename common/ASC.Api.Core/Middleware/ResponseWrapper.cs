@@ -125,6 +125,14 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 message = e.Message;
                 withStackTrace = false;
                 break;
+            // A connected storage (Dropbox, Google Drive, WebDAV…) is out of space in its own account. The
+            // user has to free space there, so it is a client error with a readable reason, not a server
+            // fault, and not the portal's own quota (402).
+            case ThirdPartyStorageQuotaException e:
+                status = HttpStatusCode.BadRequest;
+                message = e.Message;
+                withStackTrace = false;
+                break;
             // DocsCloud, the accounting service or the AI gateway gave no answer or answered with a server error: the
             // failure is on their side, so 502, as for a Document Server that does not answer; they came back as 500.
             // Only the status changes: they are still logged as critical, as before. Their other failures (not

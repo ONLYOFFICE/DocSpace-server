@@ -117,11 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
+    <value>Credit (bonusuri)</value>
+  </data>
+  <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
+    <value>Debit (bonusuri)</value>
+  </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Contact</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Sold de credit</value>
+    <value>Credit</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>Monedă</value>
@@ -149,6 +155,12 @@
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Copiere de rezervă</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus" xml:space="preserve">
+    <value>Creditare bonus</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus-expiration" xml:space="preserve">
+    <value>Expirare bonus</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vectorizare</value>

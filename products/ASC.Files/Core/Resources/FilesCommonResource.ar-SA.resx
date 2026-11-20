@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>خطأ في بدء تعديل الملف</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>لا توجد مساحة خالية كافية في وحدة التخزين التابعة لجهة خارجية المتصلة. حرّر مساحة فيها وحاول مرة أخرى.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>لا يمكنك تعديل الغرف المأرشفة</value>
   </data>

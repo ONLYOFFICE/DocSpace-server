@@ -49,7 +49,15 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
 
         bool LogError(Exception ex)
         {
-            logger.LogError(ex, "Request {RequestMethod}: {PathValue} failed", context.Request?.Method, context.Request?.Path.Value);
+            if (ex is ThirdPartyStorageQuotaException)
+            {
+                // a connected storage is out of space: the user has to free space there, not a server fault
+                logger.InformationRequestFailed(context.Request?.Method, context.Request?.Path.Value, ex.Message, ex.InnerException?.Message);
+            }
+            else
+            {
+                logger.ErrorRequestFailed(context.Request?.Method, context.Request?.Path.Value, ex);
+            }
 
             return true;
         }
@@ -92,6 +100,11 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
             case TenantQuotaException:
             case BillingException:
                 status = HttpStatusCode.PaymentRequired;
+                break;
+            case ThirdPartyStorageQuotaException e:
+                status = HttpStatusCode.BadRequest;
+                message = e.Message;
+                withStackTrace = false;
                 break;
         }
 
