@@ -191,7 +191,9 @@ async function jsonRequest(
       const json: unknown = await res.json();
       return raw ? json : unwrapDocSpaceEnvelope(json);
     }
-    return res.text();
+    // Awaited here, not returned as a promise: the finally below cancels the
+    // timeout signal, and that must happen after the body has been read.
+    return await res.text();
   } finally {
     cancel();
   }

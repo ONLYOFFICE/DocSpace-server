@@ -224,7 +224,18 @@ export const toolsController = {
     }
     const entityId = asString(req.query["entityId"]);
     const config = await engine.getCustomServer(name, entityId);
-    res.json(config === null ? null : redactSystemServer(name, config));
+    if (config === null) {
+      res.json(null);
+      return;
+    }
+    // Without the headers a server is called with: they carry its
+    // credentials, the servers run in this process (see tools/customTools.ts)
+    // and nothing reads one server's config back to edit it. The config
+    // editor reads and rewrites the whole map through list-custom-servers.
+    const { headers: _headers, ...shown } = redactSystemServer(name, config) as McpServerConfig & {
+      headers?: unknown;
+    };
+    res.json(shown);
   }),
 
   listCustomServers: asyncHandler(async (req, res) => {

@@ -48,7 +48,7 @@ import { getString, isObject } from "../narrow.js";
  * other failure of the read is a failure of the service, not an absent
  * profile, and is passed on.
  */
-async function readStored(id: string): Promise<Profile | undefined> {
+export async function readStoredProfile(id: string): Promise<Profile | undefined> {
   try {
     return await storage.profiles.readById(id);
   } catch (err) {
@@ -66,7 +66,7 @@ async function readStored(id: string): Promise<Profile | undefined> {
  */
 export async function resolveStoredProfile(sent: unknown): Promise<Profile> {
   const id = isObject(sent) ? getString(sent, "id") : undefined;
-  const stored = id ? await readStored(id) : undefined;
+  const stored = id ? await readStoredProfile(id) : undefined;
   if (!stored) {
     throw Object.assign(new Error("the AI profile does not exist"), { status: 404, expose: true });
   }

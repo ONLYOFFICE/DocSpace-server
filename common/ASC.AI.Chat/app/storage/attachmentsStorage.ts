@@ -42,25 +42,30 @@ import {
   resolveAiProjectEntityId,
 } from "./docspaceFilesApi.js";
 import { getForwardedHeaders, getAnalyzeEntryIds } from "../requestContext.js";
+import { getMaxImageSize } from "../../config/index.js";
+import { downloadHeaders, readBodyCapped } from "./roomSkills.js";
 import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
 import { uploadThreadArtifact } from "./threadFiles.js";
-import { copyIntoProject } from "./projectAttachments.js";
+import { copyManyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/attachments";
 
-// DocSpace pre-signed URLs come back as host-relative paths
-// (`/storage/files/...`). `fetch()` in Node refuses relative URLs, so
-// resolve them against the DocSpace portal root (same host the AI service
-// is proxied through).
-function resolveAbsoluteUrl(url: string): string {
-  if (/^https?:\/\//i.test(url)) {
-    return url;
-  }
-  return new URL(url, proxyBaseUrl.endsWith("/") ? proxyBaseUrl : `${proxyBaseUrl}/`).toString();
+// Where an image's pre-signed address is fetched, and whether that is the
+// portal. The Files service answers a host-relative path
+// (`/storage/files/...`) for a file the portal serves itself: `fetch()` in
+// Node refuses relative URLs, so it resolves against the portal root (the
+// host the AI service is proxied through), and the storage handler there
+// asks for the caller's session next to the signature. For a file in S3 or
+// behind a CDN the address is absolute, on the storage's own host, signed in
+// its query: the caller's cookie and token have no business there.
+function imageTarget(url: string): { href: string; portal: boolean } {
+  const root = proxyBaseUrl.endsWith("/") ? proxyBaseUrl : `${proxyBaseUrl}/`;
+  const target = new URL(url, root);
+  return { href: target.toString(), portal: target.origin === new URL(root).origin };
 }
 
 // Quick mime sniff by magic bytes; falls back to the `Content-Type` response
@@ -216,26 +221,39 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
 }
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  // Named in the log without its query: the signature there downloads the
+  // file until it expires.
+  let where = "the image";
+  const { signal, cancel } = withTimeout(undefined);
   try {
-    // DocSpace pre-signed URLs are usually host-relative (`/storage/...`);
-    // resolve against the portal root. Forward auth cookies in case the URL
-    // still requires the caller's session (some DocSpace setups gate file
-    // streams on the user, not the signature).
-    const absolute = resolveAbsoluteUrl(url);
-    const res = await fetch(absolute, { headers: getForwardedHeaders() });
+    const target = imageTarget(url);
+    where = target.href.split("?", 1)[0] ?? where;
+    const res = await fetch(target.href, {
+      headers: target.portal ? downloadHeaders() : {},
+      signal,
+    });
     if (!res.ok) {
-      logger.warn(`fetchImageAsDataUrl: ${absolute} → ${res.status} ${res.statusText}`);
+      logger.warn(`fetchImageAsDataUrl: ${where} → ${res.status} ${res.statusText}`);
       return null;
     }
-    const buf = new Uint8Array(await res.arrayBuffer());
+    // Read here, inside the timeout, and no further than the size a chat
+    // takes an image up to: the bytes are held whole and again as base64.
+    const limit = getMaxImageSize();
+    const buf = await readBodyCapped(res, limit);
+    if (buf === null) {
+      logger.warn(`fetchImageAsDataUrl: ${where} is over ${limit} bytes, not inlined`);
+      return null;
+    }
     const mime = detectImageMime(buf, res.headers.get("content-type"));
     const b64 = Buffer.from(buf).toString("base64");
     return `data:${mime};base64,${b64}`;
   } catch (err) {
     logger.error(
-      `fetchImageAsDataUrl: ${url} failed: ${err instanceof Error ? err.message : String(err)}`,
+      `fetchImageAsDataUrl: ${where} failed: ${err instanceof Error ? err.message : String(err)}`,
     );
     return null;
+  } finally {
+    cancel();
   }
 }
 
@@ -245,10 +263,14 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 // the bytes here so `Attachment.base64` is always a real data URL.
 async function inlineImagesAsync(attachments: (Attachment | null)[]): Promise<void> {
   const tasks: Promise<void>[] = [];
+  // A record named twice in one read is one object in two places: it is
+  // downloaded once.
+  const seen = new Set<Attachment>();
   for (const a of attachments) {
-    if (!a || a.kind !== "image") {
+    if (!a || a.kind !== "image" || seen.has(a)) {
       continue;
     }
+    seen.add(a);
     const src = a.base64;
     if (!src || src.startsWith("data:")) {
       continue;
@@ -410,14 +432,14 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // In a chat of an AI project a file of the portal is attached as its
     // copy in the project room, which the Files service then keeps with the
     // conversation (see projectAttachments.ts). Anywhere else, and for a file
-    // that cannot be copied, the file itself is attached.
+    // that cannot be copied, the file itself is attached. A file named twice
+    // is copied once, and the copies are made a few at a time: each holds
+    // its file in memory.
     const projectId = await resolveAiProjectEntityId(
       inputs.find((input, i) => !result[i] && input.entityId)?.entityId,
     );
     const entryIds =
-      projectId === undefined
-        ? sourceIds
-        : await Promise.all(sourceIds.map((id) => copyIntoProject(projectId, id)));
+      projectId === undefined ? sourceIds : await copyManyIntoProject(projectId, sourceIds);
 
     if (entryIds.length === 0) {
       // No DocSpace-entry inputs — everything was handled above.

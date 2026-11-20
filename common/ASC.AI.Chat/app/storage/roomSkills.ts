@@ -327,6 +327,41 @@ export async function readFileText(fileId: string): Promise<string> {
   }
 }
 
+/**
+ * The body of a response, or `null` once it proves larger than `limit`
+ * bytes: by its declared length, or by what has arrived when it declares
+ * none. The rest of an oversized body is not read.
+ */
+export async function readBodyCapped(res: Response, limit: number): Promise<Uint8Array | null> {
+  const declared = Number(res.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > limit) {
+    await res.body?.cancel();
+    return null;
+  }
+  if (!res.body) {
+    return new Uint8Array(0);
+  }
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      received += value.byteLength;
+      if (received > limit) {
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
+  }
+  return Buffer.concat(chunks, received);
+}
+
 /** A file the caller may read is larger than the limit its reader set. */
 export class FileTooLargeError extends Error {
   constructor(fileId: string, limit: number) {
@@ -350,33 +385,11 @@ export async function readFileBytes(fileId: string, limit: number): Promise<Uint
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    const declared = Number(res.headers.get("content-length"));
-    if (Number.isFinite(declared) && declared > limit) {
-      await res.body?.cancel();
+    const bytes = await readBodyCapped(res, limit);
+    if (bytes === null) {
       throw new FileTooLargeError(fileId, limit);
     }
-    if (!res.body) {
-      return new Uint8Array(0);
-    }
-    const reader = res.body.getReader();
-    const chunks: Uint8Array[] = [];
-    let received = 0;
-    try {
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
-        received += value.byteLength;
-        if (received > limit) {
-          throw new FileTooLargeError(fileId, limit);
-        }
-        chunks.push(value);
-      }
-    } finally {
-      await reader.cancel().catch(() => undefined);
-    }
-    return Buffer.concat(chunks, received);
+    return bytes;
   } finally {
     cancel();
   }
@@ -384,7 +397,7 @@ export async function readFileBytes(fileId: string, limit: number): Promise<Uint
 
 // The caller's conditional headers describe the widget's request, not the
 // file: relayed, they could turn the download into a bodiless 304.
-function downloadHeaders(): Record<string, string> {
+export function downloadHeaders(): Record<string, string> {
   return Object.fromEntries(
     Object.entries(getForwardedHeaders()).filter(
       ([name]) => !CONDITIONAL_HEADERS.has(name.toLowerCase()),

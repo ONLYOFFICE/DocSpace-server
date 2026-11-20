@@ -153,7 +153,10 @@ async function effectiveProfile(
   if (!id) {
     return { own, id: null, available: false };
   }
-  const profile = await storage.profiles.readById(id).catch(() => undefined);
+  // Absent (`undefined`) is the profile that was removed. A read that fails
+  // is passed on: an outage of the AI service is not a project whose model
+  // is unavailable.
+  const profile = await storage.profiles.readById(id);
   return { own, id, available: canChat(profile) };
 }
 

@@ -57,7 +57,38 @@ export const MAX_COPY_BYTES = 50 * 1024 * 1024;
 /** The chunk a portal takes when its settings name none. */
 const DEFAULT_CHUNK_BYTES = 10 * 1024 * 1024;
 
+/**
+ * How many files are copied at once, in the whole process. A copy holds its
+ * file in memory (twice over while the download is assembled), so the number
+ * of copies under way, not the number of requests or of files in one, is
+ * what bounds the memory they take.
+ */
+export const MAX_CONCURRENT_COPIES = 2;
+
 const FILE_ID = /^[1-9]\d*$/;
+
+let copiesUnderWay = 0;
+const copiesWaiting: (() => void)[] = [];
+
+/** Runs `copy` once one of the {@link MAX_CONCURRENT_COPIES} places is free. */
+async function inTurn<T>(copy: () => Promise<T>): Promise<T> {
+  if (copiesUnderWay >= MAX_CONCURRENT_COPIES) {
+    // The place is handed over by the copy that ends, already counted.
+    await new Promise<void>((resolve) => copiesWaiting.push(resolve));
+  } else {
+    copiesUnderWay += 1;
+  }
+  try {
+    return await copy();
+  } finally {
+    const next = copiesWaiting.shift();
+    if (next) {
+      next();
+    } else {
+      copiesUnderWay -= 1;
+    }
+  }
+}
 
 async function postFiles(
   path: string,
@@ -163,8 +194,10 @@ export async function copyIntoProject(projectId: string, entryId: string): Promi
       );
       return entryId;
     }
-    const bytes = await readFileBytes(entryId, MAX_COPY_BYTES);
-    const copyId = await uploadInChunks(projectId, title, bytes, mediaTypeOf(title));
+    const copyId = await inTurn(async () => {
+      const bytes = await readFileBytes(entryId, MAX_COPY_BYTES);
+      return uploadInChunks(projectId, title, bytes, mediaTypeOf(title));
+    });
     logger.info(`copyIntoProject: file ${entryId} -> project ${projectId} as file ${copyId}`);
     return copyId;
   } catch (err) {
@@ -180,4 +213,22 @@ export async function copyIntoProject(projectId: string, entryId: string): Promi
     }
     throw err;
   }
+}
+
+/**
+ * The ids to attach for files of the portal in a chat of the project, in
+ * the order of `entryIds`. A file named more than once is copied once, and
+ * every mention of it gets the same copy.
+ */
+export async function copyManyIntoProject(
+  projectId: string,
+  entryIds: readonly string[],
+): Promise<string[]> {
+  const copies = new Map<string, Promise<string>>();
+  for (const id of entryIds) {
+    if (!copies.has(id)) {
+      copies.set(id, copyIntoProject(projectId, id));
+    }
+  }
+  return Promise.all(entryIds.map((id) => copies.get(id)!));
 }
