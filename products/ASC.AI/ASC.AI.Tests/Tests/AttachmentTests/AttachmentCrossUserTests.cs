@@ -96,7 +96,7 @@ public class AttachmentCrossUserTests(AspireAppFixture fixture) : AttachmentTest
         var memberDraft = await SaveDraftAsync(member, "Autotest member-victim.docx");
         await ExpectStoredAsync(memberDraft, "the member's own draft");
         (await DeleteAsync(memberDraft)).Status.Should().Be(200);
-        await ExpectAbsentAsync(memberDraft, "the member's own draft after its own delete");
+        await ExpectCleanedUpAsync(memberDraft, "the member's own draft after its own delete");
 
         await ActAsAsync(Owner);
         var survivor = await FindAsync(ownerDraft);
@@ -224,7 +224,7 @@ public class AttachmentCrossUserTests(AspireAppFixture fixture) : AttachmentTest
         }
 
         statuses.Should().OnlyContain(status => status == 200, "the mixed batch is accepted on every round");
-        await ExpectAbsentAsync(memberDraft, "the caller's own draft in the mixed batch");
+        await ExpectCleanedUpAsync(memberDraft, "the caller's own draft in the mixed batch");
 
         await ActAsAsync(Owner);
         var survivor = await FindAsync(ownerDraft);

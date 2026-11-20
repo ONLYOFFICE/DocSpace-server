@@ -2289,7 +2289,7 @@
           "Group / Search"
         ],
         "summary": "Search groups for a room",
-        "description": "Returns the portal groups for sharing the room. The `shared` field tells whether a group already has access.\r\nThe list also has the system group Everyone. Requires the right to change access to the room. Other callers\r\nget 403. If no room has the ID, the call returns 404. The call is read-only. It sorts the groups by name and\r\npages them by `count` and `startIndex`, with a total count. An empty `filterValue` returns every group.\r\nOtherwise, the call keeps the groups whose name contains the value, in any case. With `excludeShared`, the\r\ncall returns only the groups without access. The call returns 400 if `count` is outside 1 to 100. To search\r\nusers and groups together, use `GET api/2.0/accounts/room/{id}/search`.",
+        "description": "Returns the portal groups for sharing the room. The `shared` field tells whether a group already has access. The\r\nlist also has the system group Everyone. Requires the right to change access to the room. Other callers get 403.\r\nIf no room has the ID, the call returns 404. The call is read-only. It sorts the groups by name and pages them by\r\n`count` and `startIndex`, with a total count. An empty `filterValue` returns every group. Otherwise, the call\r\nkeeps the groups whose name contains the value, in any case. With `excludeShared`, the call returns only the\r\ngroups without access. The call returns 400 if `count` is outside 1 to 100. To search users and groups together,\r\nuse `GET api/2.0/accounts/room/{id}/search`.",
         "operationId": "getGroupsWithRoomsShared",
         "parameters": [
           {
@@ -2474,7 +2474,7 @@
           "Group / Search"
         ],
         "summary": "Search groups for a folder",
-        "description": "Returns the portal groups for sharing the folder. The `shared` field tells whether a group already has access.\r\nA group with access to a parent folder also counts. The list also has the system group Everyone. Requires the\r\nright to change access to the folder. Other callers get 403. If no folder has the ID, the call returns 404.\r\nThe call is read-only. It sorts the groups by name and pages them by `count` and `startIndex`, with a total\r\ncount. An empty `filterValue` returns every group. Otherwise, the call keeps the groups whose name contains\r\nthe value, in any case. With `excludeShared`, the call returns only the groups without access. The call\r\nreturns 400 if `count` is outside 1 to 100. To search users and groups together, use\r\n`GET api/2.0/accounts/folder/{id}/search`.",
+        "description": "Returns the portal groups for sharing the folder. The `shared` field tells whether a group already has access. A\r\ngroup with access to a parent folder also counts. The list also has the system group Everyone. A user or a guest\r\ngets only that group. Requires the right to change access to the folder. Other callers get 403. If no folder has\r\nthe ID, the call returns 404. The call is read-only. It sorts the groups by name and pages them by `count` and\r\n`startIndex`, with a total count. An empty `filterValue` returns every group. Otherwise, the call keeps the groups\r\nwhose name contains the value, in any case. With `excludeShared`, the call returns only the groups without access.\r\nThe call returns 400 if `count` is outside 1 to 100. To search users and groups together, use `GET\r\napi/2.0/accounts/folder/{id}/search`.",
         "operationId": "getGroupsWithFoldersShared",
         "parameters": [
           {
@@ -2659,7 +2659,7 @@
           "Group / Search"
         ],
         "summary": "Search groups for a file",
-        "description": "Returns the portal groups for sharing the file. The `shared` field tells whether a group already has access.\r\nA group with access to a parent folder also counts. The list also has the system group Everyone. Requires the\r\nright to change access to the file. Other callers get 403. If no file has the ID, the call returns 404. The\r\ncall is read-only. It sorts the groups by name and pages them by `count` and `startIndex`, with a total count.\r\nAn empty `filterValue` returns every group. Otherwise, the call keeps the groups whose name contains the\r\nvalue, in any case. With `excludeShared`, the call returns only the groups without access. The call returns\r\n400 if `count` is outside 1 to 100. To search users and groups together, use\r\n`GET api/2.0/accounts/file/{id}/search`.",
+        "description": "Returns the portal groups for sharing the file. The `shared` field tells whether a group already has access. A\r\ngroup with access to a parent folder also counts. The list also has the system group Everyone. A user or a guest\r\ngets only that group. Requires the right to change access to the file. Other callers get 403. If no file has the\r\nID, the call returns 404. The call is read-only. It sorts the groups by name and pages them by `count` and\r\n`startIndex`, with a total count. An empty `filterValue` returns every group. Otherwise, the call keeps the groups\r\nwhose name contains the value, in any case. With `excludeShared`, the call returns only the groups without access.\r\nThe call returns 400 if `count` is outside 1 to 100. To search users and groups together, use `GET\r\napi/2.0/accounts/file/{id}/search`.",
         "operationId": "getGroupsWithFilesShared",
         "parameters": [
           {
@@ -6365,7 +6365,7 @@
           "People / Search"
         ],
         "summary": "Search accounts for a room",
-        "description": "Returns the users and groups that match a search, with whether each one has access to the room. Requires the\r\nright to change the access of the room. Other callers get 403. If no room has the ID, the call returns 404.\r\nThe call is read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches\r\nusers by first name, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user\r\nmust match every term between spaces. With `filterSeparator`, a user may match any one term. Groups always\r\nmatch the whole text, and they include the system group Everyone. The call returns groups first, sorted by\r\nname, and then users. The `count` and `startIndex` parameters page over both together, and the total counts\r\nboth. The `excludeShared` flag keeps only accounts without access and wins over `includeShared`. The\r\n`includeShared` flag filters only users, so groups without access still appear. Groups ignore the user\r\nfilters, such as `employeeStatus`, `area`, and `employeeTypes`. A caller who is not a DocSpace admin sees only\r\nthe guests related to them. With `area` set to `All`, they also see guests with access. If `count` is out of\r\nrange, the call returns 400.",
+        "description": "Returns the users and groups that match a search, with whether each one has access to the room. Requires the right\r\nto change the access of the room. Other callers get 403. If no room has the ID, the call returns 404. The call is\r\nread-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches users by first\r\nname, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user must match every\r\nterm between spaces. With `filterSeparator`, a user may match any one term. Groups always match the whole text,\r\nand they include the system group Everyone. The call returns groups first, sorted by name, and then users. The\r\n`count` and `startIndex` parameters page over both together, and the total counts both. The `excludeShared` flag\r\nkeeps only accounts without access and wins over `includeShared`. The `includeShared` flag filters only users, so\r\ngroups without access still appear. Groups ignore the user filters, such as `employeeStatus`, `area`, and\r\n`employeeTypes`. A caller who is not a DocSpace admin sees only the guests related to them. With `area` set to\r\n`All`, they also see guests with access. The `shared` field is also true for the owner and for an account with a\r\nrecord that denies access. Only a DocSpace admin can filter by the `inviterId` of another account. For other\r\ncallers, the call ignores such an `inviterId`. If `count` is out of range, the call returns 400.",
         "operationId": "getAccountsEntriesWithRoomsShared",
         "parameters": [
           {
@@ -6402,7 +6402,7 @@
           {
             "name": "excludeShared",
             "in": "query",
-            "description": "Keeps only the accounts that do not have access to the entry yet, which is the set to offer when adding new\r\nmembers. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
+            "description": "Keeps only the accounts that have no access record on the entry yet, which is the set to offer when adding new\r\nmembers. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
             "schema": {
               "examples": [
                 false
@@ -6413,7 +6413,7 @@
           {
             "name": "includeShared",
             "in": "query",
-            "description": "Keeps only the accounts that already have access to the entry, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when\r\n`excludeShared` is also set.",
+            "description": "Keeps only the accounts that already have an access record on the entry, a denying one included, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when\r\n`excludeShared` is also set.",
             "schema": {
               "examples": [
                 false
@@ -6640,7 +6640,7 @@
           "People / Search"
         ],
         "summary": "Search accounts for a folder",
-        "description": "Returns the users and groups that match a search, with whether each one has access to the folder. Requires the\r\nright to change the access of the folder. Other callers get 403. If no folder has the ID, the call\r\nreturns 404. The call is read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The\r\ncall matches users by first name, last name, or email, and groups by name, ignoring case. Without\r\n`filterSeparator`, a user must match every term between spaces. With `filterSeparator`, a user may match any\r\none term. Groups always match the whole text, and they include the system group Everyone. The call returns\r\ngroups first, sorted by name, and then users. The `count` and `startIndex` parameters page over both together,\r\nand the total counts both. The `excludeShared` flag keeps only accounts without access and wins over\r\n`includeShared`. The `includeShared` flag filters only users, so groups without access still appear. Groups\r\nignore the user filters, such as `employeeStatus`, `area`, and `employeeTypes`. A caller who is not a DocSpace\r\nadmin sees only the guests related to them. With `area` set to `All`, they also see guests with access. If\r\n`count` is out of range, the call returns 400.",
+        "description": "Returns the users and groups that match a search, with whether each one has access to the folder. Requires the\r\nright to change the access of the folder. Other callers get 403. If no folder has the ID, the call returns 404.\r\nThe call is read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches\r\nusers by first name, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user\r\nmust match every term between spaces. With `filterSeparator`, a user may match any one term. Groups always match\r\nthe whole text, and they include the system group Everyone. The call returns groups first, sorted by name, and\r\nthen users. The `count` and `startIndex` parameters page over both together, and the total counts both. The\r\n`excludeShared` flag keeps only accounts without access and wins over `includeShared`. The `includeShared` flag\r\nfilters only users, so groups without access still appear. Groups ignore the user filters, such as\r\n`employeeStatus`, `area`, and `employeeTypes`. A caller who is not a DocSpace admin sees only the guests related\r\nto them. With `area` set to `All`, they also see guests with access. The `shared` field is also true for the owner\r\nand for an account with a record that denies access. A user or a guest can call it for their own folder. They find\r\nonly the group Everyone and the accounts they work with. These are the owners and members of their rooms, directly\r\nor through a group. Accounts with their own record that gives access also count. A record on a parent folder\r\ncounts too. For another account, they get only the id, names, email, avatars, type flags, status, and `shared`.\r\nOnly a DocSpace admin can filter by the `inviterId` of another account. For other callers, the call ignores such\r\nan `inviterId`. If `count` is out of range, the call returns 400.",
         "operationId": "getAccountsEntriesWithFoldersShared",
         "parameters": [
           {
@@ -6677,7 +6677,7 @@
           {
             "name": "excludeShared",
             "in": "query",
-            "description": "Keeps only the accounts that do not have access to the entry yet, which is the set to offer when adding new\r\nmembers. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
+            "description": "Keeps only the accounts that have no access record on the entry yet, which is the set to offer when adding new\r\nmembers. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
             "schema": {
               "examples": [
                 false
@@ -6688,7 +6688,7 @@
           {
             "name": "includeShared",
             "in": "query",
-            "description": "Keeps only the accounts that already have access to the entry, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when\r\n`excludeShared` is also set.",
+            "description": "Keeps only the accounts that already have an access record on the entry, a denying one included, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when\r\n`excludeShared` is also set.",
             "schema": {
               "examples": [
                 false
@@ -6915,7 +6915,7 @@
           "People / Search"
         ],
         "summary": "Search accounts for a file",
-        "description": "Returns the users and groups that match a search, with whether each one has access to the file. Requires the\r\nright to change the access of the file. Other callers get 403. If no file has the ID, the call returns 404.\r\nThe call is read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches\r\nusers by first name, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user\r\nmust match every term between spaces. With `filterSeparator`, a user may match any one term. Groups always\r\nmatch the whole text, and they include the system group Everyone. The call returns groups first, sorted by\r\nname, and then users. The `count` and `startIndex` parameters page over both together, and the total counts\r\nboth. The `excludeShared` flag keeps only accounts without access and wins over `includeShared`. The\r\n`includeShared` flag filters only users, so groups without access still appear. Groups ignore the user\r\nfilters, such as `employeeStatus`, `area`, and `employeeTypes`. A caller who is not a DocSpace admin sees only\r\nthe guests related to them. With `area` set to `All`, they also see guests with access. If `count` is out of\r\nrange, the call returns 400.",
+        "description": "Returns the users and groups that match a search, with whether each one has access to the file. Requires the right\r\nto change the access of the file. Other callers get 403. If no file has the ID, the call returns 404. The call is\r\nread-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches users by first\r\nname, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user must match every\r\nterm between spaces. With `filterSeparator`, a user may match any one term. Groups always match the whole text,\r\nand they include the system group Everyone. The call returns groups first, sorted by name, and then users. The\r\n`count` and `startIndex` parameters page over both together, and the total counts both. The `excludeShared` flag\r\nkeeps only accounts without access and wins over `includeShared`. The `includeShared` flag filters only users, so\r\ngroups without access still appear. Groups ignore the user filters, such as `employeeStatus`, `area`, and\r\n`employeeTypes`. A caller who is not a DocSpace admin sees only the guests related to them. With `area` set to\r\n`All`, they also see guests with access. The `shared` field is also true for the owner and for an account with a\r\nrecord that denies access. A user or a guest can call it for their own file. They find only the group Everyone and\r\nthe accounts they work with. These are the owners and members of their rooms, directly or through a group.\r\nAccounts with their own record that gives access also count. A record on a parent folder counts too. For another\r\naccount, they get only the id, names, email, avatars, type flags, status, and `shared`. Only a DocSpace admin can\r\nfilter by the `inviterId` of another account. For other callers, the call ignores such an `inviterId`. If `count`\r\nis out of range, the call returns 400.",
         "operationId": "getAccountsEntriesWithFilesShared",
         "parameters": [
           {
@@ -6952,7 +6952,7 @@
           {
             "name": "excludeShared",
             "in": "query",
-            "description": "Keeps only the accounts that do not have access to the entry yet, which is the set to offer when adding new\r\nmembers. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
+            "description": "Keeps only the accounts that have no access record on the entry yet, which is the set to offer when adding new\r\nmembers. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
             "schema": {
               "examples": [
                 false
@@ -6963,7 +6963,7 @@
           {
             "name": "includeShared",
             "in": "query",
-            "description": "Keeps only the accounts that already have access to the entry, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when\r\n`excludeShared` is also set.",
+            "description": "Keeps only the accounts that already have an access record on the entry, a denying one included, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when\r\n`excludeShared` is also set.",
             "schema": {
               "examples": [
                 false
@@ -8321,7 +8321,7 @@
           "People / Search"
         ],
         "summary": "Search users for a room",
-        "description": "Returns the portal accounts that match a search, with whether each one has access to the room. Any signed-in user\r\nwith read access to the room can call it, except a guest. Other callers get 403. If no room has the ID, the call\r\nreturns 404. The call is read-only. If `filterValue` is empty, it returns every account that matches the other\r\nfilters. With `excludeShared`, the call returns only accounts without access. With `includeShared`, it returns\r\nonly accounts with access. If both are set, `excludeShared` wins. Without them, the `shared` field of each profile\r\nshows the access. The call does not sort the list. The `count` and `startIndex` parameters page over it, and\r\n`total` counts all matches. A caller who is not a DocSpace admin sees only the guests related to them. With `area`\r\nset to `All`, they also see guests with access. If `count` is out of range, the call returns 400. To search users\r\nand groups together, use `GET api/2.0/accounts/room/{id}/search`.",
+        "description": "Returns the portal accounts that match a search, with whether each one has access to the room. Any signed-in user\r\nwith read access to the room can call it, except a guest. Other callers get 403. If no room has the ID, the call\r\nreturns 404. The call is read-only. If `filterValue` is empty, it returns every account that matches the other\r\nfilters. With `excludeShared`, the call returns only accounts without access. With `includeShared`, it returns\r\nonly accounts with access. If both are set, `excludeShared` wins. Without them, the `shared` field of each profile\r\nshows the access. The call does not sort the list. The `count` and `startIndex` parameters page over it, and\r\n`total` counts all matches. A caller who is not a DocSpace admin sees only the guests related to them. With `area`\r\nset to `All`, they also see guests with access. The `shared` field is also true for the owner and for an account\r\nwith a record that denies access. A user sees only the accounts they work with. These are the owners and members\r\nof the user's rooms, directly or through a group. Accounts with their own record on the room that gives access\r\nalso count. For another account, a user gets only the id, names, email, avatars, type flags, status, and `shared`.\r\nOnly a DocSpace admin can filter by the `inviterId` of another account. For other callers, the call ignores such\r\nan `inviterId`. If `count` is out of range, the call returns 400. To search users and groups together, use `GET\r\napi/2.0/accounts/room/{id}/search`.",
         "operationId": "getUsersWithRoomShared",
         "parameters": [
           {
@@ -8358,7 +8358,7 @@
           {
             "name": "excludeShared",
             "in": "query",
-            "description": "Keeps only the accounts that do not have access to the entry yet, which is the set to offer when granting\r\naccess. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
+            "description": "Keeps only the accounts that have no access record on the entry yet, which is the set to offer when granting\r\naccess. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
             "schema": {
               "examples": [
                 false
@@ -8369,7 +8369,7 @@
           {
             "name": "includeShared",
             "in": "query",
-            "description": "Keeps only the accounts that already have access to the entry, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when `excludeShared`\r\nis also set.",
+            "description": "Keeps only the accounts that already have an access record on the entry, a denying one included, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when `excludeShared`\r\nis also set.",
             "schema": {
               "examples": [
                 false
@@ -8596,7 +8596,7 @@
           "People / Search"
         ],
         "summary": "Search users for a folder",
-        "description": "Returns the portal accounts that match a search, with whether each one has access to the folder. Any signed-in\r\nuser with read access to the folder can call it, except a guest. Other callers get 403. If no folder has the ID,\r\nthe call returns 404. The call is read-only. If `filterValue` is empty, it returns every account that matches the\r\nother filters. With `excludeShared`, the call returns only accounts without access. With `includeShared`, it\r\nreturns only accounts with access. If both are set, `excludeShared` wins. Without them, the `shared` field of each\r\nprofile shows the access. The call does not sort the list. The `count` and `startIndex` parameters page over it,\r\nand `total` counts all matches. A caller who is not a DocSpace admin sees only the guests related to them. With\r\n`area` set to `All`, they also see guests with access. If `count` is out of range, the call returns 400. To search\r\nusers and groups together, use `GET api/2.0/accounts/folder/{id}/search`.",
+        "description": "Returns the portal accounts that match a search, with whether each one has access to the folder. Any signed-in\r\nuser with read access to the folder can call it, except a guest. Other callers get 403. If no folder has the ID,\r\nthe call returns 404. The call is read-only. If `filterValue` is empty, it returns every account that matches the\r\nother filters. With `excludeShared`, the call returns only accounts without access. With `includeShared`, it\r\nreturns only accounts with access. If both are set, `excludeShared` wins. Without them, the `shared` field of each\r\nprofile shows the access. The call does not sort the list. The `count` and `startIndex` parameters page over it,\r\nand `total` counts all matches. A caller who is not a DocSpace admin sees only the guests related to them. With\r\n`area` set to `All`, they also see guests with access. The `shared` field is also true for the owner and for an\r\naccount with a record that denies access. Only a caller with the right to change the access learns who has access.\r\nA member of a room also learns it if the folder is that room. For other callers, `shared` is always false, and\r\n`includeShared` returns an empty list with a total of 0. For them, `excludeShared` removes no account. A user sees\r\nonly the accounts they work with. These are the owners and members of the user's rooms, directly or through a\r\ngroup. If the user learns who has access, accounts with their own record that gives access also count. A record on\r\na parent folder counts too. For another account, a user gets only the id, names, email, avatars, type flags,\r\nstatus, and `shared`. Only a DocSpace admin can filter by the `inviterId` of another account. For other callers,\r\nthe call ignores such an `inviterId`. If `count` is out of range, the call returns 400. To search users and groups\r\ntogether, use `GET api/2.0/accounts/folder/{id}/search`.",
         "operationId": "getUsersWithFoldersShared",
         "parameters": [
           {
@@ -8633,7 +8633,7 @@
           {
             "name": "excludeShared",
             "in": "query",
-            "description": "Keeps only the accounts that do not have access to the entry yet, which is the set to offer when granting\r\naccess. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
+            "description": "Keeps only the accounts that have no access record on the entry yet, which is the set to offer when granting\r\naccess. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
             "schema": {
               "examples": [
                 false
@@ -8644,7 +8644,7 @@
           {
             "name": "includeShared",
             "in": "query",
-            "description": "Keeps only the accounts that already have access to the entry, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when `excludeShared`\r\nis also set.",
+            "description": "Keeps only the accounts that already have an access record on the entry, a denying one included, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when `excludeShared`\r\nis also set.",
             "schema": {
               "examples": [
                 false
@@ -8871,7 +8871,7 @@
           "People / Search"
         ],
         "summary": "Search users for a file",
-        "description": "Returns the portal accounts that match a search, with whether each one has access to the file. Any signed-in user\r\nwith read access to the file can call it, except a guest. Other callers get 403. If no file has the ID, the call\r\nreturns 404. The call is read-only. If `filterValue` is empty, it returns every account that matches the other\r\nfilters. With `excludeShared`, the call returns only accounts without access. With `includeShared`, it returns\r\nonly accounts with access. If both are set, `excludeShared` wins. Without them, the `shared` field of each profile\r\nshows the access. The call does not sort the list. The `count` and `startIndex` parameters page over it, and\r\n`total` counts all matches. A caller who is not a DocSpace admin sees only the guests related to them. With `area`\r\nset to `All`, they also see guests with access. If `count` is out of range, the call returns 400. To search users\r\nand groups together, use `GET api/2.0/accounts/file/{id}/search`.",
+        "description": "Returns the portal accounts that match a search, with whether each one has access to the file. Any signed-in user\r\nwith read access to the file can call it, except a guest. Other callers get 403. If no file has the ID, the call\r\nreturns 404. The call is read-only. If `filterValue` is empty, it returns every account that matches the other\r\nfilters. With `excludeShared`, the call returns only accounts without access. With `includeShared`, it returns\r\nonly accounts with access. If both are set, `excludeShared` wins. Without them, the `shared` field of each profile\r\nshows the access. The call does not sort the list. The `count` and `startIndex` parameters page over it, and\r\n`total` counts all matches. A caller who is not a DocSpace admin sees only the guests related to them. With `area`\r\nset to `All`, they also see guests with access. The `shared` field is also true for the owner and for an account\r\nwith a record that denies access. Only a caller with the right to change the access learns who has access. For\r\nother callers, `shared` is always false, and `includeShared` returns an empty list with a total of 0. For them,\r\n`excludeShared` removes no account. A user sees only the accounts they work with. These are the owners and members\r\nof the user's rooms, directly or through a group. If the user learns who has access, accounts with their own\r\nrecord that gives access also count. A record on a parent folder counts too. For another account, a user gets only\r\nthe id, names, email, avatars, type flags, status, and `shared`. Only a DocSpace admin can filter by the\r\n`inviterId` of another account. For other callers, the call ignores such an `inviterId`. If `count` is out of\r\nrange, the call returns 400. To search users and groups together, use `GET api/2.0/accounts/file/{id}/search`.",
         "operationId": "getUsersWithFilesShared",
         "parameters": [
           {
@@ -8908,7 +8908,7 @@
           {
             "name": "excludeShared",
             "in": "query",
-            "description": "Keeps only the accounts that do not have access to the entry yet, which is the set to offer when granting\r\naccess. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
+            "description": "Keeps only the accounts that have no access record on the entry yet, which is the set to offer when granting\r\naccess. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.",
             "schema": {
               "examples": [
                 false
@@ -8919,7 +8919,7 @@
           {
             "name": "includeShared",
             "in": "query",
-            "description": "Keeps only the accounts that already have access to the entry, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when `excludeShared`\r\nis also set.",
+            "description": "Keeps only the accounts that already have an access record on the entry, a denying one included, which is the set to offer when changing or\r\nrevoking access. Every returned entry has `shared` set to true, and the flag is ignored when `excludeShared`\r\nis also set.",
             "schema": {
               "examples": [
                 false
@@ -13164,7 +13164,7 @@
                   "description": "The contact information.",
                   "$ref": "#/components/schemas/Contact"
                 },
-                "description": "The list of user contacts."
+                "description": "The list of user contacts. Not returned to a User or a Guest for another account, as they have no access to\r\nthe contacts of the portal."
               },
               "status": {
                 "description": "The user status.",
@@ -13205,7 +13205,7 @@
                   "description": "The group summary parameters.",
                   "$ref": "#/components/schemas/GroupSummaryDto"
                 },
-                "description": "The list of user groups."
+                "description": "The list of user groups. Not returned to a User or a Guest for another account."
               },
               "location": {
                 "examples": [
@@ -13215,7 +13215,7 @@
                   "null",
                   "string"
                 ],
-                "description": "The user location."
+                "description": "The user location. Not returned to a User or a Guest for another account."
               },
               "notes": {
                 "examples": [
@@ -13225,7 +13225,7 @@
                   "null",
                   "string"
                 ],
-                "description": "The user notes."
+                "description": "The user notes. Not returned to a User or a Guest for another account."
               },
               "isAdmin": {
                 "examples": [
@@ -13303,10 +13303,10 @@
                   "null",
                   "string"
                 ],
-                "description": "The user mobile phone number."
+                "description": "The user mobile phone number. Not returned to a User or a Guest for another account."
               },
               "mobilePhoneActivationStatus": {
-                "description": "The mobile phone activation status.",
+                "description": "The mobile phone activation status. For another account a User or a Guest always gets the default value,\r\nas the phone itself is not returned to them.",
                 "$ref": "#/components/schemas/MobilePhoneActivationStatus"
               },
               "isSSO": {

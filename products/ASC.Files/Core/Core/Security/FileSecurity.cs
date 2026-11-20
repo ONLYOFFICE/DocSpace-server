@@ -1368,6 +1368,11 @@ public class FileSecurity(
             return false;
         }
 
+        if (action is FilesSecurityActions.CanUseAi && isGuest)
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.CanUseAi &&
             !(folder is { FolderType: FolderType.USER } && folder.CreateBy == userId) &&
             !isRoom)
@@ -3649,6 +3654,11 @@ public class FileSecurity(
     public Task RemoveAiProjectMemberAsync(Guid userId, int projectId)
     {
         return daoFactory.GetSecurityDao<int>().RemoveAiProjectMemberAsync(userId, projectId);
+    }
+
+    public Task RemoveFromAiProjectsAsync(Guid userId)
+    {
+        return daoFactory.GetSecurityDao<int>().RemoveFromAiProjectsAsync(userId);
     }
 
     public Task MarkAiProjectThreadsDeletedAsync(Guid userId)

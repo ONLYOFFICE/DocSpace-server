@@ -181,6 +181,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _clients.ConnectSocketAsync(user, TestContext.Current.CancellationToken);
     }
 
+    protected Task<MySqlConnector.MySqlConnection> OpenDatabaseAsync()
+    {
+        return fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+    }
+
     /// <summary>
     /// The status and error body an SDK call ended with: 200 and an empty body when it succeeded, the <see cref="ApiException"/>
     /// code and content otherwise.
@@ -217,6 +222,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected HttpClient PeopleHttpClient => _clients.PeopleHttpClient;
     protected ProfilesApi ProfilesApi => _clients.ProfilesApi;
     protected UserStatusApi UserStatusApi => _clients.UserStatusApi;
+    protected UserTypeApi UserTypeApi => _clients.UserTypeApi;
     protected UserDataApi UserDataApi => _clients.UserDataApi;
 
     // Web.Api, for portal settings and quotas. Starts unsigned: authenticate it before the first call.

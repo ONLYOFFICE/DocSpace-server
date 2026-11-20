@@ -80,4 +80,5 @@ global using System.Threading.Channels;
 global using ASC.Web.Files.Utils;
 
 global using DeletedThread = ASC.AI.Integration.Threads.DeletedThread;
+global using OrphanAttachment = ASC.AI.Integration.Attachments.OrphanAttachment;
 global using ThreadsStorage = ASC.AI.Integration.Threads.ThreadsStorage;

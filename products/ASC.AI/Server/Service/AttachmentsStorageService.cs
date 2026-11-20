@@ -247,14 +247,14 @@ public class AttachmentsStorageService(
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id);
+        await storage.MarkForDeletionAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, [id]);
     }
 
     public async Task DeleteManyAsync(HashSet<Guid> ids)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids);
+        await storage.MarkForDeletionAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids);
     }
 
     /// <summary>

@@ -349,9 +349,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiAttachmentsGetMany:
     "Returns several attachments in one call, aligned by position with the `ids` that were sent, so the answer can be zipped straight onto the request. An ID that no longer exists leaves its slot empty rather than shortening the list, which is how a caller tells which of them are gone. `ids` has to be present and non-empty - an empty batch is rejected rather than answered with an empty list. Nothing is changed by the call.",
   aiAttachmentsDelete:
-    "Permanently deletes one attachment, whether it is still a draft or already bound to a message. The ID is not validated here, so a malformed one surfaces as an error relayed from storage rather than as a 400, and an ID that does not exist answers success without deleting anything. Deleting a bound attachment leaves the message in place without it. The deletion cannot be undone.",
+    "Hands one of the caller's own drafts to the background cleanup, which removes it at its next pass (every 15 minutes by default); until then the draft can still be read and linked to a message. When the draft was made from a file uploaded or copied into an AI project and not sent yet, that file is removed with it and its size is returned to the project. An attachment already bound to a message is left as it is, and so is a file outside a project. The ID is not validated here, so a malformed one surfaces as an error relayed from storage rather than as a 400, and an ID that does not exist or belongs to another user answers success without changing anything. Once the pass has run, the deletion cannot be undone.",
   aiAttachmentsDeleteMany:
-    "Permanently deletes several attachments in one round trip. `ids` is optional and an absent value is treated as an empty list, so a malformed request quietly deletes nothing instead of failing. IDs that do not exist are skipped without being reported, so the answer confirms only that the call was accepted. The deletions cannot be undone.",
+    "Hands several of the caller's own drafts to the background cleanup in one round trip; the cleanup removes them at its next pass (every 15 minutes by default), and until then they can still be read and linked to a message. A draft made from a file uploaded or copied into an AI project and not sent yet takes that file with it, and the file's size is returned to the project. Attachments already bound to a message are left as they are, and so are files outside a project. `ids` is optional and an absent value is treated as an empty list, so a malformed request quietly changes nothing instead of failing. IDs that do not exist or belong to another user are skipped without being reported, so the answer confirms only that the call was accepted. Once the pass has run, the deletions cannot be undone.",
   aiAttachmentsLinkToMessage:
     "Binds draft attachments to the chat message that owns them, after that message has been persisted, so that deleting the message removes them too. All three of `ids`, `messageId` and `threadId` are required, and the references are verified rather than trusted: an unknown message answers 404, a message that belongs to a different thread answers 400, and attachments that no longer exist answer 404 naming each missing ID. That verification exists because the underlying binding call skips unknown IDs silently, which used to report success for a link that had not happened. Drafts stay unbound until this succeeds.",
 
@@ -1420,9 +1420,10 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiAttachmentsGetMany:
     "The attachments, aligned by position with the IDs that were sent. A missing one leaves its " +
     "slot empty.",
-  aiAttachmentsDelete: "Confirms the request was accepted, whether or not anything was deleted.",
+  aiAttachmentsDelete:
+    "Confirms the request was accepted, whether or not a draft was handed to the cleanup.",
   aiAttachmentsDeleteMany:
-    "Confirms the request was accepted, whether or not anything was deleted.",
+    "Confirms the request was accepted, whether or not any draft was handed to the cleanup.",
   aiAttachmentsLinkToMessage: "Confirms the attachments are now bound to the message.",
   aiAttachmentsGetSuggestedQuestions:
     "The form's starter questions when they are ready; otherwise the status says whether they " +

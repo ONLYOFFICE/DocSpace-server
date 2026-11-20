@@ -93,6 +93,12 @@ public partial class FilesDbContext
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
     }
 
+    [PreCompileQuery]
+    public Task<int> DeleteAiProjectSharesAsync(int tenantId, Guid userId)
+    {
+        return AiIntegrationQueries.DeleteAiProjectSharesAsync(this, tenantId, userId);
+    }
+
     public Task<int> MarkOwnedAiProjectThreadsDeletedAsync(int tenantId, Guid userId, DateTime deletedOn)
     {
         return Threads
@@ -109,10 +115,25 @@ public partial class FilesDbContext
     {
         return AiIntegrationQueries.AiAgentChatBindingsAsync(this, tenantId);
     }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<ChatDraftFile> ChatDraftFilesAsync(int tenantId, IEnumerable<Guid> attachmentIds)
+    {
+        return AiIntegrationQueries.ChatDraftFilesAsync(this, tenantId, attachmentIds);
+    }
 }
 
 static file class AiIntegrationQueries
 {
+    public static readonly Func<FilesDbContext, int, Guid, Task<int>> DeleteAiProjectSharesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, Guid userId) =>
+            ctx.Security
+                .Where(r => r.TenantId == tenantId && r.Subject == userId && r.EntryType == FileEntryType.Folder &&
+                            ctx.Folders.Any(f => f.TenantId == tenantId &&
+                                                 f.Id == r.InternalEntryId &&
+                                                 f.FolderType == FolderType.AiProjectRoom))
+                .ExecuteDelete());
+
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteThreadsByFolderIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
             ctx.Threads
@@ -169,4 +190,18 @@ static file class AiIntegrationQueries
                     f => new { f.TenantId, RoomId = f.Id },
                     s => new { s.TenantId, s.RoomId },
                     (f, s) => new AiAgentChatBinding(s.RoomId, s.ChatProviderId, s.ChatParameters == null ? null : s.ChatParameters.ModelId)));
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<ChatDraftFile>> ChatDraftFilesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<Guid> attachmentIds) =>
+            ctx.Attachments
+                .Where(a => a.TenantId == tenantId && attachmentIds.Contains(a.Id) && a.MessageId == null && a.EntryId != null)
+                .Join(ctx.Files,
+                    a => new { a.TenantId, Id = a.EntryId!.Value, CreateBy = a.CreatedBy },
+                    f => new { f.TenantId, f.Id, f.CreateBy },
+                    (a, f) => f)
+                .Where(f => f.CurrentVersion &&
+                            ctx.Folders.Any(d => d.TenantId == tenantId && d.Id == f.ParentId && d.FolderType == FolderType.AiProjectRoom))
+                .Select(f => new { f.Id, f.ParentId, f.ContentLength })
+                .Distinct()
+                .Select(f => new ChatDraftFile(f.Id, f.ParentId, f.ContentLength)));
 }

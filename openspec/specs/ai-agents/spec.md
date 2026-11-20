@@ -448,8 +448,8 @@ An Instructions room SHALL offer the Room manager, Content creator, Editor and V
 the same without Editor, an AI project only Room manager and Content creator. The members of a project are
 users only: a group SHALL NOT be invited to a project with any role (403, "The role is not available for this
 user type"). A Guest SHALL NOT hold any role in a project (403, nobody added) while a User joins through a
-link as Content creator. Every member reads the project; only a Room manager edits it; a non-member of any
-role, a DocSpace admin included, SHALL NOT read its model, sources or skills (403).
+link as Content creator. Every member reads the project; only a Room manager edits it; a non-member other
+than a DocSpace admin SHALL NOT read its model, sources or skills (403).
 
 #### Scenario: Guest invited to a project
 
@@ -465,6 +465,11 @@ role, a DocSpace admin included, SHALL NOT read its model, sources or skills (40
 
 - **WHEN** a Content creator of the project reads the project model and then sets it
 - **THEN** the read answers 200 and the write 403
+
+#### Scenario: DocSpace admin outside the project
+
+- **WHEN** a DocSpace admin who is not a member of a project calls `getProjectModel`, `getProjectSources` and `getRoomSkills` for it
+- **THEN** each call answers 200
 
 ### Requirement: The model of an AI project
 
@@ -1511,8 +1516,8 @@ body limit. Guests 403; anonymous 401; AI off 403.
 `aiAttachmentsGet`, `aiAttachmentsGetMany`, `aiAttachmentsDelete` and `aiAttachmentsDeleteMany` SHALL see
 the caller's drafts only: another user's draft reads as null in place and is not deleted; an unknown id
 reads as null and deletes with success without stopping a batch; a malformed id, an empty list or a missing
-body 400. A draft is readable right after it is saved and gone right after it is deleted; deleting it SHALL
-leave the DocSpace file it was made from.
+body 400. A draft is readable right after it is saved. A deleted draft SHALL stay readable until the next
+background pass and be gone after it; a linked attachment SHALL stay.
 
 #### Scenario: Another user's draft
 
@@ -1521,8 +1526,18 @@ leave the DocSpace file it was made from.
 
 #### Scenario: Mixed delete
 
-- **WHEN** a User deletes their own draft and the owner's in one `aiAttachmentsDeleteMany`
+- **WHEN** a User deletes their own draft and the owner's in one `aiAttachmentsDeleteMany`, and the background pass has run
 - **THEN** only the User's draft is gone
+
+#### Scenario: Deleted draft
+
+- **WHEN** the owner deletes a draft made from a file of their My documents, and the background pass has run
+- **THEN** the draft reads as null and `getFileInfo` still answers for the file
+
+#### Scenario: Linked attachment
+
+- **WHEN** the owner links a draft to a message, deletes it, and the background pass has run
+- **THEN** the attachment still reads back
 
 #### Scenario: Draft reaches the model
 
@@ -2268,6 +2283,38 @@ later invitation SHALL NOT bring the threads back, and a change of the project's
 - **WHEN** the project passes to a new owner who had a thread in it, the former owner having one too
 - **THEN** both still read their threads and the new owner still lists their artifact
 
+### Requirement: Converting a member to Guest removes them from the projects
+
+When `startUserTypeUpdate` converts a user to Guest, the job SHALL remove the user's role in every AI project,
+one the user owned and passed on included, and SHALL delete the threads the user created in AI projects as by
+`aiThreadsDelete`, with their files. Threads of other members SHALL stay. In an AI agent the user SHALL stay a
+Viewer.
+
+#### Scenario: Member converted
+
+- **WHEN** a User who is a Content creator of a project and has a thread there with an artifact and a sent attachment is converted to Guest, the job completes and the background pass has run
+- **THEN** `getRoomSecurityInfo` of the project no longer lists the user, both files answer 404 and the project's used space equals what it was before the user's thread
+
+#### Scenario: Thread closed when the job completes
+
+- **WHEN** a User who reads their thread in a project is converted to Guest, the job completes and the user is converted back to User
+- **THEN** the thread answers 404 to the user
+
+#### Scenario: Other members
+
+- **WHEN** one of two members with a thread each is converted to Guest
+- **THEN** the other member still reads their thread and lists its artifact
+
+#### Scenario: Owner of a project converted
+
+- **WHEN** a Room admin who owns a project and has a thread there with an artifact is converted to Guest with the project passed to another account, and the background pass has run
+- **THEN** the other account owns the project (its `createdBy`), `getRoomSecurityInfo` does not list the converted user, and the artifact answers 404
+
+#### Scenario: Member of an agent converted
+
+- **WHEN** a User who is a Content creator of an AI agent is converted to Guest
+- **THEN** `getRoomSecurityInfo` of the agent lists the user as Viewer
+
 ### Requirement: Thread list of an AI project
 
 `aiThreadsList` with the id of an AI project as `entityId` SHALL list the threads the caller started in that
@@ -2410,3 +2457,199 @@ kept, so the project is listed again once the caller regains access.
 
 - **WHEN** a Room admin creates a project, pins it and calls `getRootFolders`
 - **THEN** the project is listed, although the creator holds no share record on it
+
+### Requirement: Drafts that are not sent are removed
+
+A background pass, every 15 minutes by default, SHALL remove each draft its creator deleted and each draft
+not linked to a message 2 hours, by default, after it was created; for a file stored in an AI project the
+draft counts from the upload or the copy. With the draft it SHALL remove the file the draft was made from
+when that file still lies in an AI project unsent, and return its size to the project's space. Any other
+file and any linked attachment SHALL stay.
+
+#### Scenario: Deleted draft of a file in a project
+
+- **WHEN** a Content creator of a project uploads a file into the project, attaches it, deletes the draft, and the background pass has run
+- **THEN** the draft reads as null, the file answers 404 and the project's used space equals what it was before the upload
+
+#### Scenario: Abandoned draft of a file in a project
+
+- **WHEN** a Content creator uploads a file into a project and attaches it, and the draft is not linked for 2 hours
+- **THEN** after the next background pass the draft reads as null, the file answers 404 and the project's used space equals what it was before the upload
+
+#### Scenario: Abandoned draft of a file outside a project
+
+- **WHEN** the owner attaches a file of their My documents and the draft is not linked for 2 hours
+- **THEN** after the next background pass the draft reads as null and `getFileInfo` still answers for the file
+
+#### Scenario: Sent attachment older than the lifetime
+
+- **WHEN** a Content creator uploads a file into a project, attaches it and links it to a message of a project thread, and 2 hours pass after the upload
+- **THEN** after the next background pass `getThreadAttachments` still lists the file
+
+### Requirement: Number of projects that use a room
+
+A Knowledge or an Instructions room SHALL carry `linkedProjectsCount` in the answers of `getRoomsFolder`,
+`getRoomInfo`, `createRoom` and `updateRoom`: the number of AI projects the room is linked to, 0 when there is
+none. The number SHALL count every such project, whether the caller may read it or not. A room of another type,
+an AI project included, SHALL NOT carry the field.
+
+#### Scenario: Room linked to two projects
+
+- **WHEN** the owner links a Knowledge room to two projects, lists the section with `getRoomsFolder` and `searchArea=AiHub` and reads the room with `getRoomInfo`
+- **THEN** the room carries `linkedProjectsCount` 2 in both answers
+
+#### Scenario: Room linked to no project
+
+- **WHEN** the owner creates an Instructions room and reads it with `getRoomInfo`
+- **THEN** the answer of `createRoom` and the answer of `getRoomInfo` carry `linkedProjectsCount` 0
+
+#### Scenario: Room changed
+
+- **WHEN** the owner renames a Knowledge room linked to one project with `updateRoom`
+- **THEN** the answer carries `linkedProjectsCount` 1
+
+#### Scenario: Rooms of other types
+
+- **WHEN** the owner reads an AI project and a Custom room with `getRoomInfo` and lists the section with `getRoomsFolder` and `searchArea=AiHub`
+- **THEN** neither the project nor the Custom room carries `linkedProjectsCount`
+
+#### Scenario: Reader of the room outside the projects
+
+- **WHEN** a User who is a Viewer of a Knowledge room linked to two projects, and a member of neither, reads the room with `getRoomInfo`
+- **THEN** the room carries `linkedProjectsCount` 2
+
+#### Scenario: Number follows the links
+
+- **WHEN** a room is linked to two projects, a Room manager of the first unlinks it with `unlinkProjectSources`, and the second project is then deleted with `deleteRoom`
+- **THEN** `getRoomInfo` of the room carries `linkedProjectsCount` 1 after the unlink and 0 after the deletion has completed
+
+### Requirement: Listing the projects that use a room
+
+`getRoomProjects` SHALL answer one page of the AI projects a Knowledge or an Instructions room is linked to, each
+with `id`, `title` and `logo`, sorted by title and then by id, with the number of listed projects as the total;
+an empty page when it lists none. It SHALL need read access to the room (403) and answer 404 for any other id:
+an unknown one, an AI project, a room of another type. `count` SHALL be 1 to 100, 100 when omitted, and
+`startIndex` 0 or more; any other value answers 400.
+
+#### Scenario: Projects sorted by title
+
+- **WHEN** the owner links a Knowledge room to the projects "Gamma", "Alpha" and "Beta", in that order, and calls `getRoomProjects` for the room
+- **THEN** the page holds "Alpha", "Beta" and "Gamma" in that order, each with its `id`, `title` and `logo`, and the total is 3
+
+#### Scenario: Projects with one title
+
+- **WHEN** the owner links an Instructions room to two projects that both have the title "Twin"
+- **THEN** the page lists the project with the lower id first
+
+#### Scenario: Room linked to no project
+
+- **WHEN** the owner calls `getRoomProjects` for a Knowledge room no project links
+- **THEN** the page is empty and the total is 0
+
+#### Scenario: Id that is no Knowledge or Instructions room
+
+- **WHEN** the owner calls `getRoomProjects` with the id of an AI project, of a Custom room, and with an id no room has
+- **THEN** each call answers 404
+
+#### Scenario: Caller who cannot read the room
+
+- **WHEN** a User who has no role in an Instructions room and is a member of no project that links it calls `getRoomProjects` for it
+- **THEN** the system answers 403
+
+#### Scenario: One page
+
+- **WHEN** the owner lists the three projects of a room with `count` 1 and `startIndex` 1
+- **THEN** the page holds the second project by title and the total is 3
+
+#### Scenario: Start index past the end
+
+- **WHEN** the owner lists the three projects of a room with `startIndex` 3
+- **THEN** the page is empty and the total is 3
+
+#### Scenario: Count of zero
+
+- **WHEN** the owner calls `getRoomProjects` with `count` 0
+- **THEN** the system answers 400
+
+#### Scenario: Negative count
+
+- **WHEN** the owner calls `getRoomProjects` with `count` -1
+- **THEN** the system answers 400
+
+#### Scenario: Count above the maximum
+
+- **WHEN** the owner calls `getRoomProjects` with `count` 101
+- **THEN** the system answers 400
+
+#### Scenario: Empty count
+
+- **WHEN** the owner calls `getRoomProjects` with `count` sent without a value
+- **THEN** the system answers 400
+
+#### Scenario: Negative start index
+
+- **WHEN** the owner calls `getRoomProjects` with `startIndex` -1
+- **THEN** the system answers 400
+
+#### Scenario: Largest count
+
+- **WHEN** the owner calls `getRoomProjects` with `count` 100 and `startIndex` 0 for a room linked to three projects
+- **THEN** the system answers 200 with the three projects
+
+### Requirement: Who is listed among the projects of a room
+
+`getRoomProjects` SHALL list a project only to a caller who may read it: a DocSpace admin, the creator of the
+project, or a member who holds a role of their own in it. A project the caller may not read SHALL be left out
+of the page and of the total, while `linkedProjectsCount` of the room still counts it.
+
+#### Scenario: Member of one of two projects
+
+- **WHEN** a User who is a Viewer of a Knowledge room and a Content creator of one of the two projects that link it calls `getRoomProjects` for the room
+- **THEN** the page holds that project only and the total is 1, while `getRoomInfo` of the room carries `linkedProjectsCount` 2
+
+#### Scenario: Reader of the room outside the projects
+
+- **WHEN** a User who is a Viewer of a Knowledge room linked to two projects, and a member of neither, calls `getRoomProjects` for the room
+- **THEN** the page is empty and the total is 0
+
+#### Scenario: Member who reads the room through a project
+
+- **WHEN** a User who is a Content creator of one of the two projects that link an Instructions room, and holds no role in the room, calls `getRoomProjects` for the room
+- **THEN** the system answers 200 and the page holds that project only
+
+#### Scenario: DocSpace admin outside the projects
+
+- **WHEN** a DocSpace admin who is a member of neither of the two projects that link a room calls `getRoomProjects` for the room
+- **THEN** the page holds both projects and the total is 2
+
+#### Scenario: Creator of a project
+
+- **WHEN** a Room admin creates a project and a Knowledge room, links the room to the project and calls `getRoomProjects` for the room
+- **THEN** the page holds the project, although its creator holds no share record on it
+
+### Requirement: Clients are told when the number of projects of a room changes
+
+When `linkProjectSources` links a room, `unlinkProjectSources` unlinks one or `deleteRoom` deletes a project, the
+clients of the accounts that may read each room whose `linkedProjectsCount` changed SHALL receive the event that
+reports an updated folder for that room, after the change is stored. A call that changes the number of no room
+SHALL send no such event for a room.
+
+#### Scenario: Room linked
+
+- **WHEN** a Room manager of a project links a Knowledge room while the owner of the portal listens to the AI rooms section
+- **THEN** the owner's client receives the updated-folder event for the room
+
+#### Scenario: Room unlinked
+
+- **WHEN** a Room manager of a project unlinks a linked Instructions room while the owner of the portal listens to the AI rooms section
+- **THEN** the owner's client receives the updated-folder event for the room
+
+#### Scenario: Project deleted
+
+- **WHEN** a project that links two rooms is deleted with `deleteRoom` while the owner of the portal listens to the AI rooms section, and the deletion has completed
+- **THEN** the owner's client receives the updated-folder event for each of the two rooms
+
+#### Scenario: Nothing linked anew
+
+- **WHEN** a Room manager links a room the project already links, after a first link whose event the owner's client received
+- **THEN** the owner's client receives no second updated-folder event for the room

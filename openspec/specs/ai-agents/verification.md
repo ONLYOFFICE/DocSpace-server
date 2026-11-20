@@ -117,13 +117,14 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Audited (scenario) | `AI/Server/Service/AssignmentsStorageService.cs` (`AiProfileAssigned`, `AiProfileUnassigned`) | CODE-ONLY |
 | **The AI rooms section** | | |
 | Created by owner / admin / Room admin, User 403; section root (scenario "Section listing") | `Hub/AiHubRootTests.cs:48,63,124`; `Hub/AiProjectRoomTests.cs:46,63,77,87,101,132,164` | TEST-CONFIRMED [run: PASS] |
-| Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,69,80,93,106` | TEST-CONFIRMED [run: PASS] |
+| Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,82,93,106,119`; a private project 400: `Hub/AiHubRoomSettingsTests.cs:69` (not run yet) | TEST-CONFIRMED [run: PASS] |
 | Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED [run: PASS] |
 | Knowledge room needs vectorization 403 | `Security:1422,1441`; `AI/Core/Settings` | CODE-ONLY |
 | **Members of the AI rooms** | | |
 | Guest not in a project (scenario); User joins through a link as Content creator | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
 | Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED (not run yet) |
 | Content creator reads, Room manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
+| DocSpace admin outside the project reads its model, sources and skills (scenario) | `Hub/AiRoomOutsiderAccessTests.cs:55` | TEST-CONFIRMED (not run yet) |
 | Role sets of Instructions and Knowledge rooms | `Security` (`GetAccesses`); `products/ASC.Files/Core/Helpers` | CODE-ONLY |
 | **The model of an AI project** | | |
 | Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,93,167` | TEST-CONFIRMED [run: PASS] |
@@ -142,6 +143,35 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Member reads linked room; non-member 403; not listed in members | `Hub/AiProjectMemberAccessTests.cs:45,67,142` | TEST-CONFIRMED [run: PASS] |
 | Unlink / removal ends it (scenario); own role not lowered | `Hub/AiProjectMemberAccessTests.cs:85,104,122` | TEST-CONFIRMED [run: PASS] |
 | Skills for a member | `Hub/AiProjectMemberAccessTests.cs:177`; `Hub/AiRoomSkillsTests.cs:62` | TEST-CONFIRMED [run: PASS] |
+| **Number of projects that use a room** | | |
+| Room linked to two projects (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:46` | TEST-CONFIRMED (not run yet) |
+| Room linked to no project (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:58` | TEST-CONFIRMED (not run yet) |
+| Room changed (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:69` | TEST-CONFIRMED (not run yet) |
+| Rooms of other types (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:80` | TEST-CONFIRMED (not run yet) |
+| Reader of the room outside the projects (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:96` | TEST-CONFIRMED (not run yet) |
+| Number follows the links (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:109` | TEST-CONFIRMED (not run yet) |
+| The same for a Knowledge room: the tests use an Instructions room, the stand has no vectorization | `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs` (`CarriesLinkedProjectsCount`) | CODE-ONLY |
+| **Listing the projects that use a room** | | |
+| Projects sorted by title (scenario) | `Hub/AiRoomProjectsListTests.cs:45` | TEST-CONFIRMED (not run yet) |
+| Projects with one title (scenario) | `Hub/AiRoomProjectsListTests.cs:58` | TEST-CONFIRMED (not run yet) |
+| Room linked to no project (scenario) | `Hub/AiRoomProjectsListTests.cs:69` | TEST-CONFIRMED (not run yet) |
+| Id that is no Knowledge or Instructions room (scenario) | `Hub/AiRoomProjectsListTests.cs:84` | TEST-CONFIRMED (not run yet) |
+| Caller who cannot read the room (scenario) | `Hub/AiRoomProjectsListTests.cs:102` | TEST-CONFIRMED (not run yet) |
+| One page (scenario) | `Hub/AiRoomProjectsPagingTests.cs:46` | TEST-CONFIRMED (not run yet) |
+| Start index past the end (scenario) | `Hub/AiRoomProjectsPagingTests.cs:58` | TEST-CONFIRMED (not run yet) |
+| Count of zero, negative count, count above the maximum, empty count, negative start index (scenarios) | `Hub/AiRoomProjectsPagingTests.cs:73,85` | TEST-CONFIRMED (not run yet) |
+| Largest count (scenario) | `Hub/AiRoomProjectsPagingTests.cs:97` | TEST-CONFIRMED (not run yet) |
+| **Who is listed among the projects of a room** | | |
+| Member of one of two projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:47` | TEST-CONFIRMED (not run yet) |
+| Reader of the room outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:66` | TEST-CONFIRMED (not run yet) |
+| Member who reads the room through a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:83` | TEST-CONFIRMED (not run yet) |
+| DocSpace admin outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:98` | TEST-CONFIRMED (not run yet) |
+| Creator of a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:111` | TEST-CONFIRMED (not run yet) |
+| **Clients are told when the number of projects of a room changes** | | |
+| Room linked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:46` | TEST-CONFIRMED (not run yet) |
+| Room unlinked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:63` | TEST-CONFIRMED (not run yet) |
+| Project deleted (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:81` | TEST-CONFIRMED (not run yet) |
+| Nothing linked anew (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:100` | TEST-CONFIRMED (not run yet) |
 | **Skills of an Instructions room** | | |
 | Front matter rules, upload, chunked, new version (scenario "Invalid name") | `Instr/SkillUploadTests.cs:41-221` | TEST-CONFIRMED [run: PASS] |
 | Copy and move refused; no folder | `Instr/SkillMoveCopyTests.cs:58,90,107`; `Instr/InstructionsRoomFolderTests.cs:41,56,75,91` | TEST-CONFIRMED [run: PASS] |
@@ -152,7 +182,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | `getRoomSkills` | `Hub/AiRoomSkillsTests.cs:46,62,82,95,108,118,134` | TEST-CONFIRMED [run: PASS] |
 | `getRoomsSkills` (scenario "Unreadable room left out") | `Hub/RoomsSkillsTests.cs:41,61,76,94,107,120,137,147` | TEST-CONFIRMED [run: PASS] |
 | `getRoomAiFolder` (scenario "Room without a skill") | `T/SkillTests/SkillFolderListingTests.cs:48,58,69` | TEST-CONFIRMED [run: PASS] |
-| `getRoomAiFolder` non-reader 403; `withAiFolder` (scenario) | `products/ASC.Files/Server/Api/VirtualRoomsController.cs`; yaml 30261; `Hub/AiRoomOutsiderAccessTests.cs:75,91,107,129` | TEST-CONFIRMED [run: FAIL-BUG] for the 403 and the reader's 200 (`AiRoomOutsiderAccessTests.cs:75,91`) and for `withAiFolder` with `searchArea=AiHub` (`:77`); for `withAiFolder` alone as the operation's description advises (`:99`, A34) |
+| `getRoomAiFolder` non-reader 403; `withAiFolder` (scenario) | `products/ASC.Files/Server/Api/VirtualRoomsController.cs`; yaml 30261; `Hub/AiRoomOutsiderAccessTests.cs:75,91,107,129` | TEST-CONFIRMED [run: FAIL-BUG] for the 403 and the reader's 200 (`AiRoomOutsiderAccessTests.cs:75,91`) and for `withAiFolder` with `searchArea=AiHub` (`:107`); for `withAiFolder` alone as the operation's description advises (`:129`, A34) |
 | **Using the skills in a chat** | | |
 | Index and `read_skill`; body only on request (scenario "Model reads one skill") | `T/SkillTests/SkillChatTests.cs:46,73,93` | TEST-CONFIRMED [run: PASS] |
 | Member yes, outsider, Guest, revoked no (scenario "Outsider") | `T/SkillTests/SkillPermissionTests.cs:80,98,138,153,183,209` | TEST-CONFIRMED [run: PASS] |
@@ -337,9 +367,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Batch (scenarios "Batch with one bad element", "Batch") | `T/AttachmentTests/AttachmentSaveFilesManyTests.cs:45,97,141,214,230`; `AttachmentCrossUserTests.cs:236` | TEST-CONFIRMED [run: PASS] |
 | Fields stored as sent (scenario) | `T/AttachmentTests/AttachmentSaveFileTypeTests.cs:47,75`; `AttachmentSaveFileValidationTests.cs:155`; `AttachmentSaveFileTests.cs:115` | TEST-CONFIRMED [run: PASS] |
 | **Reading and deleting attachments** | | |
-| Another user's draft (scenario); mixed delete (scenario) | `T/AttachmentTests/AttachmentCrossUserTests.cs:57,77,186,209` | TEST-CONFIRMED [run: PASS] |
-| Unknown, malformed, empty, missing body | `T/AttachmentTests/AttachmentGetManyTests.cs:45,74,86,119`; `AttachmentGetTests.cs:72,85,106`; `AttachmentDeleteTests.cs:71,103,131` | TEST-CONFIRMED [run: PASS] |
-| Immediately readable, gone; source kept | `T/AttachmentTests/AttachmentGetManyTests.cs:130,151`; `AttachmentDeleteTests.cs:85,172` | TEST-CONFIRMED [run: PASS] |
+| Another user's draft (scenario); mixed delete (scenario) | `T/AttachmentTests/AttachmentCrossUserTests.cs:57,77,186,209` | TEST-CONFIRMED |
+| Unknown, malformed, empty, missing body | `T/AttachmentTests/AttachmentGetManyTests.cs:45,74,86,119`; `AttachmentGetTests.cs:72,85,106`; `AttachmentDeleteTests.cs:72,104,132` | TEST-CONFIRMED |
+| Immediately readable; deleted draft gone after the background pass, source kept (scenario "Deleted draft") | `T/AttachmentTests/AttachmentGetManyTests.cs:130,151`; `AttachmentDeleteTests.cs:86,173` | TEST-CONFIRMED |
+| Linked attachment (scenario) | `T/AttachmentTests/AttachmentDeleteTests.cs:209` | TEST-CONFIRMED |
 | Draft does not reach the model (scenario) | failure text of `AttachmentSendTests.SendWithStream_DraftPassedAsAttachmentsIdOnly_ReachesTheModel` and `SendWithStream_FullyInlinedAttachmentRecord_ReachesTheModelToo` in run 365d87fe60 (bug 82773, A30); `T/ReasoningTests/ReasoningAttachTests.cs:48` passes and does not decide it; run 2026-11-10: both red again | TEST-CONFIRMED [run: FAIL-BUG] - `T/AttachmentTests/AttachmentSendTests.cs:68,91` (A30) |
 | Unpaid portal (scenario) | `TS/attachments/attachments.ai-disabled.spec.ts` | TS-ONLY |
 | **Linking attachments to a message** | | |
@@ -455,6 +486,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Other members; invited again (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:105,125` | TEST-CONFIRMED |
 | Owner and member remove the project from the list (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:148,172` | TEST-CONFIRMED |
 | Owner changed (scenario) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:192` | TEST-CONFIRMED |
+| **Converting a member to Guest removes them from the projects** |  |  |
+| Member converted; thread closed when the job completes (scenarios) | `T/GuestConversionTests/GuestConversionTests.cs:43,66` | TEST-CONFIRMED |
+| Other members; owner of a project converted (scenarios) | `T/GuestConversionTests/GuestConversionTests.cs:85,105` | TEST-CONFIRMED |
+| Member of an agent converted (scenario) | `T/GuestConversionTests/GuestConversionTests.cs:126` | TEST-CONFIRMED |
 | **Thread list of an AI project** |  |  |
 | Thread started in a project; thread started in a room (scenarios) | `T/ChatTests/ChatProjectThreadListTests.cs:41,62` | TEST-CONFIRMED |
 | **Deleting a profile deletes its project threads** |  |  |
@@ -478,6 +513,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | DocSpace admin outside the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:226` | TEST-CONFIRMED |
 | Creator of the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:246` | TEST-CONFIRMED |
 | A share held through a group does not count | `products/ASC.Files/Core/Core/EF/Queries/FolderQueries.cs` (`AiProjectsWithOwnRecordAsync`, `s.Subject == userId`); no test: the API refuses a group on a project | CODE-ONLY |
+| **Drafts that are not sent are removed** |  |  |
+| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:47,69` | TEST-CONFIRMED |
+| Abandoned draft of a file outside a project; sent attachment older than the lifetime (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:91,107` | TEST-CONFIRMED |
+| The pass runs every 15 minutes and a draft lives 2 hours by default | `products/ASC.AI/Worker/BackgroundServices/OrphanAttachmentsCleanerService.cs` (`_defaultPeriod`, `_defaultLifetime`) | CODE-ONLY |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 
@@ -580,5 +619,5 @@ A32 and A34 come from new tests of that run.
 | A28 | Attachment cap | More attachments than the composer allows are answered 200 and stored whole on `aiThreadsAppendUserMessage` and the send (11 stored). | `AttachmentComposerRuleTests`, the two `MoreAttachmentsThanTheClientAllows` tests (82894) | OPEN — red test, run 365d87fe60 |
 | A30 | Attachment to the model | A round with a draft by id, an inline record, a device file or an image ends healthy but no streamed request to the stub carries the text. Whether the stand's file reading plays a part was not traced. | `AttachmentSendTests`, four tests (82773) | OPEN — red test, run 365d87fe60 |
 | A32 | Dropped provider connection | `aiProfilesListModels` on a saved profile whose provider accepts the connection and closes it without an answer is answered 200 with an empty model list instead of 502, so the form shows no models instead of the failure. | `T/ProfileTests/ProfileListModelsFailureTests.cs:67` (Category=Bug); `Chat/controllers/profilesController.ts` (`listModels`) | NEW 2026-11-10, red by run |
-| A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:107,129` (Category=Bug on 99); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run |
+| A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:107,129` (Category=Bug on 128); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run |
 | A35 | `aiPromptsDelete` | Deleting another user's prompt answers `success` true although nothing is deleted (bug 82809): the route never reports whether a prompt of the caller was removed. The yaml describes it as intended. | `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` (Trait Bug 82809) | NEW 2026-11-14, red by code reading |

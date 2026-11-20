@@ -34,9 +34,10 @@
 namespace ASC.AI.Tests.Tests.AttachmentTests;
 
 /// <summary>
-/// <c>DELETE /api/2.0/ai/attachments/delete</c> and <c>delete-many</c>. An attachment is a reference to a stored file, not
-/// a copy of it, so removing the reference never touches the file; the routes report success for an id that does not
-/// exist, so a caller cannot tell "removed" from "never existed".
+/// <c>DELETE /api/2.0/ai/attachments/delete</c> and <c>delete-many</c>. The routes hand the caller's unlinked drafts to the
+/// background cleanup, which removes them at its next pass. An attachment is a reference to a stored file, not a copy of
+/// it, so removing the reference never touches a file outside an AI project; the routes report success for an id that
+/// does not exist, so a caller cannot tell "removed" from "never existed".
 /// </summary>
 [Trait("Category", "Attachments")]
 [Trait("Feature", "AI/Attachments")]
@@ -93,7 +94,7 @@ public class AttachmentDeleteTests(AspireAppFixture fixture) : AttachmentTestBas
         await ExpectStoredAsync(id, "draft before deletion");
 
         (await DeleteAsync(id)).Status.Should().Be(200);
-        await ExpectAbsentAsync(id, "the deleted draft");
+        await ExpectCleanedUpAsync(id, "the deleted draft");
 
         var file = await FilesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken);
         file.Response.Id.Should().Be(fileId, "the source file after its draft is gone");
@@ -141,8 +142,8 @@ public class AttachmentDeleteTests(AspireAppFixture fixture) : AttachmentTestBas
 
         deleted.Status.Should().Be(200, deleted.Error);
         deleted.Data!.Success.Should().BeTrue();
-        await ExpectAbsentAsync(fileId, "deleted file draft");
-        await ExpectAbsentAsync(imageId, "deleted image draft");
+        await ExpectCleanedUpAsync(fileId, "deleted file draft");
+        await ExpectCleanedUpAsync(imageId, "deleted image draft");
     }
 
     [Fact]
@@ -160,7 +161,7 @@ public class AttachmentDeleteTests(AspireAppFixture fixture) : AttachmentTestBas
         // A file draft from the middle of the set, so an off-by-one in either direction shows up below.
         var removed = drafts[1].Id;
         (await DeleteAsync(removed)).Status.Should().Be(200);
-        await ExpectAbsentAsync(removed, "the removed draft");
+        await ExpectCleanedUpAsync(removed, "the removed draft");
 
         foreach (var draft in drafts.Where(candidate => candidate.Id != removed))
         {
@@ -194,7 +195,7 @@ public class AttachmentDeleteTests(AspireAppFixture fixture) : AttachmentTestBas
 
         foreach (var id in ids)
         {
-            await ExpectAbsentAsync(id, "the deleted draft");
+            await ExpectCleanedUpAsync(id, "the deleted draft");
         }
 
         foreach (var fileId in fileIds)
@@ -202,6 +203,23 @@ public class AttachmentDeleteTests(AspireAppFixture fixture) : AttachmentTestBas
             var file = await FilesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken);
             file.Response.Id.Should().Be(fileId, $"source file {fileId} after its draft is gone");
         }
+    }
+
+    [Fact]
+    public async Task Delete_LinkedAttachment_IsLeftAsItIs()
+    {
+        var (threadId, messageId) = await ThreadWithMessageAsync();
+        var linked = await SaveDraftAsync(Owner, "Autotest linked-delete.docx", "linked");
+        var control = await SaveDraftAsync(Owner, "Autotest linked-delete-control.docx", "control");
+
+        var link = await LinkAsync([linked], messageId, threadId);
+        link.Status.Should().Be(200, link.Error);
+
+        (await DeleteAsync(linked)).Status.Should().Be(200);
+        (await DeleteAsync(control)).Status.Should().Be(200);
+
+        await ExpectCleanedUpAsync(control, "the unlinked control draft");
+        await ExpectStoredAsync(linked, "the linked attachment after its delete and a cleanup pass");
     }
 
     [Fact]

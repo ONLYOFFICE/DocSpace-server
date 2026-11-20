@@ -250,6 +250,8 @@ public interface IFileDao<T>
         return deleted;
     }
 
+    IAsyncEnumerable<(T FileId, T ProjectId, long Size)> GetChatDraftFilesAsync(IReadOnlyCollection<Guid> attachmentIds);
+
     /// <summary>
     ///     Checks whether or not file
     /// </summary>

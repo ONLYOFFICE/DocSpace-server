@@ -12513,7 +12513,7 @@
           "Files / Folders"
         ],
         "summary": "Get filtered sections",
-        "description": "Returns every top-level section that the caller can see, each with its first page of content. Sections come\r\nin this order: \"Favorites\", \"Recent\", \"Shared with me\", \"My documents\", \"Trash\", \"Rooms\", \"Forms\", and\r\n\"Archive\". While the private rooms app is on, \"Private rooms\" comes before \"Archive\". While AI access is on for\r\nthe portal, the AI agents and AI hub sections follow. The list has\r\n\"Recent\" only after `PUT api/2.0/files/displayrecent` turns it on. It skips \"My documents\" if the account has\r\nnone, which is usual for a guest. To skip \"Trash\", set `withoutTrash` to `true`. Any signed-in user can call\r\nit. The call is read-only, but a valid `sortBy` becomes the account's default order. It does not clear\r\nnew-item marks. The filters, `count`, and `startIndex` apply to each section. So `count=1` returns one entry\r\nper section, and each section has its own `total`. This is the most expensive listing of the module. When you\r\nneed one section, read it directly, for example with `GET api/2.0/files/@my`. The call returns 400 if `count`\r\nis outside its allowed range.",
+        "description": "Returns every top-level section that the caller can see, each with its first page of content. Sections come\r\nin this order: \"Favorites\", \"Recent\", \"Shared with me\", \"My documents\", \"Trash\", \"Rooms\", \"Forms\", and\r\n\"Archive\". While the private rooms app is on, \"Private rooms\" comes before \"Archive\". While AI access is on for\r\nthe portal, the AI agents and AI hub sections follow. AI hub lists only the AI projects the caller pinned and\r\ncan access. They are sorted like pinned rooms in the section listing. The list has\r\n\"Recent\" only after `PUT api/2.0/files/displayrecent` turns it on. It skips \"My documents\" if the account has\r\nnone, which is usual for a guest. To skip \"Trash\", set `withoutTrash` to `true`. Any signed-in user can call\r\nit. The call is read-only, but a valid `sortBy` becomes the account's default order. It does not clear\r\nnew-item marks. The filters, `count`, and `startIndex` apply to each section except AI hub. So `count=1`\r\nreturns one entry per other section, each with its own `total`. AI hub always lists every pinned\r\nproject. This is the most expensive listing of the module. When you\r\nneed one section, read it directly, for example with `GET api/2.0/files/@my`. The call returns 400 if `count`\r\nis outside its allowed range.",
         "operationId": "getRootFolders",
         "parameters": [
           {
@@ -25828,7 +25828,7 @@
           "Files / Sharing"
         ],
         "summary": "Get folder access of group members",
-        "description": "Returns the members of a group with their access to a folder or room that the group has access to. Any\r\nsigned-in user can call it, except a guest. A guest gets 403. The call is read-only. It sorts the members by\r\nfirst name. Use `startIndex` and `count` to page through the list. The response headers carry the total. A\r\n`count` out of range returns 400. The call returns an empty list for a group without access to the folder,\r\nor an unknown folder. It also returns an empty list if the caller cannot read the folder. So an empty\r\nlist does not mean that the group has no members.",
+        "description": "Returns the members of a group with their access to a folder or room that the group has access to. Any signed-in\r\nuser can call it, except a guest. A guest gets 403. The call is read-only. It sorts the members by first name. Use\r\n`startIndex` and `count` to page through the list. The response headers carry the total. A `count` out of range\r\nreturns 400. The call returns an empty list for a group without access to the folder, or an unknown folder. It\r\nalso returns an empty list if the caller cannot read the folder. If the folder is not a room, a caller who cannot\r\nchange its access also gets an empty list. In these cases the total is 0. So an empty list does not mean that the\r\ngroup has no members. A user gets no contacts, phone, location, or notes of the other members.",
         "operationId": "getGroupsMembersWithFolderSecurity",
         "parameters": [
           {
@@ -26012,7 +26012,7 @@
           "Files / Sharing"
         ],
         "summary": "Get file access of group members",
-        "description": "Returns the members of a group with their access to a file that the group has access to. Any signed-in user\r\ncan call it, except a guest. A guest gets 403. The call is read-only. It sorts the members by first name. Use\r\n`startIndex` and `count` to page through the list. The response headers carry the total. A `count` out of\r\nrange returns 400. The call returns an empty list for a group without access to the file, or an\r\nunknown file. It also returns an empty list if the caller cannot read the file. So an empty list does not mean\r\nthat the group has no members.",
+        "description": "Returns the members of a group with their access to a file that the group has access to. Any signed-in user can\r\ncall it, except a guest. A guest gets 403. The call is read-only. It sorts the members by first name. Use\r\n`startIndex` and `count` to page through the list. The response headers carry the total. A `count` out of range\r\nreturns 400. The call returns an empty list for a group without access to the file, or an unknown file. It also\r\nreturns an empty list if the caller cannot read the file. It also returns an empty list to a caller who cannot\r\nchange the access of the file. In these cases the total is 0. So an empty list does not mean that the group has no\r\nmembers. A user gets no contacts, phone, location, or notes of the other members.",
         "operationId": "getGroupsMembersWithFileSecurity",
         "parameters": [
           {
@@ -34456,6 +34456,155 @@
         ]
       }
     },
+    "/api/2.0/files/rooms/{id}/projects": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the AI projects of a room",
+        "description": "Returns the AI projects that use a Knowledge or an Instructions room as a source, one page at a time.\r\nRequires read access to the room. Other callers get 403.\r\nThe call is read-only.\r\nIt lists only the projects the caller may read.\r\nA DocSpace admin reads every project.\r\nOther callers read the projects they created or are members of.\r\nSo the list can be shorter than `linkedProjectsCount` of the room, which counts every project.\r\nThe call sorts the projects by title.\r\nThe total in the answer counts the listed projects of all pages.\r\nA room that no listed project uses gives an empty list.\r\nAn unknown ID or another kind of room, such as an AI project, returns 404.\r\nThe call returns 400 if `count` or `startIndex` is out of range.\r\nIt also returns 403 if AI features are turned off on the portal.\r\nTo see the rooms that a project uses, use `GET api/2.0/files/rooms/{id}/sources`.",
+        "operationId": "getRoomProjects",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the Knowledge or Instructions room. Take it from `GET api/2.0/files/rooms` with `searchArea=AiHub`.",
+            "required": true,
+            "schema": {
+              "examples": [
+                17001
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The size of the page: the maximum number of projects to return.",
+            "schema": {
+              "examples": [
+                25
+              ],
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The number of projects to skip from the start of the list sorted by title.",
+            "schema": {
+              "examples": [
+                0
+              ],
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of the AI projects that use the room and that the caller may read",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiRoomProjectArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`count` is outside its allowed range or `startIndex` is negative"
+          },
+          "403": {
+            "description": "The caller may not read the room, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No Knowledge or Instructions room has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/files/rooms/{id}/model": {
       "get": {
         "tags": [
@@ -34647,6 +34796,392 @@
           },
           "404": {
             "description": "No AI project has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/rooms/{id}/threads/{threadId}/artifacts": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the AI thread artifacts",
+        "description": "Returns the artifacts of a thread in an AI project: the files the chat tools created in it. Only the author of the thread can read them.",
+        "operationId": "getThreadArtifacts",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the project.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "threadId",
+            "in": "path",
+            "description": "ID of the thread.",
+            "required": true,
+            "schema": {
+              "examples": [
+                "0198c3f4-6a2e-7c41-9b8d-2f5e7a1c3d90"
+              ],
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The maximum number of files to return.",
+            "schema": {
+              "examples": [
+                25
+              ],
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The number of files to skip.",
+            "schema": {
+              "examples": [
+                0
+              ],
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The field to sort the files by.",
+            "schema": {
+              "examples": [
+                "DateAndTime"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The sort order.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            },
+            "example": 1
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The text to search for in the file titles.",
+            "schema": {
+              "examples": [
+                "report"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The artifacts of the thread",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`count` is outside its allowed range or `startIndex` is negative"
+          },
+          "403": {
+            "description": "The caller may not read the project, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No AI project has this id, or it has no such thread of the caller"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/rooms/{id}/threads/{threadId}/attachments": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the AI thread attachments",
+        "description": "Returns the attachments of a thread in an AI project: the files the user sent with its messages. Only the author of the thread can read them.",
+        "operationId": "getThreadAttachments",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the project.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "threadId",
+            "in": "path",
+            "description": "ID of the thread.",
+            "required": true,
+            "schema": {
+              "examples": [
+                "0198c3f4-6a2e-7c41-9b8d-2f5e7a1c3d90"
+              ],
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The maximum number of files to return.",
+            "schema": {
+              "examples": [
+                25
+              ],
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The number of files to skip.",
+            "schema": {
+              "examples": [
+                0
+              ],
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The field to sort the files by.",
+            "schema": {
+              "examples": [
+                "DateAndTime"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The sort order.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            },
+            "example": 1
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The text to search for in the file titles.",
+            "schema": {
+              "examples": [
+                "report"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The attachments of the thread",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`count` is outside its allowed range or `startIndex` is negative"
+          },
+          "403": {
+            "description": "The caller may not read the project, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No AI project has this id, or it has no such thread of the caller"
           },
           "401": {
             "description": "Unauthorized",
@@ -36649,6 +37184,88 @@
           }
         },
         "description": "The successful API response containing the AiProjectSourcesDto object."
+      },
+      "AiRoomProjectArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiRoomProjectDto"
+            },
+            "description": "The list of AiRoomProjectDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of AiRoomProjectDto objects."
+      },
+      "AiRoomProjectDto": {
+        "required": [
+          "id",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              17040
+            ],
+            "type": "integer",
+            "description": "ID of the project, the `id` that the AI project calls take, such as `GET api/2.0/files/rooms/{id}/sources`.",
+            "format": "int32"
+          },
+          "title": {
+            "examples": [
+              "Website relaunch"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Project title."
+          },
+          "logo": {
+            "description": "The addresses of the project logo in four sizes, together with the colour and the built-in cover that are\r\ndrawn when no logo was uploaded. A project without a logo answers with four empty addresses rather than with\r\nnull.",
+            "$ref": "#/components/schemas/LogoDto"
+          }
+        },
+        "description": "An AI project that uses a Knowledge or an Instructions room as a source."
       },
       "AiSkillDto": {
         "required": [
@@ -41755,7 +42372,7 @@
                   "description": "The contact information.",
                   "$ref": "#/components/schemas/Contact"
                 },
-                "description": "The list of user contacts."
+                "description": "The list of user contacts. Not returned to a User or a Guest for another account, as they have no access to\r\nthe contacts of the portal."
               },
               "status": {
                 "description": "The user status.",
@@ -41796,7 +42413,7 @@
                   "description": "The group summary parameters.",
                   "$ref": "#/components/schemas/GroupSummaryDto"
                 },
-                "description": "The list of user groups."
+                "description": "The list of user groups. Not returned to a User or a Guest for another account."
               },
               "location": {
                 "examples": [
@@ -41806,7 +42423,7 @@
                   "null",
                   "string"
                 ],
-                "description": "The user location."
+                "description": "The user location. Not returned to a User or a Guest for another account."
               },
               "notes": {
                 "examples": [
@@ -41816,7 +42433,7 @@
                   "null",
                   "string"
                 ],
-                "description": "The user notes."
+                "description": "The user notes. Not returned to a User or a Guest for another account."
               },
               "isAdmin": {
                 "examples": [
@@ -41894,10 +42511,10 @@
                   "null",
                   "string"
                 ],
-                "description": "The user mobile phone number."
+                "description": "The user mobile phone number. Not returned to a User or a Guest for another account."
               },
               "mobilePhoneActivationStatus": {
-                "description": "The mobile phone activation status.",
+                "description": "The mobile phone activation status. For another account a User or a Guest always gets the default value,\r\nas the phone itself is not returned to them.",
                 "$ref": "#/components/schemas/MobilePhoneActivationStatus"
               },
               "isSSO": {
@@ -47241,6 +47858,17 @@
                   "integer"
                 ],
                 "description": "The form the completed copies in this folder were filled from, taken from the copy submitted last. Null while\r\nthe folder holds no completed copy, and for every folder that does not collect them.",
+                "format": "int32"
+              },
+              "linkedProjectsCount": {
+                "examples": [
+                  2
+                ],
+                "type": [
+                  "null",
+                  "integer"
+                ],
+                "description": "How many AI projects use the room as a source. Every project the room is linked to is counted, the ones the\r\ncaller may not read included, so the number can be higher than the list of `GET\r\napi/2.0/files/rooms/{id}/projects` is long. 0 means that no project uses the room. Filled in for a Knowledge\r\nand an Instructions room only: null for every other room type, an AI project included, and for a folder that\r\nis not a room.",
                 "format": "int32"
               }
             }
@@ -54292,7 +54920,7 @@
             "examples": [
               1762250000000
             ],
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9007199254740991,
             "minimum": 0,
             "type": "integer",
             "description": "The number of this report within the editor session, growing with each one, such as the time it was taken in\r\nmilliseconds.",
@@ -56766,6 +57394,17 @@
                   "integer"
                 ],
                 "description": "The form the completed copies in this folder were filled from, taken from the copy submitted last. Null while\r\nthe folder holds no completed copy, and for every folder that does not collect them.",
+                "format": "int32"
+              },
+              "linkedProjectsCount": {
+                "examples": [
+                  2
+                ],
+                "type": [
+                  "null",
+                  "integer"
+                ],
+                "description": "How many AI projects use the room as a source. Every project the room is linked to is counted, the ones the\r\ncaller may not read included, so the number can be higher than the list of `GET\r\napi/2.0/files/rooms/{id}/projects` is long. 0 means that no project uses the room. Filled in for a Knowledge\r\nand an Instructions room only: null for every other room type, an AI project included, and for a folder that\r\nis not a room.",
                 "format": "int32"
               }
             }
