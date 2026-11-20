@@ -51,6 +51,9 @@ vi.mock("../../storage/docspaceFilesApi.js", () => {
   return { DocspaceApiHttpError, filesApiSend: vi.fn() };
 });
 
+const aiConfig = vi.fn();
+vi.mock("../../storage/httpClient.js", () => ({ aiService: { get: aiConfig } }));
+
 const portalChatProfileId = vi.fn();
 vi.mock("../../storage/aiProjectChatContext.js", () => ({ portalChatProfileId }));
 
@@ -73,6 +76,7 @@ beforeEach(() => {
   vi.mocked(uploadFile).mockReset().mockResolvedValue({ id: "1", title: "file" });
   vi.mocked(filesApiSend).mockReset();
   portalChatProfileId.mockReset().mockResolvedValue("p1");
+  aiConfig.mockReset().mockResolvedValue({ vectorizationEnabled: true });
   answerRooms();
 });
 
@@ -253,6 +257,42 @@ describe("installTemplate", () => {
     });
     const result = await installTemplate(catalog, catalog.agents[0]!.id);
     expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
+  });
+
+  // Regression: the Files service refuses a Knowledge room on a portal
+  // without vectorization, and an agent's Instructions rooms were made
+  // before it, so every try left one more room behind.
+  it("refuses a template with a knowledge base before any room where vectorization is off", async () => {
+    aiConfig.mockResolvedValue({ vectorizationEnabled: false, vectorizationNeedReset: false });
+    await expect(installTemplate(catalog, catalog.agents[0]!.id)).rejects.toMatchObject({
+      status: 409,
+    });
+    await expect(installTemplate(catalog, catalog.knowledgeBases[0]!.id)).rejects.toMatchObject({
+      status: 409,
+    });
+    expect(filesApiSend).not.toHaveBeenCalled();
+    expect(uploadFile).not.toHaveBeenCalled();
+  });
+
+  it("installs a skill set where vectorization is off, without asking for it", async () => {
+    aiConfig.mockResolvedValue({ vectorizationEnabled: false });
+    const result = await installTemplate(catalog, catalog.skillSets[0]!.id);
+    expect(result.kind).toBe("skillSet");
+    expect(aiConfig).not.toHaveBeenCalled();
+  });
+
+  it("lets a knowledge base through while the vectorization settings wait for a reset", async () => {
+    aiConfig.mockResolvedValue({ vectorizationEnabled: false, vectorizationNeedReset: true });
+    const result = await installTemplate(catalog, catalog.knowledgeBases[0]!.id);
+    expect(result.kind).toBe("knowledgeBase");
+  });
+
+  it("makes nothing when the vectorization settings cannot be read", async () => {
+    aiConfig.mockRejectedValue(new Error("AI service down"));
+    await expect(installTemplate(catalog, catalog.agents[0]!.id)).rejects.toThrow(
+      "AI service down",
+    );
+    expect(filesApiSend).not.toHaveBeenCalled();
   });
 
   it("fails with the Files status when a room is refused, before anything is uploaded", async () => {

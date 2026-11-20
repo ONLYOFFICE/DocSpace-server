@@ -9553,7 +9553,7 @@
         ],
         "operationId": "aiTemplatesInstall",
         "summary": "Install a template",
-        "description": "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
+        "description": "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
         "responses": {
           "200": {
             "description": "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",
@@ -9692,6 +9692,16 @@
           },
           "404": {
             "description": "The catalog has no template with this `id`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The template holds a knowledge base and vectorization is not set up on the portal; no room was made.",
             "content": {
               "application/json": {
                 "schema": {
