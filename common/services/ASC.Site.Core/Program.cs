@@ -64,7 +64,7 @@ try
 
     if (!startup.WorkspaceConfigured)
     {
-        logger.Warn("The \"{connectionStringName}\" connection string is not set: the subscription endpoints will fail ({applicationContext})", WorkspaceDbContext.ConnectionStringName, AppName);
+        logger.Warn("The {connectionStringName} connection string is not set: the subscription endpoints will fail ({applicationContext})", WorkspaceDbContext.ConnectionStringName, AppName);
     }
 
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
