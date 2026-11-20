@@ -379,6 +379,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Linking attachments to a message** | | |
 | Dies with the message (scenario), thread | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:68,89,199,218` | TEST-CONFIRMED [run: PASS] |
 | 400 / 404 / 403 refusals; foreign draft | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:111,122,133,145,156,166,177,190`; `AttachmentCrossUserTests.cs:139,265` | TEST-CONFIRMED [run: PASS] |
+| **Which drafts a link binds** | | |
 | Deleted draft is not linked; draft of another thread; another message of the same thread (scenarios), on the AI binding the operation calls | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:352,370,395`; `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`UpdateAttachmentBindingsByIdsAsync`) | TEST-CONFIRMED |
 | **Suggested questions for a form attachment** | | |
 | 200 status and list; unknown (scenario); foreign; bad id; anonymous; AI off | `T/AttachmentTests/AttachmentSuggestedQuestionsTests.cs:63,87,98,106,119,133`; `AttachmentAiDisabledTests.cs:225` | TEST-CONFIRMED [run: PASS] |
@@ -530,10 +531,12 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Creator of the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:244` | TEST-CONFIRMED |
 | A share held through a group does not count | `products/ASC.Files/Core/Core/EF/Queries/FolderQueries.cs` (`AiProjectsWithOwnRecordAsync`, `s.Subject == userId`); no test: the API refuses a group on a project | CODE-ONLY |
 | **Drafts that are not sent are removed** |  |  |
-| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:47,101` | TEST-CONFIRMED |
-| Abandoned draft of a file outside a project; sent attachment older than the lifetime (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:123,139` | TEST-CONFIRMED |
+| Sent attachment older than the lifetime (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:142` | TEST-CONFIRMED |
 | The pass runs every 15 minutes and a draft lives 2 hours by default | `products/ASC.AI/Worker/BackgroundServices/OrphanAttachmentsCleanerService.cs` (`_defaultPeriod`, `_defaultLifetime`) | CODE-ONLY |
 | A draft linked before the pass takes it keeps its file; a link after that leaves the draft unlinked | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:125`; `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`MarkOrphanAttachmentsDeletedAsync`, `UpdateAttachmentBindingsByIdsAsync`); no test: the stand cannot order the link inside the pass | CODE-ONLY |
+| **The file of a removed draft** |  |  |
+| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:50,104` | TEST-CONFIRMED |
+| Abandoned draft of a file outside a project (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:126` | TEST-CONFIRMED |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 
