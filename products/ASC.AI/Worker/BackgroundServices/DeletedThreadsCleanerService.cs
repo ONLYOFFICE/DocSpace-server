@@ -57,41 +57,46 @@ public class DeletedThreadsCleanerService(
         var id = Guid.Empty;
         var totalCount = 0;
 
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            List<DeletedThread> threads;
-
-            await using (var scope = _scopeFactory.CreateAsyncScope())
+            while (!stoppingToken.IsCancellationRequested)
             {
-                threads = await scope.ServiceProvider.GetRequiredService<ThreadsStorage>().ReadDeletedAsync(deletedOn, id, BatchSize);
-            }
+                List<DeletedThread> threads;
 
-            foreach (var thread in threads)
-            {
-                stoppingToken.ThrowIfCancellationRequested();
-
-                try
+                await using (var scope = _scopeFactory.CreateAsyncScope())
                 {
-                    await DeleteAsync(thread);
-                    totalCount++;
+                    threads = await scope.ServiceProvider.GetRequiredService<ThreadsStorage>().ReadDeletedAsync(deletedOn, id, BatchSize);
                 }
-                catch (Exception e)
+
+                foreach (var thread in threads)
                 {
-                    logger.ErrorDeleteThread(thread.TenantId, thread.Id, e);
+                    stoppingToken.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        await DeleteAsync(thread);
+                        totalCount++;
+                    }
+                    catch (Exception e)
+                    {
+                        logger.ErrorDeleteThread(thread.TenantId, thread.Id, e);
+                    }
                 }
-            }
 
-            if (threads.Count < BatchSize)
-            {
-                break;
-            }
+                if (threads.Count < BatchSize)
+                {
+                    break;
+                }
 
-            (deletedOn, id) = (threads[^1].DeletedOn, threads[^1].Id);
+                (deletedOn, id) = (threads[^1].DeletedOn, threads[^1].Id);
+            }
         }
-
-        if (totalCount > 0)
+        finally
         {
-            logger.InformationDeletedThreads(totalCount);
+            if (totalCount > 0)
+            {
+                logger.InformationDeletedThreads(totalCount);
+            }
         }
     }
 
