@@ -170,16 +170,11 @@ SHALL send no such event for a room.
 - **WHEN** a Room manager links a room the project already links, after a first link whose event the owner's client received
 - **THEN** the owner's client receives no second updated-folder event for the room
 
-## MODIFIED Requirements
+### Requirement: Users only in an AI project
 
-### Requirement: Members of the AI rooms
-
-An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
-the same without Editor, an AI project only Room manager and Content creator. The members of a project are
-users only: a group SHALL NOT be invited to a project with any role (403, "The role is not available for this
-user type"). A Guest SHALL NOT hold any role in a project (403, nobody added) while a User joins through a
-link as Content creator. Every member reads the project; only a Room manager edits it; a non-member other
-than a DocSpace admin SHALL NOT read its model, sources or skills (403).
+The members of an AI project SHALL be users only: a group SHALL NOT be invited to a project with any role
+(403, "The role is not available for this user type"). A Guest SHALL NOT hold any role in a project (403,
+nobody added), while a User joins through an invitation link as Content creator.
 
 #### Scenario: Guest invited to a project
 
@@ -190,6 +185,15 @@ than a DocSpace admin SHALL NOT read its model, sources or skills (403).
 
 - **WHEN** the owner invites a group to a project with any role
 - **THEN** the system answers 403 and the group is not a member
+
+## MODIFIED Requirements
+
+### Requirement: Members of the AI rooms
+
+An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
+the same without Editor, an AI project only Room manager and Content creator. Every member reads the project;
+only a Room manager edits it; a non-member other than a DocSpace admin SHALL NOT read its model, sources or
+skills (403).
 
 #### Scenario: Content creator reads, Room manager writes
 

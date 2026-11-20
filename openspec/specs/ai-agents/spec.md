@@ -2178,11 +2178,7 @@ included, and sorting the AI rooms root by `UsedSpace` SHALL order projects by t
 `getFolderByFolderId` of an AI project SHALL answer no files, no folders and total 0, `getFolders` an empty
 list, and a search inside the project nothing, to the creator of the files, the project's owner and a DocSpace
 admin alike. `getRoomInfo` of a project SHALL report `filesCount` and `foldersCount` 0. `getProjectSources`
-and `getRoomSkills` of the project SHALL answer as they do for a project without files. `getFolderByFolderId`
-and `searchFolder` of the AI rooms root, and `getFolderByFolderId` of the rooms root with `searchArea` AiHub,
-SHALL list rooms only, whatever `withSubFolders` says: no entry inside a project, and no such entry in `total`.
-`getFolderByFolderId` of the rooms root with `searchArea` Any SHALL list no entry inside a project, with
-`withSubFolders` true as well, and count none in `total`.
+and `getRoomSkills` of the project SHALL answer as they do for a project without files.
 
 #### Scenario: Listing a project that holds thread files
 
@@ -2193,6 +2189,23 @@ SHALL list rooms only, whatever `withSubFolders` says: no entry inside a project
 
 - **WHEN** the creator of an artifact `report.txt` calls `getFolderByFolderId` of the project with `filterValue` `report` and `withSubFolders` true
 - **THEN** the answer holds no files and total 0
+
+#### Scenario: Counters of the project
+
+- **WHEN** the owner reads `getRoomInfo` of a project that holds thread files
+- **THEN** `filesCount` and `foldersCount` are 0
+
+#### Scenario: Sources and skills
+
+- **WHEN** the owner links an Instructions room to a project that holds thread files
+- **THEN** `getProjectSources` lists that room and `getRoomSkills` of the project answers
+
+### Requirement: The rooms roots list nothing inside a project
+
+`getFolderByFolderId` and `searchFolder` of the AI rooms root, and `getFolderByFolderId` of the rooms root with
+`searchArea` AiHub, SHALL list rooms only, whatever `withSubFolders` says. `getFolderByFolderId` of the rooms
+root with `searchArea` Any SHALL list no entry inside a project, with `withSubFolders` true as well. No entry
+inside a project SHALL count in `total` of these listings.
 
 #### Scenario: Listing the AI rooms root
 
@@ -2209,25 +2222,13 @@ SHALL list rooms only, whatever `withSubFolders` says: no entry inside a project
 - **WHEN** another member of the project, the project's owner and a DocSpace admin each call `getFolderByFolderId` of the rooms root with `searchArea` Any, without a filter and with `filterValue` `artifacts`, for a project with an artifact and a file not sent yet
 - **THEN** no answer holds the folder of the thread, the artifact or the file not sent yet, and each total equals the number of entries listed; the unfiltered answer to the member lists the project
 
-#### Scenario: Counters of the project
-
-- **WHEN** the owner reads `getRoomInfo` of a project that holds thread files
-- **THEN** `filesCount` and `foldersCount` are 0
-
-#### Scenario: Sources and skills
-
-- **WHEN** the owner links an Instructions room to a project that holds thread files
-- **THEN** `getProjectSources` lists that room and `getRoomSkills` of the project answers
-
 ### Requirement: Recipients of an upload into a project
 
 The socket event that announces a file uploaded into an AI project SHALL reach the uploader only: the
 project's owner, a DocSpace admin and another member subscribed to the project SHALL NOT receive it. The
 upload SHALL NOT mark the file as new for the project's owner, and the members of the project SHALL NOT be
 sent the notification about a file uploaded to a room. `getSharedUsers` of a file inside a project SHALL
-answer an empty list. The hourly room activity digest and the daily feed digest SHALL leave out every
-event of a project and of the entries inside it, for every recipient, its owner and DocSpace admins
-included.
+answer an empty list.
 
 #### Scenario: Uploader is told
 
@@ -2253,6 +2254,11 @@ included.
 
 - **WHEN** a member uploads a file into a project on a portal that has a DocSpace admin, and calls `getSharedUsers` for it
 - **THEN** the list is empty
+
+### Requirement: Activity digests leave out AI projects
+
+The hourly room activity digest and the daily feed digest SHALL leave out every event of an AI project and of
+the entries inside it, for every recipient, the project's owner and DocSpace admins included.
 
 #### Scenario: Activity digests
 

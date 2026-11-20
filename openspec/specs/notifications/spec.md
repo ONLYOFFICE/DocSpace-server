@@ -262,7 +262,7 @@ o'clock (configurable) and whose tariff is not in the not-paid state, the system
 active member subscribed to the daily feed "What's new on your portal <host> for <date>" by e-mail
 and Telegram, listing yesterday's events they may see: files created, comments, rooms and AI
 agents created, renamed or archived, members removed, users added or updated. Nothing to report,
-no letter. Events of an AI project and of the entries inside it are never listed.
+no letter.
 
 #### Scenario: Member with activity
 
@@ -280,7 +280,7 @@ Every hour the system SHALL send every active member subscribed to room activity
 "What's new on your portal <host> for the last hour" listing the past hour's uploads, edits,
 members added to rooms or agents, role changes, type changes and form-filling steps the member
 may see, skipping muted rooms and members with nothing to report. It goes by e-mail and
-Telegram. Events of an AI project and of the entries inside it are never listed.
+Telegram.
 
 #### Scenario: Upload in the past hour
 
@@ -291,6 +291,17 @@ Telegram. Events of an AI project and of the entries inside it are never listed.
 
 - **WHEN** the portal's tariff is not paid
 - **THEN** no hourly digest is sent either, while the letters a room sends at once still go out
+
+### Requirement: AI projects in the digests
+
+The daily feed digest and the hourly room activity digest SHALL list no event of an AI project or of an
+entry inside it, for every recipient, the project's owner and DocSpace admins included (`ai-agents`,
+"Activity digests leave out AI projects").
+
+#### Scenario: Activity in a project
+
+- **WHEN** a member uploads or creates a file in an AI project, or the project is created, renamed or gets a new member
+- **THEN** neither digest of any recipient lists the event
 
 ### Requirement: SMTP settings of the portal
 

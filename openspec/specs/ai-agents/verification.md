@@ -475,15 +475,17 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Sorting by used space (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:82`; `products/ASC.Files/Core/Utils/EntryManager.cs:1112,1255-1258` | TEST-CONFIRMED |
 | **The contents of a project are not listed** |  |  |
 | Listing; search inside the project (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:51,69,80` | TEST-CONFIRMED |
+| Counters of the project; sources and skills (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:96,107` | TEST-CONFIRMED |
+| **The rooms roots list nothing inside a project** |  |  |
 | Listing the AI rooms root; filtering it by the title of a thread folder (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:53,86,103`; `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:69` | TEST-CONFIRMED |
 | Listing the rooms root across all sections (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:126` | TEST-CONFIRMED |
-| Counters of the project; sources and skills (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:96,107` | TEST-CONFIRMED |
 | **Recipients of an upload into a project** |  |  |
 | Uploader is told; others are not told (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:52,68` | TEST-CONFIRMED |
 | Owner's new items (scenario) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:106` | TEST-CONFIRMED |
 | Upload notification (scenario): the decision by room type | `CoreTests/DocSpaceHelperAnnouncementTests.cs:39,53` | TEST-CONFIRMED |
 | Upload notification (scenario): the decision is applied where the upload event is published and where it is handled | `products/ASC.Files/Server/Api/UploadController.cs`; `products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs`; `products/ASC.Files/Server/Helpers/FilesHelperBase.cs`; `products/ASC.Files/Worker/IntegrationEvents/EventHandling/RoomNotifyIntegrationEventHandler.cs` (calls of `AnnouncesEntriesToMembers`) | CODE-ONLY |
 | Shared users of a file (scenario) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:91` | TEST-CONFIRMED |
+| **Activity digests leave out AI projects** |  |  |
 | Activity digests (scenario): the decision by room type | `CoreTests/DocSpaceHelperAnnouncementTests.cs:59,74` | TEST-CONFIRMED |
 | Activity digests (scenario): the decision is applied to every digest event of a room | `products/ASC.Files/Core/Configuration/ProductEntryPoint.cs` (`GetAuditEventsAsync`, call of `ReportsActivityInDigest`) | CODE-ONLY |
 | **Deleting a thread of a project** |  |  |

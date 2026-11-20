@@ -92,6 +92,9 @@ schedule and `PortalRetentionJobTests.cs` the job's decisions with a recording n
 | E-mail + Telegram: subscription method seed `email.sender|telegram.sender` for `send_whats_new` | `common/ASC.Core.Common/EF/Model/Core/DbSubscriptionMethod.cs:66`; `Actions.cs:2941-2942` | CODE-ONLY |
 | **Hourly room activity digest** | | |
 | Hourly cron; previous hour; actions list; subject "… for the last hour"; no sender-method row so the engine's default senders (e-mail + Telegram) apply | `StudioNotifyServiceSender.cs:27, 44-47`; `StudioWhatsNewNotify.cs` (`RoomsActivityActions`); `Actions.cs:2904-2911`; `common/ASC.Core.Common/Context/WorkContext.cs:54` (`DefaultClientSenders`) | CODE-ONLY |
+| **AI projects in the digests** | | |
+| Activity in a project (scenario): the decision by room type | `common/Tests/ASC.Core.Common.Tests/DocSpaceHelperAnnouncementTests.cs:59,74` | TEST-CONFIRMED |
+| Activity in a project (scenario): the decision is applied to every digest event of a room | `products/ASC.Files/Core/Configuration/ProductEntryPoint.cs` (`GetAuditEventsAsync`, call of `ReportsActivityInDigest`) | CODE-ONLY |
 | **SMTP settings of the portal** | | |
 | Portal-settings right then hidden-section check (`BillingException` 402) | `web/ASC.Web.Api/Api/Settings/SmtpSettingsController.cs` (`CheckSmtpPermissionsAsync`); yaml 402/403 rows | CODE-ONLY |
 | Owner and DocSpace admin save and read back host, port, sender address, display name, enableAuth, enableSSL (200) | `web/ASC.Web.Api.Tests/Tests/05_Security/Smtp/SmtpSaveSettingsTests.cs:45-82`; `SmtpGetSettingsTests.cs:45-86` | TEST-CONFIRMED [run: PASS] |
