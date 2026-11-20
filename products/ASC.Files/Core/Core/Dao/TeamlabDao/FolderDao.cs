@@ -58,7 +58,8 @@ internal class FolderDao(
     Global global,
     IDistributedLockProvider distributedLockProvider,
     StorageFactory storageFactory,
-    IEventBus eventBus)
+    IEventBus eventBus,
+    ILogger<FolderDao> logger)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -727,11 +728,23 @@ internal class FolderDao(
     {
         if (folder.FolderType is FolderType.DEFAULT or FolderType.Ai or FolderType.BUNCH || folder.IsRoom)
         {
-            await eventBus.PublishAsync(new FolderIndexIntegrationEvent(folder.CreateBy, _tenantManager.GetCurrentTenantId())
+            await PublishIndexEventAsync(new FolderIndexIntegrationEvent(folder.CreateBy, _tenantManager.GetCurrentTenantId())
             {
                 FolderId = folder.Id,
                 Action = FolderIndexAction.Index
             });
+        }
+    }
+
+    private async Task PublishIndexEventAsync(FolderIndexIntegrationEvent @event)
+    {
+        try
+        {
+            await eventBus.PublishAsync(@event);
+        }
+        catch (Exception e)
+        {
+            logger.WarningPublishFolderIndexEvent(@event.Action, @event.FolderId, @event.FolderIds is null ? null : string.Join(",", @event.FolderIds), e);
         }
     }
 
@@ -1215,7 +1228,7 @@ internal class FolderDao(
 
         if (deletedFolderIds is { Count: > 0 })
         {
-            await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+            await PublishIndexEventAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
             {
                 FolderIds = deletedFolderIds,
                 Action = FolderIndexAction.Delete
@@ -1413,7 +1426,7 @@ internal class FolderDao(
 
         // the worker refreshes the search document of the folder: the ancestor chain stored in it is stale after
         // the move, and so is the title when the folder arrived under a new one
-        await eventBus.PublishAsync(new FolderIndexIntegrationEvent(currentAccount, tenantId)
+        await PublishIndexEventAsync(new FolderIndexIntegrationEvent(currentAccount, tenantId)
         {
             FolderId = folderId,
             Action = title == null ? FolderIndexAction.UpdateFolders : FolderIndexAction.Index
@@ -1618,7 +1631,7 @@ internal class FolderDao(
         filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();
 
-        await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        await PublishIndexEventAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             FolderId = folder.Id,
             Action = FolderIndexAction.Index
@@ -1701,7 +1714,7 @@ internal class FolderDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        await PublishIndexEventAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             FolderId = folder.Id,
             Action = FolderIndexAction.Index
@@ -1730,7 +1743,7 @@ internal class FolderDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        await PublishIndexEventAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             FolderId = folder.Id,
             Action = FolderIndexAction.Index
@@ -1753,7 +1766,7 @@ internal class FolderDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        await PublishIndexEventAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             FolderId = folder.Id,
             Action = FolderIndexAction.Index
@@ -2956,7 +2969,8 @@ internal class CacheFolderDao(
     Global global,
     IDistributedLockProvider distributedLockProvider,
     StorageFactory storageFactory,
-    IEventBus eventBus)
+    IEventBus eventBus,
+    ILogger<FolderDao> logger)
     : FolderDao(
         factoryIndexer,
         factoryIndexerFolderMetadata,
@@ -2981,7 +2995,8 @@ internal class CacheFolderDao(
         global,
         distributedLockProvider,
         storageFactory,
-        eventBus), ICacheFolderDao<int>
+        eventBus,
+        logger), ICacheFolderDao<int>
 {
     private readonly ConcurrentDictionary<int, Folder<int>> _cache = new();
     public override async Task<Folder<int>> GetFolderAsync(int folderId)
