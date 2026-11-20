@@ -40,6 +40,7 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
     private const decimal DocumentType = 7m;
 
     private static readonly TimeSpan _pastLifetime = TimeSpan.FromDays(1);
+    private static readonly TimeSpan _beyondRetryWindow = TimeSpan.FromDays(40);
 
     private sealed record RemovalState(AiAttachment? Draft, int FileStatus, long UsedSpace);
 
@@ -160,6 +161,28 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
 
         controlGone.Should().BeTrue("the aged control draft shows that a cleanup pass ran");
         page.Files.Should().ContainSingle().Which.Id.Should().Be(sent.Id);
+    }
+
+    [Fact]
+    public async Task Cleanup_DraftsBeyondTheRetryWindow_AreLeftAlone()
+    {
+        await ActAsAsync(Owner);
+        var folderId = await MyDocumentsIdAsync();
+        var deletedLongAgo = await AttachStoredFileAsync((await UploadAsync(folderId, "deleted-long-ago.txt")).Id);
+        var abandonedLongAgo = await AttachStoredFileAsync((await UploadAsync(folderId, "abandoned-long-ago.txt")).Id);
+        var control = await AttachStoredFileAsync((await UploadAsync(folderId, "control.txt")).Id);
+
+        await MarkDraftDeletedAsync(deletedLongAgo.Id, _beyondRetryWindow);
+        await AgeDraftAsync(abandonedLongAgo.Id, _beyondRetryWindow);
+        await AgeDraftAsync(control.Id, _pastLifetime);
+
+        var controlGone = await WaitForDraftGoneAsync(control.Id);
+        var deletedKept = await ReadDraftAsync(deletedLongAgo.Id);
+        var abandonedKept = await ReadDraftAsync(abandonedLongAgo.Id);
+
+        controlGone.Should().BeTrue("the aged control draft shows that a cleanup pass ran");
+        deletedKept.Should().NotBeNull();
+        abandonedKept.Should().NotBeNull();
     }
 
     private async Task ActAsAsync(User user)

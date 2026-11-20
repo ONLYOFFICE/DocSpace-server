@@ -43,4 +43,5 @@ public class Attachment
     public int? EntryId { get; init; }
     public string? ThirdpartyEntryId { get; init; }
     public DateTime CreatedAt { get; init; }
+    public DateTime? DeletedOn { get; init; }
 }

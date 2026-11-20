@@ -45,15 +45,23 @@ public class DeletedThreadsCleanerService(
     private static readonly TimeSpan _minPeriod = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan _maxPeriod = TimeSpan.FromDays(1);
 
+    private static readonly TimeSpan _defaultRetryWindow = TimeSpan.FromDays(7);
+    private static readonly TimeSpan _minRetryWindow = TimeSpan.FromDays(1);
+    private static readonly TimeSpan _maxRetryWindow = TimeSpan.FromDays(30);
+
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
     // d.hh:mm:ss, from 5 seconds to 1 day; five minutes is "0.00:05:00"
     protected override TimeSpan ExecuteTaskPeriod { get; set; } =
         configuration.ReadInterval("ai:deletedThreadsCleaner:period", _defaultPeriod, _minPeriod, _maxPeriod, logger);
 
+    // d.hh:mm:ss, from 1 day to 30 days; seven days is "7.00:00:00"
+    private readonly TimeSpan _retryWindow =
+        configuration.ReadInterval("ai:deletedThreadsCleaner:retryWindow", _defaultRetryWindow, _minRetryWindow, _maxRetryWindow, logger);
+
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        var deletedOn = DateTime.MinValue;
+        var deletedOn = DateTime.UtcNow - _retryWindow;
         var id = Guid.Empty;
         var totalCount = 0;
 

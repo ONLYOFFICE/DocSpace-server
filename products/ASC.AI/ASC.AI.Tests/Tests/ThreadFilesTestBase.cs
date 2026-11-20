@@ -225,6 +225,41 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
     }
 
+    protected async Task MarkDraftDeletedAsync(string attachmentId, TimeSpan ago)
+    {
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "UPDATE ai_integration_attachments SET deleted_on = @deletedOn WHERE id = @id";
+        command.Parameters.AddWithValue("@deletedOn", DateTime.UtcNow - ago);
+        command.Parameters.AddWithValue("@id", attachmentId);
+
+        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+    }
+
+    protected async Task MarkThreadDeletedAsync(Guid threadId, TimeSpan ago)
+    {
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "UPDATE ai_integration_threads SET deleted_on = @deletedOn WHERE id = @id";
+        command.Parameters.AddWithValue("@deletedOn", DateTime.UtcNow - ago);
+        command.Parameters.AddWithValue("@id", threadId.ToString());
+
+        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+    }
+
+    protected async Task<bool> ThreadRowExistsAsync(Guid threadId)
+    {
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT COUNT(*) FROM ai_integration_threads WHERE id = @id";
+        command.Parameters.AddWithValue("@id", threadId.ToString());
+
+        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken)) > 0;
+    }
+
     private static ThreadFilesPage ToPage(FileArrayWrapper page)
     {
         return new ThreadFilesPage([.. page.Response.Select(f => new ThreadFile(f.Id, f.Title, f.FolderId))], page.Total);

@@ -123,7 +123,7 @@ public class AttachmentsStorageService(
 
         foreach (var drafts in (await storage.ReadUnboundByEntryIdsAsync(tenantId, CurrentUserId, uploadedIds)).GroupBy(a => a.EntryId!.Value))
         {
-            uploaded[drafts.Key] = drafts.FirstOrDefault(a => !AttachmentsStorage.IsMarkedForDeletion(a))
+            uploaded[drafts.Key] = drafts.FirstOrDefault(a => a.DeletedOn == null)
                                    ?? throw new ItemNotFoundException();
         }
 

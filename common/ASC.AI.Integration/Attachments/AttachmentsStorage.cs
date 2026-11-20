@@ -36,13 +36,6 @@ namespace ASC.AI.Integration.Attachments;
 [Scope]
 public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public static readonly DateTime DeletedMark = DateTime.UnixEpoch;
-
-    public static bool IsMarkedForDeletion(Attachment attachment)
-    {
-        return attachment.CreatedAt <= DeletedMark;
-    }
-
     public async Task<List<Attachment>> CreateManyAsync(int tenantId, Guid createdBy, IReadOnlyList<CreateAttachmentParams> data)
     {
         if (data.Count == 0)
@@ -136,7 +129,7 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.AgeUnboundAttachmentsAsync(tenantId, createdBy, ids);
+        await context.MarkUnboundAttachmentsDeletedAsync(tenantId, createdBy, ids, DateTime.UtcNow);
     }
 
     public async Task<int> DeleteUnboundAsync(int tenantId, IReadOnlyCollection<Guid> ids)
@@ -162,7 +155,8 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             MessageId = entity.MessageId,
             EntryId = entity.EntryId,
             ThirdpartyEntryId = entity.ThirdpartyEntryId,
-            CreatedAt = entity.CreatedAt
+            CreatedAt = entity.CreatedAt,
+            DeletedOn = entity.DeletedOn
         };
     }
 }
