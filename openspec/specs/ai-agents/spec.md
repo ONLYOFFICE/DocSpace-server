@@ -1559,12 +1559,29 @@ background pass and be gone after it; a linked attachment SHALL stay.
 removed with the message or the thread; it SHALL answer 403 for a thread the caller cannot read, 404 for an
 unknown message or attachment, 400 for a message of another thread, an empty or non-array `ids`, a
 malformed id or an empty body, and write nothing onto the message itself. Linking the same draft twice SHALL
-be accepted; another user's draft cannot be linked.
+be accepted; another user's draft cannot be linked. The call SHALL leave unlinked a draft deleted before
+it, which the background pass then removes, and SHALL leave a draft linked to a message of another thread
+with that message; linking a draft to another message of the same thread SHALL move it there.
 
 #### Scenario: Linked draft dies with the message
 
 - **WHEN** the owner links a draft to a message and deletes the message
 - **THEN** the draft reads back as null while an unlinked draft stays
+
+#### Scenario: Deleted draft is not linked
+
+- **WHEN** the owner deletes a draft and then links it to a message
+- **THEN** the link is accepted and the draft is still removed by the background pass
+
+#### Scenario: Draft of another thread
+
+- **WHEN** the owner links a draft to a message of one thread, links it to a message of a second thread and deletes that second message
+- **THEN** the draft still reads back, while a draft linked only to the second message is gone
+
+#### Scenario: Another message of the same thread
+
+- **WHEN** the owner links a draft to one message of a thread, then to a second message of it, and deletes the second message
+- **THEN** the draft reads back as not found
 
 ### Requirement: Suggested questions for a form attachment
 
@@ -2093,7 +2110,8 @@ file SHALL answer 404 and store nothing of the batch, before the background pass
 `aiAttachmentsLinkToMessage` for a message of a project thread SHALL move each linked file that the caller
 stored in the project into the attachments of that thread, where `getThreadAttachments` lists it. A copy
 linked this way SHALL stay after the file it was copied from is deleted. Linking in a thread outside a
-project SHALL leave the file where it is.
+project SHALL leave the file where it is, and so SHALL linking a draft deleted before the call or a draft
+that a message of another thread already holds.
 
 #### Scenario: Linked file is listed
 
@@ -2119,6 +2137,11 @@ project SHALL leave the file where it is.
 
 - **WHEN** the owner links an attachment of a file in their My documents to a message of a thread that has no entry
 - **THEN** the link answers 204 and the file still reports My documents as `folderId`
+
+#### Scenario: Deleted draft in a project
+
+- **WHEN** the creator uploads a file into the project, attaches it, deletes the attachment and links it to a message of a project thread
+- **THEN** the link answers 204 and `getThreadAttachments` lists nothing with total 0
 
 ### Requirement: Privacy of the contents of a project
 

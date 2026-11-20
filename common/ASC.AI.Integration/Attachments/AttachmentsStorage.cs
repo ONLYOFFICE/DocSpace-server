@@ -115,7 +115,7 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         await context.SetAttachmentContentAsync(tenantId, createdBy, id, content);
     }
 
-    public async Task UpdateManyAsync(int tenantId, Guid createdBy, HashSet<Guid> ids, Guid messageId)
+    public async Task UpdateManyAsync(int tenantId, Guid createdBy, HashSet<Guid> ids, Guid messageId, Guid threadId)
     {
         if (ids.Count == 0)
         {
@@ -124,7 +124,7 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.UpdateAttachmentBindingsByIdsAsync(tenantId, createdBy, ids, messageId);
+        await context.UpdateAttachmentBindingsByIdsAsync(tenantId, createdBy, ids, messageId, threadId);
     }
 
     public async Task MarkForDeletionAsync(int tenantId, Guid createdBy, IReadOnlyCollection<Guid> ids)

@@ -333,6 +333,88 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
     }
 
     [Fact]
+    public async Task Bind_ADeletedDraftInAProject_LeavesItsFileOutOfTheThread()
+    {
+        var projectId = await CreateProjectAsync();
+        var thread = await CreateThreadInternalAsync(entityId: projectId.ToString());
+        var file = await UploadAsync(projectId, "notes.txt");
+        var attachment = await AttachAsync(file.Id);
+        var message = await CreateMessageInternalAsync(thread.Id);
+        await DeleteDraftAsync(attachment.Id);
+
+        using var response = await BindAsync(message.Id, attachment.Id);
+
+        var page = await ListAttachmentsAsync(projectId, thread.Id);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        page.Files.Should().BeEmpty();
+        page.Total.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Bind_ADeletedDraft_LeavesItToTheCleanup()
+    {
+        await FilesHttpClient.Authenticate(Owner);
+        var thread = await CreateThreadInternalAsync();
+        var file = await UploadAsync(await MyDocumentsIdAsync(), "deleted.txt");
+        var attachment = await AttachAsync(file.Id);
+        var message = await CreateMessageInternalAsync(thread.Id);
+        await DeleteDraftAsync(attachment.Id);
+
+        using var response = await BindAsync(message.Id, attachment.Id);
+
+        var status = await WaitForAttachmentStatusAsync(attachment.Id, HttpStatusCode.NotFound);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        status.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Bind_ADraftSentInAnotherThread_StaysWithItsFirstMessage()
+    {
+        await FilesHttpClient.Authenticate(Owner);
+        var myDocumentsId = await MyDocumentsIdAsync();
+        var firstThread = await CreateThreadInternalAsync();
+        var secondThread = await CreateThreadInternalAsync();
+        var sent = await AttachAsync((await UploadAsync(myDocumentsId, "sent.txt")).Id);
+        var control = await AttachAsync((await UploadAsync(myDocumentsId, "control.txt")).Id);
+        var firstMessage = await CreateMessageInternalAsync(firstThread.Id);
+        var secondMessage = await CreateMessageInternalAsync(secondThread.Id);
+
+        using var first = await BindAsync(firstMessage.Id, sent.Id);
+        using var second = await BindAsync(secondMessage.Id, sent.Id, control.Id);
+        await DeleteMessageAsync(secondMessage.Id);
+
+        var controlStatus = await AttachmentStatusAsync(control.Id);
+        var sentStatus = await AttachmentStatusAsync(sent.Id);
+
+        first.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        second.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        controlStatus.Should().Be(HttpStatusCode.NotFound, "a draft bound to the deleted message goes with it");
+        sentStatus.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Bind_ADraftAgainInTheSameThread_MovesItToTheNewMessage()
+    {
+        await FilesHttpClient.Authenticate(Owner);
+        var thread = await CreateThreadInternalAsync();
+        var attachment = await AttachAsync((await UploadAsync(await MyDocumentsIdAsync(), "edited.txt")).Id);
+        var firstMessage = await CreateMessageInternalAsync(thread.Id);
+        var secondMessage = await CreateMessageInternalAsync(thread.Id);
+
+        using var first = await BindAsync(firstMessage.Id, attachment.Id);
+        using var second = await BindAsync(secondMessage.Id, attachment.Id);
+        await DeleteMessageAsync(secondMessage.Id);
+
+        var status = await AttachmentStatusAsync(attachment.Id);
+
+        first.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        second.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        status.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task List_FileThatWasNotSent_IsNotInTheThread()
     {
         var projectId = await CreateProjectAsync();
@@ -383,6 +465,44 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
         var copy = operation.Files.OfType<FileDto>().Should().ContainSingle().Subject;
 
         return new ThreadFile(copy.Id, copy.Title, copy.FolderId);
+    }
+
+    private async Task DeleteDraftAsync(Guid id)
+    {
+        using var response = await _ai.DeleteAsync($"{AttachmentsPath}/{id}", TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    private async Task DeleteMessageAsync(Guid id)
+    {
+        using var response = await _ai.DeleteAsync($"{MessagesPath}/{id}", TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    private async Task<HttpStatusCode> AttachmentStatusAsync(Guid id)
+    {
+        using var response = await _ai.GetAsync($"{AttachmentsPath}/{id}", TestContext.Current.CancellationToken);
+
+        return response.StatusCode;
+    }
+
+    private async Task<HttpStatusCode> WaitForAttachmentStatusAsync(Guid id, HttpStatusCode expected)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(60);
+
+        while (true)
+        {
+            var status = await AttachmentStatusAsync(id);
+
+            if (status == expected || DateTime.UtcNow >= deadline)
+            {
+                return status;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
     }
 
 }

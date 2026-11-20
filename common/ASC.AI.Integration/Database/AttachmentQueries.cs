@@ -60,9 +60,9 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateAttachmentBindingsByIdsAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId)
+    public Task<int> UpdateAttachmentBindingsByIdsAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId, Guid threadId)
     {
-        return AttachmentQueriesContainer.UpdateAttachmentBindingsByIdsAsync(this, tenantId, createdBy, ids, messageId);
+        return AttachmentQueriesContainer.UpdateAttachmentBindingsByIdsAsync(this, tenantId, createdBy, ids, messageId, threadId);
     }
 
     [PreCompileQuery]
@@ -110,10 +110,14 @@ static file class AttachmentQueriesContainer
                 .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Id == id && x.MessageId == null && x.Content == null)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.Content, content));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, Guid, Task<int>> UpdateAttachmentBindingsByIdsAsync =
-        (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId) =>
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, Guid, Guid, Task<int>> UpdateAttachmentBindingsByIdsAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId, Guid threadId) =>
             ctx.Attachments
-                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id))
+                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id) &&
+                            (x.MessageId == null
+                                ? x.CreatedAt > AttachmentsStorage.DeletedMark
+                                : ctx.Messages.Any(m => m.TenantId == tenantId && m.Id == x.MessageId && m.ThreadId == threadId)))
                 .ExecuteUpdateAsync(x => x
                     .SetProperty(y => y.MessageId, messageId));
 
