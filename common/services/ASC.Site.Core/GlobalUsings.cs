@@ -31,13 +31,10 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.Net.Http.Headers;
-global using System.Reflection;
 global using System.Text;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
 
-global using ASC.Api.Core;
 global using ASC.Api.Core.Auth;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
@@ -46,6 +43,7 @@ global using ASC.Common.Caching;
 global using ASC.Common.DependencyInjection;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;
+global using ASC.Common.Utils;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
@@ -80,5 +78,7 @@ global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+
+global using MySqlConnector;
 
 global using NLog;
