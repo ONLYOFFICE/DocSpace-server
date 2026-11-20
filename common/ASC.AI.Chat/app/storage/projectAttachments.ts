@@ -201,17 +201,19 @@ export async function copyIntoProject(projectId: string, entryId: string): Promi
     logger.info(`copyIntoProject: file ${entryId} -> project ${projectId} as file ${copyId}`);
     return copyId;
   } catch (err) {
-    if (
+    // A refusal is the ordinary case; anything else (a timeout, a dropped
+    // connection, an answer that cannot be read) is worth a warning, and
+    // still no reason to fail the attachment.
+    const refused =
       err instanceof FileTooLargeError ||
       err instanceof AiServiceHttpError ||
-      err instanceof DocspaceApiHttpError
-    ) {
-      logger.info(
-        `copyIntoProject: file ${entryId} not copied into project ${projectId}, attached where it is: ${err.message}`,
-      );
-      return entryId;
-    }
-    throw err;
+      err instanceof DocspaceApiHttpError;
+    logger[refused ? "info" : "warn"](
+      `copyIntoProject: file ${entryId} not copied into project ${projectId}, attached where it is: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return entryId;
   }
 }
 

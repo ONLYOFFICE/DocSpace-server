@@ -62,6 +62,11 @@ try
 
     await startup.ConfigureServices(builder);
 
+    if (!startup.WorkspaceConfigured)
+    {
+        logger.Warn("The {connectionStringName} connection string is not set: the subscription endpoints will fail ({applicationContext})", WorkspaceDbContext.ConnectionStringName, AppName);
+    }
+
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
         containerBuilder.Register(context.Configuration);
@@ -69,7 +74,7 @@ try
 
     var app = builder.Build();
 
-    startup.Configure(app, app.Environment);
+    startup.Configure(app);
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

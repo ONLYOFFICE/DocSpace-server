@@ -37,12 +37,20 @@ vi.mock("../../log.js", () => ({
   default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 const getCustomServer = vi.fn();
+const listCustomServers = vi.fn();
+const updateCustomServer = vi.fn();
+const replaceAllCustomServers = vi.fn();
+const readByName = vi.fn();
+const readAll = vi.fn();
 vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@onlyoffice/ai-chat/core")>();
   return {
     ...actual,
     ToolsEngine: class {
       getCustomServer = getCustomServer;
+      listCustomServers = listCustomServers;
+      updateCustomServer = updateCustomServer;
+      replaceAllCustomServers = replaceAllCustomServers;
     },
   };
 });
@@ -50,7 +58,9 @@ vi.mock("../../tools/customTools.js", () => ({
   customToolsSource: {},
   resolveCustomServers: vi.fn(),
 }));
-vi.mock("../../storage/index.js", () => ({ storage: {} }));
+vi.mock("../../storage/index.js", () => ({
+  storage: { mcpServers: { readByName, readAll } },
+}));
 const getSystemServerConfig = vi.fn();
 vi.mock("../../tools/systemTools.js", () => ({ systemToolsSource: {}, getSystemServerConfig }));
 vi.mock("../../storage/docspaceFilesApi.js", () => ({
@@ -62,15 +72,17 @@ const { toolsController } = await import("../toolsController.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
-const read = async (name: string) => {
+const call = async (handler: unknown, req: { query?: unknown; body?: unknown }) => {
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (toolsController.getCustomServer as unknown as Handler)({ query: { name } }, res, next);
+  await (handler as Handler)({ query: {}, body: {}, ...req }, res, next);
   const failure = next.mock.calls[0];
   if (failure) throw failure[0];
   return res.json.mock.calls[0]?.[0];
 };
+
+const read = (name: string) => call(toolsController.getCustomServer, { query: { name } });
 
 describe("toolsController.getCustomServer", () => {
   beforeEach(() => {
@@ -93,5 +105,64 @@ describe("toolsController.getCustomServer", () => {
 
     getCustomServer.mockResolvedValue(null);
     expect(await read("gone")).toBeNull();
+  });
+});
+
+describe("toolsController custom server headers", () => {
+  const URL = "https://mcp.example.com/sse";
+  const SECRET = { Authorization: "Bearer secret" };
+
+  beforeEach(() => {
+    listCustomServers.mockReset();
+    updateCustomServer.mockReset().mockResolvedValue({ success: true });
+    replaceAllCustomServers.mockReset().mockResolvedValue({ success: true });
+    readByName.mockReset().mockResolvedValue(null);
+    readAll.mockReset().mockResolvedValue({});
+    getSystemServerConfig.mockReset().mockReturnValue(undefined);
+  });
+
+  it("lists the custom servers without their headers", async () => {
+    listCustomServers.mockResolvedValue({
+      crm: { url: URL, headers: SECRET },
+      plain: { url: "https://plain.example.com/mcp" },
+    });
+    expect(await call(toolsController.listCustomServers, {})).toEqual({
+      crm: { url: URL },
+      plain: { url: "https://plain.example.com/mcp" },
+    });
+  });
+
+  it("keeps the stored headers when the listed map is saved back", async () => {
+    readAll.mockResolvedValue({ crm: { url: URL, headers: SECRET } });
+    await call(toolsController.replaceAllCustomServers, {
+      body: { map: { crm: { url: URL, timeout: 5 }, fresh: { url: "https://new.example.com" } } },
+    });
+    expect(replaceAllCustomServers.mock.calls[0]?.[0]).toEqual({
+      crm: { url: URL, timeout: 5, headers: SECRET },
+      fresh: { url: "https://new.example.com" },
+    });
+  });
+
+  it("does not carry the stored headers to another url", async () => {
+    readAll.mockResolvedValue({ crm: { url: URL, headers: SECRET } });
+    await call(toolsController.replaceAllCustomServers, {
+      body: { map: { crm: { url: "https://elsewhere.example.com" } } },
+    });
+    expect(replaceAllCustomServers.mock.calls[0]?.[0]).toEqual({
+      crm: { url: "https://elsewhere.example.com" },
+    });
+  });
+
+  it("lets explicit headers replace or remove the stored ones", async () => {
+    readByName.mockResolvedValue({ url: URL, headers: SECRET });
+    await call(toolsController.updateCustomServer, {
+      body: { name: "crm", config: { url: URL, headers: {} } },
+    });
+    expect(updateCustomServer.mock.calls[0]?.[1]).toEqual({ url: URL, headers: {} });
+
+    await call(toolsController.updateCustomServer, {
+      body: { name: "crm", config: { url: URL } },
+    });
+    expect(updateCustomServer.mock.calls[1]?.[1]).toEqual({ url: URL, headers: SECRET });
   });
 });
