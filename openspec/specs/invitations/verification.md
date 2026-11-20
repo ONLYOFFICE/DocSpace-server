@@ -27,6 +27,10 @@ also pinned that an omitted switch is stored as off (scenario "Omitted switch is
 numbers of UC moved with the `[RaisesWebhook]` declarations of the range and of FS by +8 after line 272; IS
 moved with the AI-project checks. Behaviour of the existing scenarios is unchanged.
 
+Revision 2026-11-20 (`ecb2d0849a`): an AI project's member role is Content creator instead of Read; its link's
+Room manager access is lowered to Content creator for a User, and Read is refused with 403
+(`AiProjectRolesTests.cs:46-60`). The AI-project guest check of FS is now at `:285-291`.
+
 ## Inviting members to the portal by email
 
 | Claim | Source | Status |
@@ -120,7 +124,7 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Room manager role for User / Guest → 403, not added | RoomSharePermissionsTests.cs:218-237 | TEST-CONFIRMED [run: PASS] |
 | Room admin inviting a foreign guest → empty result — referenced from `room-role-permissions` | RoomSharePermissionsTests.cs:143-161 | TEST-CONFIRMED [run: PASS] |
 | Guest to an AI agent as Room manager / Content creator → 403 | FS:268-273; release notes v3.6 | CODE-ONLY |
-| Guest to an AI project by id (any access) or by the email of a Guest → 403 "The role is not available for this user type", not added; the project accepts Room manager and Read only | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-79 (message asserted); FS:275-281; `products/ASC.Files/Core/Core/Security/FileSecurity.cs:255-263` (`AvailableRoomAccesses`, AI project) | TEST-CONFIRMED [run: PASS] |
+| Guest to an AI project by id (any access) or by the email of a Guest → 403 "The role is not available for this user type", not added; the project accepts Room manager and Content creator only | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-79 (message asserted); FS:285-291; `products/ASC.Files/Core/Core/Security/FileSecurity.cs:255-262` (`AvailableRoomAccesses`, AI project); Viewer refused (403, not added): FT/03_Rooms/AiHub/AiProjectRolesTests.cs:46-60 | TEST-CONFIRMED [run: PASS] |
 | Invisible subjects and notification: subject the caller cannot see is dropped | VRC `SetRoomSecurity` wrappers filter (`CanUserViewAnotherUserAsync`); yaml `setRoomSecurity` | CODE-ONLY |
 | Group as subject | FS:144-157 (subject type resolved to Group), 460-466 (group members); `products/ASC.People/Tests/Tests/BaseTest.cs:175-189` helper "user or a group"; release notes v2.5; an AI project refuses a group with any access (403): FT/03_Rooms/AiHub/AiProjectRolesTests.cs:65 | CODE-ONLY (the AI project refusal: TEST-CONFIRMED, not run yet) |
 | `notify` emails existing accounts that gained access, with `message` | FS:432-451 (`SendEmailRoomInviteExistingUserAsync`); yaml `RoomInvitationRequest.notify/message` | CODE-ONLY |
@@ -142,7 +146,7 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Guest invitations disabled → 403 for the whole request | VRC `SetRoomSecurity` (`newGuestsInvited` / `AllowInvitingGuests`); yaml `setRoomSecurity` 403 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:106-130 | TEST-CONFIRMED [run: PASS] |
 | Malformed or overlong address → 400 | `common/ASC.Api.Core/Model/EmailInvitationDto.cs:59-61`; yaml `setRoomSecurity` 400 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:132-153 | TEST-CONFIRMED [run: PASS] |
 | Address rejected during profile creation → `warning`, other entries applied | FS:312-325 | CODE-ONLY |
-| An email entry into an AI project → 403 "The role is not available for this user type" (the address resolves to no account; the project refuses the guest it would create) | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:61-79; FS:275-281 | TEST-CONFIRMED [run: PASS] |
+| An email entry into an AI project → 403 "The role is not available for this user type" (the address resolves to no account; the project refuses the guest it would create) | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:61-79; FS:285-291 | TEST-CONFIRMED [run: PASS] |
 
 The AI-project test above is the only integration test that sends an `email` entry to
 `PUT /files/rooms/{id}/share`, and it asserts the refusal; the harness creates every member through
@@ -191,7 +195,7 @@ The AI-project test above is the only integration test that sends an `email` ent
 | Previously removed member → `UserExcluded` | IS:130-164 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationLinkCheckTests.cs:98-110 | TEST-CONFIRMED [run: PASS] |
 | Use limit reached → `QuotaFailed` | IS:292-297, 445-450 | CODE-ONLY |
 | Expired / Invalid (expiration, foreign key, creator disabled or removed) | IS:272-290; IV:54-69, 191-218 ; unusable key: products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationLinkCheckTests.cs:112-120 | TEST-CONFIRMED [run: PASS] (unusable key → `Invalid`) / CODE-ONLY (expiration, creator disabled or removed) |
-| Paid role for User / Guest lowered to highest free role, `QuotaFailed` when none | IS:165-182 (`ProcessForAgent`, `TrySetHighFreeRole`), 336-349, 424-431; a User joining an AI project through its Room manager link lands as Read: AiProjectInvitationLinkTests.cs:44-68 | CODE-ONLY (TEST-CONFIRMED [run: PASS] for an AI project) |
+| Paid role for User / Guest lowered to highest free role, `QuotaFailed` when none | IS:165-182 (`ProcessForAgent`, `TrySetHighFreeRole`), 336-349, 424-431; a User joining an AI project through its Room manager link lands as Content creator: AiProjectInvitationLinkTests.cs:44-68 | CODE-ONLY (TEST-CONFIRMED [run: PASS] for an AI project) |
 | Guest into an AI agent with a creator role → Viewer | IS:403-422 | CODE-ONLY |
 | Guest into an AI project through its link → `QuotaFailed`, not added | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:81-103; IS:165-171, 403-413 (`ProcessForAgent` returns false for a Guest and an AI project) | TEST-CONFIRMED [run: PASS] |
 | Individual link: password set → `UserExisted`; disabled or gone → `Invalid` | IV:143-150 | CODE-ONLY |
@@ -294,7 +298,7 @@ follows the server.
   invitation by a portal member; outside the capability.
 - The AI-agent specific rules (v3.6) are kept only where they touch invitations (guest role in an agent), and
   the AI rooms section of 4.1.0 likewise (Guests refused in an AI project, its link's Room manager access
-  lowered to Read for a User); what a project links and how its members read those rooms is in
+  lowered to Content creator for a User); what a project links and how its members read those rooms is in
   `room-role-permissions`, the room type itself in `room-types`.
 
 ## Suspected defects
