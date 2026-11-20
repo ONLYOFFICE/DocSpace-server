@@ -1373,7 +1373,35 @@ internal class FileDao(
 
     public async Task<string> GetAvailableTitleAsync(string requestTitle, int parentFolderId)
     {
-        return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
+        bool? inAiProject = null;
+
+        return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsTitleTakenAsync, FileEntryType.File);
+
+        async Task<bool> IsTitleTakenAsync(string title, int folderId)
+        {
+            if (!await IsExistAsync(title, folderId))
+            {
+                return false;
+            }
+
+            inAiProject ??= await GetFolderTypeAsync(folderId) == FolderType.AiProjectRoom;
+
+            return !inAiProject.Value || await IsExistByCreatorAsync(title, folderId, _authContext.CurrentAccount.ID);
+        }
+    }
+
+    private async Task<FolderType> GetFolderTypeAsync(int folderId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.FolderTypeByIdAsync(tenantId, folderId);
+    }
+
+    private async Task<bool> IsExistByCreatorAsync(string title, int folderId, Guid createBy)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.DbFilesAnyByCreatorAsync(tenantId, title, folderId, createBy);
     }
 
     public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks, string newTitle)
