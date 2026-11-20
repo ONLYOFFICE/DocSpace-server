@@ -462,6 +462,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Caller outside the project 403, folder 403, unsupported format 415, move 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:141,157,173,199` | TEST-CONFIRMED |
 | **Attachment of a file stored in a project** |  |  |
 | Document attached twice; picture attached twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:212,228` | TEST-CONFIRMED |
+| Deleted attachment attached again (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:69` | TEST-CONFIRMED |
 | **A sent attachment is kept with its thread** |  |  |
 | Linked file is listed; copy outlives the original; two messages of one thread; threads of one project; thread outside a project (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:242,261,286,301,318` | TEST-CONFIRMED |
 | **Privacy of the contents of a project** |  |  |
@@ -514,8 +515,8 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Creator of the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:246` | TEST-CONFIRMED |
 | A share held through a group does not count | `products/ASC.Files/Core/Core/EF/Queries/FolderQueries.cs` (`AiProjectsWithOwnRecordAsync`, `s.Subject == userId`); no test: the API refuses a group on a project | CODE-ONLY |
 | **Drafts that are not sent are removed** |  |  |
-| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:47,69` | TEST-CONFIRMED |
-| Abandoned draft of a file outside a project; sent attachment older than the lifetime (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:91,107` | TEST-CONFIRMED |
+| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:47,101` | TEST-CONFIRMED |
+| Abandoned draft of a file outside a project; sent attachment older than the lifetime (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:123,139` | TEST-CONFIRMED |
 | The pass runs every 15 minutes and a draft lives 2 hours by default | `products/ASC.AI/Worker/BackgroundServices/OrphanAttachmentsCleanerService.cs` (`_defaultPeriod`, `_defaultLifetime`) | CODE-ONLY |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)

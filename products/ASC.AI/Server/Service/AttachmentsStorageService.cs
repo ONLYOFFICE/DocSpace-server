@@ -119,9 +119,13 @@ public class AttachmentsStorageService(
             }
         }
 
-        var uploaded = (await storage.ReadUnboundByEntryIdsAsync(tenantId, CurrentUserId, uploadedIds))
-            .GroupBy(a => a.EntryId!.Value)
-            .ToDictionary(g => g.Key, g => g.First());
+        var uploaded = new Dictionary<int, Attachment>();
+
+        foreach (var drafts in (await storage.ReadUnboundByEntryIdsAsync(tenantId, CurrentUserId, uploadedIds)).GroupBy(a => a.EntryId!.Value))
+        {
+            uploaded[drafts.Key] = drafts.FirstOrDefault(a => !AttachmentsStorage.IsMarkedForDeletion(a))
+                                   ?? throw new ItemNotFoundException();
+        }
 
         var createParams = new List<CreateAttachmentParams>(entryIds.Count);
 

@@ -36,6 +36,13 @@ namespace ASC.AI.Integration.Attachments;
 [Scope]
 public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
+    public static readonly DateTime DeletedMark = DateTime.UnixEpoch;
+
+    public static bool IsMarkedForDeletion(Attachment attachment)
+    {
+        return attachment.CreatedAt <= DeletedMark;
+    }
+
     public async Task<List<Attachment>> CreateManyAsync(int tenantId, Guid createdBy, IReadOnlyList<CreateAttachmentParams> data)
     {
         if (data.Count == 0)
