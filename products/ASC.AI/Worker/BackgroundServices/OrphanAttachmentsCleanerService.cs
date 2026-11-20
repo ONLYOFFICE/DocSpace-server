@@ -158,6 +158,8 @@ public class OrphanAttachmentsCleanerService(
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
 
+            await context.MarkOrphanAttachmentsDeletedAsync(tenantId, ids, DateTime.UtcNow);
+
             return (await context.DeleteAttachmentsAsync(tenantId, ids), 0);
         }
 

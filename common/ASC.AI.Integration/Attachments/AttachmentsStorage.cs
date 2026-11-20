@@ -132,6 +132,18 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         await context.MarkUnboundAttachmentsDeletedAsync(tenantId, createdBy, ids, DateTime.UtcNow);
     }
 
+    public async Task MarkUnboundForDeletionAsync(int tenantId, IReadOnlyCollection<Guid> ids)
+    {
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        await context.MarkOrphanAttachmentsDeletedAsync(tenantId, ids, DateTime.UtcNow);
+    }
+
     public async Task<int> DeleteUnboundAsync(int tenantId, IReadOnlyCollection<Guid> ids)
     {
         if (ids.Count == 0)

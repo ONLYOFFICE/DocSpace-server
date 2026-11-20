@@ -210,7 +210,7 @@ static file class AiIntegrationQueries
     public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<ChatDraftFile>> ChatDraftFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<Guid> attachmentIds) =>
             ctx.Attachments
-                .Where(a => a.TenantId == tenantId && attachmentIds.Contains(a.Id) && a.MessageId == null && a.EntryId != null)
+                .Where(a => a.TenantId == tenantId && attachmentIds.Contains(a.Id) && a.MessageId == null && a.DeletedOn != null && a.EntryId != null)
                 .Join(ctx.Files,
                     a => new { a.TenantId, Id = a.EntryId!.Value, CreateBy = a.CreatedBy },
                     f => new { f.TenantId, f.Id, f.CreateBy },

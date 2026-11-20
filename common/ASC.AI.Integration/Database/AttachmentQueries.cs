@@ -72,6 +72,12 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
+    public Task<int> MarkOrphanAttachmentsDeletedAsync(int tenantId, IEnumerable<Guid> ids, DateTime deletedOn)
+    {
+        return AttachmentQueriesContainer.MarkOrphanAttachmentsDeletedAsync(this, tenantId, ids, deletedOn);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<OrphanAttachment> GetOrphanAttachmentsAsync(DateTime cutoffDate, DateTime createdAt, Guid id, int take)
     {
         return AttachmentQueriesContainer.GetOrphanAttachmentsAsync(this, cutoffDate, createdAt, id, take);
@@ -135,6 +141,12 @@ static file class AttachmentQueriesContainer
                 .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.MessageId == null && x.DeletedOn == null && ids.Contains(x.Id))
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
 
+    public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, DateTime, Task<int>> MarkOrphanAttachmentsDeletedAsync =
+        (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids, DateTime deletedOn) =>
+            ctx.Attachments
+                .Where(x => x.TenantId == tenantId && x.MessageId == null && x.DeletedOn == null && ids.Contains(x.Id))
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
+
     public static readonly Func<AiIntegrationContext, DateTime, DateTime, Guid, int, IAsyncEnumerable<OrphanAttachment>> GetOrphanAttachmentsAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, DateTime cutoffDate, DateTime createdAt, Guid id, int take) =>
@@ -163,6 +175,6 @@ static file class AttachmentQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids) =>
                 ctx.Attachments
-                    .Where(x => x.TenantId == tenantId && x.MessageId == null && ids.Contains(x.Id))
+                    .Where(x => x.TenantId == tenantId && x.MessageId == null && x.DeletedOn != null && ids.Contains(x.Id))
                     .ExecuteDelete());
 }
