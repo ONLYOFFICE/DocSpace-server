@@ -59,7 +59,11 @@ vi.mock("../httpClient.js", () => {
   };
 });
 vi.mock("../docspaceFilesApi.js", () => {
-  class DocspaceApiHttpError extends Error {}
+  class DocspaceApiHttpError extends Error {
+    constructor(public readonly status: number) {
+      super(`HTTP ${status}`);
+    }
+  }
   return {
     DocspaceApiHttpError,
     filesApiGet: vi.fn(),
@@ -73,6 +77,8 @@ vi.mock("../threadFiles.js", () => ({ uploadThreadArtifact: vi.fn() }));
 vi.mock("../projectAttachments.js", () => ({ copyManyIntoProject: vi.fn() }));
 
 const { HttpAttachmentsStorage } = await import("../attachmentsStorage.js");
+const { DocspaceApiHttpError, resolveAiProjectEntityId } = await import("../docspaceFilesApi.js");
+const { copyManyIntoProject } = await import("../projectAttachments.js");
 
 const PNG = [0x89, 0x50, 0x4e, 0x47];
 const fetchMock = vi.fn();
@@ -90,6 +96,7 @@ beforeEach(() => {
   aiGet.mockReset();
   aiPost.mockReset();
   cancel.mockReset();
+  vi.mocked(copyManyIntoProject).mockReset();
   fetchMock.mockReset().mockImplementation(async () => image(PNG));
   vi.stubGlobal("fetch", fetchMock);
 });
@@ -144,5 +151,48 @@ describe("an image attachment is inlined", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(read[0]).toBe(read[1]);
     expect(read[0]?.base64).toMatch(/^data:image\/png;base64,/);
+  });
+});
+
+describe("a file is saved from a folder that cannot be read", () => {
+  const saved = [{ id: "a1", title: "Report.docx", kind: "File", entryId: "40" }];
+  const save = () =>
+    new HttpAttachmentsStorage().createMany([
+      { kind: "file", title: "Report.docx", path: "40", entityId: "12" },
+    ]);
+
+  it.each([
+    ["the caller may not open it (403)", new DocspaceApiHttpError(403, "", "url")],
+    ["the Files API is down (503)", new DocspaceApiHttpError(503, "", "url")],
+    ["the read times out", new DOMException("timed out", "TimeoutError")],
+  ])("attached as it is, without a copy, when %s", async (_case, failure) => {
+    vi.mocked(resolveAiProjectEntityId).mockRejectedValueOnce(failure);
+    aiPost.mockResolvedValue(saved);
+
+    const [attachment] = await save();
+
+    expect(attachment?.id).toBe("a1");
+    expect(copyManyIntoProject).not.toHaveBeenCalled();
+    expect(aiPost.mock.calls[0]?.[1]).toMatchObject({ entryIds: ["40"] });
+  });
+
+  it("and copied into the project when the folder is one", async () => {
+    vi.mocked(resolveAiProjectEntityId).mockResolvedValueOnce("12");
+    vi.mocked(copyManyIntoProject).mockResolvedValueOnce(["77"]);
+    aiPost.mockResolvedValue([{ ...saved[0], entryId: "77" }]);
+
+    await save();
+
+    expect(copyManyIntoProject).toHaveBeenCalledWith("12", ["40"]);
+    expect(aiPost.mock.calls[0]?.[1]).toMatchObject({ entryIds: ["77"] });
+  });
+});
+
+describe("findMissingIds", () => {
+  it("names the ids the backend does not hold and downloads no image for it", async () => {
+    aiPost.mockResolvedValue([dto("a1", "/storage/files/1/pic.png?auth=sig")]);
+
+    expect(await new HttpAttachmentsStorage().findMissingIds(["a1", "a2"])).toEqual(["a2"]);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

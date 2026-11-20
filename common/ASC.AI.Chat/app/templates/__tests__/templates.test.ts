@@ -259,6 +259,20 @@ describe("installTemplate", () => {
     expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
   });
 
+  it("keeps the agent when the write of its model times out or never connects, and says so", async () => {
+    for (const failure of [new DOMException("timed out", "TimeoutError"), new TypeError("fetch failed")]) {
+      vi.mocked(filesApiSend).mockImplementation(async (_method, apiPath, body) => {
+        if (apiPath.endsWith("/model")) {
+          throw failure;
+        }
+        return apiPath === "rooms" ? { id: 7, title: (body as { title: string }).title } : undefined;
+      });
+      const result = await installTemplate(catalog, catalog.agents[0]!.id);
+      expect(result.id).toBe("7");
+      expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
+    }
+  });
+
   // Regression: the Files service refuses a Knowledge room on a portal
   // without vectorization, and an agent's Instructions rooms were made
   // before it, so every try left one more room behind.

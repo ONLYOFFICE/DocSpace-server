@@ -161,10 +161,17 @@ describe("copyIntoProject", () => {
     expect(await copyIntoProject("12", "40")).toBe("40");
   });
 
-  it("fails on an error that is not a refusal", async () => {
+  it("attaches the file where it is on any other failure: a timeout, a session without an id", async () => {
     portal({ title: "Report.docx", folderId: 5 });
-    vi.mocked(readFileBytes).mockRejectedValue(new Error("boom"));
-    await expect(copyIntoProject("12", "40")).rejects.toThrow("boom");
+    vi.mocked(readFileBytes).mockRejectedValue(new DOMException("timed out", "TimeoutError"));
+    expect(await copyIntoProject("12", "40")).toBe("40");
+
+    vi.mocked(readFileBytes).mockResolvedValue(new Uint8Array([1]));
+    fetchMock.mockResolvedValue(answer(200, {}));
+    expect(await copyIntoProject("12", "40")).toBe("40");
+
+    vi.mocked(filesApiGet).mockRejectedValue(new TypeError("fetch failed"));
+    expect(await copyIntoProject("12", "40")).toBe("40");
   });
 });
 
@@ -210,7 +217,7 @@ describe("copyManyIntoProject", () => {
   it("frees its place when a copy fails", async () => {
     portal({ title: "Report.docx", folderId: 5 });
     vi.mocked(readFileBytes).mockRejectedValue(new Error("boom"));
-    await expect(copyManyIntoProject("12", ["41", "42", "43"])).rejects.toThrow("boom");
+    expect(await copyManyIntoProject("12", ["41", "42", "43"])).toEqual(["41", "42", "43"]);
 
     vi.mocked(readFileBytes).mockResolvedValue(new Uint8Array([1]));
     expect(await copyManyIntoProject("12", ["44", "45", "46"])).toEqual(["77", "77", "77"]);

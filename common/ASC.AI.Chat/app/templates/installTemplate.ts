@@ -165,10 +165,18 @@ async function installAgent(
     }
     await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/model`, { profileId });
   } catch (err) {
-    if (!(err instanceof DocspaceApiHttpError)) {
-      throw err;
-    }
-    logger.warn(`installTemplate: ${template.id}: model not saved (${err.status})`);
+    // The rooms and the agent are made by now, so a write that fails in any
+    // way - a refusal, a timeout, a dropped connection - is told as a
+    // warning and never loses the caller the ids of what was made.
+    logger.warn(
+      `installTemplate: ${template.id}: model not saved (${
+        err instanceof DocspaceApiHttpError
+          ? err.status
+          : err instanceof Error
+            ? err.message
+            : String(err)
+      })`,
+    );
     warnings.push("modelNotSaved");
   }
   // Nothing stores an agent's instructions yet (the Files service has no

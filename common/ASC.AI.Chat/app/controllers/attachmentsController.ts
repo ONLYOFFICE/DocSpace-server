@@ -128,9 +128,11 @@ function parseFileInput(raw: unknown): ParseResult<FileInput> {
 
 // `entityId` on the save routes is the folder the client is in, as
 // @onlyoffice/ai-chat sends it. A saved file is an existing DocSpace entry
-// (`input.path` is its id), so the folder is only recorded on the attachment
-// and nothing depends on it: a save without one is the ordinary case for a
-// chat opened outside the file tree, not an error.
+// (`input.path` is its id), so a save without a folder is the ordinary case
+// for a chat opened outside the file tree, not an error. The folder decides
+// one thing: when it is an AI project, a file of the portal is attached as
+// its copy in the project room (see storage/projectAttachments.ts). A folder
+// that cannot be read attaches the file itself and fails nothing.
 export const attachmentsController = {
   saveFile: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["input", "entityId"] as const);
@@ -306,8 +308,9 @@ export const attachmentsController = {
       });
       return;
     }
-    const attachments = await engine.getMany(ids);
-    const missing = ids.filter((_, i) => !attachments[i]);
+    // The records only: reading them through the engine would download and
+    // inline every image among them to learn that it exists.
+    const missing = await storage.attachments.findMissingIds(ids);
     if (missing.length > 0) {
       res.status(404).json({
         error: `attachment(s) not found: ${missing.join(", ")}`,

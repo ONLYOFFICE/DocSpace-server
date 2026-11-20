@@ -57,7 +57,10 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
   };
 });
 const readThreadId = vi.fn();
-vi.mock("../../storage/index.js", () => ({ storage: { messages: { readThreadId } } }));
+const findMissingIds = vi.fn();
+vi.mock("../../storage/index.js", () => ({
+  storage: { messages: { readThreadId }, attachments: { findMissingIds } },
+}));
 vi.mock("../../requestContext.js", () => ({ setAnalyzeEntryIds: vi.fn() }));
 vi.mock("../../forms/suggestedQuestions.js", () => ({ getSuggestedQuestions: vi.fn() }));
 
@@ -87,6 +90,7 @@ beforeEach(() => {
     mock.mockReset();
   }
   readThreadId.mockReset().mockResolvedValue("t1");
+  findMissingIds.mockReset().mockResolvedValue([]);
 });
 
 describe("attachmentsController limits", () => {
@@ -112,9 +116,17 @@ describe("attachmentsController limits", () => {
   });
 
   it("binds an attachment named twice once and refuses more ids than the limit", async () => {
-    engine.getMany.mockImplementation(async (list: string[]) => list.map((id) => ({ id })));
     await run("linkToMessage", [["a1", "a1", "a2"], "m1", "t1"]);
     expect(engine.linkToMessage).toHaveBeenCalledWith(["a1", "a2"], "m1", "t1");
+    // Existence is checked on the records, not through the read that inlines images.
+    expect(findMissingIds).toHaveBeenCalledWith(["a1", "a2"]);
+    expect(engine.getMany).not.toHaveBeenCalled();
+
+    findMissingIds.mockResolvedValueOnce(["a2"]);
+    const gone = await run("linkToMessage", [["a1", "a2"], "m1", "t1"]);
+    expect(gone.status).toBe(404);
+    expect(gone.body).toEqual({ error: "attachment(s) not found: a2" });
+    expect(engine.linkToMessage).toHaveBeenCalledTimes(1);
 
     const over = await run("linkToMessage", [ids(MAX_ATTACHMENTS_PER_REQUEST + 1), "m1", "t1"]);
     expect(over.status).toBe(400);

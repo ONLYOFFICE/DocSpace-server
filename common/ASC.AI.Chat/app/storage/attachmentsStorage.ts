@@ -261,6 +261,23 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 // URL the model can fetch or a `data:image/*;base64,…` payload. C# returns a
 // DocSpace pre-signed URL — fine for previews, useless for the LLM. Inline
 // the bytes here so `Attachment.base64` is always a real data URL.
+// The AI project a save is made in, read from the folder the client is in.
+// That folder is only where the client happens to be: one it may not open
+// (403) is no project of the caller's, and when the Files API cannot say
+// (5xx, a timeout) the file is attached where it lies, as a file that cannot
+// be copied is. The save itself never depended on the folder.
+async function projectOf(entityId: string | undefined): Promise<string | undefined> {
+  try {
+    return await resolveAiProjectEntityId(entityId);
+  } catch (err) {
+    logger.warn(
+      `HttpAttachmentsStorage.createMany: folder ${entityId ?? "-"} not read, ` +
+        `attached without a copy: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return undefined;
+  }
+}
+
 async function inlineImagesAsync(attachments: (Attachment | null)[]): Promise<void> {
   const tasks: Promise<void>[] = [];
   // A record named twice in one read is one object in two places: it is
@@ -435,7 +452,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // that cannot be copied, the file itself is attached. A file named twice
     // is copied once, and the copies are made a few at a time: each holds
     // its file in memory.
-    const projectId = await resolveAiProjectEntityId(
+    const projectId = await projectOf(
       inputs.find((input, i) => !result[i] && input.entityId)?.entityId,
     );
     const entryIds =
@@ -733,6 +750,23 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
   }
 
   async readManyByIds(ids: string[]): Promise<(Attachment | null)[]> {
+    const result = await this.readRecords(ids);
+    await inlineImagesAsync(result);
+    return result;
+  }
+
+  /**
+   * Which of `ids` name no attachment the caller can read. The records
+   * alone answer that, so no image is downloaded for it.
+   */
+  async findMissingIds(ids: string[]): Promise<string[]> {
+    const records = await this.readRecords(ids);
+    return ids.filter((_, i) => !records[i]);
+  }
+
+  // The records as the backend holds them: an image carries its address,
+  // not its bytes.
+  private async readRecords(ids: string[]): Promise<(Attachment | null)[]> {
     if (ids.length === 0) {
       return [];
     }
@@ -755,7 +789,6 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
           `not returned by the backend: ${missing.join(", ")}`,
       );
     }
-    await inlineImagesAsync(result);
     return result;
   }
 
