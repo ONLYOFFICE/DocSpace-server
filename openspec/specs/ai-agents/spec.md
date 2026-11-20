@@ -2168,6 +2168,11 @@ included, and sorting the AI rooms root by `UsedSpace` SHALL order projects by t
 - **WHEN** a member uploads a file into a project, and another member, the project's owner and a DocSpace admin each call `getRoomInfo`
 - **THEN** `usedSpace` is positive for the owner and null for the member and the admin
 
+#### Scenario: Used space in a room webhook
+
+- **WHEN** the owner and a Content creator of a project each subscribe to `room.updated`, and the owner renames the project
+- **THEN** the owner's payload carries `usedSpace` and the Content creator's does not
+
 #### Scenario: Sorting by used space
 
 - **WHEN** a member of two projects lists the AI rooms root with `sortBy` `UsedSpace` descending, and only the later title holds a file
