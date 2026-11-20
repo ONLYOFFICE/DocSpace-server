@@ -425,7 +425,8 @@ public abstract class FoldersController<T>(
     /// folder. The call changes data of the caller only. It clears the new-item marks of the folder. It also saves a
     /// valid `sortBy` and `sortOrder` as the default order of the account. You can repeat it. With a filter, the
     /// call searches the whole subtree by default. The AI rooms root, and the rooms root with `searchArea` AiHub,
-    /// list rooms only. The text filter also searches indexed document content. Indexing
+    /// list rooms only. An AI project lists no files or folders, with a `total` of 0. The text filter also searches
+    /// indexed document content. Indexing
     /// runs in the background, so a new file can be missing from the results at first. Use `count` and `startIndex`
     /// to page through the result. The `total` field counts all matching entries. To filter by metadata with a typed
     /// body, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`
