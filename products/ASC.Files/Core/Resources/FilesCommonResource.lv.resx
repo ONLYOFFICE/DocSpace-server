@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Faila rediģēšanas uzsākšanas kļūda</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>Pievienotajā trešās puses krātuvē nav pietiekami daudz brīvas vietas. Atbrīvojiet tajā vietu un mēģiniet vēlreiz.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>Jūs nevarat rediģēt arhivētās telpas</value>
   </data>

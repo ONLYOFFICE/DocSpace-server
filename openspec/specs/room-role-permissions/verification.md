@@ -4,7 +4,7 @@
 
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
 root (`server/`); Files test paths omit the `products/ASC.Files/Tests/Tests/` prefix. `yaml` is
-`sdk/docspace-api-spec/docspace-backend.yaml` (submodule `a0fc3a2`). Status: **TEST-CONFIRMED** (an
+`sdk/docspace-api-spec/docspace-backend.yaml` (submodule `a0fc3a2`; line numbers of `ce37da4`). Status: **TEST-CONFIRMED** (an
 integration test asserts it), **CODE-ONLY** (read from the product code or the OpenAPI document, no test),
 **LIVE-CONFIRMED** (only the live run of 2026-10-14 recorded in `openspec/deviations.md` asserts it),
 **MATRIX-ONLY** (stated by the product matrix, sheet "Roles"; no test, code or live evidence found —
@@ -13,14 +13,16 @@ flagged).
 Role → right mapping used by the tests and the code: the roles are the `FileShare` values Room manager
 (`RoomManager`), Content creator (`ContentCreator`), Editor (`Editing`), Form Filler (`FillForms`),
 Reviewer (`Review`), Commentator (`Comment`), Viewer (`Read`); the numeric values are not used anywhere in
-the spec. The per-room-type role table is `products/ASC.Files/Core/Core/Security/FileSecurity.cs:159-263`
-(`AvailableRoomAccesses`), the per-user-type table `FileSecurity.cs:265-281` (`AvailableUserAccesses`);
-both are enforced in `products/ASC.Files/Core/Utils/FileSharing.cs:180-188` and `:265-271` with the message
+the spec. The per-room-type role table is `products/ASC.Files/Core/Core/Security/FileSecurity.cs:160-264`
+(`AvailableRoomAccesses`), the per-user-type table `FileSecurity.cs:266-282` (`AvailableUserAccesses`);
+both are enforced in `products/ASC.Files/Core/Utils/FileSharing.cs:190-198` and `:265-271` with the message
 "The role is not available for this user type" (`products/ASC.Files/Core/Resources/FilesCommonResource.resx:331`),
 which no test asserts (only the 403). Shared theory data of the suite: `03_Rooms/RoomAccessData.cs:43-66`
 (all accesses; the User / Guest set without Room manager; update / link access expectations) and
 `.claude/rules/tests.md:170-187`. Unless a row says otherwise the test runs on a Custom room and the member
 is a User-type account invited with the stated role.
+
+Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row. The `yaml` line numbers were moved to the submodule commit release/v4.1.0 pins (`ce37da4`); where the header names an older submodule commit, that stays the version the yaml texts were read from.
 
 Revision 2026-10-25: first verification; the spec was reshaped at the same time (matrices moved into a
 lead scenario per requirement; the prose about demotion, self-role, foreign guests, copying and locking
@@ -28,7 +30,7 @@ split into the scenarios "Room manager invites a foreign guest", "Copying does n
 "Non-member administrators restore an archived room"; no requirement or scenario renamed).
 
 Revision 2026-11-04 (release/v4.1.0, `d58816bece..3533ad8a89`): the role sets of the three room types of
-the AI rooms section were added to "Roles available in each room type" (`FileSecurity.cs:237-263`,
+the AI rooms section were added to "Roles available in each room type" (`FileSecurity.cs:238-264`,
 `AvailableRoomAccesses`; the table moved from `:158-235` to `:159-263`, `AvailableUserAccesses` from
 `:237-252` to `:265-281`) with the scenarios "Guest is never a member of an AI project" and "AI project
 member reads the rooms linked to the project"; the lines of `FileSharing.cs` after 272 moved by +8 (the
@@ -41,22 +43,22 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the range rewrote the descriptions
 | Claim | Source | Status |
 |---|---|---|
 | **Roles available in each room type** | | |
-| Collaboration room: Viewer, Editor, Content creator accepted; Form Filler, Reviewer, Commentator → 403 and member absent | `03_Rooms/Sharing/RoomShareAccessLevelTests.cs:62-67, 104-114` | TEST-CONFIRMED [run: PASS] |
-| VDR: Viewer, Editor, Form Filler, Content creator accepted; Reviewer, Commentator → 403 | `RoomShareAccessLevelTests.cs:75-80` | TEST-CONFIRMED [run: PASS] |
-| Public room: Content creator accepted; Viewer, Editor → 403; Room manager accepted | `RoomShareAccessLevelTests.cs:70-72`; `03_Rooms/Permissions/RoomLinkPermissionsTests.cs:98-124, 273-299` (Room manager invited in Arrange) | TEST-CONFIRMED [run: PASS] |
-| Public room: Reviewer, Commentator, Form Filler → 403 | `03_Rooms/Sharing/RoomShareRefusedRolesTests.cs:58` (403 with "The role is not available for this user type", member absent); `FileSecurity.cs:188-198` | TEST-CONFIRMED [run: PASS] |
-| Form filling room: Form Filler accepted; Editor, Viewer → 403; Content creator accepted | `RoomShareAccessLevelTests.cs:56-59`; `03_Rooms/Invitations/RoomInvitationResendTests.cs:243-254` | TEST-CONFIRMED [run: PASS] |
-| Form filling room: Reviewer, Commentator → 403 | `RoomShareRefusedRolesTests.cs:58`; `FileSecurity.cs:199-209` | TEST-CONFIRMED [run: PASS] |
+| Collaboration room: Viewer, Editor, Content creator accepted; Form Filler, Reviewer, Commentator → 403 and member absent | `03_Rooms/Sharing/RoomShareAccessLevelTests.cs:64-69, 106-116` | TEST-CONFIRMED [run: PASS] |
+| VDR: Viewer, Editor, Form Filler, Content creator accepted; Reviewer, Commentator → 403 | `RoomShareAccessLevelTests.cs:77-82` | TEST-CONFIRMED [run: PASS] |
+| Public room: Content creator accepted; Viewer, Editor → 403; Room manager accepted | `RoomShareAccessLevelTests.cs:72-74`; `03_Rooms/Permissions/RoomLinkPermissionsTests.cs:98-124, 273-299` (Room manager invited in Arrange) | TEST-CONFIRMED [run: PASS] |
+| Public room: Reviewer, Commentator, Form Filler → 403 | `03_Rooms/Sharing/RoomShareRefusedRolesTests.cs:58` (403 with "The role is not available for this user type", member absent); `FileSecurity.cs:189-199` | TEST-CONFIRMED [run: PASS] |
+| Form filling room: Form Filler accepted; Editor, Viewer → 403; Content creator accepted | `RoomShareAccessLevelTests.cs:56-59`; `03_Rooms/Invitations/RoomInvitationResendTests.cs:320-331` | TEST-CONFIRMED [run: PASS] |
+| Form filling room: Reviewer, Commentator → 403 | `RoomShareRefusedRolesTests.cs:58`; `FileSecurity.cs:200-210` | TEST-CONFIRMED [run: PASS] |
 | Custom room: every role but Form Filler accepted | every Permissions suite invites with the full access set (`RoomReadPermissionsTests.cs:129-147`; `RoomDeletePermissionsTests.cs:186-231`); `RoomShareSetTests.cs:87-105`; `RoomShareReadTests.cs:79-90, 127-142` | TEST-CONFIRMED [run: PASS] |
-| Custom room: Form Filler → 403 | `RoomShareRefusedRolesTests.cs:58`; `FileSecurity.cs:163-187` (no `FillForms` in the Custom set) | TEST-CONFIRMED [run: PASS] |
+| Custom room: Form Filler → 403 | `RoomShareRefusedRolesTests.cs:58`; `FileSecurity.cs:164-188` (no `FillForms` in the Custom set) | TEST-CONFIRMED [run: PASS] |
 | Instructions room: Room manager, Content creator, Editor, Viewer; Knowledge room: Room manager, Content creator, Viewer | Instructions room: `03_Rooms/AiHub/AiHubRoomRolesTests.cs:53` (the four roles stored; Reviewer, Commentator, Form Filler 403 and member absent; the invitee is a Room admin). Knowledge room: `FileSecurity.cs:246-254` only — creating one needs vectorization (`FileStorageService.CheckKnowledgeRoomCreationAsync`), which the integration-test stand has off (403 on create) | TEST-CONFIRMED [run: PASS] (Instructions) / CODE-ONLY (Knowledge: stand has vectorization off) |
-| AI project: Room manager and Viewer only; a Guest refused by id and by email (403, message asserted), not added; the invitation link refuses an existing Guest (`QuotaFailed`); a User joins with Viewer | `03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-103`; `AiProjectInvitationLinkTests.cs:44-68`; `FileSecurity.cs:255-263`; `FileSharing.cs:275-281`; `products/ASC.Files/Core/Core/VirtualRooms/InvitationService.cs:403-431` (`ProcessForAgent`, `TrySetHighFreeRole`) | TEST-CONFIRMED [run: PASS] |
-| AI project member reads the linked rooms (listing 200 with Viewer access, file 200; through a group too; outsider 403; ends on unlink or removal; a Content creator role of the room itself is kept; the linked room is not listed in the member's section) | `03_Rooms/AiHub/AiProjectMemberAccessTests.cs:44-174`; the virtual `SubjectType.AiProject` record `FileSecurity.cs:2765-2800` and `products/ASC.Files/Core/Core/Dao/TeamlabDao/SecurityDao.cs` (`GetSharesAsync` with `includeAiProjectAccess`) | TEST-CONFIRMED [run: PASS] |
+| AI project: Room manager and Viewer only; a Guest refused by id and by email (403, message asserted), not added; the invitation link refuses an existing Guest (`QuotaFailed`); a User joins with Viewer | `03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-103`; `AiProjectInvitationLinkTests.cs:44-68`; `FileSecurity.cs:256-264`; `FileSharing.cs:285-291`; `products/ASC.Files/Core/Core/VirtualRooms/InvitationService.cs:403-431` (`ProcessForAgent`, `TrySetHighFreeRole`) | TEST-CONFIRMED [run: PASS] |
+| AI project member reads the linked rooms (listing 200 with Viewer access, file 200; through a group too; outsider 403; ends on unlink or removal; a Content creator role of the room itself is kept; the linked room is not listed in the member's section) | `03_Rooms/AiHub/AiProjectMemberAccessTests.cs:44-174`; the virtual `SubjectType.AiProject` record `FileSecurity.cs:2784-2819` and `products/ASC.Files/Core/Core/Dao/TeamlabDao/SecurityDao.cs` (`GetSharesAsync` with `includeAiProjectAccess`) | TEST-CONFIRMED [run: PASS] |
 | Room Owner is the creator, not assignable | `03_Rooms/Sharing/RoomShareUserTypeRolesTests.cs:88` (room created by a Room admin, a second Room admin invited as Room manager: the creator is the only `isOwner` entry and `createdBy`, the manager holds Room manager); `FileShare` has no owner value; ownership is transferred through `setRoomSecurity`'s owner-change path (`room-types`, "Room ownership transfer") | TEST-CONFIRMED [run: PASS] |
 | **Roles available to each user type** | | |
 | Room manager refused for a User / Guest by the Owner → 403, member absent | `RoomSharePermissionsTests.cs:248-270`; `RoomShareAccessLevelTests.cs:59` | TEST-CONFIRMED [run: PASS] |
 | Guest as Content creator (invitation accepted, used for copying) | `06_Operations/Copy/CopyPermissionsTests.cs:302-324`; `RoomReadPermissionsTests.cs:129-147` (Guest × Content creator) | TEST-CONFIRMED [run: PASS] |
-| User / Guest as Content creator, Editor, Reviewer, Commentator, Viewer; User as Form Filler | `RoomDeletePermissionsTests.cs:186-206` (Arrange); `RoomShareAccessLevelTests.cs:56, 77` | TEST-CONFIRMED [run: PASS] |
+| User / Guest as Content creator, Editor, Reviewer, Commentator, Viewer; User as Form Filler | `RoomDeletePermissionsTests.cs:186-206` (Arrange); `RoomShareAccessLevelTests.cs:56, 79` | TEST-CONFIRMED [run: PASS] |
 | Owner, DocSpace admin, Room admin hold every role | `RoomReadPermissionsTests.cs:129-147`; `02_Folders/Upload/UploadPermissionsTests.cs:127-138`; `01_Files/EditSession/EditSessionPermissionsTests.cs:65`; `02_Folders/Crud/FolderRenamePermissionsTests.cs:51`; `CopyPermissionsTests.cs:382-420` | TEST-CONFIRMED [run: PASS] |
 | Full per-type table | `RoomShareUserTypeRolesTests.cs:54` (DocSpace admin, Room admin, User, Guest × Room manager, Content creator, Editor, Reviewer, Commentator, Viewer in a Custom room and Form Filler in a VDR: accepted exactly as the table, Room manager refused for User and Guest); `FileSecurity.cs:266-292` | TEST-CONFIRMED [run: PASS] |
 | User / Guest cannot own a room → 403 | `room-types` spec, scenario "User cannot become the owner" and its `verification.md` | CODE-ONLY (cross-reference) |
@@ -64,9 +66,9 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the range rewrote the descriptions
 | Edit the room: Room manager 200, Content creator / Editor / Viewer 403; Owner 200 | `RoomUpdatePermissionsTests.cs:43-58, 166-199` | TEST-CONFIRMED [run: PASS] |
 | Invite / assign roles: Room manager adds a member with a role; revoked manager 403; Owner | `RoomSharePermissionsTests.cs:43-59, 196-242` | TEST-CONFIRMED [run: PASS] |
 | Change roles / remove: Owner (Read → Editing; access None removes) | `03_Rooms/Sharing/RoomShareReadTests.cs:144-206`; `RoomShareSetTests.cs:67-85, 107-144`; `02_Folders/History/FolderHistoryMembershipTests.cs:82-98` | TEST-CONFIRMED [run: PASS] |
-| Content creator … Viewer cannot invite, change roles, remove (403, list unchanged) | `FileSharing.cs:87-104` (`CanSetAccessAsync` demands the manage right); `deviations.md` matrix row "Every role invites users … / Only Owner and Room manager invite; no moderation exists" | LIVE-CONFIRMED |
+| Content creator … Viewer cannot invite, change roles, remove (403, list unchanged) | `FileSharing.cs:88-105` (`CanSetAccessAsync` demands the manage right); `deviations.md` matrix row "Every role invites users … / Only Owner and Room manager invite; no moderation exists" | LIVE-CONFIRMED |
 | Room links: Room manager 200, Content creator 403 (Public); Viewer 403 (Custom); Owner 200 | `RoomLinkPermissionsTests.cs:227-248, 273-322`; `02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:49-136` | TEST-CONFIRMED [run: PASS] |
-| Leave the room: member removes only themselves | `03_Rooms/Sharing/RoomShareLeaveTests.cs:48` (Viewer and Content creator set None on themselves, gone), `:64` (naming another member alone: 403, both stay), `:85` (self plus another member: the other entry is dropped by the controller's visibility filter, only the caller leaves); `FileSharing.cs:86` (`selfLeave` bypasses the manage check); `VirtualRoomsController.cs:794-800` (filter) | TEST-CONFIRMED [run: PASS] |
+| Leave the room: member removes only themselves | `03_Rooms/Sharing/RoomShareLeaveTests.cs:48` (Viewer and Content creator set None on themselves, gone), `:64` (naming another member alone: 403, both stay), `:85` (self plus another member: the other entry is dropped by the controller's visibility filter, only the caller leaves); `FileSharing.cs:86` (`selfLeave` bypasses the manage check); `VirtualRoomsController.cs:789-795` (filter) | TEST-CONFIRMED [run: PASS] |
 | Owner cannot leave: 200, owner still in the room | `RoomShareSetTests.cs:171-190` | TEST-CONFIRMED [run: PASS] |
 | View member list: Owner, Room manager, Viewer; non-members 403 | `RoomShareReadPermissionsTests.cs:46-152` (bugs 81787, 81788) | TEST-CONFIRMED [run: PASS] |
 | View room history: Owner, Room manager, Viewer; non-members 403 | `02_Folders/History/FolderHistoryPermissionsTests.cs:48-144` | TEST-CONFIRMED [run: PASS] |
@@ -91,7 +93,7 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the range rewrote the descriptions
 | Lock: Room manager locks the owner's file; Content creator locks own file; Editor, Form Filler, Viewer 403 (VDR) | `01_Files/Lock/FileLockPermissionsTests.cs:72-117, 137-157`; `01_Files/Update/FileUpdateTests.cs:140-209` | TEST-CONFIRMED [run: PASS] |
 | Content creator locks a file created by the owner and unlocks it again | `deviations.md` matrix row "A Content creator locks only own files / Locks any unlocked file; cannot unlock someone else's lock" | LIVE-CONFIRMED |
 | Unlock a foreign lock: Room manager yes; Content creator 403 (even on own file) | `FileLockPermissionsTests.cs:175-231`; `FileUpdateTests.cs:211-280` | TEST-CONFIRMED [run: PASS] |
-| View version history: Room manager, Editor yes; Commentator, Viewer, Guest 403 | `01_Files/History/EditHistoryPermissionsTests.cs:57-196`; `01_Files/EditDiff/GetEditDiffPermissionsTests.cs:81-141` | TEST-CONFIRMED [run: FAIL-BUG] |
+| View version history: Room manager, Editor yes; Commentator, Viewer, Guest 403 | `01_Files/History/EditHistoryPermissionsTests.cs:57-201`; `01_Files/EditDiff/GetEditDiffPermissionsTests.cs:81-141` | TEST-CONFIRMED [run: FAIL-BUG] |
 | Manage version history: Room manager yes; Editor, Viewer, Guest 403 | `01_Files/Versions/ChangeVersionHistoryPermissionsTests.cs:98-216`; `RestoreVersionPermissionsTests.cs:98-171`; `06_Operations/DeleteVersion/DeleteVersionPermissionsTests.cs:114-177` | TEST-CONFIRMED [run: PASS] |
 | Save a docxf as oform: Content creator and above | `yaml` `saveAsPdf` / conversion operations demand the create right; `01_Files/CopySave/SaveFileAsPdfPermissionsTests.cs:48-75` (Editor, Viewer, Guest 403; the positive case needs the document server's conversion, which the Files suite does not wait for) | CODE-ONLY (unreachable: document server) |
 | Delete own: Content creator own file, own folder; Room manager own folder | `01_Files/Deletion/FileDeletePermissionsTests.cs:110-139`; `FolderDeletePermissionsTests.cs:138-193` | TEST-CONFIRMED [run: PASS] |
@@ -107,11 +109,11 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the range rewrote the descriptions
 | File and folder links: Room manager yes; Content creator, Viewer 403 (room folder) | `FolderLinkPrimaryPermissionsTests.cs:49-136`; `02_Folders/Links/FolderLinkCreateTests.cs:338-398` (bug 81575, red: 200 with an empty list instead of 403) | TEST-CONFIRMED [run: PASS] |
 | Guest has no My documents to copy from | `TextFileCreatePermissionsTests.cs:102-113` | TEST-CONFIRMED [run: PASS] |
 | **Version history of third-party provider files** | | |
-| No version history for provider files | `yaml` `getFileVersionInfo` (10180) remarks; `03_Rooms/ThirdParty/ThirdPartyFileTests.cs` (Nextcloud-gated) calls no history endpoint | CODE-ONLY (unreachable: needs a connected third-party storage, absent from the integration-test stand) |
+| No version history for provider files | `yaml` `getFileVersionInfo` (10822) remarks; `03_Rooms/ThirdParty/ThirdPartyFileTests.cs` (Nextcloud-gated) calls no history endpoint | CODE-ONLY (unreachable: needs a connected third-party storage, absent from the integration-test stand) |
 | **Archived room is read-only** | | |
-| Owner: create folder / file, update room, tags, invite, resend, rename room, upload, copy / move in, version management, duplicate, save as PDF → 403 | `RoomArchiveTests.cs:99-147` (bug 81551); `RoomUnarchiveTests.cs:300-319`; `RoomShareValidationTests.cs:176-193`; `RoomInvitationTests.cs:206-223`; `02_Folders/Upload/UploadTests.cs:199-208`; `UploadCheckPermissionsTests.cs:173-185`; `06_Operations/Copy/FileCopyBatchTests.cs:100-118`; `06_Operations/Move/FileMoveRoomTypeTests.cs:85-111`; `FoldersMoveTests.cs:43-94`; `ChangeVersionHistoryTests.cs:190`; `RestoreVersionTests.cs:154`; `DeleteVersionTests.cs:151`; `DuplicateBatchItemsTests.cs:180`; `SaveFileAsPdfTests.cs:90` | TEST-CONFIRMED [run: PASS] |
+| Owner: create folder / file, update room, tags, invite, resend, rename room, upload, copy / move in, version management, duplicate, save as PDF → 403 | `RoomArchiveTests.cs:97-145` (bug 81551); `RoomUnarchiveTests.cs:300-319`; `RoomShareValidationTests.cs:176-193`; `RoomInvitationTests.cs:206-223`; `02_Folders/Upload/UploadTests.cs:200-209`; `UploadCheckPermissionsTests.cs:173-185`; `06_Operations/Copy/FileCopyBatchTests.cs:100-118`; `06_Operations/Move/FileMoveRoomTypeTests.cs:85-111`; `FoldersMoveTests.cs:43-94`; `ChangeVersionHistoryTests.cs:190`; `RestoreVersionTests.cs:154`; `DeleteVersionTests.cs:151`; `DuplicateBatchItemsTests.cs:180`; `SaveFileAsPdfTests.cs:90` | TEST-CONFIRMED [run: PASS] |
 | Editor cannot edit, comment, rename, delete or lock in an archived room | `03_Rooms/Archive/ArchivedRoomRolesTests.cs:89` (`edit` and `comment` true before archiving, after it `edit`, `comment`, `review`, `rename`, `delete`, `lock` false and `read` true; rename and lock 403) | TEST-CONFIRMED [run: PASS] |
-| View content in an archived room: Viewer 200; Owner | `SubfoldersPermissionsTests.cs:264-283`; `RoomArchiveTests.cs:79-97` | TEST-CONFIRMED [run: PASS] |
+| View content in an archived room: Viewer 200; Owner | `SubfoldersPermissionsTests.cs:264-283`; `RoomArchiveTests.cs:79-95` | TEST-CONFIRMED [run: PASS] |
 | View member list / history / info in an archived room | Owner: `03_Rooms/Read/RoomInfoTests.cs:105-120`; `02_Folders/History/FolderHistoryQueryTests.cs:212`; every role: `ArchivedRoomRolesTests.cs:53` (Room manager, Content creator, Editor, Reviewer, Commentator, Viewer read info, member list and history) | TEST-CONFIRMED [run: PASS] |
 | View file version history in an archived room: Owner yes; Reviewer / Commentator / Viewer 403 | `01_Files/History/EditHistoryTests.cs:131-143`; roles: `ArchivedRoomRolesTests.cs:74` | TEST-CONFIRMED [run: PASS] |
 | Copy out of an archived room to My documents or own rooms, every role | `deviations.md` matrix row "Copy out of an archived room: Owner, Room manager, Content creator / Every role" | LIVE-CONFIRMED |
@@ -153,8 +155,8 @@ names another member removes only the caller (new scenario "Leave request naming
 | Rename: Owner and Room manager only | A Content creator renames own entries | same; `FileUpdatePermissionsTests.cs:181-204` |
 | Copy of other members' files: Owner and Room manager; copy out: Owner, Room manager, Content creator | Copy does not depend on authorship; every role copies out (a Viewer unless download is denied) | same; `CopyPermissionsTests.cs:302-375` |
 | Copy out of an archived room: Owner, Room manager, Content creator | Every role | same |
-| Form Filler is a role of a general room | Only VDR and Form filling rooms accept it; a Public room accepts only Content creator and Room manager | same; `FileSecurity.cs:159-263` |
-| Test name `SetRoomSecurity_RoomAdminInvitesForeignGuest_SilentlySkipped` | The inviter is the Room admin who owns the room; the spec's "Room manager invites a foreign guest" is the same code path (`FileSharing.cs:291-318`) but not asserted for an invited manager | `RoomSharePermissionsTests.cs:174-194` |
+| Form Filler is a role of a general room | Only VDR and Form filling rooms accept it; a Public room accepts only Content creator and Room manager | same; `FileSecurity.cs:160-264` |
+| Test name `SetRoomSecurity_RoomAdminInvitesForeignGuest_SilentlySkipped` | The inviter is the Room admin who owns the room; the spec's "Room manager invites a foreign guest" is the same code path (`FileSharing.cs:301-328`) but not asserted for an invited manager | `RoomSharePermissionsTests.cs:174-194` |
 | Test file `06_Operations/Comment/CommentPermissionsTests.cs:90-148` (Editor, Viewer, Guest → 403) | This is the *version comment* (`updateFileComment`, 21380), not document commenting; it does not contradict the Comment row of the content matrix | — |
 
 ## Left out of the spec, and why
@@ -181,6 +183,6 @@ D-numbers are the ones of `openspec/deviations.md`; R-numbers are new.
 
 | # | Where | What the server does | Evidence | Status |
 |---|-------|----------------------|----------|--------|
-| R4 | File and folder links by role | `POST folder/{id}/link` (primary link create) by a Content creator, a Viewer, a non-member DocSpace admin, a Guest, or on an archived room answers 200 with an empty list instead of 403. | `02_Folders/Links/FolderLinkCreateTests.cs:271-421` (bug 81575, tests red) | STILL OPEN (2026-11-04: nothing in `d58816bece..3533ad8a89` touches the folder-link path; the test keeps its "currently answers 200" remark; the product commits titled "fix Bug 81575" of 2026-05 predate the previous revision) |
+| R4 | File and folder links by role | `POST folder/{id}/link` (primary link create) by a Content creator, a Viewer, a non-member DocSpace admin, a Guest, or on an archived room answers 200 with an empty list instead of 403. | `02_Folders/Links/FolderLinkCreateTests.cs:271-421` (bug 81575, tests red) | FIXED (`021004d5bd`, 2026-05-24: `FileStorageService.cs:4540-4543` refuses with 403 when the caller may not manage the access; the tests' "currently answers 200" remark is stale) — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (earlier: STILL OPEN (2026-11-04: nothing in `d58816bece..3533ad8a89` touches the folder-link path; the test keeps its "currently answers 200" remark; the product commits titled "fix Bug 81575" of 2026-05 predate the previous revision)) |
 | R5 | Content matrix | `updateFileComment` (the version comment, `PUT file/{id}/comment`) is refused for an Editor (403) although an Editor may edit the file; only the create right passes. | `06_Operations/Comment/CommentPermissionsTests.cs:90-148` | STILL OPEN (2026-11-04: `updateFileComment` untouched in the range; design question, outside the Comment row) |
 | R11 | Archive and restore (documentation) | Since `fcd31cbadf` the yaml says `archiveRoom` and `unarchiveRoom` require the room manager role and refuse a non-invited DocSpace admin; the server refuses an invited Room manager on both (403) and lets a non-member DocSpace admin restore. | `RoomArchiveRoomManagerTests.cs:46, 62`; `03_Rooms/Permissions/RoomArchivePermissionsTests.cs:200` (`UnarchiveRoom_DocSpaceAdminForeignRoom_Unarchived`) | OPEN |

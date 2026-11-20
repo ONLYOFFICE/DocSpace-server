@@ -64,6 +64,56 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
         query["limit"].Should().Be("10");
     }
 
+    // The kind reaches the accounting service under the name it reads, so only the bonus credits come back.
+    [Fact]
+    public async Task GetCustomerOperations_FilterByBonusCredits_AsksAccountingForThatKindOnly()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email).Balance(10m)
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/operations",
+                """{"collection":[],"offset":0,"limit":25,"totalQuantity":0,"totalPage":0,"currentPage":1}""");
+
+        // Act
+        await _paymentApi.GetCustomerOperationsAsync(type: OperationType.GoodwillCredit, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/{portalId}/operations").Subject;
+        HttpUtility.ParseQueryString(request.Query).GetValues("operationTypes").Should().Equal("GoodwillCredit");
+    }
+
+    [Fact]
+    public async Task GetCustomerOperations_ExpiredBonus_IsDescribedAndSplitByItsSources()
+    {
+        // Arrange: the rest of an expired bonus written off the bonus sub-account, and a charge paid partly by bonuses,
+        // both with the parts given with a minus.
+        Payments.Customer(Owner.Email).Balance(10m)
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/operations",
+                """
+                {"collection":[
+                  {"date":"2026-10-21T10:00:00Z","service":null,"description":null,"quantity":0,"currency":"USD","credit":0,"debit":4.5,"type":"GoodwillExpiration","sources":[{"subAccount":53,"amount":-4.5}]},
+                  {"date":"2026-10-20T10:00:00Z","service":"ai-tools","description":"Chat","quantity":3,"currency":"USD","credit":0,"debit":1.5,"type":"AiDebit","sources":[{"subAccount":53,"amount":-1},{"subAccount":51,"amount":-0.5}]}
+                ],"offset":0,"limit":25,"totalQuantity":2,"totalPage":1,"currentPage":1}
+                """);
+
+        // Act
+        var report = (await _paymentApi.GetCustomerOperationsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        report.Collection.Should().HaveCount(2);
+
+        var expiration = report.Collection[0];
+        expiration.Type.Should().Be(OperationType.GoodwillExpiration);
+        expiration.Description.Should().Be("Bonus expiration");
+        var expired = expiration.Sources.Should().ContainSingle().Subject;
+        expired.IsBonus.Should().BeTrue();
+        expired.Amount.Should().Be(4.5);
+
+        // Accounting may give the parts of a charge with a minus; the direction is the movement's debit, so the parts
+        // are passed on without their sign.
+        var charge = report.Collection[1];
+        charge.Sources.Select(s => (s.SubAccount, s.IsBonus, s.Amount)).Should().Equal((53, true, 1.0), (51, false, 0.5));
+    }
+
     [Fact]
     public async Task GetCustomerOperations_PortalIsNotACustomer_ReturnsNothingWithoutAskingAccounting()
     {
@@ -89,5 +139,47 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
         // Assert
         report.TotalQuantity.Should().Be(2);
         report.Collection.Select(d => (d.Id, d.Amount, d.HasInvoice)).Should().Equal((15342, 40.0, true), (15343, 20.0, false));
+    }
+
+    // The stub answers the same page whatever the filters say, so the test checks the filters on the request that
+    // reached accounting, not on the answer.
+    [Fact]
+    public async Task GetCustomerDeposits_InitiatorAndMetadata_ArePassedToAccounting()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email).Balance(10m)
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/deposits",
+                """{"collection":[],"offset":0,"limit":25,"totalQuantity":0,"totalPage":0,"currentPage":1}""");
+
+        var metadata = new Dictionary<string, string> { ["details"] = "Automatic top up", ["source"] = "promo", ["empty"] = "", ["blank"] = " " };
+
+        // Act
+        await _paymentApi.GetCustomerDepositsAsync(status: OperationStatus.Completed, initiator: DepositInitiator.Automatic, metadata: metadata,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/{portalId}/deposits").Subject;
+        var query = HttpUtility.ParseQueryString(request.Query);
+        query["status"].Should().Be("Completed");
+        query["initiator"].Should().Be("Automatic");
+        query["metadata.details"].Should().Be("Automatic top up");
+        query["metadata.source"].Should().Be("promo");
+        query.AllKeys.Should().NotContain(["metadata.empty", "metadata.blank"], "a pair with an empty or blank value is skipped");
+    }
+
+    [Fact]
+    public async Task GetCustomerDeposits_Initiator_IsReturnedAsAccountingGivesIt()
+    {
+        // Arrange: a top-up by a user, one by the portal, and one accounting gives without an initiator.
+        Payments.Customer(Owner.Email).Balance(10m)
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/deposits",
+                """{"collection":[{"id":1,"date":"2026-10-23T11:13:53Z","sum":40.0,"currency":"USD","status":"Completed","initiator":"Manual"},{"id":2,"date":"2026-10-24T11:13:53Z","sum":20.0,"currency":"USD","status":"Completed","initiator":"Automatic"},{"id":3,"date":"2026-10-25T11:13:53Z","sum":10.0,"currency":"USD","status":"Completed"}],"offset":0,"limit":25,"totalQuantity":3,"totalPage":1,"currentPage":1}""");
+
+        // Act
+        var report = (await _paymentApi.GetCustomerDepositsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        report.Collection.Select(d => (d.Id, d.Initiator)).Should().Equal(
+            (1L, (DepositInitiator?)DepositInitiator.Manual), (2L, DepositInitiator.Automatic), (3L, null));
     }
 }

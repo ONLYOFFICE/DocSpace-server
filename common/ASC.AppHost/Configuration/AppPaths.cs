@@ -43,11 +43,35 @@ public static class AppPaths
     private const string TestSubFolder = "test";
 
     /// <summary>
-    /// The repository root that owns <c>Data/</c>, <c>Logs/</c> and <c>buildtools/</c>.
+    /// The repository root that owns <c>Data/</c>, <c>Logs/</c> and <c>buildtools/</c>: the nearest folder above
+    /// the AppHost that holds <c>buildtools/</c>. In a plain checkout that is the parent of <c>server/</c>, three
+    /// levels up; in a git worktree under <c>server/.claude/worktrees/&lt;name&gt;/</c> it is further up, and a fixed
+    /// three levels would point into the worktrees folder, where no buildtools, client or logs exist. Without
+    /// any such folder the fixed three levels are kept, as before.
     /// </summary>
     public static string GetBasePath(string appHostDirectory)
     {
-        return Path.GetFullPath(Path.Combine(appHostDirectory, "..", "..", ".."));
+        var fallback = Path.GetFullPath(Path.Combine(appHostDirectory, "..", "..", ".."));
+
+        for (var directory = new DirectoryInfo(Path.GetFullPath(appHostDirectory)).Parent; directory is not null; directory = directory.Parent)
+        {
+            if (Directory.Exists(Path.Combine(directory.FullName, "buildtools")))
+            {
+                return directory.FullName;
+            }
+        }
+
+        return fallback;
+    }
+
+    /// <summary>
+    /// The configuration directory the services read (<c>buildtools/config</c> under <see cref="GetBasePath"/>).
+    /// Handed to every service started from the sources, whose own <c>appsettings.json</c> names it by a path
+    /// relative to the project folder that is wrong in a git worktree.
+    /// </summary>
+    public static string GetConfigDirectory(string basePath)
+    {
+        return Path.Combine(basePath, "buildtools", "config");
     }
 
     /// <summary>

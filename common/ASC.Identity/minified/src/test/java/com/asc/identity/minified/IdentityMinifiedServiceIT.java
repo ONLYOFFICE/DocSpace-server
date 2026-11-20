@@ -44,6 +44,7 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
@@ -59,6 +60,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -145,15 +147,20 @@ public class IdentityMinifiedServiceIT {
 
   private final SignatureGenerator signatureGenerator = new SignatureGenerator(SIGNATURE_SECRET);
 
+  private RestClient.Builder nonRedirectingClient() {
+    return RestClient.builder()
+        .requestFactory(
+            new JdkClientHttpRequestFactory(
+                HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NEVER).build()))
+        .baseUrl("http://localhost:" + serverPort);
+  }
+
   protected RestClient restClient() {
-    return RestClient.builder().baseUrl("http://localhost:" + serverPort).build();
+    return nonRedirectingClient().build();
   }
 
   protected RestClient restClientIgnoringErrors() {
-    return RestClient.builder()
-        .baseUrl("http://localhost:" + serverPort)
-        .defaultStatusHandler(status -> true, (req, res) -> {})
-        .build();
+    return nonRedirectingClient().defaultStatusHandler(status -> true, (req, res) -> {}).build();
   }
 
   protected String randomUserId() {
@@ -636,27 +643,24 @@ public class IdentityMinifiedServiceIT {
       var client = restClientIgnoringErrors();
 
       var authResponse = startAuthorization(client, authFlowClientId);
-      var cookies = authResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
-      if (cookies == null || cookies.stream().noneMatch(c -> c.startsWith("client_state="))) {
-        return;
+
+      var redirect = authResponse.getHeaders().getLocation();
+      String code;
+      if (redirect != null && redirect.toString().contains("code=")) {
+        code = extractCodeFromRedirect(authResponse);
+      } else {
+        var stateValue = extractStateFromCookie(authResponse);
+        assertThat(stateValue).as("client_state cookie, redirect %s", redirect).isNotBlank();
+        code = extractCodeFromRedirect(submitConsent(authFlowClientId, stateValue));
       }
 
-      var stateValue = extractStateFromCookie(authResponse);
-      var consentResponse = submitConsent(authFlowClientId, stateValue);
+      assertThat(code).isNotBlank();
 
-      if (consentResponse.getHeaders().getLocation() == null
-          || !consentResponse.getHeaders().getLocation().toString().contains("code=")) {
-        return;
-      }
-
-      var code = extractCodeFromRedirect(consentResponse);
       var tokenResponse =
           exchangeCodeForTokens(client, authFlowClientId, authFlowClientSecret, code);
-
-      if (!tokenResponse.getStatusCode().is2xxSuccessful()) {
-        return;
-      }
-
+      assertThat(tokenResponse.getStatusCode().is2xxSuccessful())
+          .as(tokenResponse.getBody())
+          .isTrue();
       assertThat(tokenResponse.getBody()).contains("refresh_token");
       var refreshToken = extractJsonValue(tokenResponse.getBody(), "refresh_token");
       assertThat(refreshToken).isNotNull();

@@ -288,6 +288,8 @@ public abstract class FilesController<T>(
     /// the converted content exceeds the maximum upload size, the call returns 402. If the installation does not
     /// accept the format of the new title, the call returns 415. If the new title is empty and the source has no
     /// extension, the call returns 400. To copy many items without conversion, use `PUT api/2.0/files/fileops/copy`.
+    /// If the destination folder is in a full connected storage other than SharePoint, the call returns 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Copy a file
@@ -297,7 +299,7 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileUploaded, When = "as well when the copy is converted to another format")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The copy that was created", typeof(FileEntryBaseDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, or the new title is empty while the source file has no extension")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, or the new title is empty while the source file has no extension, or the connected storage other than SharePoint that holds the destination folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size")]
     [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room")]
     [SwaggerResponse(404, "The file or the destination folder does not exist")]
@@ -327,6 +329,8 @@ public abstract class FilesController<T>(
     /// `templateId` is a string that matches no third-party file. If the new file exceeds the storage quota, the call
     /// returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own
     /// section, use `POST api/2.0/files/@my/file`.
+    /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Create a file
@@ -335,7 +339,7 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
     [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
@@ -356,6 +360,8 @@ public abstract class FilesController<T>(
     /// it. Each call adds a file or a version. If the folder does not exist, the call returns 404. If the content
     /// exceeds the maximum upload size or the storage quota, the call returns 402. If `content` is missing, the call
     /// returns 400. To create the file in your own section, use `POST api/2.0/files/@my/html`.
+    /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Create an HTML file
@@ -364,7 +370,7 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileCreated, When = "for a new file and for a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
@@ -386,6 +392,8 @@ public abstract class FilesController<T>(
     /// version. If the folder does not exist, the call returns 404. If the content exceeds the maximum upload size or
     /// the storage quota, the call returns 402. If `content` is missing, the call returns 400. To create the file in
     /// your own section, use `POST api/2.0/files/@my/text`.
+    /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Create a text file
@@ -394,7 +402,7 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileCreated, When = "for a new file and for a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
@@ -800,6 +808,8 @@ public abstract class FilesController<T>(
     /// the file or `lastVersion` does not exist, the call returns 404. For
     /// a caller who may only fill forms, a form whose filling has not started also returns 404. If the restore
     /// exceeds the room or user storage quota, the call returns 402. A file that another user locked also returns 403.
+    /// If the file is in a full connected storage other than SharePoint, the call can return 400. The user has to free
+    /// up space there first.
     /// </remarks>
     /// <summary>
     /// Update a file
@@ -809,7 +819,7 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for a rename that takes effect, and again for a switch to `lastVersion`")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file after the rename, the restore, or both", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The title is longer than 165 characters, or `lastVersion` is the current version")]
+    [SwaggerResponse(400, "The title is longer than 165 characters, or `lastVersion` is the current version, or the connected storage other than SharePoint that holds the file has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(402, "Restoring `lastVersion` needs more space than the room or user storage quota leaves")]
     [SwaggerResponse(403, "The caller may not read or rename the file or change its version, or the file is locked by somebody else")]
@@ -1081,6 +1091,8 @@ public abstract class FilesController<T>(
     /// `folderId` or `title`, the call returns 400. If the file or the folder does not exist, the call returns 404.
     /// If the PDF exceeds the storage quota, the call returns 402. To convert the file itself, use
     /// `PUT api/2.0/files/file/{fileId}/checkconversion`.
+    /// If the destination folder is in a full connected storage other than SharePoint, the call returns 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Save a file as PDF
@@ -1089,7 +1101,7 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The PDF file that was created", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `folderId` or `title`")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `folderId` or `title`, or the connected storage other than SharePoint that holds the destination folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The PDF does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller cannot read the source file or may not create files in the destination folder")]
     [SwaggerResponse(404, "The source file or the destination folder does not exist")]

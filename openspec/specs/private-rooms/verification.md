@@ -2,6 +2,8 @@
 
 > **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
+Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row.
+
 Revision 2026-11-09 (bb406b409b..6fb013e745)
 
 
@@ -15,7 +17,7 @@ Every requirement of `spec.md`, with where it was verified. Paths are relative t
 Status: **TEST-CONFIRMED** means a test asserts it and its assertion was read (via a digest of the `Should()` lines, with the bodies
 read where the name was unclear). **CODE-ONLY** means it was read from the code, the commit or the yaml with no test. No test was run for
 this document, so nothing here says that a test passed. Several `[Trait("Bug", ...)]` tests in `T/` still carry comments saying the API
-answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802, 82803); the assertions and the code (`Controller:82`, `:267`;
+answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802, 82803); the assertions and the code (`Controller:78`, `:267`;
 `Helper:84-87`, `:103-106`, `:135-151`; `Login:64-67`) say the fixed behaviour, which is what is cited. Those comments are stale.
 
 | Claim | Source | Status |
@@ -44,7 +46,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:309-375 | TEST-CONFIRMED [run: PASS] |
 | Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:381-422 | TEST-CONFIRMED [run: PASS] |
 | File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:312-324 | TEST-CONFIRMED [run: PASS] |
-| New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5529-5537 | TEST-CONFIRMED [run: PASS] |
+| New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5533-5541 | TEST-CONFIRMED [run: PASS] |
 | Reassign of a deleted user | T/PrivateRoomFileKeysTests.cs:127-153 | TEST-CONFIRMED [run: PASS] |
 | Leaving revokes file keys; audit record; access change keeps | T/PrivateRoomFileKeysTests.cs:172-216 | TEST-CONFIRMED [run: PASS] |
 | Revocation does not depend on a client being online: the removal is a server-side API call with no client connected, and the next read already reports the key missing, also in a subfolder (run 2026-11-11) | T/PrivateRoomFileKeysTests.cs:171-204; Sharing:RevokeFileKeysAsync; commit cc60512acd | TEST-CONFIRMED [run: PASS] |
@@ -78,10 +80,10 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Section endpoint, root, browse by id | T/PrivateRoomSectionTests.cs:89-120 | TEST-CONFIRMED [run: PASS] |
 | App off | T/PrivateRoomSectionTests.cs:124-137 | TEST-CONFIRMED [run: PASS] |
 | Non-member not listed; invited listed (in the section only the DocSpace admin is asserted; the Owner only on the default Active area) | T/PrivateRoomSectionTests.cs:141-165; T/PrivateRoomVisibilityTests.cs:55-91 | TEST-CONFIRMED [run: PASS] |
-| Archived in the Archive area | T/PrivateRoomSectionTests.cs:169-178 | TEST-CONFIRMED [run: PASS] |
-| New marks | T/PrivateRoomSectionTests.cs:182-201 | TEST-CONFIRMED [run: PASS] |
-| Recent 400 | T/PrivateRoomSectionTests.cs:205-213 | TEST-CONFIRMED [run: PASS] |
-| Groups of the section | T/PrivateRoomSectionTests.cs:217-238 | TEST-CONFIRMED [run: PASS] |
+| Archived in the Archive area | T/PrivateRoomSectionTests.cs:196-205 | TEST-CONFIRMED [run: PASS] |
+| New marks | T/PrivateRoomSectionTests.cs:209-228 | TEST-CONFIRMED [run: PASS] |
+| Recent 400 | T/PrivateRoomSectionTests.cs:232-240 | TEST-CONFIRMED [run: PASS] |
+| Groups of the section | T/PrivateRoomSectionTests.cs:244-265 | TEST-CONFIRMED [run: PASS] |
 | Audit trail hides titles, keeps record and user names | web/ASC.Web.Api.Tests/Tests/05_Security/AuditTrail/AuditPrivateRoomTitleTests.cs:85-199 | TEST-CONFIRMED [run: PASS] |
 | History keeps titles for members | same file:203-222 | TEST-CONFIRMED [run: NO-LINK] |
 | Letters use the neutral title (tags of the action, not rendered pushes) | common/Tests/ASC.Notify.Tests/Invites/PrivateRoomTitleInLettersTests.cs:115-177 | TEST-CONFIRMED [run: PASS] |
@@ -127,4 +129,4 @@ All seven operations of `Rooms / Privacy room` are in requirements. These facts 
 
 ## Points for other specs
 
-- `room-types` says room groups take `Active` or `Forms` and that a private room can be grouped: the area `PrivateRooms` now exists, and a private room in an `Active` group answers 400 (T/PrivateRoomSectionTests.cs:217-238).
+- `room-types` says room groups take `Active` or `Forms` and that a private room can be grouped: the area `PrivateRooms` now exists, and a private room in an `Active` group answers 400 (T/PrivateRoomSectionTests.cs:244-265).

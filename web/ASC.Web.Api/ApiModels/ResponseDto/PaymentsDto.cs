@@ -106,7 +106,7 @@ public class ReportDto
 }
 
 /// <summary>
-/// One movement on the portal wallet: what it was for, who caused it, and how much money it moved.
+/// One movement on the portal wallet or its bonus balance: what it was for, who caused it, and how much money it moved.
 /// </summary>
 public class OperationDto
 {
@@ -153,14 +153,15 @@ public class OperationDto
     /// <example>USD</example>
     public string Currency { get; set; }
     /// <summary>
-    /// The amount that went into the wallet. It is `0` on a movement that only took money out, so the pair of
-    /// `credit` and `debit` is what shows which way the money went; the `credit` and `debit` filters of the
-    /// operation select the two directions by exactly this.
+    /// The whole amount that came in - a top-up, a refund or a bonus credit. It is `0` on a movement that only took
+    /// money out, so the pair of `credit` and `debit` is what shows which way the money went; the `credit` and `debit`
+    /// filters of the operation select the two directions by exactly this. `sources` gives the part on the bonus.
     /// </summary>
     /// <example>99.99</example>
     public decimal Credit { get; set; }
     /// <summary>
-    /// The amount that was taken out of the wallet, `0` on a movement that put money in.
+    /// The whole amount that went out - from the wallet money and the bonus together, or an expired bonus - and `0` on
+    /// a movement that put money in. `sources` gives the part on the bonus.
     /// </summary>
     /// <example>99.99</example>
     public decimal Debit { get; set; }
@@ -218,8 +219,15 @@ public class OperationDto
     /// </summary>
     public OperationTokenUsageDto TokenUsage { get; set; }
     /// <summary>
-    /// What kind of movement this is - a payment, a charge, a refund, a correction. It is what the `type` filter
-    /// matches on, and `Unknown` covers a movement the billing service reported under a kind this build does not
+    /// Which sub-accounts of the portal the amount was taken from or put on, and how much fell on each - one charge
+    /// may be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a movement
+    /// the accounting service reported without the split.
+    /// </summary>
+    /// <example>[{"subAccount": 53, "isBonus": true, "amount": 4.5}, {"subAccount": 0, "isBonus": false, "amount": 9.5}]</example>
+    public List<OperationSourceDto> Sources { get; set; }
+    /// <summary>
+    /// What kind of movement this is - a payment, a charge, a refund, a correction, a bonus credit or a bonus
+    /// expiration. It is what the `type` filter matches on, and `Unknown` covers a movement the billing service reported under a kind this build does not
     /// recognise.
     /// </summary>
     /// <example>Unknown</example>
@@ -250,6 +258,7 @@ public class OperationDto
         SourceTitle = sourceTitle;
         SourceId = sourceId;
         TokenUsage = WalletServiceDescriptionManager.GetTokenUsage(operation.Metadata)?.Map();
+        Sources = operation.Sources?.Map();
         Type = operation.Type;
     }
 }
@@ -326,7 +335,8 @@ public class CustomerMonthlyUsageDto
 ///   "operationCount": 2,
 ///   "price": 0.14,
 ///   "subscription": true,
-///   "byok": false
+///   "byok": false,
+///   "sources": [{"subAccount": 53, "isBonus": true, "amount": 20.0}, {"subAccount": 0, "isBonus": false, "amount": 29.99}]
 /// }
 /// </example>
 public class CustomerServiceUsageDto
@@ -398,6 +408,14 @@ public class CustomerServiceUsageDto
     /// <example>false</example>
     public bool Byok { get; set; }
 
+    /// <summary>
+    /// Which sub-accounts of the portal `totalAmount` was taken from, and how much fell on each - the consumption may
+    /// be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a total the
+    /// accounting service reported without the split, or on a total merged from several when one of them had none.
+    /// </summary>
+    /// <example>[{"subAccount": 53, "isBonus": true, "amount": 20.0}, {"subAccount": 0, "isBonus": false, "amount": 29.99}]</example>
+    public List<OperationSourceDto> Sources { get; set; }
+
     public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, TenantQuota> walletQuotas, Dictionary<string, string> customUom)
     {
         var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(usage.Service, customUom);
@@ -417,6 +435,7 @@ public class CustomerServiceUsageDto
         Price = quota?.Price ?? 0;
         Subscription = !string.IsNullOrEmpty(quota?.ProductId);
         Byok = WalletServiceDescriptionManager.IsByokService(usage.Service);
+        Sources = usage.Sources?.Map();
     }
 }
 

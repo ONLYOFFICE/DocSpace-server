@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Помилка початку редагування файлу</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>У підключеному сторонньому сховищі недостатньо вільного місця. Звільніть у ньому місце та спробуйте ще раз.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>Ви не можете редагувати архівовані кімнати</value>
   </data>

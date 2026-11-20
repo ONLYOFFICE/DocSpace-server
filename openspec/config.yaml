@@ -40,7 +40,14 @@ rules:
       names, file names, enum numbers, resource keys or configuration keys.
     - >-
       Keep each requirement body under 500 characters, with SHALL or MUST, and at least one scenario using
-      WHEN / THEN (/ AND).
+      WHEN / THEN (/ AND). Measure it: `python .claude/skills/review-branch/scan.py --worktree` lists every
+      requirement the change adds at 500 characters or more, brings to 500 or more, or makes longer while
+      over (untracked files included); one that was already that long and did not grow is a reminder.
+    - >-
+      Take every value of a scenario (a date, a status code, a count, a duration) from the code or from the
+      test that pins it, and write in the WHEN every condition the code checks. A SHALL that does not hold in
+      some window (the dependency does not answer, before the first background pass, until a cache entry
+      expires) names that window (.claude/rules/claims.md).
     - >-
       State boundaries explicitly for every new numeric, length or list input (minimum, maximum, what 0, a
       negative value and an empty value answer) and give each boundary its own scenario.
@@ -49,6 +56,9 @@ rules:
       Name the existing behaviour the design relies on by its capability and requirement, and say how the
       design keeps the requirements listed under "Breaks current behaviour" consistent for existing data.
   tasks:
+    - >-
+      Tick a task only when it is done. A blocked task stays unticked with the reason, or moves to a follow-up
+      list: the archive step warns only about unticked tasks.
     - >-
       For every requirement the change modifies, add a task to update the integration tests that cite it in
       the verification.md of its capability (the `File.cs:line` citations of its TEST-CONFIRMED rows).

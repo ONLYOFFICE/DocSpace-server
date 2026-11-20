@@ -117,11 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
+    <value>V dobro (bonusi)</value>
+  </data>
+  <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
+    <value>V breme (bonusi)</value>
+  </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Kontakt</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Dobroimetje</value>
+    <value>V dobro</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>Valuta</value>
@@ -130,7 +136,7 @@
     <value>Datum</value>
   </data>
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Debetna</value>
+    <value>V breme</value>
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Podrobnosti</value>
@@ -149,6 +155,12 @@
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Varnostno kopiraj</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus" xml:space="preserve">
+    <value>Pripis bonusa</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus-expiration" xml:space="preserve">
+    <value>Potek bonusa</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vektorizacija</value>
