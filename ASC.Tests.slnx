@@ -27,6 +27,7 @@
   <Project Path="common/services/ASC.Data.Backup/ASC.Data.Backup.csproj" />
   <Project Path="common/services/ASC.ElasticSearch/ASC.ElasticSearch.csproj" />
   <Project Path="common/services/ASC.Notify/ASC.Notify.csproj" />
+  <Project Path="common/services/ASC.Site.Core/ASC.Site.Core.csproj" />
   <Project Path="common/services/ASC.Studio.Notify/ASC.Studio.Notify.csproj" />
   <Project Path="common/ASC.AppHost/ASC.AppHost.csproj" />
   <Project Path="common/Tests/ASC.ClearEvents.Tests/ASC.ClearEvents.Tests.csproj" />

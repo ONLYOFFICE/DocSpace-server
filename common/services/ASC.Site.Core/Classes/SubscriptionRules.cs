@@ -64,17 +64,48 @@ public static class SubscriptionRules
     }
 
     /// <summary>
-    /// Picks the list of a subscription: the one of the request, then the one of the id, then <see cref="SubscribeType.Common"/>.
+    /// Picks the list a subscription request confirms: the <c>type</c> of the id, or <see cref="SubscribeType.Common"/>
+    /// when the id names none, as the site did (<c>type ?? 0</c>).
     /// </summary>
-    /// <returns>The list, or <see langword="null"/> when the request names a number that is not a <see cref="SubscribeType"/>.</returns>
-    public static SubscribeType? ResolveSubscribeType(SubscribeType? requested, SubscribeType? fromId)
+    /// <returns>
+    /// The list, or <see langword="null"/> when the id is not a subscription request (a plain address: the id of a
+    /// login letter or of an unsubscription, which asked for nothing) or names a list that is not a <see cref="SubscribeType"/>.
+    /// </returns>
+    public static SubscribeType? GetSubscribeType(SubscriptionId subscriptionId)
     {
-        // JsonStringEnumConverter reads any integer into the enum, so a number outside it gets here.
-        if (requested.HasValue && !Enum.IsDefined(requested.Value))
+        if (subscriptionId is not { IsSubscriptionRequest: true, HasUnknownType: false })
         {
             return null;
         }
 
-        return requested ?? fromId ?? SubscribeType.Common;
+        return subscriptionId.Type ?? SubscribeType.Common;
+    }
+
+    /// <summary>
+    /// Fits a first name into <c>template_subscribe.firstname</c>: <see langword="null"/> becomes empty, a character
+    /// outside the Basic Multilingual Plane becomes <c>?</c> (the table is <c>utf8mb3_general_ci</c> by the Workspace
+    /// DDL, which cannot store it, and a strict-mode server would refuse the insert), and the result is cut to
+    /// <see cref="DbTemplateSubscribe.FirstNameMaxLength"/> characters.
+    /// </summary>
+    public static string NormalizeFirstName(string firstName)
+    {
+        if (string.IsNullOrEmpty(firstName))
+        {
+            return string.Empty;
+        }
+
+        var builder = new StringBuilder(firstName.Length);
+
+        foreach (var rune in firstName.EnumerateRunes())
+        {
+            if (builder.Length == DbTemplateSubscribe.FirstNameMaxLength)
+            {
+                break;
+            }
+
+            builder.Append(rune.IsBmp ? (char)rune.Value : '?');
+        }
+
+        return builder.ToString();
     }
 }

@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Core.Billing;
-
 namespace ASC.Site.Core;
 
 public class Startup
@@ -77,9 +75,11 @@ public class Startup
         services.AddBaseDbContextPool<UsRegionDbContext>(region: "us", nameConnectionString: "default");
 
         // Optional: without the connection string the host starts and only the subscription endpoints fail
-        // (WorkspaceSubscriptionStore names the missing key). Program logs a warning at start.
-        WorkspaceConfigured = !string.IsNullOrEmpty(new ConfigurationExtension(_configuration)
-            .GetConnectionStrings(WorkspaceDbContext.ConnectionStringName)?.ConnectionString);
+        // (WorkspaceSubscriptionStore names the missing key). Program logs a warning at start. The section is read
+        // directly: ConfigurationExtension throws when there is no ConnectionStrings section at all. The entry is
+        // found by its "name", as ConfigurationExtension.GetConnectionStrings finds it later.
+        WorkspaceConfigured = _configuration.GetSection("ConnectionStrings").GetChildren()
+            .Any(c => c["name"] == WorkspaceDbContext.ConnectionStringName && !string.IsNullOrEmpty(c["connectionString"]));
 
         if (WorkspaceConfigured)
         {

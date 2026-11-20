@@ -37,9 +37,11 @@ namespace ASC.Site.Core.Classes;
 /// Writes the mailing-list tables of the Workspace database (<see cref="WorkspaceDbContext"/>).
 /// </summary>
 /// <remarks>
-/// Every method expects the email already trimmed and lowercased. Each call is idempotent: a row that is already
-/// there is left as it is, and a row that another request inserts between the check and the insert (the primary key
-/// refuses the second one) counts as there.
+/// Every method expects the email already trimmed and lowercased. A row that is already there is left as it is, and a
+/// row that another request inserts between the check and the insert (the primary key refuses the second one) counts
+/// as there. So a repeated <see cref="AddUnsubscribeAsync"/> or <see cref="RemoveUnsubscribeAsync"/> changes nothing;
+/// a repeated <see cref="AddSubscribeAsync"/> takes the branch of an existing row, which removes the address from
+/// <c>template_unsubscribe</c>, as the site did.
 /// </remarks>
 [Scope]
 public class WorkspaceSubscriptionStore(IServiceProvider serviceProvider)
@@ -79,17 +81,12 @@ public class WorkspaceSubscriptionStore(IServiceProvider serviceProvider)
     /// otherwise removes the address from <c>template_unsubscribe</c>.
     /// </summary>
     /// <param name="email">The address, trimmed and lowercased.</param>
-    /// <param name="firstName">The name; <see langword="null"/> is stored as empty and a longer one is cut to the column.</param>
+    /// <param name="firstName">The name, fitted to the column by <see cref="SubscriptionRules.NormalizeFirstName"/>.</param>
     /// <param name="type">The list.</param>
     /// <returns><see langword="true"/> when the row was added, <see langword="false"/> when it was already there.</returns>
     public async Task<bool> AddSubscribeAsync(string email, string firstName, sbyte type)
     {
-        firstName ??= string.Empty;
-
-        if (firstName.Length > DbTemplateSubscribe.FirstNameMaxLength)
-        {
-            firstName = firstName[..DbTemplateSubscribe.FirstNameMaxLength];
-        }
+        firstName = SubscriptionRules.NormalizeFirstName(firstName);
 
         await using var context = await CreateContextAsync();
 

@@ -50,40 +50,60 @@ public class SubscriptionRulesTests
     }
 
     [Theory]
-    [InlineData(SubscribeType.Opensource, SubscribeType.AppServer, SubscribeType.Opensource)]
-    [InlineData(null, SubscribeType.AppServer, SubscribeType.AppServer)]
-    [InlineData(SubscribeType.Common, SubscribeType.AppServer, SubscribeType.Common)]
-    [InlineData(null, null, SubscribeType.Common)]
-    public void SubscribeType_TakesTheRequestThenTheIdThenCommon(SubscribeType? requested, SubscribeType? fromId, SubscribeType expected)
+    [InlineData(SubscribeType.AppServer, SubscribeType.AppServer)]
+    [InlineData(SubscribeType.Opensource, SubscribeType.Opensource)]
+    [InlineData(null, SubscribeType.Common)]
+    public void SubscribeType_IsTheListOfTheRequestOrCommon(SubscribeType? fromId, SubscribeType expected)
     {
-        SubscriptionRules.ResolveSubscribeType(requested, fromId).Should().Be(expected);
+        var request = new SubscriptionId("a@example.com", "A", fromId, IsSubscriptionRequest: true);
+
+        SubscriptionRules.GetSubscribeType(request).Should().Be(expected);
     }
 
     [Fact]
-    public void SubscribeType_OutsideTheEnum_IsRefused()
+    public void SubscribeType_OfAPlainAddress_IsRefused()
     {
-        SubscriptionRules.ResolveSubscribeType((SubscribeType)7, SubscribeType.Common).Should().BeNull();
+        // The id of a login letter or of an unsubscription asked for no subscription.
+        SubscriptionRules.GetSubscribeType(new SubscriptionId("a@example.com", null, null)).Should().BeNull();
+    }
+
+    [Fact]
+    public void SubscribeType_OfAnUnknownList_IsRefused()
+    {
+        var request = new SubscriptionId("a@example.com", null, null, IsSubscriptionRequest: true, HasUnknownType: true);
+
+        SubscriptionRules.GetSubscribeType(request).Should().BeNull();
     }
 
     [Theory]
-    [InlineData("""{"UnsubscribeId":"id","Type":"AppServer"}""", SubscribeType.AppServer)]
-    [InlineData("""{"unsubscribeId":"id","type":"opensource"}""", SubscribeType.Opensource)]
-    [InlineData("""{"unsubscribeId":"id","type":0}""", SubscribeType.Common)]
-    [InlineData("""{"unsubscribeId":"id"}""", null)]
-    public void SubscribeRequest_ReadsTheListByNameOrNumber(string json, SubscribeType? expected)
+    [InlineData(null, "")]
+    [InlineData("", "")]
+    [InlineData("Ann", "Ann")]
+    [InlineData("Ann \U0001F338", "Ann ?")]
+    public void FirstName_FitsTheUtf8mb3Column(string? firstName, string expected)
     {
-        var request = JsonSerializer.Deserialize<SubscribeRequestDto>(json, JsonSerializerOptions.Web);
-
-        request.Should().Be(new SubscribeRequestDto("id", expected));
+        SubscriptionRules.NormalizeFirstName(firstName!).Should().Be(expected);
     }
 
     [Fact]
-    public void SubscribeRequest_WithAnUnknownName_DoesNotBind()
+    public void FirstName_IsCutToTheColumnWithoutSplittingACharacter()
     {
-        // ASP.NET Core answers 400 for a body that does not bind.
-        var read = () => JsonSerializer.Deserialize<SubscribeRequestDto>("""{"unsubscribeId":"id","type":"Weekly"}""", JsonSerializerOptions.Web);
+        var name = new string('a', 63) + "\U0001F338" + "tail";
 
-        read.Should().Throw<JsonException>();
+        var result = SubscriptionRules.NormalizeFirstName(name);
+
+        result.Should().Be(new string('a', 63) + "?");
+        result.Length.Should().Be(DbTemplateSubscribe.FirstNameMaxLength);
+        SubscriptionRules.NormalizeFirstName(new string('b', 70)).Should().Be(new string('b', 64));
+    }
+
+    [Fact]
+    public void SubscribeRequest_IgnoresATypeInTheBody()
+    {
+        // The list comes from the id only; a type the body still carries does not fail the binding.
+        var request = JsonSerializer.Deserialize<SubscribeRequestDto>("""{"unsubscribeId":"id","type":"AppServer"}""", JsonSerializerOptions.Web);
+
+        request.Should().Be(new SubscribeRequestDto("id"));
     }
 
     [Fact]

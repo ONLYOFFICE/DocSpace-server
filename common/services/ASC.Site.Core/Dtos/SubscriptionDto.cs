@@ -34,9 +34,9 @@
 namespace ASC.Site.Core.Dtos;
 
 /// <summary>The body of <c>POST /subscription/unsubscribe</c>.</summary>
-/// <param name="UnsubscribeId">The id from the link of a letter: an <c>emailKey</c> of <c>/key/generate</c>, an <c>unsubscribeId</c> of <c>/key/generateunsubscribeid</c>, or the id of the footer link of DocSpace letters.</param>
+/// <param name="UnsubscribeId">The id from the link of a letter: an <c>emailKey</c> of <c>/key/generate</c> or an <c>unsubscribeId</c> of <c>/key/generateunsubscribeid</c>.</param>
 /// <param name="Subscribe"><see langword="true"/> to subscribe the address to the marketing letters again, <see langword="false"/> to unsubscribe it.</param>
-/// <param name="NewsOnly">With <c>Subscribe = false</c>: <see langword="true"/> unsubscribes from the marketing letters only, <see langword="false"/> also from the letters of every DocSpace portal.</param>
+/// <param name="NewsOnly">With <c>Subscribe = false</c>: <see langword="true"/> unsubscribes from the marketing letters only; <see langword="false"/> also marks the address's DocSpace accounts in the EU and US regions as not activated, which stops the DocSpace letters that require an activated account; letters a portal sends to its cached user list may still arrive for up to 20 minutes.</param>
 public record UnsubscribeRequestDto(string UnsubscribeId, bool? Subscribe, bool? NewsOnly);
 
 /// <summary>The answer of <c>POST /subscription/unsubscribe</c>.</summary>
@@ -44,9 +44,8 @@ public record UnsubscribeRequestDto(string UnsubscribeId, bool? Subscribe, bool?
 public record UnsubscribeResponseDto(string Email);
 
 /// <summary>The body of <c>POST /subscription/subscribe</c>.</summary>
-/// <param name="UnsubscribeId">The id from the confirmation letter: an <c>unsubscribeId</c> of <c>/key/generateunsubscribeid</c> whose data is the JSON <c>{email, firstname, type}</c>.</param>
-/// <param name="Type">The list, by name or number; when omitted, the <c>type</c> of the id, and <see cref="SubscribeType.Common"/> when the id has none.</param>
-public record SubscribeRequestDto(string UnsubscribeId, SubscribeType? Type);
+/// <param name="UnsubscribeId">The id from the confirmation letter: an <c>unsubscribeId</c> of <c>/key/generateunsubscribeid</c> whose data is the JSON <c>{email, firstname, type}</c>; the list is its <c>type</c>.</param>
+public record SubscribeRequestDto(string UnsubscribeId);
 
 /// <summary>The answer of <c>POST /subscription/subscribe</c>.</summary>
 /// <param name="Email">The address the id holds, lowercased.</param>

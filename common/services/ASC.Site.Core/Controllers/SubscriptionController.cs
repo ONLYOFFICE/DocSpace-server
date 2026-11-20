@@ -38,7 +38,6 @@ namespace ASC.Site.Core.Controllers;
 /// </summary>
 /// <remarks>
 /// An error of a database is not caught here: <see cref="CustomExceptionHandler"/> logs it and the caller gets 500.
-/// Every call can be repeated with the same body and leaves the same state.
 /// </remarks>
 [Scope]
 [ApiController]
@@ -46,18 +45,18 @@ namespace ASC.Site.Core.Controllers;
 public class SubscriptionController(
         ValidationKeyProvider validationKeyProvider,
         WorkspaceSubscriptionStore workspaceSubscriptionStore,
-        MultiRegionProvider multiRegionProvider,
         ILogger<SubscriptionController> logger)
     : ControllerBase
 {
     /// <summary>Unsubscribes an address, or subscribes it again, by the id of a letter link.</summary>
     /// <remarks>
     /// <c>subscribe = false</c> adds the address to <c>template_unsubscribe</c> of the Workspace database; with
-    /// <c>newsOnly = false</c> it also marks every DocSpace account with the address, on every portal of the EU and US
-    /// regions, as not activated. <c>subscribe = true</c> removes the address from <c>template_unsubscribe</c> and
+    /// <c>newsOnly = false</c> it also takes the Activated flag off every DocSpace account with the address, on every
+    /// portal of the EU and US regions. <c>subscribe = true</c> removes the address from <c>template_unsubscribe</c> and
     /// leaves the accounts as they are. Both flags are required.
-    /// Answers 400 when a flag is missing, 404 when the id does not decrypt to a valid address, and 500 when a
-    /// database was not updated; the call can then be repeated.
+    /// Answers 400 when a flag is missing, 404 when the id is too long or does not decrypt to a valid address, and 500
+    /// when a database was not updated. A repeated call with the same body changes nothing more, so it can be repeated
+    /// after a 500.
     /// </remarks>
     [HttpPost("unsubscribe")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
@@ -90,6 +89,10 @@ public class SubscriptionController(
             case UnsubscribeAction.UnsubscribeAll:
                 // The Workspace row first: if a region fails, the repeated call finds it there and adds nothing.
                 await workspaceSubscriptionStore.AddUnsubscribeAsync(subscriptionId.Email);
+
+                // Resolved here only: building it needs the regional connection strings and, on the first build in
+                // the process, connects to detect the MySQL version; the other actions must not fail on a region.
+                var multiRegionProvider = HttpContext.RequestServices.GetRequiredService<MultiRegionProvider>();
                 await multiRegionProvider.DeactivateUsersByEmailAsync(subscriptionId.Email);
                 break;
         }
@@ -101,12 +104,14 @@ public class SubscriptionController(
 
     /// <summary>Confirms a subscription request by the id of its confirmation letter.</summary>
     /// <remarks>
-    /// The id carries the address and the name. The list is <c>type</c> of the body, or the one of the id when the
-    /// body has none, or <c>Common</c>. When the address has no subscription to that list, it is written to
-    /// <c>template_subscribe</c> and the result is <c>added</c>; when it has one, the address is removed from
-    /// <c>template_unsubscribe</c> and the result is <c>updated</c>.
-    /// Answers 400 when <c>type</c> is not a known list, 404 when the id does not decrypt to a valid address or its
-    /// JSON names an unknown list, and 500 when the database was not updated.
+    /// Only the id of a subscription request is accepted: the JSON <c>{email, firstname, type}</c> the site encrypts
+    /// with <c>/key/generateunsubscribeid</c>. The list is its <c>type</c>, or <c>Common</c> when it names none.
+    /// When the address has no subscription to that list, it is written to <c>template_subscribe</c> and the result is
+    /// <c>added</c>; when it has one, the address is removed from <c>template_unsubscribe</c> and the result is
+    /// <c>updated</c>. So a repeated call answers <c>updated</c> and removes the address from
+    /// <c>template_unsubscribe</c>, as the site did.
+    /// Answers 404 when the id is too long, does not decrypt to a valid address, holds a plain address instead of a
+    /// request, or names an unknown list, and 500 when the database was not updated.
     /// </remarks>
     [HttpPost("subscribe")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
@@ -121,11 +126,13 @@ public class SubscriptionController(
             return NotFound();
         }
 
-        var type = SubscriptionRules.ResolveSubscribeType(inDto.Type, subscriptionId.Type);
+        var type = SubscriptionRules.GetSubscribeType(subscriptionId);
 
         if (type is null)
         {
-            return BadRequest();
+            logger.WarningSubscriptionIdNotARequest(subscriptionId.IsSubscriptionRequest, subscriptionId.HasUnknownType);
+
+            return NotFound();
         }
 
         var added = await workspaceSubscriptionStore.AddSubscribeAsync(subscriptionId.Email, subscriptionId.FirstName, (sbyte)type.Value);

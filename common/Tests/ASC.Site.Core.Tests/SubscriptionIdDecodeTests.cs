@@ -34,8 +34,8 @@
 namespace ASC.Site.Core.Tests;
 
 /// <summary>
-/// <see cref="ValidationKeyProvider.DecodeSubscriptionIdAsync"/>: the three kinds of id a subscription link carries,
-/// and the ids it must refuse.
+/// <see cref="ValidationKeyProvider.DecodeSubscriptionIdAsync"/>: the two kinds of id a subscription link carries,
+/// and the ids it must refuse, the footer id of DocSpace letters among them.
 /// </summary>
 public class SubscriptionIdDecodeTests
 {
@@ -66,18 +66,43 @@ public class SubscriptionIdDecodeTests
 
         var result = await _provider.DecodeSubscriptionIdAsync(id);
 
-        result.Should().Be(new SubscriptionId("jane@example.com", "Jane", SubscribeType.AppServer));
+        result.Should().Be(new SubscriptionId("jane@example.com", "Jane", SubscribeType.AppServer, IsSubscriptionRequest: true));
     }
 
     [Fact]
-    public async Task FooterIdOfDocSpaceLetters_IsReadAsBase64Url()
+    public async Task FooterIdOfDocSpaceLetters_IsRefused()
     {
-        // As TextileStyler.GetSiteUnsubscribeLinkAsync builds it: Base64Url without the padding digit of UrlToken.
+        // TextileStyler.GetSiteUnsubscribeLinkAsync encodes Base64Url without the padding digit of UrlToken. No letter
+        // reaches that fallback today, and its permanent id is not accepted.
         var id = WebEncoders.Base64UrlEncode(await _crypto.EncryptAsync(Encoding.UTF8.GetBytes("user@example.com")));
 
         var result = await _provider.DecodeSubscriptionIdAsync(id);
 
-        result.Should().Be(new SubscriptionId("user@example.com", null, null));
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task LongestRequestTheColumnsHold_StaysWellUnderTheLimit()
+    {
+        // An address of 100 characters and a name of 64 Cyrillic characters, each \u-escaped by the site's JSON.
+        var address = new string('a', 88) + "@example.com";
+        var name = string.Concat(Enumerable.Repeat("\\u0416", 64));
+        var id = await _provider.EncryptAndEncode("{\"email\":\"" + address + "\",\"firstname\":\"" + name + "\",\"type\":0}");
+
+        id.Length.Should().BeLessThan(900);
+        (await _provider.DecodeSubscriptionIdAsync(id))!.FirstName.Should().Be(new string('Ж', 64));
+    }
+
+    [Fact]
+    public async Task IdLongerThanTheLimit_IsRefused()
+    {
+        // A valid id padded with spaces inside the JSON: it decrypts to a valid request, so only the limit refuses it.
+        var padded = "{\"email\":\"user@example.com\"" + new string(' ', ValidationKeyProvider.SubscriptionIdMaxLength) + "}";
+        var id = await _provider.EncryptAndEncode(padded);
+        id.Length.Should().BeGreaterThan(ValidationKeyProvider.SubscriptionIdMaxLength);
+
+        ValidationKeyProvider.ParseSubscriptionId(padded).Should().NotBeNull();
+        (await _provider.DecodeSubscriptionIdAsync(id)).Should().BeNull();
     }
 
     [Fact]
@@ -137,6 +162,16 @@ public class SubscriptionIdDecodeTests
     }
 
     [Theory]
+    [InlineData("u\U0001F338@example.com")]
+    [InlineData("u\u0001@example.com")]
+    public void AddressTheUtf8mb3ColumnCannotHold_IsRefused(string address)
+    {
+        // An emoji is outside the Basic Multilingual Plane; a control character passes the address regex.
+        ValidationKeyProvider.ParseSubscriptionId(address).Should().BeNull();
+        ValidationKeyProvider.ParseSubscriptionId("{\"email\":\"" + address.Replace("\u0001", "\\u0001") + "\"}").Should().BeNull();
+    }
+
+    [Theory]
     [InlineData("""{"email":"a@example.com","firstname":"A","type":0}""", SubscribeType.Common)]
     [InlineData("""{"email":"a@example.com","firstname":"A","type":2}""", SubscribeType.Opensource)]
     [InlineData("""{"email":"a@example.com","firstname":"A","type":"AppServer"}""", SubscribeType.AppServer)]
@@ -151,7 +186,7 @@ public class SubscriptionIdDecodeTests
     [InlineData("""{"email":"a@example.com","firstname":"A","type":null}""")]
     public void JsonWithoutType_GivesNoList(string text)
     {
-        ValidationKeyProvider.ParseSubscriptionId(text).Should().Be(new SubscriptionId("a@example.com", "A", null));
+        ValidationKeyProvider.ParseSubscriptionId(text).Should().Be(new SubscriptionId("a@example.com", "A", null, IsSubscriptionRequest: true));
     }
 
     [Theory]
@@ -159,11 +194,19 @@ public class SubscriptionIdDecodeTests
     [InlineData("""{"email":"a@example.com","type":"Unknown"}""")]
     [InlineData("""{"email":"a@example.com","type":"7"}""")]
     [InlineData("""{"email":"a@example.com","type":true}""")]
+    public void JsonWithAnUnknownList_StillGivesTheAddress(string text)
+    {
+        // An unsubscription needs only the address; the subscription confirmation refuses the unknown list.
+        ValidationKeyProvider.ParseSubscriptionId(text).Should()
+            .Be(new SubscriptionId("a@example.com", null, null, IsSubscriptionRequest: true, HasUnknownType: true));
+    }
+
+    [Theory]
     [InlineData("""{"email":"not an address","type":0}""")]
     [InlineData("""{"firstname":"A","type":0}""")]
     [InlineData("""{"email":""")]
     [InlineData("{}")]
-    public void JsonWithoutAValidAddressOrList_IsRefused(string text)
+    public void JsonWithoutAValidAddress_IsRefused(string text)
     {
         ValidationKeyProvider.ParseSubscriptionId(text).Should().BeNull();
     }

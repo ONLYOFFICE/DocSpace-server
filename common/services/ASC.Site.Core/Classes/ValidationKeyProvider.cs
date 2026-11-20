@@ -85,27 +85,53 @@ public class ValidationKeyProvider(
     }
 
     /// <summary>
+    /// The longest subscription id read; a longer one is refused before it is decoded. Nothing limits the name the
+    /// site puts into a request id, so the bound leaves room: a request with an address of 100 characters and a name of
+    /// 64 characters, every one of them \u-escaped (6 bytes), takes under 900 characters (pinned by a test), and 4096
+    /// characters hold about 3 000 bytes of JSON.
+    /// </summary>
+    public const int SubscriptionIdMaxLength = 4096;
+
+    /// <summary>
     /// Reads the id of a subscription link: the address and, for a subscription request, the name and the list.
     /// </summary>
     /// <remarks>
-    /// Three kinds of id are accepted, all the address encrypted with <see cref="InstanceCrypto"/>:
-    /// the <c>emailKey</c> of <c>/key/generate</c> (the address), the <c>unsubscribeId</c> of
-    /// <c>/key/generateunsubscribeid</c> (the address, or the JSON <c>{email, firstname, type}</c> the site puts
-    /// there), both UrlToken-encoded (<see cref="EncryptAndEncode"/>), and the id of the footer link of DocSpace
-    /// letters (<c>TextileStyler.GetSiteUnsubscribeLinkAsync</c>), Base64Url-encoded without padding.
-    /// The encryption carries no MAC, so a forged id now and then decrypts without an error; the result is accepted
-    /// only when it holds a valid address.
+    /// Two kinds of id are accepted, both the text encrypted with <see cref="InstanceCrypto"/> and UrlToken-encoded
+    /// (<see cref="EncryptAndEncode"/>): the <c>emailKey</c> of <c>/key/generate</c> (the address) and the
+    /// <c>unsubscribeId</c> of <c>/key/generateunsubscribeid</c> (the address, or the JSON <c>{email, firstname, type}</c>
+    /// the site puts there for a subscription request).
+    /// The encryption carries no MAC. A forged or spliced id now and then decrypts without an error, and the address
+    /// check refuses most of those but not all.
     /// </remarks>
-    /// <returns>The data of the id, or <see langword="null"/> when the id is not one of ours.</returns>
+    /// <returns>The data of the id, or <see langword="null"/> when the id is longer than
+    /// <see cref="SubscriptionIdMaxLength"/>, does not decrypt, or holds no valid address.</returns>
     public async Task<SubscriptionId> DecodeSubscriptionIdAsync(string id)
     {
-        if (string.IsNullOrWhiteSpace(id))
+        if (string.IsNullOrWhiteSpace(id) || id.Length > SubscriptionIdMaxLength)
         {
             return null;
         }
 
-        return await TryDecodeSubscriptionIdAsync(id, UrlTokenDecode)
-            ?? await TryDecodeSubscriptionIdAsync(id, WebEncoders.Base64UrlDecode);
+        string text;
+
+        try
+        {
+            var bytes = UrlTokenDecode(id);
+
+            if (bytes is not { Length: > 0 })
+            {
+                return null;
+            }
+
+            text = await instanceCrypto.DecryptAsync(bytes);
+        }
+        catch (Exception ex) when (ex is FormatException or CryptographicException)
+        {
+            // Not a UrlToken string, or not encrypted with this installation's key.
+            return null;
+        }
+
+        return ParseSubscriptionId(text);
     }
 
     /// <summary>
@@ -113,8 +139,9 @@ public class ValidationKeyProvider(
     /// </summary>
     /// <returns>
     /// The data with the address trimmed and lowercased, or <see langword="null"/> when the text holds no valid address
-    /// of at most <see cref="DbTemplateUnsubscribe.EmailMaxLength"/> characters, the JSON does not parse, or its
-    /// <c>type</c> is not a <see cref="SubscribeType"/>.
+    /// of at most <see cref="DbTemplateUnsubscribe.EmailMaxLength"/> characters or the JSON does not parse.
+    /// A JSON whose <c>type</c> is not a <see cref="SubscribeType"/> still gives the address, with
+    /// <see cref="SubscriptionId.HasUnknownType"/> set: an unsubscription does not need the list.
     /// </returns>
     public static SubscriptionId ParseSubscriptionId(string text)
     {
@@ -146,43 +173,32 @@ public class ValidationKeyProvider(
 
         var email = NormalizeEmail(payload?.Email);
 
-        if (email == null || !TryReadSubscribeType(payload.Type, out var type))
+        if (email == null)
         {
             return null;
         }
 
-        return new SubscriptionId(email, payload.FirstName?.Trim(), type);
+        var typeIsKnown = TryReadSubscribeType(payload.Type, out var type);
+
+        return new SubscriptionId(email, payload.FirstName?.Trim(), type, IsSubscriptionRequest: true, HasUnknownType: !typeIsKnown);
     }
 
-    private async Task<SubscriptionId> TryDecodeSubscriptionIdAsync(string id, Func<string, byte[]> decode)
-    {
-        string text;
-
-        try
-        {
-            var bytes = decode(id);
-
-            if (bytes is not { Length: > 0 })
-            {
-                return null;
-            }
-
-            text = await instanceCrypto.DecryptAsync(bytes);
-        }
-        catch (Exception ex) when (ex is FormatException or CryptographicException)
-        {
-            // Not this encoding, or not encrypted with this installation's key.
-            return null;
-        }
-
-        return ParseSubscriptionId(text);
-    }
-
+    /// <summary>
+    /// Trims and lowercases an address, and refuses one that the <c>email</c> column cannot hold: longer than
+    /// <see cref="DbTemplateUnsubscribe.EmailMaxLength"/>, with a character outside the Basic Multilingual Plane
+    /// (the Workspace tables are <c>utf8mb3_general_ci</c> by their DDL) or a control character, or not an address at all.
+    /// </summary>
     private static string NormalizeEmail(string email)
     {
         email = email?.Trim().ToLowerInvariant();
 
-        return email is { Length: <= DbTemplateUnsubscribe.EmailMaxLength } && email.TestEmailRegex() ? email : null;
+        if (email is not { Length: <= DbTemplateUnsubscribe.EmailMaxLength }
+            || email.Any(c => char.IsSurrogate(c) || char.IsControl(c)))
+        {
+            return null;
+        }
+
+        return email.TestEmailRegex() ? email : null;
     }
 
     private static bool TryReadSubscribeType(JsonElement? element, out SubscribeType? type)
@@ -310,5 +326,7 @@ public class ValidationKeyProvider(
 /// <summary>The data of a subscription link id (<see cref="ValidationKeyProvider.DecodeSubscriptionIdAsync"/>).</summary>
 /// <param name="Email">The address, trimmed and lowercased.</param>
 /// <param name="FirstName">The name from a subscription request; <see langword="null"/> for a plain address.</param>
-/// <param name="Type">The list from a subscription request; <see langword="null"/> when the id names none.</param>
-public sealed record SubscriptionId(string Email, string FirstName, SubscribeType? Type);
+/// <param name="Type">The list from a subscription request; <see langword="null"/> when the id names none or an unknown one.</param>
+/// <param name="IsSubscriptionRequest">Whether the id is the JSON of a subscription request, not a plain address.</param>
+/// <param name="HasUnknownType">Whether the request names a list that is not a <see cref="SubscribeType"/>.</param>
+public sealed record SubscriptionId(string Email, string FirstName, SubscribeType? Type, bool IsSubscriptionRequest = false, bool HasUnknownType = false);

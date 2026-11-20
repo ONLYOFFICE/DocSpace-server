@@ -33,11 +33,17 @@
 
 namespace ASC.Site.Core.Controllers;
 
-/// <remarks>The messages carry no address: the log of this service is not the place for the subscribers' emails.</remarks>
+/// <remarks>
+/// These messages carry no address. The SQL log (<c>ASC.SQL</c>, written at Debug with sensitive data logging on, as
+/// in every DocSpace host) does show the address as a query parameter when that level is enabled.
+/// </remarks>
 internal static partial class SubscriptionControllerLogger
 {
     [LoggerMessage(LogLevel.Warning, "Subscription link id not recognized ({length} characters)")]
     public static partial void WarningSubscriptionIdNotRecognized(this ILogger<SubscriptionController> logger, int length);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription confirmation refused: the id is a subscription request {isSubscriptionRequest}, names an unknown list {hasUnknownType}")]
+    public static partial void WarningSubscriptionIdNotARequest(this ILogger<SubscriptionController> logger, bool isSubscriptionRequest, bool hasUnknownType);
 
     [LoggerMessage(LogLevel.Information, "Unsubscribe done: {action}")]
     public static partial void InformationUnsubscribeDone(this ILogger<SubscriptionController> logger, UnsubscribeAction action);
