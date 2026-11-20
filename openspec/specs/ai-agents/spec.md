@@ -2158,6 +2158,21 @@ download and copy it and nothing else: `updateFile`, `deleteFile`, `moveBatchIte
 - **WHEN** the creator calls `openEditFile` for an own artifact
 - **THEN** the document opens with the edit permission false
 
+### Requirement: Used space of a project
+
+The project's `usedSpace` SHALL be null for a caller who may not edit the project, a DocSpace admin outside it
+included, and sorting the AI rooms root by `UsedSpace` SHALL order projects by title.
+
+#### Scenario: Used space of a project
+
+- **WHEN** a member uploads a file into a project, and another member, the project's owner and a DocSpace admin each call `getRoomInfo`
+- **THEN** `usedSpace` is positive for the owner and null for the member and the admin
+
+#### Scenario: Sorting by used space
+
+- **WHEN** a member of two projects lists the AI rooms root with `sortBy` `UsedSpace` descending, and only the later title holds a file
+- **THEN** the project with the earlier title comes first
+
 ### Requirement: The contents of a project are not listed
 
 `getFolderByFolderId` of an AI project SHALL answer no files, no folders and total 0, `getFolders` an empty

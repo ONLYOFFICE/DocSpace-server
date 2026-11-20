@@ -470,6 +470,9 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Artifact, thread folder and file not sent of another member 403 to a member, the owner and a DocSpace admin (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesStrangerAccessTests.cs:51,67,83,100,116,132` | TEST-CONFIRMED |
 | Creator reads, downloads and copies (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:41,52,63` | TEST-CONFIRMED |
 | Creator cannot change the file (scenario); creator opens the editor (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:78,92,107,132,146`; `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:121` | TEST-CONFIRMED |
+| **Used space of a project** |  |  |
+| Used space of a project (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:51`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:371-374` | TEST-CONFIRMED |
+| Sorting by used space (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:82`; `products/ASC.Files/Core/Utils/EntryManager.cs:1112,1255-1258` | TEST-CONFIRMED |
 | **The contents of a project are not listed** |  |  |
 | Listing; search inside the project (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:51,69,80` | TEST-CONFIRMED |
 | Listing the AI rooms root; filtering it by the title of a thread folder (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:53,86,103`; `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:69` | TEST-CONFIRMED |

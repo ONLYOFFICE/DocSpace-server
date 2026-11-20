@@ -186,7 +186,8 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is
     /// refreshed when a file operation finishes, so a read right after an upload or a deletion can still report the
-    /// previous figure. Null for a folder that is not a room.
+    /// previous figure. Null for a folder that is not a room, and for an AI project the caller may not edit: the files
+    /// of a project belong to the members who added them, so only who manages the project sees their total.
     /// </summary>
     /// <example>524288000</example>
     public long? UsedSpace { get; set; }
@@ -367,7 +368,10 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
-            result.UsedSpace = folder.Counter;
+            result.UsedSpace = folder.FolderType != FolderType.AiProjectRoom ||
+                               (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEditProject) && canEditProject)
+                ? folder.Counter
+                : null;
 
             if ((await _tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEdit) && canEdit) ||
