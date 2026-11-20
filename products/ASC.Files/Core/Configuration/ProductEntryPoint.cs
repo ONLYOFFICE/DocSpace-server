@@ -171,6 +171,9 @@ public class ProductEntryPoint : Product
 
         var filesOutsideRooms = new List<KeyValuePair<int, ActivityInfo>>();
 
+        var roomFolderDao = _daoFactory.GetFolderDao<int>();
+        var roomTypes = new Dictionary<int, FolderType?>();
+
         foreach (var e in events)
         {
             var activityInfo = new ActivityInfo
@@ -244,6 +247,11 @@ public class ProductEntryPoint : Product
                 continue;
             }
 
+            if (roomId > 0 && !DocSpaceHelper.ReportsActivityInDigest(await GetRoomTypeAsync(roomId, (FolderType?)additionalInfo.Type)))
+            {
+                continue;
+            }
+
             if (e.Action != (int)MessageAction.RoomCreated && e.Action != (int)MessageAction.AgentCreated)
             {
                 var uniqRoomId = $"folder_{roomId}";
@@ -300,6 +308,18 @@ public class ProductEntryPoint : Product
         }
 
         return result;
+
+        async Task<FolderType?> GetRoomTypeAsync(int roomId, FolderType? eventEntryType)
+        {
+            if (!roomTypes.TryGetValue(roomId, out var roomType))
+            {
+                var room = await roomFolderDao.GetFolderAsync(roomId);
+                roomType = room?.FolderType;
+                roomTypes[roomId] = roomType;
+            }
+
+            return roomType ?? eventEntryType;
+        }
     }
 
     public override Guid ProductID => ID;

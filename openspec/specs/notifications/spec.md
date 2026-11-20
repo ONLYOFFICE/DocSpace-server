@@ -262,7 +262,7 @@ o'clock (configurable) and whose tariff is not in the not-paid state, the system
 active member subscribed to the daily feed "What's new on your portal <host> for <date>" by e-mail
 and Telegram, listing yesterday's events they may see: files created, comments, rooms and AI
 agents created, renamed or archived, members removed, users added or updated. Nothing to report,
-no letter.
+no letter. Events of an AI project and of the entries inside it are never listed.
 
 #### Scenario: Member with activity
 
@@ -280,7 +280,7 @@ Every hour the system SHALL send every active member subscribed to room activity
 "What's new on your portal <host> for the last hour" listing the past hour's uploads, edits,
 members added to rooms or agents, role changes, type changes and form-filling steps the member
 may see, skipping muted rooms and members with nothing to report. It goes by e-mail and
-Telegram.
+Telegram. Events of an AI project and of the entries inside it are never listed.
 
 #### Scenario: Upload in the past hour
 

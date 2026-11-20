@@ -243,6 +243,11 @@ public static class DocSpaceHelper
         return roomType != FolderType.AiProjectRoom;
     }
 
+    public static bool ReportsActivityInDigest(FolderType? roomType)
+    {
+        return roomType != FolderType.AiProjectRoom;
+    }
+
     /// <summary>
     /// Whether the file lies in a private room or in a room with a watermark, whose content is not converted into a
     /// file of its own: such a file would leave the room unencrypted or without the watermark.

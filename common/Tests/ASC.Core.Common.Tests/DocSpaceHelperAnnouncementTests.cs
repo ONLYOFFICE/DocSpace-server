@@ -54,4 +54,25 @@ public class DocSpaceHelperAnnouncementTests
     {
         DocSpaceHelper.AnnouncesEntriesToMembers(roomType).Should().BeTrue();
     }
+
+    [Fact]
+    public void ReportsActivityInDigest_AiProject_IsFalse()
+    {
+        DocSpaceHelper.ReportsActivityInDigest(FolderType.AiProjectRoom).Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(FolderType.CustomRoom)]
+    [InlineData(FolderType.PublicRoom)]
+    [InlineData(FolderType.EditingRoom)]
+    [InlineData(FolderType.VirtualDataRoom)]
+    [InlineData(FolderType.FillingFormsRoom)]
+    [InlineData(FolderType.AiRoom)]
+    [InlineData(FolderType.InstructionsRoom)]
+    [InlineData(FolderType.KnowledgeRoom)]
+    [InlineData(null)]
+    public void ReportsActivityInDigest_OtherRoom_IsTrue(FolderType? roomType)
+    {
+        DocSpaceHelper.ReportsActivityInDigest(roomType).Should().BeTrue();
+    }
 }

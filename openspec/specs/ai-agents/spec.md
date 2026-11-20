@@ -2199,7 +2199,9 @@ The socket event that announces a file uploaded into an AI project SHALL reach t
 project's owner, a DocSpace admin and another member subscribed to the project SHALL NOT receive it. The
 upload SHALL NOT mark the file as new for the project's owner, and the members of the project SHALL NOT be
 sent the notification about a file uploaded to a room. `getSharedUsers` of a file inside a project SHALL
-answer an empty list.
+answer an empty list. The hourly room activity digest and the daily feed digest SHALL leave out every
+event of a project and of the entries inside it, for every recipient, its owner and DocSpace admins
+included.
 
 #### Scenario: Uploader is told
 
@@ -2225,6 +2227,11 @@ answer an empty list.
 
 - **WHEN** a member uploads a file into a project on a portal that has a DocSpace admin, and calls `getSharedUsers` for it
 - **THEN** the list is empty
+
+#### Scenario: Activity digests
+
+- **WHEN** a member uploads or creates a file in a project, or the project is created, renamed or gets a new member
+- **THEN** neither the hourly room activity digest nor the daily feed digest of any recipient lists the event
 
 ### Requirement: Deleting a thread of a project
 

@@ -479,6 +479,8 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Upload notification (scenario): the decision by room type | `CoreTests/DocSpaceHelperAnnouncementTests.cs:39,53` | TEST-CONFIRMED |
 | Upload notification (scenario): the decision is applied where the upload event is published and where it is handled | `products/ASC.Files/Server/Api/UploadController.cs`; `products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs`; `products/ASC.Files/Server/Helpers/FilesHelperBase.cs`; `products/ASC.Files/Worker/IntegrationEvents/EventHandling/RoomNotifyIntegrationEventHandler.cs` (calls of `AnnouncesEntriesToMembers`) | CODE-ONLY |
 | Shared users of a file (scenario) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:91` | TEST-CONFIRMED |
+| Activity digests (scenario): the decision by room type | `CoreTests/DocSpaceHelperAnnouncementTests.cs:59,74` | TEST-CONFIRMED |
+| Activity digests (scenario): the decision is applied to every digest event of a room | `products/ASC.Files/Core/Configuration/ProductEntryPoint.cs` (`GetAuditEventsAsync`, call of `ReportsActivityInDigest`) | CODE-ONLY |
 | **Deleting a thread of a project** |  |  |
 | Gone at once (scenario) | `T/ThreadDeletionTests/ThreadDeletionTests.cs:41,61` | TEST-CONFIRMED |
 | Files removed by the background pass; other thread of the project; project deleted afterwards (scenarios) | `T/ThreadDeletionTests/ThreadDeletionTests.cs:90,111,135` | TEST-CONFIRMED |
