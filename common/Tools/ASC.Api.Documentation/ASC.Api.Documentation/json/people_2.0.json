@@ -4941,43 +4941,6 @@
         "responses": {
           "200": {
             "description": "Every pending profile the caller may see, not only the ones just invited",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Rate limit: 5 invitations per day per tenant.",
-                "schema": {
-                  "examples": [
-                    5
-                  ],
-                  "maximum": 5,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Invitations remaining today per tenant.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "maximum": 5,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the daily invitation limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int64"
-                }
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4997,30 +4960,6 @@
           },
           "401": {
             "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying (5 invitations/day limit per tenant).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "maximum": 86400,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {

@@ -1882,7 +1882,7 @@
           "Files / Files"
         ],
         "summary": "Get file history",
-        "description": "Returns the activity log of one file from the portal audit trail. The log shows who renamed, moved, shared,\r\nconverted, locked, or edited the file, and when. Requires read access to the file. Other callers get 403. The\r\ncall is read-only. Entries come newest first. The call merges the events of one action into one entry, and its\r\n`related` list holds the others. The response headers carry the total number of entries, not the body. If no\r\nfile has this id, the call returns 404. The call returns 400 if `fromDate` or `toDate` has no `Z` or UTC\r\noffset. To read the log of a folder or a room, use `GET api/2.0/files/folder/{folderId}/log`.",
+        "description": "Returns the activity log of one file from the portal audit trail. The log shows who renamed, moved, shared,\r\nconverted, locked, or edited the file, and when. Requires read access to the file. Other callers get 403. A\r\nfile inside an AI project has no log, so the call returns 403 for it to everyone. The call is read-only.\r\nEntries come newest first. The call merges the events of one action into one entry, and its\r\n`related` list holds the others. The response headers carry the total number of entries, not the body. If no\r\nfile has this id, the call returns 404. The call returns 400 if `fromDate` or `toDate` has no `Z` or UTC\r\noffset. To read the log of a folder or a room, use `GET api/2.0/files/folder/{folderId}/log`.",
         "operationId": "getFileHistory",
         "parameters": [
           {
@@ -1971,7 +1971,7 @@
             "description": "A parameter has the wrong type, the `count` is outside its allowed range, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset"
           },
           "403": {
-            "description": "The caller has no read access to the file"
+            "description": "The caller has no read access to the file, or the file lies inside an AI project"
           },
           "404": {
             "description": "No file with this identifier exists"
@@ -8563,7 +8563,7 @@
           "Files / Folders"
         ],
         "summary": "Get folder history",
-        "description": "Returns the history of a folder and of the entries inside it. Each record names the action, its time, and the\r\nuser who did it. The records of one action form one entry, and its other records are in `related`. The list\r\nstarts with the most recent entry. Paging with `startIndex` and `count` counts records, so a page can hold\r\nfewer entries. The response headers carry the total number of records, and the body does not. Requires read\r\naccess to the folder. Other callers get 403. A caller who only fills forms in a form-filling folder sees only\r\nthe entries available to them. The call is read-only. If the folder does not exist,\r\nthe call returns 404. The call returns 400 if `count` is out of range or a date has a wrong format. To get\r\nthe history as a file, use `POST api/2.0/files/folder/{folderId}/log/report`.",
+        "description": "Returns the history of a folder and of the entries inside it. Each record names the action, its time, and the\r\nuser who did it. The records of one action form one entry, and its other records are in `related`. The list\r\nstarts with the most recent entry. Paging with `startIndex` and `count` counts records, so a page can hold\r\nfewer entries. The response headers carry the total number of records, and the body does not. Requires read\r\naccess to the folder. Other callers get 403. An AI project and the folders inside it have no history. For them\r\nthe call returns 403 to everyone. A caller who only fills forms in a form-filling folder sees only\r\nthe entries available to them. The call is read-only. If the folder does not exist,\r\nthe call returns 404. The call returns 400 if `count` is out of range or a date has a wrong format. To get\r\nthe history as a file, use `POST api/2.0/files/folder/{folderId}/log/report`.",
         "operationId": "getFolderHistory",
         "parameters": [
           {
@@ -8652,7 +8652,7 @@
             "description": "A parameter has the wrong type, the `count` is outside its allowed range, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset"
           },
           "403": {
-            "description": "The caller may not read this folder"
+            "description": "The caller may not read this folder, or the folder is an AI project or lies inside one"
           },
           "404": {
             "description": "The folder does not exist"
@@ -8730,7 +8730,7 @@
           "Files / Folders"
         ],
         "summary": "Start the folder history report generation",
-        "description": "Starts a job that saves the history of a folder as a report file in the caller's \"My documents\". The file is\r\nan XLSX spreadsheet, or a CSV file if `format` is `Csv`. If both `from` and `to` are left out, the report\r\ncovers the whole history. Any user with read access to the folder can call it, except a guest. Other callers\r\nget 403. The call queues work and returns the task, not the report. Repeat\r\n`GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true. Then take the file from\r\n`resultFileId` and `resultFileUrl`. For a CSV file too large for the editor, the URL downloads the file. You can\r\nrepeat the call. While a report of the same folder and caller runs, the call returns that task. It starts no\r\nsecond report. After the report ends, a repeat starts a new report and saves one more file. An XLSX report keeps\r\nat most the 200,000 most recent events by default, and fewer for long events. Its header says how many events it\r\nleft out. A CSV report has every event of the period. Only a DocSpace admin gets the IP address, browser, and\r\nplatform columns. To stop a running report, use `DELETE api/2.0/files/folder/{folderId}/log/report`. If the\r\nfolder does not exist, the call returns 404. It returns 402 only if the login history and audit trail section is\r\nturned off for the portal.",
+        "description": "Starts a job that saves the history of a folder as a report file in the caller's \"My documents\". The file is\r\nan XLSX spreadsheet, or a CSV file if `format` is `Csv`. If both `from` and `to` are left out, the report\r\ncovers the whole history. Any user with read access to the folder can call it, except a guest. Other callers\r\nget 403. An AI project and the folders inside it have no history, so the call returns 403 for them. The call\r\nqueues work and returns the task, not the report. Repeat\r\n`GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true. Then take the file from\r\n`resultFileId` and `resultFileUrl`. For a CSV file too large for the editor, the URL downloads the file. You can\r\nrepeat the call. While a report of the same folder and caller runs, the call returns that task. It starts no\r\nsecond report. After the report ends, a repeat starts a new report and saves one more file. An XLSX report keeps\r\nat most the 200,000 most recent events by default, and fewer for long events. Its header says how many events it\r\nleft out. A CSV report has every event of the period. Only a DocSpace admin gets the IP address, browser, and\r\nplatform columns. To stop a running report, use `DELETE api/2.0/files/folder/{folderId}/log/report`. If the\r\nfolder does not exist, the call returns 404. It returns 402 only if the login history and audit trail section is\r\nturned off for the portal.",
         "operationId": "createReportFolderHistory",
         "parameters": [
           {
@@ -8806,7 +8806,7 @@
             "description": "The login history and audit trail section is turned off for this portal"
           },
           "403": {
-            "description": "The caller may not export the history of this folder"
+            "description": "The caller may not export the history of this folder, or the folder is an AI project or lies inside one"
           },
           "404": {
             "description": "The folder does not exist"
@@ -8892,7 +8892,7 @@
           "Files / Folders"
         ],
         "summary": "Get the folder history report generation status",
-        "description": "Returns the state of the history report that the caller started for a folder. Each caller sees only their own\r\nreport. Any user with read access to the folder can call it, except a guest. Other callers get 403. The call\r\nis read-only. This is the call to poll after `POST api/2.0/files/folder/{folderId}/log/report`. Repeat it\r\nuntil `isCompleted` is true. It becomes true however the job ends. If the job fails, `error` gives the reason.\r\nAfter a success, `resultFileId`, `resultFileName`, and `resultFileUrl` name the file in \"My\r\ndocuments\". If the caller has no report for this folder, the response is empty. If the folder does not exist,\r\nthe call returns 404. It returns 402 if the login history and audit trail section is turned off for the\r\nportal.",
+        "description": "Returns the state of the history report that the caller started for a folder. Each caller sees only their own\r\nreport. Any user with read access to the folder can call it, except a guest. Other callers get 403. For an AI\r\nproject and the folders inside it, the call returns 403. The call is read-only. This is the call to poll\r\nafter `POST api/2.0/files/folder/{folderId}/log/report`. Repeat it\r\nuntil `isCompleted` is true. It becomes true however the job ends. If the job fails, `error` gives the reason.\r\nAfter a success, `resultFileId`, `resultFileName`, and `resultFileUrl` name the file in \"My\r\ndocuments\". If the caller has no report for this folder, the response is empty. If the folder does not exist,\r\nthe call returns 404. It returns 402 if the login history and audit trail section is turned off for the\r\nportal.",
         "operationId": "getReportFolderHistory",
         "parameters": [
           {
@@ -8932,7 +8932,7 @@
             "description": "The login history and audit trail section is turned off for this portal"
           },
           "403": {
-            "description": "The caller may not export the history of this folder"
+            "description": "The caller may not export the history of this folder, or the folder is an AI project or lies inside one"
           },
           "404": {
             "description": "The folder does not exist"
@@ -9018,7 +9018,7 @@
           "Files / Folders"
         ],
         "summary": "Terminate the folder history report generation",
-        "description": "Stops the history report that the caller started for a folder with\r\n`POST api/2.0/files/folder/{folderId}/log/report`. Each caller can stop only their own report. Any user with\r\nread access to the folder can call it, except a guest. Other callers get 403. The call only queues a request\r\nto stop the job and returns no body. To see the task end as cancelled, use\r\n`GET api/2.0/files/folder/{folderId}/log/report`. If no report runs, the call changes nothing, so you can\r\nrepeat it. A finished report stays, and its file remains in \"My documents\". If the folder does not exist, the\r\ncall returns 404. It returns 402 if the login history and audit trail section is turned off for the portal.",
+        "description": "Stops the history report that the caller started for a folder with\r\n`POST api/2.0/files/folder/{folderId}/log/report`. Each caller can stop only their own report. Any user with\r\nread access to the folder can call it, except a guest. Other callers get 403. For an AI project and the\r\nfolders inside it, the call returns 403. The call only queues a request to stop the job and returns no body. To see the task end as cancelled, use\r\n`GET api/2.0/files/folder/{folderId}/log/report`. If no report runs, the call changes nothing, so you can\r\nrepeat it. A finished report stays, and its file remains in \"My documents\". If the folder does not exist, the\r\ncall returns 404. It returns 402 if the login history and audit trail section is turned off for the portal.",
         "operationId": "terminateReportFolderHistory",
         "parameters": [
           {
@@ -9051,7 +9051,7 @@
             "description": "The login history and audit trail section is turned off for this portal"
           },
           "403": {
-            "description": "The caller may not export the history of this folder"
+            "description": "The caller may not export the history of this folder, or the folder is an AI project or lies inside one"
           },
           "404": {
             "description": "The folder does not exist"
@@ -10249,7 +10249,7 @@
           "Files / Folders"
         ],
         "summary": "Get a folder by ID",
-        "description": "Returns one page of the contents of a folder. The response has the subfolders in `folders`, the files in\r\n`files`, and the folder itself in `current`. The chain of parent folders is in `pathParts`. Requires read\r\naccess to the folder. Other callers get 403. Without signing in, a caller needs an external link to the\r\nfolder. The call changes data of the caller only. It clears the new-item marks of the folder. It also saves a\r\nvalid `sortBy` and `sortOrder` as the default order of the account. You can repeat it. With a filter, the\r\ncall searches the whole subtree by default. The text filter also searches indexed document content. Indexing\r\nruns in the background, so a new file can be missing from the results at first. Use `count` and `startIndex`\r\nto page through the result. The `total` field counts all matching entries. To filter by metadata with a typed\r\nbody, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`\r\nout of range, or a negative `startIndex`. An invalid metadata filter also returns 400. It also returns 400 if `roomId` is not a\r\nnumber but the folder ID is. It also returns 403 for a folder in the trash. If the folder does not exist, the\r\ncall returns 404. For an anonymous caller, it returns 403 instead.",
+        "description": "Returns one page of the contents of a folder. The response has the subfolders in `folders`, the files in\r\n`files`, and the folder itself in `current`. The chain of parent folders is in `pathParts`. Requires read\r\naccess to the folder. Other callers get 403. Without signing in, a caller needs an external link to the\r\nfolder. The call changes data of the caller only. It clears the new-item marks of the folder. It also saves a\r\nvalid `sortBy` and `sortOrder` as the default order of the account. You can repeat it. With a filter, the\r\ncall searches the whole subtree by default. The AI rooms root, and the rooms root with `searchArea` AiHub,\r\nlist rooms only. The text filter also searches indexed document content. Indexing\r\nruns in the background, so a new file can be missing from the results at first. Use `count` and `startIndex`\r\nto page through the result. The `total` field counts all matching entries. To filter by metadata with a typed\r\nbody, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`\r\nout of range, or a negative `startIndex`. An invalid metadata filter also returns 400. It also returns 400 if `roomId` is not a\r\nnumber but the folder ID is. It also returns 403 for a folder in the trash. If the folder does not exist, the\r\ncall returns 404. For an anonymous caller, it returns 403 instead.",
         "operationId": "getFolderByFolderId",
         "parameters": [
           {
@@ -10774,7 +10774,7 @@
           "Files / Folders"
         ],
         "summary": "Search a folder by metadata",
-        "description": "Returns one page of the contents of a folder, filtered by metadata. The response has the same shape as for\r\n`GET api/2.0/files/{folderId}`. Requires read access to the folder. Other callers get 403. The call changes\r\ndata of the caller only. It clears the new-item marks of the folder. It also saves a valid `sortBy` as the\r\ndefault order of the account. The call ignores an unknown `sortBy`. You can repeat it. All conditions of\r\n`metadataFilters` must match. Without a template, conditions, and `filterValue`, the call lists the folder\r\nunfiltered. By default, the search covers the whole subtree. Use `count` and `startIndex` to page through the\r\nresult. The `total` field counts all matches. Take the template and field IDs from\r\n`GET api/2.0/files/metadata/templates`. A folder of a connected storage has no metadata, so a filter there\r\nreturns an empty page. The call returns 400 for an unknown template or field, or a field outside the named\r\ntemplate. It also returns 400 for more than 20 conditions or a filter in the Templates or Private section. If\r\nthe folder does not exist, the call returns 404. To combine metadata with the user, extension, or form filters,\r\nuse `GET api/2.0/files/{folderId}`.",
+        "description": "Returns one page of the contents of a folder, filtered by metadata. The response has the same shape as for\r\n`GET api/2.0/files/{folderId}`. Requires read access to the folder. Other callers get 403. The call changes\r\ndata of the caller only. It clears the new-item marks of the folder. It also saves a valid `sortBy` as the\r\ndefault order of the account. The call ignores an unknown `sortBy`. You can repeat it. All conditions of\r\n`metadataFilters` must match. Without a template, conditions, and `filterValue`, the call lists the folder\r\nunfiltered. By default, the search covers the whole subtree. The AI rooms root lists rooms only. Use `count`\r\nand `startIndex` to page through the result. The `total` field counts all matches. Take the template and\r\nfield IDs from\r\n`GET api/2.0/files/metadata/templates`. A folder of a connected storage has no metadata, so a filter there\r\nreturns an empty page. The call returns 400 for an unknown template or field, or a field outside the named\r\ntemplate. It also returns 400 for more than 20 conditions or a filter in the Templates or Private section. If\r\nthe folder does not exist, the call returns 404. To combine metadata with the user, extension, or form filters,\r\nuse `GET api/2.0/files/{folderId}`.",
         "operationId": "searchFolder",
         "parameters": [
           {
@@ -30008,43 +30008,6 @@
         "responses": {
           "200": {
             "description": "The access entries of the named subjects, plus a warning or an error when something was not applied",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Rate limit: 5 invitations per day per tenant.",
-                "schema": {
-                  "examples": [
-                    5
-                  ],
-                  "maximum": 5,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Invitations remaining today per tenant.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "maximum": 5,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the daily invitation limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int64"
-                }
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -30064,30 +30027,6 @@
           },
           "401": {
             "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying (5 invitations/day limit per tenant).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "maximum": 86400,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -34924,17 +34863,17 @@
           "Rooms / AI"
         ],
         "summary": "Get the AI thread artifacts",
-        "description": "Returns the artifacts of a thread in an AI project: the files the chat tools created in it. Only the author of the thread can read them.",
+        "description": "Returns the artifacts of a thread in an AI project, one page at a time.\r\nThey are the files that the chat tools created in the thread.\r\nRequires read access to the project. Other callers get 403.\r\nOnly the author of the thread sees these files.\r\nThe call is read-only.\r\nThe total in the answer counts the files of all pages.\r\nA thread with no artifacts yet gives an empty list.\r\nA valid `sortBy` also becomes the saved default order of the account.\r\nThe call returns 404 for an unknown AI project or thread.\r\nA thread of another user also returns 404, even to the project owner or a DocSpace admin.\r\nThe call returns 400 if `count` or `startIndex` is out of range.\r\nIt also returns 403 if AI features are turned off on the portal.\r\nTo get the files the user sent with the messages of the thread, use `GET api/2.0/files/rooms/{id}/threads/{threadId}/attachments`.",
         "operationId": "getThreadArtifacts",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "ID of the project.",
+            "description": "ID of the AI project the thread was started in. Take it from `GET api/2.0/files/rooms` with `searchArea`\r\nset to `AiHub`, which lists the AI projects together with the other AI rooms.",
             "required": true,
             "schema": {
               "examples": [
-                1
+                18432
               ],
               "type": "integer",
               "format": "int32"
@@ -34943,7 +34882,7 @@
           {
             "name": "threadId",
             "in": "path",
-            "description": "ID of the thread.",
+            "description": "ID of a thread the caller started in the project. Take it from `GET api/2.0/ai/threads/list` with `entityId`\r\nset to the project ID.",
             "required": true,
             "schema": {
               "examples": [
@@ -34984,7 +34923,7 @@
           {
             "name": "sortBy",
             "in": "query",
-            "description": "The field to sort the files by.",
+            "description": "The name of the field the files are ordered by, matched case-insensitively against the file sort fields:\r\n`DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,\r\n`CustomOrder`, `LastOpened` and `UsedSpace`. Without a recognized value the saved default order of the account applies.",
             "schema": {
               "examples": [
                 "DateAndTime"
@@ -35117,17 +35056,17 @@
           "Rooms / AI"
         ],
         "summary": "Get the AI thread attachments",
-        "description": "Returns the attachments of a thread in an AI project: the files the user sent with its messages. Only the author of the thread can read them.",
+        "description": "Returns the attachments of a thread in an AI project, one page at a time.\r\nThey are the files that the user sent with the messages of the thread.\r\nRequires read access to the project. Other callers get 403.\r\nOnly the author of the thread sees these files.\r\nThe call is read-only.\r\nThe total in the answer counts the files of all pages.\r\nA thread with no attachments yet gives an empty list.\r\nA valid `sortBy` also becomes the saved default order of the account.\r\nThe call returns 404 for an unknown AI project or thread.\r\nA thread of another user also returns 404, even to the project owner or a DocSpace admin.\r\nThe call returns 400 if `count` or `startIndex` is out of range.\r\nIt also returns 403 if AI features are turned off on the portal.\r\nTo get the files the chat tools created in the thread, use `GET api/2.0/files/rooms/{id}/threads/{threadId}/artifacts`.",
         "operationId": "getThreadAttachments",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "ID of the project.",
+            "description": "ID of the AI project the thread was started in. Take it from `GET api/2.0/files/rooms` with `searchArea`\r\nset to `AiHub`, which lists the AI projects together with the other AI rooms.",
             "required": true,
             "schema": {
               "examples": [
-                1
+                18432
               ],
               "type": "integer",
               "format": "int32"
@@ -35136,7 +35075,7 @@
           {
             "name": "threadId",
             "in": "path",
-            "description": "ID of the thread.",
+            "description": "ID of a thread the caller started in the project. Take it from `GET api/2.0/ai/threads/list` with `entityId`\r\nset to the project ID.",
             "required": true,
             "schema": {
               "examples": [
@@ -35177,7 +35116,7 @@
           {
             "name": "sortBy",
             "in": "query",
-            "description": "The field to sort the files by.",
+            "description": "The name of the field the files are ordered by, matched case-insensitively against the file sort fields:\r\n`DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,\r\n`CustomOrder`, `LastOpened` and `UsedSpace`. Without a recognized value the saved default order of the account applies.",
             "schema": {
               "examples": [
                 "DateAndTime"
@@ -47712,7 +47651,7 @@
                   5
                 ],
                 "type": "integer",
-                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates, default templates and AI agents sections always report 0, because the number is not collected for\r\nthem.",
+                "description": "How many files lie directly in the folder, without counting the subfolders. Always 0 for an AI project, whose\r\nfiles no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI\r\nrooms sections, for which the number is not collected.",
                 "format": "int32"
               },
               "foldersCount": {
@@ -47720,7 +47659,7 @@
                   7
                 ],
                 "type": "integer",
-                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI\r\nagents sections report 0.",
+                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows. Always 0 for an AI project, whose thread folders\r\nno listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI rooms\r\nsections.",
                 "format": "int32"
               },
               "isShareable": {
@@ -47851,7 +47790,7 @@
                   "null",
                   "integer"
                 ],
-                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room.",
+                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room, and for an AI project the caller may not edit: the files\r\nof a project belong to the members who added them, so only who manages the project sees their total.",
                 "format": "int64"
               },
               "passwordProtected": {
@@ -57251,7 +57190,7 @@
                   5
                 ],
                 "type": "integer",
-                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates, default templates and AI agents sections always report 0, because the number is not collected for\r\nthem.",
+                "description": "How many files lie directly in the folder, without counting the subfolders. Always 0 for an AI project, whose\r\nfiles no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI\r\nrooms sections, for which the number is not collected.",
                 "format": "int32"
               },
               "foldersCount": {
@@ -57259,7 +57198,7 @@
                   7
                 ],
                 "type": "integer",
-                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI\r\nagents sections report 0.",
+                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows. Always 0 for an AI project, whose thread folders\r\nno listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI rooms\r\nsections.",
                 "format": "int32"
               },
               "isShareable": {
@@ -57390,7 +57329,7 @@
                   "null",
                   "integer"
                 ],
-                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room.",
+                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room, and for an AI project the caller may not edit: the files\r\nof a project belong to the members who added them, so only who manages the project sees their total.",
                 "format": "int64"
               },
               "passwordProtected": {
