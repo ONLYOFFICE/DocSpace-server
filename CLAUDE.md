@@ -32,7 +32,7 @@ server/
 │   ├── ASC.Data.Backup* # Backup/restore
 │   ├── services/        # Background services (Notify, AuditTrail, etc.) + ASC.Monolith (all-in-one single-process host)
 │   ├── Tools/           # Dev tools: ASC.Migration.Runner (applies DB migrations), ASC.Migration.Creator, ASC.Api.Documentation, etc.
-│   └── Tests/           # ASC.Tests.Common (shared integration-test harness) + ASC.Core.Common.Tests; the other projects here are legacy
+│   └── Tests/           # ASC.Tests.Common (shared integration-test harness) + the suites named under Testing; the other projects here are legacy
 ├── products/            # Feature modules
 │   ├── ASC.Files/       # File management (Server, Core, Worker, Tests)
 │   ├── ASC.People/      # User/team management (Server, Tests)
@@ -108,7 +108,7 @@ Conventions for writing integration tests (per-test portal, roles, `ApiException
 - **Infrastructure**: integration tests do NOT use Testcontainers — they boot the real Aspire AppHost via `Aspire.Hosting.Testing` (`DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>` with the `integration-test` launch profile; the billing suite uses `integration-test-billing`, the letter suite `notify-test`), which provides MySQL/PostgreSQL/RabbitMQ/Redis/OpenSearch containers. The harness is shared: `common/Tests/ASC.Tests.Common` holds `AspireHostFixture<TClients>`, `PortalClientsBase`, `Initializer` and `RawApiClient`; each suite only derives a thin `AspireAppFixture`/`PortalClients` pair in its own `ApiFactories/` folder
 - **Fake data**: Bogus
 - **DB cleanup**: Respawn
-- **Test locations**: `products/*/Tests/`, `web/ASC.Web.Api.Tests/` (Web.Api REST suite) and `common/Tests/` (`ASC.Core.Common.Tests`, `ASC.Notify.Tests` letter suite, `ASC.Data.Backup.Core.Tests`, `ASC.ClearEvents.Tests` audit trail cleanup suite). The remaining projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`
+- **Test locations**: `products/*/Tests/`, `web/ASC.Web.Api.Tests/` (Web.Api REST suite) and `common/Tests/` (`ASC.Core.Common.Tests`, `ASC.Notify.Tests` letter suite, `ASC.Data.Backup.Core.Tests`, `ASC.ClearEvents.Tests` audit trail cleanup suite, `ASC.Data.Backup.Tests` backup suite, `ASC.Site.Core.Tests` unit tests of the Site.Core subscription decisions, no AppHost). The remaining projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`
 
 ```bash
 dotnet test ASC.Tests.slnx
