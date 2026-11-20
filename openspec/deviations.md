@@ -151,6 +151,8 @@ Evidence column:
 | B10 | backup-and-restore | `getBackupHistory` soft-deletes records and skips unreachable storages, so the list can shrink between two reads. | static | OPEN |
 | N9 | notifications | The not-paid skip (`TariffState.NotPaid <= state`) is applied in `SendMsgWhatsNewAsync` to the daily and the hourly digest alike (a portal inside its grace period still gets them); only the at-once room letters of `NotifyClient.cs` have no such check, so a lapsed portal keeps sending them. | static | OPEN, narrowed to the at-once letters |
 | A9 | ai-agents | Export into a form-filling room or an out-of-quota room answers 202 and the worker drops the document without a trace. | red by code reading | OPEN |
+| A36 | ai-agents | The draft cleanup pass reads the files of unlinked drafts first and deletes them by id afterwards, with no lock against `aiAttachmentsLinkToMessage`. A link that moves the file into the thread between the two steps loses the file: the message keeps the attachment, the file is gone. A link that reads the file before the pass deletes it and moves it after answers 500 (the move finds no file). Only a draft older than the lifetime or deleted by its creator is exposed. | red by code reading | OPEN (left open on purpose: Known limitations of `feature/new-ai-concept`) |
+| A37 | ai-agents | The draft cleanup pass and the deleted-thread pass return the size of the deleted files to the project in a step after the deletion is committed. A failure of that step or a stop of the process between the two leaves the project's used space too high for good. Every deletion path of Files does the same. | red by code reading | OPEN (left open on purpose: Known limitations of `feature/new-ai-concept`) |
 
 ### Crashes (500) and wrong status codes
 

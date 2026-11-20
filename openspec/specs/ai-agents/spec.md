@@ -2257,8 +2257,8 @@ included.
 `aiThreadsDelete` of a thread in an AI project SHALL answer at once and close the thread everywhere: it
 leaves the list and the search, and reading or renaming it, reading or adding a message, saving an artifact
 and both file lists answer 404. Its files SHALL be removed afterwards by a background pass, every 5 minutes
-by default, which returns their size to the project's used space. Other threads of the project SHALL keep
-their files.
+by default, which then returns their size to the project's used space unless that step fails (A37). Other
+threads of the project SHALL keep their files.
 
 #### Scenario: Gone at once
 
@@ -2505,10 +2505,10 @@ kept, so the project is listed again once the caller regains access.
 ### Requirement: Drafts that are not sent are removed
 
 A background pass, every 15 minutes by default, SHALL remove each draft its creator deleted and each draft
-not linked to a message 2 hours, by default, after it was created; for a file stored in an AI project the
-draft counts from the upload or the copy. With the draft it SHALL remove the file the draft was made from
-when that file still lies in an AI project unsent, and return its size to the project's space. Any other
-file and any linked attachment SHALL stay.
+not linked to a message 2 hours, by default, after it was created, in a project from the upload or copy.
+With the draft it SHALL remove the file the draft was made from when that file still lies in an AI project
+unsent, then return its size to the project's space unless that step fails (A37). Any other file and any
+linked attachment SHALL stay, except a file linked during the pass (A36).
 
 #### Scenario: Deleted draft of a file in a project
 
