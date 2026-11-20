@@ -78,9 +78,19 @@ public class WorkspaceSubscriptionStore(IServiceProvider serviceProvider)
     /// Confirms a subscription: adds the row to <c>template_subscribe</c> when the address has none for that list,
     /// otherwise removes the address from <c>template_unsubscribe</c>.
     /// </summary>
+    /// <param name="email">The address, trimmed and lowercased.</param>
+    /// <param name="firstName">The name; <see langword="null"/> is stored as empty and a longer one is cut to the column.</param>
+    /// <param name="type">The list.</param>
     /// <returns><see langword="true"/> when the row was added, <see langword="false"/> when it was already there.</returns>
     public async Task<bool> AddSubscribeAsync(string email, string firstName, sbyte type)
     {
+        firstName ??= string.Empty;
+
+        if (firstName.Length > DbTemplateSubscribe.FirstNameMaxLength)
+        {
+            firstName = firstName[..DbTemplateSubscribe.FirstNameMaxLength];
+        }
+
         await using var context = await CreateContextAsync();
 
         if (!await context.SubscribeExistsAsync(email, type))

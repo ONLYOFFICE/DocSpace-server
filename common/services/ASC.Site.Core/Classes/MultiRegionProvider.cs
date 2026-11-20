@@ -31,102 +31,212 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Site.Core.Classes
+namespace ASC.Site.Core.Classes;
+
+[Scope]
+public class MultiRegionProvider(
+    MachinePseudoKeys machinePseudoKeys,
+    IDbContextFactory<EuRegionDbContext> euRegionDbContextFactory,
+    IDbContextFactory<UsRegionDbContext> usRegionDbContextFactory)
 {
-    [Scope]
-    public class MultiRegionProvider(
-        MachinePseudoKeys machinePseudoKeys,
-        IDbContextFactory<EuRegionDbContext> euRegionDbContextFactory,
-        IDbContextFactory<UsRegionDbContext> usRegionDbContextFactory)
+    public async Task<DbTenant> FindTenantByDomainAsync(string domain)
     {
-        public async Task<DbTenant> FindTenantByDomainAsync(string domain)
+        await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+        var euTask = GetTenantByDomainAsync(euRegionDbContext, domain);
+
+        await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+        var usTask = GetTenantByDomainAsync(usRegionDbContext, domain);
+
+        await Task.WhenAll(euTask, usTask);
+
+        return euTask.Result ?? usTask.Result;
+    }
+
+    public async Task<List<TenantUser>> FindTenantsByEmailAsync(string email)
+    {
+        var result = new List<TenantUser>();
+
+        await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+        var euTask = GetTenantsByEmailAsync(euRegionDbContext, email);
+
+        await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+        var usTask = GetTenantsByEmailAsync(usRegionDbContext, email);
+
+        await Task.WhenAll(euTask, usTask);
+
+        return [.. euTask.Result, .. usTask.Result];
+    }
+
+    public async Task<List<TenantUser>> FindTenantsByEmailPasswordAsync(string email, string passwordHash)
+    {
+        await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+        var euTask = GetTenantsByEmailPasswordAsync(euRegionDbContext, email, passwordHash);
+
+        await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+        var usTask = GetTenantsByEmailPasswordAsync(usRegionDbContext, email, passwordHash);
+
+        await Task.WhenAll(euTask, usTask);
+
+        return [.. euTask.Result, .. usTask.Result];
+    }
+
+    public async Task<List<TenantUser>> FindTenantsBySocialAsync(LoginProfile loginProfile)
+    {
+        await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+        var euTask = GetTenantsBySocialAsync(euRegionDbContext, loginProfile);
+
+        await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+        var usTask = GetTenantsBySocialAsync(usRegionDbContext, loginProfile);
+
+        await Task.WhenAll(euTask, usTask);
+
+        return [.. euTask.Result, .. usTask.Result];
+    }
+
+    /// <summary>
+    /// Marks every account with the address as not activated, on every portal of both regions, so the notify
+    /// engine stops sending it the letters that check activation.
+    /// </summary>
+    /// <remarks>
+    /// All accounts with the address are changed, removed ones and those of inactive portals included, as the site
+    /// did before. Accounts already not activated are left alone, so a repeated call writes nothing.
+    /// A portal keeps a user in its memory cache for up to 20 minutes (<c>CachedUserService</c>) and nothing here
+    /// can clear the cache of another region: until it expires the portal may show the old status. Delivery is not
+    /// affected by that window, because the recipient filter looks the address up in the database.
+    /// An error in either region is thrown; the call can be repeated safely.
+    /// </remarks>
+    public async Task DeactivateUsersByEmailAsync(string email)
+    {
+        await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+        var euTask = DeactivateUsersByEmailAsync(euRegionDbContext, email);
+
+        await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+        var usTask = DeactivateUsersByEmailAsync(usRegionDbContext, email);
+
+        await Task.WhenAll(euTask, usTask);
+    }
+
+    public async Task<DateTime> GetUserPasswordStampAsync(TenantRegion tenantRegion, int tenantId, Guid userId)
+    {
+        if (tenantRegion == TenantRegion.Eu)
         {
             await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
-            var euTask = GetTenantByDomainAsync(euRegionDbContext, domain);
-
-            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
-            var usTask = GetTenantByDomainAsync(usRegionDbContext, domain);
-
-            await Task.WhenAll(euTask, usTask);
-
-            return euTask.Result ?? usTask.Result;
+            return await GetUserPasswordStampAsync(euRegionDbContext, tenantId, userId);
         }
 
-        public async Task<List<TenantUser>> FindTenantsByEmailAsync(string email)
-        {
-            var result = new List<TenantUser>();
+        await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+        return await GetUserPasswordStampAsync(usRegionDbContext, tenantId, userId);
+    }
 
-            await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
-            var euTask = GetTenantsByEmailAsync(euRegionDbContext, email);
+    private static Task<DbTenant> GetTenantByDomainAsync(HostedRegionDbContext userDbContext, string domain)
+    {
+        return userDbContext.Tenants
+            .Where(t => t.Alias == domain || t.MappedDomain == domain)
+            .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending)
+            .OrderBy(a => a.Status == TenantStatus.Restoring ? TenantStatus.Active : a.Status)
+            .ThenByDescending(a => a.Status == TenantStatus.Restoring ? 0 : a.Id)
+            .FirstOrDefaultAsync();
+    }
 
-            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
-            var usTask = GetTenantsByEmailAsync(usRegionDbContext, email);
+    private static Task<List<TenantUser>> GetTenantsByEmailAsync(HostedRegionDbContext userDbContext, string email)
+    {
+        var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
 
-            await Task.WhenAll(euTask, usTask);
-
-            return [.. euTask.Result, .. usTask.Result];
-        }
-
-        public async Task<List<TenantUser>> FindTenantsByEmailPasswordAsync(string email, string passwordHash)
-        {
-            await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
-            var euTask = GetTenantsByEmailPasswordAsync(euRegionDbContext, email, passwordHash);
-
-            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
-            var usTask = GetTenantsByEmailPasswordAsync(usRegionDbContext, email, passwordHash);
-
-            await Task.WhenAll(euTask, usTask);
-
-            return [.. euTask.Result, .. usTask.Result];
-        }
-
-        public async Task<List<TenantUser>> FindTenantsBySocialAsync(LoginProfile loginProfile)
-        {
-            await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
-            var euTask = GetTenantsBySocialAsync(euRegionDbContext, loginProfile);
-
-            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
-            var usTask = GetTenantsBySocialAsync(usRegionDbContext, loginProfile);
-
-            await Task.WhenAll(euTask, usTask);
-
-            return [.. euTask.Result, .. usTask.Result];
-        }
-
-        public async Task<DateTime> GetUserPasswordStampAsync(TenantRegion tenantRegion, int tenantId, Guid userId)
-        {
-            if (tenantRegion == TenantRegion.Eu)
+        return userDbContext.Tenants
+            .Where(t => t.Status == TenantStatus.Active)
+            .Join(userDbContext.Users, t => t.Id, u => u.TenantId, (tenant, user) => new
             {
-                await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
-                return await GetUserPasswordStampAsync(euRegionDbContext, tenantId, userId);
-            }
+                tenant,
+                user
+            })
+            .Where(r => !r.user.Removed && r.user.Status == EmployeeStatus.Active && r.user.Email == email)
+            .Select(r => new TenantUser
+            {
+                UserId = r.user.Id,
+                UserEmail = r.user.Email,
+                UserFirstName = r.user.FirstName,
+                UserLastName = r.user.LastName,
+                TenantId = r.tenant.Id,
+                TenantAlias = r.tenant.Alias,
+                TenantMappedDomain = r.tenant.MappedDomain,
+                TenantRegion = region
+            })
+            .ToListAsync();
+    }
 
-            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
-            return await GetUserPasswordStampAsync(usRegionDbContext, tenantId, userId);
-        }
+    private string GetPasswordHash(Guid userId, string password)
+    {
+        return Hasher.Base64Hash(password + userId + Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()), HashAlg.SHA512);
+    }
 
-        private static Task<DbTenant> GetTenantByDomainAsync(HostedRegionDbContext userDbContext, string domain)
-        {
-            return userDbContext.Tenants
-                .Where(t => t.Alias == domain || t.MappedDomain == domain)
-                .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending)
-                .OrderBy(a => a.Status == TenantStatus.Restoring ? TenantStatus.Active : a.Status)
-                .ThenByDescending(a => a.Status == TenantStatus.Restoring ? 0 : a.Id)
-                .FirstOrDefaultAsync();
-        }
+    private async Task<List<TenantUser>> GetTenantsByEmailPasswordAsync(HostedRegionDbContext userDbContext, string email, string passwordHash)
+    {
+        var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
 
-        private static Task<List<TenantUser>> GetTenantsByEmailAsync(HostedRegionDbContext userDbContext, string email)
-        {
-            var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
+        var usersQuery = await userDbContext.Tenants
+            .Where(r => r.Status == TenantStatus.Active)
+            .Join(userDbContext.Users, r => r.Id, r => r.TenantId, (tenant, user) => new
+            {
+                tenant,
+                user
+            })
+            .Where(r => r.user.Status == EmployeeStatus.Active && !r.user.Removed && r.user.Email == email)
+            .Select(r => r.user.Id)
+            .ToListAsync();
 
-            return userDbContext.Tenants
-                .Where(t => t.Status == TenantStatus.Active)
-                .Join(userDbContext.Users, t => t.Id, u => u.TenantId, (tenant, user) => new
-                {
-                    tenant,
-                    user
-                })
-                .Where(r => !r.user.Removed && r.user.Status == EmployeeStatus.Active && r.user.Email == email)
+        var passwordHashs = usersQuery.Select(r => GetPasswordHash(r, passwordHash)).ToList();
+
+        return await userDbContext.Tenants
+            .Where(r => r.Status == TenantStatus.Active)
+            .Join(userDbContext.Users, r => r.Id, r => r.TenantId, (tenant, user) => new
+            {
+                tenant,
+                user
+            })
+            .Join(userDbContext.UserSecurity, r => r.user.Id, r => r.UserId, (tenantUser, security) => new TenantUserSecurity
+            {
+                DbTenant = tenantUser.tenant,
+                User = tenantUser.user,
+                UserSecurity = security
+            })
+            .Where(r => r.User.Status == EmployeeStatus.Active && !r.User.Removed && r.User.Email == email)
+            .Where(r => passwordHashs.Any(p => r.UserSecurity.PwdHash == p))
+            .Select(r => new TenantUser
+             {
+                 UserId = r.User.Id,
+                 UserEmail = r.User.Email,
+                 UserFirstName = r.User.FirstName,
+                 UserLastName = r.User.LastName,
+                 TenantId = r.DbTenant.Id,
+                 TenantAlias = r.DbTenant.Alias,
+                 TenantMappedDomain = r.DbTenant.MappedDomain,
+                 TenantRegion = region
+             })
+            .ToListAsync();
+    }
+
+    private static async Task<List<TenantUser>> GetTenantsBySocialAsync(HostedRegionDbContext userDbContext, LoginProfile loginProfile)
+    {
+        var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
+        var email = loginProfile.EMail?.ToLowerInvariant();
+        var findByEmail = !string.IsNullOrWhiteSpace(email);
+
+        // Path A: indexed seek on account_links.uid to get the ids of users linked to this social profile.
+        var linkedGuids = (await userDbContext.AccountLinks
+                .Where(a => a.UId == loginProfile.HashId)
+                .Select(a => a.Id)
+                .ToListAsync())
+            .Select(id => Guid.TryParse(id, out var g) ? g : (Guid?)null)
+            .Where(g => g.HasValue)
+            .Select(g => g.Value)
+            .ToList();
+
+        var bySocial = linkedGuids.Count == 0
+            ? []
+            : await userDbContext.Users
+                .Where(u => !u.Removed && u.Status == EmployeeStatus.Active && linkedGuids.Contains(u.Id))
+                .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new { user, tenant })
+                .Where(r => r.tenant.Status == TenantStatus.Active)
                 .Select(r => new TenantUser
                 {
                     UserId = r.user.Id,
@@ -139,185 +249,110 @@ namespace ASC.Site.Core.Classes
                     TenantRegion = region
                 })
                 .ToListAsync();
-        }
 
-        private string GetPasswordHash(Guid userId, string password)
-        {
-            return Hasher.Base64Hash(password + userId + Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()), HashAlg.SHA512);
-        }
-
-        private async Task<List<TenantUser>> GetTenantsByEmailPasswordAsync(HostedRegionDbContext userDbContext, string email, string passwordHash)
-        {
-            var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
-
-            var usersQuery = await userDbContext.Tenants
-                .Where(r => r.Status == TenantStatus.Active)
-                .Join(userDbContext.Users, r => r.Id, r => r.TenantId, (tenant, user) => new
-                {
-                    tenant,
-                    user
-                })
-                .Where(r => r.user.Status == EmployeeStatus.Active && !r.user.Removed && r.user.Email == email)
-                .Select(r => r.user.Id)
-                .ToListAsync();
-
-            var passwordHashs = usersQuery.Select(r => GetPasswordHash(r, passwordHash)).ToList();
-
-            return await userDbContext.Tenants
-                .Where(r => r.Status == TenantStatus.Active)
-                .Join(userDbContext.Users, r => r.Id, r => r.TenantId, (tenant, user) => new
-                {
-                    tenant,
-                    user
-                })
-                .Join(userDbContext.UserSecurity, r => r.user.Id, r => r.UserId, (tenantUser, security) => new TenantUserSecurity
-                {
-                    DbTenant = tenantUser.tenant,
-                    User = tenantUser.user,
-                    UserSecurity = security
-                })
-                .Where(r => r.User.Status == EmployeeStatus.Active && !r.User.Removed && r.User.Email == email)
-                .Where(r => passwordHashs.Any(p => r.UserSecurity.PwdHash == p))
+        // Path B: indexed seek on core_user.email for activated accounts matching the profile email.
+        var byEmail = !findByEmail
+            ? []
+            : await userDbContext.Users
+                .Where(u => !u.Removed && u.Status == EmployeeStatus.Active && u.Email == email && u.ActivationStatus == EmployeeActivationStatus.Activated)
+                .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new { user, tenant })
+                .Where(r => r.tenant.Status == TenantStatus.Active)
                 .Select(r => new TenantUser
-                 {
-                     UserId = r.User.Id,
-                     UserEmail = r.User.Email,
-                     UserFirstName = r.User.FirstName,
-                     UserLastName = r.User.LastName,
-                     TenantId = r.DbTenant.Id,
-                     TenantAlias = r.DbTenant.Alias,
-                     TenantMappedDomain = r.DbTenant.MappedDomain,
-                     TenantRegion = region
-                 })
+                {
+                    UserId = r.user.Id,
+                    UserEmail = r.user.Email,
+                    UserFirstName = r.user.FirstName,
+                    UserLastName = r.user.LastName,
+                    TenantId = r.tenant.Id,
+                    TenantAlias = r.tenant.Alias,
+                    TenantMappedDomain = r.tenant.MappedDomain,
+                    TenantRegion = region
+                })
                 .ToListAsync();
-        }
 
-        private static async Task<List<TenantUser>> GetTenantsBySocialAsync(HostedRegionDbContext userDbContext, LoginProfile loginProfile)
-        {
-            var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
-            var email = loginProfile.EMail?.ToLowerInvariant();
-            var findByEmail = !string.IsNullOrWhiteSpace(email);
-
-            // Path A: indexed seek on account_links.uid to get the ids of users linked to this social profile.
-            var linkedGuids = (await userDbContext.AccountLinks
-                    .Where(a => a.UId == loginProfile.HashId)
-                    .Select(a => a.Id)
-                    .ToListAsync())
-                .Select(id => Guid.TryParse(id, out var g) ? g : (Guid?)null)
-                .Where(g => g.HasValue)
-                .Select(g => g.Value)
-                .ToList();
-
-            var bySocial = linkedGuids.Count == 0
-                ? []
-                : await userDbContext.Users
-                    .Where(u => !u.Removed && u.Status == EmployeeStatus.Active && linkedGuids.Contains(u.Id))
-                    .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new { user, tenant })
-                    .Where(r => r.tenant.Status == TenantStatus.Active)
-                    .Select(r => new TenantUser
-                    {
-                        UserId = r.user.Id,
-                        UserEmail = r.user.Email,
-                        UserFirstName = r.user.FirstName,
-                        UserLastName = r.user.LastName,
-                        TenantId = r.tenant.Id,
-                        TenantAlias = r.tenant.Alias,
-                        TenantMappedDomain = r.tenant.MappedDomain,
-                        TenantRegion = region
-                    })
-                    .ToListAsync();
-
-            // Path B: indexed seek on core_user.email for activated accounts matching the profile email.
-            var byEmail = !findByEmail
-                ? []
-                : await userDbContext.Users
-                    .Where(u => !u.Removed && u.Status == EmployeeStatus.Active && u.Email == email && u.ActivationStatus == EmployeeActivationStatus.Activated)
-                    .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new { user, tenant })
-                    .Where(r => r.tenant.Status == TenantStatus.Active)
-                    .Select(r => new TenantUser
-                    {
-                        UserId = r.user.Id,
-                        UserEmail = r.user.Email,
-                        UserFirstName = r.user.FirstName,
-                        UserLastName = r.user.LastName,
-                        TenantId = r.tenant.Id,
-                        TenantAlias = r.tenant.Alias,
-                        TenantMappedDomain = r.tenant.MappedDomain,
-                        TenantRegion = region
-                    })
-                    .ToListAsync();
-
-            // Preserve the original OR semantics: a user may match by social link or by email; show each once.
-            return bySocial
-                .Concat(byEmail)
-                .GroupBy(t => t.UserId)
-                .Select(g => g.First())
-                .ToList();
-        }
-
-        private static async Task<DateTime> GetUserPasswordStampAsync(HostedRegionDbContext userDbContext, int tenantId, Guid userId)
-        {
-            var target = userId.ToString();
-
-            var auditEvent = await userDbContext.AuditEvents
-                .Where(a => a.TenantId == tenantId && a.Target == target && a.Action == (int)MessageAction.UserSentPasswordChangeInstructions)
-                .OrderByDescending(a => a.Id)
-                .FirstOrDefaultAsync();
-
-            var auditDate = auditEvent?.Date ?? DateTime.MinValue;
-
-            var securityDate = await userDbContext.UserSecurity
-                .Where(us => us.TenantId == tenantId && us.UserId == userId)
-                .Select(us => us.LastModified)
-                .FirstOrDefaultAsync();
-
-            return securityDate == null || auditDate.CompareTo(securityDate.Value) > 0 ? auditDate : securityDate.Value;
-        }
+        // Preserve the original OR semantics: a user may match by social link or by email; show each once.
+        return bySocial
+            .Concat(byEmail)
+            .GroupBy(t => t.UserId)
+            .Select(g => g.First())
+            .ToList();
     }
 
-
-    public enum TenantRegion
+    // Not precompiled on purpose: ExecuteUpdate fails to translate inside EF.CompileAsyncQuery.
+    // last_modified moves too, as in UserQueries.UpdateUsersAsync.
+    private static Task<int> DeactivateUsersByEmailAsync(HostedRegionDbContext userDbContext, string email)
     {
-        Eu = 0,
-        Us = 1
+        var now = DateTime.UtcNow;
+
+        return userDbContext.Users
+            .Where(u => u.Email == email && u.ActivationStatus != EmployeeActivationStatus.NotActivated)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(u => u.ActivationStatus, EmployeeActivationStatus.NotActivated)
+                .SetProperty(u => u.LastModified, now));
     }
 
-    public class TenantUser
+    private static async Task<DateTime> GetUserPasswordStampAsync(HostedRegionDbContext userDbContext, int tenantId, Guid userId)
     {
-        public Guid UserId { get; set; }
-        public string UserEmail { get; set; }
-        public string UserFirstName { get; set; }
-        public string UserLastName { get; set; }
-        public int TenantId { get; set; }
-        public string TenantAlias { get; set; }
-        public string TenantMappedDomain { get; set; }
-        public TenantRegion TenantRegion { get; set; }
+        var target = userId.ToString();
+
+        var auditEvent = await userDbContext.AuditEvents
+            .Where(a => a.TenantId == tenantId && a.Target == target && a.Action == (int)MessageAction.UserSentPasswordChangeInstructions)
+            .OrderByDescending(a => a.Id)
+            .FirstOrDefaultAsync();
+
+        var auditDate = auditEvent?.Date ?? DateTime.MinValue;
+
+        var securityDate = await userDbContext.UserSecurity
+            .Where(us => us.TenantId == tenantId && us.UserId == userId)
+            .Select(us => us.LastModified)
+            .FirstOrDefaultAsync();
+
+        return securityDate == null || auditDate.CompareTo(securityDate.Value) > 0 ? auditDate : securityDate.Value;
     }
+}
 
-    public partial class EuRegionDbContext(DbContextOptions<EuRegionDbContext> dbContextOptions) : HostedRegionDbContext(dbContextOptions) { }
 
-    public partial class UsRegionDbContext(DbContextOptions<UsRegionDbContext> dbContextOptions) : HostedRegionDbContext(dbContextOptions) { }
+public enum TenantRegion
+{
+    Eu = 0,
+    Us = 1
+}
 
-    public class HostedRegionDbContext(DbContextOptions options): BaseDbContext(options)
+public class TenantUser
+{
+    public Guid UserId { get; set; }
+    public string UserEmail { get; set; }
+    public string UserFirstName { get; set; }
+    public string UserLastName { get; set; }
+    public int TenantId { get; set; }
+    public string TenantAlias { get; set; }
+    public string TenantMappedDomain { get; set; }
+    public TenantRegion TenantRegion { get; set; }
+}
+
+public partial class EuRegionDbContext(DbContextOptions<EuRegionDbContext> dbContextOptions) : HostedRegionDbContext(dbContextOptions) { }
+
+public partial class UsRegionDbContext(DbContextOptions<UsRegionDbContext> dbContextOptions) : HostedRegionDbContext(dbContextOptions) { }
+
+public class HostedRegionDbContext(DbContextOptions options): BaseDbContext(options)
+{
+    public DbSet<DbTenant> Tenants { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<UserSecurity> UserSecurity { get; set; }
+    public DbSet<AccountLinks> AccountLinks { get; set; }
+    public DbSet<DbAuditEvent> AuditEvents { get; set; }
+    public DbSet<DbFilesAuditReference> FilesAuditReferences { get; set; }
+
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        public DbSet<DbTenant> Tenants { get; set; }
-        public DbSet<User> Users { get; set; }
-        public DbSet<UserSecurity> UserSecurity { get; set; }
-        public DbSet<AccountLinks> AccountLinks { get; set; }
-        public DbSet<DbAuditEvent> AuditEvents { get; set; }
-        public DbSet<DbFilesAuditReference> FilesAuditReferences { get; set; }
-
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            ModelBuilderWrapper
-               .From(modelBuilder, Database)
-               .AddDbTenant()
-               .AddUser()
-               .AddUserSecurity()
-               .AddAccountLinks()
-               .AddAuditEvent()
-               .AddFilesAuditReference();
-        }
+        ModelBuilderWrapper
+           .From(modelBuilder, Database)
+           .AddDbTenant()
+           .AddUser()
+           .AddUserSecurity()
+           .AddAccountLinks()
+           .AddAuditEvent()
+           .AddFilesAuditReference();
     }
 }
