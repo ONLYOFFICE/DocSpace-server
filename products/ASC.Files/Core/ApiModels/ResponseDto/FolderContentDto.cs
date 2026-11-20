@@ -162,9 +162,7 @@ public class FolderContentDtoHelper(
 
         var aiStatus = await accessibility.GetStatusAsync();
 
-        var linkedProjectsCounts = folderItems.FolderInfo is { FolderType: FolderType.AiHub }
-            ? await folderWrapperHelper.GetLinkedProjectsCountsAsync(folderItems.Entries)
-            : null;
+        var linkedProjectsCounts = await folderWrapperHelper.GetLinkedProjectsCountsAsync(folderItems.Entries.Append(folderItems.FolderInfo));
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
