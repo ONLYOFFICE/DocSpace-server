@@ -121,11 +121,12 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED [run: PASS] |
 | Knowledge room needs vectorization 403 | `Security:1422,1441`; `AI/Core/Settings` | CODE-ONLY |
 | **Members of the AI rooms** | | |
-| Guest not in a project (scenario); User joins through a link as Content creator | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
-| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED (not run yet) |
 | Content creator reads, Room manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
 | DocSpace admin outside the project reads its model, sources and skills (scenario) | `Hub/AiRoomOutsiderAccessTests.cs:55` | TEST-CONFIRMED (not run yet) |
 | Role sets of Instructions and Knowledge rooms | `Security` (`GetAccesses`); `products/ASC.Files/Core/Helpers` | CODE-ONLY |
+| **Users only in an AI project** | | |
+| Guest not in a project (scenario); User joins through a link as Content creator | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
+| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED (not run yet) |
 | **The model of an AI project** | | |
 | Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,93,167` | TEST-CONFIRMED [run: PASS] |
 | Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:106,123,137,150` | TEST-CONFIRMED [run: PASS] |

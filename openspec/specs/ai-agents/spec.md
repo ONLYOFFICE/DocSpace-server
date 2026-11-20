@@ -445,21 +445,9 @@ take no folder in the section root (403) and are deleted outright.
 ### Requirement: Members of the AI rooms
 
 An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
-the same without Editor, an AI project only Room manager and Content creator. The members of a project are
-users only: a group SHALL NOT be invited to a project with any role (403, "The role is not available for this
-user type"). A Guest SHALL NOT hold any role in a project (403, nobody added) while a User joins through a
-link as Content creator. Every member reads the project; only a Room manager edits it; a non-member other
-than a DocSpace admin SHALL NOT read its model, sources or skills (403).
-
-#### Scenario: Guest invited to a project
-
-- **WHEN** the owner invites a Guest to a project as Content creator by id, by email or through an invitation link
-- **THEN** the system answers 403 and the Guest is not a member
-
-#### Scenario: Group invited to a project
-
-- **WHEN** the owner invites a group to a project with any role
-- **THEN** the system answers 403 and the group is not a member
+the same without Editor, an AI project only Room manager and Content creator. Every member reads the project;
+only a Room manager edits it; a non-member other than a DocSpace admin SHALL NOT read its model, sources or
+skills (403).
 
 #### Scenario: Content creator reads, Room manager writes
 
@@ -470,6 +458,22 @@ than a DocSpace admin SHALL NOT read its model, sources or skills (403).
 
 - **WHEN** a DocSpace admin who is not a member of a project calls `getProjectModel`, `getProjectSources` and `getRoomSkills` for it
 - **THEN** each call answers 200
+
+### Requirement: Users only in an AI project
+
+The members of an AI project SHALL be users only: a group SHALL NOT be invited to a project with any role
+(403, "The role is not available for this user type"). A Guest SHALL NOT hold any role in a project (403,
+nobody added), while a User joins through an invitation link as Content creator.
+
+#### Scenario: Guest invited to a project
+
+- **WHEN** the owner invites a Guest to a project as Content creator by id, by email or through an invitation link
+- **THEN** the system answers 403 and the Guest is not a member
+
+#### Scenario: Group invited to a project
+
+- **WHEN** the owner invites a group to a project with any role
+- **THEN** the system answers 403 and the group is not a member
 
 ### Requirement: The model of an AI project
 
