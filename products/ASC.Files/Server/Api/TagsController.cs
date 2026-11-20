@@ -112,7 +112,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <remarks>
     /// Marks files and folders as favorites of the calling account. Other users do not see the mark, and the entries
     /// stay where they are. Any signed-in user can call it. The call skips items without read access, unknown ids,
-    /// and encrypted files of a private room. The call changes data. You can repeat it with the same body, and a
+    /// encrypted files of a private room, and private rooms with their folders. The call changes data. You can repeat it with the same body, and a
     /// marked item stays listed once. It returns `true` even when it marks nothing. To see the result, use
     /// `GET api/2.0/files/@favorites`. A marked entry in the trash is not listed there until it is restored. The call
     /// reads only `fileIds` and `folderIds` from the body. To delete marks, use `DELETE api/2.0/files/favorites`. To

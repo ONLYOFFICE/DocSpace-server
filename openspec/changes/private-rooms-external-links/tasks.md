@@ -78,6 +78,9 @@ fields, they call the operations through `RawApiClient`.
   in the answer (design decision 3); report `passwordRequired` and the private flag in `getExternalShareData`.
 - [ ] 3.2 Answer every link of a private item as RequiredPassword without a session, `passwordRequired:false` included;
   keep `proof` and `linkPrivateKeyEnc` out of request logs and error messages.
+  - 2026-11-20: the RequiredPassword answer is in (`ExternalShare.ValidateRecordAsync`, by the stored `PasswordRequired`
+    that only such links carry), with `T/ExternalLinks/PrivateLinkServingTests.cs`. Until 3.1 brings the proof session, no
+    link of a private item opens; the remarks of the link operations say so. The log part is open.
 - [ ] 3.3 Tests for "A link of a private item is served against its proof": valid proof returns the sealed key and the
   ciphertext as stored; no proof and a wrong proof return no key, wrap or content; repeated wrong proofs 403 until the
   block expires; internal link of a private VDR asks an anonymous visitor to sign in; a refused request leaves no proof in

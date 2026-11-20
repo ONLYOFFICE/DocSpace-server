@@ -931,9 +931,10 @@ public class CustomizationConfig<T>(
         };
     }
 
-    public async Task<AiConfigDto> GetAIConfigAsync()
+    public async Task<AiConfigDto> GetAIConfigAsync(File<T> file)
     {
-        if (!authContext.IsAuthenticated)
+        // The editor of an encrypted file would send its plain text to the AI service.
+        if (!authContext.IsAuthenticated || file is { Encrypted: true })
         {
             return new AiConfigDto
             {

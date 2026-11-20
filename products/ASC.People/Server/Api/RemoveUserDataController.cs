@@ -52,6 +52,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// To start the job, use `POST api/2.0/people/remove/start`. Requires a DocSpace admin. Other callers get 403.
     /// The call is read-only. This is the call to poll. Repeat it until `isCompleted` is true.
     /// If no job exists for the user, the response has no progress object. If the job fails, `error` holds the reason.
+    /// A private room that nobody with an encryption key could take stays with the user and is in `keptPrivateRoomIds`.
+    /// A DocSpace admin who is a member of such a room can give it a new owner with `POST api/2.0/files/owner`.
     /// To cancel a running job, use `PUT api/2.0/people/remove/terminate`.
     /// </remarks>
     /// <summary>Get the deletion progress</summary>
@@ -67,7 +69,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 
     /// <remarks>
@@ -108,7 +110,9 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <remarks>
     /// Starts a job that deletes the data and the profile of a disabled user.
     /// The job deletes the personal files of the account. It moves the rooms and third-party storage accounts to the
-    /// caller. Files and folders that the account shared from the personal section move to a new folder of the caller.
+    /// caller. A private room moves only to the caller or, failing that, the portal owner who holds an encryption key.
+    /// Otherwise it stays with the account, and `keptPrivateRoomIds` of the progress names it.
+    /// Files and folders that the account shared from the personal section move to a new folder of the caller.
     /// First, disable the account through `PUT api/2.0/people/status/{status}`.
     /// Requires a DocSpace admin. Other callers get 403.
     /// Only the portal owner can delete the data of another DocSpace admin. Other DocSpace admins get 403 for it.
@@ -161,7 +165,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
 
         var progressItem = await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, true, true, isGuest);
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 
     /// <remarks>
@@ -220,7 +224,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
 
         var progressItem = await queueDeletePersonalFolder.StartAsync(tenantId, securityContext.CurrentAccount.ID);
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 
     /// <remarks>
@@ -240,6 +244,6 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueDeletePersonalFolder.GetProgressItemStatus(tenant.Id, securityContext.CurrentAccount.ID);
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 }

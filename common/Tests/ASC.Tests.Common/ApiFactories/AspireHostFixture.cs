@@ -505,6 +505,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// Publishes an event on the stack's event bus as a service would, for a test of what a handler does with an event
+    /// whose publisher the stack cannot reach (an LDAP synchronization). Everything else is tested through the API call
+    /// that publishes the event.
+    /// </summary>
+    public async Task PublishToEventBusAsync(IntegrationEvent @event, CancellationToken cancellationToken = default)
+    {
+        await EventBusProbe.PublishAsync(await GetConnectionStringAsync(ResourceNames.Messaging, cancellationToken), @event, cancellationToken);
+    }
+
+    /// <summary>
     /// The connection string Aspire published for a resource — for a suite that talks to a container
     /// directly instead of through a service.
     /// </summary>

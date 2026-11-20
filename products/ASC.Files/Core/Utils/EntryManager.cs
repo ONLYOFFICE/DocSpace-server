@@ -504,9 +504,13 @@ public class EntryManager(IDaoFactory daoFactory,
             // per call - and the split offset between folders and files has to be maintained by hand.
             // Reading the readable selection once and slicing it serves both from one pass.
 
+            // A private room or a folder of one is never a favourite, also when it was marked before that rule.
+            var cacheFolderDao = daoFactory.GetCacheFolderDao<T>();
             var dbFolders = await fileSecurity.CanReadAsync(folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject,
                     location, trashId, folderType, orderBy, 0, -1, metadataFilter))
-                .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
+                .Where(r => r.Item2)
+                .Where(async (r, _) => !await DocSpaceHelper.IsOrLocatedInPrivateRoomAsync(r.Item1, cacheFolderDao))
+                .Select(t => (FileEntry)t.Item1).ToListAsync();
 
             var dbFiles = await fileSecurity.CanReadAsync(fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent,
                     excludeSubject, location, trashId, folderType, orderBy, 0, -1, metadataFilter))

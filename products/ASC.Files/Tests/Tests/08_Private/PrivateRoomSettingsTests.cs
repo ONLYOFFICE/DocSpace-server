@@ -105,31 +105,30 @@ public class PrivateRoomSettingsTests(AspireAppFixture fixture) : PrivacyRoomTes
         updated.Indexing.Should().BeFalse();
     }
 
-    [Fact]
-    public async Task CreateFromTemplate_TemplateWithIndexing_FailsWithoutMakingARoom()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task CreateFromTemplate_Private_IsRefusedBeforeAnythingStarts(bool templateWithIndexing)
     {
+        // The files of a template are not encrypted, so no private room is made from one, with indexing or without.
         await _filesClient.Authenticate(Owner);
         await EnsureEncryptionKeys();
 
         var source = (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto("Autotest Indexed Room", indexing: true, roomType: RoomType.VirtualDataRoom),
+            new CreateRoomRequestDto("Autotest Template Source", indexing: templateWithIndexing, roomType: RoomType.VirtualDataRoom),
             TestContext.Current.CancellationToken)).Response;
-        await _roomsApi.CreateRoomTemplateAsync(new RoomTemplateDto(source.Id, "Autotest Indexed Template"), TestContext.Current.CancellationToken);
+        await _roomsApi.CreateRoomTemplateAsync(new RoomTemplateDto(source.Id, "Autotest Template"), TestContext.Current.CancellationToken);
         var templateId = await WaitForRoomTemplate();
+        var title = $"Autotest Private From Template {Guid.NewGuid():N}";
 
-        await _roomsApi.CreateRoomFromTemplateAsync(
-            new CreateRoomFromTemplateDto(templateId, "Autotest Private From Template", @private: true),
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.CreateRoomFromTemplateAsync(
+            new CreateRoomFromTemplateDto(templateId, title, @private: true),
+            TestContext.Current.CancellationToken));
 
-        var status = await PollUntil(
-            async () => (await _roomsApi.GetRoomCreatingStatusAsync(TestContext.Current.CancellationToken)).Response,
-            state => state.IsCompleted,
-            TimeSpan.FromSeconds(30));
+        exception.ErrorCode.Should().Be(400);
 
-        status.Error.Should().NotBeNullOrEmpty();
-
-        var rooms = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-        rooms.Folders.OfType<FolderDto>().Should().NotContain(f => f.Title == "Autotest Private From Template");
+        var rooms = (await _roomsApi.GetRoomsFolderAsync(searchArea: SearchArea.Any, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        rooms.Folders.OfType<FolderDto>().Should().NotContain(f => f.Title == title);
     }
 
     [Fact]

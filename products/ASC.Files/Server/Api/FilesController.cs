@@ -182,6 +182,7 @@ public abstract class FilesController<T>(
     /// body has no `version`, the call returns 400. If the file or the version does not exist, the call returns 404.
     /// If copying the current version exceeds the room or user storage quota, the call returns 402. A file that another
     /// user locked also returns 403. The call does not work for a file in the trash or on a third-party storage.
+    /// An encrypted file of a private room returns 403 for every caller.
     /// </remarks>
     /// <summary>
     /// Change version history
@@ -192,7 +193,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The versions of the file after the change", typeof(IAsyncEnumerable<FileDto<int>>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `version`")]
     [SwaggerResponse(402, "Completing the current version needs more space than the room or user storage quota leaves")]
-    [SwaggerResponse(403, "The caller may not change the version history of the file, or the file is locked by somebody else")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, or the file is locked by somebody else, or the file is an encrypted file of a private room")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
     [HttpPut("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> ChangeVersionHistory(ChangeHistoryRequestDto<T> inDto)
@@ -489,6 +490,7 @@ public abstract class FilesController<T>(
     /// session stores them, and an uploaded version has none. If there is no earlier version, `previous` points to a
     /// blank template. The addresses carry their own time-limited keys. If the file or the version does not exist,
     /// the call returns 404. To list the versions, use `GET api/2.0/files/file/{fileId}/edit/history`.
+    /// An encrypted file of a private room returns 403 for every caller.
     /// </remarks>
     /// <summary>
     /// Get changes URL
@@ -497,7 +499,7 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The addresses and keys the editor needs to show the changes", typeof(EditHistoryDataDto))]
-    [SwaggerResponse(403, "The caller may not read the history of the file, as with an anonymous caller, read-only or commenting access, or a file in a third-party storage")]
+    [SwaggerResponse(403, "The caller may not read the history of the file, as with an anonymous caller, read-only or commenting access, or a file in a third-party storage, or the file is an encrypted file of a private room")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/diff")]
@@ -582,6 +584,7 @@ public abstract class FilesController<T>(
     /// third-party storage also get 403. The call is read-only. If no file has this id, the call returns 404. To show
     /// the changes of an entry, use `GET api/2.0/files/file/{fileId}/edit/diff`. To restore an entry, use
     /// `POST api/2.0/files/file/{fileId}/restoreversion`.
+    /// An encrypted file of a private room returns 403 for every caller.
     /// </remarks>
     /// <summary>
     /// Get version history
@@ -591,7 +594,7 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editing revisions of the file, oldest first", typeof(IAsyncEnumerable<EditHistoryDto>))]
-    [SwaggerResponse(403, "The caller may not read the history of the file, as with an anonymous caller, read-only or commenting access, or a file in a third-party storage")]
+    [SwaggerResponse(403, "The caller may not read the history of the file, as with an anonymous caller, read-only or commenting access, or a file in a third-party storage, or the file is an encrypted file of a private room")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/history")]
@@ -636,6 +639,7 @@ public abstract class FilesController<T>(
     /// If `fileId` is neither a number nor the id of a third-party file, the call returns 404. To restore a version,
     /// use `POST api/2.0/files/file/{fileId}/restoreversion`. To close or reopen a revision group, use
     /// `PUT api/2.0/files/file/{fileId}/history`.
+    /// An encrypted file of a private room returns 403 for every caller.
     /// </remarks>
     /// <summary>
     /// Get file versions
@@ -645,7 +649,7 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Every stored version of the file, newest first", typeof(IAsyncEnumerable<FileDto<int>>))]
-    [SwaggerResponse(403, "The caller may not read the history of the file, or the file id resolves to nothing")]
+    [SwaggerResponse(403, "The caller may not read the history of the file, or the file id resolves to nothing, or the file is an encrypted file of a private room")]
     [SwaggerResponse(404, "The file id is neither a number nor the id of a file in a known third-party storage")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/history")]
@@ -663,6 +667,7 @@ public abstract class FilesController<T>(
     /// creator have. Other callers get 403. A file in the trash also returns 403. Only a room manager can remove a lock
     /// that another user set. The call changes data. You can repeat it with the same body. A repeated call changes
     /// nothing and returns the file again. If no file has this id, the call returns 404.
+    /// An encrypted file of a private room returns 403 for every caller.
     /// </remarks>
     /// <summary>
     /// Lock a file
@@ -671,7 +676,7 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileUpdated, When = "on every call, even one that changes nothing, and twice for an unlock in portal storage")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file with its lock state as it now stands", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "The caller may not lock or unlock the file")]
+    [SwaggerResponse(403, "The caller may not lock or unlock the file, or the file is an encrypted file of a private room")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("file/{fileId}/lock")]
     public async Task<FileDto<T>> LockFile(LockFileRequestDto<T> inDto)
@@ -687,6 +692,7 @@ public abstract class FilesController<T>(
     /// manager, or a DocSpace admin can turn it off. Other users get 403. The call
     /// changes data, and you can repeat it with the same body. If the format does not support the mode, the call
     /// returns 400. If no file has this id, the call returns 404.
+    /// An encrypted file of a private room returns 403 for every caller.
     /// </remarks>
     /// <summary>
     /// Set the Custom Filter editing mode
@@ -695,7 +701,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The spreadsheet with its Custom Filter state as it now stands", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The file is not in a format that supports the Custom Filter mode")]
-    [SwaggerResponse(403, "The caller may not use the Custom Filter mode on the file, or somebody else switched the mode on and the caller is neither a room manager nor a DocSpace admin")]
+    [SwaggerResponse(403, "The caller may not use the Custom Filter mode on the file, or somebody else switched the mode on and the caller is neither a room manager nor a DocSpace admin, or the file is an encrypted file of a private room")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("file/{fileId}/customfilter")]
     public async Task<FileDto<T>> SetCustomFilterTag(FileCustomFilterRequestDto<T> inDto)
@@ -775,8 +781,9 @@ public abstract class FilesController<T>(
     /// Requires the right to change the version history, which a room manager and a content creator have. Other
     /// callers get 403, including an editor of another user's file. The call changes data, and you can repeat it with
     /// the same body. If the version does not exist, the call returns 400. If no file has this id, the call
-    /// returns 404. A file that another user locked or a file in the trash also returns 403. To
-    /// read the comments of all versions, use `GET api/2.0/files/file/{fileId}/edit/history`.
+    /// returns 404. A file that another user locked or a file in the trash also returns 403. An encrypted file of a
+    /// private room returns 403 for every caller. To read the comments of all versions, use
+    /// `GET api/2.0/files/file/{fileId}/edit/history`.
     /// </remarks>
     /// <summary>
     /// Update a comment
@@ -786,7 +793,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The comment as it was stored", typeof(string))]
     [SwaggerResponse(400, "The request body cannot be read or has no `version`, the version is below 1 or does not exist, or the comment is longer than 255 characters")]
-    [SwaggerResponse(403, "The caller may not change the version history of the file, or the file is locked by somebody else")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, the file is locked by somebody else, or the file is encrypted")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("file/{fileId}/comment")]
     public async Task<string> UpdateFileComment(UpdateCommentRequestDto<T> inDto)
@@ -810,6 +817,7 @@ public abstract class FilesController<T>(
     /// exceeds the room or user storage quota, the call returns 402. A file that another user locked also returns 403.
     /// If the file is in a full connected storage other than SharePoint, the call can return 400. The user has to free
     /// up space there first.
+    /// An encrypted file of a private room returns 403 for every caller.
     /// </remarks>
     /// <summary>
     /// Update a file
@@ -822,7 +830,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(400, "The title is longer than 165 characters, or `lastVersion` is the current version, or the connected storage other than SharePoint that holds the file has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(402, "Restoring `lastVersion` needs more space than the room or user storage quota leaves")]
-    [SwaggerResponse(403, "The caller may not read or rename the file or change its version, or the file is locked by somebody else")]
+    [SwaggerResponse(403, "The caller may not read or rename the file or change its version, or the file is locked by somebody else, or the file is an encrypted file of a private room")]
     [SwaggerResponse(404, "The file id, or `lastVersion` of it, resolves to nothing, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
@@ -869,7 +877,7 @@ public abstract class FilesController<T>(
     /// private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and
     /// takes `passwordRequired` instead of `password`. A new link without `passwordRequired` asks for a password. Only
     /// a file link with `expirationDate` may set `passwordRequired` to false. On other items, the call ignores
-    /// `passwordRequired` and the key fields. In a private room, only the room owner and room managers create links.
+    /// `passwordRequired` and the key fields. Such a link does not open yet. Every visit gets `RequiredPassword`. In a private room, only the room owner and room managers create links.
     /// Other callers get 403. The call also returns 403 for such a link without key fields, with other access, or with
     /// `denyDownload`. It also returns 403 if `passwordRequired` is false on any other link. It returns 400 if
     /// `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc` is
@@ -984,7 +992,7 @@ public abstract class FilesController<T>(
     /// 404. On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such
     /// a link reads only and takes `passwordRequired` instead of `password`. A new link without `passwordRequired` asks
     /// for a password. A changed link keeps its value. Only a file link with `expirationDate` may set
-    /// `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. In a
+    /// `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. Such a link does not open yet. Every visit gets `RequiredPassword`. In a
     /// private room, only the room owner and room managers set and revoke links. Other callers get 403. The call also
     /// returns 403 for such a link without key fields, with other access, or with `denyDownload`. It also returns 403
     /// if `passwordRequired` is false on any other link. It returns 400 if `linkPublicKey` or `linkProofHash` is not

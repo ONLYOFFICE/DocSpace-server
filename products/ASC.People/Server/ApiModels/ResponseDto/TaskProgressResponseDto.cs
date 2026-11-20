@@ -72,17 +72,35 @@ public class TaskProgressResponseDto
     /// <example>Running</example>
     public required DistributedTaskStatus Status { get; set; }
 
-    public static TaskProgressResponseDto Get(DistributedTaskProgress progressItem)
+    /// <summary>
+    /// The IDs of the private rooms that a data deletion or transfer left with the account it took the data from. An
+    /// empty list means that every room moved; null means that the job has not handed the rooms over yet, or hands
+    /// over no rooms.
+    /// </summary>
+    /// <example>[1567, 1590]</example>
+    public List<int> KeptPrivateRoomIds { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class TaskProgressResponseDtoMapper
+{
+    /// <summary>The progress of a queued job of People, or null when there is none.</summary>
+    public static TaskProgressResponseDto MapToDto(this DistributedTaskProgress progressItem)
     {
-        return progressItem == null
-            ? null
-            : new TaskProgressResponseDto
-            {
-                Id = progressItem.Id,
-                Error = progressItem.Exception?.Message,
-                Percentage = (int)progressItem.Percentage,
-                IsCompleted = progressItem.IsCompleted,
-                Status = progressItem.Status
-            };
+        return progressItem == null ? null : Map(progressItem);
     }
+
+    [MapPropertyFromSource(nameof(TaskProgressResponseDto.Error), Use = nameof(ErrorOf))]
+    [MapPropertyFromSource(nameof(TaskProgressResponseDto.KeptPrivateRoomIds), Use = nameof(KeptPrivateRoomIdsOf))]
+    private static partial TaskProgressResponseDto Map(DistributedTaskProgress source);
+
+    private static string ErrorOf(DistributedTaskProgress source) => source.Exception?.Message;
+
+    // Only the jobs that hand rooms over report the private rooms they left behind.
+    private static List<int> KeptPrivateRoomIdsOf(DistributedTaskProgress source) => source switch
+    {
+        RemoveProgressItem remove => remove.KeptPrivateRoomIds,
+        ReassignProgressItem reassign => reassign.KeptPrivateRoomIds,
+        _ => null
+    };
 }

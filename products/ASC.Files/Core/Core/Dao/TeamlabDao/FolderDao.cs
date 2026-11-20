@@ -1815,11 +1815,25 @@ internal class FolderDao(
         await filesDbContext.ReassignSpecificFoldersAsync(tenantId, folderIds, newOwnerId);
     }
 
-    public async Task ReassignRoomsAsync(Guid oldOwnerId, Guid newOwnerId)
+    public async Task<List<int>> GetPrivateRoomIdsWithFileKeysOfUserAsync(Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await filesDbContext.ReassignRoomsAsync(tenantId, oldOwnerId, newOwnerId);
+        return await filesDbContext.GetPrivateRoomIdsWithFileKeysOfUserAsync(tenantId, userId).ToListAsync();
+    }
+
+    public async Task<List<int>> GetPrivateRoomIdsByOwnerAsync(Guid ownerId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.GetPrivateRoomIdsByOwnerAsync(tenantId, ownerId).ToListAsync();
+    }
+
+    public async Task ReassignRoomsAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptRoomIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await filesDbContext.ReassignRoomsAsync(tenantId, oldOwnerId, newOwnerId, exceptRoomIds);
     }
 
     public async Task ReassignRoomFoldersAsync(Guid oldOwnerId)
@@ -2390,7 +2404,9 @@ internal class FolderDao(
                 SharedRecord = r.Security,
                 LastOpened = r.LastOpened,
                 OriginRoom = r.OriginRoom,
-                Origin = r.Origin
+                Origin = r.Origin,
+                // a room listed by its tag (Favorites, Recent) keeps its settings, the private flag among them
+                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Entry.Id).Distinct().FirstOrDefault()
             });
     }
 

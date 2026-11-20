@@ -95,6 +95,7 @@ public class UserController(
     SetupInfo setupInfo,
     IdentityClient client,
     GroupFullDtoHelper groupFullDtoHelper,
+    PrivateRoomAccountHelper privateRoomAccountHelper,
     IUrlValidator urlValidator,
     IHttpClientFactory httpClientFactory)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo, httpClientFactory)
@@ -732,7 +733,9 @@ public class UserController(
     /// repeated call returns 404. The account disappears immediately, with its avatar, group memberships, file shares,
     /// and OAuth apps. A queued job then deletes its data. To track the job, use
     /// `GET api/2.0/people/remove/progress/{userId}`. If the account shared files from its own section, the job moves
-    /// them to a new folder of the caller. To move rooms and shared files to another user first, use
+    /// them to a new folder of the caller. A private room stays with the account if neither the caller nor the portal
+    /// owner holds an encryption key. Then `keptPrivateRoomIds` of the progress names it. To move rooms and shared
+    /// files to another user first, use
     /// `POST api/2.0/people/reassign/start`. The call returns the profile as it was before the deletion. To delete
     /// several accounts, use `PUT api/2.0/people/delete`.
     /// </remarks>
@@ -815,8 +818,9 @@ public class UserController(
     /// first step, `PUT api/2.0/people/self/delete`, emails the confirmation link. Sign the request with the
     /// confirmation token from that link. The portal owner and an LDAP account get 403. If the account no longer
     /// exists, the call returns 401. The call changes data, and a repeated call with the same token returns 401. It
-    /// sets the `Terminated` status, ends all sessions of the account, and notifies the DocSpace admins. The account
-    /// then cannot sign in. The call keeps its rooms, files, and group memberships. A DocSpace admin can then delete
+    /// sets the `Terminated` status, ends all sessions of the account, and notifies the DocSpace admins. It also
+    /// deletes the file keys of private rooms of the account. The owner of a private room gets 403. The account then
+    /// cannot sign in. The call keeps its rooms, files, and group memberships. A DocSpace admin can then delete
     /// the account with `DELETE api/2.0/people/{userId}`. Until then, `PUT api/2.0/people/status/{status}` can enable
     /// it again. The call returns the profile with the new status.
     /// </remarks>
@@ -827,7 +831,7 @@ public class UserController(
     [RaisesWebhook(WebhookTrigger.UserUpdated, When = "and not `user.deleted`")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile of the caller with the Terminated status", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "The caller is the portal owner, an LDAP account or a system account")]
+    [SwaggerResponse(403, "The caller is the portal owner, an LDAP account or a system account, or owns a private room")]
     [SwaggerResponse(401, "The link is invalid or expired, or the calling account no longer exists")]
     [HttpDelete("@self")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "ProfileRemove")]
@@ -853,6 +857,8 @@ public class UserController(
             throw new SecurityException();
         }
 
+        await privateRoomAccountHelper.DemandNoPrivateRoomOwnedAsync([user.Id]);
+
         await securityContext.AuthenticateMeWithoutCookieAsync(Core.Configuration.Constants.CoreSystem);
         user.Status = EmployeeStatus.Terminated;
 
@@ -867,6 +873,8 @@ public class UserController(
         await studioNotifyService.SendMsgProfileHasDeletedItselfAsync(user);
 
         await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
+
+        await privateRoomAccountHelper.TryRevokeFileKeysOfDisabledAsync(user.Id);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -1474,8 +1482,10 @@ public class UserController(
     /// repeat deletes nothing more and returns only the listed accounts that still exist. The call returns the listed
     /// accounts, including the skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`.
     /// A queued job deletes the data of each account. To track it, use `GET api/2.0/people/remove/progress/{userId}`.
-    /// If an account shared files from its own section, the job moves them to a new folder of the caller. To move rooms
-    /// and shared files to another user first, use `POST api/2.0/people/reassign/start`. If `userIds` is missing, the
+    /// If an account shared files from its own section, the job moves them to a new folder of the caller. A private
+    /// room stays with the account if neither the caller nor the portal owner holds an encryption key. Then
+    /// `keptPrivateRoomIds` of the progress names it. To move rooms and shared files to another user first, use
+    /// `POST api/2.0/people/reassign/start`. If `userIds` is missing, the
     /// call returns 400.
     /// </remarks>
     /// <summary>
@@ -2132,8 +2142,10 @@ public class UserController(
     /// callers get 403. Only the portal owner can edit another DocSpace admin, and nobody else can edit the portal
     /// owner. The call changes groups only if the caller can edit groups. For an LDAP or SSO account, it keeps the
     /// names and location. If the names are not valid, the call returns 400. With `disable` set to true, the account
-    /// gets the `Terminated` status, and its sessions end. Deletion with `DELETE api/2.0/people/{userId}` requires this
-    /// status. With `isUser` set to true, the account becomes a guest, and false makes it a user again. If the tariff
+    /// gets the `Terminated` status and its sessions end. The portal also deletes its file keys of private rooms. If the
+    /// account owns a private room, the call returns 403 and saves nothing. Deletion with
+    /// `DELETE api/2.0/people/{userId}` requires this status. With `isUser` set to true, the account becomes a guest,
+    /// and false makes it a user again. If the tariff
     /// or quota has no free seat for this, the call returns 402. The call ignores a request to make the portal owner, a
     /// DocSpace admin, or a module admin a guest. If the portal refuses the `files` URL or its server returns an error,
     /// the call returns 403. If no account has the ID, the call returns 404. The call changes data. You can repeat it
@@ -2150,7 +2162,7 @@ public class UserController(
     [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The first and last name pair is not a valid user name")]
     [SwaggerResponse(402, "The tariff or the user quota does not allow the requested guest or member seat")]
-    [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status")]
+    [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status, or `disable` is true for the owner of a private room")]
     [SwaggerResponse(404, "No user has the specified ID")]
     [HttpPut("{userId}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(UpdateMemberByIdRequestDto inDto)
@@ -2176,6 +2188,12 @@ public class UserController(
             if (userIsOwner || (!currentUserIsOwner && userType == EmployeeType.DocSpaceAdmin))
             {
                 throw new SecurityException();
+            }
+
+            // Checked before anything of the request is saved: the owner of a private room is the one who manages it.
+            if (inDto.UpdateMember.Disable == true && user.Status != EmployeeStatus.Terminated)
+            {
+                await privateRoomAccountHelper.DemandNoPrivateRoomOwnedAsync([user.Id]);
             }
         }
 
@@ -2306,13 +2324,20 @@ public class UserController(
             messageService.Send(MessageAction.UserUpdated, MessageTarget.Create(user.Id),
                 user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
 
-            if (statusChanged && inDto.UpdateMember.Disable.HasValue && inDto.UpdateMember.Disable.Value)
+            var disabled = statusChanged && inDto.UpdateMember.Disable.HasValue && inDto.UpdateMember.Disable.Value;
+
+            if (disabled)
             {
                 await cookiesManager.ResetUserCookieAsync(user.Id);
                 messageService.Send(MessageAction.CookieSettingsUpdated);
             }
 
             await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
+
+            if (disabled)
+            {
+                await privateRoomAccountHelper.TryRevokeFileKeysOfDisabledAsync(user.Id);
+            }
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -2323,8 +2348,9 @@ public class UserController(
     /// accepts only `Active` and `Terminated`. Any other status returns 400. Requires a DocSpace admin. Other callers
     /// get 403. The call checks the whole list before it changes anything. If the list has a system or LDAP account,
     /// the portal owner, or the caller, the call returns 403. Only the portal owner can change a DocSpace admin. The
-    /// call changes data. You can repeat it with the same body. Disabling ends all sessions of the account and frees
-    /// its seat. Enabling takes a seat again. If the tariff or quota has no free seat, the call returns 402. The call
+    /// call changes data. You can repeat it with the same body. Disabling ends all sessions of the account, frees its
+    /// seat, and deletes its file keys of private rooms. If an account to disable owns a private room, the call returns
+    /// 403 and changes nothing. Enabling takes a seat again. If the tariff or quota has no free seat, the call returns 402. The call
     /// enables the accounts one by one, so a 402 leaves the earlier ones enabled. Enabling changes only disabled
     /// accounts. An account with no name and an unused invitation becomes `Pending`, not `Active`. So check `status` in
     /// the response. Deletion with `DELETE api/2.0/people/{userId}` requires the `Terminated` status.
@@ -2339,7 +2365,7 @@ public class UserController(
     [SwaggerResponse(200, "The listed accounts with their statuses after the change", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The requested status is neither Active nor Terminated")]
     [SwaggerResponse(402, "The tariff or the user quota does not allow enabling one more account")]
-    [SwaggerResponse(403, "No permissions to perform this action, or the list names a system, LDAP, owner, self or DocSpace admin account")]
+    [SwaggerResponse(403, "No permissions to perform this action, the list names a system, LDAP, owner, self or DocSpace admin account, or an account to disable owns a private room")]
     [HttpPut("status/{status}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserStatus(UpdateMemberStatusRequestDto inDto)
     {
@@ -2368,6 +2394,15 @@ public class UserController(
                 throw new SecurityException(Resource.ErrorAccessDenied);
             }
         }
+
+        // Checked for the whole list before anything changes: the owner of a private room is the one who manages it.
+        if (inDto.Status == EmployeeStatus.Terminated)
+        {
+            await privateRoomAccountHelper.DemandNoPrivateRoomOwnedAsync(users.Where(u => u.Status != EmployeeStatus.Terminated).Select(u => u.Id));
+        }
+
+        // whose file keys are revoked after every other effect of the request
+        var disabledUserIds = new List<Guid>();
 
         foreach (var user in users)
         {
@@ -2431,6 +2466,7 @@ public class UserController(
                     user.Status = EmployeeStatus.Terminated;
 
                     await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                    disabledUserIds.Add(user.Id);
 
                     await cookiesManager.ResetUserCookieAsync(user.Id);
                     messageService.Send(MessageAction.CookieSettingsUpdated);
@@ -2455,7 +2491,15 @@ public class UserController(
         foreach (var user in users)
         {
             await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
+        }
 
+        foreach (var userId in disabledUserIds)
+        {
+            await privateRoomAccountHelper.TryRevokeFileKeysOfDisabledAsync(userId);
+        }
+
+        foreach (var user in users)
+        {
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
@@ -2616,7 +2660,7 @@ public class UserController(
 
         var progressItem = await queueWorkerUpdateUserType.StartAsync(tenant.Id, user.Id, toUser.Id, securityContext.CurrentAccount.ID, inDto.Type);
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 
     /// <remarks>
@@ -2639,7 +2683,7 @@ public class UserController(
         var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueWorkerUpdateUserType.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 
     /// <remarks>
@@ -2671,7 +2715,7 @@ public class UserController(
             progressItem.IsCompleted = true;
         }
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 
     ///<remarks>

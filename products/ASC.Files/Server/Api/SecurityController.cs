@@ -204,8 +204,8 @@ public abstract class SecurityController<T>(
     /// room, a repeated `None` for an account emails a room invitation if `notify` is true. An empty `share` or an
     /// unknown folder changes nothing and returns an empty list. For a room, use `PUT api/2.0/files/rooms/{id}/share`,
     /// which also invites people by email. The call returns 400 for an invalid or too long `email`, too many email
-    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access, or lacks
-    /// encryption keys for a private room.
+    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access. In a
+    /// private room, a new member without encryption keys or a group also returns 403. Removing a group works.
     /// </remarks>
     /// <summary>Share a folder</summary>
     /// <path>api/2.0/files/folder/{id}/share</path>
@@ -213,7 +213,7 @@ public abstract class SecurityController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rights the listed subjects hold on the folder after the change", typeof(IAsyncEnumerable<FileShareDto>))]
     [SwaggerResponse(400, "The request body cannot be read, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, or `sharingMessage` is longer than 255 characters")]
-    [SwaggerResponse(403, "The caller may not change the sharing of the folder, a listed subject cannot be given the requested access on it, or the folder is a private room and a listed account has not set up its encryption keys")]
+    [SwaggerResponse(403, "The caller may not change the sharing of the folder, a listed subject cannot be given the requested access on it, or the folder is a private room and a listed account gets access for the first time without encryption keys or a listed group is given access")]
     [HttpPut("folder/{id}/share")]
     public IAsyncEnumerable<FileShareDto> SetFolderSecurityInfo(FolderSecurityInfoSimpleRequestDto<T> inDto)
     {
@@ -384,7 +384,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
 {
     /// <remarks>
     /// Changes the owner of the listed rooms and files to one account. Requires the owner of each listed entry, or a
-    /// DocSpace admin. Other callers get 403. The call changes data, one entry at a time. It stops at the first entry
+    /// DocSpace admin. Other callers get 403. In a private room, a DocSpace admin must also be a member, in any role.
+    /// The call changes data, one entry at a time. It stops at the first entry
     /// it may not change, and earlier entries stay changed. An entry that the account already owns stays unchanged,
     /// so you can repeat the call. The previous owner stays in a transferred room as its room manager. A transferred
     /// file gets a new version by the new owner. The call skips third-party files. The call returns 403 if the
@@ -496,8 +497,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// nothing but returns the rights of the other listed subjects on that entry. In a listed room, a repeated `None`
     /// for an account emails a room invitation if `notify` is true. For one room, use
     /// `PUT api/2.0/files/rooms/{id}/share`. The call returns 400 for an invalid or too long `email`, too many email
-    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access, or lacks
-    /// encryption keys for a private room.
+    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access. In a
+    /// private room, a new member without encryption keys or a group also returns 403. Removing a group works.
     /// </remarks>
     /// <summary>Set sharing rights in batch</summary>
     /// <path>api/2.0/files/share</path>
@@ -505,7 +506,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rights of the listed accounts and groups on every entry that was processed", typeof(IAsyncEnumerable<FileShareDto>))]
     [SwaggerResponse(400, "The request body cannot be read, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, or `sharingMessage` is longer than 255 characters")]
-    [SwaggerResponse(403, "The caller may not change the sharing of a listed entry, a listed subject cannot be given the requested access on it, or a listed private room has an account in `share` that has not set up its encryption keys")]
+    [SwaggerResponse(403, "The caller may not change the sharing of a listed entry, a listed subject cannot be given the requested access on it, or a listed private room has an account in `share` that gets access for the first time without encryption keys, or a group")]
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfo(SecurityInfoRequestDto inDto)
     {

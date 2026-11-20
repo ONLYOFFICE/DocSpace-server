@@ -324,9 +324,21 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> ReassignRoomsAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
+    public Task<int> ReassignRoomsAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptRoomIds)
     {
-        return FolderQueries.ReassignRoomsAsync(this, tenantId, DocSpaceHelper.RoomTypes, oldOwnerId, newOwnerId);
+        return FolderQueries.ReassignRoomsAsync(this, tenantId, DocSpaceHelper.RoomTypes, oldOwnerId, newOwnerId, exceptRoomIds);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> GetPrivateRoomIdsWithFileKeysOfUserAsync(int tenantId, Guid userId)
+    {
+        return FolderQueries.GetPrivateRoomIdsWithFileKeysOfUserAsync(this, tenantId, userId, DocSpaceHelper.RoomTypes);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> GetPrivateRoomIdsByOwnerAsync(int tenantId, Guid ownerId)
+    {
+        return FolderQueries.GetPrivateRoomIdsByOwnerAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes);
     }
 
     [PreCompileQuery]
@@ -834,11 +846,30 @@ static file class FolderQueries
                 .Where(r => r.TenantId == tenantId && foldersIds.Contains(r.Id))
                 .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<FolderType>, Guid, Guid, Task<int>> ReassignRoomsAsync =
-        (FilesDbContext ctx, int tenantId, IEnumerable<FolderType> roomTypes, Guid oldOwnerId, Guid newOwnerId) =>
+    public static readonly Func<FilesDbContext, int, IEnumerable<FolderType>, Guid, Guid, IEnumerable<int>, Task<int>> ReassignRoomsAsync =
+        (FilesDbContext ctx, int tenantId, IEnumerable<FolderType> roomTypes, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptRoomIds) =>
             ctx.Folders
-                .Where(r => r.TenantId == tenantId && roomTypes.Contains(r.FolderType) && r.CreateBy == oldOwnerId)
+                .Where(r => r.TenantId == tenantId && roomTypes.Contains(r.FolderType) && r.CreateBy == oldOwnerId && !exceptRoomIds.Contains(r.Id))
                 .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
+
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<int>> GetPrivateRoomIdsWithFileKeysOfUserAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid userId, IEnumerable<FolderType> roomTypes) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId && roomTypes.Contains(r.FolderType))
+                    .Where(r => ctx.RoomSettings.Any(s => s.TenantId == tenantId && s.RoomId == r.Id && s.Private))
+                    .Where(r => ctx.DbFileKeys.Any(k => k.TenantId == tenantId && k.UserId == userId &&
+                        ctx.Files.Any(f => f.TenantId == tenantId && f.Id == k.FileId &&
+                            ctx.Tree.Any(tr => tr.FolderId == f.ParentId && tr.ParentId == r.Id))))
+                    .Select(r => r.Id));
+
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<int>> GetPrivateRoomIdsByOwnerAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid ownerId, IEnumerable<FolderType> roomTypes) =>
+                ctx.Folders
+                    .Where(f => f.TenantId == tenantId && f.CreateBy == ownerId && roomTypes.Contains(f.FolderType))
+                    .Where(f => ctx.RoomSettings.Any(s => s.TenantId == tenantId && s.RoomId == f.Id && s.Private))
+                    .Select(f => f.Id));
 
     public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<FolderReassignInfo>> GetRoomsFoldersReassignInfoAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -77,8 +77,8 @@ Current texts, quoted from `openspec/specs/shared-links/spec.md` at `2029af1663`
 The system SHALL offer link settings according to the section or room type that contains the entity:
 access rights, the "who has access" choice ("Anyone with the link" or "DocSpace users only"), a password,
 the deny-download flag and a lifetime (expiration). Where a setting is not offered its value is fixed, as
-the scenarios state. A link of a private item follows the matrix of its room type except as `private-rooms`
-states: read access only, `passwordRequired` instead of a password, no deny-download.
+the scenarios state. A link of a private item follows its room type's matrix except as `private-rooms`
+states: read only, `passwordRequired` instead of a password, no deny-download.
 
 #### Scenario: Link settings matrix by location
 

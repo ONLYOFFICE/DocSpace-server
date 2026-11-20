@@ -124,33 +124,40 @@ public class PrivateRoomFileKeysTests(AspireAppFixture fixture) : PrivacyRoomTes
     }
 
     [Fact]
-    public async Task ReassignOfADeletedUser_IsNotStoppedByAMissingFileKey()
+    public async Task EncryptionAccess_ListsTheOwnerAfterAnOwnerChange()
     {
-        // The user is leaving and cannot write the keys any more, so the check of the API call must not reach here.
-        var leaving = await InviteWithKeys(EmployeeType.RoomAdmin);
-        var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
-        await UploadEncryptedFile(room.Id, "Encrypted.docx");
+        var newOwner = await InviteWithKeys(EmployeeType.RoomAdmin);
+        var (room, fileId) = await CreateRoomWithEncryptedFile();
+        await InviteToRoom(room.Id, newOwner, FileShare.RoomManager);
+        await WriteKeys(fileId, newOwner.Id);
+        await ChangeOwner(room.Id, newOwner.Id);
 
+        await _filesClient.Authenticate(newOwner);
+        var keys = (await _sharingApi.GetEncryptionAccessAsync(fileId, TestContext.Current.CancellationToken)).Response;
+
+        keys.Should().Contain(k => k.UserId == newOwner.Id);
+    }
+
+    [Fact]
+    public async Task EncryptionAccess_LeavesOutACreatorWhoLeftTheRoom()
+    {
+        var uploader = await InviteWithKeys(EmployeeType.RoomAdmin);
         await _filesClient.Authenticate(Owner);
         await SetFakeKeys(publicKeyPrefix: "owner");
-        await TerminateUser(leaving);
+        var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
+        await InviteToRoom(room.Id, uploader, FileShare.ContentCreator);
 
-        await _userDataApi.StartReassignAsync(new StartReassignRequestDto(leaving.Id, Owner.Id, deleteProfile: false), TestContext.Current.CancellationToken);
-
-        var progress = await PollUntil(
-            async () =>
-            {
-                await _peopleClient.Authenticate(Owner);
-
-                return (await _userDataApi.GetReassignProgressAsync(leaving.Id, TestContext.Current.CancellationToken)).Response;
-            },
-            state => state.IsCompleted,
-            TimeSpan.FromSeconds(60));
-
-        progress.Error.Should().BeNullOrEmpty();
+        await _filesClient.Authenticate(uploader);
+        var fileId = await UploadEncryptedFile(room.Id, "Encrypted.docx");
 
         await _filesClient.Authenticate(Owner);
-        (await RoomOwner(room.Id)).Should().Be(Owner.Id);
+        (await _sharingApi.GetEncryptionAccessAsync(fileId, TestContext.Current.CancellationToken)).Response
+            .Should().Contain(k => k.UserId == uploader.Id);
+
+        await InviteToRoom(room.Id, uploader, FileShare.None);
+
+        var keys = (await _sharingApi.GetEncryptionAccessAsync(fileId, TestContext.Current.CancellationToken)).Response;
+        keys.Should().NotContain(k => k.UserId == uploader.Id).And.Contain(k => k.UserId == Owner.Id);
     }
 
     [Fact]
@@ -214,35 +221,6 @@ public class PrivateRoomFileKeysTests(AspireAppFixture fixture) : PrivacyRoomTes
         await InviteToRoom(room.Id, member, FileShare.Read);
 
         (await GetMissing(room.Id, member.Id)).Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task DeletingAUser_DeletesTheirKeys()
-    {
-        var leaving = await InviteWithKeys(EmployeeType.User);
-        var (room, fileId) = await CreateRoomWithEncryptedFile();
-        await InviteToRoom(room.Id, leaving, FileShare.Read);
-        await WriteKeys(fileId, leaving.Id);
-        (await FileKeyRows(leaving.Id)).Should().Be(1);
-
-        await TerminateUser(leaving);
-        await _peopleClient.Authenticate(Owner);
-        await _userDataApi.StartRemoveAsync(new TerminateRequestDto(leaving.Id), TestContext.Current.CancellationToken);
-
-        var rows = await PollUntil(() => FileKeyRows(leaving.Id), count => count == 0, TimeSpan.FromSeconds(60));
-
-        rows.Should().Be(0);
-    }
-
-    private async Task<long> FileKeyRows(Guid userId)
-    {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
-
-        command.CommandText = "SELECT COUNT(*) FROM files_file_keys WHERE user_id = @user;";
-        command.Parameters.AddWithValue("@user", userId.ToString());
-
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
     }
 
     private async Task<long> AuditEvents(int action, Guid mentionedUser)

@@ -65,6 +65,7 @@ public class BaseTest(
     protected OperationsApi _filesOperationsApi = null!;
     protected RoomsApi _roomsApi = null!;
     protected DocSpace.API.SDK.Api.Security.AuditTrailDataApi _auditTrailDataApi = null!;
+    protected DocSpace.API.SDK.Api.Settings.WebhooksApi _webhooksApi = null!;
     protected GroupsApi _roomGroupsApi = null!;
     protected SettingsApi _filesSettingsApi = null!;
     protected QuotaApi _quotaApi = null!;
@@ -127,6 +128,7 @@ public class BaseTest(
         _filesOperationsApi = _clients.OperationsApi;
         _roomsApi = _clients.RoomsApi;
         _auditTrailDataApi = _clients.AuditTrailDataApi;
+        _webhooksApi = _clients.WebhooksApi;
         _roomGroupsApi = _clients.RoomGroupsApi;
         _filesSettingsApi = _clients.SettingsApi;
         _quotaApi = _clients.QuotaApi;

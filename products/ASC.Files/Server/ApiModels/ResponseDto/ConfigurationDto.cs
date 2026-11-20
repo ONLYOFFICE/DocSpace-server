@@ -708,7 +708,7 @@ public class CustomizationConfigConverter<T>(
             Review = source.GetReview(configuration.EditorConfig.ModeWrite),
             SubmitForm = await source.GetSubmitForm(file),
             Anonymous = anonymousConfigConverter.Convert(configuration),
-            Ai = await source.GetAIConfigAsync()
+            Ai = await source.GetAIConfigAsync(file)
         };
 
         return result;

@@ -84,7 +84,7 @@ public static class SearchAreaExtensions
 {
     /// <summary>
     /// Whether a room belongs to the section the search area stands for. FillingFormsRoom rooms are
-    /// surfaced in the Forms section, private rooms in the private rooms section, every other room in
+    /// surfaced in the Forms section, private rooms (of any type) in the private rooms section, every other room in
     /// Rooms; areas that do not take part in the split accept any room.
     /// </summary>
     public static bool MatchesRoom<T>(this SearchArea searchArea, Folder<T> room)
@@ -92,7 +92,8 @@ public static class SearchAreaExtensions
         return searchArea switch
         {
             SearchArea.Active or SearchArea.Templates => room.FolderType != FolderType.FillingFormsRoom && !room.SettingsPrivate,
-            SearchArea.Forms or SearchArea.FormTemplates => room.FolderType == FolderType.FillingFormsRoom,
+            // a private form room, left from before such rooms were refused, belongs to the private rooms section only
+            SearchArea.Forms or SearchArea.FormTemplates => room.FolderType == FolderType.FillingFormsRoom && !room.SettingsPrivate,
             SearchArea.PrivateRooms => room.SettingsPrivate,
             _ => true
         };

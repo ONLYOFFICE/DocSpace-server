@@ -42,28 +42,28 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Refusals: ordinary 400, Trash and unknown 404 | T/RoomAccessKeysTests.cs:184-231 | TEST-CONFIRMED [run: PASS] |
 | Candidates: public half only, left-outs, duplicates | T/RoomCandidateKeysTests.cs:74-156 | TEST-CONFIRMED [run: PASS] |
 | Candidates: who may ask, refusals | T/RoomCandidateKeysTests.cs:160-250 | TEST-CONFIRMED [run: PASS] |
-| Missing keys: answer shape | T/PrivateRoomFileKeysTests.cs:261-305 | TEST-CONFIRMED [run: PASS] |
-| Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:309-375 | TEST-CONFIRMED [run: PASS] |
-| Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:381-422 | TEST-CONFIRMED [run: PASS] |
+| Missing keys: answer shape | T/PrivateRoomFileKeysTests.cs:238-276 | TEST-CONFIRMED [run: PASS] |
+| Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:278-354 | TEST-CONFIRMED [run: PASS] |
+| Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:356-401 | TEST-CONFIRMED [run: PASS] |
 | File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:312-324 | TEST-CONFIRMED [run: PASS] |
-| New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5533-5541 | TEST-CONFIRMED [run: PASS] |
-| Reassign of a deleted user | T/PrivateRoomFileKeysTests.cs:127-153 | TEST-CONFIRMED [run: PASS] |
-| Leaving revokes file keys; audit record; access change keeps | T/PrivateRoomFileKeysTests.cs:172-216 | TEST-CONFIRMED [run: PASS] |
-| Revocation does not depend on a client being online: the removal is a server-side API call with no client connected, and the next read already reports the key missing, also in a subfolder (run 2026-11-11) | T/PrivateRoomFileKeysTests.cs:171-204; Sharing:RevokeFileKeysAsync; commit cc60512acd | TEST-CONFIRMED [run: PASS] |
+| New owner must hold keys | T/PrivateRoomFileKeysTests.cs:73-124, :163-176; Storage:5533-5541 | TEST-CONFIRMED [run: PASS] |
+| Reassign of a deleted user: a private room goes to a key holder, else stays and is named in `keptPrivateRoomIds` (change private-rooms-server-followups, 2026-11-20, not yet synced into spec.md) | T/PrivateRoomReassignTests.cs:91-243 | TEST-CONFIRMED [run: PASS] |
+| Leaving revokes file keys; audit record; access change keeps | T/PrivateRoomFileKeysTests.cs:178-224 | TEST-CONFIRMED [run: PASS] |
+| Revocation does not depend on a client being online: the removal is a server-side API call with no client connected, and the next read already reports the key missing, also in a subfolder (run 2026-11-11) | T/PrivateRoomFileKeysTests.cs:178-211; Sharing:RevokeFileKeysAsync; commit cc60512acd | TEST-CONFIRMED [run: PASS] |
 | Clearing access: member and owner | T/PrivateRoomLeaveTests.cs:58-98 | TEST-CONFIRMED [run: PASS] |
 | Owner keeps the room and keys | T/PrivateRoomLeaveTests.cs:102-160 | TEST-CONFIRMED [run: PASS] |
 | Non-member admin cannot clear; ordinary room can | T/PrivateRoomLeaveTests.cs:176-194 | TEST-CONFIRMED [run: PASS] |
-| Deleting a user deletes file keys | T/PrivateRoomFileKeysTests.cs:220-234 | TEST-CONFIRMED [run: PASS] |
+| Deleting a user deletes file keys | T/PrivateRoomReassignTests.cs:73-89 | TEST-CONFIRMED [run: PASS] |
 | Keys and file keys not backed up | common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:68, :108 | TEST-CONFIRMED [run: NOT-IN-RUN] |
-| Room types that can be private; 403 otherwise | T/PrivateRoomCreateTests.cs:47-60, :67-102 | TEST-CONFIRMED [run: PASS] |
-| Empty key set counts as no key | T/PrivateRoomContentRulesTests.cs:129-139; Login:97-105 | TEST-CONFIRMED [run: PASS] |
+| Room types that can be private; 400 otherwise, before anything is saved (change private-rooms-server-followups, 2026-11-20, not yet synced into spec.md) | T/PrivateRoomCreateTests.cs:47-60, :65-204 | TEST-CONFIRMED [run: PASS] |
+| Empty key set counts as no key | T/PrivateRoomContentRulesTests.cs:129-139; Login:97-110 | TEST-CONFIRMED [run: PASS] |
 | Editors without the library: 403 create, 415 open | Storage:DemandPrivateRoomCanBeCreatedAsync; DocumentServiceHelper hunk of b562fc3fb1; yaml openEditFile 415 | CODE-ONLY (unreachable: the test stack's document server serves the library, `docServiceEncryptionSupported` is true, and the stack cannot switch it off) |
 | `docServiceEncryptionSupported` true on the test stack | T/PrivateRoomEditorTests.cs:255-266 | TEST-CONFIRMED [run: PASS] |
 | Connected storage refused 400 (test skipped unless Nextcloud is configured) | products/ASC.Files/Tests/Tests/03_Rooms/ThirdParty/ThirdPartyPrivateRoomTests.cs:49 | TEST-CONFIRMED [run: PASS] |
-| Settings refused, off and rename allowed, template fails | T/PrivateRoomSettingsTests.cs:51-143 | TEST-CONFIRMED [run: PASS] |
+| Settings refused, off and rename allowed; a private room from a template is 400 (change private-rooms-server-followups, 2026-11-20, not yet synced into spec.md) | T/PrivateRoomSettingsTests.cs:51-143 | TEST-CONFIRMED [run: PASS] |
 | Inviting needs a key; guest always refused | T/PrivacyRoomIntegrationTests.cs:137-165; T/RoomAccessKeysPermissionsTests.cs:172-186; T/PrivacyRoomTest.cs:179-221 | TEST-CONFIRMED [run: PASS] |
-| No links | T/PrivateRoomContentBoundaryTests.cs:90-137 | TEST-CONFIRMED [run: PASS] |
-| Revoking an existing link stays possible: a revocation (`access: None`) passes the private-room check, invitation and external (run 2026-11-11) | T/PrivateRoomContentBoundaryTests.cs:139-175; Sharing hunk of bd89a24dcd (`Access != None`) | TEST-CONFIRMED [run: PASS]; on a room a revocation names an unknown id; revoking an existing link of a file or a folder of a private room is tested by T/ExternalLinks/PrivateItemSharingGuardTests.cs (change private-rooms-external-links, 2026-11-17) |
+| Links of a private item need key material (change private-rooms-external-links, not yet synced into spec.md) | T/PrivateRoomContentBoundaryTests.cs:90-137 | TEST-CONFIRMED [run: PASS] |
+| Revoking an existing link stays possible: a revocation (`access: None`) passes the private-room check, invitation and external (run 2026-11-11) | T/PrivateRoomContentBoundaryTests.cs:139-175; Sharing:841 (`ValidatePrivateLinksAsync` checks only links with `Access != None`) | TEST-CONFIRMED [run: PASS]; on a room a revocation names an unknown id; revoking an existing link of a file or a folder of a private room is tested by T/ExternalLinks/PrivateItemSharingGuardTests.cs (change private-rooms-external-links, 2026-11-17) |
 | No duplicate, no template, `security` flags | T/PrivateRoomContentBoundaryTests.cs:177-212 | TEST-CONFIRMED [run: PASS] |
 | Copy across the border 403 | T/PrivacyRoomTest.cs:225-277 | TEST-CONFIRMED [run: PASS] |
 | Move across the border and inside | T/PrivateRoomContentBoundaryTests.cs:215-248 | TEST-CONFIRMED [run: PASS] |
@@ -123,8 +123,8 @@ All seven operations of `Rooms / Privacy room` are in requirements. These facts 
 
 ## Not verified
 
-- Whether a group can be invited to a private room. `Sharing:270-276` checks keys through a user lookup of the subject id, which suggests a refusal, and `Helper:269` and the revocation skip group subjects. If a group can be a member, its people would get 403 on `getUserKeysForRoom` and keep their file keys on removal. No test covers it.
-- `getUserKeysForRoom` with a subfolder id: the code has no room check there, unlike `candidates` and `missing` (`Helper:260` against `Helper:381`). No test.
+- Settled by the change private-rooms-server-followups (2026-11-20, not yet synced into spec.md): a group is refused in a private room (T/PrivateRoomMembershipKeyTests.cs:159-176), and an old group record can still be revoked (T/PrivateRoomRefusalEffectsTests.cs:142).
+- `getUserKeysForRoom` with a subfolder id: the code has no room check there, unlike `candidates` and `missing` (`Helper:299` against `Helper:421`). No test.
 - `setEncryptionInfo` refusals (403 for missing rights and for a file outside a private room): read in the yaml only.
 
 ## Points for other specs

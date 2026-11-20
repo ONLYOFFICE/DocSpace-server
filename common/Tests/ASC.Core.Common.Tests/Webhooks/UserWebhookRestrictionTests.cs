@@ -172,7 +172,7 @@ public class UserWebhookRestrictionTests
 
         var userManager = new UserManager(
             userService, tenantManager, null!, null!, null!, null!, null!, null!, null!, null!, null!, null!,
-            new ASC.Core.Users.Constants(new ConfigurationBuilder().Build()), null!, null!, null!, null!, null!, null!);
+            new ASC.Core.Users.Constants(new ConfigurationBuilder().Build()), null!, null!, null!, null!, null!, null!, null!);
 
         return new UserWebhookDtoHelper(userManager, null!, null!, null!, null!, null!, tenantManager, null!, null!);
     }

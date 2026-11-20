@@ -619,6 +619,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A group cannot be invited to a private room: file keys are issued to each user.
+        /// </summary>
+        public static string ErrorMessage_GroupInPrivateRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_GroupInPrivateRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only Markdown files (.md) can be added to an instructions room.
         /// </summary>
         public static string ErrorMessage_InstructionsRoomMarkdownOnly {
@@ -745,11 +754,47 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A private room cannot be created from a template: the files of a template are not encrypted.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomFromTemplate {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomFromTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This action is only available in a private room.
         /// </summary>
         public static string ErrorMessage_PrivateRoomOnly {
             get {
                 return ResourceManager.GetString("ErrorMessage_PrivateRoomOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} owns private rooms ({1}). Before the account is disabled, each room needs another owner: its owner or a DocSpace admin who is a member of it can change the owner.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomOwnerCannotBeDisabled {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomOwnerCannotBeDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Private rooms are turned off on this portal.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomsAppOff {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomsAppOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A Public room, a Form filling room or an AI agent cannot be private: each of them is reached without an encryption key.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomTypeNotSupported {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomTypeNotSupported", resourceCulture);
             }
         }
         

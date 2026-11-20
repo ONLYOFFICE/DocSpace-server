@@ -694,7 +694,7 @@ public abstract class FoldersController<T>(
     /// `GET api/2.0/files/folder/{id}/link` returns 404. On an item of a private room, a link needs `linkPublicKey`,
     /// `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and takes `passwordRequired` instead of
     /// `password`. A new link without `passwordRequired` asks for a password. Only a file link with `expirationDate`
-    /// may set `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. In
+    /// may set `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. Such a link does not open yet. Every visit gets `RequiredPassword`. In
     /// a private room, only the room owner and room managers create links. Other callers get 403. The call also returns
     /// 403 for such a link without key fields, with other access, or with `denyDownload`. It also returns 403 if
     /// `passwordRequired` is false on any other link. It returns 400 if `linkPublicKey` or `linkProofHash` is not
@@ -776,7 +776,7 @@ public abstract class FoldersController<T>(
     /// room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and takes
     /// `passwordRequired` instead of `password`. A new link without `passwordRequired` asks for a password. A changed
     /// link keeps its value. Only a file link with `expirationDate` may set `passwordRequired` to false. On other
-    /// items, the call ignores `passwordRequired` and the key fields. In a private room, only the room owner and room
+    /// items, the call ignores `passwordRequired` and the key fields. Such a link does not open yet. Every visit gets `RequiredPassword`. In a private room, only the room owner and room
     /// managers set and revoke links. Other callers get 403. The call also returns 403 for such a link without key
     /// fields, with other access, or with `denyDownload`. It also returns 403 if `passwordRequired` is false on any
     /// other link. It returns 400 if `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. It also returns 400
@@ -868,12 +868,9 @@ public class FoldersControllerCommon(
     FilesSettingsHelper filesSettingsHelper,
     SettingsManager settingsManager,
     MetadataFilterHelper metadataFilterHelper,
-    AppSettingsService appSettingsService,
-    TenantManager tenantManager)
+    PrivateRoomsGate privateRoomsGate)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    private const string PrivateRoomsAppId = "e2e-rooms";
-
     /// <remarks>
     /// Returns one page of the files and folders in the "Common" section. Any signed-in user can call it. The call
     /// is read-only, but a valid `sortBy` becomes the account's default order. The `total` field counts
@@ -1137,7 +1134,7 @@ public class FoldersControllerCommon(
     [HttpGet("@private")]
     public async Task<FolderContentDto<int>> GetPrivateRoomsFolder(GetCommonFolderRequestDto inDto)
     {
-        if (!await IsPrivateRoomsAppEnabledAsync())
+        if (!await privateRoomsGate.IsEnabledAsync())
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
@@ -1145,13 +1142,6 @@ public class FoldersControllerCommon(
         var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
 
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivateRoomsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
-    }
-
-    private async Task<bool> IsPrivateRoomsAppEnabledAsync()
-    {
-        var app = await appSettingsService.GetAppAsync(tenantManager.GetCurrentTenantId(), PrivateRoomsAppId);
-
-        return app is { Enabled: true };
     }
 
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
@@ -1186,7 +1176,7 @@ public class FoldersControllerCommon(
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderFormsAsync;
 
-        if (await IsPrivateRoomsAppEnabledAsync())
+        if (await privateRoomsGate.IsEnabledAsync())
         {
             yield return await globalFolderHelper.FolderPrivateRoomsAsync;
         }

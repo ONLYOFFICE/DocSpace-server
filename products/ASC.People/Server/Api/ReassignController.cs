@@ -55,6 +55,8 @@ public class ReassignController(
     /// Other DocSpace admins get 403 for it. The call is read-only. This is the call to poll.
     /// Repeat it until `isCompleted` is true. If no job exists for the user, the response has no progress object.
     /// If the job fails, `error` holds the reason.
+    /// A private room that nobody with an encryption key could take stays with the source and is in `keptPrivateRoomIds`.
+    /// A DocSpace admin who is a member of such a room can give it a new owner with `POST api/2.0/files/owner`.
     /// To cancel a running job, use `PUT api/2.0/people/reassign/terminate`.
     /// </remarks>
     /// <summary>Get the reassignment progress</summary>
@@ -77,12 +79,14 @@ public class ReassignController(
 
         var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 
     /// <remarks>
     /// Starts a job that moves the data of a disabled user to another user.
     /// The job moves the rooms, third-party storage accounts, and files of the source.
+    /// A private room moves only to a recipient or, failing that, the portal owner who holds an encryption key.
+    /// Otherwise it stays with the source, and `keptPrivateRoomIds` of the progress names it.
     /// Files and folders that the source shared from the personal section move to a new folder of the recipient.
     /// First, disable the source account through `PUT api/2.0/people/status/{status}`.
     /// To check whether any data needs to move, use `GET api/2.0/people/reassign/necessary`.
@@ -138,7 +142,7 @@ public class ReassignController(
 
         var progressItem = await queueWorkerReassign.StartAsync(tenant.Id, fromUser.Id, toUser.Id, securityContext.CurrentAccount.ID, true, inDto.DeleteProfile);
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 
     /// <remarks>
@@ -181,7 +185,7 @@ public class ReassignController(
             progressItem.IsCompleted = true;
         }
 
-        return TaskProgressResponseDto.Get(progressItem);
+        return progressItem.MapToDto();
     }
 
     /// <remarks>

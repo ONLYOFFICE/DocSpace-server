@@ -47,6 +47,7 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using System.Text.RegularExpressions;
 global using System.Web;
 
 global using ASC.Files.Core.Text;
@@ -121,3 +122,4 @@ global using SkillFrontmatter = ASC.Files.Core.Core.AI.SkillFrontmatter;
 global using SkillFrontmatterError = ASC.Files.Core.Core.AI.SkillFrontmatterError;
 global using Task = System.Threading.Tasks.Task;
 global using User = ASC.Tests.Common.Data.User;
+global using UserDisabledIntegrationEvent = ASC.Core.Users.UserDisabledIntegrationEvent;

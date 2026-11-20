@@ -53,6 +53,12 @@ public class RemoveProgressItem : DistributedTaskProgress
 
     public bool IsGuest { get; private set; }
 
+    /// <summary>
+    /// The private rooms that stayed with the removed user, because neither the user who started the removal nor the
+    /// portal owner holds an encryption key. Empty when every room moved; null until the rooms are reassigned.
+    /// </summary>
+    public List<int> KeptPrivateRoomIds { get; set; }
+
     //private readonly IFileStorageService _docService;
     //private readonly MailGarbageEngine _mailEraser;
 
@@ -143,7 +149,7 @@ public class RemoveProgressItem : DistributedTaskProgress
             Percentage = 50;
             await PublishChanges();
 
-            await fileStorageService.ReassignRoomsAsync(UserId, _currentUserId);
+            KeptPrivateRoomIds = await fileStorageService.ReassignRoomsAsync(UserId, _currentUserId);
 
             Percentage = 60;
             await PublishChanges();

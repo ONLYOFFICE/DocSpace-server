@@ -123,8 +123,6 @@ public class FileSharingAceHelper(
         }
 
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
-        var usersLeavingPrivateRoom = new List<Guid>();
-
 
         var roomUrl = room != null
             ? room.FolderType == FolderType.AiRoom
@@ -145,6 +143,14 @@ public class FileSharingAceHelper(
         else
         {
             ClearPrivateLinkOptions(aceWrappers);
+        }
+
+        // Every key check of the request comes before its first write too, and whoever leaves loses their file keys
+        // before their access goes, so that nobody is out of the room while still holding keys.
+        if (room is { SettingsPrivate: true })
+        {
+            var usersLeavingPrivateRoom = await ValidatePrivateRoomMembersAsync(aceWrappers, room, shares, beforeOwnerChange);
+            await RevokeFileKeysAsync(room, usersLeavingPrivateRoom);
         }
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
@@ -291,12 +297,6 @@ public class FileSharingAceHelper(
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
-
-                if (room.SettingsPrivate)
-                {
-                    await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(currentUser.Id);
-                }
-
                 if (room.FolderType == FolderType.AiRoom &&
                     currentUserType == EmployeeType.Guest &&
                     w.Access is FileShare.RoomManager or FileShare.ContentCreator)
@@ -474,13 +474,6 @@ public class FileSharingAceHelper(
             changed = true;
             handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w, file != null ? file : folder));
 
-            // Before a change of owner the new owner's own share is what gets removed here: they are not leaving.
-            // Neither is the owner, who may hold a share of their own: the room stays theirs without it.
-            if (room is { SettingsPrivate: true } && eventType == EventType.Remove && !w.IsLink && !w.SubjectGroup && !beforeOwnerChange && w.Id != room.CreateBy)
-            {
-                usersLeavingPrivateRoom.Add(w.Id);
-            }
-
             if (emailInvite && share != FileShare.None)
             {
                 var inviteType = FileSecurity.GetTypeByShare(share);
@@ -601,7 +594,6 @@ public class FileSharingAceHelper(
         }
         else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } sharedRoom)
         {
-            await RevokeFileKeysAsync(sharedRoom, usersLeavingPrivateRoom);
             await documentServiceHelper.CheckRoomUsersForDropAsync(sharedRoom);
         }
 
@@ -654,6 +646,13 @@ public class FileSharingAceHelper(
         var currentShare = await fileSecurity.GetSharesAsync(entry, [currentId]);
         var currentShareIsNullOrEmpty = currentShare == null || !currentShare.Any();
 
+        // The keys go before the access does, so that nobody is out of the room while still holding them. The owner
+        // stays the owner whatever their own list says, and still has to open the files.
+        if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } leftRoom && leftRoom.CreateBy != currentId)
+        {
+            await RevokeFileKeysAsync(leftRoom, [currentId]);
+        }
+
         if (!currentShareIsNullOrEmpty || entry is Folder<T>)
         {
             var defaultShare = entry.RootFolderType == FolderType.USER
@@ -678,12 +677,6 @@ public class FileSharingAceHelper(
         }
         else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
         {
-            // The owner stays the owner whatever their own list says, and still has to open the files.
-            if (privateRoom.CreateBy != currentId)
-            {
-                await RevokeFileKeysAsync(privateRoom, [currentId]);
-            }
-
             await documentServiceHelper.CheckRoomUsersForDropAsync(privateRoom);
         }
 
@@ -716,7 +709,126 @@ public class FileSharingAceHelper(
 
         await fileDao.DeleteFileKeysAsync(fileIds, userIds);
 
-        await filesMessageService.SendAsync(MessageAction.RoomFileKeysRevoked, room, room.Title, string.Join(", ", userIds));
+        // the array overload records the revocation outside a request too (the Files worker revokes the keys of an account
+        // disabled by a directory synchronization); the two-string one drops the record when there is no request
+        await filesMessageService.SendAsync(MessageAction.RoomFileKeysRevoked, room, [room.Title, string.Join(", ", userIds)]);
+    }
+
+    /// <summary>
+    /// Checks the people and groups of a request on a private room before anything of the request is written, and
+    /// returns the members it takes out of the room. A key is asked of a user only when the request gives them access
+    /// to the room for the first time: a member without a key can still leave, be removed or get another role, and the
+    /// owner, also the previous one during a change of owner, is never asked. A group is refused, because file keys
+    /// are issued per user; revoking a group stays possible.
+    /// </summary>
+    private async Task<List<Guid>> ValidatePrivateRoomMembersAsync<T>(
+        List<AceWrapper> aceWrappers,
+        Folder<T> room,
+        Dictionary<Guid, FileShareRecord<T>> shares,
+        bool beforeOwnerChange)
+    {
+        var leaving = new List<Guid>();
+
+        foreach (var w in aceWrappers)
+        {
+            if (w.IsLink)
+            {
+                continue;
+            }
+
+            var existedShare = shares.Get(w.Id);
+            if (existedShare is { IsLink: true })
+            {
+                continue;
+            }
+
+            var isGroup = w.SubjectGroup || existedShare?.SubjectType == SubjectType.Group;
+            if (!isGroup && existedShare == null && string.IsNullOrEmpty(w.Email))
+            {
+                var group = await userManager.GetGroupInfoAsync(w.Id);
+                isGroup = group.ID != Constants.LostGroupInfo.ID && !group.Removed;
+            }
+
+            if (isGroup)
+            {
+                if (w.Access != FileShare.None)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_GroupInPrivateRoom);
+                }
+
+                continue;
+            }
+
+            if (w.Id == room.CreateBy)
+            {
+                continue;
+            }
+
+            if (w.Access == FileShare.None)
+            {
+                // Before a change of owner the new owner's own share is what gets removed: they are not leaving.
+                if (existedShare != null && !beforeOwnerChange)
+                {
+                    leaving.Add(w.Id);
+                }
+
+                continue;
+            }
+
+            var userId = w.Id;
+            UserInfo user = null;
+
+            if (string.IsNullOrEmpty(w.Email))
+            {
+                // The loop skips a disabled or deleted user before any check, so nothing is asked of them here either.
+                user = await userManager.GetUsersAsync(userId, false);
+                if (user.Status == EmployeeStatus.Terminated || user.Removed)
+                {
+                    continue;
+                }
+            }
+
+            // The role checks of the write loop are made here too, in its order, before the revocation that follows
+            // this pass: a request that refuses a role revokes nobody's keys.
+            if (!FileSecurity.AvailableRoomAccesses.TryGetValue(room.FolderType, out var subjectAccesses)
+                || !subjectAccesses.TryGetValue(SubjectType.User, out var roomAccesses) || !roomAccesses.Contains(w.Access))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+            }
+
+            if (user != null)
+            {
+                if (!FileSecurity.AvailableUserAccesses.TryGetValue(await userManager.GetUserTypeAsync(user), out var userAccesses)
+                    || !userAccesses.Contains(w.Access))
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                }
+
+                if (existedShare != null)
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (existedShare != null)
+                {
+                    continue;
+                }
+
+                // Somebody invited by an address that names no account yet holds no key either.
+                userId = (await userManager.GetUserByEmailAsync(w.Email)).Id;
+
+                if (userId != Constants.LostUser.Id && await fileSecurity.GetPureSharesAsync(room, [userId]).AnyAsync())
+                {
+                    continue;
+                }
+            }
+
+            await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(userId);
+        }
+
+        return leaving;
     }
 
     /// <summary>

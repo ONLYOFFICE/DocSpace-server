@@ -282,6 +282,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>The required folder was not found</value>
   </data>
+  <data name="ErrorMessage_GroupInPrivateRoom" xml:space="preserve">
+    <value>A group cannot be invited to a private room: file keys are issued to each user</value>
+  </data>
   <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
     <value>Only Markdown files (.md) can be added to an instructions room</value>
   </data>
@@ -323,6 +326,9 @@
   </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Sorry, this file format isn't supported</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomFromTemplate" xml:space="preserve">
+    <value>A private room cannot be created from a template: the files of a template are not encrypted</value>
   </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>This action is only available in a private room</value>
@@ -643,6 +649,15 @@ Highest compatibility with docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Failed to synchronize form data to external database.</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOwnerCannotBeDisabled" xml:space="preserve">
+    <value>{0} owns private rooms ({1}). Before the account is disabled, each room needs another owner: its owner or a DocSpace admin who is a member of it can change the owner</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomsAppOff" xml:space="preserve">
+    <value>Private rooms are turned off on this portal</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomTypeNotSupported" xml:space="preserve">
+    <value>A Public room, a Form filling room or an AI agent cannot be private: each of them is reached without an encryption key</value>
   </data>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>An AI agent's instruction cannot be longer than {0} characters</value>

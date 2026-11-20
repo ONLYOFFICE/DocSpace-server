@@ -88,13 +88,15 @@ public class VirtualRoomsInternalController(
     /// external link. The call adds the tag names that the portal does not have yet. A public room and a form filling
     /// room get a primary external link. To invite members, use `PUT api/2.0/files/rooms/{id}/share` after this call.
     /// The call returns 400 if `title` is blank, `cover` is unknown, or `share` is not empty. It also returns 400 if
-    /// `private` is set together with `indexing`, a lifetime, or a watermark. A room of the AI rooms section also
-    /// returns 400 with settings that do not apply to its type. The call returns 402 if the portal reached the room
-    /// limit of its plan or its payment is overdue. Rooms of the AI rooms section do not count toward this limit. A
-    /// logo that does not fit into the storage quota also returns 402. The call returns 403 if `quota` is set while
-    /// room quotas are turned off, or is over the portal limit. It also returns 403 for a public room while the portal
-    /// forbids external sharing. A private room also returns 403 if the caller has no encryption keys. A Knowledge room
-    /// returns 403 while vectorization is turned off. If `logo.tmpFile` names no uploaded picture, or one already used,
+    /// `private` is set with `indexing`, a lifetime, or a watermark. A private public room, form filling room, or AI
+    /// agent also returns 400. Nothing is created then. A room of the AI rooms section also returns 400 with settings
+    /// that do not apply to its type. The call returns 402 if the portal reached the room limit of its plan or its
+    /// payment is overdue. Rooms of the AI rooms section do not count toward this limit. A logo that does not fit into
+    /// the storage quota also returns 402. The call returns 403 if `quota` is set while room quotas are turned off, or
+    /// is over the portal limit. It also returns 403 for a public room while the portal forbids external sharing. A
+    /// private room also returns 403 if the caller has no encryption keys. It also returns 403 while the end-to-end
+    /// encrypted rooms app is off.
+    /// A Knowledge room returns 403 while vectorization is turned off. If `logo.tmpFile` names no uploaded picture, or one already used,
     /// the call returns 404.
     /// </remarks>
     /// <summary>Create a room</summary>
@@ -103,9 +105,9 @@ public class VirtualRoomsInternalController(
     [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`, which creates an AI agent in the Rooms section")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set together with `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set together with `indexing`, an enabled `lifetime` or an enabled `watermark`, or for a public room, a form filling room or an AI agent, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
-    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys, the connected document server cannot work with encrypted files or the end-to-end encrypted rooms app is off, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
     [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoom(CreateRoomRequestDto inDto)
@@ -150,8 +152,8 @@ public class VirtualRoomsInternalController(
     /// non-empty `error` means that the job failed. The job fails if the template is a public room while the portal
     /// forbids external sharing. The portal keeps one job record per account. Starting a new job deletes the record of
     /// a finished one. Wait for the running job to end before you start the next one. Settings that the body leaves
-    /// out come from the template. With `copyLogo`, the call ignores `logo`. The call returns 400 if `title` is blank.
-    /// It returns 403 if `quota` is set while the quota for this kind of room is turned off. If no room template has
+    /// out come from the template. With `copyLogo`, the call ignores `logo`. The call returns 400 if `title` is blank
+    /// or `private` is true. No private room is made from a template. It returns 403 if `quota` is set while the quota for this kind of room is turned off. If no room template has
     /// the `templateId`, the call returns 404.
     /// </remarks>
     /// <summary>Create a room from the template</summary>
@@ -162,7 +164,7 @@ public class VirtualRoomsInternalController(
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for such a room with `quota`")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The progress record of the room creation job", typeof(RoomFromTemplateStatusDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `templateId` or `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 or `cover` longer than 50 characters, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, `lifetime` has an unknown `period` or a `value` outside 1-999, or the `watermark` text is longer than 255 characters")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `templateId` or `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 or `cover` longer than 50 characters, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, or `private` is true")]
     [SwaggerResponse(403, "The caller cannot read the template or is a user or a guest, or `quota` is set while the storage quota for rooms (for an AI agent template, for agents) is turned off")]
     [SwaggerResponse(404, "No room template with `templateId` exists")]
     [HttpPost("fromTemplate")]
@@ -206,7 +208,7 @@ public class VirtualRoomsInternalController(
         // The room is built by a background operation, so both the access to the template and the
         // right to create rooms at all have to be verified here — otherwise the caller is told the
         // request succeeded and only finds out later, from the operation status, that it could not.
-        await _fileStorageService.CheckCanCreateRoomFromTemplateAsync(dto.TemplateId, dto.Quota);
+        await _fileStorageService.CheckCanCreateRoomFromTemplateAsync(dto.TemplateId, dto.Quota, dto.Private);
 
         var taskId = await roomTemplatesWorker.StartCreateRoomAsync(tenantManager.GetCurrentTenantId(), _authContext.CurrentAccount.ID,
             dto.TemplateId,
@@ -713,15 +715,16 @@ public abstract class VirtualRoomsController<T>(
     /// call does not remove a member who has a form role. It reports this in `error` instead. The answer can also carry
     /// a `warning`. The call returns 400 for an invalid or too long `email`, too many email invitations, or an invalid
     /// `culture`. It returns 403 if an entry has an email and the portal forbids guest invitations. It also returns 403
-    /// if a subject cannot get the access, such as a user or guest as room manager. In a private room, a subject
-    /// without encryption keys also returns 403. If the room does not exist, the call returns 404.
+    /// if a subject cannot get the access, such as a user or guest as room manager. In a private room, a new member
+    /// without encryption keys also returns 403. A group also returns 403 there, but removing a group works. Such a
+    /// refusal changes nothing. If the room does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Set the room access rights</summary>
     /// <path>api/2.0/files/rooms/{id}/share</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The access entries of the named subjects, plus a warning or an error when something was not applied", typeof(RoomSecurityDto))]
     [SwaggerResponse(400, "The request body cannot be read, an `email` in `invitations` is malformed or longer than 255 characters, `invitations` invites more addresses by email than the portal allows at once, `culture` is not a valid culture name while an invitation email is sent, or a third-party identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(403, "Email invitations are sent while the portal forbids inviting guests, the caller may not read the room or change its members, a listed subject cannot be given the requested access in this room, or the room is private and a listed account or invited address has no encryption keys")]
+    [SwaggerResponse(403, "Email invitations are sent while the portal forbids inviting guests, the caller may not read the room or change its members, a listed subject cannot be given the requested access in this room, or the room is private and a listed account or invited address gets access for the first time without encryption keys or a listed group is given access")]
     [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [HttpPut("{id}/share")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
@@ -863,7 +866,7 @@ public abstract class VirtualRoomsController<T>(
     /// `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and takes `passwordRequired`
     /// instead of `password`. A new link without `passwordRequired` asks for a password. A changed link keeps its
     /// value. Only a file link with `expirationDate` may set `passwordRequired` to false. On other items, the call
-    /// ignores `passwordRequired` and the key fields. In a private room, only the room owner and room managers set and
+    /// ignores `passwordRequired` and the key fields. Such a link does not open yet. Every visit gets `RequiredPassword`. In a private room, only the room owner and room managers set and
     /// revoke links. Other callers get 403. The call also returns 403 for such a link without key fields, with other
     /// access, or with `denyDownload`. It also returns 403 if `passwordRequired` is false on any other link. It returns
     /// 400 if `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc`
@@ -1332,7 +1335,8 @@ public class VirtualRoomsCommonController(
     /// active rooms. The other parameters filter the rooms by type, title, tags, member, owner, storage, quota, privacy,
     /// and metadata. A room must match all filters. Any signed-in user can call it. If the caller cannot read the
     /// section, the call returns 403. A caller sees only the rooms they created or were invited to. A DocSpace admin
-    /// sees all rooms. So an empty list means that the caller sees no matching room. The call is read-only, except
+    /// sees all rooms, except private rooms they are not a member of. While the end-to-end encrypted rooms app is off, the list
+    /// has no private room. So an empty list means that the caller sees no matching room. The call is read-only, except
     /// that it stores a `sortBy` value as the default sort order of the account. Without `sortBy`, the call uses the
     /// stored order. The rooms come in `folders`, and `files` stays empty. The `current` field describes the section,
     /// and `total` counts all matching rooms before paging. To read one room, use `GET api/2.0/files/rooms/{id}`. The

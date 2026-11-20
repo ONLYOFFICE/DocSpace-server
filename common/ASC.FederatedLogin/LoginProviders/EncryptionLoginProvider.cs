@@ -96,12 +96,17 @@ public class EncryptionLoginProvider(
 
     public async Task ThrowIfKeysAreNotSetAsync(Guid userId)
     {
+        if (!await HasKeysAsync(userId))
+        {
+            throw new EncryptionKeyNotSetException();
+        }
+    }
+
+    public async Task<bool> HasKeysAsync(Guid userId)
+    {
         // Deleting the last key leaves an empty list behind, which opens nothing either.
         var keys = await GetKeysAsync(userId);
-        if (keys == null || keys.Trim() == "[]")
-        {
-            throw new InvalidOperationException($"The user does not have an encryption key");
-        }
+        return keys != null && keys.Trim() != "[]";
     }
 }
 

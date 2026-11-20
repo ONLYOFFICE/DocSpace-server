@@ -73,7 +73,8 @@ public class UserManager(
     QuotaSocketManager quotaSocketManager,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     IDistributedLockProvider distributedLockProvider,
-    CoreBaseSettings coreBaseSettings)
+    CoreBaseSettings coreBaseSettings,
+    IEventBus eventBus)
 {
     private IDictionary<Guid, UserInfo> SystemUsers => userManagerConstants.SystemUsers;
 
@@ -348,7 +349,28 @@ public class UserManager(
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
         }
 
+        if (oldUserData.Status != EmployeeStatus.Terminated && newUserData.Status == EmployeeStatus.Terminated)
+        {
+            await PublishUserDisabledAsync(tenant.Id, newUserData.Id);
+        }
+
         return newUserData;
+    }
+
+    // Every way of disabling an account passes here, an LDAP synchronization too, so the cleanup that services outside this
+    // process owe a disabled account (the file keys of private rooms) is started here. Best effort: the account is already
+    // saved, and a failed publish must not fail the call that disabled it.
+    private async Task PublishUserDisabledAsync(int tenantId, Guid userId)
+    {
+        try
+        {
+            // the cleanup acts as the system, whoever disabled the account
+            await eventBus.PublishAsync(new UserDisabledIntegrationEvent(Configuration.Constants.CoreSystem.ID, tenantId) { UserId = userId });
+        }
+        catch (Exception exception)
+        {
+            log.WarningPublishUserDisabled(tenantId, userId, exception);
+        }
     }
 
     public async Task<UserInfo> UpdateUserInfoWithSyncCardDavAsync(UserInfo u)

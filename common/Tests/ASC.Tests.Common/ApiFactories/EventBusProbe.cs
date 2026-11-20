@@ -53,24 +53,56 @@ public sealed class EventBusProbe : IAsyncDisposable
 
     private static readonly TimeSpan _settle = TimeSpan.FromMilliseconds(300);
 
-    // The serializer registers the subtypes of the events declared in the assemblies already loaded when it is built,
-    // so the assembly of the event types is loaded first.
+    private readonly IConnection _connection;
+    private readonly IChannel _channel;
+    private readonly string _queue;
+    // The serializer registers the subtypes of the events declared in the assemblies loaded when it is built, and the
+    // model takes no new subtype after its first use, so it is built once, after the assemblies that declare the events
+    // the suites read or publish are loaded: ASC.Common (the letters) and ASC.Core.Common (a disabled account), which a
+    // suite that references no service project may not have.
     private static readonly Lazy<ProtobufSerializer> _serializer = new(() =>
     {
         _ = typeof(ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent).Assembly;
 
+        try
+        {
+            System.Reflection.Assembly.Load("ASC.Core.Common");
+        }
+        catch (FileNotFoundException)
+        {
+            // not deployed with this suite; its events are then not read here
+        }
+
         return new ProtobufSerializer();
     });
-
-    private readonly IConnection _connection;
-    private readonly IChannel _channel;
-    private readonly string _queue;
 
     private EventBusProbe(IConnection connection, IChannel channel, string queue)
     {
         _connection = connection;
         _channel = channel;
         _queue = queue;
+    }
+
+    /// <summary>
+    /// Publishes an event the way <c>EventBusRabbitMQ</c> does: to the services' exchange, with the event's type name as
+    /// the routing key, serialized as an <see cref="IntegrationEvent"/>. For a test of what a handler does with an
+    /// event whose publisher the stack cannot reach (an LDAP synchronization).
+    /// </summary>
+    internal static async Task PublishAsync(string connectionString, IntegrationEvent @event, CancellationToken cancellationToken)
+    {
+        var body = _serializer.Value.Serialize(@event);
+
+        await using var connection = await new ConnectionFactory { Uri = new Uri(connectionString) }.CreateConnectionAsync(cancellationToken);
+        await using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+
+        await channel.ExchangeDeclareAsync(Exchange, ExchangeType.Direct, cancellationToken: cancellationToken);
+        await channel.BasicPublishAsync(
+            Exchange,
+            @event.GetType().Name,
+            mandatory: true,
+            new BasicProperties { DeliveryMode = DeliveryModes.Persistent, MessageId = Guid.NewGuid().ToString() },
+            body,
+            cancellationToken);
     }
 
     internal static async Task<EventBusProbe> StartAsync(string connectionString, string eventName, CancellationToken cancellationToken)

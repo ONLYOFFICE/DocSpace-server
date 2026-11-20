@@ -126,6 +126,14 @@ public class ExternalShare(
             return Status.Invalid;
         }
 
+        // A link of an item in a private room (the only kind that stores PasswordRequired) opens only against the proof
+        // that the creator's browser derived from the link's secret, with a password or without one. No proof is
+        // accepted yet, so such a link always asks for it and nothing is served on its address alone.
+        if (record.Options.PasswordRequired != null)
+        {
+            return Status.RequiredPassword;
+        }
+
         if (string.IsNullOrEmpty(record.Options.Password))
         {
             return Status.Ok;

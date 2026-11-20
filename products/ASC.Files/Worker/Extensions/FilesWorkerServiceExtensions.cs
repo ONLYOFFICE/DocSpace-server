@@ -157,6 +157,8 @@ public static class FilesWorkerServiceExtensions
                 DuplicateIntegrationEventHandler>(),
             eventBus.SubscribeAsync<BulkDownloadIntegrationEvent,
                 BulkDownloadIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<UserDisabledIntegrationEvent,
+                UserDisabledIntegrationEventHandler>(),
             eventBus.SubscribeAsync<MarkAsReadIntegrationEvent,
                 MarkAsReadIntegrationEventHandler>(),
             eventBus.SubscribeAsync<FileBuilderIntegrationEvent,

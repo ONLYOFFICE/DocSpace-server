@@ -53,6 +53,12 @@ public class ReassignProgressItem : DistributedTaskProgress
     /// <type>System.Guid, System</type>
     public Guid ToUser { get; private set; }
 
+    /// <summary>
+    /// The private rooms that stayed with the source user, because neither the recipient nor the portal owner holds an
+    /// encryption key. Empty when every room moved; null until the rooms are reassigned.
+    /// </summary>
+    public List<int> KeptPrivateRoomIds { get; set; }
+
     private IDictionary<string, StringValues> _httpHeaders;
     private string _baseUri;
     private int _tenantId;
@@ -133,6 +139,14 @@ public class ReassignProgressItem : DistributedTaskProgress
             await fileStorageService.ReassignProvidersAsync(FromUser, ToUser);
 
             await SetPercentageAndCheckCancellationAsync(50, true);
+
+            // A private room goes only to somebody with an encryption key; one nobody can take stays where it is,
+            // with everything in it.
+            KeptPrivateRoomIds = await fileStorageService.ReassignPrivateRoomsAsync(FromUser, ToUser);
+            if (KeptPrivateRoomIds.Count > 0)
+            {
+                personalFolderIds = [.. personalFolderIds ?? [], .. KeptPrivateRoomIds];
+            }
 
             await fileStorageService.ReassignFoldersAsync(FromUser, ToUser, personalFolderIds);
 

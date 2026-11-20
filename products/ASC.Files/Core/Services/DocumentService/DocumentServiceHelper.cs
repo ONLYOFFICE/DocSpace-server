@@ -57,7 +57,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         IQuotaService quotaService,
         TenantManager tenantManager,
         CoreSettings coreSettings,
-        DocumentServiceEncryptionChecker documentServiceEncryptionChecker)
+        DocumentServiceEncryptionChecker documentServiceEncryptionChecker,
+        PrivateRoomsGate privateRoomsGate)
 {
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
@@ -180,6 +181,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
+
+        await privateRoomsGate.ThrowIfHiddenAsync(file);
 
         if (!string.IsNullOrEmpty(file.Error))
         {

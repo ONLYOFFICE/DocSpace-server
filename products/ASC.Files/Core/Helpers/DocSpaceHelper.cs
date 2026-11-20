@@ -195,6 +195,18 @@ public static class DocSpaceHelper
         return LocatedInPrivateRoom(room);
     }
 
+    /// <summary>Whether the entry is a private room itself, or a folder or a file of one, active or archived.</summary>
+    public static async Task<bool> IsOrLocatedInPrivateRoomAsync<T>(FileEntry<T> entry, IFolderDao<T> folderDao)
+    {
+        if (entry is Folder<T> { IsRoom: true } room)
+        {
+            return room.SettingsPrivate;
+        }
+
+        return entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive
+            && await LocatedInPrivateRoomAsync(entry, folderDao);
+    }
+
     /// <summary>
     /// The encrypted files under <paramref name="folderId"/> that hold no key for <paramref name="userId"/>,
     /// which that user could not open. A file stored in the clear needs no key and is not reported.

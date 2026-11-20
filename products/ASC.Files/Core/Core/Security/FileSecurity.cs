@@ -61,7 +61,8 @@ public class FileSecurity(
     VectorizationHelper vectorizationHelper,
     AiAccessibility aiAccessibility,
     IServiceProvider serviceProvider,
-    AiConfiguration aiConfiguration)
+    AiConfiguration aiConfiguration,
+    PrivateRoomsGate privateRoomsGate)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1707,6 +1708,12 @@ public class FileSecurity(
 
         var inPrivateRoom = isRoom ? folder is { SettingsPrivate: true } : room is { SettingsPrivate: true };
 
+        // While the end-to-end encrypted rooms app is off, nothing of a private room is listed or served to anybody.
+        if (inPrivateRoom && !await privateRoomsGate.IsEnabledAsync())
+        {
+            return false;
+        }
+
         // The content of an end-to-end encrypted room never leaves it as a copy, whether the room is
         // active or archived, and the server has no clear text to build an index or a vector from.
         if (inPrivateRoom && action is
@@ -1714,8 +1721,24 @@ public class FileSecurity(
                 FilesSecurityActions.Duplicate or
                 FilesSecurityActions.IndexExport or
                 FilesSecurityActions.UseChat or
+                FilesSecurityActions.CanUseAi or
                 FilesSecurityActions.Vectorization or
                 FilesSecurityActions.StartFilling)
+        {
+            return false;
+        }
+
+        // An encrypted file is an opaque blob to the server: a new name, a version comment, a lock, a link, a filter or
+        // the form gallery would each need its content or break the keys bound to it. Checked before full access, so
+        // the room's owner is refused too.
+        if (file is { Encrypted: true } && action is
+                FilesSecurityActions.Rename or
+                FilesSecurityActions.ReadHistory or
+                FilesSecurityActions.EditHistory or
+                FilesSecurityActions.Lock or
+                FilesSecurityActions.CopyLink or
+                FilesSecurityActions.CustomFilter or
+                FilesSecurityActions.SubmitToFormGallery)
         {
             return false;
         }
@@ -2191,6 +2214,17 @@ public class FileSecurity(
         e.ShareRecord = ace;
         e.Access = ace?.Share ?? defaultShare;
         e.Access = e.RootFolderType is FolderType.ThirdpartyBackup ? FileShare.Restrict : e.Access;
+
+        // Handing a private room over reveals none of its content: changeFileOwner refuses a new owner who lacks a key of
+        // an encrypted file. So a DocSpace admin who is a member may do it, whatever their role there; it is how a room
+        // whose owner a directory synchronization disabled, or whose owner was removed, gets a new one. The administrator
+        // bypass above stays off for private rooms, so an administrator who is not a member is still refused.
+        if (action == FilesSecurityActions.ChangeOwner && isRoom && inPrivateRoom && isDocSpaceAdmin &&
+            e.RootFolderType == FolderType.VirtualRooms &&
+            ace is { SubjectType: SubjectType.User, Share: not (FileShare.Restrict or FileShare.None) } && ace.Subject == userId)
+        {
+            return true;
+        }
 
         if (file != null)
         {
@@ -2992,14 +3026,23 @@ public class FileSecurity(
             _ => privacyFilter
         };
 
-        if (isAdmin && searchArea is not (SearchArea.Templates or SearchArea.FormTemplates))
+        var rooms = isAdmin && searchArea is not (SearchArea.Templates or SearchArea.FormTemplates)
+            ? await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
+                subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter, withAiFolder, metadataFilter)
+            : await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
+                subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter, withAiFolder, metadataFilter);
+
+        // While the end-to-end encrypted rooms app is off, no area and no filter lists a private room, and nothing that
+        // lies in one (a search with subfolders).
+        if (!await privateRoomsGate.IsEnabledAsync())
         {
-            return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-                subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter, withAiFolder, metadataFilter);
+            var cacheFolderDao = daoFactory.GetCacheFolderDao<int>();
+            rooms = await rooms.ToAsyncEnumerable()
+                .Where(async (e, _) => e is not FileEntry<int> entry || !await DocSpaceHelper.IsOrLocatedInPrivateRoomAsync(entry, cacheFolderDao))
+                .ToListAsync();
         }
 
-        return await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-            subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter, withAiFolder, metadataFilter);
+        return rooms;
     }
 
     // FillingFormsRoom rooms physically live under VirtualRooms but are surfaced in the separate Forms

@@ -219,17 +219,22 @@ public class EncryptionKeyPairDtoHelper(
 
         var tmpFiles = await fileSharing.GetSharedInfoAsync([fileId], []);
         var fileShares = tmpFiles.ToList();
-        fileShares = fileShares.Where(share => !share.SubjectGroup).ToList();
+        var recipientIds = fileShares.Where(share => !share.SubjectGroup).Select(share => share.Id).ToList();
 
-        var tasks = fileShares.Select(async share =>
+        if (locatedInPrivateRoom)
         {
-            var fileKeyPairString = await encryptionLoginProvider.GetKeysAsync(share.Id);
+            recipientIds = await GetPrivateRoomRecipientsAsync(file, folderDao, recipientIds);
+        }
+
+        var tasks = recipientIds.Distinct().Select(async userId =>
+        {
+            var fileKeyPairString = await encryptionLoginProvider.GetKeysAsync(userId);
             if (string.IsNullOrEmpty(fileKeyPairString))
             {
                 return null;
             }
 
-            var fileKeyPair = ParseKeys(fileKeyPairString, share.Id)
+            var fileKeyPair = ParseKeys(fileKeyPairString, userId)
                 .ToList();
 
             return fileKeyPair;
@@ -240,6 +245,39 @@ public class EncryptionKeyPairDtoHelper(
             .SelectMany(keyPair => keyPair);
 
         return SanitizeAccessKeys(fileKeysPair);
+    }
+
+    /// <summary>
+    /// The people a key of a file in a private room is wrapped for: the room's owner always, also after a change of
+    /// owner took away their own access record, and the file's creator only while they still belong to the room.
+    /// </summary>
+    private async Task<List<Guid>> GetPrivateRoomRecipientsAsync<T>(File<T> file, IFolderDao<T> folderDao, List<Guid> recipientIds)
+    {
+        var room = await folderDao.GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => f.IsRoom);
+        if (room == null)
+        {
+            return recipientIds;
+        }
+
+        var result = new List<Guid>(recipientIds);
+
+        if (file.CreateBy != room.CreateBy && result.Contains(file.CreateBy))
+        {
+            var creatorIsMember = await fileSecurity.GetPureSharesAsync(room, [file.CreateBy])
+                .AnyAsync(r => r.Share is not FileShare.None and not FileShare.Restrict);
+
+            if (!creatorIsMember)
+            {
+                result.RemoveAll(id => id == file.CreateBy);
+            }
+        }
+
+        if (!result.Contains(room.CreateBy))
+        {
+            result.Add(room.CreateBy);
+        }
+
+        return result;
     }
 
     public async Task<List<EncryptionKeyDto>> GetKeyPairForRoomAsync<T>(T roomId)

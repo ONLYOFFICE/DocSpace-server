@@ -52,6 +52,9 @@ internal static partial class FileStorageServiceLogger
     [LoggerMessage(LogLevel.Information, "Reassign folders from {fromUser} to {toUser}")]
     public static partial void InformationReassignFolders(this ILogger logger, Guid fromUser, Guid toUser);
 
+    [LoggerMessage(LogLevel.Warning, "{count} private rooms of {fromUser} stay with them: nobody who could take them holds an encryption key")]
+    public static partial void WarningPrivateRoomsKept(this ILogger logger, Guid fromUser, int count);
+
     [LoggerMessage(LogLevel.Information, "Reassign files from {fromUser} to {toUser}")]
     public static partial void InformationReassignFiles(this ILogger logger, Guid fromUser, Guid toUser);
 

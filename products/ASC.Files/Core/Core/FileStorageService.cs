@@ -111,7 +111,8 @@ public class FileStorageService //: IFileStorageService
     EncryptionLoginProvider encryptionLoginProvider,
     DocumentServiceEncryptionChecker documentServiceEncryptionChecker,
     AiAccessibility aiAccessibility,
-    DocumentServiceLicense documentServiceLicense)
+    DocumentServiceLicense documentServiceLicense,
+    PrivateRoomsGate privateRoomsGate)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
 
@@ -173,6 +174,8 @@ public class FileStorageService //: IFileStorageService
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
+
+        await privateRoomsGate.ThrowIfHiddenAsync(folder);
 
         if (!await fileSecurity.CanReadAsync(folder))
         {
@@ -365,6 +368,8 @@ public class FileStorageService //: IFileStorageService
 
             throw GenerateException(e);
         }
+
+        await privateRoomsGate.ThrowIfHiddenAsync(parent);
 
         if (!await fileSecurity.CanReadAsync(parent))
         {
@@ -909,7 +914,7 @@ public class FileStorageService //: IFileStorageService
     /// rooms at all. Same reason as <see cref="CheckCanCreateRoomTemplateAsync"/>: the work itself
     /// happens in the background.
     /// </summary>
-    public async Task CheckCanCreateRoomFromTemplateAsync(int templateId, long? quota = null)
+    public async Task CheckCanCreateRoomFromTemplateAsync(int templateId, long? quota = null, bool? @private = null)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var template = await folderDao.GetFolderAsync(templateId);
@@ -919,6 +924,12 @@ public class FileStorageService //: IFileStorageService
         if (template is not { IsRoom: true } || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync)
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        // The files of a template are copied in the clear, which a private room must never hold.
+        if (@private ?? template.SettingsPrivate)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_PrivateRoomFromTemplate);
         }
 
         if (!await fileSecurity.CanReadAsync(template))
@@ -1017,7 +1028,7 @@ public class FileStorageService //: IFileStorageService
         var parentId = await globalFolderHelper.FolderVirtualRoomsAsync;
         var folderDao = daoFactory.GetFolderDao<int>();
 
-        await CheckCanCreateRoomFromTemplateAsync(templateId);
+        await CheckCanCreateRoomFromTemplateAsync(templateId, @private: @private);
 
         var template = await folderDao.GetFolderAsync(templateId);
 
@@ -1224,6 +1235,14 @@ public class FileStorageService //: IFileStorageService
 
         if (isRoom && privacy)
         {
+            // A Public and a Form filling room make an external link of their own, and an AI agent is used by people
+            // who hold no key: nobody could open what such a room keeps. Refused before anything is saved.
+            if (folderType is FolderType.PublicRoom or FolderType.FillingFormsRoom or FolderType.AiRoom)
+            {
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_PrivateRoomTypeNotSupported);
+            }
+
+            await privateRoomsGate.DemandEnabledAsync();
             await DemandPrivateRoomCanBeCreatedAsync();
 
             // Indexing and a watermark need the content in the clear, which the server does not have,
@@ -1897,6 +1916,8 @@ public class FileStorageService //: IFileStorageService
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
+        await privateRoomsGate.ThrowIfHiddenAsync(file);
+
         if (!await fileSecurity.CanReadAsync(file))
         {
             await DemandAuthenticatedOrLinkAsync();
@@ -2536,7 +2557,9 @@ public class FileStorageService //: IFileStorageService
             throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(version));
         }
 
-        if (!await fileSecurity.CanEditHistoryAsync(file))
+        // The comment of a version of an encrypted file would be the one text about it stored in the clear; refused for
+        // everybody, the room's owner too, and not only through the rights below.
+        if (file.Encrypted || !await fileSecurity.CanEditHistoryAsync(file))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -4146,7 +4169,11 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task ReassignRoomsAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
+    /// <summary>
+    /// Gives the rooms of a user whose data is removed to another user and returns the private rooms it kept with the
+    /// user, because nobody who could take them holds an encryption key.
+    /// </summary>
+    public async Task<List<int>> ReassignRoomsAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
     {
         if (checkPermission)
         {
@@ -4155,10 +4182,51 @@ public class FileStorageService //: IFileStorageService
 
         if (daoFactory.GetFolderDao<int>() is not FolderDao folderDao)
         {
-            return;
+            return [];
         }
 
-        await folderDao.ReassignRoomsAsync(userFromId, userToId);
+        var keptPrivateRoomIds = await ReassignPrivateRoomsAsync(userFromId, userToId);
+
+        await folderDao.ReassignRoomsAsync(userFromId, userToId, keptPrivateRoomIds);
+
+        return keptPrivateRoomIds;
+    }
+
+    /// <summary>
+    /// A private room goes only to somebody who holds an encryption key, since nobody can open its files for anyone
+    /// else: the preferred user, else the portal owner. When neither holds one, the room stays with its owner; the ids
+    /// of those rooms are returned, so that the caller leaves them out of its own reassignment. A missing file key does
+    /// not matter here: nobody may be left to issue it.
+    /// </summary>
+    public async Task<List<int>> ReassignPrivateRoomsAsync(Guid userFromId, Guid preferredUserToId)
+    {
+        if (daoFactory.GetFolderDao<int>() is not FolderDao folderDao)
+        {
+            return [];
+        }
+
+        var privateRoomIds = await folderDao.GetPrivateRoomIdsByOwnerAsync(userFromId);
+        if (privateRoomIds.Count == 0)
+        {
+            return [];
+        }
+
+        if (await encryptionLoginProvider.HasKeysAsync(preferredUserToId))
+        {
+            // the caller's own reassignment moves them with the other rooms
+            return [];
+        }
+
+        var ownerId = tenantManager.GetCurrentTenant().OwnerId;
+        if (ownerId != userFromId && await encryptionLoginProvider.HasKeysAsync(ownerId))
+        {
+            await folderDao.ReassignFoldersAsync(ownerId, privateRoomIds);
+            return [];
+        }
+
+        _logger.WarningPrivateRoomsKept(userFromId, privateRoomIds.Count);
+
+        return privateRoomIds;
     }
 
     public async Task ReassignRoomsFoldersAsync(Guid userFromId, bool checkPermission = false)
@@ -4262,7 +4330,12 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
 
         var files = fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(filesId).Where(file => !file.Encrypted)).ToListAsync();
-        var folders = fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)).ToListAsync();
+        // A private room and its folders are skipped like an encrypted file: a favourite mark is a row about them that
+        // lives outside the room.
+        var cacheFolderDao = daoFactory.GetCacheFolderDao<T>();
+        var folders = fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)
+                .Where(async (folder, _) => !await DocSpaceHelper.IsOrLocatedInPrivateRoomAsync(folder, cacheFolderDao)))
+            .ToListAsync();
 
         List<FileEntry<T>> entries = [];
 
@@ -4744,15 +4817,16 @@ public class FileStorageService //: IFileStorageService
                     .Select(r => r.Subject)
                     .ToListAsync();
 
+                // The keys go before the access does, so that nobody is out of the room while still holding them;
+                // the caller's own keys go with RemoveAceAsync below.
+                if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+                {
+                    await fileSharingAceHelper.RevokeFileKeysAsync(privateRoom, subjects.Where(s => s != authContext.CurrentAccount.ID).ToList());
+                }
+
                 foreach (var subject in subjects)
                 {
                     await fileSecurity.ShareAsync(entry.Id, entry.FileEntryType, subject, FileShare.None);
-                }
-
-                if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
-                {
-                    // the caller's own keys go with the call below
-                    await fileSharingAceHelper.RevokeFileKeysAsync(privateRoom, subjects.Where(s => s != authContext.CurrentAccount.ID).ToList());
                 }
 
                 // keep the caller's own list-cleanup semantics (favorites / recent / new-marks)
