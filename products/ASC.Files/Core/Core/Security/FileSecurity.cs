@@ -3004,6 +3004,11 @@ public class FileSecurity(
             _ => privacyFilter
         };
 
+        if (searchArea == SearchArea.AiHub)
+        {
+            withSubfolders = false;
+        }
+
         if (isAdmin && searchArea is not (SearchArea.Templates or SearchArea.FormTemplates))
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,

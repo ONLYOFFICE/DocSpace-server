@@ -2159,7 +2159,9 @@ download and copy it and nothing else: `updateFile`, `deleteFile`, `moveBatchIte
 `getFolderByFolderId` of an AI project SHALL answer no files, no folders and total 0, `getFolders` an empty
 list, and a search inside the project nothing, to the creator of the files, the project's owner and a DocSpace
 admin alike. `getRoomInfo` of a project SHALL report `filesCount` and `foldersCount` 0. `getProjectSources`
-and `getRoomSkills` of the project SHALL answer as they do for a project without files.
+and `getRoomSkills` of the project SHALL answer as they do for a project without files. `getFolderByFolderId`
+and `searchFolder` of the AI rooms root, and `getFolderByFolderId` of the rooms root with `searchArea` AiHub,
+SHALL list rooms only, whatever `withSubFolders` says: no entry inside a project, and no such entry in `total`.
 
 #### Scenario: Listing a project that holds thread files
 
@@ -2170,6 +2172,16 @@ and `getRoomSkills` of the project SHALL answer as they do for a project without
 
 - **WHEN** the creator of an artifact `report.txt` calls `getFolderByFolderId` of the project with `filterValue` `report` and `withSubFolders` true
 - **THEN** the answer holds no files and total 0
+
+#### Scenario: Listing the AI rooms root
+
+- **WHEN** another member of the project, the project's owner and a DocSpace admin each call `getFolderByFolderId` and `searchFolder` of the AI rooms root, and `getFolderByFolderId` of the rooms root with `searchArea` AiHub, for a project with an artifact and a file not sent yet
+- **THEN** every answer lists the project and other rooms only, no file and no folder of a thread, with a total equal to the number of rooms listed
+
+#### Scenario: Filtering the AI rooms root by the title of a thread folder
+
+- **WHEN** the same callers call `getFolderByFolderId` of the AI rooms root with `filterValue` `artifacts`
+- **THEN** the answer holds no folder of a thread and no file
 
 #### Scenario: Counters of the project
 

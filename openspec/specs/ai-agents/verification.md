@@ -471,6 +471,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Creator cannot change the file (scenario); creator opens the editor (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:78,92,107,132,146`; `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:121` | TEST-CONFIRMED |
 | **The contents of a project are not listed** |  |  |
 | Listing; search inside the project (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:51,69,80` | TEST-CONFIRMED |
+| Listing the AI rooms root; filtering it by the title of a thread folder (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:53,86,103`; `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:69` | TEST-CONFIRMED |
 | Counters of the project; sources and skills (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:96,107` | TEST-CONFIRMED |
 | **Recipients of an upload into a project** |  |  |
 | Uploader is told; others are not told (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:52,68` | TEST-CONFIRMED |
