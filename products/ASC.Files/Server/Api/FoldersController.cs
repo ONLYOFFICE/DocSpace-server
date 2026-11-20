@@ -422,7 +422,8 @@ public abstract class FoldersController<T>(
     /// access to the folder. Other callers get 403. Without signing in, a caller needs an external link to the
     /// folder. The call changes data of the caller only. It clears the new-item marks of the folder. It also saves a
     /// valid `sortBy` and `sortOrder` as the default order of the account. You can repeat it. With a filter, the
-    /// call searches the whole subtree by default. The text filter also searches indexed document content. Indexing
+    /// call searches the whole subtree by default. The AI rooms root, and the rooms root with `searchArea` AiHub,
+    /// list rooms only. The text filter also searches indexed document content. Indexing
     /// runs in the background, so a new file can be missing from the results at first. Use `count` and `startIndex`
     /// to page through the result. The `total` field counts all matching entries. To filter by metadata with a typed
     /// body, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`
@@ -472,8 +473,9 @@ public abstract class FoldersController<T>(
     /// data of the caller only. It clears the new-item marks of the folder. It also saves a valid `sortBy` as the
     /// default order of the account. The call ignores an unknown `sortBy`. You can repeat it. All conditions of
     /// `metadataFilters` must match. Without a template, conditions, and `filterValue`, the call lists the folder
-    /// unfiltered. By default, the search covers the whole subtree. Use `count` and `startIndex` to page through the
-    /// result. The `total` field counts all matches. Take the template and field IDs from
+    /// unfiltered. By default, the search covers the whole subtree. The AI rooms root lists rooms only. Use `count`
+    /// and `startIndex` to page through the result. The `total` field counts all matches. Take the template and
+    /// field IDs from
     /// `GET api/2.0/files/metadata/templates`. A folder of a connected storage has no metadata, so a filter there
     /// returns an empty page. The call returns 400 for an unknown template or field, or a field outside the named
     /// template. It also returns 400 for more than 20 conditions or a filter in the Templates or Private section. If
