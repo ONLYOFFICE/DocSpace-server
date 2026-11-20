@@ -33,6 +33,40 @@
 
 namespace ASC.Site.Core.Dtos;
 
+/// <summary>The body of <c>POST /subscription/unsubscribe</c>.</summary>
+/// <param name="UnsubscribeId">The id from the link of a letter: an <c>emailKey</c> of <c>/key/generate</c>, an <c>unsubscribeId</c> of <c>/key/generateunsubscribeid</c>, or the id of the footer link of DocSpace letters.</param>
+/// <param name="Subscribe"><see langword="true"/> to subscribe the address to the marketing letters again, <see langword="false"/> to unsubscribe it.</param>
+/// <param name="NewsOnly">With <c>Subscribe = false</c>: <see langword="true"/> unsubscribes from the marketing letters only, <see langword="false"/> also from the letters of every DocSpace portal.</param>
+public record UnsubscribeRequestDto(string UnsubscribeId, bool? Subscribe, bool? NewsOnly);
+
+/// <summary>The answer of <c>POST /subscription/unsubscribe</c>.</summary>
+/// <param name="Email">The address the id holds, lowercased; the site shows it on the page.</param>
+public record UnsubscribeResponseDto(string Email);
+
+/// <summary>The body of <c>POST /subscription/subscribe</c>.</summary>
+/// <param name="UnsubscribeId">The id from the confirmation letter: an <c>unsubscribeId</c> of <c>/key/generateunsubscribeid</c> whose data is the JSON <c>{email, firstname, type}</c>.</param>
+/// <param name="Type">The list, by name or number; when omitted, the <c>type</c> of the id, and <see cref="SubscribeType.Common"/> when the id has none.</param>
+public record SubscribeRequestDto(string UnsubscribeId, SubscribeType? Type);
+
+/// <summary>The answer of <c>POST /subscription/subscribe</c>.</summary>
+/// <param name="Email">The address the id holds, lowercased.</param>
+/// <param name="Type">The list the subscription was written for.</param>
+/// <param name="Result">Whether the subscription was added or was already there.</param>
+public record SubscribeResponseDto(string Email, SubscribeType Type, SubscribeResult Result);
+
+/// <summary>What <c>POST /subscription/subscribe</c> did.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<SubscribeResult>))]
+public enum SubscribeResult
+{
+    /// <summary>The subscription was written.</summary>
+    [JsonStringEnumMemberName("added")]
+    Added,
+
+    /// <summary>The subscription was already there; the address was removed from the unsubscribed list.</summary>
+    [JsonStringEnumMemberName("updated")]
+    Updated
+}
+
 /// <summary>
 /// The mailing list of a subscription, stored as the <c>type</c> column of <c>template_subscribe</c>.
 /// The names and values are the ones the site uses.

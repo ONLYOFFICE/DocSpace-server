@@ -84,3 +84,5 @@ global using Microsoft.Extensions.Hosting.WindowsServices;
 global using MySqlConnector;
 
 global using NLog;
+
+global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
