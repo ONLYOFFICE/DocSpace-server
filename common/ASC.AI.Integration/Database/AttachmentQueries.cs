@@ -104,6 +104,7 @@ static file class AttachmentQueriesContainer
                     .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.MessageId == null &&
                                 x.EntryId != null && entryIds.Contains(x.EntryId.Value)));
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<AiIntegrationContext, int, Guid, Guid, string, Task<int>> SetAttachmentContentAsync =
         (AiIntegrationContext ctx, int tenantId, Guid createdBy, Guid id, string content) =>
             ctx.Attachments
@@ -121,6 +122,7 @@ static file class AttachmentQueriesContainer
                 .ExecuteUpdateAsync(x => x
                     .SetProperty(y => y.MessageId, messageId));
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, Task<int>> AgeUnboundAttachmentsAsync =
         (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids) =>
             ctx.Attachments

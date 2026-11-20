@@ -83,14 +83,10 @@ public partial class FilesDbContext
         return AiIntegrationQueries.MarkProjectMemberThreadsDeletedAsync(this, tenantId, projectId, userId, deletedOn);
     }
 
+    [PreCompileQuery]
     public Task<int> MarkAiProjectThreadsDeletedAsync(int tenantId, Guid userId, DateTime deletedOn)
     {
-        return Threads
-            .Where(x => x.TenantId == tenantId && x.CreatedBy == userId && x.DeletedOn == null &&
-                        Folders.Any(f => f.TenantId == tenantId &&
-                                         f.Id == x.EntryId &&
-                                         f.FolderType == FolderType.AiProjectRoom))
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
+        return AiIntegrationQueries.MarkAiProjectThreadsDeletedAsync(this, tenantId, userId, deletedOn);
     }
 
     [PreCompileQuery]
@@ -99,15 +95,10 @@ public partial class FilesDbContext
         return AiIntegrationQueries.DeleteAiProjectSharesAsync(this, tenantId, userId);
     }
 
+    [PreCompileQuery]
     public Task<int> MarkOwnedAiProjectThreadsDeletedAsync(int tenantId, Guid userId, DateTime deletedOn)
     {
-        return Threads
-            .Where(x => x.TenantId == tenantId && x.CreatedBy == userId && x.DeletedOn == null &&
-                        Folders.Any(f => f.TenantId == tenantId &&
-                                         f.Id == x.EntryId &&
-                                         f.FolderType == FolderType.AiProjectRoom &&
-                                         f.CreateBy == userId))
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
+        return AiIntegrationQueries.MarkOwnedAiProjectThreadsDeletedAsync(this, tenantId, userId, deletedOn);
     }
 
     [PreCompileQuery]
@@ -158,24 +149,49 @@ static file class AiIntegrationQueries
                 .Where(x => x.TenantId == tenantId && x.EntryId != null && folderIds.Contains(x.EntryId.Value))
                 .ExecuteDelete());
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<FilesDbContext, int, Guid, int, Task<int>> SetThreadArtifactsFolderAsync =
         (FilesDbContext ctx, int tenantId, Guid threadId, int folderId) =>
             ctx.Threads
                 .Where(x => x.TenantId == tenantId && x.Id == threadId && x.ArtifactsFolderId == null && x.DeletedOn == null)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.ArtifactsFolderId, folderId));
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<FilesDbContext, int, Guid, int, Task<int>> SetThreadAttachmentsFolderAsync =
         (FilesDbContext ctx, int tenantId, Guid threadId, int folderId) =>
             ctx.Threads
                 .Where(x => x.TenantId == tenantId && x.Id == threadId && x.AttachmentsFolderId == null && x.DeletedOn == null)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.AttachmentsFolderId, folderId));
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<FilesDbContext, int, Guid, DateTime, Task<int>> TouchLiveThreadAsync =
         (FilesDbContext ctx, int tenantId, Guid threadId, DateTime lastEditDate) =>
             ctx.Threads
                 .Where(x => x.TenantId == tenantId && x.Id == threadId && x.DeletedOn == null)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.LastEditDate, lastEditDate));
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public static readonly Func<FilesDbContext, int, Guid, DateTime, Task<int>> MarkAiProjectThreadsDeletedAsync =
+        (FilesDbContext ctx, int tenantId, Guid userId, DateTime deletedOn) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.CreatedBy == userId && x.DeletedOn == null &&
+                            ctx.Folders.Any(f => f.TenantId == tenantId &&
+                                                 f.Id == x.EntryId &&
+                                                 f.FolderType == FolderType.AiProjectRoom))
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public static readonly Func<FilesDbContext, int, Guid, DateTime, Task<int>> MarkOwnedAiProjectThreadsDeletedAsync =
+        (FilesDbContext ctx, int tenantId, Guid userId, DateTime deletedOn) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.CreatedBy == userId && x.DeletedOn == null &&
+                            ctx.Folders.Any(f => f.TenantId == tenantId &&
+                                                 f.Id == x.EntryId &&
+                                                 f.FolderType == FolderType.AiProjectRoom &&
+                                                 f.CreateBy == userId))
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<FilesDbContext, int, int, Guid, DateTime, Task<int>> MarkProjectMemberThreadsDeletedAsync =
         (FilesDbContext ctx, int tenantId, int projectId, Guid userId, DateTime deletedOn) =>
             ctx.Threads

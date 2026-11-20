@@ -196,6 +196,7 @@ static file class ThreadQueriesContainer
                 .Where(x => x.TenantId == tenantId && x.ProfileId == profileId)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.ProfileId, (Guid?)null));
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<AiIntegrationContext, int, Guid, DateTime, Task<int>> MarkThreadDeletedAsync =
         (AiIntegrationContext ctx, int tenantId, Guid id, DateTime deletedOn) =>
             ctx.Threads
