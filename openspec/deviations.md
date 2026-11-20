@@ -243,7 +243,6 @@ Evidence column:
 | PG-1 | people-and-groups | `displayName` of a profile comes back HTML-encoded (`O&#39;Hara`) while `firstName`, `lastName` and the stored columns are not, so feeding it back to a search finds nothing. | per test comment | OPEN |
 | SI5 | storage-and-integrations | The Yandex entry of `getAllProviders` has key `WebDav` without `requiredConnectionUrl`, while a WebDAV connection without an address is refused (the refusal read only as a comment). | red by code reading | OPEN |
 | SI8 | storage-and-integrations | A second `saveThirdPartyBackup` stores the new title without the invalid-character cleaning a new account gets. | red by code reading | OPEN |
-| PR2 | private-rooms | A private room or its subfolder can be added to Favorites. | per commit message | OPEN |
 | FW2 | form-filling-workflow | By-id read of a hidden form: this spec, the code, the test and `form-filling-room-roles` say 403; an older live run recorded 404 and has not been repeated. | test pins (documentation item) | OPEN |
 | Q5 | quotas | A file that does not fit the remaining portal allowance is refused with "The maximum file size is exceeded (<remaining>)", quoting free space as a per-file limit. | static | OPEN |
 | FX2 | files-settings | A second person refused by `startEditFile` is told "This document is being edited by you in another tab". | pinned by a test; wording judged by reading | OPEN |
@@ -337,6 +336,7 @@ green, run 2026-11-18" were confirmed by that run; the others were read, not run
 
 | # | Spec | What the server did | Evidence | Status |
 |---|------|---------------------|----------|--------|
+| PR2 | private-rooms | A private room or its subfolder could be added to Favorites, and a room marked before it became private was listed there. `addFavorites` now skips private rooms and their folders, and the Favorites listing leaves them out (change private-rooms-server-followups, decision 11). | tests (`products/ASC.Files/Tests/Tests/08_Private/PrivateRoomContentGatesTests.cs:161`, `:176`); tests green, run 2026-11-20 | FIXED `a77956ac1c` |
 | AC-1 to AC-4 | access-settings | `saveSsoSettingsV2` answered 500 for no IdP entity ID (bug 84685), a missing or invalid SSO URL (84686), an incomplete field mapping (84687) and a malformed SLO URL (84688); each now answers 400. | commit read, not run; tests green, run 2026-11-18 | FIXED `f3a52c35dd` |
 | AC-5 | access-settings | `sendSmsCode` with valid credentials and SMS off for the account answered 500, the thrown exception type having no mapping (bug 84503). | commit read, not run; tests green, run 2026-11-18 | FIXED `f5f2735e30` |
 | F22 | file-operations | `updateFile` on a file locked by somebody else was refused through a 500 instead of a client error; it now answers 403 (bug 84842). | tests (`LockedFileStateTests.cs:147`, `FileRenameLockedTests.cs:110`); tests green, run 2026-11-18 | FIXED `77db3a6128` |
