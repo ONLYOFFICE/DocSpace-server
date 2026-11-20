@@ -80,8 +80,9 @@ public class FilesControllerInternal(
 {
     /// <remarks>
     /// Returns the activity log of one file from the portal audit trail. The log shows who renamed, moved, shared,
-    /// converted, locked, or edited the file, and when. Requires read access to the file. Other callers get 403. The
-    /// call is read-only. Entries come newest first. The call merges the events of one action into one entry, and its
+    /// converted, locked, or edited the file, and when. Requires read access to the file. Other callers get 403. A
+    /// file inside an AI project has no log, so the call returns 403 for it to everyone. The call is read-only.
+    /// Entries come newest first. The call merges the events of one action into one entry, and its
     /// `related` list holds the others. The response headers carry the total number of entries, not the body. If no
     /// file has this id, the call returns 404. The call returns 400 if `fromDate` or `toDate` has no `Z` or UTC
     /// offset. To read the log of a folder or a room, use `GET api/2.0/files/folder/{folderId}/log`.
@@ -94,7 +95,7 @@ public class FilesControllerInternal(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The activity entries of the file, newest first", typeof(IAsyncEnumerable<HistoryDto>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset")]
-    [SwaggerResponse(403, "The caller has no read access to the file")]
+    [SwaggerResponse(403, "The caller has no read access to the file, or the file lies inside an AI project")]
     [SwaggerResponse(404, "No file with this identifier exists")]
     [HttpGet("file/{fileId:int}/log")]
     public IAsyncEnumerable<HistoryDto> GetFileHistory(HistoryRequestDto inDto)

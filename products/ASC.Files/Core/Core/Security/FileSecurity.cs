@@ -1260,6 +1260,11 @@ public class FileSecurity(
             return false;
         }
 
+        if (action == FilesSecurityActions.HistoryExport && folder is { FolderType: FolderType.AiProjectRoom })
+        {
+            return false;
+        }
+
         if (action == FilesSecurityActions.HistoryExport)
         {
             if (isGuest)
