@@ -103,9 +103,11 @@ public sealed class UserManagerWrapper(
         var mail = new MailAddress(email);
         var emailLinkedCheckTask = IsEmailLinkedAsync(mail.Address);
 
+        // Both refusals were plain exceptions, a 500. An address taken by another account is the caller's input: 400,
+        // as every other check with the text ErrorEmailAlreadyExists answers
         if (existenceCheck && (await userManager.GetUserByEmailAsync(mail.Address)).Id != Constants.LostUser.Id)
         {
-            throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new ArgumentException(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         var result = await emailLinkedCheckTask;
@@ -114,7 +116,7 @@ public sealed class UserManagerWrapper(
             var linkedUser = await userManager.GetUsersAsync(result.UserId);
             var pattern = await customNamingPeople.Substitute<Resource>("ErrorEmailLinked");
 
-            throw new Exception(string.Format(pattern, linkedUser.DisplayUserName(displayUserSettingsHelper)));
+            throw new ArgumentException(string.Format(pattern, linkedUser.DisplayUserName(displayUserSettingsHelper)));
         }
 
         var currentUserId = securityContext.CurrentAccount.ID;
@@ -355,9 +357,11 @@ public sealed class UserManagerWrapper(
 
     public async Task CheckPasswordPolicyAsync(string password)
     {
+        // A password of spaces passes the callers' own empty checks and arrives here empty after trimming. It was a plain
+        // exception, a 500; it is the caller's input: 400, as the callers answer for the same text
         if (string.IsNullOrWhiteSpace(password))
         {
-            throw new Exception(Resource.ErrorPasswordEmpty);
+            throw new ArgumentException(Resource.ErrorPasswordEmpty);
         }
 
         var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();

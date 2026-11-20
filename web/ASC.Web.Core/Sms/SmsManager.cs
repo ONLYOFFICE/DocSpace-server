@@ -48,19 +48,23 @@ public class SmsManager(UserManager userManager,
     {
         mobilePhone = SmsSender.GetPhoneValueDigits(mobilePhone);
 
+        // Each refusal below was a plain exception, a 500. An account the phone activation link names but the portal
+        // does not have: 404, as ValidateSmsCodeAsync answers for it. A number without digits is the caller's input:
+        // 400. An activated number cannot be replaced, so a repeated activation is a state that does not allow the
+        // call: 409, as a repeated wizard.
         if (user == null || Equals(user, Constants.LostUser))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (string.IsNullOrEmpty(mobilePhone))
         {
-            throw new Exception(Resource.ActivateMobilePhoneEmptyPhoneNumber);
+            throw new ArgumentException(Resource.ActivateMobilePhoneEmptyPhoneNumber);
         }
 
         if (!string.IsNullOrEmpty(user.MobilePhone) && user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.Activated)
         {
-            throw new Exception(Resource.MobilePhoneMustErase);
+            throw new CustomHttpException(HttpStatusCode.Conflict, Resource.MobilePhoneMustErase);
         }
 
         user.MobilePhone = mobilePhone;
@@ -92,9 +96,11 @@ public class SmsManager(UserManager userManager,
 
     public async ValueTask PutAuthCodeAsync(UserInfo user, bool again)
     {
+        // A plain exception (500) before; 404 as in SaveMobilePhoneAsync. The callers check the account first, so it is
+        // a guard.
         if (user == null || Equals(user, Constants.LostUser))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         // Answered the way PUT settings/tfaapp reports SMS that is not available: 405, not an unmapped 500.
@@ -110,9 +116,11 @@ public class SmsManager(UserManager userManager,
             return;
         }
         var (succ, key) = await smsKeyStorage.GenerateKeyAsync(mobilePhone);
+        // Too many codes for this number: a plain exception (500) before; the same limit with the same text is
+        // BruteForceCredentialException (403) when the codes are checked, in ValidateSmsCodeAsync.
         if (!succ)
         {
-            throw new Exception(Resource.SmsTooMuchError);
+            throw new BruteForceCredentialException(Resource.SmsTooMuchError);
         }
 
         if (await smsSender.SendSMSAsync(mobilePhone, string.Format(Resource.SmsAuthenticationMessageToUser, key)))

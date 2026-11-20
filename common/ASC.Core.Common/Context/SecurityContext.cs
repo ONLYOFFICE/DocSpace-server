@@ -299,7 +299,10 @@ public class SecurityContext(
         await authentication.SetUserPasswordHashAsync(userID, passwordHash);
     }
 
-    public class PasswordException(string message) : Exception(message);
+    // Derives from ArgumentException so that every caller answers 400 for a new password equal to the current one:
+    // only PUT people/{userid}/password caught it, the wizard and re-registering an existing account left it as an
+    // exception nothing maps (500).
+    public class PasswordException(string message) : ArgumentException(message);
 }
 
 [Scope]
