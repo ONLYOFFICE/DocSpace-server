@@ -55,8 +55,10 @@ public class ErrorResponseFilter : IDocumentFilter
     // generated SDKs with no error type to deserialize into.
     private const string ErrorSchemaId = "ErrorApiResponse";
 
-    // 502/503 are excluded on purpose - they come from the reverse proxy, never reach this
-    // handler, and their body may be HTML (their descriptions below say so).
+    // 502/503 are excluded on purpose: the reverse proxy sends them with a body that may be HTML
+    // (their descriptions below say so). The handler also answers 502 when a service the server
+    // calls fails, and 503 when a distributed lock is busy, but the generic response cannot tell
+    // the two sources apart, so it gets no JSON schema.
     private static readonly string[] _handlerStatuses =
         ["400", "401", "402", "403", "404", "405", "409", "413", "415", "429", "500", "501"];
 
@@ -85,8 +87,8 @@ public class ErrorResponseFilter : IDocumentFilter
                 operation.Responses.TryAdd("400", new OpenApiResponse { Description = "Bad Request." });
             }
 
-            operation.Responses.TryAdd("502", new OpenApiResponse { Description = "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON." });
-            operation.Responses.TryAdd("503", new OpenApiResponse { Description = "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON." });
+            operation.Responses.TryAdd("502", new OpenApiResponse { Description = "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON." });
+            operation.Responses.TryAdd("503", new OpenApiResponse { Description = "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON." });
 
             foreach (var status in _handlerStatuses)
             {

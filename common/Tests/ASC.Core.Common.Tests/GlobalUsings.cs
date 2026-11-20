@@ -49,6 +49,7 @@ global using ASC.Api.Core.Webhook.Payloads;
 global using ASC.Common.Caching;
 global using ASC.Common.Notify.Patterns;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.DistributedLock.Common;
 global using ASC.Common.Threading.DistributedLock.InMemoryLock;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;

@@ -37,6 +37,9 @@ namespace ASC.Api.Core.Middleware;
 
 public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IExceptionHandler
 {
+    // Retry-After of a 503 for a lock held by another request: the holder usually finishes within seconds
+    private const string LockRetryAfterSeconds = "10";
+
     public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
     {
         var status = (HttpStatusCode)context.Response.StatusCode;
@@ -139,6 +142,16 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             case NotSupportedException:
                 status = HttpStatusCode.UnsupportedMediaType;
                 withStackTrace = false;
+                break;
+            // A distributed lock was not acquired in time: another request holds the same resource. Every provider
+            // throws it while acquiring, before the work the lock guards, so the request did nothing and can be
+            // repeated - 503 with Retry-After rather than a 500. The exception text names the internal lock key, so
+            // the body gets a fixed one.
+            case DistributedLockException:
+                status = HttpStatusCode.ServiceUnavailable;
+                message = "The server is busy with another request for the same data. Repeat the request later.";
+                withStackTrace = false;
+                context.Response.Headers.RetryAfter = LockRetryAfterSeconds;
                 break;
             // The request itself is malformed or over a limit ([RequestSizeLimit] gives 413): the exception
             // already carries the status the client must see, it is not a server fault.

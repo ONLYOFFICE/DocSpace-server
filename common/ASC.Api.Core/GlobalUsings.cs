@@ -79,6 +79,7 @@ global using ASC.Common.Security.Authentication;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.DistributedLock.Common;
 global using ASC.Common.Threading.DistributedLock.RedisLock;
 global using ASC.Common.Threading.DistributedLock.ZooKeeperLock;
 global using ASC.Common.Threading.DistributedLock.ZooKeeperLock.Configuration;
