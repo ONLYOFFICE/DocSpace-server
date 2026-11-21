@@ -103,14 +103,19 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// </summary>
     protected virtual bool NeedsLazyResources => false;
 
+    // the wait is shared by every class that needs them, so it is not cancelled itself: this test just stops waiting
+    protected Task WaitForLazyResourcesAsync()
+    {
+        return fixture.WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken);
+    }
+
     public async ValueTask InitializeAsync()
     {
         var setupSw = Stopwatch.StartNew();
 
         if (NeedsLazyResources)
         {
-            // the wait is shared by every class that needs them, so it is not cancelled itself: this test just stops waiting
-            await fixture.WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken);
+            await WaitForLazyResourcesAsync();
         }
 
         // Register a brand-new portal for this test and bind a fresh set of clients to it.

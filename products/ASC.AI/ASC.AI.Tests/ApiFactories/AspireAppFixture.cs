@@ -44,10 +44,10 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
     // so the first export does not go out before it subscribes. It reports no health check of its own, so "healthy" is
     // "running", as for the backup worker of the backup suite.
     protected override IEnumerable<string> Resources =>
-        [ResourceNames.AiChat, ResourceNames.Ai, ResourceNames.AiWorker, ResourceNames.Files, ResourceNames.People, ResourceNames.WebStudio];
+        [ResourceNames.AiChat, ResourceNames.Ai, ResourceNames.AiWorker, ResourceNames.Files, ResourceNames.People];
 
     // Only the third-party room tests (NeedsLazyResources) connect to Nextcloud, and they wait for it themselves.
-    protected override IEnumerable<string> LazyResources => [ResourceNames.Nextcloud];
+    protected override IEnumerable<string> LazyResources => [ResourceNames.Nextcloud, ResourceNames.WebStudio];
 
     /// <summary>The model provider shared by the run: profiles are created against it, chats answered by it.</summary>
     public StubModelProvider ModelProvider { get; } = StubModelProvider.CreateShared();

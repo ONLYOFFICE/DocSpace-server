@@ -239,6 +239,8 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
     [Fact]
     public async Task Convert_AgentWithALogoAndNoKnowledge_RemovesTheLogoFilesOfTheDeletedRoom()
     {
+        await WaitForLazyResourcesAsync();
+
         var title = NewTitle("Logo files agent");
         var agent = await CreateAgentAsync(title);
         await SetLogoAsync(agent.Id);
