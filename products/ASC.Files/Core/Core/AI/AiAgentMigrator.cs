@@ -175,7 +175,7 @@ public class AiAgentMigrator(
 
             await folderDao.MoveFolderAsync(child.Id, myDocumentsId.Value, AiAgentMigrationTitle.Compose(agent.Title, child.Title), null);
 
-            await BestEffortAsync(tenantId, agent.Id, "the socket event of the moved Chat outputs folder", async () =>
+            await RunSideEffectAsync(tenantId, agent.Id, "the socket event of the moved Chat outputs folder", async () =>
             {
                 await socketManager.CreateFolderAsync(await folderDao.GetFolderAsync(child.Id));
             });
@@ -237,7 +237,7 @@ public class AiAgentMigrator(
 
         if (agent.SettingsHasLogo)
         {
-            await BestEffortAsync(tenantId, agentId, "the copy of the logo", async () =>
+            await RunSideEffectAsync(tenantId, agentId, "the copy of the logo", async () =>
             {
                 var project = await folderDao.GetFolderAsync(projectId);
 
@@ -249,10 +249,10 @@ public class AiAgentMigrator(
             });
         }
 
-        await BestEffortAsync(tenantId, agentId, "the index event of the project", () =>
+        await RunSideEffectAsync(tenantId, agentId, "the index event of the project", () =>
             eventBus.PublishAsync(new FolderIndexIntegrationEvent(currentAccount, tenantId) { FolderId = projectId, Action = FolderIndexAction.Index }));
 
-        await BestEffortAsync(tenantId, agentId, "the socket event of the project", async () =>
+        await RunSideEffectAsync(tenantId, agentId, "the socket event of the project", async () =>
         {
             await socketManager.CreateFolderAsync(await folderDao.GetFolderAsync(projectId));
         });
@@ -264,10 +264,10 @@ public class AiAgentMigrator(
             return;
         }
 
-        await BestEffortAsync(tenantId, agentId, "the index event of the room", () =>
+        await RunSideEffectAsync(tenantId, agentId, "the index event of the room", () =>
             eventBus.PublishAsync(new FolderIndexIntegrationEvent(currentAccount, tenantId) { FolderId = agentId, Action = FolderIndexAction.Index }));
 
-        await BestEffortAsync(tenantId, agentId, "the index events of the knowledge files", async () =>
+        await RunSideEffectAsync(tenantId, agentId, "the index events of the knowledge files", async () =>
         {
             foreach (var fileId in conversion.KnowledgeFileIds)
             {
@@ -275,7 +275,7 @@ public class AiAgentMigrator(
             }
         });
 
-        await BestEffortAsync(tenantId, agentId, "the socket event of the room", async () =>
+        await RunSideEffectAsync(tenantId, agentId, "the socket event of the room", async () =>
         {
             await socketManager.UpdateFolderAsync(await folderDao.GetFolderAsync(agentId));
         });
@@ -288,7 +288,7 @@ public class AiAgentMigrator(
         IEnumerable<Guid> sharedUsers = null;
 
         // the recipients are read before the deletion: afterwards nobody can read the room
-        await BestEffortAsync(tenantId, roomId, "the recipients of the socket event of the deleted room", async () =>
+        await RunSideEffectAsync(tenantId, roomId, "the recipients of the socket event of the deleted room", async () =>
         {
             room = await folderDao.GetFolderAsync(roomId);
             (users, sharedUsers) = await socketManager.GetDeleteRecipientsAsync(room);
@@ -296,7 +296,7 @@ public class AiAgentMigrator(
 
         var deleted = false;
 
-        await BestEffortAsync(tenantId, roomId, "the deletion of the room without knowledge files", async () =>
+        await RunSideEffectAsync(tenantId, roomId, "the deletion of the room without knowledge files", async () =>
         {
             await folderDao.DeleteFolderAsync(roomId);
             deleted = true;
@@ -304,18 +304,18 @@ public class AiAgentMigrator(
 
         if (deleted && hasLogo)
         {
-            await BestEffortAsync(tenantId, roomId, "the deletion of the logo files of the deleted room", () =>
+            await RunSideEffectAsync(tenantId, roomId, "the deletion of the logo files of the deleted room", () =>
                 roomLogoManager.DeleteLogoFilesAsync(roomId));
         }
 
         if (deleted && room != null && users != null)
         {
-            await BestEffortAsync(tenantId, roomId, "the socket event of the deleted room", () =>
+            await RunSideEffectAsync(tenantId, roomId, "the socket event of the deleted room", () =>
                 socketManager.DeleteFolder(room, users, sharedUsers: sharedUsers));
         }
     }
 
-    private async Task BestEffortAsync(int tenantId, int agentId, string effect, Func<Task> action)
+    private async Task RunSideEffectAsync(int tenantId, int agentId, string effect, Func<Task> action)
     {
         try
         {
