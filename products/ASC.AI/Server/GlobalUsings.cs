@@ -145,3 +145,5 @@ global using Swashbuckle.AspNetCore.Annotations;
 global using Riok.Mapperly.Abstractions;
 
 global using ZiggyCreatures.Caching.Fusion;
+
+global using SecurityContext = ASC.Core.SecurityContext;
