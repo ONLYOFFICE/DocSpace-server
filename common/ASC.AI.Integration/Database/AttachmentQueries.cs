@@ -48,27 +48,45 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateAttachmentBindingsByIdsAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId)
+    public IAsyncEnumerable<DbAttachment> GetUnboundAttachmentsByEntryIdsAsync(int tenantId, Guid createdBy, IEnumerable<int> entryIds)
     {
-        return AttachmentQueriesContainer.UpdateAttachmentBindingsByIdsAsync(this, tenantId, createdBy, ids, messageId);
+        return AttachmentQueriesContainer.GetUnboundAttachmentsByEntryIdsAsync(this, tenantId, createdBy, entryIds);
     }
 
     [PreCompileQuery]
-    public Task<int> DeleteAttachmentAsync(int tenantId, Guid createdBy, Guid id)
+    public Task<int> SetAttachmentContentAsync(int tenantId, Guid createdBy, Guid id, string content)
     {
-        return AttachmentQueriesContainer.DeleteAttachmentAsync(this, tenantId, createdBy, id);
+        return AttachmentQueriesContainer.SetAttachmentContentAsync(this, tenantId, createdBy, id, content);
     }
 
     [PreCompileQuery]
-    public Task<int> DeleteAttachmentsByIdsAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids)
+    public Task<int> UpdateAttachmentBindingsByIdsAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId, Guid threadId)
     {
-        return AttachmentQueriesContainer.DeleteAttachmentsByIdsAsync(this, tenantId, createdBy, ids);
+        return AttachmentQueriesContainer.UpdateAttachmentBindingsByIdsAsync(this, tenantId, createdBy, ids, messageId, threadId);
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<OrphanAttachment> GetOrphanAttachmentsAsync(DateTime cutoffDate, int take)
+    public Task<int> MarkUnboundAttachmentsDeletedAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids, DateTime deletedOn)
     {
-        return AttachmentQueriesContainer.GetOrphanAttachmentsAsync(this, cutoffDate, take);
+        return AttachmentQueriesContainer.MarkUnboundAttachmentsDeletedAsync(this, tenantId, createdBy, ids, deletedOn);
+    }
+
+    [PreCompileQuery]
+    public Task<int> MarkOrphanAttachmentsDeletedAsync(int tenantId, IEnumerable<Guid> ids, DateTime deletedOn)
+    {
+        return AttachmentQueriesContainer.MarkOrphanAttachmentsDeletedAsync(this, tenantId, ids, deletedOn);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<OrphanAttachment> GetOrphanAttachmentsAsync(DateTime cutoffDate, DateTime createdAt, Guid id, int take)
+    {
+        return AttachmentQueriesContainer.GetOrphanAttachmentsAsync(this, cutoffDate, createdAt, id, take);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<OrphanAttachment> GetDeletedAttachmentsAsync(DateTime deletedOn, Guid id, int take)
+    {
+        return AttachmentQueriesContainer.GetDeletedAttachmentsAsync(this, deletedOn, id, take);
     }
 
     [PreCompileQuery]
@@ -91,40 +109,73 @@ static file class AttachmentQueriesContainer
                 ctx.Attachments
                     .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id)));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, Guid, Task<int>> UpdateAttachmentBindingsByIdsAsync =
-        (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId) =>
+    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<int>, IAsyncEnumerable<DbAttachment>> GetUnboundAttachmentsByEntryIdsAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<int> entryIds) =>
+                ctx.Attachments
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.MessageId == null &&
+                                x.EntryId != null && entryIds.Contains(x.EntryId.Value)));
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public static readonly Func<AiIntegrationContext, int, Guid, Guid, string, Task<int>> SetAttachmentContentAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid createdBy, Guid id, string content) =>
             ctx.Attachments
-                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id))
+                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Id == id && x.MessageId == null && x.Content == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.Content, content));
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, Guid, Guid, Task<int>> UpdateAttachmentBindingsByIdsAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId, Guid threadId) =>
+            ctx.Attachments
+                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id) &&
+                            (x.MessageId == null
+                                ? x.DeletedOn == null
+                                : ctx.Messages.Any(m => m.TenantId == tenantId && m.Id == x.MessageId && m.ThreadId == threadId)))
                 .ExecuteUpdateAsync(x => x
                     .SetProperty(y => y.MessageId, messageId));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, Guid, Task<int>> DeleteAttachmentAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid createdBy, Guid id) =>
-                ctx.Attachments
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Id == id)
-                    .ExecuteDelete());
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, DateTime, Task<int>> MarkUnboundAttachmentsDeletedAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids, DateTime deletedOn) =>
+            ctx.Attachments
+                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.MessageId == null && x.DeletedOn == null && ids.Contains(x.Id))
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, Task<int>> DeleteAttachmentsByIdsAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids) =>
-                ctx.Attachments
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id))
-                    .ExecuteDelete());
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, DateTime, Task<int>> MarkOrphanAttachmentsDeletedAsync =
+        (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids, DateTime deletedOn) =>
+            ctx.Attachments
+                .Where(x => x.TenantId == tenantId && x.MessageId == null && x.DeletedOn == null && ids.Contains(x.Id))
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
 
-    public static readonly Func<AiIntegrationContext, DateTime, int, IAsyncEnumerable<OrphanAttachment>> GetOrphanAttachmentsAsync =
+    public static readonly Func<AiIntegrationContext, DateTime, DateTime, Guid, int, IAsyncEnumerable<OrphanAttachment>> GetOrphanAttachmentsAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, DateTime cutoffDate, int take) =>
+            (AiIntegrationContext ctx, DateTime cutoffDate, DateTime createdAt, Guid id, int take) =>
                 ctx.Attachments
-                    .Where(x => x.MessageId == null && x.CreatedAt <= cutoffDate)
+                    .Where(x => x.MessageId == null && x.DeletedOn == null && x.CreatedAt <= cutoffDate
+                                && (x.CreatedAt > createdAt
+                                    || (x.CreatedAt == createdAt && x.Id.CompareTo(id) > 0)))
                     .OrderBy(x => x.CreatedAt)
+                    .ThenBy(x => x.Id)
                     .Take(take)
-                    .Select(x => new OrphanAttachment { TenantId = x.TenantId, Id = x.Id }));
+                    .Select(x => new OrphanAttachment { TenantId = x.TenantId, Id = x.Id, CreatedAt = x.CreatedAt }));
+
+    public static readonly Func<AiIntegrationContext, DateTime, Guid, int, IAsyncEnumerable<OrphanAttachment>> GetDeletedAttachmentsAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, DateTime deletedOn, Guid id, int take) =>
+                ctx.Attachments
+                    .Where(x => x.MessageId == null && x.DeletedOn != null
+                                && (x.DeletedOn > deletedOn
+                                    || (x.DeletedOn == deletedOn && x.Id.CompareTo(id) > 0)))
+                    .OrderBy(x => x.DeletedOn)
+                    .ThenBy(x => x.Id)
+                    .Take(take)
+                    .Select(x => new OrphanAttachment { TenantId = x.TenantId, Id = x.Id, CreatedAt = x.CreatedAt, DeletedOn = x.DeletedOn }));
 
     public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, Task<int>> DeleteAttachmentsAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids) =>
                 ctx.Attachments
-                    .Where(x => x.TenantId == tenantId && ids.Contains(x.Id))
+                    .Where(x => x.TenantId == tenantId && x.MessageId == null && x.DeletedOn != null && ids.Contains(x.Id))
                     .ExecuteDelete());
 }

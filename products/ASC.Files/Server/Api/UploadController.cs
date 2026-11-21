@@ -93,8 +93,10 @@ public abstract class UploadController<T>(
     /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the
     /// folder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has
     /// it there only as a content creator. In My documents, the owner and anyone with read and write access to the
-    /// folder have it. A section root, an archived room, and an AI agent or AI project root also return 403. The call
-    /// changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist
+    /// folder have it. A section root, an archived room, and an AI agent root also return 403. In an AI project,
+    /// the right to chat in the project is required instead. The file is stored in the project itself, visible to its
+    /// uploader only. There, `relativePath` returns 403. A file that is neither a picture nor a document with
+    /// readable text returns 400. The call changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist
     /// yet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With
     /// false, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this
     /// way. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call
@@ -112,9 +114,9 @@ public abstract class UploadController<T>(
     [Obsolete]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The created session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
+    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, a file going into an AI project is neither a picture nor a document with readable text, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
-    [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`")]
+    [SwaggerResponse(403, "The caller cannot add content to the target folder or, for an AI project, cannot chat in it, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder, an instructions room or an AI project, or the file going into a private room is not marked `encrypted`")]
     [SwaggerResponse(404, "No folder with the specified ID")]
     [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("{folderId}/upload/create_session")]
@@ -137,8 +139,10 @@ public abstract class UploadController<T>(
     /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the
     /// folder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has
     /// it there only as a content creator. In My documents, the owner and anyone with read and write access to the
-    /// folder have it. A section root, an archived room, and an AI agent or AI project root also return 403. The call
-    /// changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist
+    /// folder have it. A section root, an archived room, and an AI agent root also return 403. In an AI project,
+    /// the right to chat in the project is required instead. The file is stored in the project itself, visible to its
+    /// uploader only. There, `relativePath` returns 403. A file that is neither a picture nor a document with
+    /// readable text returns 400. The call changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist
     /// yet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With
     /// false, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this
     /// way. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call
@@ -155,9 +159,9 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/session</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The created upload session", typeof(ChunkedUploadSessionDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
+    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, a file going into an AI project is neither a picture nor a document with readable text, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
-    [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`")]
+    [SwaggerResponse(403, "The caller cannot add content to the target folder or, for an AI project, cannot chat in it, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder, an instructions room or an AI project, or the file going into a private room is not marked `encrypted`")]
     [SwaggerResponse(404, "No folder with the specified ID")]
     [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("{folderId}/session")]
@@ -263,7 +267,7 @@ public abstract class UploadController<T>(
             {
                 var folderDao = daoFactory.GetFolderDao<T>();
                 var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => f.IsRoom);
-                if (room != null)
+                if (room != null && DocSpaceHelper.AnnouncesEntriesToMembers(room.FolderType))
                 {
                     var data = room.Id is int rId && resumedSession.File.Id is int fId
                         ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
@@ -389,7 +393,7 @@ public abstract class UploadController<T>(
             var folderDao = daoFactory.GetFolderDao<T>();
             var parents = await folderDao.GetParentFoldersAsync(session.FolderId).ToListAsync();
             var room = parents.FirstOrDefault(f => f.IsRoom);
-            if (room != null)
+            if (room != null && DocSpaceHelper.AnnouncesEntriesToMembers(room.FolderType))
             {
                 var data = room.Id is int rId && session.File.Id is int fId
                     ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }

@@ -163,6 +163,7 @@ Evidence column:
 | B10 | backup-and-restore | `getBackupHistory` soft-deletes records and skips unreachable storages, so the list can shrink between two reads. | static | OPEN |
 | N9 | notifications | The not-paid skip (`TariffState.NotPaid <= state`) is applied in `SendMsgWhatsNewAsync` to the daily and the hourly digest alike (a portal inside its grace period still gets them); only the at-once room letters of `NotifyClient.cs` have no such check, so a lapsed portal keeps sending them. | static | OPEN, narrowed to the at-once letters |
 | A9 | ai-agents | Export into a form-filling room or an out-of-quota room answers 202 and the worker drops the document without a trace. | red test, run 2026-11-18 (bugs 83070, 83071; cause by code reading) | OPEN |
+| A37 | ai-agents | The draft cleanup pass and the deleted-thread pass return the size of the deleted files to the project in a step after the deletion is committed. A failure of that step or a stop of the process between the two leaves the project's used space too high for good. Every deletion path of Files does the same. | red by code reading | OPEN (left open on purpose: Known limitations of `feature/new-ai-concept`) |
 
 ### Crashes (500) and wrong status codes
 
@@ -362,6 +363,7 @@ green, run 2026-11-18" were confirmed by that run; the others were read, not run
 | A5 | ai-agents | `aiThreadsRegenerateTitle` answered 500 on a thread with a real conversation; the TS `test.fail` is stale. | test comment | FIXED `876875d79d` |
 | A8 | ai-agents | MCP replace-all stored two names differing only in case. | test comment "used to" | FIXED `b6d11f1999` (library update) |
 | A10 | ai-agents | OpenAI passthrough answered 500 with a stack trace on a large body and on malformed image requests. | commit and code; no .NET test | FIXED `9768f0a6f3`, `e84932692d` |
+| A36 | ai-agents | The draft cleanup pass read the files of unlinked drafts first and deleted them by id afterwards, with no lock against `aiAttachmentsLinkToMessage`: a link between the two steps kept the attachment on the message and lost its file, or answered 500 when the move found the file gone. The pass now marks the drafts deleted with a conditional update before it reads their files, and reads and deletes only marked drafts, which a link no longer takes. | code read, not run; the interleaving has no test | FIXED `a1f6ce3988` |
 | B1 | backup-and-restore | `deleteBackup` of an unknown id answered 500; it now answers 404 and the yaml still says 500. | test | FIXED `61ff4b1ee4` (bug 80605) |
 | T1 | portal-lifecycle | `Blocked` was missing from the published `TenantStatus`, `PortalUnblock` from `ConfirmType` and `PUT portal/unblock` from the paths. `portal/portalrename` is still absent: see T5. | yaml | FIXED submodule `5ea4dc6` |
 | W3 | billing | Nine `servicelimit` operations and the `aiServicesLimit` profile field were missing from the published document and the SDKs. | yaml | FIXED submodule `5ea4dc6` |

@@ -77,6 +77,8 @@ public abstract class AttachmentTestBase(AspireAppFixture fixture) : ChatTests.C
 
     private static readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(10);
 
+    private static readonly TimeSpan _cleanupTimeout = TimeSpan.FromSeconds(60);
+
     private readonly Dictionary<string, int> _backingFiles = [];
 
     /// <summary>The typed attachments client over the chat service; it signs in as whoever <c>_aiChatClient</c> is.</summary>
@@ -331,9 +333,13 @@ public abstract class AttachmentTestBase(AspireAppFixture fixture) : ChatTests.C
     }
 
     /// <summary>Waits for the draft to stop resolving; asserts it did within the deadline.</summary>
-    protected async Task ExpectAbsentAsync(string id, string what = "attachment")
+    protected Task ExpectAbsentAsync(string id, string what = "attachment") => PollAbsentAsync(id, what, _readTimeout);
+
+    protected Task ExpectCleanedUpAsync(string id, string what = "attachment") => PollAbsentAsync(id, what, _cleanupTimeout);
+
+    private async Task PollAbsentAsync(string id, string what, TimeSpan timeout)
     {
-        var deadline = DateTime.UtcNow + _readTimeout;
+        var deadline = DateTime.UtcNow + timeout;
         AiAttachment? last;
 
         while (true)

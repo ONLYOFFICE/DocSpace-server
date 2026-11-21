@@ -110,7 +110,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
 
     /// <remarks>
     /// Starts a job that deletes the data and the profile of a disabled user.
-    /// The job deletes the personal files of the account. It moves the rooms and third-party storage accounts to the
+    /// The job deletes the personal files of the account. It also deletes the account's chat threads in AI projects,
+    /// with their files. It moves the rooms and third-party storage accounts to the
     /// caller. Files and folders that the account shared from the personal section move to a new folder of the caller.
     /// First, disable the account through `PUT api/2.0/people/status/{status}`.
     /// Requires a DocSpace admin. Other callers get 403.

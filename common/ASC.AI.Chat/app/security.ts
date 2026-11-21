@@ -56,6 +56,10 @@ const alwaysBlocked = new BlockList();
 alwaysBlocked.addSubnet("0.0.0.0", 8, "ipv4"); // "this host"
 alwaysBlocked.addSubnet("169.254.0.0", 16, "ipv4"); // link-local — IMDS metadata
 alwaysBlocked.addSubnet("fe80::", 10, "ipv6"); // IPv6 link-local
+// The unspecified IPv6 address, the counterpart of 0.0.0.0/8 above: a
+// connect to it lands on the host itself. The C# `UrlValidator` blocks it
+// as `::/128`.
+alwaysBlocked.addAddress("::", "ipv6");
 
 // Loopback + RFC1918 private ranges. Blocked by default (anti-SSRF), allowed
 // when `AI__ALLOW_PRIVATE_BASE_URL` is set for on-prem model servers reachable

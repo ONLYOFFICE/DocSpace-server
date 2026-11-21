@@ -40,6 +40,9 @@ public class AiHubController(
     AiHubService aiHubService,
     AiProjectSourcesDtoMapper aiProjectSourcesDtoMapper,
     AiSkillsDtoMapper aiSkillsDtoMapper,
+    AiRoomProjectDtoMapper aiRoomProjectDtoMapper,
+    FolderContentDtoHelper folderContentDtoHelper,
+    ApiContext apiContext,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
@@ -180,6 +183,47 @@ public class AiHubController(
     }
 
     /// <remarks>
+    /// Returns the AI projects that use a Knowledge or an Instructions room as a source, one page at a time.
+    /// Requires read access to the room. Other callers get 403.
+    /// The call is read-only.
+    /// It lists only the projects the caller may read.
+    /// A DocSpace admin reads every project.
+    /// Other callers read the projects they created or are members of.
+    /// So the list can be shorter than `linkedProjectsCount` of the room, which counts every project.
+    /// The call sorts the projects by title.
+    /// The total in the answer counts the listed projects of all pages.
+    /// A room that no listed project uses gives an empty list.
+    /// An unknown ID or another kind of room, such as an AI project, returns 404.
+    /// The call returns 400 if `count` or `startIndex` is out of range.
+    /// It also returns 403 if AI features are turned off on the portal.
+    /// To see the rooms that a project uses, use `GET api/2.0/files/rooms/{id}/sources`.
+    /// </remarks>
+    /// <summary>Get the AI projects of a room</summary>
+    /// <path>api/2.0/files/rooms/{id}/projects</path>
+    /// <collection>list</collection>
+    [Tags("Rooms / AI")]
+    [SwaggerResponse(200, "One page of the AI projects that use the room and that the caller may read", typeof(IEnumerable<AiRoomProjectDto>))]
+    [SwaggerResponse(400, "`count` is outside its allowed range or `startIndex` is negative")]
+    [SwaggerResponse(403, "The caller may not read the room, or the AI features are turned off on the portal")]
+    [SwaggerResponse(404, "No Knowledge or Instructions room has this id")]
+    [HttpGet("{id}/projects")]
+    public async Task<IEnumerable<AiRoomProjectDto>> GetRoomProjects(GetAiRoomProjectsRequestDto inDto)
+    {
+        var (projects, total) = await aiHubService.GetRoomProjectsAsync(inDto.Id, inDto.StartIndex, inDto.Count);
+
+        apiContext.SetCount(projects.Count).SetTotalCount(total);
+
+        var result = new List<AiRoomProjectDto>(projects.Count);
+
+        foreach (var project in projects)
+        {
+            result.Add(await aiRoomProjectDtoMapper.MapAsync(project));
+        }
+
+        return result;
+    }
+
+    /// <remarks>
     /// Returns the AI model selected for the chat of an AI project, as the ID of an AI model profile.
     /// Requires read access to the project. Other callers get 403.
     /// The call is read-only and returns only the project's own choice.
@@ -226,5 +270,100 @@ public class AiHubController(
         var profile = await aiHubService.SetModelAsync(inDto.Id, inDto.Model.ProfileId);
 
         return profile.Map();
+    }
+
+    /// <remarks>
+    /// Returns the artifacts of a thread in an AI project, one page at a time.
+    /// They are the files that the chat tools created in the thread.
+    /// Requires read access to the project. Other callers get 403.
+    /// Only the author of the thread sees these files.
+    /// The call is read-only.
+    /// The total in the answer counts the files of all pages.
+    /// A thread with no artifacts yet gives an empty list.
+    /// A valid `sortBy` also becomes the saved default order of the account.
+    /// The call returns 404 for an unknown AI project or thread.
+    /// A thread of another user also returns 404, even to the project owner or a DocSpace admin.
+    /// The call returns 400 if `count` or `startIndex` is out of range.
+    /// It also returns 403 if AI features are turned off on the portal.
+    /// To get the files the user sent with the messages of the thread, use `GET api/2.0/files/rooms/{id}/threads/{threadId}/attachments`.
+    /// </remarks>
+    /// <summary>Get the AI thread artifacts</summary>
+    /// <path>api/2.0/files/rooms/{id}/threads/{threadId}/artifacts</path>
+    /// <collection>list</collection>
+    [Tags("Rooms / AI")]
+    [SwaggerResponse(200, "The artifacts of the thread", typeof(IEnumerable<FileDto<int>>))]
+    [SwaggerResponse(400, "`count` is outside its allowed range or `startIndex` is negative")]
+    [SwaggerResponse(403, "The caller may not read the project, or the AI features are turned off on the portal")]
+    [SwaggerResponse(404, "No AI project has this id, or it has no such thread of the caller")]
+    [HttpGet("{id}/threads/{threadId:guid}/artifacts")]
+    public async Task<IEnumerable<FileDto<int>>> GetThreadArtifacts(GetAiThreadFilesRequestDto inDto)
+    {
+        var folderId = await aiHubService.GetThreadArtifactsFolderIdAsync(inDto.Id, inDto.ThreadId);
+
+        return await GetThreadFilesAsync(folderId, inDto);
+    }
+
+    /// <remarks>
+    /// Returns the attachments of a thread in an AI project, one page at a time.
+    /// They are the files that the user sent with the messages of the thread.
+    /// Requires read access to the project. Other callers get 403.
+    /// Only the author of the thread sees these files.
+    /// The call is read-only.
+    /// The total in the answer counts the files of all pages.
+    /// A thread with no attachments yet gives an empty list.
+    /// A valid `sortBy` also becomes the saved default order of the account.
+    /// The call returns 404 for an unknown AI project or thread.
+    /// A thread of another user also returns 404, even to the project owner or a DocSpace admin.
+    /// The call returns 400 if `count` or `startIndex` is out of range.
+    /// It also returns 403 if AI features are turned off on the portal.
+    /// To get the files the chat tools created in the thread, use `GET api/2.0/files/rooms/{id}/threads/{threadId}/artifacts`.
+    /// </remarks>
+    /// <summary>Get the AI thread attachments</summary>
+    /// <path>api/2.0/files/rooms/{id}/threads/{threadId}/attachments</path>
+    /// <collection>list</collection>
+    [Tags("Rooms / AI")]
+    [SwaggerResponse(200, "The attachments of the thread", typeof(IEnumerable<FileDto<int>>))]
+    [SwaggerResponse(400, "`count` is outside its allowed range or `startIndex` is negative")]
+    [SwaggerResponse(403, "The caller may not read the project, or the AI features are turned off on the portal")]
+    [SwaggerResponse(404, "No AI project has this id, or it has no such thread of the caller")]
+    [HttpGet("{id}/threads/{threadId:guid}/attachments")]
+    public async Task<IEnumerable<FileDto<int>>> GetThreadAttachments(GetAiThreadFilesRequestDto inDto)
+    {
+        var folderId = await aiHubService.GetThreadAttachmentsFolderIdAsync(inDto.Id, inDto.ThreadId);
+
+        return await GetThreadFilesAsync(folderId, inDto);
+    }
+
+    private async Task<IEnumerable<FileDto<int>>> GetThreadFilesAsync(int? folderId, GetAiThreadFilesRequestDto inDto)
+    {
+        if (folderId is null)
+        {
+            apiContext.SetCount(0).SetTotalCount(0);
+
+            return [];
+        }
+
+        var content = await folderContentDtoHelper.GetAsync(
+            folderId.Value,
+            null,
+            null,
+            null,
+            0,
+            false,
+            false,
+            false,
+            ApplyFilterOption.All,
+            SearchArea.Active,
+            inDto.SortBy,
+            inDto.SortOrder,
+            inDto.StartIndex,
+            inDto.Count,
+            inDto.Text);
+
+        var files = content.Files.OfType<FileDto<int>>().ToList();
+
+        apiContext.SetCount(files.Count).SetTotalCount(content.Total);
+
+        return files;
     }
 }

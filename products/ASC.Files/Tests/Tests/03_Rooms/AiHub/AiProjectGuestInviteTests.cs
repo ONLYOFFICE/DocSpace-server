@@ -50,7 +50,7 @@ public class AiProjectGuestInviteTests(AspireAppFixture fixture) : AiHubTestBase
         var guest = await InviteGuest();
 
         // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(async () => await ShareRoomAsync(projectId, guest.Id, FileShare.Read));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await ShareRoomAsync(projectId, guest.Id, FileShare.ContentCreator));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -65,7 +65,7 @@ public class AiProjectGuestInviteTests(AspireAppFixture fixture) : AiHubTestBase
         var projectId = await CreateProjectAsync();
         var request = new RoomInvitationRequest
         {
-            Invitations = [new RoomInvitation { Email = $"guest-{Guid.NewGuid():N}@example.com", Access = FileShare.Read }],
+            Invitations = [new RoomInvitation { Email = $"guest-{Guid.NewGuid():N}@example.com", Access = FileShare.ContentCreator }],
             Notify = false
         };
 

@@ -313,12 +313,17 @@ entries of the named subjects.
 #### Scenario: Guest invited to an AI project
 
 - **WHEN** a Guest is invited to an AI project (v4.1) by account id with any access, or an email entry names an address that belongs to a Guest
-- **THEN** the system rejects the whole request (403, "The role is not available for this user type") and the guest is not a member; an AI project accepts Room manager and Read only
+- **THEN** the system rejects the whole request (403, "The role is not available for this user type") and the guest is not a member; an AI project accepts Room manager and Content creator only
 
 #### Scenario: Group as subject
 
 - **WHEN** an entry names a group id that is not an existing share of the room
 - **THEN** the share is recorded for the group and every member of the group gets that access
+
+#### Scenario: Group invited to an AI project
+
+- **WHEN** an entry names a group and the room is an AI project, with any access
+- **THEN** the system rejects the request (403, "The role is not available for this user type") and the group is not in the project's member list
 
 ### Requirement: Everyone system group as a share subject
 
@@ -532,7 +537,7 @@ the registration is completed, which SHALL set the type the link grants, ignorin
 #### Scenario: Joining an AI project through its link
 
 - **WHEN** a signed-in User who is not a member follows the invitation link of an AI project, which grants Room manager
-- **THEN** `result` is `UserExisted` and the User is a member with the Read access, the highest free role of a project
+- **THEN** `result` is `UserExisted` and the User is a member with the Content creator access, the highest free role of a project
 - **AND** a signed-in Guest following the same link gets `QuotaFailed` and is not added
 
 #### Scenario: Individual email link already accepted

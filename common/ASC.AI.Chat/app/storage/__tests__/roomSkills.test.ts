@@ -26,8 +26,7 @@ vi.mock("../../requestContext.js", () => ({
   getForwardedHeaders: () => ({}),
 }));
 
-const { getContextFolders, getKnowledgeFolders, getRoomSkill, getRoomSkills, getRoomsSkills } =
-  await import("../roomSkills.js");
+const { getContextFolders, getKnowledgeFolders, getRoomSkill, getRoomSkills, getRoomsSkills, readBodyCapped } = await import("../roomSkills.js");
 
 const fetchMock = vi.fn();
 
@@ -133,5 +132,19 @@ describe("skills catalog", () => {
 
     expect(folders).toEqual([{ cloud: "docspace", rooms: [{ id: "7", name: "Brand voice" }] }]);
     expect(filesApiGet).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("readBodyCapped", () => {
+  const body = (bytes: number[], headers: Record<string, string> = {}) =>
+    new Response(new Uint8Array(bytes), { headers });
+
+  it("answers the bytes of a body within the limit", async () => {
+    expect(Array.from((await readBodyCapped(body([1, 2, 3]), 3)) ?? [])).toEqual([1, 2, 3]);
+  });
+
+  it("answers null for a body that declares more than the limit, or proves larger", async () => {
+    expect(await readBodyCapped(body([1], { "content-length": "9" }), 3)).toBeNull();
+    expect(await readBodyCapped(body([1, 2, 3, 4]), 3)).toBeNull();
   });
 });

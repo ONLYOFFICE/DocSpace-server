@@ -145,6 +145,8 @@ public class ProjectConfigurator(
                 // Nothing here needs a graceful stop — the portals and their storage are thrown away —
                 // and an honest shutdown takes ~0.5 s, so this only trims the hang.
                 .WithEnvironment("shutdownTimeoutSeconds", "3")
+                .WithEnvironment("ai:deletedThreadsCleaner:period", "00:00:05")
+                .WithEnvironment("ai:orphanAttachmentsCleaner:period", "0.00:00:05")
 
                 // Small ceilings for unpacking migration backups, see Constants.MigrationTestMaxExtractedSize and MigrationTestMaxExtractedEntries.
                 .WithEnvironment("migration:maxExtractedSize", Constants.MigrationTestMaxExtractedSize.ToString(CultureInfo.InvariantCulture))

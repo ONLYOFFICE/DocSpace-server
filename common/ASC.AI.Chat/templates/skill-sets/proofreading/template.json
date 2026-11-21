@@ -1,0 +1,11 @@
+{
+  "name": "Proofreading",
+  "description": "Skills for correcting a text and for adjusting its tone to an audience.",
+  "category": "Document",
+  "color": "7757D9",
+  "cover": "pen",
+  "files": [
+    "proofread.md",
+    "tone-adjust.md"
+  ]
+}

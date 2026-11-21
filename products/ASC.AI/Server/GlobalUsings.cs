@@ -127,7 +127,6 @@ global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.AI;
 
-global using System.Collections.Frozen;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;

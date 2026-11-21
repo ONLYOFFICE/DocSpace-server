@@ -217,8 +217,9 @@ function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Recor
 // forwarded auth headers — exactly what in-process provider calls (chat
 // engine, openai passthrough) need, and exactly what must never leave the
 // process; HTTP responses use `readByIdRaw` instead (Bug 82821). `key` is
-// only reported as present/absent; never logged. `source` is the raw DTO
-// (HTTP path) or the literal "chat-context" (served from the round snapshot).
+// only reported as present/absent; never logged, and of a payload that
+// cannot be read only the field names are. `source` is the raw DTO (HTTP
+// path) or the literal "chat-context" (served from the round snapshot).
 function describeReasoningSupport(profile: Profile): string {
   const support = profile.reasoningSupport;
   if (!support) {
@@ -241,7 +242,7 @@ function logResolvedProfile(id: string, profile: Profile | undefined, source: un
       : source === "chat-context"
         ? `HttpProfilesStorage.readById(${id}) via chat-context -> NOT FOUND`
         : `HttpProfilesStorage.readById(${id}) -> UNUSABLE payload (a required field is missing): ` +
-            `${JSON.stringify(source).slice(0, 500)}`,
+            `fields=[${isObject(source) ? Object.keys(source).sort().join(",") : typeof source}]`,
   );
 }
 
