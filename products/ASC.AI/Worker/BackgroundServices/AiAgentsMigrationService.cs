@@ -189,7 +189,7 @@ public class AiAgentsMigrationService(
 
             failed = migration.Failed > 0;
         }
-        catch (Exception e) when (e is not OperationCanceledException)
+        catch (Exception e) when (!cancellationToken.IsCancellationRequested)
         {
             logger.ErrorPortalFailed(tenantId, e);
             failed = true;

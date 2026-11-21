@@ -72,7 +72,7 @@ public class AiAgentMigrator(
                         }
                     }
                 }
-                catch (Exception e) when (e is not OperationCanceledException)
+                catch (Exception e) when (!cancellationToken.IsCancellationRequested)
                 {
                     failed++;
                     logger.ErrorAgentFailed(e, tenantId, agentId);
