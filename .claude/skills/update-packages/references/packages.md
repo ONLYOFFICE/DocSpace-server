@@ -145,18 +145,16 @@ skill re-checks usage through LSP on every run anyway.
 
 ## Roslyn (`Microsoft.CodeAnalysis.Common`, `Microsoft.CodeAnalysis.CSharp`)
 
-- **Traps:** they are referenced only by `ASC.Analyzers`, which the services load as an analyzer — so it runs
+- **Traps:** they are referenced only by `ASC.Analyzers`, with `VersionOverride` in its csproj and no central pin: with transitive pinning a central pin also forced the Roslyn that `Microsoft.EntityFrameworkCore.Design` brings, whose Workspaces packages pin Common/CSharp exactly, and a different value dropped `Microsoft.CodeAnalysis.Common` from those projects. `ASC.Analyzers`, which the services load as an analyzer — so it runs
   inside the compiler of whatever SDK builds the code, not on our pinned Roslyn. The pin must not exceed the
-  Roslyn of the oldest SDK feature band we support (10.0.1xx ships Roslyn 5.0.x; distro packages install that
+  Roslyn of the oldest SDK feature band we support (11.0.1xx: 11.0.100 ships Roslyn 5.12.0; distro packages install that
   band), otherwise that compiler skips the analyzer with CS9057 — a new warning, and the analyzer silently stops
   checking. A local build on a newer SDK stays green and hides it. Recheck: the file version of
   `<dotnet root>/sdk/<version>/Roslyn/bincore/Microsoft.CodeAnalysis.dll` of the oldest SDK used by CI/packaging.
 
 ## Microsoft.Build
 
-- **Blockers for the next attempt:** 18.10 and later ship only `net11.0` and `net472` (no net10.0 group), so on
-  net10.0 NuGet falls back to the net472 assets with NU1701. Stay on the newest 18.x that still has a net10.0
-  group until the TFM moves to net11. Recheck: the `targetFramework` groups of the target version's nuspec.
+- **Traps:** 18.10 and later ship only `net11.0` and `net472` groups, so the pin follows the TFM: on net10.0 NuGet fell back to the net472 assets with NU1701. Recheck: the `targetFramework` groups of the target version's nuspec against the TFM in `Directory.Packages.props`.
 
 ## FirebaseAdmin
 

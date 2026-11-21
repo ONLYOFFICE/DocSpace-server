@@ -93,9 +93,9 @@ public class ErrorResponseFilter : IDocumentFilter
                 if (operation.Responses.TryGetValue(status, out var response) &&
                     response is OpenApiResponse { Content: null } concrete)
                 {
-                    concrete.Content = new Dictionary<string, OpenApiMediaType>
+                    concrete.Content = new Dictionary<string, IOpenApiMediaType>
                     {
-                        ["application/json"] = new() { Schema = new OpenApiSchemaReference(ErrorSchemaId) }
+                        ["application/json"] = new OpenApiMediaType { Schema = new OpenApiSchemaReference(ErrorSchemaId) }
                     };
                 }
             }

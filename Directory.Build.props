@@ -3,26 +3,40 @@
     <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
   </PropertyGroup>
   <!--
-    Strip native .pdb files that come from NuGet packages (e.g. libSkiaSharp.pdb,
-    ~81 MB × ~48 hosts ≈ 3.8 GB). We never step into these C++ libraries, and
-    they bloat bin/, AV-scan time and incremental copies.
-    Our own .pdb (managed, from ASC.* projects) are untouched.
+    Static web assets are off for every project. No project here has a wwwroot folder, Razor views or components,
+    scoped CSS or a JS initializer module, no referenced package ships static web assets, and no host calls
+    MapStaticAssets or UseStaticFiles. The pipeline still ran in every Microsoft.NET.Sdk.Web project, and from SDK
+    11.0.100 on it also builds the Blazor Hot Reload browser tools initializer into every one of them in Debug. In a
+    build of ASC.Web.slnx that failed ASC.Monolith, and ASC.Web.Api built as its reference, in
+    GenerateJSModuleManifestBuildStaticWebAssets: "scoped css bundles do not have matching endpoints"; ASC.Web.Api
+    built on its own passed.
+    A project that starts serving static files sets StaticWebAssetsEnabled to true in its own csproj; the
+    DisableHotReloadBrowserTools target below keeps such a project clear of that failure.
   -->
+  <PropertyGroup>
+    <StaticWebAssetsEnabled Condition="'$(StaticWebAssetsEnabled)' == ''">false</StaticWebAssetsEnabled>
+  </PropertyGroup>
   <!--
     SDK 11 adds a Blazor Hot Reload browser-tools JS module to every Microsoft.NET.Sdk.Web
     project in Debug builds. Our web projects are API hosts without Blazor; the module gets no
-    endpoint there and GenerateJSModuleManifestBuildStaticWebAssets fails with "scoped css bundles
-    do not have matching endpoints". Turn the browser tools off; C# hot reload is not affected.
+    endpoint there, and GenerateJSModuleManifestBuildStaticWebAssets can fail with "scoped css bundles
+    do not have matching endpoints" (seen for the hosts named in the comment above). Turn the browser tools off; C# hot reload is not affected.
     The SDK sets the opt-in properties after Directory.Build.targets is imported, so this has to be
     a target: it runs after ResolveWebAssemblyProjectReferences, the step that precedes
     _DefineHotReloadBrowserToolsAssetsCore, whose condition is evaluated only then. A BeforeTargets
-    hook on the Core target itself runs too late. A no-op on SDK 10.
+    hook on the Core target itself runs too late. A no-op on SDK 10, and while StaticWebAssetsEnabled is false.
   -->
   <Target Name="DisableHotReloadBrowserTools" AfterTargets="ResolveWebAssemblyProjectReferences">
     <PropertyGroup>
       <_HotReloadBrowserToolsEnabled>false</_HotReloadBrowserToolsEnabled>
     </PropertyGroup>
   </Target>
+  <!--
+    Strip native .pdb files that come from NuGet packages (e.g. libSkiaSharp.pdb,
+    ~81 MB × ~48 hosts ≈ 3.8 GB). We never step into these C++ libraries, and
+    they bloat bin/, AV-scan time and incremental copies.
+    Our own .pdb (managed, from ASC.* projects) are untouched.
+  -->
   <Target Name="RemoveNativePackagePdbs" AfterTargets="ResolvePackageAssets">
     <ItemGroup>
       <RuntimeTargetsCopyLocalItems Remove="@(RuntimeTargetsCopyLocalItems)"

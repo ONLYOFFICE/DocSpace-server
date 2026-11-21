@@ -123,7 +123,7 @@ public class EFUserService(
             q = q.Take(count);
         }
 
-        await foreach (var group in q.Project().ToAsyncEnumerable())
+        await foreach (var group in q.Project().AsAsyncEnumerable())
         {
             yield return group;
         }
@@ -447,7 +447,7 @@ public class EFUserService(
 
         q = q.Take((int)filter.Limit);
 
-        await foreach (var user in q.ToAsyncEnumerable())
+        await foreach (var user in q.AsAsyncEnumerable())
         {
             yield return user.Map();
         }

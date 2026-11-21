@@ -144,7 +144,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
         var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
 
-        await foreach (var queryItem in q1.ToAsyncEnumerable())
+        await foreach (var queryItem in q1.AsAsyncEnumerable())
         {
             yield return ToProviderRoom(providerDao.ToProviderInfo(queryItem.Account), virtualRoomsFolderId, archiveFolderId, queryItem.Shared);
         }
@@ -166,7 +166,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
         var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
 
-        await foreach (var providerQuery in q1.ToAsyncEnumerable())
+        await foreach (var providerQuery in q1.AsAsyncEnumerable())
         {
             yield return ToProviderRoom(providerDao.ToProviderInfo(providerQuery.Account), virtualRoomsFolderId, archiveFolderId, providerQuery.Shared);
         }

@@ -57,9 +57,11 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
                     // status code, so every documented success response with a body must be wrapped too.
                     if (response.Key.StartsWith('2') && response.Value.Content != null)
                     {
-                        foreach (var content in response.Value.Content)
+                        // Microsoft.OpenApi 3 exposes the content as IOpenApiMediaType, whose Schema is read-only;
+                        // the generator writes concrete media types, a media type reference would be a component.
+                        foreach (var mediaType in response.Value.Content.Values.OfType<OpenApiMediaType>())
                         {
-                            content.Value.Schema = WrapSchemaInSuccessApiResponse(content.Value.Schema, schemas, generated);
+                            mediaType.Schema = WrapSchemaInSuccessApiResponse(mediaType.Schema, schemas, generated);
                         }
                     }
                 }
@@ -78,7 +80,8 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         {
             // A type with no schema of its own - `JsonElement?`, `object?` - is any JSON value, null included.
             // Swashbuckle up to 10.2 emitted it as `type: null` alone, which claims the payload is always null;
-            // from 10.3 it is an empty schema, which the object branch below would document as `type: object`.
+            // from 10.3 (and in 11) it is an empty schema, which the object branch below would document as
+            // `type: object` (GET apps/{id}/settings). Both land here, and so does any other empty schema.
             responseSchemaKey = "JsonValueWrapper";
             responseSchema = CreateSuccessApiResponseSchema(new OpenApiSchema(),
                 ("The successful API response containing an arbitrary JSON value.",
@@ -286,20 +289,27 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
 
     private static bool IsAnyValue(IOpenApiSchema schema)
     {
+        // A schema with no type other than null and none of the keywords below. They are the ones a type-less schema
+        // can carry from Swashbuckle or from our own filters (MapType<IFormFile> writes contentMediaType as an extension);
+        // a schema with any of them is not "any value". Numeric and length bounds are not checked: they come with a type.
         return schema is OpenApiSchema
         {
             Type: null or JsonSchemaType.Null,
-            AdditionalProperties: null,
             Items: null,
             Properties: null or { Count: 0 },
             OneOf: null or { Count: 0 },
             AnyOf: null or { Count: 0 },
             AllOf: null or { Count: 0 },
             Enum: null or { Count: 0 },
-            Not: null,
             Const: null,
+            Not: null,
+            AdditionalProperties: null,
+            Discriminator: null,
             Format: null,
-            Discriminator: null
+            Pattern: null,
+            Required: null or { Count: 0 },
+            AdditionalPropertiesAllowed: true,
+            Extensions: null or { Count: 0 }
         };
     }
 

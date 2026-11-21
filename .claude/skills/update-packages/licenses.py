@@ -14,7 +14,7 @@ Directory.Packages.props and for the Aspire.AppHost.Sdk version in the AppHost c
 
 For every changed package the nuspec of the old and the new version is read from nuget.org and the
 script prints:
-  1. DEPENDENCY GROUP - the target-framework group read for net10.0, old -> new;
+  1. DEPENDENCY GROUP - the target-framework group read for net11.0, old -> new;
   2. LICENSE CHANGED  - packages whose license expression / file / url differs between the versions;
   3. the new license of every changed package, grouped;
   4. NEW DEPENDENCIES - dependency ids the new nuspec has and the old one did not, with their license;
@@ -24,9 +24,9 @@ script prints:
      its own: read its release notes too.
 A license of type "file" or a bare licenseUrl cannot be judged from the id: open it and read it.
 
-Dependencies are read from the ONE target-framework group NuGet picks for net10.0: an exact net10.0
+Dependencies are read from the ONE target-framework group NuGet picks for net11.0: an exact net11.0
 group, else the highest netX.Y / netcoreappX.Y below it, else the highest netstandard up to 2.1, else
-the group without a targetFramework. "[-]" means the nuspec has no group a net10.0 project can use.
+the group without a targetFramework. "[-]" means the nuspec has no group a net11.0 project can use.
 A nuspec that cannot be fetched or parsed is listed under ERRORS and left out of the dependency
 comparison instead of stopping the report.
 """
@@ -44,7 +44,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 PROPS = "Directory.Packages.props"
 APPHOST = "common/ASC.AppHost/ASC.AppHost.csproj"
-TARGET = (10, 0)  # net10.0, the global TargetFramework of Directory.Packages.props
+TARGET = (11, 0)  # net11.0, the global TargetFramework of Directory.Packages.props
 
 
 def pins(text_props, text_apphost):
@@ -61,12 +61,12 @@ def at_ref(ref, path):
 
 
 def tfm_rank(tfm):
-    """Sort key of a nuspec group targetFramework for a net10.0 consumer; None = not usable."""
+    """Sort key of a nuspec group targetFramework for a net11.0 consumer; None = not usable."""
     t = (tfm or "").strip().lower()
     if not t:
         return (0, 0, 0)  # group without targetFramework: last resort
     if "," in t or "-" in t:
-        return None  # multi-framework legacy groups, platform-specific groups (net10.0-windows)
+        return None  # multi-framework legacy groups, platform-specific groups (net11.0-windows)
     m = re.fullmatch(r"\.?netstandard(\d+)\.(\d+)", t)
     if m:
         v = (int(m.group(1)), int(m.group(2)))
@@ -147,7 +147,7 @@ def main(argv):
     broken = {p for (p, side), r in res.items() if r[0] == "ERR"}
 
     print(f"{len(changed)} changed pins against {ref}\n")
-    print("== DEPENDENCY GROUP read for net10.0 (old -> new)")
+    print("== DEPENDENCY GROUP read for net11.0 (old -> new)")
     for p, (o, n) in sorted(changed.items()):
         if p in broken:
             continue

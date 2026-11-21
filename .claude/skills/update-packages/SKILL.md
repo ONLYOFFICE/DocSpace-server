@@ -91,7 +91,7 @@ A license that moves from an open-source license to a commercial or dual license
 blocker-class change even when the nuspec only says `type=file` — report it as a blocker (FluentAssertions
 8 moved from Apache-2.0 to a commercial Xceed license; see `references/packages.md`).
 
-Dependencies are read from the one target-framework group NuGet picks for net10.0 (exact net10.0, else
+Dependencies are read from the one target-framework group NuGet picks for net11.0 (exact net11.0, else
 the highest lower netX.Y, else netstandard2.1/2.0, else the group without a framework); the chosen group
 is printed as `[tfm]`. A nuspec the script cannot fetch or parse is listed under ERRORS — pins that are
 not on nuget.org (local or legacy feeds) show up there too; check the rest by hand. A package with native code

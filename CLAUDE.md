@@ -2,12 +2,12 @@
 
 ## Project Overview
 
-ONLYOFFICE DocSpace server — a multi-tenant SaaS platform for document management, collaboration, and file sharing. Built on **ASP.NET Core 10.0** with a modular microservices architecture.
+ONLYOFFICE DocSpace server — a multi-tenant SaaS platform for document management, collaboration, and file sharing. Built on **ASP.NET Core 11.0** with a modular microservices architecture.
 
 ## Tech Stack
 
-- **Runtime**: .NET 10.0 (C#)
-- **Web Framework**: ASP.NET Core 10.0
+- **Runtime**: .NET 11.0 (C#)
+- **Web Framework**: ASP.NET Core 11.0
 - **Orchestration**: .NET Aspire
 - **Databases**: MySQL, PostgreSQL
 - **Caching**: Redis (StackExchange.Redis) + FusionCache
@@ -69,7 +69,7 @@ The AppHost has 7 launch profiles: `development`, `test`, `preview`, `frontend-d
 
 **Aspire CLI:** works from the repo root — the committed `aspire.config.json` points to the AppHost (`appHostPath`, relative to the repo root), no `--apphost` flag needed. CLI 13.x dropped the older `.aspire/settings.json`; if the config is missing, recreate it with `aspire config set appHostPath "common/ASC.AppHost/ASC.AppHost.csproj"` (the CLI never writes the file on its own). The resource graph is defined in `common/ASC.AppHost/Program.cs` plus `common/ASC.AppHost/Configuration/` (`ProjectConfigurator.cs`, `ConnectionStringManager.cs`, `NginxConfiguration.cs`) — not in a single-file `apphost.cs`.
 
-**Package management:** Centralized in `Directory.Packages.props` — all version pins AND the global `TargetFramework` (net10.0) live there. `Directory.Build.props` only enables OpenAPI doc generation and strips native NuGet .pdb files; most csprojs set no TFM of their own.
+**Package management:** Centralized in `Directory.Packages.props` — all version pins AND the global `TargetFramework` (net11.0) live there. `Directory.Build.props` enables OpenAPI doc generation (for the `ASC.Api.Documentation` solution or with `GenerateApiDocs=true`), switches static web assets off (`StaticWebAssetsEnabled=false`: no project serves static files) and strips native NuGet .pdb files; `Directory.Build.targets` appends `NU1608` to `NoWarn` while Npgsql 11 is an RC (see its comment). Most csprojs set no TFM of their own (`ASC.Analyzers` targets netstandard2.0).
 
 **More detail:** `README.md` documents service ports (Web.Api 5000, Studio 5003, People 5004, Files 5007/5009, AI 5157/5154), Aspire dashboard / Scalar / DBGate / Mailpit URLs, prerequisites, and troubleshooting.
 

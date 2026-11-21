@@ -344,7 +344,7 @@ internal abstract class SecurityBaseDao<T>(
             q = q.Take(count);
         }
 
-        await foreach (var record in q.ToAsyncEnumerable())
+        await foreach (var record in q.AsAsyncEnumerable())
         {
             yield return record;
         }
@@ -830,7 +830,7 @@ internal abstract class SecurityBaseDao<T>(
             q1 = q1.Take(count);
         }
 
-        await foreach (var r in q1.ToAsyncEnumerable())
+        await foreach (var r in q1.AsAsyncEnumerable())
         {
             yield return new UserInfoWithShared { UserInfo = r.User.Map(), Shared = r.Shared };
         }
@@ -1480,7 +1480,7 @@ internal class SecurityDao(
             q = q.Where(r => subjects.Contains(r.Subject));
         }
 
-        var records = q.ToAsyncEnumerable()
+        var records = q.AsAsyncEnumerable()
             .Select(ToFileShareRecord)
             .OrderBy(r => r.Level)
             .ThenByDescending(r => r.Share, new FileShareRecord<int>.ShareComparer(entry.RootFolderType));

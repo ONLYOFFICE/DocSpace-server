@@ -816,10 +816,10 @@ internal abstract class BaseFolderDao
     {
         if (withoutTags)
         {
-            return rooms.Join(filesDbContext.ThirdpartyIdMapping.ToAsyncEnumerable(), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
+            return rooms.Join(filesDbContext.ThirdpartyIdMapping.AsAsyncEnumerable(), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
                 .Where(async (r, _) => !await filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (link, tag) => new { link.EntryId, tag })
                     .Where(tag => tag.tag.Type == TagType.Custom)
-                    .ToAsyncEnumerable()
+                    .AsAsyncEnumerable()
                     .AnyAsync(t => t.EntryId == r.HashId))
                 .Select(r => r.folder);
         }
@@ -829,9 +829,9 @@ internal abstract class BaseFolderDao
             return rooms;
         }
 
-        var filtered = rooms.Join(filesDbContext.ThirdpartyIdMapping.ToAsyncEnumerable(), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
-            .Join(filesDbContext.TagLink.ToAsyncEnumerable(), r => r.HashId, t => t.EntryId, (result, tag) => new { result.folder, tag.TagId })
-            .Join(filesDbContext.Tag.ToAsyncEnumerable(), r => r.TagId, t => t.Id, (result, tagInfo) => new { result.folder, tagInfo.Name })
+        var filtered = rooms.Join(filesDbContext.ThirdpartyIdMapping.AsAsyncEnumerable(), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
+            .Join(filesDbContext.TagLink.AsAsyncEnumerable(), r => r.HashId, t => t.EntryId, (result, tag) => new { result.folder, tag.TagId })
+            .Join(filesDbContext.Tag.AsAsyncEnumerable(), r => r.TagId, t => t.Id, (result, tagInfo) => new { result.folder, tagInfo.Name })
             .Where(r => tags.Contains(r.Name))
             .Select(r => r.folder);
 

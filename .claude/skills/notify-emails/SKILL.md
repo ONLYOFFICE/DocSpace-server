@@ -439,7 +439,7 @@ Two tests are generated per culture:
   `"caption":"url"` still renders and still contains the address, so nothing else catches it), the top
   image / letter logo, the signature. Then your `AssertContent`, and
   `AssertDefaultCultureText` for `en-US` only (another culture may carry a translation). Saves
-  `bin/Debug/net10.0/letter-preview/<letter-id>.<culture>.html`.
+  `bin/Debug/net11.0/letter-preview/<letter-id>.<culture>.html`.
 - **`Letter_IsDeliveredToMailPit`** — sends the letter over SMTP, asserts it arrived, prints the message
   URL, then calls MailPit's `html-check` and asserts the share of mail clients that render the markup
   (`MinimumHtmlSupport`, 75% by default). The letters measure 78.5–91.5%; nearly all of the remainder is

@@ -225,7 +225,7 @@ grep -A6 'M:<Namespace>.<Class>.<Method>' $(find <project-dir>/bin/Debug -name '
 ```
 
 (`find` rather than a literal path because the layout is not uniform here — some projects write the
-xml to `bin/Debug/`, others to `bin/Debug/net10.0/`.)
+xml to `bin/Debug/`, others to `bin/Debug/net11.0/`.)
 
 If your text is not in there, the generator will never see it, and no amount of regenerating will fix
 the finding. An unrecognised doc tag is precisely the case that passes the compiler, passes the style

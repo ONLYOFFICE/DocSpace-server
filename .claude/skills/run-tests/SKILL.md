@@ -32,7 +32,7 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filt
 
 **Test runner log** (assertion failures, test output):
 
-- File: `products/ASC.Files/Tests/bin/Debug/net10.0/TestResults/*.log`
+- File: `products/ASC.Files/Tests/bin/Debug/net11.0/TestResults/*.log`
 - It is **UTF-16LE** — re-encode before grepping: `iconv -f UTF-16LE -t UTF-8 <file>`,
   otherwise grep sees text "with spaces between letters".
 - The first ~2600 lines are stack-startup noise ("Couldn't connect", "failed to start

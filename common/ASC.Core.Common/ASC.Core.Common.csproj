@@ -41,6 +41,10 @@
     <PackageReference Include="CsvHelper" />
     <PackageReference Include="FirebaseAdmin" />
     <PackageReference Include="MailKit" />
+    <!-- Referenced directly while Npgsql.EntityFrameworkCore.PostgreSQL is an RC: it names an exact EF Core RC version,
+         and against the central 11.0.0 pin NuGet then drops both packages from the graph instead of resolving them. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microting.EntityFrameworkCore.MySql" />

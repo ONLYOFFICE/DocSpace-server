@@ -149,7 +149,7 @@ public class InvitationService(
 
                     var currentUserId = authContext.CurrentAccount.ID;
 
-                    await foreach (var auditEvent in query.ToAsyncEnumerable())
+                    await foreach (var auditEvent in query.AsAsyncEnumerable())
                     {
                         var description = JsonSerializer.Deserialize<List<string>>(auditEvent.DescriptionRaw);
                         var info = JsonSerializer.Deserialize<EventDescription<JsonElement>>(description.Last());

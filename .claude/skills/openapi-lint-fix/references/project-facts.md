@@ -49,7 +49,7 @@ watching a separate field. A present `description` is never evidence that the `<
 survived — check the field the failing rule actually names.
 
 **The XML documentation artefact is not always under a TFM subdirectory.** A project that overrides
-its output path puts it directly in `bin/Debug/`; one that does not puts it in `bin/Debug/net10.0/`.
+its output path puts it directly in `bin/Debug/`; one that does not puts it in `bin/Debug/net11.0/`.
 Both layouts exist here, so locate the file instead of assuming either shape (2026-08-28):
 
 ```bash

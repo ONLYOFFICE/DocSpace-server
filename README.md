@@ -31,8 +31,8 @@ This repository contains the **backend** for [ONLYOFFICE DocSpace](https://githu
 ## Technology Stack
 
 ### Core
-- **Language:** C# 14.0
-- **Runtime:** .NET 10.0 with ASP.NET Core
+- **Language:** C# 15.0, the net11.0 default (the services set no LangVersion; ASC.Analyzers uses latest, ASC.Migration.Creator and the PostgreSQL Standalone migrations pin 12)
+- **Runtime:** .NET 11.0 with ASP.NET Core
 - **Orchestration:** .NET Aspire 13.1
 - **DI Container:** Autofac 10.0
 - **API Versioning:** Asp.Versioning 8.1
@@ -205,7 +205,7 @@ Official API SDKs are available as submodules for multiple languages:
 
 | Tool | Version | Verification Command |
 |------|---------|---------------------|
-| [.NET SDK](https://dotnet.microsoft.com/download) | 10.0 | `dotnet --version` |
+| [.NET SDK](https://dotnet.microsoft.com/download) | 11.0 | `dotnet --version` |
 | [Docker](https://www.docker.com/) | >= 28.5.0 | `docker --version` |
 
 ### Quick Start
@@ -392,7 +392,7 @@ taskkill /PID <PID> /F
 <details>
 <summary><b>dotnet run fails with SDK version error</b></summary>
 
-Ensure you have .NET 10.0 SDK installed. The `global.json` specifies `rollForward: latestMajor`, so any .NET 9.0+ SDK should work, but .NET 10.0 is recommended:
+Ensure you have the .NET 11.0 SDK installed: the projects target `net11.0`, so an older SDK cannot build them. `global.json` does not pin an SDK version, so the newest installed SDK is used:
 ```bash
 dotnet --list-sdks
 ```

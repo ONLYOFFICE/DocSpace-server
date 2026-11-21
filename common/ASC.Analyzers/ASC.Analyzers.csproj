@@ -14,9 +14,18 @@
       <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
     </ItemGroup>
 
+    <!--
+      The Roslyn version is set here, not in Directory.Packages.props: with CentralPackageTransitivePinningEnabled a
+      central pin also applies to the Roslyn that Microsoft.EntityFrameworkCore.Design brings. EF Design asks for at
+      least 5.0.0 (Design 10) or 5.9.0 (Design 11) of Microsoft.CodeAnalysis.CSharp.Workspaces and Workspaces.MSBuild,
+      and those Roslyn packages pin Microsoft.CodeAnalysis.Common and CSharp to exactly their own version; a central pin
+      that differs makes NuGet refuse the downgrade or drop Microsoft.CodeAnalysis.Common from those projects. This analyzer is loaded into the compiler of
+      whatever SDK builds the code, so the version stays low: it must not exceed the Roslyn of the oldest SDK band that
+      builds the repo (11.0.100 ships 5.12.0), or that compiler skips the analyzer with CS9057.
+    -->
     <ItemGroup>
-      <PackageReference Include="Microsoft.CodeAnalysis.Common" PrivateAssets="all" />
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+      <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="5.0.0" PrivateAssets="all" />
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="5.0.0" PrivateAssets="all" />
     </ItemGroup>
 
 </Project>

@@ -79,7 +79,7 @@ jobs:
       if: matrix.language == 'csharp'
       uses: actions/setup-dotnet@v3
       with:
-       dotnet-version: '7.0.x'
+       dotnet-version: '11.0.x'
         
     - name: build csharp
       if: matrix.language == 'csharp'
