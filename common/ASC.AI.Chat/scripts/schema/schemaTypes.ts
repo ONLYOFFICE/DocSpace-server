@@ -773,12 +773,18 @@ export type Res_aiMetaGenerate = {
 export type Req_aiSkillsGenerate = {
   /** The integer id of the Instructions room the skill is written for. */
   destId: string | number;
-  /** The skill's title, at most 64 characters; its kebab-case form is the skill's name. */
-  title: string;
+  /**
+   * The skill's title, at most 64 characters; its kebab-case form is the
+   * skill's name. Optional: the model titles the skill when it is absent
+   * or empty.
+   */
+  title?: string;
   /** What the skill should do, at most 2000 characters; a specification for the model. */
   description: string;
 };
 export type Res_aiSkillsGenerate = {
+  /** The skill's title: the one given, or the one the model chose. */
+  title: string;
   /** The skill's name as written in the frontmatter; the file is saved as `<name>.md`. */
   name: string;
   /** The whole Markdown file, frontmatter included. Nothing is saved. */

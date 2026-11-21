@@ -374,7 +374,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Skills.
   aiSkillsGenerate:
-    "Writes the text of one skill from a title and the caller's description of the skill they need, for an Instructions room, without saving it: the caller shows the text for review and saves the version the user accepts as `<name>.md` through `POST api/2.0/files/{folderId}/insert`, where the Files service validates the frontmatter. `destId` is the integer id of the Instructions room, checked before the model runs: the caller has to be able to create files in it, and any other folder answers 400. `title` becomes the skill's `name`: it is lower-cased and every run of characters other than letters and digits is folded into one hyphen, so `Sales report` becomes `sales-report`. `description` is a specification of the skill, passed to the model as data, never as an instruction. The model bound to the `Chat` action - the `Default` slot when that action has no profile of its own - runs once, without tools, and writes the description and the body; the frontmatter is then rebuilt here, with the description flattened to one line, stripped of tags and cut to 1 024 characters, so the text as returned always passes the Files service's skill validation. The answer carries the skill's name and the whole file, frontmatter included.",
+    "Writes the text of one skill from the caller's description of the skill they need and, optionally, a title, for an Instructions room, without saving it: the caller shows the text for review and saves the version the user accepts as `<name>.md` through `POST api/2.0/files/{folderId}/insert`, where the Files service validates the frontmatter. `destId` is the integer id of the Instructions room, checked before the model runs: the caller has to be able to create files in it, and any other folder answers 400. `title` is optional: an absent or empty one leaves the model to title the skill in the same round, from the description and in its language. The title, given or chosen, becomes the skill's `name`: it is lower-cased and every run of characters other than letters and digits is folded into one hyphen, so `Sales report` becomes `sales-report`. `description` is a specification of the skill, passed to the model as data, never as an instruction. The model bound to the `Chat` action - the `Default` slot when that action has no profile of its own - runs once, without tools, and writes the description and the body; the frontmatter is then rebuilt here, with the description flattened to one line, stripped of tags and cut to 1 024 characters, so the text as returned always passes the Files service's skill validation. The answer carries the skill's title, its name and the whole file, frontmatter included.",
   aiSkillsCreate:
     "Creates a new skill in an Instructions room from the skill template and saves it as `<title>.md`; no model is involved. `destId` is the integer id of the Instructions room, checked before anything is written: the caller has to be able to create files in it, and any other folder answers 400. `title` is the file's title, at most 165 characters, without the extension (a trailing `.md` is dropped), and has to hold a letter or a digit: the skill's `name` is derived from it as in `POST api/2.0/ai/skills/generate`, and its `description` starts as the title itself. The body is a skeleton of the sections a skill is made of, for the user to fill in. The file is saved through `POST api/2.0/files/{folderId}/insert`, so the Files service validates the frontmatter and the room's limits, and a title already taken in the room gets a numbered one. The answer carries the ID and the title of the new file.",
 
@@ -788,7 +788,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
   aiSkillsGenerate: {
     "400":
-      "`destId` is not an integer id, `title` or `description` is missing or too long, `title` has no letter or digit, or the folder is not an Instructions room.",
+      "`destId` is not an integer id, `description` is missing or too long, `title` is not a string, is too long or has no letter or digit, or the folder is not an Instructions room.",
     "403": "The caller cannot create files in the room.",
     "404": "The room does not exist.",
     "402":
@@ -796,7 +796,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "429":
       "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
     "502":
-      "The model request failed or returned an empty skill; `code` says how. `providerMessage` carries the provider's own words only for the portal's spending limit; other failures, an authentication one among them, leave it out.",
+      "The model request failed, or returned an empty skill or one it left unnamed; `code` says how. `providerMessage` carries the provider's own words only for the portal's spending limit; other failures, an authentication one among them, leave it out.",
     "503": "No profile is bound to `Chat` and the `Default` slot is empty too.",
     "504": "The model round did not finish within the time budget.",
   },
@@ -1460,7 +1460,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "with the reason for each, and the documents the values were read from.",
 
   aiSkillsGenerate:
-    "The skill's name and the whole Markdown file, frontmatter included; nothing is saved.",
+    "The skill's title, its name and the whole Markdown file, frontmatter included; nothing is saved.",
   aiSkillsCreate: "The ID and the title of the new skill file.",
   aiTemplatesList: "The agents, skill sets and knowledge bases of the catalog.",
   aiTemplatesInstall:

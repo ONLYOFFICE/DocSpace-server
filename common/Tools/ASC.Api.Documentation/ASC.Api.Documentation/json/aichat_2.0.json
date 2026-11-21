@@ -8985,15 +8985,19 @@
         ],
         "operationId": "aiSkillsGenerate",
         "summary": "Generate a skill",
-        "description": "Writes the text of one skill from a title and the caller's description of the skill they need, for an Instructions room, without saving it: the caller shows the text for review and saves the version the user accepts as `<name>.md` through `POST api/2.0/files/{folderId}/insert`, where the Files service validates the frontmatter. `destId` is the integer id of the Instructions room, checked before the model runs: the caller has to be able to create files in it, and any other folder answers 400. `title` becomes the skill's `name`: it is lower-cased and every run of characters other than letters and digits is folded into one hyphen, so `Sales report` becomes `sales-report`. `description` is a specification of the skill, passed to the model as data, never as an instruction. The model bound to the `Chat` action - the `Default` slot when that action has no profile of its own - runs once, without tools, and writes the description and the body; the frontmatter is then rebuilt here, with the description flattened to one line, stripped of tags and cut to 1 024 characters, so the text as returned always passes the Files service's skill validation. The answer carries the skill's name and the whole file, frontmatter included.",
+        "description": "Writes the text of one skill from the caller's description of the skill they need and, optionally, a title, for an Instructions room, without saving it: the caller shows the text for review and saves the version the user accepts as `<name>.md` through `POST api/2.0/files/{folderId}/insert`, where the Files service validates the frontmatter. `destId` is the integer id of the Instructions room, checked before the model runs: the caller has to be able to create files in it, and any other folder answers 400. `title` is optional: an absent or empty one leaves the model to title the skill in the same round, from the description and in its language. The title, given or chosen, becomes the skill's `name`: it is lower-cased and every run of characters other than letters and digits is folded into one hyphen, so `Sales report` becomes `sales-report`. `description` is a specification of the skill, passed to the model as data, never as an instruction. The model bound to the `Chat` action - the `Default` slot when that action has no profile of its own - runs once, without tools, and writes the description and the body; the frontmatter is then rebuilt here, with the description flattened to one line, stripped of tags and cut to 1 024 characters, so the text as returned always passes the Files service's skill validation. The answer carries the skill's title, its name and the whole file, frontmatter included.",
         "responses": {
           "200": {
-            "description": "The skill's name and the whole Markdown file, frontmatter included; nothing is saved.",
+            "description": "The skill's title, its name and the whole Markdown file, frontmatter included; nothing is saved.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "title": {
+                      "type": "string",
+                      "description": "The skill's title: the one given, or the one the model chose."
+                    },
                     "name": {
                       "type": "string",
                       "description": "The skill's name as written in the frontmatter; the file is saved as `<name>.md`."
@@ -9004,6 +9008,7 @@
                     }
                   },
                   "required": [
+                    "title",
                     "name",
                     "content"
                   ],
@@ -9013,7 +9018,7 @@
             }
           },
           "400": {
-            "description": "`destId` is not an integer id, `title` or `description` is missing or too long, `title` has no letter or digit, or the folder is not an Instructions room.",
+            "description": "`destId` is not an integer id, `description` is missing or too long, `title` is not a string, is too long or has no letter or digit, or the folder is not an Instructions room.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9149,7 +9154,7 @@
             }
           },
           "502": {
-            "description": "The model request failed or returned an empty skill; `code` says how. `providerMessage` carries the provider's own words only for the portal's spending limit; other failures, an authentication one among them, leave it out.",
+            "description": "The model request failed, or returned an empty skill or one it left unnamed; `code` says how. `providerMessage` carries the provider's own words only for the portal's spending limit; other failures, an authentication one among them, leave it out.",
             "content": {
               "application/json": {
                 "schema": {
@@ -15880,7 +15885,7 @@
           },
           "title": {
             "type": "string",
-            "description": "The skill's title, at most 64 characters; its kebab-case form is the skill's name."
+            "description": "The skill's title, at most 64 characters; its kebab-case form is the skill's name. Optional: the model titles the skill when it is absent or empty."
           },
           "description": {
             "type": "string",
@@ -15889,7 +15894,6 @@
         },
         "required": [
           "destId",
-          "title",
           "description"
         ],
         "additionalProperties": false

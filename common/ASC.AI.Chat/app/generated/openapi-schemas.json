@@ -4775,7 +4775,7 @@
           },
           "title": {
             "type": "string",
-            "description": "The skill's title, at most 64 characters; its kebab-case form is the skill's name."
+            "description": "The skill's title, at most 64 characters; its kebab-case form is the skill's name. Optional: the model titles the skill when it is absent or empty."
           },
           "description": {
             "type": "string",
@@ -4784,7 +4784,6 @@
         },
         "required": [
           "destId",
-          "title",
           "description"
         ],
         "additionalProperties": false
@@ -4792,6 +4791,10 @@
       "response": {
         "type": "object",
         "properties": {
+          "title": {
+            "type": "string",
+            "description": "The skill's title: the one given, or the one the model chose."
+          },
           "name": {
             "type": "string",
             "description": "The skill's name as written in the frontmatter; the file is saved as `<name>.md`."
@@ -4802,6 +4805,7 @@
           }
         },
         "required": [
+          "title",
           "name",
           "content"
         ],

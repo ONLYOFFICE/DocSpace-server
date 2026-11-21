@@ -75,15 +75,20 @@ function asInput(body: unknown): GenerateSkillInput {
     badRequest("body must be an object");
   }
   const destId = asDestId(body);
+  // Optional: the model titles a skill that comes without one.
+  const rawTitle = body.title;
+  if (rawTitle !== undefined && rawTitle !== null && typeof rawTitle !== "string") {
+    badRequest("title must be a string");
+  }
   const title = getString(body, "title")?.trim() ?? "";
-  if (!title || title.length > MAX_NAME_LENGTH) {
-    badRequest(`title must be a non-empty string of at most ${MAX_NAME_LENGTH} characters`);
+  if (title.length > MAX_NAME_LENGTH) {
+    badRequest(`title must be a string of at most ${MAX_NAME_LENGTH} characters`);
   }
   const description = getString(body, "description")?.trim() ?? "";
   if (!description || description.length > MAX_REQUEST_CHARS) {
     badRequest(`description must be a non-empty string of at most ${MAX_REQUEST_CHARS} characters`);
   }
-  return { destId, title, description };
+  return { destId, ...(title && { title }), description };
 }
 
 // The provider's own text reaches every member who may create a skill, not
