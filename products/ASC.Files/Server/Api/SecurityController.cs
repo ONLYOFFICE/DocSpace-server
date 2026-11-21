@@ -459,7 +459,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// owner's record and external links stay. To delete external links, use the link operations of the entry.
     /// Requires read access to each entry. Other callers get 403. Only a caller who may manage access, or a DocSpace
     /// admin outside a private room, deletes the rights. Any other caller only removes the entry from their own list.
-    /// For a room member, this means leaving the room. The call changes data, and you can repeat it. It stops at the
+    /// For a room member, this means leaving the room. On an AI project, every member the call removes also loses the
+    /// chat threads they created there. The call changes data, and you can repeat it. It stops at the
     /// first entry it may not change, and earlier entries stay changed. In both modes, it clears the caller's
     /// favorite, recent, and new marks on the entry. In a private room, every account
     /// that loses access also loses its file keys. The call always returns `true` and skips IDs that match nothing.

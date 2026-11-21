@@ -247,6 +247,45 @@ public class WebhookEntryContextTests(
         readerPayload!.Model.QuotaLimit.Should().BeNull("the reader may not edit the room");
     }
 
+    /// <summary>
+    /// The REST API shows the used space of an AI project only to who may edit the project, since the files in it
+    /// belong to the members who added them; the room.* payload carried it to every member who reads the project.
+    /// </summary>
+    [Fact]
+    public async Task RoomUpdated_UsedSpaceOfAnAiProject_GoesOnlyToWhoMayEditIt()
+    {
+        // Arrange: a project of the owner with a Content creator, both subscribed to room.updated
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var member = await InviteContact(EmployeeType.User);
+
+        await _filesClient.Authenticate(Owner);
+        var projectId = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(title: $"project-{Guid.NewGuid():N}", roomType: RoomType.AiProjectRoom), cancellationToken)).Response.Id;
+
+        await _roomsApi.SetRoomSecurityAsync(
+            projectId,
+            new RoomInvitationRequest(invitations: [new RoomInvitation(member.Id, DocSpace.API.SDK.Model.FileShare.ContentCreator)], notify: false),
+            cancellationToken);
+
+        var ownerSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated);
+        var memberSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated, member);
+
+        // Act
+        var title = $"project-{Guid.NewGuid():N}";
+
+        await _filesClient.Authenticate(Owner);
+        await _roomsApi.UpdateRoomAsync(projectId, new UpdateRoomRequest(title: title), cancellationToken);
+
+        // Assert
+        var ownerPayload = await WaitForEventPayloadAsync<RoomPayload>(ownerSubscription.Id, "room.updated", p => p.Title == title);
+        var memberPayload = await WaitForEventPayloadAsync<RoomPayload>(memberSubscription.Id, "room.updated", p => p.Title == title);
+
+        ownerPayload.Should().NotBeNull("the owner may read the project");
+        ownerPayload!.Model.UsedSpace.Should().NotBeNull("the owner may edit the project");
+        memberPayload.Should().NotBeNull("a Content creator reads the project");
+        memberPayload!.Model.UsedSpace.Should().BeNull("a Content creator may not edit the project");
+    }
+
     /// <summary>A custom room of the owner with a quota of its own; room quotas are turned on for it.</summary>
     private async Task<int> CreateRoomWithQuotaAsync()
     {

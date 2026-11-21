@@ -50,6 +50,7 @@ global using ASC.Common.Log;
 
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.HeartBeat.Abstractions;
+global using ASC.Common.Utils;
 
 global using ASC.ElasticSearch.VectorData;
 
@@ -58,6 +59,7 @@ global using ASC.EventBus.Log;
 
 global using ASC.Files.Core;
 global using ASC.Files.Core.Core;
+global using ASC.Files.Core.Core.AI;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Vectorization;
@@ -77,3 +79,7 @@ global using System.Text;
 global using System.Threading.Channels;
 
 global using ASC.Web.Files.Utils;
+
+global using DeletedThread = ASC.AI.Integration.Threads.DeletedThread;
+global using OrphanAttachment = ASC.AI.Integration.Attachments.OrphanAttachment;
+global using ThreadsStorage = ASC.AI.Integration.Threads.ThreadsStorage;

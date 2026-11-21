@@ -23,7 +23,7 @@ matrices themselves are stated in the first scenario of each requirement.
 The system SHALL accept a member role only when the room type offers it, as the matrix scenario states: in
 short, a Custom room every role but Form Filler, a Public room only Room manager and Content creator, a
 Form filling room Room manager, Content creator and Form Filler, and of the AI rooms section (v4.1) an AI
-project Room manager and Viewer only, never for a Guest. The Room Owner is the room's creator, not an
+project Room manager and Content creator only, never for a Guest. The Room Owner is the room's creator, not an
 assignable role.
 
 #### Scenario: Role availability matrix by room type
@@ -40,7 +40,7 @@ assignable role.
 | Form filling room  | ✔ | ✔ |   | ✔ |   |   |   |
 | Instructions room  | ✔ | ✔ | ✔ |   |   |   | ✔ |
 | Knowledge room     | ✔ | ✔ |   |   |   |   | ✔ |
-| AI project room    | ✔ |   |   |   |   |   | ✔ |
+| AI project room    | ✔ | ✔ |   |   |   |   |   |
 
 #### Scenario: Form Filler is refused in a Custom room
 
@@ -56,11 +56,11 @@ assignable role.
 
 - **WHEN** a Guest is invited to an AI project with `setRoomSecurity` by id or by email with any role, or an existing Guest follows the project's invitation link
 - **THEN** the invitation is rejected (403, "The role is not available for this user type") and the link check answers `QuotaFailed`; the guest is not in the member list
-- **AND** a User invited by id with Viewer, or joining through the link, is a member with the Viewer role (see `invitations`)
+- **AND** a User invited by id with Content creator, or joining through the link, is a member with the Content creator role (see `invitations`)
 
 #### Scenario: AI project member reads the rooms linked to the project
 
-- **WHEN** a User holds the Viewer role in an AI project, directly or through a group, and an Instructions room is linked to the project
+- **WHEN** a User holds the Content creator role in an AI project, through an own share (a group cannot be invited to a project), and an Instructions room is linked to the project
 - **THEN** the member lists the linked room and reads its files with the Viewer access, without the room being listed in their AI rooms section; a User outside the project gets 403
 - **AND** the access ends when the room is unlinked or the member is removed, and a higher role the member holds in the room itself (Content creator through a group) is kept
 

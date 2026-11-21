@@ -287,10 +287,14 @@ global using static ASC.Web.Files.Services.DocumentService.DocumentServiceTracke
 global using static ASC.Web.Files.Utils.FileTracker;
 
 global using ActionType = ASC.AI.Integration.Assignments.ActionType;
+global using AiThread = ASC.AI.Integration.Threads.Thread;
+global using AttachmentKind = ASC.AI.Integration.Attachments.AttachmentKind;
+global using AttachmentsStorage = ASC.AI.Integration.Attachments.AttachmentsStorage;
 global using AuditReportFormat = ASC.Files.Core.Services.DocumentBuilderService.AuditReportFormat;
 global using AuditReportKind = ASC.Files.Core.Services.DocumentBuilderService.AuditReportKind;
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;
 global using Constants = ASC.Core.Users.Constants;
+global using DeletedThread = ASC.AI.Integration.Threads.DeletedThread;
 global using DocumentBuilderFailedException = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderFailedException;
 global using DocumentBuilderScriptRunner = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderScriptRunner;
 global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttribute;
@@ -315,6 +319,8 @@ global using SecurityContext = ASC.Core.SecurityContext;
 global using SocketManager = ASC.Web.Files.Utils.SocketManager;
 global using SortOrder = ASC.Api.Core.Core.SortOrder;
 global using Tag = ASC.Files.Core.Tag;
+global using ThreadFolderKind = ASC.AI.Integration.Threads.ThreadFolderKind;
+global using ThreadsStorage = ASC.AI.Integration.Threads.ThreadsStorage;
 global using Thumbnail = ASC.Files.Core.Thumbnail;
 global using Token = ASC.Web.Files.ThirdPartyApp.Token;
 global using UserInfo = ASC.Core.Users.UserInfo;

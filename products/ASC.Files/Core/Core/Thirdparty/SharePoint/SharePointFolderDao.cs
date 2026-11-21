@@ -88,7 +88,7 @@ internal class SharePointFolderDao(
     }
 
     public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false,
-        MetadataFilter metadataFilter = null)
+        MetadataFilter metadataFilter = null, bool excludeAiProjectContent = false)
     {
         if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != SharePointProviderInfo.ProviderFilter))
         {
@@ -115,6 +115,12 @@ internal class SharePointFolderDao(
             yield return room;
         }
     }
+
+    public IAsyncEnumerable<Folder<string>> GetAiProjectsVisibleToAsync(IEnumerable<string> projectsIds, int aiHubRootId, Guid userId, bool isAdmin)
+    {
+        return AsyncEnumerable.Empty<Folder<string>>();
+    }
+
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
     {
         return GetFoldersAsync(parentId);
@@ -213,6 +219,11 @@ internal class SharePointFolderDao(
     }
 
     public Task<string> SaveFolderAsync(Folder<string> folder, IEnumerable<Folder<string>> children)
+    {
+        throw new NotSupportedException();
+    }
+
+    public Task<string> SaveThreadFolderAsync(Folder<string> folder, Guid threadId, ThreadFolderKind kind)
     {
         throw new NotSupportedException();
     }

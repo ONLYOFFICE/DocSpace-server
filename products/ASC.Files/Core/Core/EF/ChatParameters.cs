@@ -41,6 +41,8 @@ public record ChatParameters
 
 public record AiAgentChatBinding(int RoomId, int ChatProviderId, string ModelId);
 
+public record ChatDraftFile(int Id, int ProjectId, long Size);
+
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class ChatParametersMapper
 {

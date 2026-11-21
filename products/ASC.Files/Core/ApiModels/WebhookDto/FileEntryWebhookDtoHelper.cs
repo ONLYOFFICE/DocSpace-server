@@ -90,7 +90,8 @@ public class FileEntryWebhookDtoHelper(
     /// Cuts a payload built by <see cref="GetAsync{T}"/> from <paramref name="source"/> for one subscription owner, as
     /// the REST API shows the entry to them: a User or a Guest gets the author and the last editor without the profile
     /// link and the user name, the quota of a room goes only to an owner the REST API shows it to
-    /// (<see cref="CanSeeRoomQuotaAsync{T}"/>), and the origins of an entry in the trash only to an owner who may read
+    /// (<see cref="CanSeeRoomQuotaAsync{T}"/>), the used space of an AI project only to an owner who may edit the
+    /// project, as the REST API shows it, and the origins of an entry in the trash only to an owner who may read
     /// the folder or the room it was deleted from.
     /// </summary>
     public async Task<FileEntryWebhookDto<T>> RestrictForSubscriberAsync<T>(FileEntryWebhookDto<T> entry, FileEntry<T> source, Guid? subscriberId)
@@ -112,6 +113,16 @@ public class FileEntryWebhookDtoHelper(
             result = withoutQuota;
         }
 
+        if (result is RoomWebhookDto<T> { UsedSpace: not null } project &&
+            source is Folder<T> { FolderType: FolderType.AiProjectRoom } &&
+            !await CanEditRoomAsync(source, subscriberId.Value))
+        {
+            var withoutUsedSpace = (RoomWebhookDto<T>)(ReferenceEquals(project, entry) ? project.Clone() : project);
+
+            withoutUsedSpace.UsedSpace = null;
+            result = withoutUsedSpace;
+        }
+
         result = await RestrictOriginsForSubscriberAsync(result, entry, subscriberId.Value);
 
         return result;
@@ -124,6 +135,24 @@ public class FileEntryWebhookDtoHelper(
     /// (see <see cref="RoomWebhookDto{T}.QuotaLimit"/>), and the last clause is what shows it to the managers of an
     /// archived room in room.archived and room.deleted.
     /// </summary>
+    private async Task<bool> CanEditRoomAsync<T>(FileEntry<T> room, Guid subscriberId)
+    {
+        var access = room.Access;
+        var shareRecord = room.ShareRecord;
+
+        try
+        {
+            room.ShareRecord = null;
+
+            return await fileSecurity.CanEditRoomAsync(room, subscriberId);
+        }
+        finally
+        {
+            room.Access = access;
+            room.ShareRecord = shareRecord;
+        }
+    }
+
     private async Task<bool> CanSeeRoomQuotaAsync<T>(FileEntry<T> room, Guid subscriberId)
     {
         // each check stores the checked user's share in the entry, which the payloads of all the subscribers of the

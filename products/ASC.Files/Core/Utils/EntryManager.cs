@@ -363,7 +363,8 @@ public class EntryManager(IDaoFactory daoFactory,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
         List<FolderType> folderType = null,
         bool withAiFolder = false,
-        MetadataFilter metadataFilter = null)
+        MetadataFilter metadataFilter = null,
+        bool pinnedAiProjects = false)
     {
         int total;
         var withShared = true;
@@ -376,6 +377,11 @@ public class EntryManager(IDaoFactory daoFactory,
         if (parent.ProviderEntry && !await filesSettingsHelper.GetEnableThirdParty())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
+
+        if (parent.FolderType == FolderType.AiProjectRoom)
+        {
+            return ([], 0);
         }
 
         var entries = new List<FileEntry>();
@@ -560,6 +566,12 @@ public class EntryManager(IDaoFactory daoFactory,
             entries.AddRange(await task3);
 
             CalculateTotal();
+        }
+        else if (pinnedAiProjects && parent.FolderType == FolderType.AiHub && !parent.ProviderEntry)
+        {
+            entries = await fileSecurity.GetPinnedAiProjectsAsync();
+
+            return ((await SortEntries<T>(entries, orderBy)).ToList(), entries.Count);
         }
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms && !parent.ProviderEntry)
         {
@@ -1097,7 +1109,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 if (x is Folder<T> { IsRoom: true, ProviderEntry: false } x1 &&
                     y is Folder<T> { IsRoom: true, ProviderEntry: false } y1)
                 {
-                    cmp = c * x1.Counter.CompareTo(y1.Counter);
+                    cmp = c * SortedCounter(x1).CompareTo(SortedCounter(y1));
                 }
 
                 return cmp == 0 ? x.Title.EnumerableComparer(y.Title) : cmp;
@@ -1238,6 +1250,11 @@ public class EntryManager(IDaoFactory daoFactory,
             FileEntry<string> thirdPartyEntry => thirdPartyEntry.Id,
             _ => entry.Title
         };
+    }
+
+    private static long SortedCounter<T>(Folder<T> room)
+    {
+        return room.FolderType == FolderType.AiProjectRoom ? 0 : room.Counter;
     }
 
     private static long GetContentLength(FileEntry entry)

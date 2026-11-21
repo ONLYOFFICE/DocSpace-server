@@ -48,6 +48,12 @@ import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 // `GET /api/2.0/files/folder/{folderId}` (FoldersController.GetFolderInfo).
 /** `FolderType.AiProjectRoom` on the C# side — an AI project. */
 const AI_PROJECT_FOLDER_TYPE = 40;
+/**
+ * `RoomType.AiProjectRoom` on the C# side. `FolderDto.Type` is filled for a
+ * few system folders only and not for an AI project, so the DTO of
+ * `GET files/folder/{id}` names a project by its `roomType` alone.
+ */
+const AI_PROJECT_ROOM_TYPE = 12;
 
 export interface DocspaceFolderInfo {
   /** The folder's display name (`FolderDto.Title`). */
@@ -62,6 +68,13 @@ export interface DocspaceFolderInfo {
    * security block at all, which callers must not read as a denial.
    */
   canCreate?: boolean;
+  /**
+   * The folder is the root of a section that holds rooms (see
+   * `SECTION_ROOT_FOLDER_TYPES`): a file is never placed in it directly.
+   * `FolderDto` names no `type` for such a root, so it is told by having no
+   * parent and a root type of that kind.
+   */
+  sectionRoot?: boolean;
 }
 
 // The form-filling room — the one room kind the "Forms" section shows. That
@@ -77,14 +90,20 @@ const ROOM_TYPE_FORM_ROOM = 1;
 const FOLDER_TYPES_ROOM = new Set<number>([16, 19, 22, 29]);
 const ROOM_TYPES_ROOM = new Set<number>([2, 5, 6, 8]);
 
-// Folder types the Files API refuses an upload into outright, whatever the
-// caller's rights — see `FileUploader.GetFolderIdAsync` in
+// The roots of the sections that hold rooms (`DocSpaceHelper.IsRoomsSectionRoot`
+// on the C# side). The Files API refuses an upload into one outright,
+// whatever the caller's rights — see `FileUploader.GetFolderIdAsync` in
 // products/ASC.Files/Core/Utils/FileUploader.cs, which throws
-// `SecurityException` for these before it ever looks at `CanCreate`.
-const UPLOAD_REFUSING_FOLDER_TYPES = new Set<number>([
+// `SecurityException` for these before it ever looks at `CanCreate`, and an
+// admin reads `Create: true` on them all the same.
+const SECTION_ROOT_FOLDER_TYPES = new Set<number>([
   14, // FolderType.VirtualRooms — the "Rooms" root
   20, // FolderType.Archive
   30, // FolderType.RoomTemplates
+  34, // FolderType.AiAgents
+  36, // FolderType.Forms
+  41, // FolderType.AiHub — the "AI rooms" root
+  42, // FolderType.PrivateRooms
 ]);
 
 /**
@@ -97,7 +116,10 @@ export function canTakeUpload(info: DocspaceFolderInfo | undefined): boolean {
   if (!info) {
     return false;
   }
-  if (info.folderType !== undefined && UPLOAD_REFUSING_FOLDER_TYPES.has(info.folderType)) {
+  if (info.sectionRoot) {
+    return false;
+  }
+  if (info.folderType !== undefined && SECTION_ROOT_FOLDER_TYPES.has(info.folderType)) {
     return false;
   }
   return info.canCreate !== false;
@@ -154,6 +176,37 @@ export async function filesApiGet(path: string, query?: FilesApiQuery): Promise<
   }
 }
 
+/**
+ * A write to `api/2.0/files/{path}` on behalf of the current user, with a
+ * JSON body, answering the `response` of the DocSpace envelope (`undefined`
+ * when the answer carries none). Any non-2xx answer throws
+ * {@link DocspaceApiHttpError} with its status. `path` is relative to
+ * `api/2.0/files/` and must already be encoded.
+ */
+export async function filesApiSend(
+  method: "POST" | "PUT",
+  path: string,
+  body: unknown,
+): Promise<unknown> {
+  const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
+  const { signal, cancel } = withTimeout(undefined);
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { ...getForwardedHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    const raw: unknown = await res.json().catch(() => undefined);
+    return isObject(raw) ? raw["response"] : undefined;
+  } finally {
+    cancel();
+  }
+}
+
 function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   // DocSpace API responses are wrapped in a `{ response: ... }` envelope.
   const envelope = isObject(raw) ? getObject(raw, "response") : undefined;
@@ -173,6 +226,14 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   }
   if (roomType !== undefined) {
     result.roomType = roomType;
+  }
+  const rootFolderType = getNumber(envelope, "rootFolderType");
+  if (
+    getNumber(envelope, "parentId") === 0 &&
+    rootFolderType !== undefined &&
+    SECTION_ROOT_FOLDER_TYPES.has(rootFolderType)
+  ) {
+    result.sectionRoot = true;
   }
   // `FolderDto.Security` is a dictionary keyed by the `FilesSecurityActions`
   // enum name; the JSON casing has changed before, so match case-insensitively
@@ -250,6 +311,15 @@ function getFolderInfoOnce(folderId: string): Promise<DocspaceFolderInfo | undef
   return pending;
 }
 
+/**
+ * A folder's info for a reader that asks about several folders of one
+ * round (the context folders): memoized per request, served from the
+ * primed chat context when it carries the folder.
+ */
+export function getFolderInfoCached(folderId: string): Promise<DocspaceFolderInfo | undefined> {
+  return getFolderInfoOnce(folderId);
+}
+
 /** What kind of DocSpace entry a client names as the round's source. */
 export type SourceKind = "folder" | "file";
 
@@ -296,10 +366,17 @@ export function folderSourceType(info: DocspaceFolderInfo): SourceType {
 
 // Derived from the DocSpace `FileDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FileDto.cs) returned by
-// `GET /api/2.0/files/file/{fileId}` (FilesController.GetFileInfo). Only the
-// title is read: a file is always a `File` source, whatever its format.
+// `GET /api/2.0/files/file/{fileId}` (FilesController.GetFileInfo). A file is
+// always a `File` source, whatever its format, so the source needs only the
+// title; the rest describes a file a tool created (see documentAgent.ts).
 export interface DocspaceFileInfo {
   title?: string;
+  /** `FileDto.FolderId`: the folder the file lies in. */
+  folderId?: string;
+  /** `FileDto.FileExst`: the extension, with its dot. */
+  fileExst?: string;
+  /** `FileDto.WebUrl`: the absolute link the portal opens the file by. */
+  webUrl?: string;
 }
 
 function parseFileInfo(raw: unknown): DocspaceFileInfo | undefined {
@@ -307,7 +384,20 @@ function parseFileInfo(raw: unknown): DocspaceFileInfo | undefined {
   if (!envelope || getEntityId(envelope, "id") === undefined) {
     return undefined;
   }
-  return { title: getString(envelope, "title") };
+  const info: DocspaceFileInfo = { title: getString(envelope, "title") };
+  const folderId = getEntityId(envelope, "folderId");
+  const fileExst = getString(envelope, "fileExst");
+  const webUrl = getString(envelope, "webUrl");
+  if (folderId !== undefined) {
+    info.folderId = folderId;
+  }
+  if (fileExst) {
+    info.fileExst = fileExst;
+  }
+  if (webUrl) {
+    info.webUrl = webUrl;
+  }
+  return info;
 }
 
 /**
@@ -454,7 +544,12 @@ export async function resolveAiProjectEntityId(
     return undefined;
   }
   const folderInfo = await getFolderInfoOnce(entityId);
-  return folderInfo?.folderType === AI_PROJECT_FOLDER_TYPE ? entityId : undefined;
+  // The chat-context snapshot carries the folder type, the Files DTO only
+  // the room type (see AI_PROJECT_ROOM_TYPE): either one names a project.
+  return folderInfo?.folderType === AI_PROJECT_FOLDER_TYPE ||
+    folderInfo?.roomType === AI_PROJECT_ROOM_TYPE
+    ? entityId
+    : undefined;
 }
 
 /**

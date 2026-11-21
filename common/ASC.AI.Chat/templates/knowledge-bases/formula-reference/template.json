@@ -1,0 +1,11 @@
+{
+  "name": "Formula reference",
+  "description": "A reference of the most used functions and a guide to formula errors.",
+  "category": "Tables",
+  "color": "F2D230",
+  "cover": "archive",
+  "files": [
+    "Function reference.docx",
+    "Error guide.md"
+  ]
+}

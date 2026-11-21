@@ -40,13 +40,17 @@ public class AiHubService(
     AiProjectRoomDao aiProjectRoomDao,
     SkillDao skillDao,
     AssignmentsStorage assignmentsStorage,
+    AiProjectThreadsService projectThreadsService,
     ProfileReader profileReader,
     FileSecurity fileSecurity,
+    FileSecurityCommon fileSecurityCommon,
+    AuthContext authContext,
     TenantManager tenantManager,
     GlobalFolderHelper globalFolderHelper,
     IDistributedLockProvider distributedLockProvider,
     FilesMessageService filesMessageService,
-    SocketManager socketManager)
+    SocketManager socketManager,
+    ILogger<AiHubService> logger)
 {
     public const int MaxRoomsPerType = 20;
 
@@ -111,6 +115,36 @@ public class AiHubService(
         return await BuildRoomSkillsAsync(tenantId, rooms);
     }
 
+    public async Task<(List<Folder<int>> Projects, int Total)> GetRoomProjectsAsync(int roomId, int startIndex, int count)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(roomId);
+        if (room is not { FolderType: FolderType.KnowledgeRoom or FolderType.InstructionsRoom, RootFolderType: FolderType.AiHub })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
+
+        var roomsFolderId = await globalFolderHelper.GetFolderAiHubAsync();
+        var userId = authContext.CurrentAccount.ID;
+        var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId);
+
+        var total = await aiProjectRoomDao.GetProjectsTotalAsync(tenantId, roomId, roomsFolderId, userId, isAdmin);
+        if (startIndex >= total)
+        {
+            return ([], total);
+        }
+
+        var projects = await aiProjectRoomDao.GetProjectsAsync(tenantId, roomId, roomsFolderId, userId, isAdmin, startIndex, count);
+
+        return (projects, total);
+    }
+
     public async Task LinkSourcesAsync(int projectId, IReadOnlySet<int> roomIds)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -158,6 +192,8 @@ public class AiHubService(
         await filesMessageService.SendAsync(MessageAction.RoomsLinkedToAiProject, project, project.Title, string.Join(", ", added.Select(r => r.Title)));
 
         await socketManager.UpdateFolderAsync(project);
+
+        await NotifyRoomsUpdatedAsync(added);
     }
 
     public async Task UnlinkSourcesAsync(int projectId, IReadOnlySet<int> roomIds)
@@ -183,10 +219,12 @@ public class AiHubService(
             return;
         }
 
-        var titles = await daoFactory.GetFolderDao<int>().GetFoldersAsync(removed).Select(r => r.Title).ToListAsync();
-        await filesMessageService.SendAsync(MessageAction.RoomsUnlinkedFromAiProject, project, project.Title, string.Join(", ", titles));
+        var rooms = await daoFactory.GetFolderDao<int>().GetFoldersAsync(removed).ToListAsync();
+        await filesMessageService.SendAsync(MessageAction.RoomsUnlinkedFromAiProject, project, project.Title, string.Join(", ", rooms.Select(r => r.Title)));
 
         await socketManager.UpdateFolderAsync(project);
+
+        await NotifyRoomsUpdatedAsync(rooms);
     }
 
     public async Task<Profile> GetModelAsync(int projectId)
@@ -224,6 +262,31 @@ public class AiHubService(
         return profile;
     }
 
+    public async Task<int?> GetThreadArtifactsFolderIdAsync(int projectId, Guid threadId)
+    {
+        return (await GetThreadAsync(projectId, threadId)).ArtifactsFolderId;
+    }
+
+    public async Task<int?> GetThreadAttachmentsFolderIdAsync(int projectId, Guid threadId)
+    {
+        return (await GetThreadAsync(projectId, threadId)).AttachmentsFolderId;
+    }
+
+    private async Task NotifyRoomsUpdatedAsync(List<Folder<int>> rooms)
+    {
+        foreach (var room in rooms)
+        {
+            try
+            {
+                await socketManager.UpdateFolderAsync(room);
+            }
+            catch (Exception e)
+            {
+                logger.WarningRoomUpdateEventNotSent(e, room.Id);
+            }
+        }
+    }
+
     private async Task<List<RoomSkills>> BuildRoomSkillsAsync(int tenantId, List<Folder<int>> rooms)
     {
         if (rooms.Count == 0)
@@ -240,6 +303,13 @@ public class AiHubService(
                 .ThenBy(r => r.Id)
                 .Select(r => new RoomSkills(r, skills.GetValueOrDefault(r.Id) ?? []))
         ];
+    }
+
+    private async Task<AiThread> GetThreadAsync(int projectId, Guid threadId)
+    {
+        await GetProjectAsync(projectId);
+
+        return await projectThreadsService.GetForReadAsync(projectId, threadId);
     }
 
     private async Task<Folder<int>> GetProjectAsync(int projectId)

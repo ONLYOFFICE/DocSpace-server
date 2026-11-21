@@ -4,18 +4,23 @@ vi.mock("../../log.js", () => ({
   default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 const getAllAssignments = vi.fn();
+const tryResolveForAction = vi.fn();
+const cascadeProfileDelete = vi.fn();
 vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@onlyoffice/ai-chat/core")>();
   return {
     ...actual,
     AssignmentsEngine: class {
       getAllAssignments = getAllAssignments;
+      tryResolveForAction = tryResolveForAction;
+      cascadeProfileDelete = cascadeProfileDelete;
     },
   };
 });
 const readAllForClient = vi.fn();
+const readByIdRaw = vi.fn();
 vi.mock("../../storage/index.js", () => ({
-  storage: { profiles: { readAllForClient } },
+  storage: { profiles: { readAllForClient, readByIdRaw } },
 }));
 const assertEntityAccessible = vi.fn(async () => {});
 vi.mock("../../storage/docspaceFilesApi.js", () => ({ assertEntityAccessible }));
@@ -68,5 +73,82 @@ describe("assignmentsController.getAllAssignments", () => {
     await call({ entityId: "room-7", expand: "profile" });
     expect(assertEntityAccessible).toHaveBeenCalledWith("room-7");
     expect(getAllAssignments).toHaveBeenCalledWith("room-7");
+  });
+});
+
+const run = async (name: keyof typeof assignmentsController, req: Record<string, unknown>) => {
+  const res = { status: vi.fn(), json: vi.fn() };
+  res.status.mockReturnValue(res);
+  const next = vi.fn();
+  await (assignmentsController[name] as unknown as Handler)({ query: {}, ...req }, res, next);
+  const failure = next.mock.calls[0];
+  if (failure) throw failure[0];
+  return { status: res.status.mock.calls[0]?.[0] as number | undefined, body: res.json.mock.calls[0]?.[0] };
+};
+
+describe("assignmentsController resolve operations", () => {
+  // What the engine resolves with is the in-process read: the provider key,
+  // and for an onlyoffice profile the internal gateway and the caller's
+  // forwarded headers.
+  const resolved = {
+    profileId: "p1",
+    profile: {
+      id: "p1",
+      name: "Chatty",
+      baseUrl: "http://internal-gateway:5157/api/2.0/ai/gateway",
+      key: "sk-secret",
+      headers: { cookie: "asc_auth_key=1" },
+    },
+  };
+  const stored = {
+    id: "p1",
+    name: "Chatty",
+    baseUrl: "https://api.example.com/v1",
+    key: "sk-secret",
+    headers: { "x-extra": "1" },
+  };
+
+  beforeEach(() => {
+    tryResolveForAction.mockReset().mockResolvedValue(resolved);
+    readByIdRaw.mockReset().mockResolvedValue(stored);
+  });
+
+  it.each(["resolveForAction", "tryResolveForAction"] as const)(
+    "%s answers the stored profile without its secrets or the internal address",
+    async (name) => {
+      const { body } = await run(name, { query: { actionType: "Chat" } });
+      expect(body).toEqual({
+        profileId: "p1",
+        profile: { id: "p1", name: "Chatty", baseUrl: "https://api.example.com/v1" },
+      });
+      expect(readByIdRaw).toHaveBeenCalledWith("p1");
+    },
+  );
+
+  it("answers nothing configured as before", async () => {
+    tryResolveForAction.mockResolvedValue(null);
+    expect((await run("resolveForAction", { query: { actionType: "Chat" } })).status).toBe(404);
+    expect((await run("tryResolveForAction", { query: { actionType: "Chat" } })).body).toBeNull();
+    expect(readByIdRaw).not.toHaveBeenCalled();
+  });
+});
+
+describe("assignmentsController.cascadeProfileDelete", () => {
+  beforeEach(() => {
+    cascadeProfileDelete.mockReset().mockResolvedValue(undefined);
+  });
+
+  it.each([
+    ["the bare string the widget sends", { body: "p1" }],
+    ["a named field", { body: { profileId: "p1" } }],
+    ["the query", { body: undefined, query: { profileId: "p1" } }],
+  ])("takes the id as %s", async (_label, req) => {
+    expect((await run("cascadeProfileDelete", req)).body).toEqual({ success: true });
+    expect(cascadeProfileDelete).toHaveBeenCalledWith("p1");
+  });
+
+  it("answers 400 without an id", async () => {
+    expect((await run("cascadeProfileDelete", { body: {} })).status).toBe(400);
+    expect(cascadeProfileDelete).not.toHaveBeenCalled();
   });
 });

@@ -259,10 +259,10 @@ public class FilesMessageService(
         eventDescriptionFrom.ParentTitle = null;
         eventDescriptionFrom.ParentType = 0;
 
-        var toReferences = GetReferences(toParents);
-        var fromReferences = GetReferences(fromParents);
+        var toReferences = IsInAiProject(to, toParents) ? null : GetReferences(toParents);
+        var fromReferences = IsInAiProject(from, fromParents) ? null : GetReferences(fromParents);
 
-        toReferences.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
+        toReferences?.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
 
         var jsonTo = JsonSerializer.Serialize(eventDescriptionTo, _serializerOptions);
         messageService.SendHeadersMessage(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, jsonTo), toReferences);
@@ -396,14 +396,16 @@ public class FilesMessageService(
             return new FileEntryData(JsonSerializer.Serialize(desc, _serializerOptions), null);
         }
 
-        var references = parents.Where(x => !x.IsRoot).Select(x =>
-            new FilesAuditReference
-            {
-                EntryId = x.Id,
-                EntryType = (byte)x.FileEntryType
-            }).ToList();
+        var references = room is { FolderType: FolderType.AiProjectRoom }
+            ? null
+            : parents.Where(x => !x.IsRoot).Select(x =>
+                new FilesAuditReference
+                {
+                    EntryId = x.Id,
+                    EntryType = (byte)x.FileEntryType
+                }).ToList();
 
-        if (action is not (MessageAction.FileDeleted or MessageAction.FolderDeleted or MessageAction.RoomDeleted))
+        if (references != null && action is not (MessageAction.FileDeleted or MessageAction.FolderDeleted or MessageAction.RoomDeleted))
         {
             references.Add(new FilesAuditReference
             {
@@ -521,6 +523,11 @@ public class FilesMessageService(
     private static bool IsInPrivateRoom(Folder<int> folder, List<Folder<int>> parents)
     {
         return (folder.IsRoom ? folder : parents.Find(x => x.IsRoom)) is { SettingsPrivate: true };
+    }
+
+    private static bool IsInAiProject(Folder<int> folder, List<Folder<int>> parents)
+    {
+        return (folder.IsRoom ? folder : parents.Find(x => x.IsRoom)) is { FolderType: FolderType.AiProjectRoom };
     }
 
     private static Folder<T> FindRoom<T>(Folder<T> folder, List<Folder<T>> parents)

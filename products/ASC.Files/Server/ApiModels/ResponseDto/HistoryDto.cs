@@ -193,6 +193,14 @@ public class HistoryApiHelper(
                 : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
+        if (entry is Folder<int> { FolderType: FolderType.AiProjectRoom } ||
+            await DocSpaceHelper.InAiProjectAsync(entry, daoFactory.GetFolderDao<int>()))
+        {
+            throw new SecurityException(entryType == FileEntryType.File
+                ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile
+                : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
+
         if (entryType == FileEntryType.Folder &&
             DocSpaceHelper.IsFormsFillingFolder(entry) &&
             entry.ShareRecord is { Share: FileShare.FillForms })

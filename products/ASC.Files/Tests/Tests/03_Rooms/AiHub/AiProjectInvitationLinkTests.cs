@@ -42,7 +42,7 @@ namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 public class AiProjectInvitationLinkTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
     [Fact]
-    public async Task InvitationLink_ExistingUser_JoinsWithRead()
+    public async Task InvitationLink_ExistingUser_JoinsAsContentCreator()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
@@ -64,6 +64,6 @@ public class AiProjectInvitationLinkTests(AspireAppFixture fixture) : AiHubTestB
         confirm.Result.Should().Be(ValidationResult.UserExisted);
         var shares = (await _roomsApi.GetRoomSecurityInfoAsync(projectId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         shares.Should().ContainSingle(s => s.SubjectType == SubjectType.User && s.SharedToUser.Id == user.Id)
-            .Which.Access.Should().Be(FileShare.Read);
+            .Which.Access.Should().Be(FileShare.ContentCreator);
     }
 }

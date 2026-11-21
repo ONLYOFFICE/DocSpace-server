@@ -1041,6 +1041,17 @@ metadata.
 - **WHEN** the Templates section is listed by identifier, by `@templates` or searched by `searchFolder` with a `metadataTemplateId`
 - **THEN** the system answers 400
 
+### Requirement: The AI rooms root is searched flat
+
+`getFolderByFolderId` and `searchFolder` of the AI rooms root SHALL search its rooms only, whatever
+`withSubFolders` says: no folder or file inside a room of that section is matched (`ai-agents`, "The rooms
+roots list nothing inside a project").
+
+#### Scenario: Filter on the AI rooms root
+
+- **WHEN** the AI rooms root is listed with a `filterValue` that only a folder inside an AI project matches
+- **THEN** the answer holds no folder and no file
+
 ### Requirement: Typed metadata search
 
 `searchFolder` (`POST api/2.0/files/{folderId}/search`) and `searchRooms` (`POST api/2.0/files/rooms/search`)

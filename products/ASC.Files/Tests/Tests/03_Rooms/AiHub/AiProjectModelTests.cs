@@ -57,30 +57,12 @@ public class AiProjectModelTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
     }
 
     [Fact]
-    public async Task GetModel_ProjectReader_Returns200()
+    public async Task GetModel_ProjectMember_Returns200()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var member = await InviteContact(EmployeeType.User);
-        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
-
-        await _filesClient.Authenticate(member);
-
-        // Act
-        using var response = await GetModelResponseAsync(projectId);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact]
-    public async Task GetModel_ProjectReaderThroughGroup_Returns200()
-    {
-        // Arrange
-        var projectId = await CreateProjectAsync();
-        var member = await InviteContact(EmployeeType.User);
-        var groupId = await CreateGroupAsync(member);
-        await ShareRoomAsync(projectId, groupId, FileShare.Read);
+        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
 
         await _filesClient.Authenticate(member);
 
@@ -121,12 +103,12 @@ public class AiProjectModelTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
     }
 
     [Fact]
-    public async Task SetModel_ProjectReader_Returns403()
+    public async Task SetModel_ProjectMember_Returns403()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var member = await InviteContact(EmployeeType.User);
-        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
+        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
 
         await _filesClient.Authenticate(member);
 
