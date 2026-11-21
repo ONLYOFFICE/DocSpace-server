@@ -77,6 +77,6 @@ public class AgentsMigrationController(
             throw new CustomHttpException(HttpStatusCode.Conflict, "The legacy AI providers migration is running");
         }
 
-        return new AgentsMigrationDto { Migrated = migration.Migrated, Failed = migration.Failed };
+        return migration.Map();
     }
 }

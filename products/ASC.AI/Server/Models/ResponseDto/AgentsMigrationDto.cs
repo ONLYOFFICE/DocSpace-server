@@ -51,3 +51,9 @@ public class AgentsMigrationDto
     /// <example>0</example>
     public required int Failed { get; init; }
 }
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class AgentsMigrationDtoMapper
+{
+    public static partial AgentsMigrationDto Map(this AiAgentMigrationResult source);
+}
