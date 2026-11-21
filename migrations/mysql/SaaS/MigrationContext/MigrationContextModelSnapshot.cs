@@ -694,6 +694,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex("DeletedOn", "Id")
                         .HasDatabaseName("IX_deleted_on_id");
 
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
+
                     b.HasIndex("TenantId", "LastEditDate")
                         .HasDatabaseName("IX_tenant_id_last_edit_date");
 

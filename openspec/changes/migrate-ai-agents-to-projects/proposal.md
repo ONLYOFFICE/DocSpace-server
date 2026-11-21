@@ -76,7 +76,7 @@ on. What changes is the stored data, so a caller meets other objects under the i
 - Webhooks: none are raised; the conversion does not go through the API actions that raise them.
 - Socket events: existing events only (`create-folder` for the project and the moved folder, `update-folder` for the
   room, `delete-folder` for a deleted agent).
-- Backup and restore: no schema change and no new table. An archive made before the conversion restores agents; the
+- Backup and restore: no new table or column; the one schema change is an index on `ai_integration_threads`. An archive made before the conversion restores agents; the
   background pass converts them, so between the end of the restore and that pass the portal still holds agents.
   The pass depends on the restore and the transfer setting the portal's last-modified time, which both do today.
 - Portal migration (data import): not affected, it creates no agents.

@@ -46,6 +46,8 @@ After this group: the room side is complete, including the empty-knowledge case.
 - [ ] 6.1 Add a `DbSet<DbPreference>` to `FilesDbContext` (the table exists; no schema change) and step 3 of design D4 to `ConvertAiAgentAsync`: `entry_id` room → project in threads, assignments, tool preferences, MCP servers and preferences. Verified by the build of `ASC.Files.Core` with no new warnings, `dotnet format style`, no warm-up warning, and `ASC.Migration.Creator` reporting no model change
 - [ ] 6.2 Write `AgentMigrationThreadsTests`: "Threads of an agent become threads of the project" (thread follows the agent with its messages; a thread started without an entity stays where it was) and "The model of an agent becomes the model of the project" (bound profile; no assignment answers null). Add a test for a thread of a Guest of the agent that records the status the Guest gets (design, Open Questions). Verified by the tests built, run on the user's command, proven red
 
+- [x] 6.3 Add the index `(tenant_id, entry_id)` to `DbThread` (MySQL and PostgreSQL sections of the model) and generate `MigrationContext_Upgrade110` with `ASC.Migration.Creator`. Verified by the migration holding only that index, the runner applying it locally, and `EXPLAIN` of the move of the threads and of `DeleteThreadsByFolderIdsAsync` choosing `IX_tenant_id_entry_id`
+
 After this group: the chat history and the model of an agent are in its project.
 
 ## 7. Members, access and marks

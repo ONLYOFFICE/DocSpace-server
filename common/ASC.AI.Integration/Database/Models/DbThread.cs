@@ -142,6 +142,9 @@ public static class DbThreadExtension
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.EntryId, e.LastEditDate, e.Id })
                 .HasDatabaseName("IX_tenant_id_created_by_entry_id_last_edit_date_id");
 
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("IX_tenant_id_entry_id");
+
             entity.HasIndex(e => new { e.DeletedOn, e.Id })
                 .HasDatabaseName("IX_deleted_on_id");
         });
@@ -209,6 +212,9 @@ public static class DbThreadExtension
 
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.EntryId, e.LastEditDate, e.Id })
                 .HasDatabaseName("IX_ai_integration_threads_created_by_entry_id_last_edit_date");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("IX_ai_integration_threads_tenant_id_entry_id");
 
             entity.HasIndex(e => new { e.DeletedOn, e.Id })
                 .HasDatabaseName("IX_ai_integration_threads_deleted_on_id");
