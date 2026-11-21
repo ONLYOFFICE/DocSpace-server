@@ -770,7 +770,7 @@ internal class FolderDao(
             project.SettingsCover = room.SettingsCover;
             project.SettingsQuota = TenantEntityQuotaSettings.DefaultQuotaValue;
 
-            var (projectId, metadataInherited) = await InternalSaveFolderToDbAsync(context, project);
+            var (projectId, _) = await InternalSaveFolderToDbAsync(context, project);
 
             await context.MoveAiAgentThreadsAsync(tenantId, roomId, projectId);
             await context.MoveAiAgentAssignmentsAsync(tenantId, roomId, projectId);
@@ -799,15 +799,13 @@ internal class FolderDao(
                 await context.DeleteAiAgentFileSharesAsync(tenantId, fileIds);
                 await context.UpdateFilesFolderIdAsync(tenantId, fileIds, knowledgeIds, roomId);
 
-                // the Knowledge folder goes with every row DeleteFolderAsync removes for a folder;
+                // the Knowledge folder goes with every row DeleteFolderAsync removes for a folder that an agent's Knowledge folder can have;
                 // DeleteOrderAsync is the query that removes its tree rows
                 await context.DeleteOrderAsync(knowledgeIds);
                 await context.DeleteTagLinksAsync(tenantId, knowledgeKeys);
                 await context.DeleteFilesSecurityAsync(tenantId, knowledgeIds);
                 await context.DeleteOrderByFolderIdsAsync(tenantId, knowledgeIds);
                 await context.DeleteAuditReferencesByFolderIdsAsync(knowledgeIds);
-                await context.DeleteMetadataLinksByEntriesAsync(tenantId, knowledgeIds, FileEntryType.Folder);
-                await context.DeleteMetadataValuesByEntriesAsync(tenantId, knowledgeIds, FileEntryType.Folder);
                 await context.DeleteAiAgentKnowledgeFolderAsync(tenantId, knowledge.Id);
                 await context.ChangeFoldersCountAsync(tenantId, roomId, -1);
 
@@ -817,7 +815,7 @@ internal class FolderDao(
 
             await tx.CommitAsync();
 
-            conversion = new AiAgentConversion(projectId, knowledge != null, fileIds, metadataInherited);
+            conversion = new AiAgentConversion(projectId, knowledge != null, fileIds);
         });
 
         return conversion;

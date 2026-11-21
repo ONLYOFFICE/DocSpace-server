@@ -46,7 +46,6 @@ public class AiAgentMigrator(
     IDistributedLockProvider distributedLockProvider,
     RoomLogoManager roomLogoManager,
     SocketManager socketManager,
-    MetadataIndexHelper metadataIndexHelper,
     IEventBus eventBus,
     ILogger<AiAgentMigrator> logger)
 {
@@ -248,12 +247,6 @@ public class AiAgentMigrator(
                     await folderDao.SaveFolderAsync(project);
                 }
             });
-        }
-
-        if (conversion.ProjectMetadataInherited)
-        {
-            await BestEffortAsync(tenantId, agentId, "the metadata index of the project", () =>
-                metadataIndexHelper.IndexEntriesAsync(FileEntryType.Folder, [projectId]));
         }
 
         await BestEffortAsync(tenantId, agentId, "the index event of the project", () =>
