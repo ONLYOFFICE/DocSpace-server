@@ -92,15 +92,17 @@ agent had.
 ## Impact
 
 - `products/ASC.AI/Worker`: a new background service next to `DeletedThreadsCleanerService`; configuration keys for
-  its switch, period and attempt limit, with the test profile in `common/ASC.AppHost/Configuration`.
+  its switch, period, window overlap and attempt limit, with the test profile in `common/ASC.AppHost/Configuration`.
 - `products/ASC.AI/Server`: the internal route; `Migration/LegacyAiProviders*` moves to `products/ASC.AI/Core` so
   the worker can run it for a portal before converting its agents.
 - `products/ASC.Files/Core`: the conversion service, one new `IFolderDao` operation that does the conversion in one
   transaction, new compiled queries in `Core/EF/Queries`, `DbPreference` added to `FilesDbContext`.
 - `common/ASC.Core.Common`: a compiled query for the active portals changed since a moment and for paging over all
   active portals; a settings class for the state of the pass.
-- No database migration, no change in `common/ASC.Data.Backup.Core`, no change to the OpenSearch documents of the
-  knowledge files.
+- One schema migration, `MigrationContext_Upgrade110` (MySQL SaaS): the index `(tenant_id, entry_id)` on
+  `ai_integration_threads`. No change in `common/ASC.Data.Backup.Core`.
+- OpenSearch: the vectors of the knowledge files in `files_embeddings` are not touched. The full-text documents of the
+  project, the room and the knowledge files are updated through the usual index events, which Files.Worker applies.
 - Tests: `products/ASC.AI/ASC.AI.Tests` (conversion scenarios through the internal route), unit tests of the
   candidate window and the attempt limit, a unit test in `common/Tests/ASC.Data.Backup.Core.Tests` pinning the
   last-modified time a restore writes.

@@ -116,8 +116,8 @@ agent. A Guest and an invitation link SHALL NOT be carried over.
 ### Requirement: Access to the Knowledge room of a converted agent
 
 In the Knowledge room made from an agent, the users and groups that were Room manager or Content creator of the
-agent SHALL keep that role. Viewers, Guests and invitation links SHALL be removed from the room: a Viewer reads
-it through the project only. An external link of a knowledge file SHALL be removed.
+agent SHALL keep that role, a Guest included. Viewers and invitation links SHALL be removed from the room: a Viewer
+reads it through the project only. An external link of a knowledge file SHALL be removed.
 
 #### Scenario: Content creator keeps the room
 

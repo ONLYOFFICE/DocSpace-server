@@ -34,7 +34,8 @@ AI project", "Files of a project thread", "Privacy of the contents of a project"
 
 **Goals:**
 
-- No write to OpenSearch and no re-embedding.
+- No write to the vector index `files_embeddings` and no re-embedding; the full-text index gets only the usual index
+  events of the project, the room and the moved knowledge files (D3).
 - One short database transaction decides whether an agent is converted; every other step can be repeated.
 - No periodic scan of `files_folder` across portals, no new table, no change in the backup service.
 - A restored, transferred or dump-restored portal is converted without anyone marking it.
@@ -148,7 +149,8 @@ What is batch and what is DAO code:
 | user, Viewer | Content creator | removed |
 | group, Content creator | each member: Content creator | kept |
 | group, Viewer | each member: Content creator | removed |
-| Guest (Viewer only) | not carried | removed |
+| Guest, Content creator | not carried | Content creator |
+| Guest, Viewer | not carried | removed |
 | invitation link | not carried | removed |
 | external link of a knowledge file | — | removed |
 
@@ -184,9 +186,9 @@ One pass:
    `Attempts` with its count unchanged (0 when absent).
 6. Save `LastPassStart = now` and `Attempts`. A pass that stops earlier saves nothing and is repeated.
 
-`overlap` covers clock differences between the hosts that write `last_modified`; a portal checked twice costs three
-short reads. A portal in `Restoring` is not active and is not a candidate; its activation writes `last_modified`
-again, which puts it into the window of the next pass.
+`overlap` covers clock differences between the hosts that write `last_modified`; a portal without agents checked
+twice costs its four short reads again (see Risks). A portal in `Restoring` is not active and is not a candidate;
+its activation writes `last_modified` again, which puts it into the window of the next pass.
 
 Alternatives rejected: a query for portals that hold a room of type `AiRoom` on every pass (a scan of
 `files_folder`, which has no index on the type); a per-portal marker row written by a data migration and by the
@@ -273,8 +275,10 @@ release.
   accepted; it holds no data and its owner can delete it.
 - [The owner's personal quota can be exceeded by the outputs folder] → accepted by the product decision; the
   alternative is a conversion that fails on a full quota.
-- [The first pass after the release visits every active portal] → three short indexed reads per portal, paged, on
-  one instance; no scan of `files_folder`.
+- [The first pass after the release visits every active portal] → per portal without agents, its
+  record and four short indexed reads: the ids of the `aiagents`, `virtualrooms` and `aihub` roots in
+  `files_bunch_objects` and the agents under them in `files_folder` (`AiAgentMigrator.FindAgentsAsync`); the portals
+  are paged, on one instance; no scan of `files_folder`.
 - [A portal left alone after the attempt limit hides its agents from users] → the error log names the portal; an
   operator removes its entry from `Attempts` in the settings record after the cause is fixed.
 - [Threads of a Guest move to the project, where the Guest is no member] → they stay stored and unreachable, as
@@ -294,7 +298,10 @@ release.
 
 ## Open Questions
 
-- The exact length limit of a room title (the database column allows 400 characters; the limit the rename applies
-  is read when D6 is written and pinned by its unit test). It changes a constant, not the approach.
-- The status a Guest gets when reading their own thread after it moved to the project. No spec scenario states it;
-  the test of that case records what the code answers.
+None. Both questions raised while designing are closed by the code:
+
+- The length limit of a room title is `Global.MaxTitle`, 170 characters, the default of
+  `AiAgentMigrationTitle.Compose`, pinned by `AiAgentMigrationTitleTests.Compose_DefaultLimit_IsTheLimitOfAFolderTitle`.
+- A Guest reading their own thread after it moved to the project gets 403: the thread routes refuse a Guest by the
+  account type, and the thread stays stored in the project
+  (`AgentMigrationThreadsTests.Convert_ThreadOfAGuestOfTheAgent_StaysStoredAndAnswers403ToTheGuest`).
