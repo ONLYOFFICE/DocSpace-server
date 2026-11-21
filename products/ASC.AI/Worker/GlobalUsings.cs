@@ -33,6 +33,7 @@
 
 global using ASC.AI.Integration.Database;
 global using ASC.AI.Integration.Extensions;
+global using ASC.AI.Migration;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.AI.Worker;

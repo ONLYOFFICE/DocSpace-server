@@ -35,28 +35,25 @@ namespace ASC.AI.Migration;
 
 public class LegacyAiProvidersMigrationStartupTask(
     IServiceProvider provider,
-    AiGatewayConfiguration gatewayConfiguration,
-    IDistributedLockProvider distributedLockProvider,
+    LegacyAiProvidersMigrationGate gate,
     ITenantService tenantService,
     ILogger<LegacyAiProvidersMigrationStartupTask> logger) : IStartupTaskNotAwaitable
 {
-    private const string LockKey = "ai_legacy_providers_migration";
-
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         await Task.Yield();
 
         try
         {
-            if (gatewayConfiguration.Configured)
+            await using var lease = await gate.TryEnterAsync(cancellationToken);
+            if (lease.Entry == LegacyAiProvidersMigrationEntry.Busy)
             {
+                logger.DebugLockNotAcquired();
                 return;
             }
 
-            await using var lockHandle = await distributedLockProvider.TryAcquireLockAsync(LockKey, throwIfNotAcquired: false, cancellationToken: cancellationToken);
-            if (lockHandle == null)
+            if (lease.Entry != LegacyAiProvidersMigrationEntry.Entered)
             {
-                logger.DebugLockNotAcquired();
                 return;
             }
 
@@ -95,11 +92,6 @@ public class LegacyAiProvidersMigrationStartupTask(
         var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<LegacyAiDbContext>>();
 
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        if (!context.Database.IsMySql())
-        {
-            return [];
-        }
 
         return await context.TenantIdsWithProvidersAsync().ToListAsync(cancellationToken);
     }

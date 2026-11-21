@@ -42,6 +42,7 @@ public static class AiWorkerServiceExtensions
         IConfiguration configuration)
     {
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddBaseDbContextPool<LegacyAiDbContext>();
         services.AddAiIntegrationServices();
         services.RegisterQuotaFeature();
 

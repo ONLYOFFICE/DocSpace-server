@@ -35,6 +35,8 @@ global using ASC.AI.Core.Database.Legacy;
 global using ASC.AI.Core.Embedding;
 global using ASC.AI.Core.Resources;
 global using ASC.AI.Core.Settings;
+global using ASC.AI.Integration.Assignments;
+global using ASC.AI.Integration.Profiles;
 
 global using ASC.Common;
 global using ASC.Common.Log;
@@ -49,6 +51,7 @@ global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Ai;
+global using ASC.Core.Common.EF.Model.Ai.Legacy;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Users;
