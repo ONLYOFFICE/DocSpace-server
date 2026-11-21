@@ -725,6 +725,163 @@ internal class FolderDao(
         return folderId;
     }
 
+    public async Task<AiAgentConversion> ConvertAiAgentAsync(int roomId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var currentAccount = _authContext.CurrentAccount.ID;
+        AiAgentConversion conversion = null;
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            conversion = null;
+
+            var room = await GetFolderAsync(roomId);
+            if (room is not { FolderType: FolderType.AiRoom })
+            {
+                return;
+            }
+
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var knowledgeFolder = await context.AiAgentKnowledgeFolderAsync(tenantId, roomId);
+            var fileIds = knowledgeFolder == null ? [] : await context.AiAgentKnowledgeFileIdsAsync(tenantId, knowledgeFolder.Id).ToListAsync();
+            var knowledge = fileIds.Count > 0 ? knowledgeFolder : null;
+
+            if (knowledge != null && await context.SubfolderIdsAsync(knowledge.Id).CountAsync() > 1)
+            {
+                throw new InvalidOperationException($"The Knowledge folder {knowledge.Id} of the AI agent {roomId} holds folders.");
+            }
+
+            var roomTitle = knowledge != null ? AiAgentMigrationTitle.Compose(room.Title, knowledge.Title) : null;
+
+            if (await context.ClaimAiAgentRoomAsync(tenantId, roomId, roomTitle, currentAccount, DateTime.UtcNow) == 0)
+            {
+                await tx.RollbackAsync();
+
+                return;
+            }
+
+            var project = _serviceProvider.GetService<Folder<int>>();
+            project.ParentId = room.ParentId;
+            project.Title = room.Title;
+            project.FolderType = FolderType.AiProjectRoom;
+            project.CreateBy = room.CreateBy;
+            project.CreateOn = room.CreateOn;
+            project.SettingsColor = room.SettingsColor;
+            project.SettingsCover = room.SettingsCover;
+            project.SettingsQuota = TenantEntityQuotaSettings.DefaultQuotaValue;
+
+            var (projectId, metadataInherited) = await InternalSaveFolderToDbAsync(context, project);
+
+            await context.MoveAiAgentThreadsAsync(tenantId, roomId, projectId);
+            await context.MoveAiAgentAssignmentsAsync(tenantId, roomId, projectId);
+            await context.MoveAiAgentToolPrefsAsync(tenantId, roomId, projectId);
+            await context.MoveAiAgentMcpServersAsync(tenantId, roomId, projectId);
+            await context.MoveAiAgentPreferencesAsync(tenantId, roomId, projectId);
+
+            var shares = await context.AiAgentMemberSharesAsync(tenantId, roomId).ToListAsync();
+
+            context.Security.AddRange(await GetProjectMembersAsync(shares, projectId, room.CreateBy));
+            await context.SaveChangesAsync();
+
+            await context.DeleteAiAgentRoomSharesAsync(tenantId, roomId);
+
+            TagType[] tagsToMove = [TagType.Custom, TagType.Pin];
+            TagType[] tagsToDrop = [TagType.Recent, TagType.New];
+
+            await context.MoveAiAgentTagLinksAsync(tenantId, roomId.ToString(), projectId.ToString(), tagsToMove);
+            await context.DeleteAiAgentTagLinksAsync(tenantId, roomId.ToString(), tagsToDrop);
+
+            if (knowledge != null)
+            {
+                int[] knowledgeIds = [knowledge.Id];
+                string[] knowledgeKeys = [knowledge.Id.ToString()];
+
+                await context.DeleteAiAgentFileSharesAsync(tenantId, fileIds);
+                await context.UpdateFilesFolderIdAsync(tenantId, fileIds, knowledgeIds, roomId);
+
+                // the Knowledge folder goes with every row DeleteFolderAsync removes for a folder;
+                // DeleteOrderAsync is the query that removes its tree rows
+                await context.DeleteOrderAsync(knowledgeIds);
+                await context.DeleteTagLinksAsync(tenantId, knowledgeKeys);
+                await context.DeleteFilesSecurityAsync(tenantId, knowledgeIds);
+                await context.DeleteOrderByFolderIdsAsync(tenantId, knowledgeIds);
+                await context.DeleteAuditReferencesByFolderIdsAsync(knowledgeIds);
+                await context.DeleteMetadataLinksByEntriesAsync(tenantId, knowledgeIds, FileEntryType.Folder);
+                await context.DeleteMetadataValuesByEntriesAsync(tenantId, knowledgeIds, FileEntryType.Folder);
+                await context.DeleteAiAgentKnowledgeFolderAsync(tenantId, knowledge.Id);
+                await context.ChangeFoldersCountAsync(tenantId, roomId, -1);
+
+                context.AiProjectRooms.Add(new DbFilesAiProjectRoom { TenantId = tenantId, ProjectId = projectId, RoomId = roomId });
+                await context.SaveChangesAsync();
+            }
+
+            await tx.CommitAsync();
+
+            conversion = new AiAgentConversion(projectId, knowledge != null, fileIds, metadataInherited);
+        });
+
+        return conversion;
+
+        async Task<List<DbFilesSecurity>> GetProjectMembersAsync(List<DbFilesSecurity> shares, int projectId, Guid ownerId)
+        {
+            var members = new Dictionary<Guid, DbFilesSecurity>();
+            var timeStamp = DateTime.UtcNow;
+
+            foreach (var share in shares.Where(s => s.SubjectType == SubjectType.User))
+            {
+                var role = AiAgentMigrationAccess.ToProjectRole(share.Share);
+
+                if (role == null || share.Subject == ownerId || await _userManager.IsGuestAsync(share.Subject))
+                {
+                    continue;
+                }
+
+                members[share.Subject] = NewMember(share.Subject, role.Value, share.Owner);
+            }
+
+            foreach (var share in shares.Where(s => s.SubjectType == SubjectType.Group))
+            {
+                if (AiAgentMigrationAccess.ToProjectRole(share.Share) == null)
+                {
+                    continue;
+                }
+
+                foreach (var user in await _userManager.GetUsersByGroupAsync(share.Subject))
+                {
+                    if (user.Id == ownerId || members.ContainsKey(user.Id) || await _userManager.IsGuestAsync(user))
+                    {
+                        continue;
+                    }
+
+                    members[user.Id] = NewMember(user.Id, FileShare.ContentCreator, share.Owner);
+                }
+            }
+
+            return [.. members.Values];
+
+            DbFilesSecurity NewMember(Guid userId, FileShare role, Guid grantedBy)
+            {
+                return new DbFilesSecurity
+                {
+                    TenantId = tenantId,
+                    EntryId = projectId.ToString(),
+                    InternalEntryId = projectId,
+                    EntryType = FileEntryType.Folder,
+                    SubjectType = SubjectType.User,
+                    Subject = userId,
+                    Owner = grantedBy,
+                    Share = role,
+                    TimeStamp = timeStamp
+                };
+            }
+        }
+    }
+
     private async Task PublishFolderIndexEventAsync(Folder<int> folder)
     {
         if (folder.FolderType is FolderType.DEFAULT or FolderType.Ai or FolderType.BUNCH || folder.IsRoom)
@@ -1350,8 +1507,9 @@ internal class FolderDao(
             else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
             {
                 var archiveId = await GetFolderIDArchive(false);
+                var aiHubId = await GetFolderIDAiHubAsync(false);
                 var fromRoomTag = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.FromRoom).FirstOrDefaultAsync();
-                if (folder.ParentId != archiveId && toFolder.Id != archiveId &&
+                if (folder.ParentId != archiveId && toFolder.Id != archiveId && toFolder.Id != aiHubId &&
                     toFolderRoomId == -1 &&
                     ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
                 {

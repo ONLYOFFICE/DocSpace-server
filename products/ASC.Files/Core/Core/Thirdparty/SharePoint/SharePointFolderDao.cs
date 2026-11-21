@@ -228,6 +228,11 @@ internal class SharePointFolderDao(
         throw new NotSupportedException();
     }
 
+    public Task<AiAgentConversion> ConvertAiAgentAsync(string roomId)
+    {
+        throw new NotSupportedException();
+    }
+
     public async Task<string> SaveFolderAsync(Folder<string> folder)
     {
         if (folder.Id != null)
