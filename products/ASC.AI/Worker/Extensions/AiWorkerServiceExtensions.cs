@@ -57,6 +57,7 @@ public static class AiWorkerServiceExtensions
         services.AddActivePassiveHostedService<OrphanVectorsCleanerService>(configuration);
         services.AddActivePassiveHostedService<OrphanAttachmentsCleanerService>(configuration);
         services.AddActivePassiveHostedService<DeletedThreadsCleanerService>(configuration);
+        services.AddActivePassiveHostedService<AiAgentsMigrationService>(configuration);
 
         services.AddSingleton(Channel.CreateBounded<VectorsDeletionIntegrationEvent>(new BoundedChannelOptions(1000)
         {

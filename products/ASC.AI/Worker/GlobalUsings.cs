@@ -43,7 +43,11 @@ global using ASC.AI.Worker.Handlers;
 global using ASC.AI.Worker.Log;
 
 global using ASC.Core;
+global using ASC.Core.Common.AI;
 global using ASC.Core.Common.EF;
+global using ASC.Core.Common.EF.Context;
+global using ASC.Core.Common.Settings;
+global using ASC.Core.Tenants;
 global using ASC.Core.Common.Hosting;
 global using ASC.Common;
 global using ASC.Common.DependencyInjection;
