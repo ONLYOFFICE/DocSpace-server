@@ -52,6 +52,7 @@ public sealed class OFormRequestManagerTests : IDisposable
 {
     private const string Pdf = "%PDF-1.7\n%form\n";
     private const string List = """{"data":[{"id":1}]}""";
+    private const string GalleryPath = "/dashboard/v2/api/oforms";
 
     private readonly List<ServiceProvider> _services = [];
     private readonly List<HttpStub> _stubs = [];
@@ -186,11 +187,13 @@ public sealed class OFormRequestManagerTests : IDisposable
         await AssertGalleryUnavailableAsync(CreateManager(gallery.Url, clientTimeout: TimeSpan.FromMilliseconds(500)));
     }
 
-    [Fact]
-    public async Task Get_FileAddressDoesNotParse_Returns502()
+    [Theory]
+    [InlineData("http://exa mple:x/file.pdf")]
+    [InlineData("ftp://gallery.example/file.pdf")]
+    public async Task Get_FileAddressCannotBeRequested_Returns502(string fileUrl)
     {
         var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK,
-            """{"data":[{"id":1,"file_oform":[{"url":"http://exa mple:x/file.pdf","name":"form","ext":".pdf"}]}]}"""));
+            $$"""{"data":[{"id":1,"file_oform":[{"url":"{{fileUrl}}","name":"form","ext":".pdf"}]}]}"""));
 
         await AssertGalleryUnavailableAsync(CreateManager(gallery.Url));
     }
@@ -245,16 +248,31 @@ public sealed class OFormRequestManagerTests : IDisposable
         (await CreateManager(Unreachable().Url).IsAvailableAsync()).Should().BeFalse();
     }
 
-    [Fact]
-    public async Task IsAvailableAsync_GalleryAddressDoesNotParse_IsFalse()
+    [Theory]
+    [InlineData("http://exa mple:x")]
+    [InlineData("ftp://gallery.example")]
+    public async Task IsAvailableAsync_GalleryAddressCannotBeRequested_IsFalse(string domain)
     {
-        (await CreateManager("http://exa mple:x").IsAvailableAsync()).Should().BeFalse();
+        (await CreateManager(domain).IsAvailableAsync()).Should().BeFalse();
     }
 
     [Fact]
     public async Task IsAvailableAsync_NoGalleryConfigured_IsFalse()
     {
         (await CreateManager(null).IsAvailableAsync()).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_SharedCacheChecksAChangedGalleryUrl()
+    {
+        var original = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List));
+        var replacement = Gallery(_ => new StubResponse(HttpStatusCode.BadGateway));
+
+        (await CreateManager(original.Url).IsAvailableAsync()).Should().BeTrue();
+        (await CreateManager(replacement.Url).IsAvailableAsync()).Should().BeFalse();
+
+        original.CallCount.Should().Be(1);
+        replacement.CallCount.Should().Be(1);
     }
 
     [Theory]
@@ -272,10 +290,14 @@ public sealed class OFormRequestManagerTests : IDisposable
         (await manager.IsAvailableAsync()).Should().BeTrue();
 
         failing = true;
-        await _cache.ExpireAsync(OFormRequestManager.GetAvailabilityCacheKey(), token: TestContext.Current.CancellationToken);
+        var refreshFailed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _cache.Events.FactoryError += (_, _) => refreshFailed.TrySetResult();
+        _cache.Events.BackgroundFactoryError += (_, _) => refreshFailed.TrySetResult();
+        await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: TestContext.Current.CancellationToken);
 
         (await manager.IsAvailableAsync()).Should().BeTrue();
-        (await WaitForCallsAsync(gallery, 2)).Should().Be(2);
+        await refreshFailed.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+        gallery.CallCount.Should().Be(2);
         (await manager.IsAvailableAsync()).Should().BeTrue();
     }
 
@@ -291,7 +313,7 @@ public sealed class OFormRequestManagerTests : IDisposable
         (await manager.IsAvailableAsync()).Should().BeFalse();
 
         failing = false;
-        await _cache.ExpireAsync(OFormRequestManager.GetAvailabilityCacheKey(), token: TestContext.Current.CancellationToken);
+        await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: TestContext.Current.CancellationToken);
 
         // The check may outlast the 200 ms the reader waits for it: the answer then comes with a later call
         var deadline = DateTime.UtcNow.AddSeconds(10);
@@ -321,7 +343,7 @@ public sealed class OFormRequestManagerTests : IDisposable
         (await manager.IsAvailableAsync()).Should().BeTrue();
 
         slow = true;
-        await _cache.ExpireAsync(OFormRequestManager.GetAvailabilityCacheKey(), token: TestContext.Current.CancellationToken);
+        await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: TestContext.Current.CancellationToken);
 
         var watch = Stopwatch.StartNew();
         (await manager.IsAvailableAsync()).Should().BeTrue();
@@ -344,31 +366,40 @@ public sealed class OFormRequestManagerTests : IDisposable
 
         (await firstManager.IsAvailableAsync()).Should().BeFalse();
 
-        await first.ExpireAsync(OFormRequestManager.GetAvailabilityCacheKey(), token: TestContext.Current.CancellationToken);
-        await firstManager.IsAvailableAsync();
-        (await WaitForCallsAsync(gallery, 2)).Should().Be(2);
+        var key = AvailabilityCacheKey(gallery);
+        await first.ExpireAsync(key, token: TestContext.Current.CancellationToken);
+        (await firstManager.IsAvailableAsync()).Should().BeFalse();
+        await WaitForCachedAnswerAsync(first, key, expected: false);
+        gallery.CallCount.Should().Be(2);
 
         failing = false;
         (await CreateManager(gallery.Url, cache: second).IsAvailableAsync()).Should().BeTrue();
         gallery.CallCount.Should().Be(3);
     }
 
-    /// <summary>
-    /// Waits on a deadline until the gallery got <paramref name="count"/> requests, and returns the count it saw last:
-    /// a check that outlasts the reader's wait goes on in the background.
-    /// </summary>
-    private static async Task<int> WaitForCallsAsync(HttpStub gallery, int count)
+    private static string AvailabilityCacheKey(HttpStub gallery)
     {
+        return OFormRequestManager.GetAvailabilityCacheKey(gallery.Url + GalleryPath);
+    }
+
+    private static async Task WaitForCachedAnswerAsync(IFusionCache cache, string key, bool expected)
+    {
+        var token = TestContext.Current.CancellationToken;
         var deadline = DateTime.UtcNow.AddSeconds(10);
-        while (gallery.CallCount < count && DateTime.UtcNow < deadline)
+
+        do
         {
-            await Task.Delay(100, TestContext.Current.CancellationToken);
+            var answer = await cache.TryGetAsync<bool>(key, options => options.AllowStaleOnReadOnly = false, token);
+            if (answer.HasValue && answer.Value == expected)
+            {
+                return;
+            }
+
+            await Task.Delay(100, token);
         }
+        while (DateTime.UtcNow < deadline);
 
-        // Let a check that just arrived end and store its answer
-        await Task.Delay(300, TestContext.Current.CancellationToken);
-
-        return gallery.CallCount;
+        throw new TimeoutException($"The gallery availability cache did not store {expected}.");
     }
 
     private static FusionCache CreateNodeCache(IDistributedCache distributed)
@@ -425,7 +456,7 @@ public sealed class OFormRequestManagerTests : IDisposable
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["files:oform:domain"] = domain,
-                ["files:oform:path"] = domain is null ? null : "/dashboard/v2/api/oforms/"
+                ["files:oform:path"] = domain is null ? null : GalleryPath + "/"
             })
             .Build();
 

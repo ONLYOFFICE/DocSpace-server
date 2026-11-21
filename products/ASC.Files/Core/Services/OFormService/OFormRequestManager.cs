@@ -82,7 +82,7 @@ public class OFormRequestManager(
     /// <exception cref="ItemNotFoundException">The gallery has no such form, or no file of this format for it.</exception>
     /// <exception cref="CustomHttpException">
     /// 502: the gallery did not answer in time, answered with an error status or with a body that is not the form list,
-    /// or gave a PDF, DOCX, XLSX or PPTX file that does not start as a file of its format.
+    /// or returned a PDF without a PDF header or a DOCX, XLSX or PPTX file without a ZIP signature.
     /// </exception>
     public async Task<Stream> Get(int id, string ext)
     {
@@ -138,13 +138,13 @@ public class OFormRequestManager(
 
             return stream;
         }
-        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException or UriFormatException
+        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException or UriFormatException or NotSupportedException
                                        or InvalidOperationException and not ObjectDisposedException)
         {
             // No token of a caller reaches here: a cancellation is a timeout, of this download or of the client. An
             // InvalidOperationException is a charset of the answer the runtime cannot decode, or a gallery address
-            // without a scheme; a UriFormatException is an address that does not parse (in the configuration or in the
-            // file address the gallery gave)
+            // without a scheme. UriFormatException and NotSupportedException cover malformed addresses and unsupported
+            // schemes, in the configuration or in the file address the gallery gave.
             logger.WarningOFormGalleryUnreachable(e);
 
             throw GalleryUnavailable();
@@ -152,12 +152,13 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// Whether the gallery is configured and answers with its form list. "Available" is one answer per installation,
+    /// Whether the gallery is configured and answers with its form list. "Available" is cached per list URL,
     /// kept in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" for up to a
     /// day, so a short failure of the gallery or the network never hides a gallery that answered before. With nothing
     /// known, a failed check means "unavailable" for 1 minute, kept by this process only, so one process that cannot
     /// reach the gallery never hides it from the others. When the next check takes longer than 200 ms, a reader with an
-    /// expired answer gets that answer; a reader with no answer waits for the check, at most 4 seconds.
+    /// expired answer can get that answer while the check continues. The CMS probe times out after 4 seconds.
+    /// Distributed cache access and waiting for its local lock can add to the overall response time.
     /// </summary>
     public async Task<bool> IsAvailableAsync()
     {
@@ -168,7 +169,7 @@ public class OFormRequestManager(
 
         try
         {
-            return await cache.GetOrSetAsync<bool>(GetAvailabilityCacheKey(), async (context, cancellationToken) =>
+            return await cache.GetOrSetAsync<bool>(GetAvailabilityCacheKey(GetListUrl()), async (context, cancellationToken) =>
             {
                 if (await ProbeAsync(cancellationToken))
                 {
@@ -200,11 +201,14 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// The key of the availability answer: one per installation, so it carries the installation's own tenant.
+    /// The key of the availability answer for the list URL, scoped to the installation.
     /// </summary>
-    public static string GetAvailabilityCacheKey()
+    public static string GetAvailabilityCacheKey(string listUrl)
     {
-        return Tenant.DefaultTenant + "oformgallery";
+        var normalizedUrl = Uri.TryCreate(listUrl, UriKind.Absolute, out var uri) ? uri.AbsoluteUri : listUrl;
+        var urlHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(normalizedUrl)));
+
+        return Tenant.DefaultTenant + "oformgallery" + urlHash;
     }
 
     /// <summary>
@@ -237,7 +241,7 @@ public class OFormRequestManager(
 
             return true;
         }
-        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException or UriFormatException
+        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException or UriFormatException or NotSupportedException
                                        or InvalidOperationException and not ObjectDisposedException)
         {
             logger.WarningOFormGalleryProbeFailed(e);

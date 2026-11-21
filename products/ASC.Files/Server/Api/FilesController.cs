@@ -328,9 +328,10 @@ public abstract class FilesController<T>(
     /// call returns 404 for an unknown `formId` or a gallery form without a file of this format. With a `formId`, it
     /// also returns 404 when no form gallery is configured. A string `templateId` that matches no third-party file also
     /// returns 404. The call returns 502 if the form gallery is unreachable or takes over 30 seconds. It also returns
-    /// 502 if the gallery answers with an error or without its form list. A gallery form whose file is not of its
-    /// format also returns 502. If the new file exceeds the storage quota, the call returns 402. The call returns 400 if
-    /// `title` is missing, empty, or too long. To create the file in your own section, use `POST api/2.0/files/@my/file`.
+    /// 502 if the gallery answers with an error or without its form list. It returns 502 for a PDF without a PDF header
+    /// or for a DOCX, XLSX or PPTX without a ZIP signature. If the new file exceeds the storage quota, the call
+    /// returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own
+    /// section, use `POST api/2.0/files/@my/file`.
     /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
     /// The user has to free up space there first.
     /// </remarks>
@@ -345,7 +346,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
     [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it, or a `formId` is given and no form gallery is configured")]
-    [SwaggerResponse(502, "The form gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its form list, or returned a gallery form whose file is not of its format")]
+    [SwaggerResponse(502, "The form gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its form list, returned a PDF without a PDF header, or returned a DOCX, XLSX or PPTX without a ZIP signature")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -1324,7 +1325,8 @@ public class FilesControllerCommon(
     /// without a file of the title's format. A `formId` without a configured gallery also returns 404. If a string
     /// `templateId` is not a file of a connected third-party storage, the call also returns 404. The call returns 502
     /// if the form gallery is unreachable or takes over 30 seconds. It also returns 502 if the gallery answers with an
-    /// error or without its form list. A gallery form whose file is not of its format also returns 502.
+    /// error or without its form list. It returns 502 for a PDF without a PDF header or for a DOCX, XLSX or PPTX without
+    /// a ZIP signature.
     /// </remarks>
     /// <summary>
     /// Create a file in My documents
@@ -1337,7 +1339,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller is a guest whose My documents still exists, or the template does not exist or cannot be read")]
     [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it, or a `formId` is given and no form gallery is configured")]
-    [SwaggerResponse(502, "The form gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its form list, or returned a gallery form whose file is not of its format")]
+    [SwaggerResponse(502, "The form gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its form list, returned a PDF without a PDF header, or returned a DOCX, XLSX or PPTX without a ZIP signature")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {
