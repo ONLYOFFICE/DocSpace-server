@@ -83,6 +83,8 @@ public sealed class PortalClients : PortalClientsBase
     public UserStatusApi UserStatusApi { get; }
     public UserTypeApi UserTypeApi { get; }
     public UserDataApi UserDataApi { get; }
+    public DocSpace.API.SDK.Api.People.QuotaApi PeopleQuotaApi { get; }
+    public DocSpace.API.SDK.Api.Group.GroupApi GroupApi { get; }
 
     // Web.Api: the portal-wide AI switch (settings/ai-access)
     public CommonSettingsApi CommonSettingsApi { get; }
@@ -131,6 +133,8 @@ public sealed class PortalClients : PortalClientsBase
         UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
         UserTypeApi = new UserTypeApi(PeopleHttpClient, peopleConfig);
         UserDataApi = new UserDataApi(PeopleHttpClient, peopleConfig);
+        PeopleQuotaApi = new DocSpace.API.SDK.Api.People.QuotaApi(PeopleHttpClient, peopleConfig);
+        GroupApi = new DocSpace.API.SDK.Api.Group.GroupApi(PeopleHttpClient, peopleConfig);
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);

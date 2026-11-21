@@ -114,6 +114,9 @@ global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 
 global using static ASC.Core.Common.Tests.PaymentStubs;
 
+global using AiAgentMigrationTitle = ASC.Files.Core.Core.AI.AiAgentMigrationTitle;
+global using AiAgentsMigrationPlan = ASC.Core.Common.AI.AiAgentsMigrationPlan;
+global using AiAgentsMigrationService = ASC.AI.Worker.BackgroundServices.AiAgentsMigrationService;
 global using BoxAPIException = Box.V2.Exceptions.BoxAPIException;
 global using BoxError = Box.V2.BoxError;
 global using CreateFolderError = Dropbox.Api.Files.CreateFolderError;

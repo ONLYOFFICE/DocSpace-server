@@ -224,6 +224,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected UserStatusApi UserStatusApi => _clients.UserStatusApi;
     protected UserTypeApi UserTypeApi => _clients.UserTypeApi;
     protected UserDataApi UserDataApi => _clients.UserDataApi;
+    protected DocSpace.API.SDK.Api.People.QuotaApi PeopleQuotaApi => _clients.PeopleQuotaApi;
+    protected DocSpace.API.SDK.Api.Group.GroupApi GroupApi => _clients.GroupApi;
 
     // Web.Api, for portal settings and quotas. Starts unsigned: authenticate it before the first call.
     protected HttpClient WebApiHttpClient => _clients.WebApiHttpClient;

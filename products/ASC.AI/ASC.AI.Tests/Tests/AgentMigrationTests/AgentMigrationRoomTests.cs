@@ -1,0 +1,315 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+
+namespace ASC.AI.Tests.Tests.AgentMigrationTests;
+
+/// <summary>
+/// Requirements "Conversion of an AI agent into an AI project", "The room of a converted agent becomes a Knowledge
+/// room" and "An agent without knowledge leaves no room": what the sections, the room and its files answer after
+/// the conversion.
+/// </summary>
+/// <remarks>
+/// The stand runs with vectorization off, so every knowledge file here is arranged by
+/// <see cref="AgentMigrationTestBase.AddKnowledgeFileAsync"/> and every case also holds for a portal without it.
+/// </remarks>
+[Trait("Category", "Migration")]
+[Trait("Feature", "AI/AgentMigration")]
+public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationTestBase(fixture)
+{
+    // The minimal valid 1x1 PNG the room logo suites of the Files tests use.
+    private const string LogoImageBase64 =
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+
+    [Fact]
+    public async Task Convert_Agent_ListsAProjectWithItsTitleAndOwnerAndNoAgent()
+    {
+        // Arrange - the agent belongs to a Room admin, so the owner of the project is neither the caller of the
+        // route nor the system account the conversion runs under
+        var author = await InviteContact(EmployeeType.RoomAdmin, TestContext.Current.CancellationToken);
+        var title = NewTitle("Agent");
+        var agent = await CreateAgentAsync(title, author);
+
+        (await AgentsInAnySectionAsync()).Select(room => room.Id).Should().Contain(agent.Id, "the agent is listed before the conversion");
+
+        // Act
+        var result = await ConvertAgentsAsync();
+
+        // Assert
+        result.Migrated.Should().Be(1);
+
+        var project = await ProjectOfAsync(title);
+        project.Id.Should().NotBe(agent.Id, "the project is a new room");
+        project.CreatedBy.Id.Should().Be(author.Id);
+
+        (await AgentsInAnySectionAsync()).Should().BeEmpty("no room of the AI room type is left in any section");
+    }
+
+    [Fact]
+    public async Task Convert_AgentOfTheAgentsSection_BecomesAProjectToo()
+    {
+        // Arrange - an agent under the root of the AI agents section, where 4.0 created them
+        var title = NewTitle("Section agent");
+        var agentId = await CreateAgentInAgentsSectionAsync(title);
+
+        (await RoomInfoAsync(agentId)).RootFolderType.Should().Be(FolderType.AiAgents);
+
+        // Act
+        var result = await ConvertAgentsAsync();
+
+        // Assert
+        result.Migrated.Should().Be(1);
+        (await ProjectOfAsync(title)).RootFolderType.Should().Be(FolderType.AiHub);
+        (await AgentsInAnySectionAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Convert_Twice_KeepsOneProjectForTheAgent()
+    {
+        // Arrange
+        var title = NewTitle("Agent");
+        var agent = await CreateAgentAsync(title);
+        await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt");
+
+        await ConvertAgentsAsync();
+        var first = await ProjectOfAsync(title);
+
+        // Act
+        var second = await ConvertAgentsAsync();
+
+        // Assert
+        second.Migrated.Should().Be(0);
+        (await ProjectOfAsync(title)).Id.Should().Be(first.Id);
+        (await ProjectSourcesAsync(first.Id)).KnowledgeRooms.Select(room => room.Id).Should().Equal(agent.Id);
+    }
+
+    [Fact]
+    public async Task Convert_AgentWithAKnowledgeFile_KeepsItsIdAsALinkedKnowledgeRoom()
+    {
+        // Arrange
+        var title = NewTitle("Sales bot");
+        var agent = await CreateAgentAsync(title);
+        var knowledge = await AgentFolderAsync(agent.Id, FolderType.Knowledge);
+        var file = await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt");
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert
+        var room = await RoomInfoAsync(agent.Id);
+        room.RoomType.Should().Be(RoomType.KnowledgeRoom);
+        room.Title.Should().Be($"{title} ({knowledge.Title})");
+
+        var project = await ProjectOfAsync(title);
+        (await ProjectSourcesAsync(project.Id)).KnowledgeRooms.Select(source => source.Id).Should().Equal(agent.Id);
+
+        await FilesHttpClient.Authenticate(Owner);
+        var info = (await FilesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        info.Id.Should().Be(file.Id);
+        info.FolderId.Should().Be(agent.Id, "the knowledge files lie directly in the room");
+
+        var folderStatus = await StatusOfAsync(() => FoldersApi.GetFolderInfoAsync(knowledge.Id, TestContext.Current.CancellationToken));
+        folderStatus.Should().Be(404, "the Knowledge folder is gone");
+    }
+
+    [Fact]
+    public async Task Convert_AgentTitleAtTheLimit_CutsTheAgentTitleAndKeepsTheSuffix()
+    {
+        // Arrange
+        var title = NewTitle("Long").PadRight(MaxTitleLength, 'x');
+        var agent = await CreateAgentAsync(title);
+        agent.Title.Should().HaveLength(MaxTitleLength, "the agent takes a title of the greatest length");
+
+        var knowledge = await AgentFolderAsync(agent.Id, FolderType.Knowledge);
+        await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt");
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert
+        var suffix = $" ({knowledge.Title})";
+        var room = await RoomInfoAsync(agent.Id);
+
+        room.Title.Should().HaveLength(MaxTitleLength);
+        room.Title.Should().Be(title[..(MaxTitleLength - suffix.Length)] + suffix);
+        (await ProjectOfAsync(title)).Title.Should().Be(title, "the project keeps the whole title of the agent");
+    }
+
+    [Fact]
+    public async Task Convert_VectorizationOff_StillMakesAndLinksTheKnowledgeRoom()
+    {
+        // Arrange
+        var title = NewTitle("Agent");
+        var agent = await CreateAgentAsync(title);
+        var knowledge = await AgentFolderAsync(agent.Id, FolderType.Knowledge);
+
+        // What "vectorization is off" means to a caller: the Knowledge folder refuses a new file, to the owner too.
+        var refused = await StatusOfAsync(async () =>
+        {
+            await OperationsApi.CreateUploadSessionInFolderAsync(
+                knowledge.Id,
+                new SessionRequest("autotest-refused.txt", 4, createNewIfExist: true),
+                TestContext.Current.CancellationToken);
+        });
+        refused.Should().Be(403, "vectorization is off on the portal");
+
+        await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt");
+
+        // Act
+        var result = await ConvertAgentsAsync();
+
+        // Assert
+        result.Migrated.Should().Be(1);
+        (await RoomInfoAsync(agent.Id)).RoomType.Should().Be(RoomType.KnowledgeRoom);
+
+        var project = await ProjectOfAsync(title);
+        (await ProjectSourcesAsync(project.Id)).KnowledgeRooms.Select(source => source.Id).Should().Equal(agent.Id);
+    }
+
+    [Fact]
+    public async Task Convert_AgentWithoutKnowledge_LeavesNoRoom()
+    {
+        // Arrange
+        var title = NewTitle("Agent");
+        var agent = await CreateAgentAsync(title);
+
+        // Act
+        var result = await ConvertAgentsAsync();
+
+        // Assert
+        result.Migrated.Should().Be(1);
+
+        var project = await ProjectOfAsync(title);
+        var sources = await ProjectSourcesAsync(project.Id);
+        (sources.KnowledgeRooms ?? []).Should().BeEmpty();
+        (sources.InstructionsRooms ?? []).Should().BeEmpty();
+
+        await FilesHttpClient.Authenticate(Owner);
+        var roomStatus = await StatusOfAsync(() => RoomsApi.GetRoomInfoAsync(agent.Id, TestContext.Current.CancellationToken));
+        roomStatus.Should().Be(404);
+    }
+
+    [Fact]
+    public async Task Convert_AgentWithALogo_GivesTheProjectALogo()
+    {
+        // Arrange
+        var title = NewTitle("Logo agent");
+        var agent = await CreateAgentAsync(title);
+
+        await using (var image = new MemoryStream(Convert.FromBase64String(LogoImageBase64)))
+        {
+            var uploaded = await RoomsApi.UploadRoomLogoAsync(
+                new FileParameter("logo.png", "image/png", image),
+                TestContext.Current.CancellationToken);
+
+            await RoomsApi.CreateRoomLogoAsync(
+                agent.Id,
+                new LogoRequest(uploaded.Response.Data?.ToString() ?? string.Empty, 0, 0, 1, 1),
+                TestContext.Current.CancellationToken);
+        }
+
+        (await RoomInfoAsync(agent.Id)).Logo.Original.Should().NotBeNullOrEmpty("the agent has a logo before the conversion");
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert
+        (await ProjectOfAsync(title)).Logo.Original.Should().NotBeNullOrEmpty("the logo of the agent is copied to the project");
+    }
+
+    [Fact]
+    public async Task Convert_KnowledgeFile_IsFoundByTitleInTheKnowledgeRoom()
+    {
+        // Arrange
+        var title = NewTitle("Search agent");
+        var agent = await CreateAgentAsync(title);
+        var word = $"needle{Guid.NewGuid():N}";
+        var file = await AddKnowledgeFileAsync(agent.Id, $"{word}.txt");
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert - the index follows the conversion through an event, so the search is polled
+        await FilesHttpClient.Authenticate(Owner);
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+        List<int> found;
+
+        while (true)
+        {
+            var content = (await FoldersApi.GetFolderByFolderIdAsync(
+                agent.Id,
+                filterValue: word,
+                cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+            found = [.. (content.Files ?? []).OfType<FileDto>().Select(entry => entry.Id)];
+
+            if (found.Contains(file.Id) || DateTime.UtcNow >= deadline)
+            {
+                break;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+
+        found.Should().Equal(file.Id);
+    }
+
+    [Fact]
+    public async Task Convert_AgentWithKnowledge_ChargesNoUserWithTheSizeOfTheRoom()
+    {
+        // Arrange - the root of the AI rooms section is created by the owner's first listing of it, so a room
+        // charged on its way under that root would be charged to the owner
+        var bystander = await InviteContact(EmployeeType.RoomAdmin, TestContext.Current.CancellationToken);
+        await ListRoomsAsync(SearchArea.AiHub);
+        await EnableUserQuotaAsync(100 * 1024 * 1024);
+
+        var title = NewTitle("Sized agent");
+        var agent = await CreateAgentAsync(title);
+        var knowledgeFile = await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt", new byte[4096]);
+        var outputsFile = await AddOutputsFileAsync(agent.Id, "autotest-output.txt", bytes: new byte[1024]);
+
+        var ownerBefore = (await ProfileOfAsync(Owner)).UsedSpace ?? 0;
+        var bystanderBefore = (await ProfileOfAsync(bystander)).UsedSpace ?? 0;
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert - the Chat outputs are the one thing the owner is charged with: seeing that charge arrive shows
+        // the counters were read after the conversion, and its exact size shows the room was not added to it
+        var owner = await WaitForProfileAsync(Owner, profile => (profile.UsedSpace ?? 0) >= ownerBefore + outputsFile.Size);
+
+        (owner.UsedSpace ?? 0).Should().Be(ownerBefore + outputsFile.Size, $"the room holds {knowledgeFile.Size} bytes of knowledge that stay with the room");
+        ((await ProfileOfAsync(bystander)).UsedSpace ?? 0).Should().Be(bystanderBefore);
+        ((await RoomInfoAsync(agent.Id)).UsedSpace ?? 0).Should().Be(knowledgeFile.Size);
+    }
+}

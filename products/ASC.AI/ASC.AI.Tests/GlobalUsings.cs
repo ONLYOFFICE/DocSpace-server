@@ -61,6 +61,7 @@ global using WireMock.Types;
 global using WireMock.Util;
 
 global using Xunit;
+global using AgentsMigrationDto = ASCAi::ASC.AI.Models.ResponseDto.AgentsMigrationDto;
 // The public AI surface (/api/2.0/ai, the Node chat service). Aliased: several names clash with other SDK areas.
 global using AiAssignmentsApi = DocSpace.API.SDK.Api.AI.AssignmentsApi;
 global using AiChatApi = DocSpace.API.SDK.Api.AI.AIApi;
