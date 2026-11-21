@@ -121,4 +121,32 @@ public class AiAgentsMigrationPlanTests
         AiAgentsMigrationPlan.IsLeftAlone(next, 7, MaxAttempts).Should().BeTrue();
         AiAgentsMigrationPlan.GetCandidates([7], next, MaxAttempts).Should().BeEmpty();
     }
+
+    [Fact]
+    public void GetNextAttemptsWhenBusy_UnchangedPortal_IsACandidateOfTheNextPass()
+    {
+        var next = AiAgentsMigrationPlan.GetNextAttemptsWhenBusy(new Dictionary<int, int>(), 7);
+
+        AiAgentsMigrationPlan.GetCandidates([], next, MaxAttempts).Should().Equal(7);
+        AiAgentsMigrationPlan.IsLeftAlone(next, 7, MaxAttempts).Should().BeFalse();
+    }
+
+    [Fact]
+    public void GetNextAttemptsWhenBusy_PortalWithFailures_KeepsItsCount()
+    {
+        var attempts = new Dictionary<int, int> { [7] = MaxAttempts - 1 };
+
+        var next = AiAgentsMigrationPlan.GetNextAttemptsWhenBusy(attempts, 7);
+
+        next[7].Should().Be(MaxAttempts - 1);
+        AiAgentsMigrationPlan.GetCandidates([], next, MaxAttempts).Should().Equal(7);
+    }
+
+    [Fact]
+    public void GetNextAttempts_SuccessAfterBusy_RemovesTheEntry()
+    {
+        var busy = AiAgentsMigrationPlan.GetNextAttemptsWhenBusy(new Dictionary<int, int>(), 7);
+
+        AiAgentsMigrationPlan.GetNextAttempts(busy, 7, failed: false).Should().BeEmpty();
+    }
 }

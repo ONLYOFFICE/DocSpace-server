@@ -184,7 +184,7 @@ public class AiAgentsMigrationService(
             {
                 logger.DebugLegacyMigrationBusy(tenantId);
 
-                return attempts;
+                return AiAgentsMigrationPlan.GetNextAttemptsWhenBusy(attempts, tenantId);
             }
 
             failed = migration.Failed > 0;

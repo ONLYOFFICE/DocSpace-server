@@ -82,6 +82,15 @@ public static class AiAgentsMigrationPlan
         return next;
     }
 
+    public static Dictionary<int, int> GetNextAttemptsWhenBusy(IReadOnlyDictionary<int, int> attempts, int tenantId)
+    {
+        var next = new Dictionary<int, int>(attempts);
+
+        next.TryAdd(tenantId, 0);
+
+        return next;
+    }
+
     public static bool IsLeftAlone(IReadOnlyDictionary<int, int> attempts, int tenantId, int maxAttempts)
     {
         return attempts.TryGetValue(tenantId, out var count) && count >= maxAttempts;

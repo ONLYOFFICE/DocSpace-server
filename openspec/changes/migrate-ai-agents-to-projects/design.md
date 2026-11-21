@@ -180,7 +180,8 @@ One pass:
    next.
 4. Run the legacy providers migration for the portal (D8), then D3 for each agent, each in its own try/catch.
 5. Any agent failed: `Attempts[portal] += 1`; at the limit, an error log naming the portal, and the portal is
-   skipped from then on. All converted: drop it from `Attempts`.
+   skipped from then on. All converted: drop it from `Attempts`. The lock of D8 not acquired: keep the portal in
+   `Attempts` with its count unchanged (0 when absent).
 6. Save `LastPassStart = now` and `Attempts`. A pass that stops earlier saves nothing and is repeated.
 
 `overlap` covers clock differences between the hosts that write `last_modified`; a portal checked twice costs three
@@ -206,8 +207,9 @@ is a second caller that makes sure it has run. The migrator, its context, querie
 move from `products/ASC.AI/Server/Migration` to `products/ASC.AI/Core` (the worker references Core only); the
 start-up task stays in the server. The worker calls it for a portal under the start-up task's lock
 (`ai_legacy_providers_migration`) and under the same conditions (no AI gateway configured, MySQL): both callers
-take them from one method, `LegacyAiProvidersMigrationGate.TryEnterAsync`. Lock not acquired or the migrator
-throws: the portal is skipped for this pass; a throw counts as a failed pass.
+take them from one method, `LegacyAiProvidersMigrationGate.TryEnterAsync`. Lock not acquired: the portal is
+skipped for this pass and kept in `Attempts` with its count unchanged (0 when it had none), so the next pass tries
+it again whether or not it changed. The migrator throws: a failed pass.
 
 ### D9. The route
 
