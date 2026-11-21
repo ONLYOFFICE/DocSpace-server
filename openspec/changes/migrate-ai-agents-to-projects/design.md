@@ -85,7 +85,8 @@ Run under the system account with the portal set, holding a distributed lock on 
 4. **After the commit**, each in its own try/catch with a warning log: copy the logo to the project and set its
    flag; `FolderIndexIntegrationEvent` for the project and the room and the index events for the moved knowledge
    files; socket events (`create-folder` for the project, `update-folder` for the room); for an agent without
-   knowledge files `DeleteFolderAsync` of the room, with `delete-folder`.
+   knowledge files `DeleteFolderAsync` of the room, with `delete-folder`, and once the room is deleted the logo
+   files of an agent with a logo (`RoomLogoManager.DeleteLogoFilesAsync`), after the copy to the project.
 
 `MoveFolderAsync` and `DeleteFolderAsync` are reused as they are: the folder tree, the counters, the used space and
 the index events of a subtree move are the logic not worth a second copy.
@@ -238,6 +239,7 @@ middle would convert a half-built one. The tests start the conversion through th
 | 3 transaction | rolled back, agent pending and whole | commit seen or not: either pending or converted, nothing between | re-reads the type in the transaction, rolls back if converted |
 | 4 logo, events | warning; the project has no logo, the index catches up on its periodic pass | same | not repeated: the room is no longer pending |
 | 4 delete of an empty room | warning; an empty Knowledge room linked to nothing stays, visible to its owner | same | not repeated |
+| 4 logo files of the deleted room | warning; the logo files stay in the storage, referenced by no folder | same | not repeated |
 
 The lock is released on every exit (`await using`). Nothing is marked before the transaction, so there is no mark to
 release.

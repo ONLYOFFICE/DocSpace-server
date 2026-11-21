@@ -225,18 +225,7 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
         // Arrange
         var title = NewTitle("Logo agent");
         var agent = await CreateAgentAsync(title);
-
-        await using (var image = new MemoryStream(Convert.FromBase64String(LogoImageBase64)))
-        {
-            var uploaded = await RoomsApi.UploadRoomLogoAsync(
-                new FileParameter("logo.png", "image/png", image),
-                TestContext.Current.CancellationToken);
-
-            await RoomsApi.CreateRoomLogoAsync(
-                agent.Id,
-                new LogoRequest(uploaded.Response.Data?.ToString() ?? string.Empty, 0, 0, 1, 1),
-                TestContext.Current.CancellationToken);
-        }
+        await SetLogoAsync(agent.Id);
 
         (await RoomInfoAsync(agent.Id)).Logo.Original.Should().NotBeNullOrEmpty("the agent has a logo before the conversion");
 
@@ -245,6 +234,55 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
 
         // Assert
         (await ProjectOfAsync(title)).Logo.Original.Should().NotBeNullOrEmpty("the logo of the agent is copied to the project");
+    }
+
+    [Fact]
+    public async Task Convert_AgentWithALogoAndNoKnowledge_RemovesTheLogoFilesOfTheDeletedRoom()
+    {
+        var title = NewTitle("Logo files agent");
+        var agent = await CreateAgentAsync(title);
+        await SetLogoAsync(agent.Id);
+
+        var agentLogo = PathOf((await RoomInfoAsync(agent.Id)).Logo.Original);
+        await StudioHttpClient.Authenticate(Owner);
+
+        using (var before = await StudioHttpClient.GetAsync(agentLogo, TestContext.Current.CancellationToken))
+        {
+            before.StatusCode.Should().Be(HttpStatusCode.OK, "the storage holds the logo of the agent before the conversion");
+        }
+
+        await ConvertAgentsAsync();
+
+        var projectLogo = PathOf((await ProjectOfAsync(title)).Logo.Original);
+
+        using (var room = await StudioHttpClient.GetAsync(agentLogo, TestContext.Current.CancellationToken))
+        {
+            room.StatusCode.Should().Be(HttpStatusCode.NotFound, "the room of an agent without knowledge files is deleted with its logo files");
+        }
+
+        using var project = await StudioHttpClient.GetAsync(projectLogo, TestContext.Current.CancellationToken);
+        project.StatusCode.Should().Be(HttpStatusCode.OK, "the copy of the logo made for the project stays");
+    }
+
+    private async Task SetLogoAsync(int roomId)
+    {
+        await using var image = new MemoryStream(Convert.FromBase64String(LogoImageBase64));
+
+        var uploaded = await RoomsApi.UploadRoomLogoAsync(
+            new FileParameter("logo.png", "image/png", image),
+            TestContext.Current.CancellationToken);
+
+        await RoomsApi.CreateRoomLogoAsync(
+            roomId,
+            new LogoRequest(uploaded.Response.Data?.ToString() ?? string.Empty, 0, 0, 1, 1),
+            TestContext.Current.CancellationToken);
+    }
+
+    private static string PathOf(string url)
+    {
+        return Uri.TryCreate(url, UriKind.Absolute, out var absolute) && absolute.Scheme.StartsWith("http", StringComparison.Ordinal)
+            ? absolute.PathAndQuery
+            : url;
     }
 
     [Fact]

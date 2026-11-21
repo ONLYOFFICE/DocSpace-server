@@ -218,6 +218,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi ThirdPartyIntegrationApi => _clients.ThirdPartyIntegrationApi;
     protected DocSpace.API.SDK.Api.Rooms.AIApi RoomsAiApi => _clients.RoomsAiApi;
 
+    protected HttpClient StudioHttpClient => _clients.StudioHttpClient;
+
     // The People service: member profiles (culture, type). Starts unsigned: authenticate it before the first call.
     protected HttpClient PeopleHttpClient => _clients.PeopleHttpClient;
     protected ProfilesApi ProfilesApi => _clients.ProfilesApi;

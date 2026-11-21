@@ -36,7 +36,7 @@ After this group: an agent with knowledge files becomes a project plus a linked 
 
 ## 5. After the commit
 
-- [x] 5.1 Add step 4 of design D3 to `AiAgentMigrator`: logo copy to the project, `FolderIndexIntegrationEvent` for the project and the room and the index events of the moved knowledge files, socket events through `SocketManager` (`create-folder`, `update-folder`, `delete-folder`), and `DeleteFolderAsync` of a room without knowledge files; each effect in its own try/catch with a warning log, after the commit (`failure-paths.md` §3). Verified by the build with no new warnings and by the tests of 5.2
+- [x] 5.1 Add step 4 of design D3 to `AiAgentMigrator`: logo copy to the project, `FolderIndexIntegrationEvent` for the project and the room and the index events of the moved knowledge files, socket events through `SocketManager` (`create-folder`, `update-folder`, `delete-folder`), and `DeleteFolderAsync` of a room without knowledge files, followed by `RoomLogoManager.DeleteLogoFilesAsync` for an agent with a logo; each effect in its own try/catch with a warning log, after the commit (`failure-paths.md` §3). Verified by the build with no new warnings and by the tests of 5.2
 - [ ] 5.2 Add to `AgentMigrationRoomTests`: "An agent without knowledge leaves no room" (empty `getProjectSources`, `getRoomInfo` 404); the project of an agent with a logo has a logo; a knowledge file is found by a title search in the Knowledge room after the conversion, polled on a deadline (`full-text-search.md`). Verified by the tests built, run on the user's command, proven red
 
 After this group: the room side is complete, including the empty-knowledge case.

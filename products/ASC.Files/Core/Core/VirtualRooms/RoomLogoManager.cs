@@ -225,6 +225,12 @@ public class RoomLogoManager(
         return room;
     }
 
+    public async Task DeleteLogoFilesAsync<T>(T id)
+    {
+        var store = await GetLogoStoreAsync();
+        await store.DeleteFilesAsync(string.Empty, $"{ProcessFolderId(id)}{LogosPathSplitter}*.*", false);
+    }
+
     public async ValueTask<LogoDto> GetLogoAsync<T>(Folder<T> room)
     {
         if (!room.SettingsHasLogo)

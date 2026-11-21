@@ -45,6 +45,7 @@ public sealed class PortalClients : PortalClientsBase
     public HttpClient AiHttpClient { get; }
     public HttpClient FilesHttpClient { get; }
     public HttpClient PeopleHttpClient { get; }
+    public HttpClient StudioHttpClient { get; }
 
     /// <summary>ASC.AI's internal storage API (<c>/internal/ai</c>), the one the Node chat service calls.</summary>
     public RawApiClient Ai { get; }
@@ -98,6 +99,7 @@ public sealed class PortalClients : PortalClientsBase
         AiHttpClient = CreateClient(ResourceNames.Ai);
         FilesHttpClient = CreateClient(ResourceNames.Files);
         PeopleHttpClient = CreateClient(ResourceNames.People);
+        StudioHttpClient = CreateClient(ResourceNames.WebStudio);
 
         Ai = new RawApiClient(AiHttpClient);
 

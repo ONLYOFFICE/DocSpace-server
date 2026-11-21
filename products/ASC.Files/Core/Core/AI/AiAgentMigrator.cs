@@ -227,7 +227,7 @@ public class AiAgentMigrator(
 
         if (!conversion.HasKnowledge)
         {
-            await DeleteRoomWithoutKnowledgeAsync(folderDao, tenantId, agentId);
+            await DeleteRoomWithoutKnowledgeAsync(folderDao, tenantId, agentId, agent.SettingsHasLogo);
 
             return;
         }
@@ -249,7 +249,7 @@ public class AiAgentMigrator(
         });
     }
 
-    private async Task DeleteRoomWithoutKnowledgeAsync(IFolderDao<int> folderDao, int tenantId, int roomId)
+    private async Task DeleteRoomWithoutKnowledgeAsync(IFolderDao<int> folderDao, int tenantId, int roomId, bool hasLogo)
     {
         Folder<int> room = null;
         IEnumerable<Guid> users = null;
@@ -269,6 +269,12 @@ public class AiAgentMigrator(
             await folderDao.DeleteFolderAsync(roomId);
             deleted = true;
         });
+
+        if (deleted && hasLogo)
+        {
+            await BestEffortAsync(tenantId, roomId, "the deletion of the logo files of the deleted room", () =>
+                roomLogoManager.DeleteLogoFilesAsync(roomId));
+        }
 
         if (deleted && room != null && users != null)
         {
