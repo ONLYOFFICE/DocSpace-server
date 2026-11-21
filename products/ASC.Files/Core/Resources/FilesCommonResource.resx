@@ -656,6 +656,9 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PrivateRoomsAppOff" xml:space="preserve">
     <value>Private rooms are turned off on this portal</value>
   </data>
+  <data name="ErrorMessage_PrivateRoomsCannotPassTo" xml:space="preserve">
+    <value>{0} cannot take the private rooms of this account. The recipient needs an encryption key and the keys of every encrypted file in those rooms</value>
+  </data>
   <data name="ErrorMessage_PrivateRoomTypeNotSupported" xml:space="preserve">
     <value>A Public room, a Form filling room or an AI agent cannot be private: each of them is reached without an encryption key</value>
   </data>

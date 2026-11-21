@@ -390,9 +390,9 @@ again.
 
 ### Requirement: The owner of a private room cannot be disabled
 
-`updateMember`, `updateUserStatus` and `deleteProfile` MUST answer 403 for a user who owns a private room and change no
-account of the request, until the room has another owner. An LDAP synchronization follows the directory and still
-disables such a user; the room keeps them as its owner until a member DocSpace admin hands it over.
+`updateMember`, `updateUserStatus` and `deleteProfile` MUST answer 403 for a user who owns a private room, with `error.type`
+`ASC.Files.Core.Helpers.PrivateRoomOwnershipException`, and change no account of the request, until the room has another
+owner. An LDAP synchronization still disables such a user; a member DocSpace admin hands the room over then.
 
 #### Scenario: Owner disabled
 
@@ -413,3 +413,25 @@ their role there. A DocSpace admin or the Owner who is not a member MUST get 403
 
 - **WHEN** a DocSpace admin who is not a member calls `changeFileOwner` for a private room
 - **THEN** the answer is 403 and the owner is unchanged
+
+### Requirement: A user made a guest leaves the private rooms
+
+`startUserTypeUpdate` to `Guest` SHALL give the user's own private rooms to the recipient, take the user out of every
+private room, delete their file keys with a revocation record and delete their key pair; a later type change restores
+none of it. If the recipient lacks an encryption key or a key of an encrypted file of such a room, the call MUST answer
+403 with the `error.type` of the ownership refusal before anything changes.
+
+#### Scenario: Member made a guest
+
+- **WHEN** a member of a private room holding file keys is made a guest, and later a user again
+- **THEN** they are no member of the room, hold no file key and no key pair, and inviting them back is refused
+
+#### Scenario: Owner made a guest
+
+- **WHEN** the owner of a private room is made a guest and the recipient holds the keys of its files
+- **THEN** the room has the recipient as its owner and the previous owner is no member
+
+#### Scenario: Recipient cannot take the room
+
+- **WHEN** the recipient lacks the key of an encrypted file of a private room the user owns
+- **THEN** the answer is 403 and the user, the room and the keys are unchanged

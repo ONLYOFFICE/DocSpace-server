@@ -342,6 +342,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<int> GetPrivateRoomIdsWithMemberAsync(int tenantId, Guid userId)
+    {
+        return FolderQueries.GetPrivateRoomIdsWithMemberAsync(this, tenantId, userId, DocSpaceHelper.RoomTypes);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<FolderReassignInfo> GetRoomsFoldersReassignInfoAsync(int tenantId, Guid ownerId)
     {
         return FolderQueries.GetRoomsFoldersReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes);
@@ -869,6 +875,17 @@ static file class FolderQueries
                 ctx.Folders
                     .Where(f => f.TenantId == tenantId && f.CreateBy == ownerId && roomTypes.Contains(f.FolderType))
                     .Where(f => ctx.RoomSettings.Any(s => s.TenantId == tenantId && s.RoomId == f.Id && s.Private))
+                    .Select(f => f.Id));
+
+    // the private rooms in which the user holds an access record of their own (a member, not the owner)
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<int>> GetPrivateRoomIdsWithMemberAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid userId, IEnumerable<FolderType> roomTypes) =>
+                ctx.Folders
+                    .Where(f => f.TenantId == tenantId && roomTypes.Contains(f.FolderType))
+                    .Where(f => ctx.RoomSettings.Any(s => s.TenantId == tenantId && s.RoomId == f.Id && s.Private))
+                    .Where(f => ctx.Security.Any(s => s.TenantId == tenantId && s.EntryType == FileEntryType.Folder &&
+                        s.InternalEntryId == f.Id && s.Subject == userId))
                     .Select(f => f.Id));
 
     public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<FolderReassignInfo>> GetRoomsFoldersReassignInfoAsync =

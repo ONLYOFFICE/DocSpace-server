@@ -2596,7 +2596,10 @@ public class UserController(
     /// portal does not allow inviting guests. Only the portal owner can change a DocSpace admin. Otherwise the call
     /// returns 400. The call also returns 400 for a system or disabled account, or for the account of the caller. The
     /// recipient is `reassignUserId`, or the caller if it is empty. It must be an active room admin or DocSpace admin,
-    /// other than the account. Otherwise the call returns 400. The call queues work. While the job runs, a repeated
+    /// other than the account. Otherwise the call returns 400. A new guest leaves every private room. Its own private
+    /// rooms go to the recipient, its file keys and key pair are deleted, and a later type change restores none of it.
+    /// If the recipient lacks an encryption key or a key of an encrypted file there, the call returns 403. The call
+    /// queues work. While the job runs, a repeated
     /// call returns its state and starts nothing. After the job ends, a repeat starts a new job, which emails the
     /// caller again. Poll `GET api/2.0/people/type/progress/{userId}` until `isCompleted` is true. To cancel the job,
     /// use `PUT api/2.0/people/type/terminate`. A failure inside the job shows in `error` of the progress, not as a
@@ -2610,7 +2613,7 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "The state of the queued user type change", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The requested type is neither Guest nor User, the account is a system account, disabled or the caller, the recipient is the same account or is not an active admin, or a non-owner tried to convert a DocSpace admin")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(403, "The caller may not change the type, the portal does not allow guests for `Guest`, or the recipient cannot take a private room of the account: no encryption key or a missing key of an encrypted file")]
     [HttpPost("type")]
     public async Task<TaskProgressResponseDto> StartUserTypeUpdate(StartUpdateUserTypeDto inDto)
     {
@@ -2656,6 +2659,12 @@ public class UserController(
         if (toUserType != EmployeeType.DocSpaceAdmin && toUserType != EmployeeType.RoomAdmin)
         {
             throw new ArgumentException($"Can not reassign to user - {inDto.ReassignUserId}");
+        }
+
+        // The job checks it again before it changes anything; answered here so the caller gets the refusal at once.
+        if (inDto.Type is EmployeeType.Guest && userType is not EmployeeType.Guest)
+        {
+            await privateRoomAccountHelper.DemandPrivateRoomsCanPassToAsync(user.Id, toUser.Id);
         }
 
         var progressItem = await queueWorkerUpdateUserType.StartAsync(tenant.Id, user.Id, toUser.Id, securityContext.CurrentAccount.ID, inDto.Type);

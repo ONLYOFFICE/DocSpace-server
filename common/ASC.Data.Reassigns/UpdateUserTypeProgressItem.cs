@@ -84,7 +84,7 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, loggerFactory, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory, groupFullDtoHelper, fileSecurity) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, loggerFactory, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory, groupFullDtoHelper, fileSecurity, privateRoomAccountHelper) = scopeClass;
         var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
         var logger = loggerFactory.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
@@ -104,13 +104,29 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
             await SetPercentageAndCheckCancellationAsync(5, true);
 
             var currentType = await userManager.GetUserTypeAsync(_userInfo);
+            var toGuest = _employeeType == EmployeeType.Guest && currentType is not EmployeeType.Guest;
+
             if (currentType is not EmployeeType.Guest)
             {
                 await fileStorageService.DemandPermissionToReassignDataAsync(User, ToUser);
+
+                // A guest keeps no private room, so the recipient must be able to take every one the user owns; checked
+                // before anything of the type change is done.
+                if (toGuest)
+                {
+                    await privateRoomAccountHelper.DemandPrivateRoomsCanPassToAsync(User, ToUser);
+                }
+
                 await SetPercentageAndCheckCancellationAsync(10, true);
 
                 await fileStorageService.ChangeRoomsOwnerAsync(User, ToUser);
                 await SetPercentageAndCheckCancellationAsync(40, true);
+            }
+
+            if (toGuest)
+            {
+                await LeavePrivateRoomsAsync(fileStorageService, securityContext, privateRoomAccountHelper);
+                await SetPercentageAndCheckCancellationAsync(42, true);
             }
 
             if (currentType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin &&
@@ -256,6 +272,33 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
         }
     }
 
+    /// <summary>
+    /// The private rooms of the room list are not among the rooms <see cref="FileStorageService.ChangeRoomsOwnerAsync"/>
+    /// moves, so the user's own ones are handed to the recipient here, as their owner (in a private room only the owner
+    /// changes the owner) and with the recipient's file keys demanded. Then the user leaves every private room and loses
+    /// their file keys and key pair.
+    /// </summary>
+    private async Task LeavePrivateRoomsAsync(FileStorageService fileStorageService, SecurityContext securityContext, PrivateRoomAccountHelper privateRoomAccountHelper)
+    {
+        var ownedRoomIds = await privateRoomAccountHelper.GetOwnedPrivateRoomIdsAsync(User);
+
+        if (ownedRoomIds.Count > 0)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(User);
+
+            try
+            {
+                await fileStorageService.ChangeOwnerAsync(ownedRoomIds, [], ToUser, Files.Core.Security.FileShare.ContentCreator, demandFileKeys: true).ToListAsync();
+            }
+            finally
+            {
+                await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
+            }
+        }
+
+        await privateRoomAccountHelper.LeavePrivateRoomsAsync(User);
+    }
+
     private async Task SetPercentageAndCheckCancellationAsync(double percentage, bool publish)
     {
         Percentage = percentage;
@@ -307,4 +350,5 @@ public record ChangeUserTypeProgressItemScope(
     UserFormatter UserFormatter,
     IDaoFactory DaoFactory,
     GroupFullDtoHelper GroupFullDtoHelper,
-    IFileSecurity FileSecurity);
+    IFileSecurity FileSecurity,
+    PrivateRoomAccountHelper PrivateRoomAccountHelper);

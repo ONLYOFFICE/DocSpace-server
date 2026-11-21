@@ -790,6 +790,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} cannot take the private rooms of this account. The recipient needs an encryption key and the keys of every encrypted file in those rooms.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomsCannotPassTo {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomsCannotPassTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A Public room, a Form filling room or an AI agent cannot be private: each of them is reached without an encryption key.
         /// </summary>
         public static string ErrorMessage_PrivateRoomTypeNotSupported {

@@ -145,6 +145,40 @@ public class PrivateRoomContentGatesTests(AspireAppFixture fixture) : PrivacyRoo
     }
 
     [Fact]
+    public async Task AppOff_MembersKeysAndDownloadAreRefusedToAMember()
+    {
+        // Each call is seen to work for the member first, so a refusal after the switch is the gate's.
+        var member = await InviteWithKeys(EmployeeType.RoomAdmin);
+        var room = await CreateRoomAsOwner();
+        var fileId = await UploadEncryptedFile(room.Id, "Encrypted.docx");
+        await InviteToRoom(room.Id, member, FileShare.RoomManager);
+        var ct = TestContext.Current.CancellationToken;
+
+        Func<Task>[] calls =
+        [
+            () => _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: ct),
+            () => _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest { Invitations = [new RoomInvitation { Id = member.Id, Access = FileShare.RoomManager }], Notify = false }, cancellationToken: ct),
+            () => _privacyRoomApi.GetUserKeysForRoomAsync(room.Id, ct),
+            () => _sharingApi.GetEncryptionAccessAsync(fileId, ct),
+            () => _filesApi.GetPresignedFileUriAsync(fileId, ct)
+        ];
+
+        await _filesClient.Authenticate(member);
+        foreach (var call in calls)
+        {
+            (await StatusOf(call)).Should().Be(200);
+        }
+
+        await SetApp(false);
+        await _filesClient.Authenticate(member);
+
+        foreach (var call in calls)
+        {
+            (await StatusOf(call)).Should().BeOneOf(403, 404);
+        }
+    }
+
+    [Fact]
     public async Task FormsAreas_LeaveOutAPrivateFormRoomFromBefore()
     {
         await _filesClient.Authenticate(Owner);

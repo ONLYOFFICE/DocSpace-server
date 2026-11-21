@@ -33,6 +33,9 @@ it is merged yet. This change takes the items that belong to the server's own co
 - **BREAKING** Disabling a user (`updateMember`, `updateUserStatus`, `deleteProfile`) deletes their file keys, with an audit
   record; disabling the owner of a private room is refused with 403 until the room has another owner. An account disabled
   any other way (an LDAP synchronization) loses its file keys too, shortly after, through the Files worker.
+- **BREAKING** A user made a guest (`startUserTypeUpdate`) leaves every private room: their own private rooms go to the
+  recipient, their file keys and key pair are deleted. If the recipient cannot open a room they would get, the call
+  answers 403 before anything changes. The refusals about owned private rooms carry an `error.type` of their own.
 - **BREAKING** A DocSpace admin who is a member of a private room, in any role, may change its owner with
   `changeFileOwner`; the new owner must still hold every file key. Today only the owner may, so a room whose owner a
   directory synchronization disabled, or whose owner was removed, could not get a new one.

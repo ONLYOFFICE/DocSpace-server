@@ -70,6 +70,15 @@ public class EncryptionLoginProvider(
         await accountLinker.AddLinkAsync(userId, loginProfile);
     }
 
+    /// <summary>
+    /// Deletes the whole key pair of an account, for the server's own cleanup (a user made a guest). The owner deletes a
+    /// key of their own through the privacy room routes.
+    /// </summary>
+    public async Task DeleteAllKeysAsync(Guid userId)
+    {
+        await accountLinker.RemoveProviderAsync(userId, ProviderConstants.Encryption);
+    }
+
     public async Task<string> GetKeysAsync()
     {
         return await GetKeysAsync(authContext.CurrentAccount.ID);

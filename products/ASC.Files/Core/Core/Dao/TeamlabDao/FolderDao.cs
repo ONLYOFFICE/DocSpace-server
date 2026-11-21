@@ -1829,6 +1829,13 @@ internal class FolderDao(
         return await filesDbContext.GetPrivateRoomIdsByOwnerAsync(tenantId, ownerId).ToListAsync();
     }
 
+    public async Task<List<int>> GetPrivateRoomIdsWithMemberAsync(Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.GetPrivateRoomIdsWithMemberAsync(tenantId, userId).ToListAsync();
+    }
+
     public async Task ReassignRoomsAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptRoomIds)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

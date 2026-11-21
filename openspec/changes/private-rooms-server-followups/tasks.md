@@ -120,8 +120,10 @@
 
 ## 7. Specs and close-out
 
-- [ ] 7.1 Mark deviation PR2 fixed in `openspec/deviations.md` and update the rows of `verification.md` the tasks above
+- [x] 7.1 Mark deviation PR2 fixed in `openspec/deviations.md` and update the rows of `verification.md` the tasks above
   touch.
+  - 2026-11-20: PR2 moved to "Closed by v4.1.0" as FIXED `a77956ac1c`, with the two Favorites tests of
+    `T/PrivateRoomContentGatesTests.cs` (run 2026-11-20, green).
   - 2026-11-20: the moved citations of `openspec/specs/private-rooms/verification.md` are updated, and the rows whose cited tests now assert the new behaviour say so. PR2 is not marked fixed yet: the register records a fix with its commit.
 - [x] 7.2 Re-check the touched specs with `openspec validate --specs --no-interactive` and run
   `python -I -X utf8 .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec private-rooms`; no operation of
@@ -145,3 +147,23 @@
   key fields and `keptPrivateRoomIds`; `TaskProgressResponseDto` through a Mapperly mapper; the resource texts.
 - [x] 9.4 Tests: the class split into `T/PrivateRoomReassignTests.cs`, presence before absence in the webhook, audit and
   agent checks, filtered by the portal.
+
+## 10. Items of the client document left out (added 2026-11-20)
+
+- [x] 10.1 Client item 1.6: a user made a guest hands their private rooms to the recipient, leaves every private room,
+  and loses their file keys and key pair; the type change is refused with 403 before any change when the recipient cannot
+  take a room (design decision 17).
+  - Run 2026-11-20: `T/PrivateRoomGuestDemotionTests.cs` passes (a member leaves and gets nothing back after being made a
+    user again; an owner's room goes to the recipient; a recipient without the file key is refused with 403 and nothing
+    changes); prove-red.sh --patch: 3 of 3 failed without the change. People `_02_UserType` 25 of 25.
+- [x] 10.2 Client item 8.1: the refusal to disable the owner of a private room carries `error.type`
+  `ASC.Files.Core.Helpers.PrivateRoomOwnershipException` (design decision 18).
+  - Run 2026-11-20: `T/PrivateRoomDisableTests.cs` reads the type in both owner refusals; prove-red.sh --patch: 3 of 3
+    failed with the old exception type.
+- [x] 10.3 Client item 2.5: tests that members, access changes, room keys, file keys and the download are refused while
+  the app is off.
+  - Run 2026-11-20: `T/PrivateRoomContentGatesTests.cs` (`AppOff_MembersKeysAndDownloadAreRefusedToAMember`) passes; each
+    call answers 200 before the switch. No product change, so nothing to prove red.
+- Client item 1.8 (a failed revocation leaves the member in the room with their keys): the order is in the code
+  (decision 5, revocation before the access record), but no test makes the revocation fail. The stand cannot fail one DAO
+  call, and there is no decision to move into a unit test: it is the order of two writes. Not proven.

@@ -67,6 +67,7 @@ public sealed class PortalClients : PortalClientsBase
     public UserStatusApi UserStatusApi { get; }
     public UserDataApi UserDataApi { get; }
     public PhotosApi PhotosApi { get; }
+    public UserTypeApi UserTypeApi { get; }
 
     // WebApi service
     public AuthenticationApi AuthenticationApi { get; }
@@ -102,6 +103,7 @@ public sealed class PortalClients : PortalClientsBase
         UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
         UserDataApi = new UserDataApi(PeopleHttpClient, peopleConfig);
         PhotosApi = new PhotosApi(PeopleHttpClient, peopleConfig);
+        UserTypeApi = new UserTypeApi(PeopleHttpClient, peopleConfig);
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         AuthenticationApi = new AuthenticationApi(WebApiHttpClient, webApiConfig);

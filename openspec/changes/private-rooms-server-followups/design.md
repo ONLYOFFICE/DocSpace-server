@@ -148,6 +148,18 @@ removal"; `file-sharing` "The Favorites section" (`addFavorites` answers `true` 
     admin who holds a user record of their own in the room, any role. It reveals no content: `changeFileOwner` still
     refuses a new owner without every file key (409). An administrator who is not a member stays refused.
 
+17. **A user made a guest leaves the private rooms (client item 1.6).** `ChangeRoomsOwnerAsync` lists the rooms of the
+    Rooms section, which holds no private room, so a guest kept their private rooms, memberships and keys. The type change
+    job now checks first that the recipient can take each private room the user owns (a key, and the key of every
+    encrypted file; `PrivateRoomAccountHelper.DemandPrivateRoomsCanPassToAsync`, also called by `startUserTypeUpdate` so
+    the refusal is a 403 of the call), then hands those rooms over as their owner with the file keys demanded, then takes
+    the user out of every private room after revoking their file keys, and deletes their key pair. It runs before the
+    room manager roles are lowered. The access records go straight through `FileSecurity.ShareAsync`: the job acts for
+    an administrator who need not be a member, and the type change is that administrator's decision.
+18. **The ownership refusal has a type of its own.** Disabling the owner of a private room and a type change whose
+    recipient cannot take the rooms throw `PrivateRoomOwnershipException` (an `InvalidOperationException`, so 403), and
+    `error.type` tells a client the reason, as decision 2 does for a missing key.
+
 ## Risks / Trade-offs
 
 - [Decision 5 revokes keys of a removal that later fails] -> the member stays and lacks keys until a member issues them

@@ -50,6 +50,17 @@ public class PrivateRoomDisableTests(AspireAppFixture fixture) : PrivacyRoomTest
         return (room, await UploadEncryptedFile(room.Id, "Encrypted.docx"));
     }
 
+    private const string OwnershipRefusalType = "ASC.Files.Core.Helpers.PrivateRoomOwnershipException";
+
+    private static string ErrorType(ApiException exception)
+    {
+        using var body = JsonDocument.Parse(exception.ErrorContent!.ToString()!);
+
+        return body.RootElement.TryGetProperty("error", out var error) && error.TryGetProperty("type", out var type)
+            ? type.GetString() ?? ""
+            : "";
+    }
+
     private const string ThroughStatus = "updateUserStatus";
     private const string ThroughUpdateMember = "updateMember";
     private const string ThroughDeleteProfile = "deleteProfile";
@@ -184,6 +195,7 @@ public class PrivateRoomDisableTests(AspireAppFixture fixture) : PrivacyRoomTest
         var exception = await Assert.ThrowsAsync<ApiException>(() => Disable(roomOwner, route));
 
         exception.ErrorCode.Should().Be(403);
+        ErrorType(exception).Should().Be(OwnershipRefusalType, "a client tells this refusal from one for rights");
         (await StatusOf(roomOwner)).Should().Be(EmployeeStatus.Active);
 
         await _filesClient.Authenticate(roomOwner);
@@ -242,6 +254,7 @@ public class PrivateRoomDisableTests(AspireAppFixture fixture) : PrivacyRoomTest
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
+        ErrorType(exception).Should().Be(OwnershipRefusalType);
         (await StatusOf(other)).Should().Be(EmployeeStatus.Active);
         (await StatusOf(roomOwner)).Should().Be(EmployeeStatus.Active);
     }

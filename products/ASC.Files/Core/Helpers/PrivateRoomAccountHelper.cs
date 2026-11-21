@@ -39,12 +39,16 @@ namespace ASC.Files.Core.Helpers;
 /// disabled loses its wrapped file keys, so a later return gets keys only when a member issues them again. Every way of
 /// disabling reaches <see cref="RevokeFileKeysOfDisabledAsync"/> through <see cref="UserDisabledIntegrationEvent"/> in
 /// the Files worker; the API actions also try it themselves, last, so that the keys are usually gone when they answer.
-/// The key pair of the account and its memberships stay.
+/// The key pair of the account and its memberships stay. A user made a guest leaves the private rooms altogether: their
+/// own rooms go to the recipient of the type change, their memberships and file keys go, and so does their key pair.
 /// </summary>
 [Scope]
 public class PrivateRoomAccountHelper(
     IDaoFactory daoFactory,
     FileSharingAceHelper fileSharingAceHelper,
+    FileSecurity fileSecurity,
+    SocketManager socketManager,
+    EncryptionLoginProvider encryptionLoginProvider,
     UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     ILogger<PrivateRoomAccountHelper> logger)
@@ -84,9 +88,80 @@ public class PrivateRoomAccountHelper(
             {
                 var userName = (await userManager.GetUsersAsync(userId)).DisplayUserName(false, displayUserSettingsHelper);
 
-                throw new InvalidOperationException(string.Format(FilesCommonResource.ErrorMessage_PrivateRoomOwnerCannotBeDisabled, userName, roomIds.Count));
+                throw new PrivateRoomOwnershipException(string.Format(FilesCommonResource.ErrorMessage_PrivateRoomOwnerCannotBeDisabled, userName, roomIds.Count));
             }
         }
+    }
+
+    /// <summary>The private rooms the account owns.</summary>
+    public async Task<List<int>> GetOwnedPrivateRoomIdsAsync(Guid userId)
+    {
+        return daoFactory.GetFolderDao<int>() is FolderDao folderDao ? await folderDao.GetPrivateRoomIdsByOwnerAsync(userId) : [];
+    }
+
+    /// <summary>
+    /// Answers 403 when the recipient cannot take every private room the account owns: they hold no encryption key, or
+    /// no key of an encrypted file of one of the rooms. Made before a type change to guest changes anything.
+    /// </summary>
+    public async Task DemandPrivateRoomsCanPassToAsync(Guid userId, Guid recipientId)
+    {
+        var roomIds = await GetOwnedPrivateRoomIdsAsync(userId);
+        if (roomIds.Count == 0)
+        {
+            return;
+        }
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var canTake = await encryptionLoginProvider.HasKeysAsync(recipientId);
+
+        foreach (var roomId in roomIds)
+        {
+            if (!canTake || (await DocSpaceHelper.GetEncryptedFilesWithoutKeyAsync(fileDao, roomId, recipientId)).Count != 0)
+            {
+                var userName = (await userManager.GetUsersAsync(recipientId)).DisplayUserName(false, displayUserSettingsHelper);
+
+                throw new PrivateRoomOwnershipException(string.Format(FilesCommonResource.ErrorMessage_PrivateRoomsCannotPassTo, userName));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Takes an account out of every private room after it was made a guest: its file keys are revoked first (with a
+    /// record per room), then its access records go, then its key pair. Its own rooms have been given to the recipient
+    /// before this call. Nobody is asked for a right here: the type change is the decision of an administrator.
+    /// </summary>
+    public async Task LeavePrivateRoomsAsync(Guid userId)
+    {
+        if (daoFactory.GetFolderDao<int>() is not FolderDao folderDao)
+        {
+            return;
+        }
+
+        var roomIds = await folderDao.GetPrivateRoomIdsWithMemberAsync(userId);
+
+        await RevokeFileKeysOfDisabledAsync(userId);
+
+        foreach (var roomId in roomIds)
+        {
+            var room = await folderDao.GetFolderAsync(roomId);
+            if (room == null)
+            {
+                continue;
+            }
+
+            await fileSecurity.ShareAsync(room.Id, FileEntryType.Folder, userId, FileShare.None);
+
+            try
+            {
+                await socketManager.DeleteFolder(room, [userId]);
+            }
+            catch (Exception exception)
+            {
+                logger.WarningLeavePrivateRoomSocketFailed(userId, room.Id, exception);
+            }
+        }
+
+        await encryptionLoginProvider.DeleteAllKeysAsync(userId);
     }
 
     /// <summary>
