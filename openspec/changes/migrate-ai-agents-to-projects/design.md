@@ -80,6 +80,12 @@ Run under the system account with the portal set, holding a distributed lock on 
    that stops between the two statements leaves the title as it was and the next run composes the same one.
    Without content: `DeleteFolderAsync`. Matching "every other child" instead of "the folder of type
    `ChatOutputs`" makes a rerun pick up a folder whose type was already changed.
+   **Knowledge made flat.** A Knowledge folder is flat: the API refuses to create a folder in it, its folders could
+   not be used in the UI and their files were never vectorized, so a folder there holds nothing of value and got
+   there only around those checks. The step is a safeguard that keeps such a folder from failing the conversion:
+   the files of every folder inside the Knowledge folder are deleted by `IFileDao.DeleteFilesAsync` (rows, storage,
+   vectors, index), then each of its folders by `DeleteFolderAsync`, with an information line in the log. The files
+   directly in the Knowledge folder stay and go to the room in step 3.
 2. **Under the AiHub root.** If the agent's parent is not the `aihub` root, `MoveFolderAsync` there.
 3. **Conversion transaction** (D4).
 4. **After the commit**, each in its own try/catch with a warning log: copy the logo to the project and set its
@@ -97,8 +103,8 @@ A new `IFolderDao<int>` operation (third-party implementations throw `NotSupport
 `SaveThreadFolderAsync` does). In one transaction of `FilesDbContext`:
 
 1. Change the room's type to `KnowledgeRoom`, and its title (D6) when its Knowledge folder holds files, with one
-   `UPDATE … WHERE folder_type = AiRoom`. No row changed: roll back and report "already converted". A Knowledge
-   folder that holds folders (creating one there is refused today) fails the agent instead of losing them.
+   `UPDATE … WHERE folder_type = AiRoom`. No row changed: roll back and report "already converted". The Knowledge
+   folder is flat by then (step 1 of D3), so only its own files are moved.
 2. Insert the project through `InternalSaveFolderToDbAsync` (title, owner, creation date of the agent) and its
    `files_room_settings` row with the colour and the cover.
 3. Re-key `entry_id` room → project in `ai_integration_threads`, `_assignments`, `_tool_preferences`,
@@ -235,6 +241,8 @@ middle would convert a half-built one. The tests start the conversion through th
 |---|---|---|---|
 | 1 outputs type changed | agent pending; next run moves the folder as "other child" under the same title | same | waits for the lock, then finds the folder as "other child" |
 | 1 outputs moved or deleted | agent pending, without outputs; next run skips step 1 | same | same |
+| 1 files inside Knowledge folders deleted | agent pending; next run finds the folders without files and deletes them | same | waits for the lock, then the same |
+| 1 Knowledge folders deleted | agent pending with a flat Knowledge folder; next run skips this part of step 1 | same | same |
 | 2 moved under AiHub | agent pending under the AiHub root; next run skips step 2 | same | same |
 | 3 transaction | rolled back, agent pending and whole | commit seen or not: either pending or converted, nothing between | re-reads the type in the transaction, rolls back if converted |
 | 4 logo, events | warning; the project has no logo, the index catches up on its periodic pass | same | not repeated: the room is no longer pending |

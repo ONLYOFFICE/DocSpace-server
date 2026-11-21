@@ -44,4 +44,7 @@ internal static partial class AiAgentMigratorLogger
 
     [LoggerMessage(LogLevel.Information, "AI agents migration for tenant {tenantId}: {found} agents found, {migrated} converted, {failed} failed")]
     public static partial void InfoPortalProcessed(this ILogger<AiAgentMigrator> logger, int tenantId, int found, int migrated, int failed);
+
+    [LoggerMessage(LogLevel.Information, "AI agents migration for tenant {tenantId}: agent {agentId}, {folders} folders and {files} files inside its Knowledge folder deleted")]
+    public static partial void InfoKnowledgeSubfoldersDeleted(this ILogger<AiAgentMigrator> logger, int tenantId, int agentId, int folders, int files);
 }

@@ -61,6 +61,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<int> AiAgentNestedFileIdsAsync(int tenantId, int folderId)
+    {
+        return AiAgentMigrationQueries.AiAgentNestedFileIdsAsync(this, tenantId, folderId);
+    }
+
+    [PreCompileQuery]
     public Task<int> ClaimAiAgentRoomAsync(int tenantId, int roomId, string title, Guid modifiedBy, DateTime modifiedOn)
     {
         return AiAgentMigrationQueries.ClaimAiAgentRoomAsync(this, tenantId, roomId, title, modifiedBy, modifiedOn);
@@ -163,6 +169,15 @@ static file class AiAgentMigrationQueries
             (FilesDbContext ctx, int tenantId, int folderId) =>
                 ctx.Files
                     .Where(f => f.TenantId == tenantId && f.ParentId == folderId)
+                    .Select(f => f.Id)
+                    .Distinct());
+
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> AiAgentNestedFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId) =>
+                ctx.Files
+                    .Where(f => f.TenantId == tenantId &&
+                                ctx.Tree.Any(t => t.ParentId == folderId && t.FolderId == f.ParentId && t.Level > 0))
                     .Select(f => f.Id)
                     .Distinct());
 

@@ -264,6 +264,54 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
         project.StatusCode.Should().Be(HttpStatusCode.OK, "the copy of the logo made for the project stays");
     }
 
+    [Fact]
+    public async Task Convert_KnowledgeWithAFolder_ConvertsTheAgentAndDeletesTheFolder()
+    {
+        var title = NewTitle("Nested knowledge agent");
+        var agent = await CreateAgentAsync(title);
+        var file = await AddKnowledgeFileAsync(agent.Id, "autotest-flat-knowledge.txt");
+
+        var outputs = await AgentFolderAsync(agent.Id, FolderType.ChatOutputs);
+        var folder = (await FoldersApi.CreateFolderAsync(outputs.Id, new CreateFolderRequest("Nested"), TestContext.Current.CancellationToken)).Response;
+        var nested = await UploadAsync(folder.Id, "autotest-nested-knowledge.txt");
+        await MoveFolderToKnowledgeAsync(agent.Id, folder.Id);
+
+        var result = await ConvertAgentsAsync();
+
+        result.Migrated.Should().Be(1);
+        await ProjectOfAsync(title);
+
+        await FilesHttpClient.Authenticate(Owner);
+        var content = (await FoldersApi.GetFolderByFolderIdAsync(agent.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        (content.Files ?? []).OfType<FileDto>().Select(entry => entry.Id).Should().BeEquivalentTo([file.Id], "the file of the Knowledge folder is in the Knowledge room");
+        (content.Folders ?? []).Should().BeEmpty("the folder inside the Knowledge folder is deleted");
+
+        (await StatusOfAsync(() => FoldersApi.GetFolderInfoAsync(folder.Id, TestContext.Current.CancellationToken))).Should().Be(404);
+        (await StatusOfAsync(() => FilesApi.GetFileInfoAsync(nested.Id, cancellationToken: TestContext.Current.CancellationToken))).Should().Be(404);
+    }
+
+    private async Task MoveFolderToKnowledgeAsync(int agentId, int folderId)
+    {
+        var outputs = await AgentFolderAsync(agentId, FolderType.ChatOutputs);
+        var knowledge = await AgentFolderAsync(agentId, FolderType.Knowledge);
+
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText =
+            """
+            UPDATE files_folder SET parent_id = @knowledge WHERE id = @folder AND parent_id = @outputs;
+            UPDATE files_folder_tree SET parent_id = @knowledge
+            WHERE parent_id = @outputs
+              AND folder_id IN (SELECT folder_id FROM (SELECT folder_id FROM files_folder_tree WHERE parent_id = @folder) subtree);
+            """;
+        command.Parameters.AddWithValue("@knowledge", knowledge.Id);
+        command.Parameters.AddWithValue("@outputs", outputs.Id);
+        command.Parameters.AddWithValue("@folder", folderId);
+
+        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().BeGreaterThanOrEqualTo(2, $"the folder {folderId} lies in Chat outputs");
+    }
+
     private async Task SetLogoAsync(int roomId)
     {
         await using var image = new MemoryStream(Convert.FromBase64String(LogoImageBase64));

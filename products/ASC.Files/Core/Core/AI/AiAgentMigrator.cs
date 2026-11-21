@@ -125,6 +125,7 @@ public class AiAgentMigrator(
         }
 
         await MoveOutputsAsync(folderDao, tenantId, agent);
+        await DeleteKnowledgeSubfoldersAsync(folderDao, tenantId, agent.Id);
 
         var aiHubId = await folderDao.GetFolderIDAiHubAsync(true);
         if (agent.ParentId != aiHubId)
@@ -180,6 +181,44 @@ public class AiAgentMigrator(
                 await socketManager.CreateFolderAsync(await folderDao.GetFolderAsync(child.Id));
             });
         }
+    }
+
+    private async Task DeleteKnowledgeSubfoldersAsync(IFolderDao<int> folderDao, int tenantId, int agentId)
+    {
+        List<int> subfolderIds;
+        List<int> fileIds;
+
+        await using (var filesDbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            var knowledge = await filesDbContext.AiAgentKnowledgeFolderAsync(tenantId, agentId);
+            if (knowledge == null)
+            {
+                return;
+            }
+
+            subfolderIds = await filesDbContext.AiAgentChildFoldersAsync(tenantId, knowledge.Id).Select(f => f.Id).ToListAsync();
+            fileIds = await filesDbContext.AiAgentNestedFileIdsAsync(tenantId, knowledge.Id).ToListAsync();
+        }
+
+        if (subfolderIds.Count == 0)
+        {
+            return;
+        }
+
+        if (fileIds.Count > 0)
+        {
+            var fileDao = daoFactory.GetFileDao<int>();
+            var files = await fileDao.GetFilesAsync(fileIds).ToListAsync();
+
+            await fileDao.DeleteFilesAsync(files.Select(f => KeyValuePair.Create(f.Id, f.GetFileQuotaOwner())));
+        }
+
+        foreach (var subfolderId in subfolderIds)
+        {
+            await folderDao.DeleteFolderAsync(subfolderId);
+        }
+
+        logger.InfoKnowledgeSubfoldersDeleted(tenantId, agentId, subfolderIds.Count, fileIds.Count);
     }
 
     private async Task<Guid> GetOutputsOwnerIdAsync(Folder<int> agent)

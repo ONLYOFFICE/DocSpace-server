@@ -751,11 +751,6 @@ internal class FolderDao(
             var fileIds = knowledgeFolder == null ? [] : await context.AiAgentKnowledgeFileIdsAsync(tenantId, knowledgeFolder.Id).ToListAsync();
             var knowledge = fileIds.Count > 0 ? knowledgeFolder : null;
 
-            if (knowledge != null && await context.SubfolderIdsAsync(knowledge.Id).CountAsync() > 1)
-            {
-                throw new InvalidOperationException($"The Knowledge folder {knowledge.Id} of the AI agent {roomId} holds folders.");
-            }
-
             var roomTitle = knowledge != null ? AiAgentMigrationTitle.Compose(room.Title, knowledge.Title) : null;
 
             if (await context.ClaimAiAgentRoomAsync(tenantId, roomId, roomTitle, currentAccount, DateTime.UtcNow) == 0)
