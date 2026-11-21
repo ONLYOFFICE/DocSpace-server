@@ -120,6 +120,10 @@ public class AiProjectThreadsService(
 
     public async Task<(int Drafts, int Files)> DeleteChatDraftsAsync(IReadOnlyCollection<Guid> attachmentIds)
     {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        await attachmentsStorage.MarkUnboundForDeletionAsync(tenantId, attachmentIds);
+
         var fileDao = daoFactory.GetFileDao<int>();
         var files = await fileDao.GetChatDraftFilesAsync(attachmentIds).ToListAsync();
 
@@ -131,7 +135,7 @@ public class AiProjectThreadsService(
             await folderDao.ChangeTreeFolderSizeAsync(project.Key, -project.Sum(f => f.Size));
         }
 
-        var drafts = await attachmentsStorage.DeleteUnboundAsync(tenantManager.GetCurrentTenantId(), attachmentIds);
+        var drafts = await attachmentsStorage.DeleteUnboundAsync(tenantId, attachmentIds);
 
         return (drafts, deleted.Count);
     }

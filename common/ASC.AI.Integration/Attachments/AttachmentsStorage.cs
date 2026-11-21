@@ -36,13 +36,6 @@ namespace ASC.AI.Integration.Attachments;
 [Scope]
 public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public static readonly DateTime DeletedMark = DateTime.UnixEpoch;
-
-    public static bool IsMarkedForDeletion(Attachment attachment)
-    {
-        return attachment.CreatedAt <= DeletedMark;
-    }
-
     public async Task<List<Attachment>> CreateManyAsync(int tenantId, Guid createdBy, IReadOnlyList<CreateAttachmentParams> data)
     {
         if (data.Count == 0)
@@ -115,7 +108,7 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         await context.SetAttachmentContentAsync(tenantId, createdBy, id, content);
     }
 
-    public async Task UpdateManyAsync(int tenantId, Guid createdBy, HashSet<Guid> ids, Guid messageId)
+    public async Task UpdateManyAsync(int tenantId, Guid createdBy, HashSet<Guid> ids, Guid messageId, Guid threadId)
     {
         if (ids.Count == 0)
         {
@@ -124,7 +117,7 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.UpdateAttachmentBindingsByIdsAsync(tenantId, createdBy, ids, messageId);
+        await context.UpdateAttachmentBindingsByIdsAsync(tenantId, createdBy, ids, messageId, threadId);
     }
 
     public async Task MarkForDeletionAsync(int tenantId, Guid createdBy, IReadOnlyCollection<Guid> ids)
@@ -136,7 +129,19 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.AgeUnboundAttachmentsAsync(tenantId, createdBy, ids);
+        await context.MarkUnboundAttachmentsDeletedAsync(tenantId, createdBy, ids, DateTime.UtcNow);
+    }
+
+    public async Task MarkUnboundForDeletionAsync(int tenantId, IReadOnlyCollection<Guid> ids)
+    {
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        await context.MarkOrphanAttachmentsDeletedAsync(tenantId, ids, DateTime.UtcNow);
     }
 
     public async Task<int> DeleteUnboundAsync(int tenantId, IReadOnlyCollection<Guid> ids)
@@ -162,7 +167,8 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             MessageId = entity.MessageId,
             EntryId = entity.EntryId,
             ThirdpartyEntryId = entity.ThirdpartyEntryId,
-            CreatedAt = entity.CreatedAt
+            CreatedAt = entity.CreatedAt,
+            DeletedOn = entity.DeletedOn
         };
     }
 }

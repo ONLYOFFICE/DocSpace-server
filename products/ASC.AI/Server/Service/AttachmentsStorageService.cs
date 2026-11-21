@@ -123,7 +123,7 @@ public class AttachmentsStorageService(
 
         foreach (var drafts in (await storage.ReadUnboundByEntryIdsAsync(tenantId, CurrentUserId, uploadedIds)).GroupBy(a => a.EntryId!.Value))
         {
-            uploaded[drafts.Key] = drafts.FirstOrDefault(a => !AttachmentsStorage.IsMarkedForDeletion(a))
+            uploaded[drafts.Key] = drafts.FirstOrDefault(a => a.DeletedOn == null)
                                    ?? throw new ItemNotFoundException();
         }
 
@@ -220,31 +220,35 @@ public class AttachmentsStorageService(
         var message = await messageStorageService.ReadByIdAsync(messageId);
         var tenantId = tenantManager.GetCurrentTenantId();
 
+        await storage.UpdateManyAsync(tenantId, CurrentUserId, ids, message.Id, message.ThreadId);
+
         var thread = await threadsStorage.ReadByIdAsync(tenantId, message.ThreadId);
-        if (thread?.EntryId is { } projectId &&
-            await DaoFactory.GetFolderDao<int>().GetFolderAsync(projectId) is { FolderType: FolderType.AiProjectRoom })
+        if (thread?.EntryId is not { } projectId ||
+            await DaoFactory.GetFolderDao<int>().GetFolderAsync(projectId) is not { FolderType: FolderType.AiProjectRoom })
         {
-            var attachments = await storage.ReadManyByIdsAsync(tenantId, CurrentUserId, ids);
-            var fileDao = DaoFactory.GetFileDao<int>();
-
-            var uploaded = await fileDao.GetFilesAsync([
-                    .. attachments.Where(a => a.EntryId.HasValue).Select(a => a.EntryId!.Value).Distinct()
-                ])
-                .Where(f => f != null && f.ParentId == projectId && f.CreateBy == CurrentUserId)
-                .ToListAsync();
-
-            if (uploaded.Count > 0)
-            {
-                var folderId = await projectThreadsService.GetOrCreateAttachmentsFolderAsync(thread);
-
-                foreach (var file in uploaded)
-                {
-                    await fileDao.MoveThreadFileAsync(file.Id, folderId, thread.Id);
-                }
-            }
+            return;
         }
 
-        await storage.UpdateManyAsync(tenantId, CurrentUserId, ids, message.Id);
+        var attachments = await storage.ReadManyByIdsAsync(tenantId, CurrentUserId, ids);
+        var fileDao = DaoFactory.GetFileDao<int>();
+
+        var uploaded = await fileDao.GetFilesAsync([
+                .. attachments.Where(a => a.MessageId == message.Id && a.EntryId.HasValue).Select(a => a.EntryId!.Value).Distinct()
+            ])
+            .Where(f => f != null && f.ParentId == projectId && f.CreateBy == CurrentUserId)
+            .ToListAsync();
+
+        if (uploaded.Count == 0)
+        {
+            return;
+        }
+
+        var folderId = await projectThreadsService.GetOrCreateAttachmentsFolderAsync(thread);
+
+        foreach (var file in uploaded)
+        {
+            await fileDao.MoveThreadFileAsync(file.Id, folderId, thread.Id);
+        }
     }
 
     public async Task DeleteAsync(Guid id)

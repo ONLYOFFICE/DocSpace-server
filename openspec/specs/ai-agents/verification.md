@@ -379,6 +379,8 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Linking attachments to a message** | | |
 | Dies with the message (scenario), thread | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:68,89,199,218` | TEST-CONFIRMED [run: PASS] |
 | 400 / 404 / 403 refusals; foreign draft | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:111,122,133,145,156,166,177,190`; `AttachmentCrossUserTests.cs:139,265` | TEST-CONFIRMED [run: PASS] |
+| **Which drafts a link binds** | | |
+| Deleted draft is not linked; draft of another thread; another message of the same thread (scenarios), on the AI binding the operation calls | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:352,370,395`; `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`UpdateAttachmentBindingsByIdsAsync`) | TEST-CONFIRMED |
 | **Suggested questions for a form attachment** | | |
 | 200 status and list; unknown (scenario); foreign; bad id; anonymous; AI off | `T/AttachmentTests/AttachmentSuggestedQuestionsTests.cs:63,87,98,106,119,133`; `AttachmentAiDisabledTests.cs:225` | TEST-CONFIRMED [run: PASS] |
 | **Exporting markdown into a document** | | |
@@ -443,31 +445,32 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Switch audited (scenario) | `SettingsController.cs` (`MessageAction`); `Web/05_Security/AuditTrail/` tests the audit API only | CODE-ONLY |
 | Reads not audited (scenario); socket events | absence of a message in read paths; `AI/Server/Service/AiSocketManager.cs:46-52` | CODE-ONLY |
 | **Files of a project thread** |  |  |
-| A set per thread (scenario "Two threads of one project"); one folder for saves made at the same moment (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:105,88`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:301` | TEST-CONFIRMED |
+| A set per thread (scenario "Two threads of one project"); one folder for saves made at the same moment (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:105,88`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:298` | TEST-CONFIRMED |
 | The thread does not name its folders (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:186` | TEST-CONFIRMED |
-| A thread of another entry has neither set | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:318` | TEST-CONFIRMED |
+| A thread of another entry has neither set | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:315` | TEST-CONFIRMED |
 | **Saving an artifact of a thread** |  |  |
 | Saved and listed (scenario); same title twice (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:41,56,72` | TEST-CONFIRMED |
 | Thread outside a project 400, unknown thread 404, thread of another member 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123,133,141` | TEST-CONFIRMED |
 | Empty file 400, file over 100 MB 400 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:158,172` | TEST-CONFIRMED |
 | **Listing the files of a thread** |  |  |
 | Thread without files; one page with the total (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:200,212` | TEST-CONFIRMED |
-| Project owner asks for a member's thread 404 (scenario); thread of another project 404; caller outside the project 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:226,247,260`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:350` | TEST-CONFIRMED |
+| Project owner asks for a member's thread 404 (scenario); thread of another project 404; caller outside the project 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:226,247,260`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:429` | TEST-CONFIRMED |
 | Deleted thread 404 | `T/ThreadDeletionTests/ThreadDeletionTests.cs:61` | TEST-CONFIRMED |
-| Attachment that was not sent (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:336` | TEST-CONFIRMED |
+| Attachment that was not sent (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:415` | TEST-CONFIRMED |
 | `count` 0 and 101 and `startIndex` -1 answer 400; `count` 100 answers 200 (scenarios) | `T/ThreadArtifactsTests/ThreadFilesListBoundsTests.cs:47,60` | TEST-CONFIRMED |
 | `count` is 100 when omitted | `products/ASC.Files/Server/ApiModels/RequestDto/GetAiThreadFilesRequestDto.cs:61` | CODE-ONLY |
 | **Uploading an attachment into a project** |  |  |
 | Member uploads (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:44,54` | TEST-CONFIRMED |
 | Caller outside the project 403, relative path 403, unsupported format 400, upload in one request 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:67,80,90,100` | TEST-CONFIRMED |
 | **Copying a portal file into a project** |  |  |
-| Member copies; same file twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:115,127,186` | TEST-CONFIRMED |
-| Caller outside the project 403, folder 403, unsupported format 415, move 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:141,157,173,199` | TEST-CONFIRMED |
+| Member copies; same file twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:112,124,183` | TEST-CONFIRMED |
+| Caller outside the project 403, folder 403, unsupported format 415, move 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:138,154,170,196` | TEST-CONFIRMED |
 | **Attachment of a file stored in a project** |  |  |
-| Document attached twice; picture attached twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:212,228` | TEST-CONFIRMED |
+| Document attached twice; picture attached twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:209,225` | TEST-CONFIRMED |
 | Deleted attachment attached again (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:69` | TEST-CONFIRMED |
 | **A sent attachment is kept with its thread** |  |  |
-| Linked file is listed; copy outlives the original; two messages of one thread; threads of one project; thread outside a project (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:242,261,286,301,318` | TEST-CONFIRMED |
+| Linked file is listed; copy outlives the original; two messages of one thread; threads of one project; thread outside a project (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:239,258,283,298,315` | TEST-CONFIRMED |
+| Deleted draft in a project (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:333` | TEST-CONFIRMED |
 | **Privacy of the contents of a project** |  |  |
 | Artifact, thread folder and file not sent of another member 403 to a member, the owner and a DocSpace admin (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesStrangerAccessTests.cs:51,67,83,100,116,132` | TEST-CONFIRMED |
 | Creator reads, downloads and copies (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:41,52,63` | TEST-CONFIRMED |
@@ -528,9 +531,12 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Creator of the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:244` | TEST-CONFIRMED |
 | A share held through a group does not count | `products/ASC.Files/Core/Core/EF/Queries/FolderQueries.cs` (`AiProjectsWithOwnRecordAsync`, `s.Subject == userId`); no test: the API refuses a group on a project | CODE-ONLY |
 | **Drafts that are not sent are removed** |  |  |
-| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:47,101` | TEST-CONFIRMED |
-| Abandoned draft of a file outside a project; sent attachment older than the lifetime (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:123,139` | TEST-CONFIRMED |
+| Sent attachment older than the lifetime (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:142` | TEST-CONFIRMED |
 | The pass runs every 15 minutes and a draft lives 2 hours by default | `products/ASC.AI/Worker/BackgroundServices/OrphanAttachmentsCleanerService.cs` (`_defaultPeriod`, `_defaultLifetime`) | CODE-ONLY |
+| A draft linked before the pass takes it keeps its file; a link after that leaves the draft unlinked | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:125`; `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`MarkOrphanAttachmentsDeletedAsync`, `UpdateAttachmentBindingsByIdsAsync`); no test: the stand cannot order the link inside the pass | CODE-ONLY |
+| **The file of a removed draft** |  |  |
+| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:50,104` | TEST-CONFIRMED |
+| Abandoned draft of a file outside a project (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:126` | TEST-CONFIRMED |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 
@@ -635,5 +641,5 @@ A32 and A34 come from new tests of that run.
 | A32 | Dropped provider connection | `aiProfilesListModels` on a saved profile whose provider accepts the connection and closes it without an answer is answered 200 with an empty model list instead of 502, so the form shows no models instead of the failure. | `T/ProfileTests/ProfileListModelsFailureTests.cs:67` (Category=Bug); `Chat/controllers/profilesController.ts` (`listModels`) | NEW 2026-11-10, red by run — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:107,129` (Category=Bug on 128); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (`AiRoomOutsiderAccessTests.cs:129`, `Category=Bug`) |
 | A35 | `aiPromptsDelete` | Deleting another user's prompt answers `success` true although nothing is deleted (bug 82809): the route never reports whether a prompt of the caller was removed. The yaml describes it as intended. | `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` (Trait Bug 82809) | NEW 2026-11-14, red by code reading — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 82809, `PromptIsolationTests.cs:108`) |
-| A36 | Draft cleanup races a link | The pass reads the files of unlinked drafts, then deletes them by id with no lock. A link that moves the file into the thread in between loses it: the message keeps the attachment without the file. A link that read the file before the deletion and moves it after answers 500. | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:124,126`; `products/ASC.AI/Server/Service/AttachmentsStorageService.cs:230-242`; `FileDao.MoveFileAsync` (`file.ParentId` of a missing file) | NEW 2026-11-20, red by code reading; left open on purpose |
-| A37 | Size after the deletion | Both passes return the size of the deleted files to the project after the deletion is committed; a failure of that step or a stop in between leaves the used space too high for good, as in every deletion path of Files (`FileDeleteOperation`). | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:126-131,191-193`; `products/ASC.Files/Core/Services/WCFService/FileOperations/FileDeleteOperation.cs:905-984` | NEW 2026-11-20, red by code reading; left open on purpose |
+| A36 | Draft cleanup races a link | The pass read the files of unlinked drafts, then deleted them by id with no lock. A link that moved the file into the thread in between lost it: the message kept the attachment without the file. A link that read the file before the deletion and moved it after answered 500. Now the pass marks the unlinked drafts deleted first (`MarkOrphanAttachmentsDeletedAsync`, `MessageId == null && DeletedOn == null`), and both the file read and the row delete take marked drafts only; a link refuses a marked draft. | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:125,128`; `products/ASC.Files/Core/Core/EF/Queries/AiIntegrationQueries.cs` (`ChatDraftFilesAsync`, `a.DeletedOn != null`); `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`MarkOrphanAttachmentsDeletedAsync`, `DeleteAttachmentsAsync`, `UpdateAttachmentBindingsByIdsAsync`) | FIXED `a1f6ce3988`, code read, not run; the interleaving has no test |
+| A37 | Size after the deletion | Both passes return the size of the deleted files to the project after the deletion is committed; a failure of that step or a stop in between leaves the used space too high for good, as in every deletion path of Files (`FileDeleteOperation`). | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:130-135,195-197`; `products/ASC.Files/Core/Services/WCFService/FileOperations/FileDeleteOperation.cs:905-984` | NEW 2026-11-20, red by code reading; left open on purpose |

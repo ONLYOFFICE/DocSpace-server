@@ -44,6 +44,9 @@ internal static partial class OrphanAttachmentsCleanerServiceLogger
     [LoggerMessage(LogLevel.Error, "Failed to delete orphan attachments of tenant {TenantId}")]
     public static partial void ErrorDeleteOrphanAttachments(this ILogger logger, int tenantId, Exception exception);
 
+    [LoggerMessage(LogLevel.Warning, "Orphan attachment {AttachmentId} of tenant {TenantId} from {Since} leaves the retry window and will not be deleted")]
+    public static partial void WarningOrphanAttachmentLeavesRetryWindow(this ILogger logger, Guid attachmentId, int tenantId, DateTime since);
+
     [LoggerMessage(LogLevel.Error, "Failed to clean up orphan attachments")]
     public static partial void ErrorCleanUpOrphanAttachments(this ILogger logger, Exception exception);
 }

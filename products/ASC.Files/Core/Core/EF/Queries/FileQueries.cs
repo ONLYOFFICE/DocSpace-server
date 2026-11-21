@@ -246,6 +246,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<bool> DbFilesAnyByCreatorAsync(int tenantId, string title, int folderId, Guid createBy)
+    {
+        return FileQueries.DbFilesAnyByCreatorAsync(this, tenantId, title, folderId, createBy);
+    }
+
+    [PreCompileQuery]
     public Task<DbFile> DbFileAsync(int tenantId, int fileId)
     {
         return FileQueries.DbFileAsync(this, tenantId, fileId);
@@ -908,6 +914,16 @@ static file class FileQueries
                     .Any(r => r.Title == title &&
                               r.ParentId == folderId &&
                               (category == 0 || r.Category == category) &&
+                              r.CurrentVersion &&
+                              r.TenantId == tenantId));
+
+    public static readonly Func<FilesDbContext, int, string, int, Guid, Task<bool>> DbFilesAnyByCreatorAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string title, int folderId, Guid createBy) =>
+                ctx.Files
+                    .Any(r => r.Title == title &&
+                              r.ParentId == folderId &&
+                              r.CreateBy == createBy &&
                               r.CurrentVersion &&
                               r.TenantId == tenantId));
 

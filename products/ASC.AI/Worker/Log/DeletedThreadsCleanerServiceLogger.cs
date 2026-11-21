@@ -43,4 +43,7 @@ internal static partial class DeletedThreadsCleanerServiceLogger
 
     [LoggerMessage(LogLevel.Error, "Failed to delete thread {ThreadId} of tenant {TenantId}")]
     public static partial void ErrorDeleteThread(this ILogger logger, int tenantId, Guid threadId, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Thread {ThreadId} of tenant {TenantId} deleted on {DeletedOn} leaves the retry window and will not be deleted")]
+    public static partial void WarningThreadLeavesRetryWindow(this ILogger logger, Guid threadId, int tenantId, DateTime deletedOn);
 }

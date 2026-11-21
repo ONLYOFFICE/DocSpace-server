@@ -37,6 +37,8 @@ namespace ASC.AI.Tests.Tests.ThreadDeletionTests;
 [Trait("Feature", "AI/ThreadDeletion")]
 public class ThreadDeletionTests(AspireAppFixture fixture) : ThreadFilesTestBase(fixture)
 {
+    private static readonly TimeSpan _beyondRetryWindow = TimeSpan.FromDays(40);
+
     [Fact]
     public async Task Delete_ProjectThread_LeavesTheListAndTheSearchAtOnce()
     {
@@ -147,6 +149,47 @@ public class ThreadDeletionTests(AspireAppFixture fixture) : ThreadFilesTestBase
 
         deleted.StatusCode.Should().Be(HttpStatusCode.NoContent);
         statuses.Should().OnlyContain(s => s.Finished && string.IsNullOrEmpty(s.Error));
+    }
+
+    [Fact]
+    public async Task Cleaner_ThreadDeletedBeyondTheRetryWindow_IsLeftAlone()
+    {
+        var projectId = await CreateProjectAsync();
+        var stale = await CreateThreadInternalAsync(entityId: projectId.ToString());
+        var staleArtifact = await UploadArtifactAsync(stale.Id, "stale.txt");
+        var control = await CreateThreadInternalAsync(entityId: projectId.ToString());
+
+        await MarkThreadDeletedAsync(stale.Id, _beyondRetryWindow);
+        using var deleted = await DeleteThreadAsync(control.Id);
+
+        var controlGone = await WaitForThreadRowGoneAsync(control.Id);
+        var staleKept = await ThreadRowExistsAsync(stale.Id);
+        var artifactStatus = await StatusOfAsync(() => FilesApi.GetFileInfoAsync(staleArtifact.Id, cancellationToken: TestContext.Current.CancellationToken));
+
+        deleted.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        controlGone.Should().BeTrue("the control thread shows that a cleaner pass ran");
+        staleKept.Should().BeTrue();
+        artifactStatus.Should().Be(200);
+    }
+
+    private async Task<bool> WaitForThreadRowGoneAsync(Guid threadId)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(60);
+
+        while (true)
+        {
+            if (!await ThreadRowExistsAsync(threadId))
+            {
+                return true;
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                return false;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
     }
 
     private Task<HttpResponseMessage> DeleteThreadAsync(Guid threadId)

@@ -40,6 +40,9 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
     private const decimal DocumentType = 7m;
 
     private static readonly TimeSpan _pastLifetime = TimeSpan.FromDays(1);
+    private static readonly TimeSpan _beyondRetryWindow = TimeSpan.FromDays(40);
+
+    private User? _actor;
 
     private sealed record RemovalState(AiAttachment? Draft, int FileStatus, long UsedSpace);
 
@@ -50,9 +53,9 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
         var member = await InviteMemberAsync(projectId);
         await ActAsAsync(member);
 
-        var spaceBefore = await UsedSpaceAsync(projectId);
+        var spaceBefore = await ProjectSpaceAsync(projectId);
         var file = await UploadAsync(projectId, "notes.txt");
-        var spaceWithFile = await UsedSpaceAsync(projectId);
+        var spaceWithFile = await ProjectSpaceAsync(projectId);
         var draft = await AttachStoredFileAsync(file.Id);
 
         (await _aiAttachments.AiAttachmentsDeleteAsync(draft.Id, TestContext.Current.CancellationToken)).Success.Should().BeTrue();
@@ -72,7 +75,7 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
         var member = await InviteMemberAsync(projectId);
         await ActAsAsync(member);
 
-        var spaceBefore = await UsedSpaceAsync(projectId);
+        var spaceBefore = await ProjectSpaceAsync(projectId);
         var file = await UploadAsync(projectId, "notes.txt");
         var other = await UploadAsync(await MyDocumentsIdAsync(), "other.txt");
         var draft = await AttachStoredFileAsync(file.Id);
@@ -104,9 +107,9 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
         var member = await InviteMemberAsync(projectId);
         await ActAsAsync(member);
 
-        var spaceBefore = await UsedSpaceAsync(projectId);
+        var spaceBefore = await ProjectSpaceAsync(projectId);
         var file = await UploadAsync(projectId, "notes.txt");
-        var spaceWithFile = await UsedSpaceAsync(projectId);
+        var spaceWithFile = await ProjectSpaceAsync(projectId);
         var draft = await AttachStoredFileAsync(file.Id);
 
         await AgeDraftAsync(draft.Id, _pastLifetime);
@@ -162,11 +165,49 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
         page.Files.Should().ContainSingle().Which.Id.Should().Be(sent.Id);
     }
 
+    [Fact]
+    public async Task Cleanup_DraftsBeyondTheRetryWindow_AreLeftAlone()
+    {
+        await ActAsAsync(Owner);
+        var folderId = await MyDocumentsIdAsync();
+        var deletedLongAgo = await AttachStoredFileAsync((await UploadAsync(folderId, "deleted-long-ago.txt")).Id);
+        var abandonedLongAgo = await AttachStoredFileAsync((await UploadAsync(folderId, "abandoned-long-ago.txt")).Id);
+        var control = await AttachStoredFileAsync((await UploadAsync(folderId, "control.txt")).Id);
+
+        await MarkDraftDeletedAsync(deletedLongAgo.Id, _beyondRetryWindow);
+        await AgeDraftAsync(abandonedLongAgo.Id, _beyondRetryWindow);
+        await AgeDraftAsync(control.Id, _pastLifetime);
+
+        var controlGone = await WaitForDraftGoneAsync(control.Id);
+        var deletedKept = await ReadDraftAsync(deletedLongAgo.Id);
+        var abandonedKept = await ReadDraftAsync(abandonedLongAgo.Id);
+
+        controlGone.Should().BeTrue("the aged control draft shows that a cleanup pass ran");
+        deletedKept.Should().NotBeNull();
+        abandonedKept.Should().NotBeNull();
+    }
+
     private async Task ActAsAsync(User user)
     {
+        _actor = user;
+
         await FilesHttpClient.Authenticate(user);
         await _aiClient.Authenticate(user);
         await _aiChatClient.Authenticate(user);
+    }
+
+    private async Task<long> ProjectSpaceAsync(int projectId)
+    {
+        await FilesHttpClient.Authenticate(Owner);
+
+        try
+        {
+            return await UsedSpaceAsync(projectId);
+        }
+        finally
+        {
+            await FilesHttpClient.Authenticate(_actor ?? Owner);
+        }
     }
 
     private async Task<AiAttachment> AttachStoredFileAsync(int fileId)
@@ -226,7 +267,7 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
             var state = new RemovalState(
                 await ReadDraftAsync(draftId),
                 await StatusOfAsync(() => FilesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)),
-                await UsedSpaceAsync(projectId));
+                await ProjectSpaceAsync(projectId));
 
             if ((state.Draft is null && state.FileStatus == expectedFileStatus && state.UsedSpace == expectedSpace) || DateTime.UtcNow >= deadline)
             {

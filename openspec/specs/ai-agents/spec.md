@@ -1566,6 +1566,27 @@ be accepted; another user's draft cannot be linked.
 - **WHEN** the owner links a draft to a message and deletes the message
 - **THEN** the draft reads back as null while an unlinked draft stays
 
+### Requirement: Which drafts a link binds
+
+`aiAttachmentsLinkToMessage` SHALL leave unlinked a draft deleted before the call, which the background pass
+then removes, and SHALL leave a draft linked to a message of another thread with that message; linking a draft
+to another message of the same thread SHALL move it there.
+
+#### Scenario: Deleted draft is not linked
+
+- **WHEN** the owner deletes a draft and then links it to a message
+- **THEN** the link is accepted and the draft is still removed by the background pass
+
+#### Scenario: Draft of another thread
+
+- **WHEN** the owner links a draft to a message of one thread, links it to a message of a second thread and deletes that second message
+- **THEN** the draft still reads back, while a draft linked only to the second message is gone
+
+#### Scenario: Another message of the same thread
+
+- **WHEN** the owner links a draft to one message of a thread, then to a second message of it, and deletes the second message
+- **THEN** the draft reads back as not found
+
 ### Requirement: Suggested questions for a form attachment
 
 `aiAttachmentsGetSuggestedQuestions` SHALL answer 200 with a `status` and a `questions` list for an
@@ -2093,7 +2114,8 @@ file SHALL answer 404 and store nothing of the batch, before the background pass
 `aiAttachmentsLinkToMessage` for a message of a project thread SHALL move each linked file that the caller
 stored in the project into the attachments of that thread, where `getThreadAttachments` lists it. A copy
 linked this way SHALL stay after the file it was copied from is deleted. Linking in a thread outside a
-project SHALL leave the file where it is.
+project SHALL leave the file where it is, and so SHALL linking a draft deleted before the call or a draft
+that a message of another thread already holds.
 
 #### Scenario: Linked file is listed
 
@@ -2119,6 +2141,11 @@ project SHALL leave the file where it is.
 
 - **WHEN** the owner links an attachment of a file in their My documents to a message of a thread that has no entry
 - **THEN** the link answers 204 and the file still reports My documents as `folderId`
+
+#### Scenario: Deleted draft in a project
+
+- **WHEN** the creator uploads a file into the project, attaches it, deletes the attachment and links it to a message of a project thread
+- **THEN** the link answers 204 and `getThreadAttachments` lists nothing with total 0
 
 ### Requirement: Privacy of the contents of a project
 
@@ -2524,9 +2551,18 @@ kept, so the project is listed again once the caller regains access.
 
 A background pass, every 15 minutes by default, SHALL remove each draft its creator deleted and each draft
 not linked to a message 2 hours, by default, after it was created, in a project from the upload or copy.
-With the draft it SHALL remove the file the draft was made from when that file still lies in an AI project
-unsent, then return its size to the project's space unless that step fails (A37). Any other file and any
-linked attachment SHALL stay, except a file linked during the pass (A36).
+Any linked attachment SHALL stay. A draft the pass has taken SHALL be left unlinked by a link that comes after.
+
+#### Scenario: Sent attachment older than the lifetime
+
+- **WHEN** a Content creator uploads a file into a project, attaches it and links it to a message of a project thread, and 2 hours pass after the upload
+- **THEN** after the next background pass `getThreadAttachments` still lists the file
+
+### Requirement: The file of a removed draft
+
+With a draft it removes, the background pass SHALL remove the file the draft was made from when that file still
+lies in an AI project unsent, then return its size to the project's space unless that step fails (A37). Any
+other file SHALL stay.
 
 #### Scenario: Deleted draft of a file in a project
 
@@ -2542,11 +2578,6 @@ linked attachment SHALL stay, except a file linked during the pass (A36).
 
 - **WHEN** the owner attaches a file of their My documents and the draft is not linked for 2 hours
 - **THEN** after the next background pass the draft reads as null and `getFileInfo` still answers for the file
-
-#### Scenario: Sent attachment older than the lifetime
-
-- **WHEN** a Content creator uploads a file into a project, attaches it and links it to a message of a project thread, and 2 hours pass after the upload
-- **THEN** after the next background pass `getThreadAttachments` still lists the file
 
 ### Requirement: Number of projects that use a room
 

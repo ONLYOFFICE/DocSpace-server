@@ -54,6 +54,7 @@ public class DbAttachment : BaseEntity
 
     public Guid CreatedBy { get; init; }
     public DateTime CreatedAt { get; init; }
+    public DateTime? DeletedOn { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
     public DbMessage? Message { get; init; }
@@ -139,6 +140,10 @@ public static class DbAttachmentExtension
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
 
+            entity.Property(e => e.DeletedOn)
+                .HasColumnName("deleted_on")
+                .HasColumnType("datetime");
+
             entity.HasOne(e => e.Message)
                 .WithMany()
                 .HasForeignKey(e => new { e.TenantId, e.MessageId })
@@ -156,6 +161,9 @@ public static class DbAttachmentExtension
 
             entity.HasIndex(e => new { e.MessageId, e.CreatedAt })
                 .HasDatabaseName("IX_message_id_created_at");
+
+            entity.HasIndex(e => new { e.DeletedOn, e.Id })
+                .HasDatabaseName("IX_deleted_on_id");
         });
     }
 
@@ -209,6 +217,10 @@ public static class DbAttachmentExtension
                 .HasColumnName("created_at")
                 .HasColumnType("timestamp without time zone");
 
+            entity.Property(e => e.DeletedOn)
+                .HasColumnName("deleted_on")
+                .HasColumnType("timestamp without time zone");
+
             entity.HasOne(e => e.Message)
                 .WithMany()
                 .HasForeignKey(e => new { e.TenantId, e.MessageId })
@@ -226,6 +238,9 @@ public static class DbAttachmentExtension
 
             entity.HasIndex(e => new { e.MessageId, e.CreatedAt })
                 .HasDatabaseName("ix_ai_integration_attachments_message_id_created_at");
+
+            entity.HasIndex(e => new { e.DeletedOn, e.Id })
+                .HasDatabaseName("ix_ai_integration_attachments_deleted_on_id");
         });
     }
 }

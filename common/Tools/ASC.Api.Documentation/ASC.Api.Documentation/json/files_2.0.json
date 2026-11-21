@@ -17602,7 +17602,7 @@
           "Files / Operations"
         ],
         "summary": "Copy files and folders",
-        "description": "Starts a background job that copies files and folders into `destFolderId`. With `content` true, the call copies\r\nthe content of each listed folder, not the folder. Requires the right to create content in the destination and\r\nto copy every listed item. Other callers get 403. In a room, room managers and content creators can create\r\ncontent. A room that forbids downloads denies copying to the Read role. The call queues work. Repeat `GET\r\napi/2.0/files/fileops` until `finished` is true. Its `files` and `folders` then name the copies. What a repeated\r\ncall does depends on `conflictResolveType`. With `Skip`, it skips clashing files, except encrypted files, rooms,\r\nand copies into knowledge folders. With `Overwrite`, it adds a new version to each earlier copy of a file. With\r\n`Duplicate`, it makes new copies under new names. The call returns the copy operations of the caller, including\r\nthe new one. An empty selection queues nothing and returns the existing operations. To find name clashes first,\r\nuse `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use `GET\r\napi/2.0/files/fileops/checkdestfolder`. To move the items instead, use `PUT api/2.0/files/fileops/move`. The\r\ncall also returns 403 if the destination is inside a listed folder. A listed folder that would exceed a room or\r\nuser quota also returns 403. It also returns 403 if a file to overwrite is locked, open for editing, or not\r\neditable by the caller. A file that is not a PDF form sent to a form-filling room also returns 403. A listed\r\nfile too large for a knowledge folder also returns 403. If the destination or a listed file or folder does not\r\nexist, the call returns 404. The call returns 415 for a file format the portal does not accept for upload. It\r\nalso returns 415 for a format a knowledge folder cannot index.\n\nRaises the `folder.copied` webhook for every copied folder, and for its subfolders only within one storage. Raises the `room.copied` webhook for every listed room copied into its own section, an AI agent included. Raises the `file.copied` webhook for every copied file, and for files inside copied folders only within one storage.",
+        "description": "Starts a background job that copies files and folders into `destFolderId`. With `content` true, the call copies\r\nthe content of each listed folder, not the folder. Requires the right to create content in the destination and\r\nto copy every listed item. Other callers get 403. In a room, room managers and content creators can create\r\ncontent. A room that forbids downloads denies copying to the Read role. Into an AI project, the right to chat\r\nthere is enough, and only files can be copied. Each copy is stored there as a new file, whatever\r\n`conflictResolveType` says. A listed folder returns 403 there. A file that is neither a picture nor a document\r\nwith readable text returns 415. The call queues work. Repeat `GET\r\napi/2.0/files/fileops` until `finished` is true. Its `files` and `folders` then name the copies. What a repeated\r\ncall does depends on `conflictResolveType`. With `Skip`, it skips clashing files, except encrypted files, rooms,\r\nand copies into knowledge folders. With `Overwrite`, it adds a new version to each earlier copy of a file. With\r\n`Duplicate`, it makes new copies under new names. The call returns the copy operations of the caller, including\r\nthe new one. An empty selection queues nothing and returns the existing operations. To find name clashes first,\r\nuse `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use `GET\r\napi/2.0/files/fileops/checkdestfolder`. To move the items instead, use `PUT api/2.0/files/fileops/move`. The\r\ncall also returns 403 if the destination is inside a listed folder. A listed folder that would exceed a room or\r\nuser quota also returns 403. It also returns 403 if a file to overwrite is locked, open for editing, or not\r\neditable by the caller. A file that is not a PDF form sent to a form-filling room also returns 403. A listed\r\nfile too large for a knowledge folder also returns 403. If the destination or a listed file or folder does not\r\nexist, the call returns 404. The call returns 415 for a file format the portal does not accept for upload. It\r\nalso returns 415 for a format a knowledge folder cannot index.\n\nRaises the `folder.copied` webhook for every copied folder, and for its subfolders only within one storage. Raises the `room.copied` webhook for every listed room copied into its own section, an AI agent included. Raises the `file.copied` webhook for every copied file, and for files inside copied folders only within one storage.",
         "operationId": "copyBatchItems",
         "requestBody": {
           "content": {
@@ -17637,13 +17637,13 @@
             }
           },
           "403": {
-            "description": "The caller cannot create items in the destination folder or cannot copy one of the listed items, the destination is a listed folder or lies inside one, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, or a file to overwrite is locked, open for editing or cannot be edited by the caller"
+            "description": "The caller cannot create items in the destination folder or, for an AI project, cannot chat in it, cannot copy one of the listed items, the destination is a listed folder or lies inside one, a folder is listed for an AI project, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, or a file to overwrite is locked, open for editing or cannot be edited by the caller"
           },
           "404": {
             "description": "The destination folder, a listed file or a listed folder does not exist"
           },
           "415": {
-            "description": "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index"
+            "description": "A listed file has a format the portal does not accept for upload, one a knowledge folder cannot index, or, for an AI project, is neither a picture nor a document with readable text"
           },
           "401": {
             "description": "Unauthorized",
@@ -18627,7 +18627,7 @@
           "Files / Operations"
         ],
         "summary": "Move files and folders",
-        "description": "Starts a background job that moves files and folders into `destFolderId`. With `content` true, the call moves\r\nthe content of each listed folder, not the folder. Requires the right to create content in the destination and\r\nto remove the items from their source. Other callers get 403. In a room, room managers and content creators\r\nhave the right to create content. In a room, a content creator can move only the items they created. The call\r\nqueues work. Repeat `GET api/2.0/files/fileops` until `finished` is true. What a repeated call does depends on\r\n`conflictResolveType`. With `Skip`, it changes nothing. With `Overwrite`, it adds to each listed file a new\r\nversion of itself. With `Duplicate`, it gives each listed folder a new name and a new id. The call returns the\r\nmove operations of the caller, including the new one. An empty selection queues nothing and returns the\r\nexisting operations. A room can move only between the Rooms section and the archive. To archive a room, use\r\n`PUT api/2.0/files/rooms/{id}/archive`. To find name clashes first, use `GET api/2.0/files/fileops/move`. To\r\ncheck that the destination accepts the files, use `GET api/2.0/files/fileops/checkdestfolder`. To keep the\r\noriginals, use `PUT api/2.0/files/fileops/copy`. The call also returns 403 if the destination is inside a\r\nlisted folder. A listed folder that would exceed a room or user quota also returns 403. It also returns 403 if\r\na listed file is locked or open for editing. A file open for editing inside a listed folder also returns 403.\r\nA file to overwrite that is locked, open for editing, or not editable by the caller also returns 403. A file\r\nthat is not a PDF form sent to a form-filling room also returns 403. A folder or several files moved into a\r\nform-filling room from outside also return 403. A listed file too large for a knowledge folder also returns\r\n403. If the destination or a listed file or folder does not exist, the call returns 404. The call returns 415\r\nfor a file format the portal does not accept for upload. It also returns 415 for a format a knowledge folder\r\ncannot index.\n\nRaises the `folder.moved` webhook for each listed folder, and for subfolders of a merged folder. Raises the `folder.copied` webhook instead for a listed folder merged into an existing one. Raises the `folder.restored` webhook instead for a folder moved out of the trash. Raises the `room.archived` webhook for every listed room moved to the archive. Raises the `room.restored` webhook for every listed room moved out of the archive. Raises the `file.moved` webhook for each listed file, and for files of merged folders. Raises the `file.restored` webhook instead for a file moved out of the trash.",
+        "description": "Starts a background job that moves files and folders into `destFolderId`. With `content` true, the call moves\r\nthe content of each listed folder, not the folder. Requires the right to create content in the destination and\r\nto remove the items from their source. Other callers get 403. In a room, room managers and content creators\r\nhave the right to create content. In a room, a content creator can move only the items they created. The call\r\nqueues work. Repeat `GET api/2.0/files/fileops` until `finished` is true. What a repeated call does depends on\r\n`conflictResolveType`. With `Skip`, it changes nothing. With `Overwrite`, it adds to each listed file a new\r\nversion of itself. With `Duplicate`, it gives each listed folder a new name and a new id. The call returns the\r\nmove operations of the caller, including the new one. An empty selection queues nothing and returns the\r\nexisting operations. A room can move only between the Rooms section and the archive. Moving into an AI project\r\nreturns 403. To archive a room, use\r\n`PUT api/2.0/files/rooms/{id}/archive`. To find name clashes first, use `GET api/2.0/files/fileops/move`. To\r\ncheck that the destination accepts the files, use `GET api/2.0/files/fileops/checkdestfolder`. To keep the\r\noriginals, use `PUT api/2.0/files/fileops/copy`. The call also returns 403 if the destination is inside a\r\nlisted folder. A listed folder that would exceed a room or user quota also returns 403. It also returns 403 if\r\na listed file is locked or open for editing. A file open for editing inside a listed folder also returns 403.\r\nA file to overwrite that is locked, open for editing, or not editable by the caller also returns 403. A file\r\nthat is not a PDF form sent to a form-filling room also returns 403. A folder or several files moved into a\r\nform-filling room from outside also return 403. A listed file too large for a knowledge folder also returns\r\n403. If the destination or a listed file or folder does not exist, the call returns 404. The call returns 415\r\nfor a file format the portal does not accept for upload. It also returns 415 for a format a knowledge folder\r\ncannot index.\n\nRaises the `folder.moved` webhook for each listed folder, and for subfolders of a merged folder. Raises the `folder.copied` webhook instead for a listed folder merged into an existing one. Raises the `folder.restored` webhook instead for a folder moved out of the trash. Raises the `room.archived` webhook for every listed room moved to the archive. Raises the `room.restored` webhook for every listed room moved out of the archive. Raises the `file.moved` webhook for each listed file, and for files of merged folders. Raises the `file.restored` webhook instead for a file moved out of the trash.",
         "operationId": "moveBatchItems",
         "requestBody": {
           "content": {
@@ -18662,7 +18662,7 @@
             }
           },
           "403": {
-            "description": "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, a listed file is locked or open for editing, a file inside a listed folder is open for editing, or a file to overwrite is locked, open for editing or cannot be edited by the caller"
+            "description": "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is an AI project, a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, a listed file is locked or open for editing, a file inside a listed folder is open for editing, or a file to overwrite is locked, open for editing or cannot be edited by the caller"
           },
           "404": {
             "description": "The destination folder, a listed file or a listed folder does not exist"
@@ -19699,7 +19699,7 @@
           "Files / Operations"
         ],
         "summary": "Chunked upload",
-        "description": "Opens a chunked upload session for a file in the folder and returns it in a success envelope. This call is\r\ndeprecated. Use `POST api/2.0/files/{folderId}/session`, which returns the same session without the envelope.\r\nNo content is stored yet. Send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Each\r\npart is at most `chunkUploadSize` from `GET api/2.0/files/settings`. Then store the file with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the\r\nfolder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has\r\nit there only as a content creator. In My documents, the owner and anyone with read and write access to the\r\nfolder have it. A section root, an archived room, and an AI agent or AI project root also return 403. The call\r\nchanges data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist\r\nyet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With\r\nfalse, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this\r\nway. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call\r\nreturns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase\r\nUUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or\r\nfor a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder\r\ngets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an\r\ninstructions room. If the installation does not allow uploads with this extension, the call returns 415.\r\nIf the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a\r\n`fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is\r\nstored. The user has to free up space there first.",
+        "description": "Opens a chunked upload session for a file in the folder and returns it in a success envelope. This call is\r\ndeprecated. Use `POST api/2.0/files/{folderId}/session`, which returns the same session without the envelope.\r\nNo content is stored yet. Send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Each\r\npart is at most `chunkUploadSize` from `GET api/2.0/files/settings`. Then store the file with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the\r\nfolder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has\r\nit there only as a content creator. In My documents, the owner and anyone with read and write access to the\r\nfolder have it. A section root, an archived room, and an AI agent root also return 403. In an AI project,\r\nthe right to chat in the project is required instead. The file is stored in the project itself, visible to its\r\nuploader only. There, `relativePath` returns 403. A file that is neither a picture nor a document with\r\nreadable text returns 400. The call changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist\r\nyet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With\r\nfalse, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this\r\nway. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call\r\nreturns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase\r\nUUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or\r\nfor a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder\r\ngets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an\r\ninstructions room. If the installation does not allow uploads with this extension, the call returns 415.\r\nIf the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a\r\n`fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is\r\nstored. The user has to free up space there first.",
         "operationId": "createUploadSession",
         "parameters": [
           {
@@ -19751,13 +19751,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, a file going into an AI project is neither a picture nor a document with readable text, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`"
+            "description": "The caller cannot add content to the target folder or, for an AI project, cannot chat in it, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder, an instructions room or an AI project, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -19878,7 +19878,7 @@
           "Files / Operations"
         ],
         "summary": "Create an upload session",
-        "description": "Opens a chunked upload session for a file in the folder and returns it. If `fileSize` is below\r\n`chunkUploadSize` from `GET api/2.0/files/settings`, send the whole file in one\r\n`POST api/2.0/files/{folderId}/session/{sessionId}`. That call stores the file and returns 201. For a larger\r\nfile, send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Then store the file with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the\r\nfolder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has\r\nit there only as a content creator. In My documents, the owner and anyone with read and write access to the\r\nfolder have it. A section root, an archived room, and an AI agent or AI project root also return 403. The call\r\nchanges data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist\r\nyet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With\r\nfalse, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this\r\nway. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call\r\nreturns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase\r\nUUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or\r\nfor a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder\r\ngets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an\r\ninstructions room. If the installation does not allow uploads with this extension, the call returns 415.\r\nIf the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a\r\n`fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is\r\nstored. The user has to free up space there first.",
+        "description": "Opens a chunked upload session for a file in the folder and returns it. If `fileSize` is below\r\n`chunkUploadSize` from `GET api/2.0/files/settings`, send the whole file in one\r\n`POST api/2.0/files/{folderId}/session/{sessionId}`. That call stores the file and returns 201. For a larger\r\nfile, send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Then store the file with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the\r\nfolder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has\r\nit there only as a content creator. In My documents, the owner and anyone with read and write access to the\r\nfolder have it. A section root, an archived room, and an AI agent root also return 403. In an AI project,\r\nthe right to chat in the project is required instead. The file is stored in the project itself, visible to its\r\nuploader only. There, `relativePath` returns 403. A file that is neither a picture nor a document with\r\nreadable text returns 400. The call changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist\r\nyet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With\r\nfalse, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this\r\nway. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call\r\nreturns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase\r\nUUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or\r\nfor a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder\r\ngets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an\r\ninstructions room. If the installation does not allow uploads with this extension, the call returns 415.\r\nIf the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a\r\n`fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is\r\nstored. The user has to free up space there first.",
         "operationId": "createUploadSessionInFolder",
         "parameters": [
           {
@@ -19930,13 +19930,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, a file going into an AI project is neither a picture nor a document with readable text, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`"
+            "description": "The caller cannot add content to the target folder or, for an AI project, cannot chat in it, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder, an instructions room or an AI project, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -30008,6 +30008,43 @@
         "responses": {
           "200": {
             "description": "The access entries of the named subjects, plus a warning or an error when something was not applied",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Rate limit: 5 invitations per day per tenant.",
+                "schema": {
+                  "examples": [
+                    5
+                  ],
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Invitations remaining today per tenant.",
+                "schema": {
+                  "examples": [
+                    1
+                  ],
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the daily invitation limit resets.",
+                "schema": {
+                  "examples": [
+                    1750000000
+                  ],
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -30027,6 +30064,30 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying (5 invitations/day limit per tenant).",
+                "schema": {
+                  "examples": [
+                    30
+                  ],
+                  "maximum": 86400,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {

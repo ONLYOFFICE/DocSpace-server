@@ -69,6 +69,29 @@ public class AttachmentDeleteTests(AspireAppFixture fixture) : AttachmentTestBas
     }
 
     [Fact]
+    public async Task Delete_Draft_KeepsItsCreatedAtWhileItAwaitsTheCleanup()
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            var id = await SaveDraftAsync(Owner, "Autotest created-at.docx");
+            var stored = await ExpectStoredAsync(id, "draft before deletion");
+
+            (await DeleteAsync(id)).Status.Should().Be(200);
+            var marked = await ReadOnceAsync(id);
+
+            if (marked is null && attempt < 3)
+            {
+                continue;
+            }
+
+            marked.Should().NotBeNull();
+            marked!.CreatedAt.Should().Be(stored.CreatedAt);
+
+            return;
+        }
+    }
+
+    [Fact]
     public async Task Delete_TwiceAndAnUnknownId_BothReportSuccess()
     {
         // Idempotent as far as the response goes: there is no 404, so a caller cannot tell "removed" from "never existed".

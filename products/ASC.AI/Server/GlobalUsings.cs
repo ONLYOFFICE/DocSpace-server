@@ -119,7 +119,6 @@ global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Helpers;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
-global using ASC.Web.Studio.Core;
 global using ASC.Webhooks.Core;
 
 global using Microsoft.EntityFrameworkCore;
@@ -128,7 +127,6 @@ global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.AI;
 
-global using System.Collections.Frozen;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;
