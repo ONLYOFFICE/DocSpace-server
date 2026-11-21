@@ -11,8 +11,7 @@ so the conversion cannot be a one-time step of the release.
 ## What Changes
 
 - A background pass converts every AI agent of an active portal, with no request from a user:
-  - a new AI project takes the agent's title, owner, colour, cover, logo, custom tags and the pins and favourites of
-    its users;
+  - a new AI project takes the agent's title, owner, colour, cover, logo, custom tags and the pins of its users;
   - the agent's room keeps its id and becomes a Knowledge room titled `<agent title> (<title of its Knowledge
     folder>)`, linked to the project, with the knowledge files moved into the room itself; an agent whose Knowledge
     folder holds no file is deleted instead;

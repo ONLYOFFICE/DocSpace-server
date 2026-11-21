@@ -107,7 +107,8 @@ A new `IFolderDao<int>` operation (third-party implementations throw `NotSupport
 5. Shares of the room: one `ExecuteDelete` of every row that is not a user or a group with Room manager or
    Content creator (an invitation link goes whatever role it invites to), and one of the shares of the
    knowledge files.
-6. Tag links of the room: re-point Custom, Pin and Favorite links to the project, delete Recent and "new" links.
+6. Tag links of the room: re-point Custom and Pin links to the project, delete Recent and "new" links. A
+   Favorite link is left on the room.
 7. With knowledge files: move them to the room with `UpdateFilesFolderIdAsync` (the query the batched
    `FileDao.MoveFilesAsync` uses), delete the Knowledge folder row with its tree rows and the rows
    `DeleteFolderAsync` removes for a folder, lower the folder count of the room and its ancestors by one, insert
@@ -125,7 +126,7 @@ What is batch and what is DAO code:
 | threads, model, preferences, MCP entries | 5 `ExecuteUpdate` |
 | members of the project | 2 reads, 1 `SaveChanges` |
 | shares of the room and of its files | 2 `ExecuteDelete` |
-| tags, pins, favourites | 1 `ExecuteUpdate`, 1 `ExecuteDelete` |
+| tags, pins | 1 `ExecuteUpdate`, 1 `ExecuteDelete` |
 | knowledge files into the room | 1 `ExecuteUpdate` |
 | project row, tree, root counters | `InternalSaveFolderToDbAsync` |
 | Chat outputs, the move under the AiHub root, deletion of an empty room | `MoveFolderAsync`, `DeleteFolderAsync` |

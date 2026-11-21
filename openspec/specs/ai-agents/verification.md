@@ -551,7 +551,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Members of a converted agent** |  |  |
 | Roles carried over; group invited to the agent; joining the group later (scenarios) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:51,72,98` | TEST-CONFIRMED |
 | Guest of the agent (scenario) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:122` | TEST-CONFIRMED |
-| A Guest among the members of an invited group is left out too: a group takes no Guest through the API, so no test builds the case | `products/ASC.Files/Core/Core/Dao/TeamlabDao/FolderDao.cs:844` (`GetAiProjectMembersAsync`, the Guest check on a member of a group) | CODE-ONLY |
+| A Guest among the members of an invited group is left out too: a group takes no Guest through the API, so no test builds the case | `products/ASC.Files/Core/Core/Dao/TeamlabDao/FolderDao.cs:856` (the local function `GetProjectMembersAsync` of `ConvertAiAgentAsync`, the Guest check on a member of a group) | CODE-ONLY |
 | **Access to the Knowledge room of a converted agent** |  |  |
 | Content creator keeps the room (scenario). That such a member can still upload is not asserted: the stand refuses every create in a Knowledge room while vectorization is off. A group that keeps the room is not built either: the API refuses a group as a Content creator of an agent (`products/ASC.Files/Core/Utils/FileSharing.cs:278-299`); the test asserts that a group invited as a Viewer is gone | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:145` | TEST-CONFIRMED |
 | Viewer reads through the project; Guest of the agent; external link of a knowledge file (scenarios) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:178,197,218` | TEST-CONFIRMED |
