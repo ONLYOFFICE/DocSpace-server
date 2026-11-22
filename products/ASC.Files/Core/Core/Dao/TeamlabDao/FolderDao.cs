@@ -1393,7 +1393,7 @@ internal class FolderDao(
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFolderCoreAsync(folderId, tId, newTitle));
+            return IdConverter.Convert<TTo>(await MoveFolderCoreAsync(folderId, tId, newTitle, null));
         }
 
         if (toFolderId is string tsId)
@@ -1406,14 +1406,20 @@ internal class FolderDao(
 
     public Task<int> MoveFolderAsync(int folderId, int toFolderId, CancellationToken? cancellationToken)
     {
-        return MoveFolderCoreAsync(folderId, toFolderId, null);
+        return MoveFolderCoreAsync(folderId, toFolderId, null, null);
+    }
+
+    public Task<int> MoveFolderAsync(int folderId, int toFolderId, string newTitle, Func<FilesDbContext, Task> inTransaction)
+    {
+        return MoveFolderCoreAsync(folderId, toFolderId, newTitle, inTransaction);
     }
 
     /// <summary>
     /// Moves the folder; a non-null <paramref name="newTitle"/> is stored in the same update, so the folder
-    /// arrives under it instead of being renamed afterwards.
+    /// arrives under it instead of being renamed afterwards. A non-null <paramref name="inTransaction"/> runs on the context
+    /// of the move right before its commit.
     /// </summary>
-    private async Task<int> MoveFolderCoreAsync(int folderId, int toFolderId, string newTitle)
+    private async Task<int> MoveFolderCoreAsync(int folderId, int toFolderId, string newTitle, Func<FilesDbContext, Task> inTransaction)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var title = newTitle == null ? null : Global.ReplaceInvalidCharsAndTruncate(newTitle);
@@ -1461,17 +1467,17 @@ internal class FolderDao(
             var trashId = await trashIdTask;
             var folderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, folderId, toFolderId, title ?? folder.Title, folder.FolderType);
 
-            await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, folderType, currentAccount, title);
+            await context.UpdateFoldersAsync(tenantId, folderId, toFolderId, folderType, currentAccount, title);
 
             if (folder.FolderType is FolderType.InstructionsRoom or FolderType.KnowledgeRoom)
             {
                 await context.DeleteAiProjectRoomsByRoomAsync(tenantId, folderId);
             }
 
-            var subfolders = await filesDbContext.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
+            var subfolders = await context.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
 
-            await filesDbContext.DeleteTreesBySubfoldersDictionaryAsync(subfolders.Select(r => r.Key));
-            var toInsert = await filesDbContext.TreesOrderByLevel(toFolderId).ToListAsync();
+            await context.DeleteTreesBySubfoldersDictionaryAsync(subfolders.Select(r => r.Key));
+            var toInsert = await context.TreesOrderByLevel(toFolderId).ToListAsync();
 
             foreach (var subfolder in subfolders)
             {
@@ -1555,6 +1561,11 @@ internal class FolderDao(
                 // Only after the save above: the query tells a source left behind from a source still above by the ancestor
                 // rows of the moved folder, and the re-parented rows are pending in the change tracker until then
                 await context.ConvertOrphanedMetadataCascadeLinksInSubtreeAsync(tenantId, folderId);
+            }
+
+            if (inTransaction != null)
+            {
+                await inTransaction(context);
             }
 
             await tx.CommitAsync();

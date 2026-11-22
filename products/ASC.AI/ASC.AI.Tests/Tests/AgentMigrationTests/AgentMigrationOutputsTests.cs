@@ -208,6 +208,16 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
             (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().BeGreaterThanOrEqualTo(2);
         }
 
+        await using (var connection = await OpenDatabaseAsync())
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "UPDATE files_folder SET modified_on = @past WHERE id = @folder";
+            command.Parameters.AddWithValue("@past", past);
+            command.Parameters.AddWithValue("@folder", folder.Id);
+
+            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+        }
+
         await AddOlderVersionAsync(direct.Id, past);
         await AddOlderVersionAsync(direct.Id, past);
 
@@ -237,5 +247,47 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
         var versions = await ModifiedOnByVersionAsync(direct.Id);
         versions[1].Should().BeAfter(past, "the periodic pass of the index finds a file by the modified_on of its first version");
         versions[2].Should().Be(past, "a version between the first and the current one keeps its date in the version history");
+
+        await using (var connection = await OpenDatabaseAsync())
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "SELECT modified_on FROM files_folder WHERE id = @folder";
+            command.Parameters.AddWithValue("@folder", folder.Id);
+
+            var folderModifiedOn = (DateTime)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken))!;
+            folderModifiedOn.Should().BeAfter(past, "the periodic pass of the folder index finds a subfolder of the moved Chat outputs folder by its modified_on");
+        }
+    }
+
+    [Fact]
+    public async Task Convert_ChatOutputs_PublishesIndexEventsForItsSubtree()
+    {
+        // Arrange
+        var agent = await CreateAgentAsync(NewTitle("Outputs events bot"));
+        var outputs = await AgentFolderAsync(agent.Id, FolderType.ChatOutputs);
+
+        var direct = await UploadAsync(outputs.Id, "autotest-direct-output.txt");
+        var folder = (await FoldersApi.CreateFolderAsync(outputs.Id, new CreateFolderRequest("Nested"), TestContext.Current.CancellationToken)).Response;
+        var nested = await UploadAsync(folder.Id, "autotest-nested-output.txt");
+        int[] fileIds = [direct.Id, nested.Id];
+
+        await using var fileProbe = await ListenToEventBusAsync(nameof(FileIndexIntegrationEvent));
+        await using var folderProbe = await ListenToEventBusAsync(nameof(FolderIndexIntegrationEvent));
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert - the worker stores the new ancestor chain of each file and subfolder it gets an event for
+        var fileEvents = await fileProbe.ReadAsync<FileIndexIntegrationEvent>(
+            e => e.Action == FileIndexAction.UpdateFolders && fileIds.Contains(e.FileId),
+            TestContext.Current.CancellationToken);
+
+        fileEvents.Select(e => e.FileId).Should().BeEquivalentTo(fileIds, "every file of the moved Chat outputs folder gets its event");
+
+        var folderEvents = await folderProbe.ReadAsync<FolderIndexIntegrationEvent>(
+            e => e.Action == FolderIndexAction.UpdateFolders && e.FolderId == folder.Id,
+            TestContext.Current.CancellationToken);
+
+        folderEvents.Should().ContainSingle("the subfolder of the moved Chat outputs folder gets its event");
     }
 }

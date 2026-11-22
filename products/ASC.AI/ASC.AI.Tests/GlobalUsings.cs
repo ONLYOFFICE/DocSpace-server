@@ -84,6 +84,8 @@ global using DocumentAgentReasoning = ASC.AI.Integration.DocumentAgent.DocumentA
 global using DocumentAgentSettingsDto = ASCAi::ASC.AI.Models.ResponseDto.DocumentAgentSettingsDto;
 // The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
 global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
+global using FileIndexAction = ASC.Files.Core.IntegrationEvents.Events.FileIndexAction;
+global using FileIndexIntegrationEvent = ASC.Files.Core.IntegrationEvents.Events.FileIndexIntegrationEvent;
 global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FilesQuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;

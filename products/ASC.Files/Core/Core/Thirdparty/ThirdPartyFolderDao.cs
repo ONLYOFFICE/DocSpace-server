@@ -253,6 +253,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotSupportedException();
     }
 
+    public Task<int> MoveFolderAsync(string folderId, int toFolderId, string newTitle, Func<FilesDbContext, Task> inTransaction)
+    {
+        throw new NotSupportedException();
+    }
+
     public async Task<string> SaveFolderAsync(Folder<string> folder)
     {
         ArgumentNullException.ThrowIfNull(folder);

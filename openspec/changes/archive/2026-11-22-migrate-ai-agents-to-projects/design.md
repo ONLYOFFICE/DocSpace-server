@@ -79,12 +79,17 @@ Run under the system account with the portal set, holding a distributed lock on 
    into the My documents of the owner (`GetFolderIDUserAsync(createIfNotExists: true, owner)`; the portal owner
    when the agent's owner is not found or is terminated). The move stores the title in its own update, so a run
    that stops between the two statements leaves the title as it was and the next run composes the same one.
-   After the move, in a try/catch with a warning log, one update sets `modified_on` of the current and the first
-   version of every file of the moved subtree to now (the periodic pass of the index finds a file by its first
-   version and reads its current one); the versions between keep their dates. The move itself sends an index event for the moved folder only, and Files.Worker re-indexes only
-   the folder an event names, so the files would keep their old ancestor chain in the index and a search in My
-   documents with subfolders would not find them; the periodic pass of the full-text index, which reads files by
-   `modified_on`, stores the new chain on its next run (every minute by default, `elastic:Period`).
+   The update that gives the folder its new parent, the new tree rows of its subtree and two more updates, which the
+   migrator passes to the move as a delegate run right before its commit, are committed in one transaction: one
+   sets `modified_on` of the current and the first version of every file of the moved subtree to now (the periodic
+   pass of the index finds a file by its first version and reads its current one; the versions between keep their
+   dates), the other sets `modified_on` of every subfolder of that subtree. The move itself sends an index event for
+   the moved folder only, and Files.Worker re-indexes only the folder an event names, so after the commit the
+   migrator publishes an `UpdateFolders` event for every file and every subfolder of the subtree, each in its own
+   try/catch with a warning log. A lost event leaves the entry to the periodic pass of the full-text index, which
+   reads files and folders by `modified_on` and stores the new chain on its next run (every minute by default,
+   `elastic:Period`); a run that stops after the commit has already moved those dates, so no later run has to
+   find the folder again.
    Without content: `DeleteFolderAsync`. Matching "every other child" instead of "the folder of type
    `ChatOutputs`" makes a rerun pick up a folder whose type was already changed.
    **Knowledge made flat.** A Knowledge folder is flat: the API refuses to create a folder in it, its folders could

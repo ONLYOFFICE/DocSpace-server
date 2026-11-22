@@ -173,18 +173,27 @@ public class AiAgentMigrator(
 
             myDocumentsId ??= await folderDao.GetFolderIDUserAsync(true, await GetOutputsOwnerIdAsync(agent));
 
-            await folderDao.MoveFolderAsync(child.Id, myDocumentsId.Value, AiAgentMigrationTitle.Compose(agent.Title, child.Title), null);
+            List<int> subfolderIds = [];
+            List<int> fileIds = [];
+
+            await folderDao.MoveFolderAsync(child.Id, myDocumentsId.Value, AiAgentMigrationTitle.Compose(agent.Title, child.Title), async filesDbContext =>
+            {
+                var modifiedOn = DateTime.UtcNow;
+
+                await filesDbContext.TouchAiAgentSubtreeFilesAsync(tenantId, child.Id, modifiedOn);
+                await filesDbContext.TouchAiAgentSubtreeFoldersAsync(tenantId, child.Id, modifiedOn);
+
+                subfolderIds = await filesDbContext.AiAgentSubtreeFolderIdsAsync(tenantId, child.Id).ToListAsync();
+                fileIds = await filesDbContext.AiAgentSubtreeFileIdsAsync(tenantId, child.Id).ToListAsync();
+            });
 
             await RunSideEffectAsync(tenantId, agent.Id, "the socket event of the moved Chat outputs folder", async () =>
             {
                 await socketManager.CreateFolderAsync(await folderDao.GetFolderAsync(child.Id));
             });
 
-            await RunSideEffectAsync(tenantId, agent.Id, "the modified time of the files of the moved Chat outputs folder", async () =>
-            {
-                await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-                await filesDbContext.TouchAiAgentSubtreeFilesAsync(tenantId, child.Id, DateTime.UtcNow);
-            });
+            await PublishFolderIndexEventsAsync(tenantId, agent.Id, subfolderIds);
+            await PublishFileIndexEventsAsync(tenantId, agent.Id, fileIds);
         }
     }
 
@@ -196,6 +205,17 @@ public class AiAgentMigrator(
         {
             await RunSideEffectAsync(tenantId, agentId, $"the index event of the moved file {fileId}", () =>
                 eventBus.PublishAsync(new FileIndexIntegrationEvent(currentAccount, tenantId) { FileId = fileId, Action = FileIndexAction.UpdateFolders }));
+        }
+    }
+
+    private async Task PublishFolderIndexEventsAsync(int tenantId, int agentId, IEnumerable<int> folderIds)
+    {
+        var currentAccount = authContext.CurrentAccount.ID;
+
+        foreach (var folderId in folderIds)
+        {
+            await RunSideEffectAsync(tenantId, agentId, $"the index event of the moved folder {folderId}", () =>
+                eventBus.PublishAsync(new FolderIndexIntegrationEvent(currentAccount, tenantId) { FolderId = folderId, Action = FolderIndexAction.UpdateFolders }));
         }
     }
 

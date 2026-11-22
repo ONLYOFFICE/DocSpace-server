@@ -73,6 +73,24 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<int> TouchAiAgentSubtreeFoldersAsync(int tenantId, int folderId, DateTime modifiedOn)
+    {
+        return AiAgentMigrationQueries.TouchAiAgentSubtreeFoldersAsync(this, tenantId, folderId, modifiedOn);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> AiAgentSubtreeFolderIdsAsync(int tenantId, int folderId)
+    {
+        return AiAgentMigrationQueries.AiAgentSubtreeFolderIdsAsync(this, tenantId, folderId);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> AiAgentSubtreeFileIdsAsync(int tenantId, int folderId)
+    {
+        return AiAgentMigrationQueries.AiAgentSubtreeFileIdsAsync(this, tenantId, folderId);
+    }
+
+    [PreCompileQuery]
     public Task<int> ClaimAiAgentRoomAsync(int tenantId, int roomId, string title, Guid modifiedBy, DateTime modifiedOn)
     {
         return AiAgentMigrationQueries.ClaimAiAgentRoomAsync(this, tenantId, roomId, title, modifiedBy, modifiedOn);
@@ -198,11 +216,34 @@ static file class AiAgentMigrationQueries
                     .Select(f => f.Id)
                     .Distinct());
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<FilesDbContext, int, int, DateTime, Task<int>> TouchAiAgentSubtreeFilesAsync =
         (FilesDbContext ctx, int tenantId, int folderId, DateTime modifiedOn) =>
             ctx.Files
                 .Where(f => f.TenantId == tenantId && (f.CurrentVersion || f.Version == 1) && ctx.Tree.Any(t => t.ParentId == folderId && t.FolderId == f.ParentId))
                 .ExecuteUpdateAsync(f => f.SetProperty(p => p.ModifiedOn, modifiedOn));
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public static readonly Func<FilesDbContext, int, int, DateTime, Task<int>> TouchAiAgentSubtreeFoldersAsync =
+        (FilesDbContext ctx, int tenantId, int folderId, DateTime modifiedOn) =>
+            ctx.Folders
+                .Where(f => f.TenantId == tenantId && f.Id != folderId && ctx.Tree.Any(t => t.ParentId == folderId && t.FolderId == f.Id))
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.ModifiedOn, modifiedOn));
+
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> AiAgentSubtreeFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId) =>
+                ctx.Folders
+                    .Where(f => f.TenantId == tenantId && f.Id != folderId && ctx.Tree.Any(t => t.ParentId == folderId && t.FolderId == f.Id))
+                    .Select(f => f.Id));
+
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> AiAgentSubtreeFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId) =>
+                ctx.Files
+                    .Where(f => f.TenantId == tenantId && ctx.Tree.Any(t => t.ParentId == folderId && t.FolderId == f.ParentId))
+                    .Select(f => f.Id)
+                    .Distinct());
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     // The type in the predicate makes the statement the claim of the conversion: it changes no row once

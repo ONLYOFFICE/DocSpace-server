@@ -182,6 +182,13 @@ public interface IFolderDao<T>
     Task<int> MoveFolderAsync(T folderId, int toFolderId, CancellationToken? cancellationToken);
 
     /// <summary>
+    /// Moves the folder like <see cref="MoveFolderAsync{TTo}"/> and runs <paramref name="inTransaction"/> on the context of the
+    /// move right before its commit, so what it writes is committed together with the new parent and tree rows of the
+    /// folder. The delegate can run more than once when the database retries the move. Third-party storages do not support it.
+    /// </summary>
+    Task<int> MoveFolderAsync(T folderId, int toFolderId, string newTitle, Func<FilesDbContext, Task> inTransaction);
+
+    /// <summary>
     ///     copy folder
     /// </summary>
     /// <param name="folderId"></param>
