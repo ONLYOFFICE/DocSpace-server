@@ -333,6 +333,9 @@ public class AiAgentMigrator(
 
         if (!deleted)
         {
+            await RunSideEffectAsync(tenantId, roomId, "the index event of the room left without knowledge files", () =>
+                eventBus.PublishAsync(new FolderIndexIntegrationEvent(authContext.CurrentAccount.ID, tenantId) { FolderId = roomId, Action = FolderIndexAction.Index }));
+
             await RunSideEffectAsync(tenantId, roomId, "the socket event of the room left without knowledge files", async () =>
             {
                 await socketManager.CreateFolderAsync(await folderDao.GetFolderAsync(roomId));
