@@ -80,7 +80,7 @@ on. What changes is the stored data, so a caller meets other objects under the i
   Knowledge room the agent becomes (also for a room without knowledge files whose deletion failed). Nothing is sent
   for the agent's old place: no `delete-folder` for the agent, its moved or deleted folders, its Knowledge folder or
   a deleted room, because the client does not show the agents section.
-- Backup and restore: no new table or column; the one schema change is an index on `ai_integration_threads`. An archive made before the conversion restores agents; the
+- Backup and restore: no new table or column; the only schema changes are indexes `(tenant_id, entry_id)` on `ai_integration_threads`, `_assignments`, `_tool_preferences`, `_mcp_servers` and `_preferences`. An archive made before the conversion restores agents; the
   background pass converts them, so between the end of the restore and that pass the portal still holds agents.
   The pass depends on the restore and the transfer setting the portal's last-modified time, which both do today.
 - Portal migration (data import): not affected, it creates no agents.
@@ -103,8 +103,9 @@ agent had.
   transaction, new compiled queries in `Core/EF/Queries`, `DbPreference` added to `FilesDbContext`.
 - `common/ASC.Core.Common`: a compiled query for the active portals changed since a moment and for paging over all
   active portals; a settings class for the state of the pass.
-- One schema migration, `MigrationContext_Upgrade110` (MySQL SaaS): the index `(tenant_id, entry_id)` on
-  `ai_integration_threads`. No change in `common/ASC.Data.Backup.Core`.
+- Two schema migrations (MySQL SaaS): `MigrationContext_Upgrade110`, the index `(tenant_id, entry_id)` on
+  `ai_integration_threads`, and `MigrationContext_Upgrade111`, the same index on `ai_integration_assignments`,
+  `_tool_preferences`, `_mcp_servers` and `_preferences`. No change in `common/ASC.Data.Backup.Core`.
 - OpenSearch: the vectors of the knowledge files in `files_embeddings` are not touched. The full-text documents of the
   project, the room and the knowledge files are updated, and the one of the removed Knowledge folder deleted,
   through the usual index events, which Files.Worker applies; the files and subfolders of the moved Chat outputs

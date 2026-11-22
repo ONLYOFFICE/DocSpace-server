@@ -313,9 +313,12 @@ release.
 
 ## Migration Plan
 
-1. Deploy. One schema migration, `MigrationContext_Upgrade110` (MySQL SaaS): the index `(tenant_id, entry_id)` on
-   `ai_integration_threads`, which the move of the threads in D4 and the deletion of the threads of a deleted folder
-   (`FolderDao.DeleteFolderAsync`) filter by. The start-up task of the AI server and the worker may start in any order: the
+1. Deploy. Two schema migrations (MySQL SaaS), each adding only indexes `(tenant_id, entry_id)`:
+   `MigrationContext_Upgrade110` on `ai_integration_threads`, `MigrationContext_Upgrade111` on
+   `ai_integration_assignments`, `_tool_preferences`, `_mcp_servers` and `_preferences`. The move of `entry_id` in D4
+   filters all five tables by these columns, and `FolderDao.DeleteFolderAsync` deletes the rows of a deleted folder from
+   all of them but `_preferences` the same way; without the index each statement read the whole portal's range of the
+   table, inside the transaction. The start-up task of the AI server and the worker may start in any order: the
    worker runs the legacy providers migration for a portal itself before converting it (D8).
 2. The first pass walks all active portals; later passes only the changed ones.
 3. Rollback: set `ai:agentsMigration:enabled` to `false`. Converted agents are not converted back; a portal

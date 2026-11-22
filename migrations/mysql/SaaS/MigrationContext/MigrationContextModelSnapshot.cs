@@ -181,6 +181,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
+
                     b.HasIndex("TenantId", "ActionType", "EntryId")
                         .HasDatabaseName("IX_tenant_id_action_type_entry_id");
 
@@ -355,6 +358,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
+
                     b.HasIndex("TenantId", "Name", "EntryId")
                         .HasDatabaseName("IX_tenant_id_name_entry_id");
 
@@ -430,6 +436,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
 
                     b.HasIndex("TenantId", "CreatedBy", "EntryId")
                         .HasDatabaseName("IX_tenant_id_created_by_entry_id");
@@ -756,6 +765,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
 
                     b.HasIndex("TenantId", "CreatedBy", "ServerType", "EntryId")
                         .HasDatabaseName("IX_tenant_id_created_by_server_type_entry_id");
