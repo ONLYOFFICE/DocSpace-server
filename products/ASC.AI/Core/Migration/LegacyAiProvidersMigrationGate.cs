@@ -64,11 +64,21 @@ public class LegacyAiProvidersMigrationGate(
             }
         }
 
-        var handle = await distributedLockProvider.TryAcquireLockAsync(LockKey, throwIfNotAcquired: false, cancellationToken: cancellationToken);
+        return await EnterLockAsync(distributedLockProvider, cancellationToken);
+    }
 
-        return handle == null
-            ? new LegacyAiProvidersMigrationLease(LegacyAiProvidersMigrationEntry.Busy, null)
-            : new LegacyAiProvidersMigrationLease(LegacyAiProvidersMigrationEntry.Entered, handle);
+    public static async Task<LegacyAiProvidersMigrationLease> EnterLockAsync(IDistributedLockProvider distributedLockProvider, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var handle = await distributedLockProvider.TryAcquireLockAsync(LockKey, cancellationToken: cancellationToken);
+
+            return new LegacyAiProvidersMigrationLease(LegacyAiProvidersMigrationEntry.Entered, handle);
+        }
+        catch (DistributedLockException)
+        {
+            return new LegacyAiProvidersMigrationLease(LegacyAiProvidersMigrationEntry.Busy, null);
+        }
     }
 }
 

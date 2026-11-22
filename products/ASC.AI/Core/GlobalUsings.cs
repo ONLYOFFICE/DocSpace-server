@@ -42,6 +42,7 @@ global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.DistributedLock.Common;
 global using ASC.Common.Web;
 
 global using ASC.Core;
