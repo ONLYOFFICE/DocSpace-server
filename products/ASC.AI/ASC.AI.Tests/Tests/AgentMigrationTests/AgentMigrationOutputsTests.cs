@@ -209,6 +209,7 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
         }
 
         await AddOlderVersionAsync(direct.Id, past);
+        await AddOlderVersionAsync(direct.Id, past);
 
         // Act
         await ConvertAgentsAsync();
@@ -233,6 +234,8 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
 
         modified.Keys.Should().BeEquivalentTo(fileIds);
         modified.Values.Should().AllSatisfy(value => value.Should().BeAfter(past, "the file lies in the moved Chat outputs folder"));
-        (await ModifiedOnByCurrentVersionAsync(direct.Id))[false].Should().Be(past, "an older version keeps its date in the version history");
+        var versions = await ModifiedOnByVersionAsync(direct.Id);
+        versions[1].Should().BeAfter(past, "the periodic pass of the index finds a file by the modified_on of its first version");
+        versions[2].Should().Be(past, "a version between the first and the current one keeps its date in the version history");
     }
 }

@@ -161,15 +161,17 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
         }
 
         await AddOlderVersionAsync(file.Id, past);
+        await AddOlderVersionAsync(file.Id, past);
 
         // Act
         await ConvertAgentsAsync();
 
-        // Assert - the periodic pass of the full-text index reads the current versions by modified_on
+        // Assert - the periodic pass of the full-text index finds a file by the modified_on of its first version and
+        // reads its current version
         await using (var connection = await OpenDatabaseAsync())
         await using (var command = connection.CreateCommand())
         {
-            command.CommandText = "SELECT folder_id, modified_on, current_version FROM files_file WHERE id = @id";
+            command.CommandText = "SELECT folder_id, modified_on, current_version, version FROM files_file WHERE id = @id";
             command.Parameters.AddWithValue("@id", file.Id);
 
             await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
@@ -180,17 +182,17 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
                 rows++;
                 reader.GetInt32(0).Should().Be(agent.Id, "every version of the knowledge file lies directly in the room");
 
-                if (reader.GetBoolean(2))
+                if (reader.GetBoolean(2) || reader.GetInt32(3) == 1)
                 {
                     reader.GetDateTime(1).Should().BeAfter(past, "the move of a knowledge file into the room is a change the index has to pick up");
                 }
                 else
                 {
-                    reader.GetDateTime(1).Should().Be(past, "an older version keeps its date in the version history");
+                    reader.GetDateTime(1).Should().Be(past, "a version between the first and the current one keeps its date in the version history");
                 }
             }
 
-            rows.Should().Be(2);
+            rows.Should().Be(3);
         }
     }
 

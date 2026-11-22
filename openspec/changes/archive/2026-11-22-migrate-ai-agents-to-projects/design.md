@@ -79,8 +79,9 @@ Run under the system account with the portal set, holding a distributed lock on 
    into the My documents of the owner (`GetFolderIDUserAsync(createIfNotExists: true, owner)`; the portal owner
    when the agent's owner is not found or is terminated). The move stores the title in its own update, so a run
    that stops between the two statements leaves the title as it was and the next run composes the same one.
-   After the move, in a try/catch with a warning log, one update sets `modified_on` of the current version of every
-   file of the moved subtree to now; older versions keep their dates. The move itself sends an index event for the moved folder only, and Files.Worker re-indexes only
+   After the move, in a try/catch with a warning log, one update sets `modified_on` of the current and the first
+   version of every file of the moved subtree to now (the periodic pass of the index finds a file by its first
+   version and reads its current one); the versions between keep their dates. The move itself sends an index event for the moved folder only, and Files.Worker re-indexes only
    the folder an event names, so the files would keep their old ancestor chain in the index and a search in My
    documents with subfolders would not find them; the periodic pass of the full-text index, which reads files by
    `modified_on`, stores the new chain on its next run (every minute by default, `elastic:Period`).
@@ -127,7 +128,7 @@ A new `IFolderDao<int>` operation (third-party implementations throw `NotSupport
 6. Tag links of the room: re-point Custom and Pin links to the project, delete Recent and "new" links. A
    Favorite link is left on the room.
 7. With knowledge files: move them to the room with `MoveAiAgentKnowledgeFilesAsync`, one update that moves every
-   version row and sets `modified_on` of the current one to now (older versions keep their dates), so the periodic pass of the full-text index, which reads files by
+   version row and sets `modified_on` of the current and the first one to now (the versions between keep their dates), so the periodic pass of the full-text index, which reads files by
    `modified_on`, picks them up when their index event is lost; delete the Knowledge folder row with its tree rows and the rows
    `DeleteFolderAsync` removes for a folder, lower the folder count of the room and its ancestors by one, insert
    the `files_ai_project_room` link. Without them: nothing more, the room is no longer pending since step 1;

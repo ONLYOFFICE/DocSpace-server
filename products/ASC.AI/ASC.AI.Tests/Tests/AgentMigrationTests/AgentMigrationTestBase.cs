@@ -255,21 +255,21 @@ public abstract class AgentMigrationTestBase(AspireAppFixture fixture) : BaseTes
         await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
     }
 
-    protected async Task<Dictionary<bool, DateTime>> ModifiedOnByCurrentVersionAsync(int fileId)
+    protected async Task<Dictionary<int, DateTime>> ModifiedOnByVersionAsync(int fileId)
     {
         await using var connection = await OpenDatabaseAsync();
         await using var command = connection.CreateCommand();
 
-        command.CommandText = "SELECT current_version, modified_on FROM files_file WHERE id = @id";
+        command.CommandText = "SELECT version, modified_on FROM files_file WHERE id = @id";
         command.Parameters.AddWithValue("@id", fileId);
 
-        var result = new Dictionary<bool, DateTime>();
+        var result = new Dictionary<int, DateTime>();
 
         await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
 
         while (await reader.ReadAsync(TestContext.Current.CancellationToken))
         {
-            result.Add(reader.GetBoolean(0), reader.GetDateTime(1));
+            result.Add(reader.GetInt32(0), reader.GetDateTime(1));
         }
 
         return result;
