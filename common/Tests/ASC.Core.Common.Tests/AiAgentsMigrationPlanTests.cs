@@ -46,10 +46,38 @@ public class AiAgentsMigrationPlanTests
         AiAgentsMigrationPlan.GetWindowStart(null, TimeSpan.FromMinutes(5)).Should().BeNull();
     }
 
-    [Fact]
-    public void GetWindowStart_OverlapZero_IsTheLastPassStart()
+    public static TheoryData<string?, TimeSpan, bool> Overlaps => new()
     {
-        AiAgentsMigrationPlan.GetWindowStart(_lastPassStart, TimeSpan.Zero).Should().Be(_lastPassStart);
+        { null, TimeSpan.FromMinutes(5), false },
+        { "0.00:10:00", TimeSpan.FromMinutes(10), false },
+        { "0.00:01:00", TimeSpan.FromMinutes(1), false },
+        { "0.00:00:00", TimeSpan.FromMinutes(1), true },
+        { "0.00:00:30", TimeSpan.FromMinutes(1), true },
+        { "-0.00:05:00", TimeSpan.FromMinutes(1), true },
+        { "0.02:00:00", TimeSpan.FromHours(1), true },
+        { "five", TimeSpan.FromMinutes(5), true }
+    };
+
+    [Theory]
+    [MemberData(nameof(Overlaps))]
+    public void ReadOverlap_KeepsTheWindowAtLeastAMinuteWide(string? configured, TimeSpan expected, bool warned)
+    {
+        var logger = new RecordingLogger();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { [AiAgentsMigrationPlan.OverlapKey] = configured })
+            .Build();
+
+        AiAgentsMigrationPlan.ReadOverlap(configuration, logger).Should().Be(expected);
+        logger.Warnings.Should().HaveCount(warned ? 1 : 0);
+    }
+
+    [Fact]
+    public void GetWindowStart_RestoreStampCutToTheSecond_FallsInsideTheWindow()
+    {
+        var passStart = new DateTime(2026, 11, 20, 12, 0, 0, 500, DateTimeKind.Utc);
+        var restoreStamp = new DateTime(2026, 11, 20, 12, 0, 0, DateTimeKind.Utc);
+
+        AiAgentsMigrationPlan.GetWindowStart(passStart, AiAgentsMigrationPlan.MinOverlap).Should().BeOnOrBefore(restoreStamp);
     }
 
     [Fact]

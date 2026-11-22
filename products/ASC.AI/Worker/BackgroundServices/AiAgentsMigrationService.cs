@@ -47,9 +47,6 @@ public class AiAgentsMigrationService(
     private static readonly TimeSpan _minPeriod = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan _maxPeriod = TimeSpan.FromDays(1);
 
-    private static readonly TimeSpan _defaultOverlap = TimeSpan.FromMinutes(5);
-    private static readonly TimeSpan _maxOverlap = TimeSpan.FromHours(1);
-
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
     // true or false; false switches the pass off (logged once), the internal route still converts
@@ -59,10 +56,9 @@ public class AiAgentsMigrationService(
     protected override TimeSpan ExecuteTaskPeriod { get; set; } =
         configuration.ReadInterval("ai:agentsMigration:period", _defaultPeriod, _minPeriod, _maxPeriod, logger);
 
-    // d.hh:mm:ss, from 0 to 1 hour; five minutes is "0.00:05:00". How far before the start of the previous pass
-    // the window over the last-modified time of the portals opens: it covers the clock difference of the hosts.
-    private readonly TimeSpan _overlap =
-        configuration.ReadInterval("ai:agentsMigration:overlap", _defaultOverlap, TimeSpan.Zero, _maxOverlap, logger);
+    // d.hh:mm:ss, from 1 minute to 1 hour; five minutes is "0.00:05:00". Why the window needs at least a minute:
+    // AiAgentsMigrationPlan.ReadOverlap.
+    private readonly TimeSpan _overlap = AiAgentsMigrationPlan.ReadOverlap(configuration, logger);
 
     // a count, from 1 to 1000; ten is "10". The passes that may end with a failed agent before a portal is left alone.
     private readonly int _maxAttempts = configuration.ReadInt("ai:agentsMigration:maxAttempts", 10, 1, 1000, logger);

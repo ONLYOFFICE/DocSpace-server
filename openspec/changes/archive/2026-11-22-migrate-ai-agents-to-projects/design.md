@@ -205,7 +205,8 @@ One pass:
    stop thus opens the next window at the start of its first part, so a portal before `Cursor` changed while the pass
    was stopped is in that window.
 
-`overlap` covers clock differences between the hosts that write `last_modified`; a portal without agents checked
+`overlap` covers clock differences between the hosts that write `last_modified`, the time between a stamp and its
+commit, and the activation stamp of a restore cut to whole seconds, so it is at least a minute; a portal without agents checked
 twice costs its four short reads again (see Risks). A portal in `Restoring` is not active and is not a candidate;
 its activation writes `last_modified` again, which puts it into the window of the next pass.
 
@@ -252,7 +253,7 @@ Read once in the service constructor through `ConfigurationValueExtensions`:
 |---|---|---|---|
 | `ai:agentsMigration:enabled` | `true` | — | `false`: the pass does nothing, logged once at start; the route still works |
 | `ai:agentsMigration:period` | `0.00:05:00` | 5 s – 1 day | time between passes |
-| `ai:agentsMigration:overlap` | `0.00:05:00` | 0 – 1 hour | how far before `LastPassStart` the window opens |
+| `ai:agentsMigration:overlap` | `0.00:05:00` | 1 minute – 1 hour | how far before `LastPassStart` the window opens; at least a minute to cover the clock difference of the hosts, the time between the stamp and the commit, and the restore stamp cut to whole seconds |
 | `ai:agentsMigration:maxAttempts` | `10` | 1 – 1000 | failed passes before a portal is left alone |
 
 The `integration-test` profile sets `enabled` to `false`: a test builds an agent in several calls and a pass in the

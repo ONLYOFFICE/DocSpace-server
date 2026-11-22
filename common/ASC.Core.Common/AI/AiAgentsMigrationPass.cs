@@ -63,6 +63,23 @@ public enum AiAgentsMigrationPortalOutcome
 
 public static class AiAgentsMigrationPlan
 {
+    public const string OverlapKey = "ai:agentsMigration:overlap";
+
+    private static readonly TimeSpan _defaultOverlap = TimeSpan.FromMinutes(5);
+    public static readonly TimeSpan MinOverlap = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan _maxOverlap = TimeSpan.FromHours(1);
+
+    // d.hh:mm:ss, from 1 minute to 1 hour; five minutes is "0.00:05:00". How far before the start of the previous pass
+    // the window over the last-modified time of the portals opens. The writers stamp that time with their own clock
+    // before the commit, so the window has to cover: the clock difference of the hosts (a restore activates the portal
+    // on the backup host), the time between the stamp and the commit (a row stamped before the pass started but
+    // committed after its read), and the restore stamp cut to whole seconds (RestorePortalTask.SetTenantActive).
+    // Below 1 minute these are no longer covered, and a restored portal would be skipped for good.
+    public static TimeSpan ReadOverlap(IConfiguration configuration, ILogger logger)
+    {
+        return configuration.ReadInterval(OverlapKey, _defaultOverlap, MinOverlap, _maxOverlap, logger);
+    }
+
     public static DateTime? GetWindowStart(DateTime? lastPassStart, TimeSpan overlap)
     {
         return lastPassStart - overlap;
