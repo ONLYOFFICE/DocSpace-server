@@ -291,23 +291,12 @@ public class AiAgentMigrator(
 
         await RunSideEffectAsync(tenantId, agentId, "the socket event of the room", async () =>
         {
-            await socketManager.UpdateFolderAsync(await folderDao.GetFolderAsync(agentId));
+            await socketManager.CreateFolderAsync(await folderDao.GetFolderAsync(agentId));
         });
     }
 
     private async Task DeleteRoomWithoutKnowledgeAsync(IFolderDao<int> folderDao, int tenantId, int roomId, bool hasLogo)
     {
-        Folder<int> room = null;
-        IEnumerable<Guid> users = null;
-        IEnumerable<Guid> sharedUsers = null;
-
-        // the recipients are read before the deletion: afterwards nobody can read the room
-        await RunSideEffectAsync(tenantId, roomId, "the recipients of the socket event of the deleted room", async () =>
-        {
-            room = await folderDao.GetFolderAsync(roomId);
-            (users, sharedUsers) = await socketManager.GetDeleteRecipientsAsync(room);
-        });
-
         var deleted = false;
 
         await RunSideEffectAsync(tenantId, roomId, "the deletion of the room without knowledge files", async () =>
@@ -322,10 +311,12 @@ public class AiAgentMigrator(
                 roomLogoManager.DeleteLogoFilesAsync(roomId));
         }
 
-        if (deleted && room != null && users != null)
+        if (!deleted)
         {
-            await RunSideEffectAsync(tenantId, roomId, "the socket event of the deleted room", () =>
-                socketManager.DeleteFolder(room, users, sharedUsers: sharedUsers));
+            await RunSideEffectAsync(tenantId, roomId, "the socket event of the room left without knowledge files", async () =>
+            {
+                await socketManager.CreateFolderAsync(await folderDao.GetFolderAsync(roomId));
+            });
         }
     }
 

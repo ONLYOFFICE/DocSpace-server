@@ -32,8 +32,8 @@ so the conversion cannot be a one-time step of the release.
   the caller's portal at once. It exists as the entry point the integration tests drive the conversion through; it
   is not a product feature and no user interface calls it.
 - The stored prompt of an agent (`chatSettings.prompt`) is not carried over: it already reaches no model.
-- No letter, no new audit action. Open clients get the usual folder events for the created project, the changed
-  room and the moved folder.
+- No letter, no new audit action. Open clients get the usual folder events for the created project, the Knowledge
+  room the agent becomes and the moved folder.
 - Out of scope: hiding the agents section and closing `createRoom` for the AI room type (a separate change).
 
 ## Capabilities
@@ -74,8 +74,10 @@ on. What changes is the stored data, so a caller meets other objects under the i
   client change that hides it belongs to the separate change.
 - Published SDKs and the OpenAPI document: unchanged. The new route is internal and not published.
 - Webhooks: none are raised; the conversion does not go through the API actions that raise them.
-- Socket events: existing events only (`create-folder` for the project and the moved folder, `update-folder` for the
-  room, `delete-folder` for a deleted agent).
+- Socket events: existing events only, `create-folder` for the project, the moved Chat outputs folder and the
+  Knowledge room the agent becomes (also for a room without knowledge files whose deletion failed). Nothing is sent
+  for the agent's old place: no `delete-folder` for the agent, its moved or deleted folders, its Knowledge folder or
+  a deleted room, because the client does not show the agents section.
 - Backup and restore: no new table or column; the one schema change is an index on `ai_integration_threads`. An archive made before the conversion restores agents; the
   background pass converts them, so between the end of the restore and that pass the portal still holds agents.
   The pass depends on the restore and the transfer setting the portal's last-modified time, which both do today.

@@ -97,8 +97,9 @@ Run under the system account with the portal set, holding a distributed lock on 
 4. **After the commit**, each in its own try/catch with a warning log: copy the logo to the project and set its
    flag; `FolderIndexIntegrationEvent` for the project and the room, a `Delete` index event for the removed Knowledge
    folder, and an `UpdateFolders` index event for each moved knowledge file, each event in its own try/catch so that
-   one failed publish does not skip the rest; socket events (`create-folder` for the project, `update-folder` for the room); for an agent without
-   knowledge files `DeleteFolderAsync` of the room, with `delete-folder`, and once the room is deleted the logo
+   one failed publish does not skip the rest; socket events (`create-folder` for the project and for the Knowledge room); for an agent without
+   knowledge files `DeleteFolderAsync` of the room with no socket event (`create-folder` for the room when the deletion
+   fails), and once the room is deleted the logo
    files of an agent with a logo (`RoomLogoManager.DeleteLogoFilesAsync`), after the copy to the project.
 
 `MoveFolderAsync` and `DeleteFolderAsync` are reused as they are: the folder tree, the counters and the used space
