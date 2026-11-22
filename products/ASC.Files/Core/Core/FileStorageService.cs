@@ -6042,6 +6042,18 @@ public class FileStorageService //: IFileStorageService
                 break;
 
             case FormFillingManageAction.Resume:
+                // Resume had no check: any member, or anyone who could open the room, resumed a stopped form. In a
+                // Virtual Data Room the right to stop ends with the stop, so a resume takes the right to act on a
+                // stopped form, held by the same people; elsewhere it takes the right to stop.
+                var canResume = room?.FolderType == FolderType.VirtualDataRoom
+                    ? await fileSecurity.CanResetFillingAsync(form, authContext.CurrentAccount.ID)
+                    : await fileSecurity.CanStopFillingAsync(form, authContext.CurrentAccount.ID);
+
+                if (!canResume)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                }
+
                 properties.FormFilling.FillingStopedDate = DateTime.MinValue;
                 properties.FormFilling.FormFillingInterruption = null;
                 break;

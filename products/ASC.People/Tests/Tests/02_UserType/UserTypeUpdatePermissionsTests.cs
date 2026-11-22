@@ -193,6 +193,32 @@ public class UserTypeUpdatePermissionsTests(AspireAppFixture fixture) : BaseTest
         profile.IsRoomAdmin.Should().BeTrue();
     }
 
+    /// <summary>
+    /// A room admin used to promote a guest the owner had invited through the job (200, the type changed), while
+    /// `PUT people/type/User` refused the same guest with 403. The job now applies the same visibility rule.
+    /// </summary>
+    [Fact]
+    public async Task StartUserTypeUpdate_RoomAdminPromotesForeignGuest_ThrowsAccessDeniedAndGuestStays()
+    {
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        var guest = await InviteGuest();
+
+        await _peopleClient.Authenticate(roomAdmin);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _userTypeApi.StartUserTypeUpdateAsync(
+                new StartUpdateUserTypeDto(EmployeeType.User, guest.Id),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("Access denied");
+
+        await _peopleClient.Authenticate(Owner);
+
+        var profile = (await _profilesApi.GetProfileByUserIdAsync(guest.Id.ToString(), TestContext.Current.CancellationToken)).Response;
+        profile.IsVisitor.Should().BeTrue();
+    }
+
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "80669")]

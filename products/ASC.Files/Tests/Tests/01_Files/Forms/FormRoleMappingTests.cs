@@ -195,6 +195,35 @@ public class FormRoleMappingTests(
         resumed.Select(r => r.RoleStatus).Should().Equal(FormFillingStatus.Complete, FormFillingStatus.YouTurn);
     }
 
+    /// <summary>
+    /// Resume used to check no right at all: a form filler without a role, or a user outside the room, resumed a
+    /// stopped form with 200 and the interruption was gone. It now takes the right the room's managers hold on a
+    /// stopped form.
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Resume_ByFillerWithoutRoleOrOutsider_IsRefusedAndTheFormStaysStopped(bool outsider)
+    {
+        // Arrange
+        var setup = await CreateFormInVdrWithFillers();
+        await SaveRoles(setup, ("Alpha", setup.First, true), ("Beta", setup.Second, false));
+        await Manage(setup.FormId, FormFillingManageAction.Stop);
+
+        var actor = outsider ? await InviteMember(EmployeeType.User) : setup.Third;
+
+        // Act
+        await _filesClient.Authenticate(actor);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await Manage(setup.FormId, FormFillingManageAction.Resume));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+
+        await _filesClient.Authenticate(Owner);
+        (await GetRoles(setup.FormId)).Select(r => r.RoleStatus).Should().Equal(FormFillingStatus.Complete, FormFillingStatus.Stoped);
+    }
+
     [Fact]
     public async Task SaveFormRoleMapping_EmptyListAfterStop_ResetsTheFormAndANewSetReplacesTheOldOne()
     {

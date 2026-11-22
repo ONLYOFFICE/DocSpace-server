@@ -119,6 +119,7 @@ client's way into and out of filling mode.
 
 - **WHEN** `Resume` is applied to a form
 - **THEN** the interruption record (the stop time and the interrupting role) is cleared; the action exists for the Virtual Data Room flow and changes nothing else in a Form filling room
+- **AND** it requires the right to stop the filling; in a Virtual Data Room, the right to act on the stopped form, which the same managers hold, so a form filler without a role, a user outside the room and a repeated `Resume` get 403
 
 #### Scenario: Start and stop
 
@@ -132,8 +133,8 @@ client's way into and out of filling mode.
 
 #### Scenario: Resume of a form that was never started
 
-- **WHEN** `Resume` is sent for a PDF in a room that has no filling properties yet
-- **THEN** the server fails with 500, because there is no record to clear
+- **WHEN** `Resume` is sent for a PDF in a custom room, which has no filling properties
+- **THEN** the request is refused (403), because nobody holds the right to stop or resume a filling there
 
 #### Scenario: Edit through the editor
 

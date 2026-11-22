@@ -253,7 +253,7 @@ test carries the mark or its summary says so, "red by code reading" means the pa
 | `convertFile`: no access 403, anonymous 401, 999999999 → 404, empty / unknown `outputtype` 400 | `01_Files/Docs/DocsConverterTests.cs:46-104`; yaml `convertFile` (l. 8686) | TEST-CONFIRMED [run: PASS] |
 | `runBuilderScript`: no edit access 403, anonymous 401, unquoted numeric id 400, empty script 400, second script while one runs 403 | `01_Files/Docs/DocsBuilderTests.cs:47-125`; yaml `runBuilderScript` (l. 8800) | TEST-CONFIRMED [run: PASS] |
 | **Thumbnails** | | |
-| One/two files echoed; folder id dropped; 999999999 echoed; `{}` body and folders only → 200 empty list | `01_Files/Thumbnails/ThumbnailsCreateTests.cs:49-86, 88-110, 117-176` (the "unfiled-thumbnails-null-fileids" trait stays after the fix); `FilesController.cs:1454-1464` | TEST-CONFIRMED [run: PASS] |
+| One/two files echoed; folder id dropped; 999999999 echoed; `{}` body and folders only → 200 empty list | `01_Files/Thumbnails/ThumbnailsCreateTests.cs:49-86, 88-110, 117-176` (the "unfiled-thumbnails-null-fileids" trait stays after the fix); `FilesController.cs:1455-1465` | TEST-CONFIRMED [run: PASS] |
 | Guest Read, User Read, Room manager, DocSpace admin may queue | `ThumbnailsPermissionsTests.cs:69-167` | TEST-CONFIRMED [run: PASS] |
 | Sizes 1280×720 and 3840×2160 (v2.6); 30 MB image / 1000 MB video limits | `buildtools/config/appsettings.json:318-324`; `products/ASC.Files/Core/Core/ThumbnailSettings.cs:101-111` | CODE-ONLY |
 | **Custom Filter mode of a spreadsheet** | | |
@@ -426,7 +426,7 @@ Re-checked against `3533ad8a89`, by reading: no test was run. FIXED rows keep th
 
 | # | Where | What the server does | Evidence | Verdict |
 |---|---|---|---|---|
-| F2 | thumbnails | A request without `fileIds` answered 400 with a stack trace instead of 200 with an empty list. | `FilesController.cs:1456-1461`; `ThumbnailsCreateTests.cs:88-110, 137-157` | FIXED (`a79b825223`, before the base; the earlier row was stale) |
+| F2 | thumbnails | A request without `fileIds` answered 400 with a stack trace instead of 200 with an empty list. | `FilesController.cs:1457-1462`; `ThumbnailsCreateTests.cs:88-110, 137-157` | FIXED (`a79b825223`, before the base; the earlier row was stale) |
 | F3 | copy | `copyBatchItems` with a folder id that does not exist answered 500. | `FolderCopyTests.cs:127-152` asserts 404; `CopyPermissionsCheck.cs:224-237` | FIXED (`184d90789e`, bug 84435) — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | F4 | move | `moveBatchItems` with a file id that does not exist answered 403 instead of 404. | `CopyPermissionsCheck.cs:279-292` (`FileNotFoundException` → 404); `FileMoveOperationTests.cs:121-144`; `MoveBatchBugTests.cs:58-62` (control) | FIXED (`01d0b7713d`, bug 82204, shared check; the test's "403 today" comment is stale) — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | F5 | upload session | Aborting a session id that never existed answered 500 instead of 404. | `ChunkedUploadSessionHolder.cs:70-85`; `UploadSessionLifecycleTests.cs:183-199` | FIXED (`73aa4e8ab8`, bug 82278) |

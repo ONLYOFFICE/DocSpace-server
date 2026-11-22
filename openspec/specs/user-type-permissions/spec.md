@@ -287,7 +287,7 @@ appear only through room invitations.
 
 ### Requirement: Changing a user's type
 
-The system SHALL restrict user type changes (`updateUserType`) by the caller's type: only the Owner promotes to or demotes
+The system SHALL restrict user type changes (`updateUserType` and the queued `startUserTypeUpdate`) by the caller's type: only the Owner promotes to or demotes
 from DocSpace admin; the Owner and DocSpace admins promote to Room admin, demote Room admins and Users (to User or Guest), and
 promote any Guest; only the Owner demotes a DocSpace admin to Guest; a Room admin promotes only the Guests they invited themselves. Demotions run as a queued
 job that reports its result.
@@ -322,8 +322,8 @@ job that reports its result.
 
 #### Scenario: Room admin cannot promote another inviter's Guest
 
-- **WHEN** a Room admin promotes a Guest invited by someone else to User
-- **THEN** the system rejects the request (403)
+- **WHEN** a Room admin promotes a Guest invited by someone else to User, through `updateUserType` or `startUserTypeUpdate`
+- **THEN** the system rejects the request (403), no job is started and the account stays a Guest
 
 #### Scenario: Room admin cannot demote a User
 

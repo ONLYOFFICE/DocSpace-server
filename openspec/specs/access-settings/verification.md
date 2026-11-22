@@ -76,17 +76,17 @@ and from the method body where a row needed the request; test line numbers point
 | **Enforcing IP restrictions** | `S/IpRestrictions/IpRestrictionsEnforcementTests.cs:56,73,89,103,127` (caller address set with `X-Forwarded-For`, trusted from 127.0.0.1) | TEST-CONFIRMED [run: PASS] |
 | **Listing two-factor methods** | `S/Tfa/TfaGetSettingsTests.cs:46`; `S/Tfa/TfaSettingsPermissionsTests.cs:83`; fields `Tfa:87-112` | TEST-CONFIRMED [run: PASS] |
 | **Changing the two-factor policy** | | |
-| Owner, admin enable and disable | `S/Tfa/TfaSettingsUpdateTests.cs:46,57,178,193` | TEST-CONFIRMED [run: PASS] |
+| Owner, admin enable and disable | `S/Tfa/TfaSettingsUpdateTests.cs:46,57,191,206` | TEST-CONFIRMED [run: PASS] |
 | SMS without provider 405 (bug 82970) | `S/Tfa/TfaSettingsUpdateTests.cs:71` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401, roles below admin 403 | `S/Tfa/TfaSettingsPermissionsTests.cs:48,66` | TEST-CONFIRMED [run: PASS] |
-| Enabling one method switches the other off | `Tfa:264-267,286-289`. Unreachable: SMS cannot be switched on without a provider, so neither direction can be observed | CODE-ONLY |
+| Enabling one method switches the other off | `Tfa:265-268,287-290`. Unreachable: SMS cannot be switched on without a provider, so neither direction can be observed | CODE-ONLY |
 | **Validation of the two-factor policy** | | |
-| Malformed `mandatoryUsers` 400 | `S/Tfa/TfaSettingsUpdateTests.cs:121` | TEST-CONFIRMED [run: PASS] |
-| Malformed `trustedIps` 400, sign-in keeps working (bug 82994) | `S/Tfa/TfaSettingsUpdateTests.cs:142` | TEST-CONFIRMED [run: PASS] |
-| Nonexistent user and group ids accepted | `S/Tfa/TfaSettingsUpdateTests.cs:97,108` | TEST-CONFIRMED [run: PASS] |
+| Malformed `mandatoryUsers` 400 | `S/Tfa/TfaSettingsUpdateTests.cs:134` | TEST-CONFIRMED [run: PASS] |
+| Malformed `trustedIps` 400, sign-in keeps working (bug 82994) | `S/Tfa/TfaSettingsUpdateTests.cs:155` | TEST-CONFIRMED [run: PASS] |
+| Nonexistent user and group ids accepted | `S/Tfa/TfaSettingsUpdateTests.cs:110,121` | TEST-CONFIRMED [run: PASS] |
 | Owner named while `id` is not the caller's: 403 | `S/Tfa/TfaOwnerGuardTests.cs:55,71,89,101` (the owner listing themselves without `id` is refused too, AC-8) | TEST-CONFIRMED [run: PASS] |
-| **Switching a two-factor method on ends sessions** | `S/Tfa/TfaSettingsUpdateTests.cs:208,225`; `Tfa:311-314` | TEST-CONFIRMED [run: PASS] |
-| **Who must pass the second factor** | `S/Tfa/TfaSettingsUpdateTests.cs:161`; `S/Tfa/TfaTrustedIpsOverrideTests.cs:70,98`; `web/ASC.Web.Core/Sms/TfaSettingsBase.cs:64-105` | TEST-CONFIRMED [run: PASS] |
+| **Switching a two-factor method on ends sessions** | `S/Tfa/TfaSettingsUpdateTests.cs:221,238`; `Tfa:316-319` | TEST-CONFIRMED [run: PASS] |
+| **Who must pass the second factor** | `S/Tfa/TfaSettingsUpdateTests.cs:174`; `S/Tfa/TfaTrustedIpsOverrideTests.cs:70,98`; `web/ASC.Web.Core/Sms/TfaSettingsBase.cs:64-105` | TEST-CONFIRMED [run: PASS] |
 | **Policy change with a confirmation link** | | |
 | Link returned; 405; refused callers | `S/Tfa/TfaSettingsLinkTests.cs:49,63`; `S/Tfa/TfaSettingsPermissionsTests.cs:97,115` | TEST-CONFIRMED [run: PASS] |
 | Empty string when off or exempt | `S/Tfa/TfaOwnerGuardTests.cs:112,123` | TEST-CONFIRMED [run: PASS] |
@@ -106,7 +106,7 @@ and from the method body where a row needed the request; test line numbers point
 | Other roles 403 with the message; anonymous 401 | `S/Tfa/TfaUnlinkAppPermissionsTests.cs:48,67` | TEST-CONFIRMED [run: PASS] |
 | No `id` 403; malformed and empty 400; not linked 405 (bug 82983) | `S/Tfa/TfaUnlinkAppTests.cs:120,67,82,49` | TEST-CONFIRMED [run: PASS] |
 | Caller's own `id` gives an activation link; another person's gives an empty string | `S/Tfa/TfaActivationLinkTests.cs:105,119` | TEST-CONFIRMED [run: PASS] |
-| Letter to the person | `Tfa:543-551`. Unreachable: the suite cannot read the letter | CODE-ONLY |
+| Letter to the person | `Tfa:548-556`. Unreachable: the suite cannot read the letter | CODE-ONLY |
 | **Reading single sign-on settings** | | |
 | Owner, anonymous, members | `S/Sso/SsoReadTests.cs:65,76`; `S/Sso/SsoPermissionsTests.cs:115` | TEST-CONFIRMED [run: PASS] |
 | 402 for an administrator; anonymous `false` without the plan | `B/Settings/FreePlanSettingsTests.cs:74,85` | TEST-CONFIRMED [run: PASS] |
@@ -149,11 +149,11 @@ and from the method body where a row needed the request; test line numbers point
 
 | Operation | yaml | Server |
 |---|---|---|
-| `getTfaAppCodes`, `updateTfaAppCodes` | no 403 | `Tfa:428-431,468-471` can answer 403 for an outsider account |
+| `getTfaAppCodes`, `updateTfaAppCodes` | no 403 | `Tfa:433-436,473-476` can answer 403 for an outsider account |
 | `authenticateMeFromBodyWithCode`, `sendSmsCode` | 404 for no matching user | With a password, an unknown account gets 401 (`SendSmsCodeTests.cs:68`, `BruteForceLoginManager.cs:162-165`); 404 was not traced to a reachable path |
 | Routes | `settings/security/loginsettings` | Code declares `loginSettings`; tests reach it through the SDK with the yaml spelling |
 
-A comment at `S/Tfa/TfaAuditTrailTests.cs:125` says that disabling two-factor invalidates the session. `Tfa:311-314` resets
+A comment at `S/Tfa/TfaAuditTrailTests.cs:125` says that disabling two-factor invalidates the session. `Tfa:316-319` resets
 sessions only when a method was switched on, so the spec states only that. The test name
 `UnlinkTfaApp_Owner_CannotUnlinkTheirOwnAppThisWay` (`TfaUnlinkAppTests.cs:120`) sends no `id`; the spec describes what it
 asserts, the request without an identifier.
@@ -178,9 +178,9 @@ No test was run. "Red by code reading" means the code as read would fail that te
 | AC-3 | `saveSsoSettingsV2` | Incomplete field mapping answers 500; the test expects 400 (bug 84687) | `SsoSaveTests.cs:148`; `Sso:224-229` | FIXED (f3a52c35dd): refused as a bad request, missing `fieldMapping` too — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | AC-4 | `saveSsoSettingsV2` | Malformed SLO URL answers 500; the test expects 400 (bug 84688) | `SsoSaveTests.cs:166`; `Sso:219-222` | FIXED (f3a52c35dd): refused as a bad request — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | AC-5 | `sendSmsCode` | Valid credentials with SMS off for the account answer 500: the thrown exception type has no mapping; the test requires anything but 500 (bug 84503) | `SendSmsCodeTests.cs:125`; `web/ASC.Web.Core/Sms/SmsManager.cs:101-104`; `Wrap` default branch | FIXED (f5f2735e30): 405 "SMS not available", asserted at `SendSmsCodeTests.cs:146` — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
-| AC-8 | `updateTfaSettings` | The 403 for naming the owner depends on the `id` field, not on the caller's role. An owner listing themselves in `mandatoryUsers` with no `id` gets 403 | `Tfa:234-239`; `S/Tfa/TfaOwnerGuardTests.cs:89` | confirmed by test (the spec states this rule) |
-| AC-9 | `unlinkTfaApp` | The branch that treats an empty `id` as the caller is not reached: an empty `id` resolves to no account and answers 403 first | `Tfa:507-515`; `TfaUnlinkAppTests.cs:120` | by code reading |
-| AC-10 | `updateTfaAppCodes` | Does not check that the method is on at portal level, while `getTfaAppCodes` does; with the method off and an application still linked the two disagree | `Tfa:421-423` vs `Tfa:463` | by code reading |
+| AC-8 | `updateTfaSettings` | The 403 for naming the owner depends on the `id` field, not on the caller's role. An owner listing themselves in `mandatoryUsers` with no `id` gets 403 | `Tfa:235-240`; `S/Tfa/TfaOwnerGuardTests.cs:89` | confirmed by test (the spec states this rule) |
+| AC-9 | `unlinkTfaApp` | The branch that treats an empty `id` as the caller is not reached: an empty `id` resolves to no account and answers 403 first | `Tfa:512-520`; `TfaUnlinkAppTests.cs:120` | by code reading |
+| AC-10 | `updateTfaAppCodes` | Does not check that the method is on at portal level, while `getTfaAppCodes` does; with the method off and an application still linked the two disagree | `Tfa:426-428` vs `Tfa:468` | by code reading |
 | AC-11 | `getIpRestrictions` | The ETag is the MD5 of zero bytes for every list: `HttpContextExtension.CalculateEtagAsync` hashes its `MemoryStream` without rewinding it. A client holding any earlier ETag gets 304 after the list changed | `S/IpRestrictions/IpRestrictionsRulesTests.cs:144`; `common/ASC.Common/Caching/HttpContextExtension.cs:87-99` (the same unrewound stream in `IPRestrictionsService.CalculateEtagAsync`) | test red [run: FAIL-BUG] — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 
 ## Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
@@ -189,7 +189,7 @@ Login history and active connections (`getIsAuthentificated` aside, the operatio
 
 | Claim | Source | Status |
 |---|---|---|
-| `tfaAppGenerateSetupCode` 403 for an ordinary token and `saveMobilePhone` 401 and 403 now documented; the two rows of "Differences between the yaml and the server" are removed | `web/ASC.Web.Api/Api/Settings/TfaappController.cs:376`; `web/ASC.Web.Api/Api/AuthenticationController.cs:537-538`; yaml at `ce37da4` (`c096f23fa9`, `893c80e16c`) | READ |
+| `tfaAppGenerateSetupCode` 403 for an ordinary token and `saveMobilePhone` 401 and 403 now documented; the two rows of "Differences between the yaml and the server" are removed | `web/ASC.Web.Api/Api/Settings/TfaappController.cs:381`; `web/ASC.Web.Api/Api/AuthenticationController.cs:537-538`; yaml at `ce37da4` (`c096f23fa9`, `893c80e16c`) | READ |
 | Documented 500 removed from `tfaValidateAuthCode` (empty code) and `saveSsoSettingsV2`: matches AC-1..AC-4, already FIXED | `c096f23fa9` | READ, no verdict change |
 | **Checking whether a request is signed in**: Owner and each member type `true`, anonymous `false` | `web/ASC.Web.Api.Tests/Tests/03_Authentication/AuthCheckTests.cs:46-95` | TEST-CONFIRMED [run: PASS] |
 | Unpaid portal still answers | `web/ASC.Web.Api/Api/AuthenticationController.cs:97` (`AllowNotPayment`) | CODE-ONLY |

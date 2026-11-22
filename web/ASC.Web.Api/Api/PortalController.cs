@@ -1197,14 +1197,14 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Sends the welcome email of a newly registered portal to the account in `userid`. Anyone can call it without
-    /// signing in. Instead of a token, `key` must be the confirmation key of the sign-in link for that account. The
-    /// key works for one hour. The call returns 403 for a wrong, foreign, or expired key, and then sends nothing. The
-    /// call changes data. Call it once, right after registration. Each repeated call with a valid key sends the emails
-    /// again. On a hosted portal, the password link of the earlier email then stops working. If the installation
-    /// requires SMS or an authenticator app after registration, the call turns that method on for the portal. It skips
-    /// this step for an internal test address. On a hosted portal in custom mode, the call also sends the registration
-    /// data to the sales address. The call returns no data.
+    /// Sends the welcome email of a newly registered portal to its owner, named in `userid`. Anyone can call it
+    /// without signing in. Instead of a token, `key` must be the confirmation key of the sign-in link for that account.
+    /// The key works for one hour. The call returns 403 for another account, or a wrong, foreign, or expired key, and
+    /// then sends nothing. The call changes data. Call it once, right after registration. Each repeated call with a
+    /// valid key sends the emails again. On a hosted portal, the password link of the earlier email then stops
+    /// working. If the installation requires SMS or an authenticator app after registration, the call turns that
+    /// method on for the portal. It skips this step for an internal test address. On a hosted portal in custom mode,
+    /// the call also sends the registration data to the sales address. The call returns no data.
     /// </remarks>
     /// <summary>
     /// Send congratulations
@@ -1213,11 +1213,18 @@ public class PortalController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The welcome letters were sent and the configured second factor was switched on for the portal")]
-    [SwaggerResponse(403, "The confirmation key does not match the user or is older than one hour")]
+    [SwaggerResponse(403, "`userid` is not the portal owner, or the confirmation key does not match the user or is older than one hour")]
     [AllowAnonymous]
     [HttpPost("sendcongratulations")]
     public async Task SendCongratulations([FromQuery] SendCongratulationsDto inDto)
     {
+        // the registration letter flow signs the key for the portal owner only (ApiSystem CommonMethods); a key of any
+        // other account must not send the letters or switch the second factor on for the whole portal
+        if (inDto.Userid != tenantManager.GetCurrentTenant().OwnerId)
+        {
+            throw new SecurityException("Access Denied.");
+        }
+
         var authInterval = TimeSpan.FromHours(1);
         var checkKeyResult = emailValidationKeyProvider.ValidateEmailKey(inDto.Userid.ToString() + ConfirmType.Auth, inDto.Key, authInterval);
 

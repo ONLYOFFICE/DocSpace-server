@@ -2552,7 +2552,8 @@ public class UserController(
     /// account to another admin. Changing an account to `Guest` also removes it from every AI project. The job deletes
     /// its chat threads there, with their files. For other types, use `PUT api/2.0/people/type/{type}`. Any other type
     /// returns 400.
-    /// Requires a room admin or a DocSpace admin. Other callers get 403. The `Guest` type also returns 403 if the
+    /// Requires a room admin or a DocSpace admin. Other callers get 403. A room admin also gets 403 for a guest they
+    /// are not related to, such as one another member invited. The `Guest` type also returns 403 if the
     /// portal does not allow inviting guests. Only the portal owner can change a DocSpace admin. Otherwise the call
     /// returns 400. The call also returns 400 for a system or disabled account, or for the account of the caller. The
     /// recipient is `reassignUserId`, or the caller if it is empty. It must be an active room admin or DocSpace admin,
@@ -2598,6 +2599,13 @@ public class UserController(
 
         var userType = await _userManager.GetUserTypeAsync(user);
         var toUserType = await _userManager.GetUserTypeAsync(toUser);
+
+        // the same rule as PUT people/type/{type}: a room admin changes the type only of the accounts they may see,
+        // so not of a guest someone else invited
+        if (!await _userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, inDto.UserId))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
 
         if (_userManager.IsSystemUser(user.Id)
             || user.Status == EmployeeStatus.Terminated

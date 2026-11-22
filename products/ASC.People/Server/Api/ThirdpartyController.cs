@@ -66,7 +66,9 @@ public class ThirdpartyController(
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
     UserSocketManager socketManager,
     UserWebhookManager webhookManager,
-    GeolocationHelper geolocationHelper)
+    GeolocationHelper geolocationHelper,
+    IUrlValidator urlValidator,
+    SetupInfo setupInfo)
     : ApiControllerBase
 {
 
@@ -445,18 +447,54 @@ public class ThirdpartyController(
         return (user, quotaLimit);
     }
 
+    /// <summary>
+    /// Saves the avatar of the provider profile as the photo of the new account. The address comes from the profile,
+    /// so it is checked like an address a member sends to the photo endpoints (bug 81491): a loopback, link-local or
+    /// private target, or a plain-HTTP address, is never requested. An avatar that cannot be saved leaves the account
+    /// without a photo; the sign-up goes on.
+    /// </summary>
     private async Task SaveContactImage(Guid userID, string url)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var validation = await urlValidator.ValidateAsync(url);
+        if (!validation.IsValid)
+        {
+            logger.WarningAvatarNotSaved(userID, validation.ErrorMessage);
+            return;
+        }
 
-        #pragma warning disable CA2000
-        var httpClient = httpClientFactory.CreateClient();
-        #pragma warning restore CA2000
+        try
+        {
+            var httpClient = httpClientFactory.CreateClient(UrlValidator.PinnedHttpClient);
+            using var request = new HttpRequestMessage(HttpMethod.Get, validation.ParsedUri);
+            request.Options.Set(UrlValidator.PinnedIpKey, validation.ResolvedAddresses[0]);
+            using var response = await httpClient.SendAsync(request);
 
-        using var response = await httpClient.SendAsync(request);
-        var bytes = await response.Content.ReadAsByteArrayAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.WarningAvatarNotSaved(userID, $"the provider answered {(int)response.StatusCode}");
+                return;
+            }
 
-        await userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
+            if (response.Content.Headers.ContentLength > setupInfo.MaxImageUploadSize)
+            {
+                logger.WarningAvatarNotSaved(userID, "the image is over the size limit");
+                return;
+            }
+
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            if (bytes.Length > setupInfo.MaxImageUploadSize)
+            {
+                logger.WarningAvatarNotSaved(userID, "the image is over the size limit");
+                return;
+            }
+
+            await userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
+        }
+        catch (Exception ex)
+        {
+            // best effort: before, a failed download ended the sign-up halfway, without the provider link and the sign-in
+            logger.WarningAvatarNotSaved(userID, ex.Message);
+        }
     }
 
     private static string GetMeaningfulProviderName(string providerName)

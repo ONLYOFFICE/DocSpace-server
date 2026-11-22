@@ -248,8 +248,12 @@ public class FormFillingStateTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// A form of a custom room has no filling to resume. The call used to fail with 500 on the missing filling
+    /// properties; since Resume checks the right to stop the filling, which nobody holds there, it returns 403.
+    /// </summary>
     [Fact]
-    public async Task Resume_OfFormThatWasNeverStarted_Returns500()
+    public async Task Resume_OfFormThatWasNeverStarted_Returns403()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -261,7 +265,7 @@ public class FormFillingStateTests(
             async () => await Manage(form.Id, FormFillingManageAction.Resume));
 
         // Assert
-        exception.ErrorCode.Should().Be(500, "a form without filling properties has nothing to resume");
+        exception.ErrorCode.Should().Be(403, "nobody may stop or resume a filling of a form in a custom room");
     }
 
     [Fact]

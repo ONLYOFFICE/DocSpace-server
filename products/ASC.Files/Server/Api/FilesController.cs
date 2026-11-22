@@ -1152,9 +1152,10 @@ public abstract class FilesController<T>(
     /// The call reads the form id only from `formId` in the body. Send the same value in the route. The form must be
     /// a PDF in a room. The action `Start` requires the right to start the filling, which a room manager and a
     /// content creator have. Other callers get 403. Only a room manager can stop a filling that another user started.
-    /// A content creator gets 403 there. In a form-filling room, `Edit` requires editing access to the form. The call
-    /// changes data. You can repeat `Resume` and `Edit` with the same body. A repeated `Stop` returns 403 in a
-    /// virtual data room and changes nothing in a form-filling room. Do not repeat `Start` in a form-filling room. A
+    /// A content creator gets 403 there. `Resume` requires the same right as `Stop`. In a virtual data room, it
+    /// applies to a stopped form. In a form-filling room, `Edit` requires editing access to the form. The call
+    /// changes data. You can repeat `Edit` with the same body. A repeated `Stop` or `Resume` returns 403 in a
+    /// virtual data room. A repeated `Stop` changes nothing in a form-filling room. Do not repeat `Start` there. A
     /// repeat can delete the drafts that users started after the first call. If the body has no `formId`, the call
     /// returns 400. If `action` is not a known value, the call returns 403. To read the resulting state, use
     /// `GET api/2.0/files/file/{fileId}/formroles`.
@@ -1167,7 +1168,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The action was applied to the form")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId`")]
-    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling or, in a form-filling room, put it back into editing, or `action` is not one of the known values")]
+    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start, stop or resume its filling or, in a form-filling room, put it back into editing, or `action` is not one of the known values")]
     // Same shape as formrolemapping above: the id travels in the body, the route placeholder is
     // unbound, and the client fills both with the same value.
     [SwaggerPathParameter("fileId", "The form the action applies to. Send the same value as the `formId` of the request body, which is the one the handler reads.")]

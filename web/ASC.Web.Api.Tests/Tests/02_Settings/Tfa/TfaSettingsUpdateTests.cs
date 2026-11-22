@@ -79,18 +79,31 @@ public class TfaSettingsUpdateTests(
         exception.ErrorCode.Should().Be(405);
     }
 
+    /// <summary>
+    /// A number outside the enum used to be taken as None: the call answered 200 false and switched
+    /// two-factor authentication off for the whole portal. It is refused with 400 now, and the policy
+    /// stays as it was.
+    /// </summary>
     // The DTO's Type is a plain enum, so an out-of-range value ("99") isn't a value the typed
-    // constructor can reject client-side — it's an ordinary int on the wire the server is free to
-    // ignore, so this stays a typed call via an explicit cast.
+    // constructor can reject client-side — it's an ordinary int on the wire, so this stays a typed
+    // call via an explicit cast.
     [Fact]
-    public async Task UpdateTfaSettings_OutOfRangeType_IsIgnored_ReturnsFalse()
+    public async Task UpdateTfaSettings_OutOfRangeType_Returns400AndKeepsThePolicy()
     {
+        // Arrange: switching the method on signs every session out, so the owner signs in again with a code
+        await EnableTfaAppAsync();
+        await LinkTfaAppAsync(Owner);
+
         // Act
-        var result = await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestDto((TfaType)99), TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _tfaSettingsApi.UpdateTfaSettingsAsync(
+                new TfaRequestDto((TfaType)99), TestContext.Current.CancellationToken));
 
         // Assert
-        result.Response.Should().BeFalse();
+        exception.ErrorCode.Should().Be(400);
+
+        var settings = (await _tfaSettingsApi.GetTfaSettingsAsync(TestContext.Current.CancellationToken)).Response;
+        settings.Should().ContainSingle(s => s.Id == "app").Which.Enabled.Should().BeTrue();
     }
 
     [Fact]

@@ -1064,7 +1064,7 @@ The group lists SHALL answer 404 for an entry that does not exist, a deleted fol
 
 ### Requirement: Letters after portal registration
 
-`sendCongratulations` (`POST portal/sendcongratulations`) SHALL answer without authentication and, given the `userid` and a confirmation `key` no older than one hour, SHALL send that account the welcome letters on every such call. Any other key SHALL answer 403 and send nothing.
+`sendCongratulations` (`POST portal/sendcongratulations`) SHALL answer without authentication and, given the `userid` and a confirmation `key` no older than one hour, SHALL send that account the welcome letters on every such call. A `userid` other than the portal owner and any other key SHALL answer 403 and send nothing.
 
 #### Scenario: Valid key
 
@@ -1075,6 +1075,11 @@ The group lists SHALL answer 404 for an entry that does not exist, a deleted fol
 
 - **WHEN** the key is older than one hour
 - **THEN** the answer is 403 and nothing is sent
+
+#### Scenario: Account other than the owner
+
+- **WHEN** `userid` names an account that is not the portal owner, whatever the key
+- **THEN** the answer is 403, nothing is sent and the second factor of the portal stays as it was
 
 ### Requirement: Real-time account and group events
 

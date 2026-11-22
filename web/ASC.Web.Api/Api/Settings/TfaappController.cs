@@ -207,7 +207,7 @@ public class TfaappController(
 
     /// <remarks>
     /// Sets the portal-wide two-factor authentication policy. With `type` `1`, it switches on the SMS method, and with
-    /// `2`, the authenticator app. Any other `type`, including `0`, turns TFA off. Switching one method on switches the
+    /// `2`, the authenticator app. With `0`, it turns TFA off. Switching one method on switches the
     /// other off. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other
     /// callers get 403. If `id` or `mandatoryUsers` names the portal owner while `id` is not the caller, the call
     /// returns 403. The call changes data and replaces the trusted and mandatory lists. Switching a method on signs out
@@ -215,14 +215,15 @@ public class TfaappController(
     /// policy and signs everyone out again. You can repeat a call that turns TFA off. It returns `true` if it switched
     /// a method on. It returns `false` if it turned TFA off. To also get the caller's own confirmation link, use
     /// `PUT api/2.0/settings/tfaappwithlink`. If the method is unavailable on the portal or SMS has no provider, the
-    /// call returns 405. The call returns 400 for an unreadable `type` or a malformed ID. It also returns 400 if a
-    /// `trustedIps` entry is not an address, range, or CIDR block. It works even when the portal payment is overdue.
+    /// call returns 405. The call returns 400 for an unreadable or unknown `type`, or a malformed ID. It also returns
+    /// 400 if a `trustedIps` entry is not an address, range, or CIDR block. Then the policy stays as it was. It works
+    /// even when the portal payment is overdue.
     /// </remarks>
     /// <summary>Update the TFA settings</summary>
     /// <path>api/2.0/settings/tfaapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "`true` when the SMS or the authenticator method was switched on, `false` when TFA was turned off", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block")]
+    [SwaggerResponse(400, "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, a number other than 0, 1 and 2, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or names the owner's account in `id` or `mandatoryUsers` while `id` is not the caller's own")]
     [SwaggerResponse(405, "The requested method is not enabled on this portal, or the SMS method has no configured provider")]
     [AllowNotPayment]
@@ -292,7 +293,7 @@ public class TfaappController(
 
                 break;
 
-            default:
+            case TfaType.None:
                 if (await tfaAppAuthSettingsHelper.GetEnable())
                 {
                     await tfaAppAuthSettingsHelper.SetEnable(false);
@@ -306,6 +307,10 @@ public class TfaappController(
                 action = MessageAction.TwoFactorAuthenticationDisabled;
 
                 break;
+
+            default:
+                // a number outside the enum binds as is; taken as None, it used to switch TFA off for the whole portal
+                throw new ArgumentException($"Unknown TFA type {(int)inDto.Type}", nameof(inDto.Type));
         }
 
         if (result)
@@ -329,20 +334,20 @@ public class TfaappController(
     /// Sets the portal-wide two-factor policy as `PUT api/2.0/settings/tfaapp` does. It also returns the caller's own
     /// confirmation link. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
     /// Other callers get 403. If `id` or `mandatoryUsers` names the portal owner while `id` is not the caller, the call
-    /// returns 403. Any `type` other than `1` and `2` turns TFA off. The call changes data. Switching a method on signs
+    /// returns 403. With `type` `0`, the call turns TFA off. The call changes data. Switching a method on signs
     /// out every session on the portal. With `type` `1` or `2`, a repeated call signs everyone out again and returns a
     /// new link. You can repeat a call that turns TFA off. The call returns an empty string if it turned TFA off or the
     /// caller is exempt. Usually, the caller is exempt through their own address in `trustedIps`. For the authenticator
     /// method, the call sets the link's cookie but does not return its value. To get the value, use
     /// `GET api/2.0/settings/tfaapp/confirm`, which issues a new link. If the method is unavailable on the portal or
-    /// SMS has no provider, the call returns 405. The call returns 400 for an unreadable `type` or a malformed ID. It
-    /// also returns 400 if a `trustedIps` entry is not an address, range, or CIDR block.
+    /// SMS has no provider, the call returns 405. The call returns 400 for an unreadable or unknown `type`, or a
+    /// malformed ID. It also returns 400 if a `trustedIps` entry is not an address, range, or CIDR block.
     /// </remarks>
     /// <summary>Update TFA settings with a link</summary>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "The caller's own confirmation link, or an empty string when TFA was turned off or the caller is exempt", typeof(string))]
-    [SwaggerResponse(400, "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block")]
+    [SwaggerResponse(400, "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, a number other than 0, 1 and 2, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or names the owner's account in `id` or `mandatoryUsers` while `id` is not the caller's own")]
     [SwaggerResponse(405, "The requested method is not enabled on this portal, or the SMS method has no configured provider")]
     [HttpPut("tfaappwithlink")]
