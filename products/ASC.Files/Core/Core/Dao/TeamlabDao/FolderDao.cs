@@ -797,7 +797,7 @@ internal class FolderDao(
                 string[] knowledgeKeys = [knowledge.Id.ToString()];
 
                 await context.DeleteAiAgentFileSharesAsync(tenantId, fileIds);
-                await context.UpdateFilesFolderIdAsync(tenantId, fileIds, knowledgeIds, roomId);
+                await context.MoveAiAgentKnowledgeFilesAsync(tenantId, fileIds, knowledge.Id, roomId, DateTime.UtcNow);
 
                 // the Knowledge folder goes with every row DeleteFolderAsync removes for a folder that an agent's Knowledge folder can have;
                 // DeleteOrderAsync is the query that removes its tree rows
@@ -815,7 +815,7 @@ internal class FolderDao(
 
             await tx.CommitAsync();
 
-            conversion = new AiAgentConversion(projectId, knowledge != null, fileIds);
+            conversion = new AiAgentConversion(projectId, knowledge?.Id, fileIds);
         });
 
         return conversion;

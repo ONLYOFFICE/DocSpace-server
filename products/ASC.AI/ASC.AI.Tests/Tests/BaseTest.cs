@@ -191,6 +191,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
     }
 
+    protected Task<EventBusProbe> ListenToEventBusAsync(string eventName)
+    {
+        return fixture.ListenToEventBusAsync(eventName, TestContext.Current.CancellationToken);
+    }
+
     /// <summary>
     /// The status and error body an SDK call ended with: 200 and an empty body when it succeeded, the <see cref="ApiException"/>
     /// code and content otherwise.

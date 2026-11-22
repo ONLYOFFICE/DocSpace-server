@@ -34,7 +34,10 @@
 
 namespace ASC.Files.Core.Core.AI;
 
-public record AiAgentConversion(int ProjectId, bool HasKnowledge, IReadOnlyList<int> KnowledgeFileIds);
+public record AiAgentConversion(int ProjectId, int? KnowledgeFolderId, IReadOnlyList<int> KnowledgeFileIds)
+{
+    public bool HasKnowledge => KnowledgeFolderId.HasValue;
+}
 
 public static class AiAgentMigrationAccess
 {

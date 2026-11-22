@@ -67,6 +67,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<int> TouchAiAgentSubtreeFilesAsync(int tenantId, int folderId, DateTime modifiedOn)
+    {
+        return AiAgentMigrationQueries.TouchAiAgentSubtreeFilesAsync(this, tenantId, folderId, modifiedOn);
+    }
+
+    [PreCompileQuery]
     public Task<int> ClaimAiAgentRoomAsync(int tenantId, int roomId, string title, Guid modifiedBy, DateTime modifiedOn)
     {
         return AiAgentMigrationQueries.ClaimAiAgentRoomAsync(this, tenantId, roomId, title, modifiedBy, modifiedOn);
@@ -76,6 +82,12 @@ public partial class FilesDbContext
     public Task<int> DeleteAiAgentKnowledgeFolderAsync(int tenantId, int folderId)
     {
         return AiAgentMigrationQueries.DeleteAiAgentKnowledgeFolderAsync(this, tenantId, folderId);
+    }
+
+    [PreCompileQuery]
+    public Task<int> MoveAiAgentKnowledgeFilesAsync(int tenantId, IEnumerable<int> fileIds, int knowledgeFolderId, int roomId, DateTime modifiedOn)
+    {
+        return AiAgentMigrationQueries.MoveAiAgentKnowledgeFilesAsync(this, tenantId, fileIds, knowledgeFolderId, roomId, modifiedOn);
     }
 
     [PreCompileQuery]
@@ -181,6 +193,12 @@ static file class AiAgentMigrationQueries
                     .Select(f => f.Id)
                     .Distinct());
 
+    public static readonly Func<FilesDbContext, int, int, DateTime, Task<int>> TouchAiAgentSubtreeFilesAsync =
+        (FilesDbContext ctx, int tenantId, int folderId, DateTime modifiedOn) =>
+            ctx.Files
+                .Where(f => f.TenantId == tenantId && ctx.Tree.Any(t => t.ParentId == folderId && t.FolderId == f.ParentId))
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.ModifiedOn, modifiedOn));
+
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     // The type in the predicate makes the statement the claim of the conversion: it changes no row once
     // the room is no longer an agent, whoever converted it.
@@ -200,6 +218,14 @@ static file class AiAgentMigrationQueries
                 ctx.Folders
                     .Where(f => f.TenantId == tenantId && f.Id == folderId && f.FolderType == FolderType.Knowledge)
                     .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, int, int, DateTime, Task<int>> MoveAiAgentKnowledgeFilesAsync =
+        (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, int knowledgeFolderId, int roomId, DateTime modifiedOn) =>
+            ctx.Files
+                .Where(f => f.TenantId == tenantId && fileIds.Contains(f.Id) && f.ParentId == knowledgeFolderId)
+                .ExecuteUpdateAsync(f => f
+                    .SetProperty(p => p.ParentId, roomId)
+                    .SetProperty(p => p.ModifiedOn, modifiedOn));
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<FilesDbContext, int, int, int, Task<int>> MoveAiAgentThreadsAsync =

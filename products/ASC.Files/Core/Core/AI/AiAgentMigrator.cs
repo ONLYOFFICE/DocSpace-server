@@ -179,6 +179,23 @@ public class AiAgentMigrator(
             {
                 await socketManager.CreateFolderAsync(await folderDao.GetFolderAsync(child.Id));
             });
+
+            await RunSideEffectAsync(tenantId, agent.Id, "the modified time of the files of the moved Chat outputs folder", async () =>
+            {
+                await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+                await filesDbContext.TouchAiAgentSubtreeFilesAsync(tenantId, child.Id, DateTime.UtcNow);
+            });
+        }
+    }
+
+    private async Task PublishFileIndexEventsAsync(int tenantId, int agentId, IEnumerable<int> fileIds)
+    {
+        var currentAccount = authContext.CurrentAccount.ID;
+
+        foreach (var fileId in fileIds)
+        {
+            await RunSideEffectAsync(tenantId, agentId, $"the index event of the moved file {fileId}", () =>
+                eventBus.PublishAsync(new FileIndexIntegrationEvent(currentAccount, tenantId) { FileId = fileId, Action = FileIndexAction.UpdateFolders }));
         }
     }
 
@@ -267,13 +284,10 @@ public class AiAgentMigrator(
         await RunSideEffectAsync(tenantId, agentId, "the index event of the room", () =>
             eventBus.PublishAsync(new FolderIndexIntegrationEvent(currentAccount, tenantId) { FolderId = agentId, Action = FolderIndexAction.Index }));
 
-        await RunSideEffectAsync(tenantId, agentId, "the index events of the knowledge files", async () =>
-        {
-            foreach (var fileId in conversion.KnowledgeFileIds)
-            {
-                await eventBus.PublishAsync(new FileIndexIntegrationEvent(currentAccount, tenantId) { FileId = fileId, Action = FileIndexAction.UpdateFolders });
-            }
-        });
+        await RunSideEffectAsync(tenantId, agentId, "the index event of the deleted Knowledge folder", () =>
+            eventBus.PublishAsync(new FolderIndexIntegrationEvent(currentAccount, tenantId) { FolderIds = [conversion.KnowledgeFolderId.Value], Action = FolderIndexAction.Delete }));
+
+        await PublishFileIndexEventsAsync(tenantId, agentId, conversion.KnowledgeFileIds);
 
         await RunSideEffectAsync(tenantId, agentId, "the socket event of the room", async () =>
         {

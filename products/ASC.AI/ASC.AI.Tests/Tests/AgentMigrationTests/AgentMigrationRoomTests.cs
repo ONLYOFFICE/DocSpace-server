@@ -143,6 +143,69 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
     }
 
     [Fact]
+    public async Task Convert_KnowledgeFile_MovesItsModifiedOn()
+    {
+        // Arrange
+        var agent = await CreateAgentAsync(NewTitle("Indexed bot"));
+        var file = await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt");
+        var past = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        await using (var connection = await OpenDatabaseAsync())
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "UPDATE files_file SET modified_on = @past WHERE id = @id";
+            command.Parameters.AddWithValue("@past", past);
+            command.Parameters.AddWithValue("@id", file.Id);
+
+            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().BeGreaterThan(0);
+        }
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert - the periodic pass of the full-text index reads the files by modified_on
+        await using (var connection = await OpenDatabaseAsync())
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "SELECT folder_id, modified_on FROM files_file WHERE id = @id";
+            command.Parameters.AddWithValue("@id", file.Id);
+
+            await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
+            var rows = 0;
+
+            while (await reader.ReadAsync(TestContext.Current.CancellationToken))
+            {
+                rows++;
+                reader.GetInt32(0).Should().Be(agent.Id, "the knowledge file lies directly in the room");
+                reader.GetDateTime(1).Should().BeAfter(past, "the move of a knowledge file into the room is a change the index has to pick up");
+            }
+
+            rows.Should().BeGreaterThan(0);
+        }
+    }
+
+    [Fact]
+    public async Task Convert_AgentWithKnowledge_DeletesTheKnowledgeFolderFromTheIndex()
+    {
+        // Arrange
+        var agent = await CreateAgentAsync(NewTitle("Index cleanup bot"));
+        var knowledge = await AgentFolderAsync(agent.Id, FolderType.Knowledge);
+        await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt");
+
+        await using var probe = await ListenToEventBusAsync(nameof(FolderIndexIntegrationEvent));
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert - the API never answers with a folder the database no longer holds, so the event is read off the bus
+        var deletions = await probe.ReadAsync<FolderIndexIntegrationEvent>(
+            e => e.Action == FolderIndexAction.Delete && e.FolderIds?.Contains(knowledge.Id) == true,
+            TestContext.Current.CancellationToken);
+
+        deletions.Should().ContainSingle();
+    }
+
+    [Fact]
     public async Task Convert_AgentTitleAtTheLimit_CutsTheAgentTitleAndKeepsTheSuffix()
     {
         // Arrange

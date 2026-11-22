@@ -102,7 +102,9 @@ agent had.
 - One schema migration, `MigrationContext_Upgrade110` (MySQL SaaS): the index `(tenant_id, entry_id)` on
   `ai_integration_threads`. No change in `common/ASC.Data.Backup.Core`.
 - OpenSearch: the vectors of the knowledge files in `files_embeddings` are not touched. The full-text documents of the
-  project, the room and the knowledge files are updated through the usual index events, which Files.Worker applies.
+  project, the room and the knowledge files are updated, and the one of the removed Knowledge folder deleted,
+  through the usual index events, which Files.Worker applies; the files of the moved Chat outputs folders get a new
+  `modified_on`, and the periodic pass of the index picks them up.
 - Tests: `products/ASC.AI/ASC.AI.Tests` (conversion scenarios through the internal route), unit tests of the
   candidate window and the attempt limit, a unit test in `common/Tests/ASC.Data.Backup.Core.Tests` pinning the
   last-modified time a restore writes.

@@ -79,6 +79,11 @@ Run under the system account with the portal set, holding a distributed lock on 
    into the My documents of the owner (`GetFolderIDUserAsync(createIfNotExists: true, owner)`; the portal owner
    when the agent's owner is not found or is terminated). The move stores the title in its own update, so a run
    that stops between the two statements leaves the title as it was and the next run composes the same one.
+   After the move, in a try/catch with a warning log, one update sets `modified_on` of every file of the moved
+   subtree to now. The move itself sends an index event for the moved folder only, and Files.Worker re-indexes only
+   the folder an event names, so the files would keep their old ancestor chain in the index and a search in My
+   documents with subfolders would not find them; the periodic pass of the full-text index, which reads files by
+   `modified_on`, stores the new chain on its next run (every minute by default, `elastic:Period`).
    Without content: `DeleteFolderAsync`. Matching "every other child" instead of "the folder of type
    `ChatOutputs`" makes a rerun pick up a folder whose type was already changed.
    **Knowledge made flat.** A Knowledge folder is flat: the API refuses to create a folder in it, its folders could
@@ -90,13 +95,14 @@ Run under the system account with the portal set, holding a distributed lock on 
 2. **Under the AiHub root.** If the agent's parent is not the `aihub` root, `MoveFolderAsync` there.
 3. **Conversion transaction** (D4).
 4. **After the commit**, each in its own try/catch with a warning log: copy the logo to the project and set its
-   flag; `FolderIndexIntegrationEvent` for the project and the room and the index events for the moved knowledge
-   files; socket events (`create-folder` for the project, `update-folder` for the room); for an agent without
+   flag; `FolderIndexIntegrationEvent` for the project and the room, a `Delete` index event for the removed Knowledge
+   folder, and an `UpdateFolders` index event for each moved knowledge file, each event in its own try/catch so that
+   one failed publish does not skip the rest; socket events (`create-folder` for the project, `update-folder` for the room); for an agent without
    knowledge files `DeleteFolderAsync` of the room, with `delete-folder`, and once the room is deleted the logo
    files of an agent with a logo (`RoomLogoManager.DeleteLogoFilesAsync`), after the copy to the project.
 
-`MoveFolderAsync` and `DeleteFolderAsync` are reused as they are: the folder tree, the counters, the used space and
-the index events of a subtree move are the logic not worth a second copy.
+`MoveFolderAsync` and `DeleteFolderAsync` are reused as they are: the folder tree, the counters and the used space
+are the logic not worth a second copy.
 
 ### D4. The conversion transaction
 
@@ -117,8 +123,9 @@ A new `IFolderDao<int>` operation (third-party implementations throw `NotSupport
    knowledge files.
 6. Tag links of the room: re-point Custom and Pin links to the project, delete Recent and "new" links. A
    Favorite link is left on the room.
-7. With knowledge files: move them to the room with `UpdateFilesFolderIdAsync` (the query the batched
-   `FileDao.MoveFilesAsync` uses), delete the Knowledge folder row with its tree rows and the rows
+7. With knowledge files: move them to the room with `MoveAiAgentKnowledgeFilesAsync`, one update that also sets
+   `modified_on` of every version row to now, so the periodic pass of the full-text index, which reads files by
+   `modified_on`, picks them up when their index event is lost; delete the Knowledge folder row with its tree rows and the rows
    `DeleteFolderAsync` removes for a folder, lower the folder count of the room and its ancestors by one, insert
    the `files_ai_project_room` link. Without them: nothing more, the room is no longer pending since step 1;
    step 4 of D3 deletes it.

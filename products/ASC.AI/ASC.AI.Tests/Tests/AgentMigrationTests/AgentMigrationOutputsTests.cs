@@ -183,4 +183,53 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
         var info = (await FilesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         info.FolderId.Should().Be(moved[0].Id);
     }
+
+    [Fact]
+    public async Task Convert_ChatOutputsFiles_MovesTheirModifiedOn()
+    {
+        // Arrange
+        var agent = await CreateAgentAsync(NewTitle("Outputs index bot"));
+        var outputs = await AgentFolderAsync(agent.Id, FolderType.ChatOutputs);
+
+        var direct = await UploadAsync(outputs.Id, "autotest-direct-output.txt");
+        var folder = (await FoldersApi.CreateFolderAsync(outputs.Id, new CreateFolderRequest("Nested"), TestContext.Current.CancellationToken)).Response;
+        var nested = await UploadAsync(folder.Id, "autotest-nested-output.txt");
+        int[] fileIds = [direct.Id, nested.Id];
+        var past = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        await using (var connection = await OpenDatabaseAsync())
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "UPDATE files_file SET modified_on = @past WHERE id IN (@direct, @nested)";
+            command.Parameters.AddWithValue("@past", past);
+            command.Parameters.AddWithValue("@direct", direct.Id);
+            command.Parameters.AddWithValue("@nested", nested.Id);
+
+            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().BeGreaterThanOrEqualTo(2);
+        }
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert - the periodic pass of the full-text index reads the files by modified_on and stores their new ancestor chain
+        var modified = new Dictionary<int, DateTime>();
+
+        await using (var connection = await OpenDatabaseAsync())
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "SELECT id, modified_on FROM files_file WHERE id IN (@direct, @nested)";
+            command.Parameters.AddWithValue("@direct", direct.Id);
+            command.Parameters.AddWithValue("@nested", nested.Id);
+
+            await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
+
+            while (await reader.ReadAsync(TestContext.Current.CancellationToken))
+            {
+                modified[reader.GetInt32(0)] = reader.GetDateTime(1);
+            }
+        }
+
+        modified.Keys.Should().BeEquivalentTo(fileIds);
+        modified.Values.Should().AllSatisfy(value => value.Should().BeAfter(past, "the file lies in the moved Chat outputs folder"));
+    }
 }
