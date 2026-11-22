@@ -58,8 +58,9 @@ room and the agent's id answers 404.
 ### Requirement: Threads of an agent become threads of the project
 
 Every thread started with the agent as `entityId` SHALL become a thread of the project with its messages,
-whoever created it. `aiThreadsList` SHALL list it to its creator for the project's id and no longer for another
-`entityId` or without one.
+whoever created it. `aiThreadsList` SHALL list it for the project's id, and no longer for another `entityId` or
+without one, to its creator while the creator may use AI in the project. A Guest is refused on every thread route,
+so the thread of a creator who is a Guest at the conversion stays stored in the project and answers 403 to them.
 
 #### Scenario: Thread follows the agent
 
@@ -70,6 +71,11 @@ whoever created it. `aiThreadsList` SHALL list it to its creator for the project
 
 - **WHEN** the same member has a thread started without an entity
 - **THEN** that thread is still listed without an entity and is not listed for the project
+
+#### Scenario: Thread of a Guest
+
+- **WHEN** a member who started a thread in the agent is a Guest when the conversion runs
+- **THEN** the thread is stored as a thread of the project, the project does not list the Guest among its members, and the Guest reading the thread gets 403
 
 ### Requirement: The model of an agent becomes the model of the project
 

@@ -157,8 +157,7 @@ public class AgentMigrationThreadsTests(AspireAppFixture fixture) : AgentMigrati
     }
 
     /// <summary>
-    /// No spec scenario states what a Guest gets for a thread that moved to a project the Guest is no member of.
-    /// This test records what the code answers today: a Guest is refused on every thread route by its account type
+    /// Scenario "Thread of a Guest": a Guest is refused on every thread route by its account type
     /// (<c>ThreadStorageService</c>), before the thread is looked at, so the thread stays stored in the project and
     /// out of the Guest's reach.
     /// </summary>
