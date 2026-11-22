@@ -98,7 +98,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected virtual bool NeedsDocumentServer => false;
 
     /// <summary>
-    /// True for a class whose tests use a service of <see cref="AspireAppFixture"/>'s <c>LazyResources</c> (Nextcloud):
+    /// True for a class whose tests use a service of <see cref="AspireAppFixture"/>'s <c>LazyResources</c> (Nextcloud, Web.Studio):
     /// its setup then waits until those are healthy, which the rest of the suite does not.
     /// </summary>
     protected virtual bool NeedsLazyResources => false;

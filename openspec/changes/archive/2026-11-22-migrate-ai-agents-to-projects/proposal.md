@@ -13,8 +13,9 @@ so the conversion cannot be a one-time step of the release.
 - A background pass converts every AI agent of an active portal, with no request from a user:
   - a new AI project takes the agent's title, owner, colour, cover, logo, custom tags and the pins of its users;
   - the agent's room keeps its id and becomes a Knowledge room titled `<agent title> (<title of its Knowledge
-    folder>)`, linked to the project, with the knowledge files moved into the room itself; an agent whose Knowledge
-    folder holds no file is deleted instead;
+    folder>)`, linked to the project, with the knowledge files moved into the room itself and without the room
+    settings a Knowledge room refuses (lifetime, watermark, download restriction, indexing, privacy, form settings);
+    an agent whose Knowledge folder holds no file is deleted instead;
   - the threads started in the agent, its Chat assignment and the tool preferences and MCP server entries scoped to
     it move to the project;
   - the agent's Chat outputs folder moves to the My documents of the agent's owner as `<agent title> (<title of the
@@ -34,7 +35,8 @@ so the conversion cannot be a one-time step of the release.
 - The stored prompt of an agent (`chatSettings.prompt`) is not carried over: it already reaches no model.
 - No letter, no new audit action. Open clients get the usual folder events for the created project, the Knowledge
   room the agent becomes and the moved folder.
-- Out of scope: hiding the agents section and closing `createRoom` for the AI room type (a separate change).
+- Out of scope: closing `createRoom` for the AI room type (a separate change). The client of this release does not
+  show the agents section.
 
 ## Capabilities
 
@@ -70,8 +72,8 @@ on. What changes is the stored data, so a caller meets other objects under the i
   as project members, fixed at the moment of the conversion.
 - The files of Chat outputs are charged to the personal quota of the agent's owner, with no check of the limit, and
   the other members of the agent no longer reach them.
-- Web client (`../client`): no route or field changes. The agents section turns empty for a converted portal; the
-  client change that hides it belongs to the separate change.
+- Web client (`../client`): no route or field changes. The client does not show the agents section, so no open list
+  holds an agent.
 - Published SDKs and the OpenAPI document: unchanged. The new route is internal and not published.
 - Webhooks: none are raised; the conversion does not go through the API actions that raise them.
 - Socket events: existing events only, `create-folder` for the project, the moved Chat outputs folder and the

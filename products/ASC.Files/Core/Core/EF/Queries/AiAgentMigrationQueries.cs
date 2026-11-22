@@ -201,7 +201,7 @@ static file class AiAgentMigrationQueries
     public static readonly Func<FilesDbContext, int, int, DateTime, Task<int>> TouchAiAgentSubtreeFilesAsync =
         (FilesDbContext ctx, int tenantId, int folderId, DateTime modifiedOn) =>
             ctx.Files
-                .Where(f => f.TenantId == tenantId && ctx.Tree.Any(t => t.ParentId == folderId && t.FolderId == f.ParentId))
+                .Where(f => f.TenantId == tenantId && f.CurrentVersion && ctx.Tree.Any(t => t.ParentId == folderId && t.FolderId == f.ParentId))
                 .ExecuteUpdateAsync(f => f.SetProperty(p => p.ModifiedOn, modifiedOn));
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
@@ -222,6 +222,9 @@ static file class AiAgentMigrationQueries
             ctx.RoomSettings
                 .Where(s => s.TenantId == tenantId && s.RoomId == roomId)
                 .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.Private, false)
+                    .SetProperty(p => p.SendFormToExternalDB, false)
+                    .SetProperty(p => p.SaveFormAsXLSX, false)
                     .SetProperty(p => p.Indexing, false)
                     .SetProperty(p => p.DenyDownload, false)
                     .SetProperty(p => p.Lifetime, (DbRoomDataLifetime)null)
@@ -240,7 +243,7 @@ static file class AiAgentMigrationQueries
                 .Where(f => f.TenantId == tenantId && fileIds.Contains(f.Id) && f.ParentId == knowledgeFolderId)
                 .ExecuteUpdateAsync(f => f
                     .SetProperty(p => p.ParentId, roomId)
-                    .SetProperty(p => p.ModifiedOn, modifiedOn));
+                    .SetProperty(p => p.ModifiedOn, p => p.CurrentVersion ? modifiedOn : p.ModifiedOn));
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<FilesDbContext, int, int, int, Task<int>> MoveAiAgentThreadsAsync =

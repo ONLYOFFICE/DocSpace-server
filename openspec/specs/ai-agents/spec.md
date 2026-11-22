@@ -2773,7 +2773,8 @@ type. An agent SHALL be converted once, and an agent the conversion has not reac
 An agent whose Knowledge folder holds at least one file SHALL keep its id as a Knowledge room linked to the
 project and titled `<agent title> (<title of its Knowledge folder>)`; a title over the length limit of a room
 title SHALL be cut inside the agent title. The knowledge files SHALL keep their ids and lie directly in the
-room, and the Knowledge folder SHALL be gone. The room SHALL be made also while vectorization is off.
+room, and the Knowledge folder SHALL be gone; folders inside it SHALL be deleted with their files. The room SHALL be
+made also while vectorization is off.
 
 #### Scenario: Knowledge kept
 
@@ -2792,18 +2793,19 @@ room, and the Knowledge folder SHALL be gone. The room SHALL be made also while 
 
 ### Requirement: The Knowledge room of a converted agent drops the settings it refuses
 
-The Knowledge room made from an agent SHALL keep none of the agent's lifetime, watermark, download restriction and
-indexing: `updateRoom` refuses each of them for a Knowledge room, so one carried over could not be turned off.
+The Knowledge room made from an agent SHALL keep none of the agent's lifetime, watermark, download restriction,
+indexing, privacy and form settings: `updateRoom` refuses each of them for a Knowledge room and `createRoom` refuses a
+private one, so one carried over could not be turned off.
 
 #### Scenario: Restricted agent converted
 
-- **WHEN** the conversion has run for an agent with a knowledge file, a lifetime, a watermark, downloads denied and indexing on
-- **THEN** `getRoomInfo` with the agent's id answers a Knowledge room with no `lifetime` and no `watermark`, and `denyDownload` and `indexing` false
+- **WHEN** the conversion has run for a private agent with a knowledge file, a lifetime, a watermark, downloads denied, indexing on and both form settings on
+- **THEN** `getRoomInfo` with the agent's id answers a Knowledge room with no `lifetime` and no `watermark`, and `denyDownload`, `indexing` and `private` false, and both form settings of the room are off
 
 ### Requirement: An agent without knowledge leaves no room
 
 An agent whose Knowledge folder holds no file SHALL be deleted once its project exists: the project has no linked
-room and the agent's id answers 404.
+room and the agent's id answers 404. When that deletion fails, a Knowledge room with the agent's id and no file stays.
 
 #### Scenario: Empty Knowledge folder
 
@@ -2931,8 +2933,9 @@ owner's account is deleted or disabled, the portal owner SHALL take the folder.
 
 A background pass SHALL convert the agents of every active portal changed since its previous pass, and of every
 active portal on its first pass. A portal restored or transferred from an archive that holds agents SHALL be
-converted by the first pass that starts after the portal became active; until that pass it holds agents. A
-portal that is not active SHALL be skipped.
+converted by the first pass that starts after the portal became active, or by a later one when the lock of the legacy
+AI providers migration is held or an agent fails; until then it holds agents. A portal that is not active SHALL be
+skipped.
 
 #### Scenario: Restored archive
 
@@ -2953,7 +2956,7 @@ portal that is not active SHALL be skipped.
 
 An agent whose conversion fails SHALL stay an agent and SHALL NOT stop the other agents of the portal. The pass
 SHALL try the portal again on its next passes; after the configured number of passes that ended with a failed
-agent it SHALL leave the portal alone, and no route resumes it.
+agent it SHALL leave the portal alone; no later pass resumes it, while the internal route still converts its agents.
 
 #### Scenario: One agent of two fails
 
@@ -2973,9 +2976,9 @@ agent it SHALL leave the portal alone, and no route resumes it.
 ### Requirement: Starting the conversion by request
 
 `POST internal/ai/agents/migration`, an internal route kept for the integration tests, SHALL convert the agents
-of the caller's portal before it answers and answer 200 with `migrated` and `failed`, the numbers of agents
-converted and failed by this call. It SHALL need the portal owner or a DocSpace admin (other users 403, no
-sign-in 401) and work while the AI switch is off. A repeated call converts nothing again.
+of the caller's portal before it answers: 200 with `migrated` and `failed` (this call's counts), or 409 with nothing
+converted while the legacy AI providers migration holds its lock. It SHALL need the portal owner or a DocSpace admin
+(others 403, no sign-in 401) and work while the AI switch is off. A repeated call converts nothing again.
 
 #### Scenario: Owner starts the conversion
 

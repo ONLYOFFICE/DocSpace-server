@@ -155,8 +155,8 @@ public interface IFolderDao<T>
     Task<T> SaveThreadFolderAsync(Folder<T> folder, Guid threadId, ThreadFolderKind kind);
 
     /// <summary>
-    /// Converts an AI agent into an AI project in one transaction: the room becomes a Knowledge room linked to a
-    /// new project that takes the agent's threads, model, members and marks. Returns null when the room is not
+    /// Converts an AI agent into an AI project in one transaction: the room becomes a Knowledge room, linked to the
+    /// project when it holds knowledge files, and a new project takes the agent's threads, model, members and marks. Returns null when the room is not
     /// an AI agent, which is how a repeated call sees an agent that is already converted.
     /// </summary>
     Task<AiAgentConversion> ConvertAiAgentAsync(T roomId);

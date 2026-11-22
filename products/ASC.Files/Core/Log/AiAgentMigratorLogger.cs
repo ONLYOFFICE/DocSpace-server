@@ -39,12 +39,12 @@ internal static partial class AiAgentMigratorLogger
     [LoggerMessage(LogLevel.Error, "AI agents migration for tenant {tenantId}: agent {agentId} failed and stays an agent")]
     public static partial void ErrorAgentFailed(this ILogger<AiAgentMigrator> logger, Exception exception, int tenantId, int agentId);
 
-    [LoggerMessage(LogLevel.Warning, "AI agents migration for tenant {tenantId}: agent {agentId} is converted, but {effect} failed")]
+    [LoggerMessage(LogLevel.Warning, "AI agents migration for tenant {tenantId}: agent {agentId}, {effect} failed")]
     public static partial void WarningEffectFailed(this ILogger<AiAgentMigrator> logger, Exception exception, int tenantId, int agentId, string effect);
 
     [LoggerMessage(LogLevel.Information, "AI agents migration for tenant {tenantId}: {found} agents found, {migrated} converted, {failed} failed")]
     public static partial void InfoPortalProcessed(this ILogger<AiAgentMigrator> logger, int tenantId, int found, int migrated, int failed);
 
-    [LoggerMessage(LogLevel.Information, "AI agents migration for tenant {tenantId}: agent {agentId}, {folders} folders and {files} files inside its Knowledge folder deleted")]
+    [LoggerMessage(LogLevel.Information, "AI agents migration for tenant {tenantId}: agent {agentId}, {folders} folders directly in its Knowledge folder deleted with the {files} files inside them")]
     public static partial void InfoKnowledgeSubfoldersDeleted(this ILogger<AiAgentMigrator> logger, int tenantId, int agentId, int folders, int files);
 }

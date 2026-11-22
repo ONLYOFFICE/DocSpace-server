@@ -208,6 +208,8 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
             (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().BeGreaterThanOrEqualTo(2);
         }
 
+        await AddOlderVersionAsync(direct.Id, past);
+
         // Act
         await ConvertAgentsAsync();
 
@@ -217,7 +219,7 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
         await using (var connection = await OpenDatabaseAsync())
         await using (var command = connection.CreateCommand())
         {
-            command.CommandText = "SELECT id, modified_on FROM files_file WHERE id IN (@direct, @nested)";
+            command.CommandText = "SELECT id, modified_on FROM files_file WHERE id IN (@direct, @nested) AND current_version = 1";
             command.Parameters.AddWithValue("@direct", direct.Id);
             command.Parameters.AddWithValue("@nested", nested.Id);
 
@@ -231,5 +233,6 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
 
         modified.Keys.Should().BeEquivalentTo(fileIds);
         modified.Values.Should().AllSatisfy(value => value.Should().BeAfter(past, "the file lies in the moved Chat outputs folder"));
+        (await ModifiedOnByCurrentVersionAsync(direct.Id))[false].Should().Be(past, "an older version keeps its date in the version history");
     }
 }

@@ -160,7 +160,7 @@ public class AgentMigrationSettingsTests(AspireAppFixture fixture) : AgentMigrat
     }
 
     [Fact]
-    public async Task Convert_AgentWithLifetimeWatermarkDenyDownloadAndIndexing_DropsThemFromTheKnowledgeRoom()
+    public async Task Convert_AgentWithRoomSettings_DropsTheOnesAKnowledgeRoomRefuses()
     {
         // Arrange
         var title = NewTitle("Restricted agent");
@@ -174,11 +174,11 @@ public class AgentMigrationSettingsTests(AspireAppFixture fixture) : AgentMigrat
                 lifetime: new RoomDataLifetimeDto(deletePermanently: false, period: RoomDataLifetimePeriod.Day, value: 30, enabled: true),
                 watermark: new WatermarkRequestDto(enabled: true, additions: WatermarkAdditions.UserName, text: "Conf", rotate: 0, imageScale: 100)),
             TestContext.Current.CancellationToken);
-        await TurnIndexingOnAsync(agent.Id);
-
         await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt");
+        await TurnRoomSettingsOnBySqlAsync(agent.Id);
 
         var before = await RoomInfoAsync(agent.Id);
+        before.Private.Should().BeTrue();
         before.Indexing.Should().BeTrue();
         before.DenyDownload.Should().BeTrue();
         before.Lifetime.Should().NotBeNull();
@@ -195,6 +195,8 @@ public class AgentMigrationSettingsTests(AspireAppFixture fixture) : AgentMigrat
         room.DenyDownload.Should().BeFalse();
         room.Lifetime.Should().BeNull("the lifetime would go on deleting the knowledge files");
         room.Watermark.Should().BeNull();
+        room.Private.Should().BeFalse();
+        (await FormFlagsAsync(agent.Id)).Should().Be((false, false));
     }
 
     [Fact]
@@ -263,15 +265,30 @@ public class AgentMigrationSettingsTests(AspireAppFixture fixture) : AgentMigrat
         }
     }
 
-    private async Task TurnIndexingOnAsync(int roomId)
+    private async Task TurnRoomSettingsOnBySqlAsync(int roomId)
     {
         await using var connection = await OpenDatabaseAsync();
         await using var command = connection.CreateCommand();
 
-        command.CommandText = "UPDATE files_room_settings SET indexing = 1 WHERE room_id = @id";
+        command.CommandText =
+            "UPDATE files_room_settings SET indexing = 1, private = 1, send_form_to_external_db = 1, save_form_as_xlsx = 1 WHERE room_id = @id";
         command.Parameters.AddWithValue("@id", roomId);
 
         (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+    }
+
+    private async Task<(bool SendFormToExternalDb, bool SaveFormAsXlsx)> FormFlagsAsync(int roomId)
+    {
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT send_form_to_external_db, save_form_as_xlsx FROM files_room_settings WHERE room_id = @id";
+        command.Parameters.AddWithValue("@id", roomId);
+
+        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
+        (await reader.ReadAsync(TestContext.Current.CancellationToken)).Should().BeTrue();
+
+        return (reader.GetBoolean(0), reader.GetBoolean(1));
     }
 
     private async Task AddRecentMarkAsync(int folderId, Guid userId)

@@ -236,6 +236,45 @@ public abstract class AgentMigrationTestBase(AspireAppFixture fixture) : BaseTes
         return (await RoomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken)).Response;
     }
 
+    protected async Task AddOlderVersionAsync(int fileId, DateTime modifiedOn)
+    {
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText =
+            """
+            CREATE TEMPORARY TABLE autotest_file_version AS SELECT * FROM files_file WHERE id = @id AND current_version = 1;
+            UPDATE autotest_file_version SET version = version + 1, version_group = version_group + 1;
+            UPDATE files_file SET current_version = 0, modified_on = @modifiedOn WHERE id = @id AND current_version = 1;
+            INSERT INTO files_file SELECT * FROM autotest_file_version;
+            DROP TEMPORARY TABLE autotest_file_version;
+            """;
+        command.Parameters.AddWithValue("@id", fileId);
+        command.Parameters.AddWithValue("@modifiedOn", modifiedOn);
+
+        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<Dictionary<bool, DateTime>> ModifiedOnByCurrentVersionAsync(int fileId)
+    {
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT current_version, modified_on FROM files_file WHERE id = @id";
+        command.Parameters.AddWithValue("@id", fileId);
+
+        var result = new Dictionary<bool, DateTime>();
+
+        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
+
+        while (await reader.ReadAsync(TestContext.Current.CancellationToken))
+        {
+            result.Add(reader.GetBoolean(0), reader.GetDateTime(1));
+        }
+
+        return result;
+    }
+
     protected async Task<AiProjectSourcesDto> ProjectSourcesAsync(int projectId, User? actor = null)
     {
         await FilesHttpClient.Authenticate(actor ?? Owner);

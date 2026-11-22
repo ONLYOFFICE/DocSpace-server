@@ -79,8 +79,8 @@ Run under the system account with the portal set, holding a distributed lock on 
    into the My documents of the owner (`GetFolderIDUserAsync(createIfNotExists: true, owner)`; the portal owner
    when the agent's owner is not found or is terminated). The move stores the title in its own update, so a run
    that stops between the two statements leaves the title as it was and the next run composes the same one.
-   After the move, in a try/catch with a warning log, one update sets `modified_on` of every file of the moved
-   subtree to now. The move itself sends an index event for the moved folder only, and Files.Worker re-indexes only
+   After the move, in a try/catch with a warning log, one update sets `modified_on` of the current version of every
+   file of the moved subtree to now; older versions keep their dates. The move itself sends an index event for the moved folder only, and Files.Worker re-indexes only
    the folder an event names, so the files would keep their old ancestor chain in the index and a search in My
    documents with subfolders would not find them; the periodic pass of the full-text index, which reads files by
    `modified_on`, stores the new chain on its next run (every minute by default, `elastic:Period`).
@@ -112,7 +112,9 @@ A new `IFolderDao<int>` operation (third-party implementations throw `NotSupport
 
 1. Change the room's type to `KnowledgeRoom`, and its title (D6) when its Knowledge folder holds files, with one
    `UPDATE … WHERE folder_type = AiRoom`. No row changed: roll back and report "already converted". The Knowledge
-   folder is flat by then (step 1 of D3), so only its own files are moved.
+   folder is flat by then (step 1 of D3), so only its own files are moved. Then clear the room settings a Knowledge
+   room refuses (lifetime, watermark, download restriction, indexing, privacy, the two form settings) with one
+   update of its `files_room_settings` row.
 2. Insert the project through `InternalSaveFolderToDbAsync` (title, owner, creation date of the agent) and its
    `files_room_settings` row with the colour and the cover.
 3. Re-key `entry_id` room → project in `ai_integration_threads`, `_assignments`, `_tool_preferences`,
@@ -124,8 +126,8 @@ A new `IFolderDao<int>` operation (third-party implementations throw `NotSupport
    knowledge files.
 6. Tag links of the room: re-point Custom and Pin links to the project, delete Recent and "new" links. A
    Favorite link is left on the room.
-7. With knowledge files: move them to the room with `MoveAiAgentKnowledgeFilesAsync`, one update that also sets
-   `modified_on` of every version row to now, so the periodic pass of the full-text index, which reads files by
+7. With knowledge files: move them to the room with `MoveAiAgentKnowledgeFilesAsync`, one update that moves every
+   version row and sets `modified_on` of the current one to now (older versions keep their dates), so the periodic pass of the full-text index, which reads files by
    `modified_on`, picks them up when their index event is lost; delete the Knowledge folder row with its tree rows and the rows
    `DeleteFolderAsync` removes for a folder, lower the folder count of the room and its ancestors by one, insert
    the `files_ai_project_room` link. Without them: nothing more, the room is no longer pending since step 1;
