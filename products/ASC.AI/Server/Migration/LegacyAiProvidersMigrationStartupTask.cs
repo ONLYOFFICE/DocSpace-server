@@ -74,13 +74,13 @@ public class LegacyAiProvidersMigrationStartupTask(
                     scope.ServiceProvider.GetRequiredService<TenantManager>().SetCurrentTenant(tenant);
                     await scope.ServiceProvider.GetRequiredService<LegacyAiProvidersMigrator>().MigrateAsync(tenant.Id);
                 }
-                catch (Exception e) when (e is not OperationCanceledException)
+                catch (Exception e) when (!cancellationToken.IsCancellationRequested)
                 {
                     logger.ErrorTenantFailed(tenant.Id, e);
                 }
             }
         }
-        catch (Exception e) when (e is not OperationCanceledException)
+        catch (Exception e) when (!cancellationToken.IsCancellationRequested)
         {
             logger.ErrorFailed(e);
         }
