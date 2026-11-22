@@ -760,6 +760,8 @@ internal class FolderDao(
                 return;
             }
 
+            await context.ResetAiAgentRoomSettingsAsync(tenantId, roomId);
+
             var project = _serviceProvider.GetService<Folder<int>>();
             project.ParentId = room.ParentId;
             project.Title = room.Title;

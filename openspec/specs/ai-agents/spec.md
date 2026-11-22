@@ -2790,6 +2790,16 @@ room, and the Knowledge folder SHALL be gone. The room SHALL be made also while 
 - **WHEN** the conversion runs for an agent with a knowledge file on a portal where vectorization is turned off
 - **THEN** the Knowledge room is made and linked all the same
 
+### Requirement: The Knowledge room of a converted agent drops the settings it refuses
+
+The Knowledge room made from an agent SHALL keep none of the agent's lifetime, watermark, download restriction and
+indexing: `updateRoom` refuses each of them for a Knowledge room, so one carried over could not be turned off.
+
+#### Scenario: Restricted agent converted
+
+- **WHEN** the conversion has run for an agent with a knowledge file, a lifetime, a watermark, downloads denied and indexing on
+- **THEN** `getRoomInfo` with the agent's id answers a Knowledge room with no `lifetime` and no `watermark`, and `denyDownload` and `indexing` false
+
 ### Requirement: An agent without knowledge leaves no room
 
 An agent whose Knowledge folder holds no file SHALL be deleted once its project exists: the project has no linked

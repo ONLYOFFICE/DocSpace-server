@@ -78,6 +78,11 @@ public partial class FilesDbContext
         return AiAgentMigrationQueries.ClaimAiAgentRoomAsync(this, tenantId, roomId, title, modifiedBy, modifiedOn);
     }
 
+    public Task<int> ResetAiAgentRoomSettingsAsync(int tenantId, int roomId)
+    {
+        return AiAgentMigrationQueries.ResetAiAgentRoomSettingsAsync(this, tenantId, roomId);
+    }
+
     [PreCompileQuery]
     public Task<int> DeleteAiAgentKnowledgeFolderAsync(int tenantId, int folderId)
     {
@@ -211,6 +216,16 @@ static file class AiAgentMigrationQueries
                     .SetProperty(p => p.Title, p => title ?? p.Title)
                     .SetProperty(p => p.ModifiedBy, modifiedBy)
                     .SetProperty(p => p.ModifiedOn, modifiedOn));
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> ResetAiAgentRoomSettingsAsync =
+        (FilesDbContext ctx, int tenantId, int roomId) =>
+            ctx.RoomSettings
+                .Where(s => s.TenantId == tenantId && s.RoomId == roomId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.Indexing, false)
+                    .SetProperty(p => p.DenyDownload, false)
+                    .SetProperty(p => p.Lifetime, (DbRoomDataLifetime)null)
+                    .SetProperty(p => p.Watermark, (DbRoomWatermark)null));
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteAiAgentKnowledgeFolderAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

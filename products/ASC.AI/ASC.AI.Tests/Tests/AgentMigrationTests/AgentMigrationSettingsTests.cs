@@ -160,6 +160,44 @@ public class AgentMigrationSettingsTests(AspireAppFixture fixture) : AgentMigrat
     }
 
     [Fact]
+    public async Task Convert_AgentWithLifetimeWatermarkDenyDownloadAndIndexing_DropsThemFromTheKnowledgeRoom()
+    {
+        // Arrange
+        var title = NewTitle("Restricted agent");
+        var agent = await CreateAgentAsync(title);
+
+        await FilesHttpClient.Authenticate(Owner);
+        await RoomsApi.UpdateRoomAsync(
+            agent.Id,
+            new UpdateRoomRequest(
+                denyDownload: true,
+                lifetime: new RoomDataLifetimeDto(deletePermanently: false, period: RoomDataLifetimePeriod.Day, value: 30, enabled: true),
+                watermark: new WatermarkRequestDto(enabled: true, additions: WatermarkAdditions.UserName, text: "Conf", rotate: 0, imageScale: 100)),
+            TestContext.Current.CancellationToken);
+        await TurnIndexingOnAsync(agent.Id);
+
+        await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt");
+
+        var before = await RoomInfoAsync(agent.Id);
+        before.Indexing.Should().BeTrue();
+        before.DenyDownload.Should().BeTrue();
+        before.Lifetime.Should().NotBeNull();
+        before.Watermark.Should().NotBeNull();
+
+        // Act
+        await ConvertAgentsAsync();
+
+        // Assert
+        var room = await RoomInfoAsync(agent.Id);
+
+        room.RoomType.Should().Be(RoomType.KnowledgeRoom);
+        room.Indexing.Should().BeFalse();
+        room.DenyDownload.Should().BeFalse();
+        room.Lifetime.Should().BeNull("the lifetime would go on deleting the knowledge files");
+        room.Watermark.Should().BeNull();
+    }
+
+    [Fact]
     public async Task Convert_AgentWithNewAndRecentMarks_DropsThem()
     {
         // Arrange - a member gets a "new" mark on the agent when the owner adds a file to it; no route marks a room
@@ -223,6 +261,17 @@ public class AgentMigrationSettingsTests(AspireAppFixture fixture) : AgentMigrat
 
             await Task.Delay(500, TestContext.Current.CancellationToken);
         }
+    }
+
+    private async Task TurnIndexingOnAsync(int roomId)
+    {
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "UPDATE files_room_settings SET indexing = 1 WHERE room_id = @id";
+        command.Parameters.AddWithValue("@id", roomId);
+
+        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
     }
 
     private async Task AddRecentMarkAsync(int folderId, Guid userId)
