@@ -40,6 +40,10 @@ public class AiAgentsMigrationPassState : ISettings<AiAgentsMigrationPassState>
 
     public DateTime? LastPassStart { get; set; }
 
+    public DateTime? PendingPassStart { get; set; }
+
+    public int? Cursor { get; set; }
+
     public Dictionary<int, int> Attempts { get; set; } = [];
 
     public DateTime LastModified { get; set; }
@@ -50,6 +54,13 @@ public class AiAgentsMigrationPassState : ISettings<AiAgentsMigrationPassState>
     }
 }
 
+public enum AiAgentsMigrationPortalOutcome
+{
+    Done,
+    Failed,
+    Busy
+}
+
 public static class AiAgentsMigrationPlan
 {
     public static DateTime? GetWindowStart(DateTime? lastPassStart, TimeSpan overlap)
@@ -57,38 +68,63 @@ public static class AiAgentsMigrationPlan
         return lastPassStart - overlap;
     }
 
-    public static List<int> GetCandidates(IEnumerable<int> changedTenantIds, IReadOnlyDictionary<int, int> attempts, int maxAttempts)
+    public static DateTime GetPassStart(DateTime? pendingPassStart, DateTime now)
+    {
+        return pendingPassStart ?? now;
+    }
+
+    public static List<int> GetCandidates(IEnumerable<int> changedTenantIds, IReadOnlyDictionary<int, int> attempts, int maxAttempts, int? afterId = null)
     {
         var candidates = new SortedSet<int>(changedTenantIds.Where(id => !IsLeftAlone(attempts, id, maxAttempts)));
 
         candidates.UnionWith(attempts.Where(a => a.Value < maxAttempts).Select(a => a.Key));
 
+        if (afterId is { } cursor)
+        {
+            candidates.RemoveWhere(id => id <= cursor);
+        }
+
         return [.. candidates];
     }
 
-    public static Dictionary<int, int> GetNextAttempts(IReadOnlyDictionary<int, int> attempts, int tenantId, bool failed)
+    public static Dictionary<int, int> GetNextAttempts(IReadOnlyDictionary<int, int> attempts, int tenantId, AiAgentsMigrationPortalOutcome outcome)
     {
         var next = new Dictionary<int, int>(attempts);
 
-        if (failed)
+        switch (outcome)
         {
-            next[tenantId] = next.GetValueOrDefault(tenantId) + 1;
-        }
-        else
-        {
-            next.Remove(tenantId);
+            case AiAgentsMigrationPortalOutcome.Failed:
+                next[tenantId] = next.GetValueOrDefault(tenantId) + 1;
+                break;
+            case AiAgentsMigrationPortalOutcome.Busy:
+                next.TryAdd(tenantId, 0);
+                break;
+            default:
+                next.Remove(tenantId);
+                break;
         }
 
         return next;
     }
 
-    public static Dictionary<int, int> GetNextAttemptsWhenBusy(IReadOnlyDictionary<int, int> attempts, int tenantId)
+    public static AiAgentsMigrationPassState GetCheckpoint(DateTime? lastPassStart, DateTime passStart, int cursor, IReadOnlyDictionary<int, int> attempts)
     {
-        var next = new Dictionary<int, int>(attempts);
+        return new AiAgentsMigrationPassState
+        {
+            LastPassStart = lastPassStart,
+            PendingPassStart = passStart,
+            Cursor = cursor,
+            Attempts = new Dictionary<int, int>(attempts)
+        };
+    }
 
-        next.TryAdd(tenantId, 0);
-
-        return next;
+    public static AiAgentsMigrationPassState GetCompleted(DateTime passStart, IReadOnlyDictionary<int, int> attempts)
+    {
+        return new AiAgentsMigrationPassState
+        {
+            LastPassStart = passStart,
+            Attempts = new Dictionary<int, int>(attempts)
+        };
     }
 
     public static bool IsLeftAlone(IReadOnlyDictionary<int, int> attempts, int tenantId, int maxAttempts)

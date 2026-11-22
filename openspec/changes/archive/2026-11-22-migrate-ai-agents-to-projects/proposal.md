@@ -28,7 +28,7 @@ so the conversion cannot be a one-time step of the release.
   its first pass) for rooms of the AI room type, so a portal restored or transferred from an archive with agents is
   converted by the next pass without a step in the backup service.
 - An agent that fails stays an agent and is retried on the next passes; after a configured number of failed passes
-  the portal is left alone until its entry is removed from the state of the pass by hand.
+  the pass leaves the portal alone; the internal route below still converts its agents.
 - A new internal route `POST internal/ai/agents/migration` (portal owner or DocSpace admin) runs the conversion for
   the caller's portal at once. It exists as the entry point the integration tests drive the conversion through; it
   is not a product feature and no user interface calls it.

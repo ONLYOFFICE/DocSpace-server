@@ -179,14 +179,16 @@ agent title is cut and the suffix kept. The function is pure and unit tested wit
 
 `AiAgentsMigrationService`, an `ActivePassiveBackgroundService` in `products/ASC.AI/Worker`. State: one settings
 record of the installation (`SettingsManager.LoadForDefaultTenantAsync` / `SaveForDefaultTenantAsync`):
-`LastPassStart` and `Attempts` (portal id → number of passes that ended with a failed agent).
+`LastPassStart`, `Attempts` (portal id → number of passes that ended with a failed agent), and the progress of a
+pass that has not completed: `PendingPassStart` (the start of its first part) and `Cursor` (the last portal it
+checked).
 
 One pass:
 
-1. `now = UtcNow`.
+1. `start = PendingPassStart ?? UtcNow`.
 2. Candidates: the active portals with `last_modified >= LastPassStart - overlap` (a new compiled query in
    `TenantDbContext`, ids only), plus the portals in `Attempts` below the limit. With no `LastPassStart`: every
-   active portal, paged by id.
+   active portal, paged by id. With a `PendingPassStart`, only the candidates after `Cursor`.
 3. For each candidate: scope, set the portal, authenticate the system account; read the ids of its `aiagents`,
    `virtualrooms` and `aihub` roots without creating them and the ids of their direct children of type `AiRoom`
    (index `(tenant_id, parent_id)`). None, or the portal is no longer active: drop the portal from `Attempts`,
@@ -195,7 +197,13 @@ One pass:
 5. Any agent failed: `Attempts[portal] += 1`; at the limit, an error log naming the portal, and the portal is
    skipped from then on. All converted: drop it from `Attempts`. The lock of D8 not acquired: keep the portal in
    `Attempts` with its count unchanged (0 when absent).
-6. Save `LastPassStart = now` and `Attempts`. A pass that stops earlier saves nothing and is repeated.
+6. Every 20 portals, and once more when the pass ends by an exception or a cancellation, save `PendingPassStart =
+   start`, `Cursor` = the last portal checked and `Attempts`, keeping `LastPassStart`. The next pass goes on after
+   `Cursor` in the same window; a process killed without a cancellation checks again at most the 19 portals after
+   the last save.
+7. Save `LastPassStart = start` and `Attempts`, with no `PendingPassStart` and `Cursor`. A pass resumed after a
+   stop thus opens the next window at the start of its first part, so a portal before `Cursor` changed while the pass
+   was stopped is in that window.
 
 `overlap` covers clock differences between the hosts that write `last_modified`; a portal without agents checked
 twice costs its four short reads again (see Risks). A portal in `Restoring` is not active and is not a candidate;
@@ -290,8 +298,8 @@ release.
   record and four short indexed reads: the ids of the `aiagents`, `virtualrooms` and `aihub` roots in
   `files_bunch_objects` and the agents under them in `files_folder` (`AiAgentMigrator.FindAgentsAsync`); the portals
   are paged, on one instance; no scan of `files_folder`.
-- [A portal left alone after the attempt limit hides its agents from users] → the error log names the portal; an
-  operator removes its entry from `Attempts` in the settings record after the cause is fixed.
+- [A portal left alone after the attempt limit hides its agents from users] → the error log names the portal; no later
+  pass resumes it, and the internal route of D9 still converts its agents.
 - [Threads of a Guest move to the project, where the Guest is no member] → they stay stored and unreachable, as
   decided; no deletion of user data in the conversion.
 - [Moving the legacy migrator between projects] → no behaviour change intended; the existing start-up path is

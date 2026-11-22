@@ -44,12 +44,15 @@ internal static partial class AiAgentsMigrationServiceLogger
     [LoggerMessage(LogLevel.Debug, "AI agents migration: tenant {tenantId} skipped for this pass, the legacy AI providers migration holds its lock")]
     public static partial void DebugLegacyMigrationBusy(this ILogger<AiAgentsMigrationService> logger, int tenantId);
 
-    [LoggerMessage(LogLevel.Warning, "AI agents migration: the state of the pass was not saved, the next pass repeats this one")]
+    [LoggerMessage(LogLevel.Warning, "AI agents migration: the state of the pass was not saved, the next pass repeats the portals after the last saved progress of this one")]
     public static partial void WarningPassStateNotSaved(this ILogger<AiAgentsMigrationService> logger);
+
+    [LoggerMessage(LogLevel.Warning, "AI agents migration: the progress of the pass up to tenant {tenantId} was not saved, a pass that stops before the next save repeats the portals after the last saved progress")]
+    public static partial void WarningProgressNotSaved(this ILogger<AiAgentsMigrationService> logger, int tenantId, Exception? exception);
 
     [LoggerMessage(LogLevel.Error, "AI agents migration failed for tenant {tenantId}")]
     public static partial void ErrorPortalFailed(this ILogger<AiAgentsMigrationService> logger, int tenantId, Exception exception);
 
-    [LoggerMessage(LogLevel.Error, "AI agents migration: tenant {tenantId} reached {maxAttempts} failed passes and is left alone until its entry is removed from the state of the pass")]
+    [LoggerMessage(LogLevel.Error, "AI agents migration: tenant {tenantId} reached {maxAttempts} failed passes and is left alone by the background pass")]
     public static partial void ErrorPortalLeftAlone(this ILogger<AiAgentsMigrationService> logger, int tenantId, int maxAttempts);
 }

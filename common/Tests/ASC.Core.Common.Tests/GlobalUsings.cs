@@ -117,6 +117,7 @@ global using static ASC.Core.Common.Tests.PaymentStubs;
 
 global using AiAgentMigrationTitle = ASC.Files.Core.Core.AI.AiAgentMigrationTitle;
 global using AiAgentsMigrationPlan = ASC.Core.Common.AI.AiAgentsMigrationPlan;
+global using AiAgentsMigrationPortalOutcome = ASC.Core.Common.AI.AiAgentsMigrationPortalOutcome;
 global using AiAgentsMigrationService = ASC.AI.Worker.BackgroundServices.AiAgentsMigrationService;
 global using BoxAPIException = Box.V2.Exceptions.BoxAPIException;
 global using BoxError = Box.V2.BoxError;

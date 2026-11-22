@@ -95,7 +95,7 @@ public class AiAgentsMigrationPlanTests
     {
         var attempts = new Dictionary<int, int> { [7] = 2, [9] = 1 };
 
-        var next = AiAgentsMigrationPlan.GetNextAttempts(attempts, 7, failed: false);
+        var next = AiAgentsMigrationPlan.GetNextAttempts(attempts, 7, AiAgentsMigrationPortalOutcome.Done);
 
         next.Should().Equal(new Dictionary<int, int> { [9] = 1 });
         attempts.Should().ContainKey(7, "the function returns a new dictionary and leaves its input alone");
@@ -104,7 +104,7 @@ public class AiAgentsMigrationPlanTests
     [Fact]
     public void GetNextAttempts_FirstFailure_StartsFromOne()
     {
-        var next = AiAgentsMigrationPlan.GetNextAttempts(new Dictionary<int, int>(), 7, failed: true);
+        var next = AiAgentsMigrationPlan.GetNextAttempts(new Dictionary<int, int>(), 7, AiAgentsMigrationPortalOutcome.Failed);
 
         next[7].Should().Be(1);
         AiAgentsMigrationPlan.IsLeftAlone(next, 7, MaxAttempts).Should().BeFalse();
@@ -115,7 +115,7 @@ public class AiAgentsMigrationPlanTests
     {
         var attempts = new Dictionary<int, int> { [7] = MaxAttempts - 1 };
 
-        var next = AiAgentsMigrationPlan.GetNextAttempts(attempts, 7, failed: true);
+        var next = AiAgentsMigrationPlan.GetNextAttempts(attempts, 7, AiAgentsMigrationPortalOutcome.Failed);
 
         next[7].Should().Be(MaxAttempts);
         AiAgentsMigrationPlan.IsLeftAlone(next, 7, MaxAttempts).Should().BeTrue();
@@ -123,20 +123,20 @@ public class AiAgentsMigrationPlanTests
     }
 
     [Fact]
-    public void GetNextAttemptsWhenBusy_UnchangedPortal_IsACandidateOfTheNextPass()
+    public void GetNextAttempts_BusyUnchangedPortal_IsACandidateOfTheNextPass()
     {
-        var next = AiAgentsMigrationPlan.GetNextAttemptsWhenBusy(new Dictionary<int, int>(), 7);
+        var next = AiAgentsMigrationPlan.GetNextAttempts(new Dictionary<int, int>(), 7, AiAgentsMigrationPortalOutcome.Busy);
 
         AiAgentsMigrationPlan.GetCandidates([], next, MaxAttempts).Should().Equal(7);
         AiAgentsMigrationPlan.IsLeftAlone(next, 7, MaxAttempts).Should().BeFalse();
     }
 
     [Fact]
-    public void GetNextAttemptsWhenBusy_PortalWithFailures_KeepsItsCount()
+    public void GetNextAttempts_BusyPortalWithFailures_KeepsItsCount()
     {
         var attempts = new Dictionary<int, int> { [7] = MaxAttempts - 1 };
 
-        var next = AiAgentsMigrationPlan.GetNextAttemptsWhenBusy(attempts, 7);
+        var next = AiAgentsMigrationPlan.GetNextAttempts(attempts, 7, AiAgentsMigrationPortalOutcome.Busy);
 
         next[7].Should().Be(MaxAttempts - 1);
         AiAgentsMigrationPlan.GetCandidates([], next, MaxAttempts).Should().Equal(7);
@@ -145,8 +145,58 @@ public class AiAgentsMigrationPlanTests
     [Fact]
     public void GetNextAttempts_SuccessAfterBusy_RemovesTheEntry()
     {
-        var busy = AiAgentsMigrationPlan.GetNextAttemptsWhenBusy(new Dictionary<int, int>(), 7);
+        var busy = AiAgentsMigrationPlan.GetNextAttempts(new Dictionary<int, int>(), 7, AiAgentsMigrationPortalOutcome.Busy);
 
-        AiAgentsMigrationPlan.GetNextAttempts(busy, 7, failed: false).Should().BeEmpty();
+        AiAgentsMigrationPlan.GetNextAttempts(busy, 7, AiAgentsMigrationPortalOutcome.Done).Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetPassStart_NoPassPending_IsNow()
+    {
+        var now = _lastPassStart.AddHours(1);
+
+        AiAgentsMigrationPlan.GetPassStart(null, now).Should().Be(now);
+    }
+
+    [Fact]
+    public void GetPassStart_InterruptedPass_IsTheStartOfItsFirstPart()
+    {
+        AiAgentsMigrationPlan.GetPassStart(_lastPassStart, _lastPassStart.AddHours(1)).Should().Be(_lastPassStart);
+    }
+
+    [Fact]
+    public void GetCandidates_AfterTheCursor_LeavesOutThePortalsUpToIt()
+    {
+        var attempts = new Dictionary<int, int> { [4] = 1, [8] = 1 };
+
+        AiAgentsMigrationPlan.GetCandidates([3, 5, 9], attempts, MaxAttempts, afterId: 5).Should().Equal(8, 9);
+    }
+
+    [Fact]
+    public void GetCheckpoint_KeepsTheWindowAndRecordsTheProgress()
+    {
+        var passStart = _lastPassStart.AddHours(1);
+        var attempts = new Dictionary<int, int> { [5] = 1, [9] = 1 };
+
+        var checkpoint = AiAgentsMigrationPlan.GetCheckpoint(_lastPassStart, passStart, 5, attempts);
+
+        checkpoint.LastPassStart.Should().Be(_lastPassStart);
+        checkpoint.PendingPassStart.Should().Be(passStart);
+        checkpoint.Cursor.Should().Be(5);
+        checkpoint.Attempts.Should().Equal(attempts);
+    }
+
+    [Fact]
+    public void GetCompleted_ResumedPass_OpensTheNextWindowAtTheStartOfItsFirstPart()
+    {
+        var firstPartStart = _lastPassStart.AddHours(1);
+        var checkpoint = AiAgentsMigrationPlan.GetCheckpoint(_lastPassStart, firstPartStart, 5, new Dictionary<int, int>());
+
+        var passStart = AiAgentsMigrationPlan.GetPassStart(checkpoint.PendingPassStart, firstPartStart.AddHours(1));
+        var completed = AiAgentsMigrationPlan.GetCompleted(passStart, new Dictionary<int, int>());
+
+        completed.LastPassStart.Should().Be(firstPartStart);
+        completed.PendingPassStart.Should().BeNull();
+        completed.Cursor.Should().BeNull();
     }
 }

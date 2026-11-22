@@ -41,6 +41,7 @@ public class AiAgentsMigrationService(
     : ActivePassiveBackgroundService<AiAgentsMigrationService>(logger, scopeFactory)
 {
     private const int PageSize = 1000;
+    private const int CheckpointEvery = 20;
 
     private static readonly TimeSpan _defaultPeriod = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan _minPeriod = TimeSpan.FromSeconds(5);
@@ -83,49 +84,73 @@ public class AiAgentsMigrationService(
             return;
         }
 
-        var passStart = DateTime.UtcNow;
         var checkedCount = 0;
         var completed = false;
+        var passStart = default(DateTime);
+        DateTime? lastPassStart = null;
+        int? cursor = null;
+        int? savedCursor = null;
+        IReadOnlyDictionary<int, int> attempts = new Dictionary<int, int>();
 
         try
         {
-            IReadOnlyDictionary<int, int> attempts;
             List<int> changedTenantIds;
+            int? afterId;
 
             await using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 var state = await scope.ServiceProvider.GetRequiredService<SettingsManager>().LoadForDefaultTenantAsync<AiAgentsMigrationPassState>();
 
+                lastPassStart = state.LastPassStart;
+                passStart = AiAgentsMigrationPlan.GetPassStart(state.PendingPassStart, DateTime.UtcNow);
+                afterId = state.PendingPassStart is null ? null : state.Cursor;
+                savedCursor = afterId;
                 attempts = state.Attempts ?? [];
-                changedTenantIds = await ReadChangedTenantIdsAsync(scope.ServiceProvider, AiAgentsMigrationPlan.GetWindowStart(state.LastPassStart, _overlap), stoppingToken);
+                changedTenantIds = await ReadChangedTenantIdsAsync(scope.ServiceProvider, AiAgentsMigrationPlan.GetWindowStart(lastPassStart, _overlap), afterId ?? 0, stoppingToken);
             }
 
-            foreach (var tenantId in AiAgentsMigrationPlan.GetCandidates(changedTenantIds, attempts, _maxAttempts))
+            foreach (var tenantId in AiAgentsMigrationPlan.GetCandidates(changedTenantIds, attempts, _maxAttempts, afterId))
             {
                 stoppingToken.ThrowIfCancellationRequested();
 
-                attempts = await MigratePortalAsync(tenantId, attempts, stoppingToken);
+                var outcome = await MigratePortalAsync(tenantId, stoppingToken);
+
+                attempts = AiAgentsMigrationPlan.GetNextAttempts(attempts, tenantId, outcome);
+                cursor = tenantId;
                 checkedCount++;
+
+                if (outcome == AiAgentsMigrationPortalOutcome.Failed && AiAgentsMigrationPlan.IsLeftAlone(attempts, tenantId, _maxAttempts))
+                {
+                    logger.ErrorPortalLeftAlone(tenantId, _maxAttempts);
+                }
+
+                if (checkedCount % CheckpointEvery == 0 && await SaveStateAsync(AiAgentsMigrationPlan.GetCheckpoint(lastPassStart, passStart, tenantId, attempts)))
+                {
+                    savedCursor = tenantId;
+                }
             }
 
-            await using (var scope = _scopeFactory.CreateAsyncScope())
+            if (!await SaveStateAsync(AiAgentsMigrationPlan.GetCompleted(passStart, attempts)))
             {
-                var saved = await scope.ServiceProvider.GetRequiredService<SettingsManager>().SaveForDefaultTenantAsync(new AiAgentsMigrationPassState
-                {
-                    LastPassStart = passStart,
-                    Attempts = new Dictionary<int, int>(attempts)
-                });
-
-                if (!saved)
-                {
-                    logger.WarningPassStateNotSaved();
-                }
+                logger.WarningPassStateNotSaved();
             }
 
             completed = true;
         }
         finally
         {
+            if (!completed && cursor is { } last && last != savedCursor)
+            {
+                try
+                {
+                    await SaveStateAsync(AiAgentsMigrationPlan.GetCheckpoint(lastPassStart, passStart, last, attempts));
+                }
+                catch (Exception e)
+                {
+                    logger.WarningProgressNotSaved(last, e);
+                }
+            }
+
             if (checkedCount > 0)
             {
                 logger.InformationPassEnded(checkedCount, completed);
@@ -133,7 +158,20 @@ public class AiAgentsMigrationService(
         }
     }
 
-    private static async Task<List<int>> ReadChangedTenantIdsAsync(IServiceProvider serviceProvider, DateTime? windowStart, CancellationToken cancellationToken)
+    private async Task<bool> SaveStateAsync(AiAgentsMigrationPassState state)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+
+        var saved = await scope.ServiceProvider.GetRequiredService<SettingsManager>().SaveForDefaultTenantAsync(state);
+        if (!saved && state.Cursor is { } cursor)
+        {
+            logger.WarningProgressNotSaved(cursor, null);
+        }
+
+        return saved;
+    }
+
+    private static async Task<List<int>> ReadChangedTenantIdsAsync(IServiceProvider serviceProvider, DateTime? windowStart, int afterId, CancellationToken cancellationToken)
     {
         await using var tenantDbContext = await serviceProvider.GetRequiredService<IDbContextFactory<TenantDbContext>>().CreateDbContextAsync(cancellationToken);
 
@@ -143,7 +181,6 @@ public class AiAgentsMigrationService(
         }
 
         var tenantIds = new List<int>();
-        var afterId = 0;
 
         while (true)
         {
@@ -160,10 +197,8 @@ public class AiAgentsMigrationService(
         }
     }
 
-    private async Task<IReadOnlyDictionary<int, int>> MigratePortalAsync(int tenantId, IReadOnlyDictionary<int, int> attempts, CancellationToken cancellationToken)
+    private async Task<AiAgentsMigrationPortalOutcome> MigratePortalAsync(int tenantId, CancellationToken cancellationToken)
     {
-        bool failed;
-
         try
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
@@ -173,7 +208,7 @@ public class AiAgentsMigrationService(
             var tenant = await tenantManager.GetTenantAsync(tenantId);
             if (tenant is not { Status: TenantStatus.Active })
             {
-                return AiAgentsMigrationPlan.GetNextAttempts(attempts, tenantId, failed: false);
+                return AiAgentsMigrationPortalOutcome.Done;
             }
 
             tenantManager.SetCurrentTenant(tenant);
@@ -184,24 +219,16 @@ public class AiAgentsMigrationService(
             {
                 logger.DebugLegacyMigrationBusy(tenantId);
 
-                return AiAgentsMigrationPlan.GetNextAttemptsWhenBusy(attempts, tenantId);
+                return AiAgentsMigrationPortalOutcome.Busy;
             }
 
-            failed = migration.Failed > 0;
+            return migration.Failed > 0 ? AiAgentsMigrationPortalOutcome.Failed : AiAgentsMigrationPortalOutcome.Done;
         }
         catch (Exception e) when (!cancellationToken.IsCancellationRequested)
         {
             logger.ErrorPortalFailed(tenantId, e);
-            failed = true;
+
+            return AiAgentsMigrationPortalOutcome.Failed;
         }
-
-        var next = AiAgentsMigrationPlan.GetNextAttempts(attempts, tenantId, failed);
-
-        if (AiAgentsMigrationPlan.IsLeftAlone(next, tenantId, _maxAttempts))
-        {
-            logger.ErrorPortalLeftAlone(tenantId, _maxAttempts);
-        }
-
-        return next;
     }
 }
