@@ -371,9 +371,9 @@ Filters use **Microsoft.Testing.Platform** syntax and go after `--`: `--filter-c
 `--filter-method`. VSTest's `--filter Name~...` does not apply.
 
 The webhook tests of `ASC.Web.Api.Tests` (the `Webhooks` folder) subscribe to `WebhookReceiver`, a
-WireMock.Net server in the test process, started on first use on the loopback alias `127.0.0.2:18089`
-(`WebhookReceiverHost`/`WebhookReceiverPort` in `common/ASC.AppHost/Configuration/Constants.cs`;
-`127.0.0.1` stays blocked by the webhook blacklist). Windows and Linux answer on all of
+WireMock.Net server in the test process, started on first use on the loopback alias `127.0.0.2`
+(`WebhookReceiverHost` in `common/ASC.AppHost/Configuration/Constants.cs`; `127.0.0.1` stays blocked by
+the webhook blacklist), on the run's free port for `WebhookReceiverPort` (`HostPorts.Of`). Windows and Linux answer on all of
 `127.0.0.0/8`; macOS does not, and without `sudo ifconfig lo0 alias 127.0.0.2` (lost on reboot)
 the server cannot bind. The rest of the suite still runs, but every test that creates a
 subscription fails on starting it — an environment problem, not a product regression.

@@ -19,7 +19,7 @@ Exception → status mapping used throughout: `SecurityException` 403, `Argument
 
 Revised after the merge of `hotfix/v4.0.1` (`183da52625`, previous state `34df477e4e`). That range added the
 integration suite `common/Tests/ASC.Data.Backup.Tests` (74 test files; `ASC.Tests.slnx`, and the backup service plus
-its worker in the `integration-test` profile of `common/ASC.AppHost/Program.cs:95-98`) and fixed bugs 84509, 84510,
+its worker in the `integration-test` profile of `common/ASC.AppHost/Program.cs:107-110`) and fixed bugs 84509, 84510,
 84511, 84512, 84513 and 80605, the archive naming of back-to-back backups and the concurrency of `deleteBackup`.
 
 Revised again after the merge of `release/v4.1.0` (`3533ad8a89`, previous state `183da52625`). That range left the

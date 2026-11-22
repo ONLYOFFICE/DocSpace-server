@@ -186,6 +186,12 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     public async ValueTask InitializeAsync()
     {
+        // Before anything reads a port, the stubs of OnStartingAsync included: the listeners with a port of their own -
+        // services, router, socket, published container ports, stubs - take a free one (HostPorts), the proxied
+        // endpoints get one from DCP, so a run of another checkout or a development stack can run at the same time.
+        // The AppHost runs in this process and reads the same table.
+        HostPorts.UseFreePorts();
+
         await OnStartingAsync();
 
         // Start the Aspire AppHost with the suite's launch profile.
@@ -678,7 +684,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     {
         using var startUp = new CancellationTokenSource(_startUpBudget);
         using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
-        var probe = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/api/2.0/people/@self");
+        var probe = new Uri($"http://localhost:{HostPorts.Of(AppHostConstants.AppHostPort)}/api/2.0/people/@self");
 
         try
         {
@@ -715,7 +721,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         using var startUp = new CancellationTokenSource(_startUpBudget);
         using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
         // The router port the services reach the document server through.
-        var healthCheck = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/ds-vpath/healthcheck");
+        var healthCheck = new Uri($"http://localhost:{HostPorts.Of(AppHostConstants.AppHostPort)}/ds-vpath/healthcheck");
 
         try
         {
@@ -814,7 +820,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         }
         finally
         {
-            // Also when stopping the stack fails: a stub left running would hold its fixed port until the process ends.
+            // Also when stopping the stack fails: a stub left running would hold its port until the process ends.
             try
             {
                 await OnStoppedAsync();
@@ -848,7 +854,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// </summary>
     public Task<Dictionary<string, int>> FindSocketHubRefusalsAsync()
     {
-        var logs = AppPaths.GetTestLogsDirectory(AppPaths.GetBasePath(Projects.ASC_AppHost.ProjectPath));
+        var logs = AppPaths.GetTestLogsDirectory(Projects.ASC_AppHost.ProjectPath);
 
         return SocketHubRefusals.FindAsync(logs, _startedAt);
     }
