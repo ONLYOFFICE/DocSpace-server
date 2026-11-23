@@ -73,7 +73,8 @@ public partial class SettingsController(
     CustomQuota customQuota,
     UserSocketManager userSocketManager,
     QuotaSocketManager quotaSocketManager,
-    ExternalDatabaseClient externalDatabaseClient)
+    ExternalDatabaseClient externalDatabaseClient,
+    WebPluginConfigSettings webPluginConfigSettings)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
@@ -199,7 +200,7 @@ public partial class SettingsController(
                 settings.Plugins.Delete = pluginsDelete;
             }
 
-            settings.Plugins.Personal = !bool.TryParse(configuration["plugins:personal"], out var pluginsPersonal) || pluginsPersonal;
+            settings.Plugins.Personal = webPluginConfigSettings.PersonalEnabled;
 
             var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = formGallerySettings.Map();

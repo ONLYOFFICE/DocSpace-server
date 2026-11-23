@@ -120,7 +120,7 @@ public class WebPluginManager(
 
     private async Task<bool> IsPersonalWebPluginsAllowedAsync()
     {
-        return webPluginConfigSettings.Personal && !await userManager.IsGuestAsync(authContext.CurrentAccount.ID);
+        return webPluginConfigSettings.PersonalEnabled && !await userManager.IsGuestAsync(authContext.CurrentAccount.ID);
     }
 
     private async Task<IDataStore> GetPluginStorageAsync(int tenantId)
@@ -150,8 +150,8 @@ public class WebPluginManager(
     private static bool ClashesWith(WebPlugin webPlugin, IEnumerable<WebPlugin> webPlugins)
     {
         return webPlugins.Any(x =>
-            x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase) ||
-            x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture));
+            string.Equals(x.Name, webPlugin.Name, StringComparison.InvariantCultureIgnoreCase) ||
+            string.Equals(x.PluginName, webPlugin.PluginName, StringComparison.InvariantCulture));
     }
 
     private Task<WebPluginSettings> LoadWebPluginSettingsAsync(bool personal)
@@ -242,7 +242,7 @@ public class WebPluginManager(
 
             tempDirToDelete = tempPath;
 
-            var maxCount = owner.HasValue ? webPluginConfigSettings.PersonalMaxCount : webPluginConfigSettings.MaxCount;
+            var maxCount = owner.HasValue ? webPluginConfigSettings.MaxPersonalCount : webPluginConfigSettings.MaxCount;
 
             if (existingWebPlugins.Count + 1 > maxCount &&
                 !existingWebPlugins.Exists(x => x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -496,7 +496,7 @@ public class WebPluginManager(
             ctx.Tags = [CacheExtention.GetWebPluginsTag(tenantId)];
             return ctx.Modified(webPlugins);
 
-        });
+        }, opt => opt.Duration = TimeSpan.FromHours(1));
 
         return webPlugins;
     }

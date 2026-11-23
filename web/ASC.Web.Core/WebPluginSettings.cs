@@ -36,15 +36,18 @@ namespace ASC.Web.Core;
 [Singleton]
 public class WebPluginConfigSettings
 {
-    public WebPluginConfigSettings(ConfigurationExtension configuration)
+    public WebPluginConfigSettings(ConfigurationExtension configurationExtension, IConfiguration configuration, ILogger<WebPluginConfigSettings> logger)
     {
-        configuration.GetSetting("plugins", this);
+        configurationExtension.GetSetting("plugins", this);
+
+        PersonalEnabled = configuration.ReadBool("plugins:personal", true, logger);
+        MaxPersonalCount = configuration.ReadInt("plugins:personalMaxCount", 10, 1, 100, logger);
     }
 
     public bool Enabled { get; set; }
     public bool Upload { get; set; }
     public bool Delete { get; set; }
-    public bool Personal { get; set; } = true;
+    public bool PersonalEnabled { get; }
 
     public int MaxCount
     {
@@ -52,11 +55,7 @@ public class WebPluginConfigSettings
         set;
     }
 
-    public int PersonalMaxCount
-    {
-        get => field > 0 ? field : 10;
-        set;
-    }
+    public int MaxPersonalCount { get; }
 
     public long MaxSize
     {

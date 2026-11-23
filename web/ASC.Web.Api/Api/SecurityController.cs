@@ -65,7 +65,6 @@ public class SecurityController(
         AuditActionMapper auditActionMapper,
         CoreBaseSettings coreBaseSettings,
         CspSettingsHelper cspSettingsHelper,
-        WebPluginManager webPluginManager,
         ApiDateTimeHelper apiDateTimeHelper,
         IdentityClient identityClient,
         SecurityContext securityContext,
@@ -727,6 +726,8 @@ public class SecurityController(
     /// then. Change the allowed domains with `POST api/2.0/security/csp`, which does need a DocSpace administrator.
     /// A signed-in member whose request carries the `asc_personal_csp` cookie gets `header` extended with the domains
     /// of their own enabled personal web plugins, without the not-modified shortcut; `domains` stays the portal's list.
+    /// The cookie is set and cleared by `GET api/2.0/settings/webplugins` and by its `POST`, `PUT` and `DELETE` with
+    /// `personal=true`.
     /// </remarks>
     /// <summary>
     /// Get CSP settings
@@ -744,7 +745,7 @@ public class SecurityController(
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var personalCspDomains = Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName)
-            ? await webPluginManager.GetPersonalCspDomainsAsync(tenantManager.GetCurrentTenantId())
+            ? await serviceProvider.GetRequiredService<WebPluginManager>().GetPersonalCspDomainsAsync(tenantManager.GetCurrentTenantId())
             : [];
 
         var settings = personalCspDomains.Count == 0
