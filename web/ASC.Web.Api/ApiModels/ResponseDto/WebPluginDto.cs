@@ -36,7 +36,7 @@ using EnumMappingStrategy = Riok.Mapperly.Abstractions.EnumMappingStrategy;
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// One web plugin available to the portal: its manifest, where to load it from, and the state the portal keeps.
+/// One web plugin available to the caller: its manifest, where to load it from, and the state kept for it.
 /// </summary>
 public class WebPluginDto
 {
@@ -122,8 +122,8 @@ public class WebPluginDto
     public required DateTime CreateOn { get; set; }
 
     /// <summary>
-    /// Whether the portal loads the plugin. It is the state this portal stored, so an installation-wide plugin
-    /// can be on for one portal and off for another.
+    /// Whether the plugin is loaded. It is the state this portal stored, so an installation-wide plugin can be on
+    /// for one portal and off for another; for a personal plugin it is the state its owner stored.
     /// </summary>
     /// <example>true</example>
     public required bool Enabled { get; set; }
@@ -137,9 +137,7 @@ public class WebPluginDto
 
     /// <summary>
     /// Whether the plugin was installed by the calling user for themselves rather than for the portal. A personal
-    /// plugin is loaded for its owner alone, keeps its state and settings for that owner, and is addressed with
-    /// `personal=true`; it is left out of the list while a portal or installation-wide plugin holds its `name` or
-    /// `pluginName`.
+    /// plugin is addressed with `personal=true`.
     /// </summary>
     /// <example>false</example>
     public bool Personal { get; set; }
@@ -158,8 +156,9 @@ public class WebPluginDto
     public required string CssUrl { get; set; }
 
     /// <summary>
-    /// The settings string the portal keeps for the plugin, stored and returned verbatim - only the plugin knows
-    /// its shape. It is empty until `PUT api/2.0/settings/webplugins/{name}` saves one.
+    /// The settings string kept for the plugin, by the portal or, for a personal plugin, for its owner, stored and
+    /// returned verbatim - only the plugin knows its shape. It is empty until `PUT api/2.0/settings/webplugins/{name}`
+    /// saves one.
     /// </summary>
     /// <example>{"theme":"dark"}</example>
     public required string Settings { get; set; }

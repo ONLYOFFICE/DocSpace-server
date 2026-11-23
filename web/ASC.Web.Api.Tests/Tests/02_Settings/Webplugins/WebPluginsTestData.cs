@@ -92,19 +92,27 @@ internal static class WebPluginsTestData
     }
 
     /// <summary>
-    /// Uploads a freshly built plugin package, for the caller alone when <paramref name="personal"/> is set.
+    /// Uploads a freshly built plugin package, for the caller alone when <paramref name="personal"/> is set, sending
+    /// the given <paramref name="headers"/> the way a browser would add them.
     /// </summary>
-    public static async Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, string pluginName, bool personal, CancellationToken cancellationToken)
+    public static async Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, string pluginName, bool personal, CancellationToken cancellationToken, params (string Name, string Value)[] headers)
     {
         var zipBytes = CreatePluginZip(pluginName);
 
-        using var content = new MultipartFormDataContent();
+        var content = new MultipartFormDataContent();
         var fileContent = new ByteArrayContent(zipBytes);
         fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/zip");
         content.Add(fileContent, "file", "plugin.zip");
 
         var url = personal ? "api/2.0/settings/webplugins?personal=true" : "api/2.0/settings/webplugins";
 
-        return await webApiClient.PostAsync(url, content, cancellationToken);
+        using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
+
+        foreach (var (name, value) in headers)
+        {
+            request.Headers.TryAddWithoutValidation(name, value);
+        }
+
+        return await webApiClient.SendAsync(request, cancellationToken);
     }
 }

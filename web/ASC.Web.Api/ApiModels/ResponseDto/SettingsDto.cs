@@ -318,10 +318,10 @@ public class SettingsDto
     public int? InvitationLimit { get; set; }
 
     /// <summary>
-    /// What the installation allows to be done with web plugins. Filled in for a signed-in caller only, with all
-    /// three flags `false` unless the installation switched plugins on.
+    /// What the installation allows to be done with web plugins. Filled in for a signed-in caller only, with
+    /// `enabled`, `upload` and `delete` `false` unless the installation switched them on.
     /// </summary>
-    /// <example>{ "enabled": true, "upload": true, "delete": true }</example>
+    /// <example>{ "enabled": true, "upload": true, "delete": true, "personal": true }</example>
     public PluginsDto Plugins { get; set; }
 
     /// <summary>

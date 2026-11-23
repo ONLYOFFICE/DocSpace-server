@@ -84,6 +84,8 @@ public class PersonalWebPluginTests(
         // Assert
         portalResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         personalResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await personalResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
+            .Should().Contain("already installed for the whole portal");
     }
 
     [Fact]
@@ -128,6 +130,61 @@ public class PersonalWebPluginTests(
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
+    [Theory]
+    [InlineData("Sec-Fetch-Site", "cross-site", true)]
+    [InlineData("Sec-Fetch-Site", "same-site", true)]
+    [InlineData("Sec-Fetch-Site", "cross-site", false)]
+    public async Task UploadWebPlugin_RequestFromAnotherSite_Forbidden(string header, string value, bool personal)
+    {
+        // Arrange
+        var user = personal ? await InviteMember(EmployeeType.User) : Owner;
+        await _webApiClient.Authenticate(user);
+
+        // Act
+        using var response = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, "cross-site-autotest", personal, TestContext.Current.CancellationToken, AuthCookie(user), (header, value));
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task UploadPersonalWebPlugin_RequestFromPortalPage_Installed()
+    {
+        // Arrange
+        var user = await InviteMember(EmployeeType.User);
+        await _webApiClient.Authenticate(user);
+
+        // Act
+        using var response = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, "same-origin-autotest", true, TestContext.Current.CancellationToken, AuthCookie(user), ("Sec-Fetch-Site", "same-origin"));
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task UploadPersonalWebPlugin_BearerFromAnotherSite_Installed()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
+
+        // Act
+        using var response = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, "bearer-autotest", true, TestContext.Current.CancellationToken, ("Sec-Fetch-Site", "cross-site"));
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    private static (string Name, string Value) AuthCookie(User user)
+    {
+        return ("Cookie", $"asc_auth_key={user.Token}");
+    }
+
+    /// <summary>
+    /// Lists the plugins over raw HTTP: the generated SDK has no <c>personal</c> parameter on the list operation yet.
+    /// </summary>
     private async Task<List<(string Name, bool Personal)>> GetPluginsAsync(bool personal)
     {
         var url = personal ? "api/2.0/settings/webplugins?personal=true" : "api/2.0/settings/webplugins";

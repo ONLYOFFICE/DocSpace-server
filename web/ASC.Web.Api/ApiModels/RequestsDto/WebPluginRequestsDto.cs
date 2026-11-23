@@ -34,22 +34,20 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The state the portal keeps for an installed web plugin: whether it runs, and its own settings blob.
+/// The state kept for an installed web plugin: whether it runs, and its own settings blob.
 /// </summary>
 public class WebPluginRequests
 {
     /// <summary>
-    /// Whether the plugin runs in this portal. Switching it on adds the domains its manifest declares to the portal
-    /// Content Security Policy and switching it off takes them away again; connected clients are told of the new
-    /// state without a reload.
+    /// Whether the plugin runs: for the whole portal, or for its owner alone when it is a personal plugin.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
     /// The configuration the plugin reads at run time, as a JSON document serialised into a string. Its shape is
-    /// defined by the plugin and not by the portal, which stores it encrypted for this portal alone. It replaces
-    /// whatever was stored rather than merging into it, so send `{}` when there is nothing to keep.
+    /// defined by the plugin and not by the portal. It replaces whatever was stored rather than merging into it, so
+    /// send `{}` when there is nothing to keep.
     /// </summary>
     /// <example>{"theme":"dark","autoSave":true}</example>
     [StringLength(255)]
@@ -79,8 +77,7 @@ public class WebPluginRequestsDto
     public required WebPluginRequests WebPlugin { get; set; }
 
     /// <summary>
-    /// Whether the plugin to change is the calling user's personal plugin rather than a plugin of the portal. The
-    /// state of a personal plugin is kept for its owner alone and needs no portal-settings right.
+    /// Whether the plugin to change is the calling user's personal plugin rather than a plugin of the portal.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "personal")]
@@ -88,7 +85,7 @@ public class WebPluginRequestsDto
 }
 
 /// <summary>
-/// Which installed web plugin an operation addresses.
+/// Which installed web plugin an operation addresses, a portal plugin or one of the caller's personal plugins.
 /// </summary>
 public class WebPluginNameRequestDto
 {
@@ -125,15 +122,28 @@ public class WebPluginFromFileRequestDto
     public bool System { get; set; }
 
     /// <summary>
-    /// Whether the plugin is installed for the calling user alone. Any portal member except a guest may install a
-    /// personal plugin; it cannot take the `name` or `pluginName` of a portal or installation-wide plugin and cannot
-    /// be combined with `system`, and the domains its `cspDomains` declares are allowed on that user's pages alone.
+    /// Whether the plugin is installed for the calling user alone rather than for the portal. It cannot be combined
+    /// with `system`.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "personal")]
     public bool Personal { get; set; }
 }
 
+/// <summary>
+/// Which portal web plugin is checked against its files in storage.
+/// </summary>
+public class RefreshWebPluginRequestDto
+{
+    /// <summary>
+    /// The plugin to check, by the manifest name `GET api/2.0/settings/webplugins` publishes as `name`, matched
+    /// without regard to case. It is neither the localized display name nor the JavaScript object name in
+    /// `pluginName`; a name that is not installed answers 404.
+    /// </summary>
+    /// <example>example-plugin</example>
+    [FromRoute(Name = "name")]
+    public required string Name { get; set; }
+}
 
 /// <summary>
 /// Which installed web plugins are listed.
@@ -149,8 +159,7 @@ public class GetWebPluginsRequestDto
     public bool? Enabled { get; set; }
 
     /// <summary>
-    /// Whether to list the calling user's personal plugins alone, including the ones that are not loaded because a
-    /// portal or installation-wide plugin holds their `name` or `pluginName`.
+    /// Whether to list the calling user's personal plugins alone instead of every plugin available to the caller.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "personal")]
