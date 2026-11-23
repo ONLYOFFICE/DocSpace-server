@@ -42,6 +42,7 @@ import {
 import { isObject, getNumber, getObject, getString, getEntityId } from "../narrow.js";
 import logger from "../log.js";
 import { lookupChatContextFolder } from "./chatContextSnapshot.js";
+import { clientFault } from "../httpErrors.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
@@ -571,17 +572,11 @@ export async function assertEntityAccessible(entityId: string | undefined): Prom
     accessible = (await getFolderInfoOnce(entityId)) !== undefined;
   } catch (err) {
     if (err instanceof DocspaceApiHttpError && err.status === 403) {
-      throw Object.assign(new Error(`Entity "${entityId}" is not accessible`), {
-        status: 403,
-        expose: true,
-      });
+      throw clientFault(403, `Entity "${entityId}" is not accessible`);
     }
     throw err; // genuine upstream failure (5xx) → propagate as-is
   }
   if (!accessible) {
-    throw Object.assign(new Error(`Entity "${entityId}" not found`), {
-      status: 404,
-      expose: true,
-    });
+    throw clientFault(404, `Entity "${entityId}" not found`);
   }
 }

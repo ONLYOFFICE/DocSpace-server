@@ -42,6 +42,7 @@ import { asString, isObject, readProp } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import logger from "../log.js";
 import type { Response } from "express";
+import { clientFault } from "../httpErrors.js";
 
 const engine = new ProfilesEngine({ storage });
 
@@ -56,10 +57,7 @@ const engine = new ProfilesEngine({ storage });
 async function assertProfilesWritable(): Promise<void> {
   const config = await aiService.get("/config");
   if (isObject(config) && config["systemAiEnabled"] === true) {
-    throw Object.assign(
-      new Error("AI profiles are read-only on this portal (managed by the AI gateway)"),
-      { status: 403, expose: true },
-    );
+    throw clientFault(403, "AI profiles are read-only on this portal (managed by the AI gateway)");
   }
 }
 

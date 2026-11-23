@@ -47,6 +47,7 @@ import { systemToolsSource, getSystemServerConfig } from "../tools/systemTools.j
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
+import { clientFault } from "../httpErrors.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
 
@@ -63,15 +64,12 @@ const UNSAFE_NAME_CHARS = /[\u0000-\u001f\u007f/\\]/;
 
 function assertRoutableServerName(rawName: unknown): string {
   if (typeof rawName !== "string" || rawName.trim().length === 0) {
-    throw Object.assign(new Error("name is required"), {
-      status: 400,
-      expose: true,
-    });
+    throw clientFault(400, "name is required");
   }
   if (rawName === "." || rawName === ".." || UNSAFE_NAME_CHARS.test(rawName)) {
-    throw Object.assign(
-      new Error('name must not be ".", "..", or contain a path separator or control character'),
-      { status: 400, expose: true },
+    throw clientFault(
+      400,
+      'name must not be ".", "..", or contain a path separator or control character',
     );
   }
   return rawName;
@@ -102,10 +100,7 @@ async function resolveConfig(
   if (portal) {
     return portal;
   }
-  throw Object.assign(new Error(`No config provided and no portal-level server named "${name}"`), {
-    status: 400,
-    expose: true,
-  });
+  throw clientFault(400, `No config provided and no portal-level server named "${name}"`);
 }
 
 // No read answers a server's headers (see withoutHeaders below), so a config

@@ -38,6 +38,7 @@ import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { isObject, readProp } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
+import { badRequest } from "../httpErrors.js";
 
 async function checkConfigUrl(config: WebSearchConfig): Promise<void> {
   await assertSafeBaseUrl(config.baseUrl);
@@ -54,10 +55,6 @@ const engine = new WebSearchEngine({ storage });
 // probe; 84312 / 84313 for configure; 84431 / 84432 for set-active-config).
 async function assertWebSearchAccess(): Promise<void> {
   await storage.webSearch.read();
-}
-
-function badRequest(message: string): never {
-  throw Object.assign(new Error(message), { status: 400, expose: true });
 }
 
 /** A field a client actually sent a value for; `null` counts as "not set". */

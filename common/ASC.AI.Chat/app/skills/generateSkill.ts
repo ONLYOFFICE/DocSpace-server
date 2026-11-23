@@ -51,6 +51,7 @@ import { storage } from "../storage/index.js";
 import { getFolderInfo } from "../storage/docspaceFilesApi.js";
 import logger from "../log.js";
 import { GENERATION_BUDGET_MS, ModelCallError, runModel } from "../meta/common.js";
+import { clientFault } from "../httpErrors.js";
 
 /** `SkillFrontmatter.MaxNameLength`: the title is cut to it as well. */
 export const MAX_NAME_LENGTH = 64;
@@ -282,28 +283,24 @@ async function resolveSkillProfile(): Promise<Profile | undefined> {
 // in a description and could break the user message apart.
 const CONTROL_CHARS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g;
 
-function httpError(status: number, message: string): Error {
-  return Object.assign(new Error(message), { status, expose: true });
-}
-
 /** The folder is an Instructions room the caller may create files in, or the matching 4xx. */
 export async function assertInstructionsRoom(destId: string): Promise<void> {
   const info = await getFolderInfo(destId);
   if (!info) {
-    throw httpError(404, "The folder does not exist");
+    throw clientFault(404, "The folder does not exist");
   }
   if (info.folderType !== INSTRUCTIONS_FOLDER_TYPE && info.roomType !== INSTRUCTIONS_ROOM_TYPE) {
-    throw httpError(400, "Skills are created in an Instructions room only");
+    throw clientFault(400, "Skills are created in an Instructions room only");
   }
   if (info.canCreate === false) {
-    throw httpError(403, "The caller cannot create files in this room");
+    throw clientFault(403, "The caller cannot create files in this room");
   }
 }
 
 export async function generateSkill(input: GenerateSkillInput): Promise<GenerateSkillResult> {
   const givenTitle = input.title?.trim() ?? "";
   if (givenTitle && !toSkillName(givenTitle)) {
-    throw httpError(400, "title must contain a letter or a digit");
+    throw clientFault(400, "title must contain a letter or a digit");
   }
   await assertInstructionsRoom(input.destId);
 
@@ -319,7 +316,7 @@ export async function generateSkill(input: GenerateSkillInput): Promise<Generate
   // a spec like "total < 100" short. The system prompt keeps it a spec.
   const request = input.description.replace(CONTROL_CHARS, "").trim();
   if (!request) {
-    throw httpError(400, "description must contain text");
+    throw clientFault(400, "description must contain text");
   }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GENERATION_BUDGET_MS);

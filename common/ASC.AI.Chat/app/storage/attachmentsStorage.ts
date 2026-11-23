@@ -52,6 +52,7 @@ import { uploadThreadArtifact } from "./threadFiles.js";
 import { copyManyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 import { errorBodyText } from "./errorBody.js";
+import { clientFault } from "../httpErrors.js";
 
 const PATH = "/attachments";
 
@@ -528,10 +529,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         // does not exist, or one the caller cannot read), so a missing match
         // is a client error, not a service fault — answer 404 instead of
         // collapsing to a generic 500 (Bug 82893).
-        throw Object.assign(new Error(`attachment entry not found or inaccessible: ${entryId}`), {
-          status: 404,
-          expose: true,
-        });
+        throw clientFault(404, `attachment entry not found or inaccessible: ${entryId}`);
       }
       // The caller's own `type` wins over the title-derived one from
       // `dtoToAttachment`: it comes from the same `c_oAscFileType` table but

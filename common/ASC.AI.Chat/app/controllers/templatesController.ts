@@ -39,13 +39,10 @@ import { getString, isObject } from "../narrow.js";
 import { mayCreateAiRooms } from "../storage/docspacePeopleApi.js";
 import { getTemplateCatalog } from "../templates/catalog.js";
 import { installTemplate } from "../templates/installTemplate.js";
+import { badRequest, clientFault } from "../httpErrors.js";
 
 /** The longest id a request may carry; the shipped ids are far shorter. */
 const MAX_ID_LENGTH = 200;
-
-function badRequest(message: string): never {
-  throw Object.assign(new Error(message), { status: 400, expose: true });
-}
 
 export const templatesController = {
   list: asyncHandler(async (_req, res) => {
@@ -59,9 +56,9 @@ export const templatesController = {
   install: asyncHandler(async (req, res) => {
     await assertAiAccess();
     if (!(await mayCreateAiRooms())) {
-      throw Object.assign(
-        new Error("Only the portal owner, portal admins and room admins may install a template"),
-        { status: 403, expose: true },
+      throw clientFault(
+        403,
+        "Only the portal owner, portal admins and room admins may install a template",
       );
     }
     const id = isObject(req.body) ? getString(req.body, "id")?.trim() : undefined;

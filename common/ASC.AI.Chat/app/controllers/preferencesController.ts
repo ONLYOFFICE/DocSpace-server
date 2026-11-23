@@ -40,6 +40,7 @@ import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 import { isReasoningLevel, REASONING_LEVELS } from "../storage/reasoningDepth.js";
+import { clientFault } from "../httpErrors.js";
 
 const engine = new PreferencesEngine({ storage });
 
@@ -62,10 +63,7 @@ function scopeOf(value: unknown): string | undefined {
   if (typeof value === "string" && /^\d+$/.test(value)) {
     return value;
   }
-  throw Object.assign(new Error("entityId must be a room id (a positive integer)"), {
-    status: 400,
-    expose: true,
-  });
+  throw clientFault(400, "entityId must be a room id (a positive integer)");
 }
 
 export const preferencesController = {

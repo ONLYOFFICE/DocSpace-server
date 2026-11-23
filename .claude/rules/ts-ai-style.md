@@ -58,6 +58,8 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
   decides what the caller sees: the status and reason phrase of an `AiServiceHttpError` or a
   `DocspaceApiHttpError`, the message of an error with `expose === true` and a 4xx `status`, and
   `500 "Internal server error"` for everything else. The answer is `{ error: string }`.
+- A refusal written for the caller is thrown with `clientFault(status, message)` or
+  `badRequest(message)` (`app/httpErrors.ts`), not built by hand with `Object.assign`.
 - An error class extends `Error` and carries `readonly status`; `expose = true` says its message is
   written for the caller. `clientError` honours `expose` for 4xx only, so an error that must reach
   the caller as 5xx with its own text (a 503 "no model") is caught in the controller that knows it.

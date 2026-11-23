@@ -36,6 +36,7 @@ import logger from "../log.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 import { isObject, readProp } from "../narrow.js";
+import type { SourceKind } from "../storage/docspaceFilesApi.js";
 
 // Mirror of the widget composer's per-kind attachment cap (ATTACHMENT_LIMIT
 // in the chat library's attachments store): at most 5 file parts and 5
@@ -148,6 +149,16 @@ export type TypedRequest<ReqBody = unknown, ReqQuery = Record<string, unknown>> 
   ReqBody,
   ReqQuery
 >;
+
+// The query parameters by which a passthrough route (OpenAI, web search) names the entry the
+// call is made for. They are read here and stripped from what goes to the provider.
+export const ENTITY_ID_PARAM = "entityId";
+export const ENTITY_KIND_PARAM = "entityKind";
+
+/** `entityKind` as sent: `file` for a file, a folder (or room) for anything else. */
+export function sourceKindOf(value: string | null): SourceKind {
+  return value === "file" ? "file" : "folder";
+}
 
 type AsyncHandler<ReqBody, ReqQuery> = (
   req: TypedRequest<ReqBody, ReqQuery>,

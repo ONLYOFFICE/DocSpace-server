@@ -38,9 +38,15 @@ import logger from "../log.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { safeResolveSource } from "../storage/docspaceFilesApi.js";
-import type { SourceKind, SourceMeta } from "../storage/docspaceFilesApi.js";
+import type { SourceMeta } from "../storage/docspaceFilesApi.js";
 import { sourceMetadataFields } from "@onlyoffice/ai-chat/core";
-import { asyncHandler, startStreamHeartbeat } from "./_helpers.js";
+import {
+  asyncHandler,
+  ENTITY_ID_PARAM,
+  ENTITY_KIND_PARAM,
+  sourceKindOf,
+  startStreamHeartbeat,
+} from "./_helpers.js";
 import { hasCacheBreakpoints, markCacheBreakpoints } from "./cacheBreakpoints.js";
 import { isObject } from "../narrow.js";
 import { errorBodyText } from "../storage/errorBody.js";
@@ -71,13 +77,7 @@ import { errorBodyText } from "../storage/errorBody.js";
 // All are consumed here and never forwarded — the rest of the query string is
 // relayed to the provider verbatim, and an unknown parameter is at best
 // ignored and at worst a 400.
-const ENTITY_ID_PARAM = "entityId";
-const ENTITY_KIND_PARAM = "entityKind";
 const SESSION_ID_PARAM = "sessionId";
-
-function sourceKindOf(value: string | null): SourceKind {
-  return value === "file" ? "file" : "folder";
-}
 
 // The conversation-correlation header the ONLYOFFICE route reads, mirroring
 // `OnlyOfficeProvider` in `@onlyoffice/ai-chat`.

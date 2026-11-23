@@ -37,9 +37,9 @@ import logger from "../log.js";
 import { isObject } from "../narrow.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { safeResolveSource } from "../storage/docspaceFilesApi.js";
-import type { SourceKind, SourceMeta } from "../storage/docspaceFilesApi.js";
+import type { SourceMeta } from "../storage/docspaceFilesApi.js";
 import { storage } from "../storage/index.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, ENTITY_ID_PARAM, ENTITY_KIND_PARAM, sourceKindOf } from "./_helpers.js";
 import { errorBodyText } from "../storage/errorBody.js";
 
 // Web-search passthrough for the document editor's AI plugin.
@@ -66,12 +66,6 @@ import { errorBodyText } from "../storage/errorBody.js";
 // sends no entry, or names one the caller cannot see, yields no metadata.
 
 const EXA_BASE_URL = "https://api.exa.ai";
-const ENTITY_ID_PARAM = "entityId";
-const ENTITY_KIND_PARAM = "entityKind";
-
-function sourceKindOf(value: string | null): SourceKind {
-  return value === "file" ? "file" : "folder";
-}
 
 function queryParam(originalUrl: string, name: string): string | undefined {
   const queryIndex = originalUrl.indexOf("?");

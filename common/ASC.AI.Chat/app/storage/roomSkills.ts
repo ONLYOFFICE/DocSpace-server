@@ -59,6 +59,7 @@ import {
 } from "../narrow.js";
 import { DocspaceApiHttpError, filesApiGet } from "./docspaceFilesApi.js";
 import logger from "../log.js";
+import { clientFault } from "../httpErrors.js";
 
 /** `RoomType.InstructionsRoom` on the C# side — the rooms whose Markdown files are skills. */
 const INSTRUCTIONS_ROOM_TYPE = 10;
@@ -461,10 +462,7 @@ export async function getRoomSkills(roomId: string): Promise<RoomSkill[]> {
 export async function getRoomSkill(roomId: string, skillId: string): Promise<string> {
   const skills = await getRoomSkills(roomId);
   if (!skills.some((skill) => skill.id === skillId)) {
-    throw Object.assign(new Error(`Skill ${skillId} is not a skill of room ${roomId}`), {
-      status: 404,
-      expose: true,
-    });
+    throw clientFault(404, `Skill ${skillId} is not a skill of room ${roomId}`);
   }
   return readFileText(skillId);
 }

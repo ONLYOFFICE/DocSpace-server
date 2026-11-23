@@ -44,10 +44,7 @@ import type { GenerateMetaInput } from "../meta/generateMeta.js";
 import { fillMeta } from "../meta/fillMeta.js";
 import type { FillMetaInput } from "../meta/fillMeta.js";
 import type { EntryKind } from "../meta/portalMetadata.js";
-
-function badRequest(message: string): never {
-  throw Object.assign(new Error(message), { status: 400, expose: true });
-}
+import { badRequest } from "../httpErrors.js";
 
 // The entry both routes work on: one file, named by its table and its
 // integer id. Folders and rooms are not accepted for now: whether their

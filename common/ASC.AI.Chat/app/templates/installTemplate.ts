@@ -63,6 +63,7 @@ import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import { findTemplate, readTemplateFile } from "./catalog.js";
 import type { AgentTemplate, SourceTemplate, Template, TemplateCatalog } from "./catalog.js";
+import { clientFault } from "../httpErrors.js";
 
 /** `RoomType` on the C# side. */
 const ROOM_TYPES = { skillSet: 10, knowledgeBase: 11, agent: 12 } as const;
@@ -83,10 +84,6 @@ export interface InstalledTemplate extends InstalledRoom {
   knowledgeBases: InstalledRoom[];
   /** What was skipped: `modelNotSaved`; `instructionsNotSaved` for every agent. */
   warnings: string[];
-}
-
-function httpError(status: number, message: string): Error {
-  return Object.assign(new Error(message), { status, expose: true });
 }
 
 async function createRoom(
@@ -204,7 +201,7 @@ async function assertKnowledgeRoomsAllowed(template: Template): Promise<void> {
     (config["vectorizationEnabled"] === true || config["vectorizationNeedReset"] === true);
   if (!enabled) {
     logger.info(`installTemplate: ${template.id}: refused, vectorization is not set up`);
-    throw httpError(
+    throw clientFault(
       409,
       "This template holds a knowledge base, which needs vectorization to be set up on the portal",
     );
@@ -218,7 +215,7 @@ export async function installTemplate(
 ): Promise<InstalledTemplate> {
   const template = findTemplate(catalog, id);
   if (!template) {
-    throw httpError(404, "Template not found");
+    throw clientFault(404, "Template not found");
   }
   if (makesKnowledgeRoom(template)) {
     await assertKnowledgeRoomsAllowed(template);

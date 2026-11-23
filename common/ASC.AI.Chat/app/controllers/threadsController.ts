@@ -52,6 +52,7 @@ import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFile
 import { getSourceMeta } from "../requestContext.js";
 import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 import { readStoredProfile, resolveStoredProfile } from "./storedProfile.js";
+import { clientFault } from "../httpErrors.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -134,18 +135,12 @@ export async function assertThreadCreatable(
   const project = await readAiProjectChatContext(entityId);
   if (project) {
     if (!project.canChat) {
-      throw Object.assign(new Error("You cannot chat in this AI project"), {
-        status: 403,
-        expose: true,
-      });
+      throw clientFault(403, "You cannot chat in this AI project");
     }
     if (project.profileAvailable && project.effectiveProfileId) {
       return;
     }
-    throw Object.assign(new Error("The model of this AI project is not available"), {
-      status: 409,
-      expose: true,
-    });
+    throw clientFault(409, "The model of this AI project is not available");
   }
   // A malformed profileId makes the C# lookup fail with 400; treat that the
   // same as "no such profile" and fall through to the scope-assignment
@@ -158,10 +153,7 @@ export async function assertThreadCreatable(
   if (resolved?.profile) {
     return;
   }
-  throw Object.assign(new Error("no AI profile is available for this thread"), {
-    status: 404,
-    expose: true,
-  });
+  throw clientFault(404, "no AI profile is available for this thread");
 }
 
 type ThreadMessageInput = Omit<ThreadMessageLike, "id" | "createdAt">;

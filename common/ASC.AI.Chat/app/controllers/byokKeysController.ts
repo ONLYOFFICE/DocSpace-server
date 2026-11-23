@@ -36,6 +36,7 @@ import { AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler } from "./_helpers.js";
 import { getObject, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
+import { clientFault } from "../httpErrors.js";
 
 function readBody(body: unknown): JsonObject {
   return isObject(body) ? body : {};
@@ -62,7 +63,7 @@ async function withValidationMessage<T>(call: Promise<T>): Promise<T> {
     if (err instanceof AiServiceHttpError && err.status === 400) {
       const message = upstreamMessage(err.body);
       if (message) {
-        throw Object.assign(new Error(message), { status: 400, expose: true });
+        throw clientFault(400, message);
       }
     }
     throw err;
