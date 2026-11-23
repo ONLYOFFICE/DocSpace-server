@@ -65,6 +65,7 @@ public class SecurityController(
         AuditActionMapper auditActionMapper,
         CoreBaseSettings coreBaseSettings,
         CspSettingsHelper cspSettingsHelper,
+        WebPluginManager webPluginManager,
         ApiDateTimeHelper apiDateTimeHelper,
         IdentityClient identityClient,
         SecurityContext securityContext,
@@ -694,10 +695,11 @@ public class SecurityController(
     /// value. Anyone can call it without signing in, from any origin. The call is read-only. To skip an unchanged
     /// policy, send the `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value exactly as
     /// you got it. If the policy has not changed since then, the call returns 304 with an empty body. A signed-in
-    /// member whose request carries the `asc_personal_csp` cookie gets the header extended with the domains of their
-    /// own enabled personal web plugins, and never gets 304; `domains` stays the portal's list. The cookie is set and
-    /// cleared by `GET api/2.0/settings/webplugins` and by its `POST`, `PUT` and `DELETE` with `personal=true`. To
-    /// change the allowed domains, use `POST api/2.0/security/csp`, which requires the EditPortalSettings permission.
+    /// member may have enabled personal web plugins with domains that no portal plugin shadows. If the request also
+    /// carries the `asc_personal_csp` cookie, the header allows those domains too. Such a request never gets 304. The
+    /// `domains` field stays the portal's list. The plugin list sets or clears the cookie when called without
+    /// `personal`. The personal uploads, updates and deletions of `api/2.0/settings/webplugins` do the same. To change
+    /// the allowed domains, use `POST api/2.0/security/csp`, which requires the EditPortalSettings permission.
     /// </remarks>
     /// <summary>
     /// Get CSP settings
@@ -715,7 +717,7 @@ public class SecurityController(
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var personalCspDomains = Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName)
-            ? await serviceProvider.GetRequiredService<WebPluginManager>().GetPersonalCspDomainsAsync(tenantManager.GetCurrentTenantId())
+            ? await webPluginManager.GetPersonalCspDomainsAsync(tenantManager.GetCurrentTenantId())
             : [];
 
         var settings = personalCspDomains.Count == 0

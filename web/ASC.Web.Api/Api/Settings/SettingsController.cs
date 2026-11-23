@@ -179,24 +179,13 @@ public partial class SettingsController(
                 settings.DebugInfo = debugInfo;
             }
 
-            settings.Plugins = new PluginsDto();
-
-            if (bool.TryParse(configuration["plugins:enabled"], out var pluginsEnabled))
+            settings.Plugins = new PluginsDto
             {
-                settings.Plugins.Enabled = pluginsEnabled;
-            }
-
-            if (bool.TryParse(configuration["plugins:upload"], out var pluginsUpload))
-            {
-                settings.Plugins.Upload = pluginsUpload;
-            }
-
-            if (bool.TryParse(configuration["plugins:delete"], out var pluginsDelete))
-            {
-                settings.Plugins.Delete = pluginsDelete;
-            }
-
-            settings.Plugins.Personal = webPluginConfigSettings.PersonalEnabled;
+                Enabled = webPluginConfigSettings.Enabled,
+                Upload = webPluginConfigSettings.Upload,
+                Delete = webPluginConfigSettings.Delete,
+                Personal = webPluginConfigSettings.Personal
+            };
 
             var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = formGallerySettings.Map();

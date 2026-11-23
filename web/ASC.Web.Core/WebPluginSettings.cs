@@ -36,50 +36,40 @@ namespace ASC.Web.Core;
 [Singleton]
 public class WebPluginConfigSettings
 {
-    public WebPluginConfigSettings(ConfigurationExtension configurationExtension, IConfiguration configuration, ILogger<WebPluginConfigSettings> logger)
+    public WebPluginConfigSettings(IConfiguration configuration)
     {
-        configurationExtension.GetSetting("plugins", this);
-
-        PersonalEnabled = configuration.ReadBool("plugins:personal", true, logger);
-        MaxPersonalCount = configuration.ReadInt("plugins:personalMaxCount", 10, 1, 100, logger);
+        Enabled = ReadBool(configuration, "plugins:enabled", false);
+        Upload = ReadBool(configuration, "plugins:upload", false);
+        Delete = ReadBool(configuration, "plugins:delete", false);
+        Personal = ReadBool(configuration, "plugins:personal", true);
+        MaxCount = ReadPositive(configuration, "plugins:maxCount", 100);
+        PersonalMaxCount = ReadPositive(configuration, "plugins:personalMaxCount", 10);
+        MaxSize = long.TryParse(configuration["plugins:maxSize"], out var maxSize) && maxSize > 0 ? maxSize : 5L * 1024L * 1024L;
+        Extension = configuration["plugins:extension"] ?? ".zip";
+        AssetExtensions = configuration.GetSection("plugins:assetExtensions").Get<string[]>() ?? [];
+        AssetMaxCount = ReadPositive(configuration, "plugins:assetMaxCount", 10);
     }
 
-    public bool Enabled { get; set; }
-    public bool Upload { get; set; }
-    public bool Delete { get; set; }
-    public bool PersonalEnabled { get; }
-
-    public int MaxCount
+    private static bool ReadBool(IConfiguration configuration, string key, bool defaultValue)
     {
-        get => field > 0 ? field : 100;
-        set;
+        return bool.TryParse(configuration[key], out var value) ? value : defaultValue;
     }
 
-    public int MaxPersonalCount { get; }
-
-    public long MaxSize
+    private static int ReadPositive(IConfiguration configuration, string key, int defaultValue)
     {
-        get => field > 0 ? field : 5L * 1024L * 1024L;
-        set;
+        return int.TryParse(configuration[key], out var value) && value > 0 ? value : defaultValue;
     }
 
-    public string Extension
-    {
-        get => field ?? ".zip";
-        set;
-    }
-
-    public string[] AssetExtensions
-    {
-        get => field ?? [];
-        set;
-    }
-
-    public int AssetMaxCount
-    {
-        get => field > 0 ? field : 10;
-        set;
-    }
+    public bool Enabled { get; }
+    public bool Upload { get; }
+    public bool Delete { get; }
+    public bool Personal { get; }
+    public int MaxCount { get; }
+    public int PersonalMaxCount { get; }
+    public long MaxSize { get; }
+    public string Extension { get; }
+    public string[] AssetExtensions { get; }
+    public int AssetMaxCount { get; }
 }
 
 public class WebPluginSettings : ISettings<WebPluginSettings>
