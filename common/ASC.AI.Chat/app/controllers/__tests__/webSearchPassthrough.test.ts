@@ -49,11 +49,6 @@ import { useFile, useFolder } from "../../__tests__/fixtures/providers.js";
 // parser, the gate, the request context): the portal's web-search config read from the AI
 // service, the source entry from the Files API, the search provider stubbed with msw.
 
-// The access log is not what these tests are about.
-vi.mock("morgan", () => ({
-  default: () => (_req: unknown, _res: unknown, next: () => void) => next(),
-}));
-
 const upstream = useUpstream();
 const { default: logger } = await import("../../log.js");
 const { createApp } = await import("../../createApp.js");

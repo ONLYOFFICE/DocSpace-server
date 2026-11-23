@@ -64,12 +64,6 @@ import {
 // The AI service, the Files API and the provider are stubbed with msw; the client is a raw
 // socket (openaiPassthrough.harness.ts), so the unparsed body reaches the handler as sent.
 
-// CORS from the developer's appsettings would add headers to every answer.
-// The access log is not what these tests are about.
-vi.mock("morgan", () => ({
-  default: () => (_req: unknown, _res: unknown, next: () => void) => next(),
-}));
-
 const upstream = useUpstream();
 const useProfile = (dto?: unknown): void => profileStub(upstream, dto);
 const useProvider = (url: string, answer: () => Response | Promise<Response>) =>

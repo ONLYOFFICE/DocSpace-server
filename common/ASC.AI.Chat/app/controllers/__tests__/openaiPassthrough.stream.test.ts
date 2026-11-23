@@ -53,11 +53,6 @@ import {
 // is written after the 200 is committed, and a client that goes away. The clock is fake and
 // driven by the test; socket I/O runs on the real event loop (`until`, `ioTurn`).
 
-// The access log is not what these tests are about.
-vi.mock("morgan", () => ({
-  default: () => (_req: unknown, _res: unknown, next: () => void) => next(),
-}));
-
 const upstream = useUpstream();
 const { default: logger } = await import("../../log.js");
 const { createApp } = await import("../../createApp.js");

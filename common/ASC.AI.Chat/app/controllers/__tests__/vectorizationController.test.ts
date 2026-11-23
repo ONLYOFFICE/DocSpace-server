@@ -50,11 +50,6 @@ const upstream = useUpstream();
 const { aiServiceBaseUrl } = await import("../../storage/httpClient.js");
 const { vectorizationController } = await import("../vectorizationController.js");
 
-// CORS from the developer's appsettings would add headers to every answer.
-// The access log is not what these tests are about.
-vi.mock("morgan", () => ({
-  default: () => (_req: unknown, _res: unknown, next: () => void) => next(),
-}));
 const { createApp } = await import("../../createApp.js");
 
 const TASKS = `${aiServiceBaseUrl}/internal/ai/vectorization/tasks`;

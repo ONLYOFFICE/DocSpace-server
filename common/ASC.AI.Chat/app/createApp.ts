@@ -33,11 +33,11 @@
 
 import express from "express";
 import type { Express } from "express";
-import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import cors from "cors";
-import logger, { logStream } from "./log.js";
+import logger from "./log.js";
+import { accessLog } from "./accessLog.js";
 import { coreCors } from "../config/index.js";
 import { corsOptions } from "./cors.js";
 import registerRoutes, { API_PREFIX } from "./routes.js";
@@ -93,7 +93,7 @@ export function createApp(): Express {
   // parsed here and the handler left with no bytes to save.
 
   app
-    .use(morgan("combined", { stream: logStream }))
+    .use(accessLog())
     .use(cookieParser())
     .use((req, res, next) => {
       if (
