@@ -126,7 +126,7 @@ public class BillingClientTests
             "admin@example.com", "https://portal.example.com", "John Smith", null, "en", "");
         var result = await client.GetDocsCloudTrialAsync("portal-1", customer);
 
-        result.Should().BeTrue();
+        result.Granted.Should().BeTrue();
         handler.LastUri!.AbsolutePath.Should().Be("/billing/getwdocstrial");
 
         var body = JsonDocument.Parse(handler.LastRequestBody!).RootElement;
