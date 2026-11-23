@@ -224,6 +224,8 @@ describe("dtoToProfile", () => {
     ["canUseTool is a string", { canUseTool: "true" }, noTool],
     ["useResponsesApi is null", { useResponsesApi: null }, noResponses],
     ["useResponsesApi is a number", { useResponsesApi: 1 }, noResponses],
+    // The next eight rows: fields dtoToProfile reads and ProfileDto does not declare (contract.dotnet.test.ts).
+    // The AI service does not send them; the rows pin what the reader would do if it did.
     ["useProxy is given", { useProxy: true }, profileOf({ useProxy: true })],
     ["useProxy is a string", { useProxy: "true" }, profileOf()],
     ["isCloudProvider is given", { isCloudProvider: false }, profileOf({ isCloudProvider: false })],

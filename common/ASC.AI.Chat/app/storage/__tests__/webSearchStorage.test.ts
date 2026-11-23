@@ -66,6 +66,8 @@ describe("parseWebSearchConfig", () => {
     });
   });
 
+  // isCloudProvider is not a property of WebSearchConfigDto (contract.dotnet.test.ts): the AI service does not
+  // send it. This and the two isCloudProvider rows below pin what the reader would do if it did.
   it("takes isCloudProvider when the answer carries it", () => {
     expect(parseWebSearchConfig({ provider: "onlyoffice", isCloudProvider: true })).toEqual({
       provider: "onlyoffice",

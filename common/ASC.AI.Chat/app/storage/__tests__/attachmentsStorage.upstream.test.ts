@@ -188,6 +188,8 @@ describe("readById", () => {
       fileAttachment({ path: "sbox-1-a b/Report.docx" }),
     ],
     ["type is a FileType that disagrees with the title", { type: 5 }, fileAttachment()],
+    // source, and base64 in the rows above, are fields dtoToAttachment reads and AttachmentDto
+    // does not declare (contract.dotnet.test.ts): the AI service does not send them.
     ["source is user", { source: "user" }, fileAttachment({ source: "user" })],
     ["source is tool", { source: "tool" }, fileAttachment({ source: "tool" })],
     ["source is another word", { source: "agent" }, fileAttachment()],

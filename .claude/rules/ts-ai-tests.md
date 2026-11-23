@@ -44,6 +44,7 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   | an MCP server the library's own client talks to | `mcpStub.ts` | msw |
   | `FolderDto` and `FileDto` of the Files API, a round's folder snapshot | `fixtures/filesApi.ts` (`folderDto`, `fileDto`, `snapshotWithFolders`) | |
   | the chat context aggregate and a primed round | `fixtures/chatContext.ts` (`chatContextDto`, `inRound`) | |
+  | the properties of a C# DTO class, the members of an enum, the fields a Node function reads | `readClass`, `readEnum`, `readsOf` in `helpers/csharp.ts` | |
   | `ProfileDto` and a stubbed model provider | `fixtures/providers.ts` (`profileDto`, `useProfile`, `useProvider`) | |
   | the whole app: parsers, gate, routes, 404 | `request(createApp())` | supertest |
   | waits between polls and retries | `useFastTimers()` in `time.ts` | vitest fake timers |
@@ -130,7 +131,27 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   from the .NET run only, so a vitest citation reads `[run: NO-LINK]`.
 - A commit that moves the cited lines updates the rows (`claims.md` §4).
 
-## 8. The suite pins what the code does today
+## 8. The contract with the .NET services
+
+- `app/__tests__/contract.dotnet.test.ts` compares the sources of both sides, without running a
+  service: the properties a C# DTO class declares with the fields the Node function that maps it
+  reads (`helpers/csharp.ts` reads both), and every enum that crosses the boundary with the
+  values Node knows. It fails when a property or an enum member is added, removed, renamed or
+  changes its kind (string, number, boolean, array, object) on either side alone.
+- A new mapper of an upstream answer gets a row in `CONTRACTS`: the C# class or classes, the Node
+  function. A difference that is meant is listed in the row with its reason (`notSent`: read by
+  Node, not declared by C#; `unread`: declared, not read; `otherKind`); a reason states what the
+  code does, not what was intended. For the Files and People DTOs only the fields Node reads are
+  checked, as it reads a few properties out of dozens.
+- A numeric constant that stands for a C# enum member (a folder or room type) gets a row in the
+  enum table of the same file.
+- A fixture of an upstream DTO carries the properties the C# class declares. A test row for a
+  field the class does not declare says so in a comment above it.
+- What the comparison cannot see: a property that is declared and left null, a value the
+  serializer writes differently from the declaration, the bodies Node sends (the request DTOs).
+  Those show only against the running services, in `products/ASC.AI/ASC.AI.Tests`.
+
+## 9. The suite pins what the code does today
 
 - The tests are characterization tests: they assert the exact status, body, upstream requests and
   log level of the code as it is, so that a refactoring which changes any of it turns a test red.

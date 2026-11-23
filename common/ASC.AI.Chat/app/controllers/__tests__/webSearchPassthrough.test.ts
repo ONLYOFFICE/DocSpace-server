@@ -356,6 +356,8 @@ describe("another provider with a base URL of its own", () => {
   });
 
   // DEFECT passthrough-7: a stored config marked as a cloud provider but without a base URL takes the provider name for a URL, `new URL` throws, and the route answers 500 — expected the 404 "Web search is not configured" the same branch gives a config without a base URL (ts-ai-failure-paths.md §4: a wrong input is never a 500)
+  // Not reachable with the AI service of this repository: WebSearchConfigDto has no
+  // isCloudProvider (contract.dotnet.test.ts), so a stored config never carries it.
   it("answers 500 for a cloud provider without a base URL", async () => {
     useConfig(configDto({ provider: "exa", isCloudProvider: true }));
 

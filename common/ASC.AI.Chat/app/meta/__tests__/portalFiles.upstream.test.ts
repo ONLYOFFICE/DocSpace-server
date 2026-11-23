@@ -121,7 +121,7 @@ function operationDto(id: string, extra: Record<string, unknown> = {}) {
 }
 
 // `extsConvertible` of `GET api/2.0/files/settings`
-// (products/ASC.Files/Core/ApiModels/ResponseDto/FilesSettingsDto.cs).
+// (products/ASC.Files/Server/ApiModels/ResponseDto/FilesSettingsDto.cs).
 const SETTINGS_DTO = {
   extsConvertible: { ".docx": [".pdf", ".txt"], ".xlsx": [".csv"], ".png": [".jpg"] },
   extsWebEdited: [".docx"],

@@ -114,7 +114,7 @@ const THREAD = "0198c3f4-6a2e-7c41-9b8d-2f5e7a1c3d90";
 const MAX_FILE_BYTES = 32 * 1024 * 1024;
 
 // `GET internal/ai/document-agent/settings` as the AI service answers it
-// (products/ASC.AI/Core/Settings/DocumentAgentSettings.cs, the AI service's settings action).
+// (common/ASC.AI.Integration/DocumentAgent/DocumentAgentSettings.cs, the AI service's settings action).
 const tenantSettings = {
   enabled: true,
   profileId: null,
