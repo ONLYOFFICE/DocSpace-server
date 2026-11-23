@@ -442,8 +442,7 @@ describe("systemToolsSource.getTools", () => {
     );
   });
 
-  // DEFECT tools-3: the body of an MCP server's error answer is written to the log (first 500 characters) — expected the status only ([ts-ai-style.md, State and logging])
-  it("answers an empty group for a server that refuses, and logs its answer", async () => {
+  it("answers an empty group for a server that refuses, and logs its status without its answer", async () => {
     upstream.use(
       http.post(DOCSPACE_URL, () =>
         HttpResponse.text("denied", { status: 401, statusText: "Unauthorized" }),
@@ -454,46 +453,9 @@ describe("systemToolsSource.getTools", () => {
     const grouped = await systemToolsSource.getTools();
 
     expect(grouped).toEqual({ docspace: [], other: [PLAIN_TOOL] });
-    expect(logger.warn).toHaveBeenCalledWith(
-      `MCP fetch <- 401 Unauthorized for ${DOCSPACE_URL} body=denied`,
-    );
+    expect(logger.warn).toHaveBeenCalledWith(`MCP fetch <- 401 Unauthorized for ${DOCSPACE_URL}`);
+    expect(JSON.stringify(vi.mocked(logger.warn).mock.calls)).not.toContain("denied");
     expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it("cuts the logged error body at 500 characters", async () => {
-    upstream.use(
-      http.post(DOCSPACE_URL, () => HttpResponse.text("x".repeat(600), { status: 500 })),
-    );
-    mcpServer(upstream, OTHER_URL);
-
-    await systemToolsSource.getTools();
-
-    expect(logger.warn).toHaveBeenCalledWith(
-      `MCP fetch <- 500 Internal Server Error for ${DOCSPACE_URL} body=${"x".repeat(500)}`,
-    );
-  });
-
-  it("logs an empty body when the error answer cannot be read", async () => {
-    upstream.use(
-      http.post(
-        DOCSPACE_URL,
-        () =>
-          new HttpResponse(
-            new ReadableStream({
-              start(controller) {
-                controller.error(new Error("reset"));
-              },
-            }),
-            { status: 502, statusText: "Bad Gateway" },
-          ),
-      ),
-    );
-    mcpServer(upstream, OTHER_URL);
-
-    await expect(systemToolsSource.getTools()).resolves.toEqual({ docspace: [], other: [] });
-    expect(logger.warn).toHaveBeenCalledWith(
-      `MCP fetch <- 502 Bad Gateway for ${DOCSPACE_URL} body=`,
-    );
   });
 
   // DEFECT tools-4: when every configured server fails the answer is `{ docspace: [], other: [] }` and the "no tools from any server" warning is not written — it fires only when no server is configured (systemTools.ts:379)

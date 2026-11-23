@@ -1096,8 +1096,8 @@ describe("createMany of a generated image", () => {
     );
   });
 
-  // DEFECT stor1-9: a refusal of the Files API insert is an AiServiceHttpError (the 403 retry depends on that class), and its log line carries the first 1000 characters of the upstream body — expected a DocspaceApiHttpError, and a log line that names the status, not the payload (ts-ai-style.md, Upstream calls; State and logging)
-  it("logs the body of a refused insert and does not retry another status", async () => {
+  // DEFECT stor1-9: a refusal of the Files API insert is an AiServiceHttpError (the 403 retry depends on that class) — expected a DocspaceApiHttpError (ts-ai-style.md, Upstream calls)
+  it("logs the status of a refused insert, not its body, and does not retry another status", async () => {
     const inserts = filesApi({
       insert: () => HttpResponse.text("upstream body", { status: 500, statusText: "Boom" }),
     });
@@ -1106,9 +1106,7 @@ describe("createMany of a generated image", () => {
     const result = await new HttpAttachmentsStorage().createMany([tool()]);
 
     expect(inserts).toHaveLength(1);
-    expect(logged("error")[0]).toBe(
-      `insertGeneratedImage: POST ${FILES}/4/insert -> 500 Boom; body=upstream body`,
-    );
+    expect(logged("error")[0]).toBe(`insertGeneratedImage: POST ${FILES}/4/insert -> 500 Boom`);
     expect(result[0]?.source).toBe("tool");
     expect(logged("error")[1]).toMatch(
       /^uploadToolImage: entityId=- FAILED at stage=insert: AI service 500 Boom/,

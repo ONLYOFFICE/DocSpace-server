@@ -355,15 +355,13 @@ describe("HttpToolsAdapter.getTools", () => {
     expect(upstream.seen[0]?.body).toEqual({ ...EMPTY_CONTEXT, formSubAgent: true });
   });
 
-  it("logs the context, the raw answer and the tool names", async () => {
+  it("logs the context and the tool names, not the answer itself", async () => {
     answerList();
 
     await new HttpToolsAdapter().getTools("5");
 
     expect(vi.mocked(logger.info).mock.calls.map((c) => c[0])).toEqual([
       `docspaceTools.list entityId=5 -> /tools/list context=${JSON.stringify({ ...EMPTY_CONTEXT, folderId: 5 })}`,
-      // DEFECT tools-1: the upstream answer is written to the log (first 1000 characters) — expected a line that names counts or fields, not the payload ([ts-ai-style.md, State and logging])
-      `docspaceTools.list raw response: ${JSON.stringify(TOOL_LIST).slice(0, 1000)}`,
       expect.stringMatching(
         /^docspaceTools\.list entityId=5 -> 2 tool\(s\) in \d+ms: \[get_folder, onlyoffice_generate_docx\]$/,
       ),

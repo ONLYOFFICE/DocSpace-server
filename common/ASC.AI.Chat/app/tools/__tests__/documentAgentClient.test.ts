@@ -148,7 +148,7 @@ describe("the A2A client of the document agent", () => {
     expect(sdk.createFromUrl).toHaveBeenLastCalledWith(changed.url);
   });
 
-  it("rejects with DocumentAgentError naming the URL when the client cannot be built, and tries again next time", async () => {
+  it("rejects with a DocumentAgentError that names no address when the client cannot be built, and tries again next time", async () => {
     const cause = new Error("card unreachable");
     sdk.createFromUrl.mockImplementationOnce(() => Promise.reject(cause));
 
@@ -157,9 +157,12 @@ describe("the A2A client of the document agent", () => {
     await expect(failed).rejects.toBeInstanceOf(mod.DocumentAgentError);
     await expect(failed).rejects.toMatchObject({
       name: "DocumentAgentError",
-      message: "document agent at http://agent:9838 is unreachable",
+      message: "the document agent is unreachable",
       cause,
     });
+    expect(logger.warn).toHaveBeenCalledWith(
+      "documentAgent: the agent at http://agent:9838 is unreachable",
+    );
     await expect(mod.runDocumentTask(config, input())).resolves.toMatchObject({ state: "unknown" });
     expect(sdk.createFromUrl).toHaveBeenCalledTimes(2);
   });

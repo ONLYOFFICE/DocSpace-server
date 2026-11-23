@@ -261,19 +261,25 @@ export async function primeChatContext(request: ChatContextRequest): Promise<voi
     if (err instanceof AiServiceHttpError && (err.status === 401 || err.status === 403)) {
       throw err;
     }
+    // The message of an upstream error holds the internal address and the upstream body.
     logger.warn(
       `chat-context: aggregate read failed, falling back to per-entity reads: ${
-        err instanceof Error ? err.message : String(err)
+        err instanceof AiServiceHttpError
+          ? `AI service ${err.status}`
+          : err instanceof Error
+            ? err.message
+            : String(err)
       }`,
     );
     return;
   }
   const snapshot = parseChatContext(raw, request);
   if (!snapshot) {
+    // The aggregate carries the thread's messages: the log gets its shape, not its content.
     logger.warn(
-      `chat-context: unusable payload, falling back to per-entity reads: ${JSON.stringify(
-        raw,
-      ).slice(0, 500)}`,
+      `chat-context: unusable payload, falling back to per-entity reads: ${
+        isObject(raw) ? `an object with ${Object.keys(raw).sort().join(",")}` : typeof raw
+      }`,
     );
     return;
   }

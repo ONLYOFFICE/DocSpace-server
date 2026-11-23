@@ -355,7 +355,9 @@ export async function runDocumentTask(
   try {
     client = await clientFor(config);
   } catch (err) {
-    throw new DocumentAgentError(`document agent at ${config.url} is unreachable`, { cause: err });
+    // The address stays in the log: the error's message is read by the model.
+    logger.warn(`documentAgent: the agent at ${config.url} is unreachable`);
+    throw new DocumentAgentError("the document agent is unreachable", { cause: err });
   }
 
   let taskId: string | undefined;

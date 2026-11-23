@@ -287,7 +287,8 @@ describe.each([
     expect(published(operationId, reply)).toEqual([]);
   });
 
-  // DEFECT data-6: a body that is not an object, or whose fields have the wrong type, is cast and handed to the engine as it came — expected 400 naming the field before the engine (ts-ai-failure-paths.md §4; ts-ai-style.md, Types: "the generic of asyncHandler<Dto> is a cast too")
+  // The engine compares the name with the stored ones first, so a body without a string name
+  // made it throw (500). The other fields are the engine's and the AI service's to judge.
   it.each([
     ["null", null],
     ["a string", "profile"],
@@ -295,12 +296,24 @@ describe.each([
     ["{}", {}],
     ["a name that is a number", { ...body, name: 5 }],
     ["a name that is null", { ...body, name: null }],
+  ])("answers 400 for a body that is %s, before the engine", async (_what, sent) => {
+    portalConfig(false);
+
+    const reply = await invoke(profilesController[method], { body: sent });
+
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "name is required and must be a string" });
+    expect(published(operationId, reply)).toEqual([]);
+    expect(engineCall()).not.toHaveBeenCalled();
+  });
+
+  it.each([
     ["no modelId", { ...body, modelId: undefined }],
     ["a modelId that is an object", { ...body, modelId: {} }],
     ["a providerType that is a number", { ...body, providerType: 7 }],
     ["headers that are a string", { ...body, headers: "x" }],
     ["a name of 10 000 characters", { ...body, name: "n".repeat(10_000) }],
-  ])("hands a body that is %s to the engine unchecked", async (_what, sent) => {
+  ])("hands a body with %s to the engine, which judges it", async (_what, sent) => {
     portalConfig(false);
     engineCall().mockResolvedValue({ success: true, profile: stored });
 

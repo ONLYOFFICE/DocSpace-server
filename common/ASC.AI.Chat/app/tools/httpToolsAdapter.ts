@@ -432,7 +432,6 @@ export class HttpToolsAdapter implements ToolsAdapter {
       );
       throw err;
     }
-    logger.info(`docspaceTools.list raw response: ${JSON.stringify(raw).slice(0, 1000)}`);
     const parsed = parseList(raw);
     // The generate tools only create an empty file; with a document agent
     // configured the model gets `document_agent` instead, which fills it.

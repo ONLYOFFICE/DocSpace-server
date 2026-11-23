@@ -221,12 +221,34 @@ describe("fillMeta", () => {
     expect(portalMetadata.setCustomFields).not.toHaveBeenCalled();
   });
 
-  // DEFECT ctl-73: when the values were written and the read of the metadata that follows fails, fillMeta rejects with that error and the route answers a bare 5xx although the values are stored — expected the answer to name what was written (`filled`) with a warning, or the read to be optional (ts-ai-failure-paths.md §6: a later step's failure never answers a bare error after something was made)
-  it("fails the whole request when the read after a successful write fails", async () => {
+  // What was written is not answered as a failure: a bare 5xx would hide it, and a retry would
+  // run the model again.
+  it("answers what was written, with the metadata read before, when the read after the write fails", async () => {
     customSync.mockResolvedValue(
       assistantText(JSON.stringify({ values: [{ key: "f3", value: 1200 }] })),
     );
-    const failure = new FakeDocspaceApiHttpError(503, "Unavailable", "u");
+    vi.mocked(portalMetadata.getEntryMetadata)
+      .mockResolvedValueOnce(METADATA)
+      .mockRejectedValueOnce(new FakeDocspaceApiHttpError(503, "Unavailable", "u"));
+
+    const result = await fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false });
+
+    expect(portalMetadata.setValues).toHaveBeenCalledWith("file", "42", [
+      { fieldId: 3, numberValue: 1200 },
+    ]);
+    expect(result.dryRun).toBe(false);
+    expect(result.metadata).toBe(METADATA);
+    expect(result.filled).toEqual([{ fieldId: 3, name: "Amount", value: { numberValue: 1200 } }]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      "meta.fill: the values of file 42 were written, reading them back failed with 503",
+    );
+  });
+
+  it("still fails when the read after the write fails for a reason that is no answer of the portal", async () => {
+    customSync.mockResolvedValue(
+      assistantText(JSON.stringify({ values: [{ key: "f3", value: 1200 }] })),
+    );
+    const failure = new Error("timeout");
     vi.mocked(portalMetadata.getEntryMetadata)
       .mockResolvedValueOnce(METADATA)
       .mockRejectedValueOnce(failure);
@@ -234,9 +256,31 @@ describe("fillMeta", () => {
     await expect(
       fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false }),
     ).rejects.toBe(failure);
-    expect(portalMetadata.setValues).toHaveBeenCalledWith("file", "42", [
-      { fieldId: 3, numberValue: 1200 },
-    ]);
+  });
+
+  it("reports the second write as write_failed when it gets a 5xx after the first one landed", async () => {
+    customSync.mockResolvedValue(
+      assistantText(
+        JSON.stringify({
+          values: [
+            { key: "f3", value: 1200 },
+            { key: "c0", value: "Apollo" },
+          ],
+        }),
+      ),
+    );
+    vi.mocked(portalMetadata.getEntryMetadata).mockResolvedValue(METADATA);
+    vi.mocked(portalMetadata.setValues).mockResolvedValue(undefined as never);
+    vi.mocked(portalMetadata.setCustomFields).mockRejectedValue(
+      new FakeDocspaceApiHttpError(502, "Bad Gateway", "u"),
+    );
+
+    const result = await fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false });
+
+    expect(result.filled).toEqual([{ fieldId: 3, name: "Amount", value: { numberValue: 1200 } }]);
+    expect(result.unresolved).toContainEqual(
+      expect.objectContaining({ name: "Project", reason: "write_failed" }),
+    );
   });
 
   it("reads the files of a folder entry through the folder listing", async () => {

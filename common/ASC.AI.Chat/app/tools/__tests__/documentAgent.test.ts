@@ -990,15 +990,13 @@ describe("where the files of a task go", () => {
     expect(client.sendMessageStream).not.toHaveBeenCalled();
   });
 
-  // DEFECT docagent-4: the Files API's error message, with the proxy's internal URL in it, goes to the model as the tool's answer — expected a reason that names no address of ours (ts-ai-failure-paths.md §5; documentAgentFiles.ts unreadable() keeps addresses out for the same reason)
   it("answers that the workspace could not be reached when the folder read fails", async () => {
     arrange({ folders: { "42": 500 } });
 
     const answer = await call({ task: "Do" }, { entityId: "42" });
 
-    expect(answer).toMatch(
-      /^The workspace could not be reached: DocSpace API 500 Internal Server Error for http:\/\/\S+\/api\/2\.0\/files\/folder\/42\.$/,
-    );
+    expect(answer).toBe("The workspace could not be reached: it answered 500.");
+    expect(answer).not.toContain("http");
     expect(client.sendMessageStream).not.toHaveBeenCalled();
   });
 
@@ -1181,17 +1179,18 @@ describe("the MCP servers the agent gets", () => {
 });
 
 describe("documentAgentTools.callTool when the run fails", () => {
-  // DEFECT docagent-7: the agent's internal address goes to the model in the tool's answer ("document agent at http://... is unreachable") — expected a reason that names no address of ours (ts-ai-failure-paths.md §5)
   it("answers that the agent is unavailable when it cannot be reached", async () => {
     arrange();
     conf.agent = { ...CONFIG, url: "http://agent-down:9838" };
     createFromUrl.mockImplementation(() => Promise.reject(new Error("ECONNREFUSED")));
 
-    expect(await call({ task: "Do" })).toBe(
-      "The document agent is unavailable: document agent at http://agent-down:9838 is unreachable.",
-    );
+    const answer = await call({ task: "Do" });
+
+    expect(answer).toBe("The document agent is unavailable: the document agent is unreachable.");
+    expect(answer).not.toContain("agent-down");
     expect(warnings()).toEqual([
-      "document_agent failed: document agent at http://agent-down:9838 is unreachable",
+      "documentAgent: the agent at http://agent-down:9838 is unreachable",
+      "document_agent failed: the document agent is unreachable",
     ]);
   });
 

@@ -501,7 +501,6 @@ describe("primeChatContext", () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  // DEFECT stor2-2: the warning of a failed aggregate read carries `err.message`, which for an AiServiceHttpError holds the internal URL of the AI service and the upstream body — expected the status only (ts-ai-style.md, State and logging: "A log line names the field or the status that was wrong, not the payload")
   it.each([400, 404, 409, 500, 502, 503])(
     "falls back to the per-entity reads on a %i, with a warning",
     async (status) => {
@@ -517,13 +516,11 @@ describe("primeChatContext", () => {
       expect(snapshot).toBeUndefined();
       expect(vi.mocked(logger.warn).mock.calls).toHaveLength(1);
       const line = String(vi.mocked(logger.warn).mock.calls[0]?.[0]);
-      expect(line).toMatch(
-        new RegExp(
-          `^chat-context: aggregate read failed, falling back to per-entity reads: AI service ${status} `,
-        ),
+      expect(line).toBe(
+        `chat-context: aggregate read failed, falling back to per-entity reads: AI service ${status}`,
       );
-      expect(line).toContain("/internal/ai/chat-context?");
-      expect(line).toContain("upstream detail");
+      expect(line).not.toContain("/internal/ai/chat-context");
+      expect(line).not.toContain("upstream detail");
       expect(logger.info).not.toHaveBeenCalled();
     },
   );

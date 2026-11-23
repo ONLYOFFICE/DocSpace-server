@@ -201,6 +201,13 @@ async function profileExists(id: string): Promise<boolean> {
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
     await assertProfilesWritable();
+    // The engine compares the name with the stored ones before anything else: a body without a
+    // string name made it throw, which answered 500.
+    const sent: unknown = req.body;
+    if (!isObject(sent) || typeof sent["name"] !== "string") {
+      res.status(400).json({ error: "name is required and must be a string" });
+      return;
+    }
     if (rejectExternalProviderType(req.body?.providerType, res)) {
       return;
     }
@@ -216,6 +223,13 @@ export const profilesController = {
 
   update: asyncHandler<Profile>(async (req, res) => {
     await assertProfilesWritable();
+    // The engine compares the name with the stored ones before anything else: a body without a
+    // string name made it throw, which answered 500.
+    const sent: unknown = req.body;
+    if (!isObject(sent) || typeof sent["name"] !== "string") {
+      res.status(400).json({ error: "name is required and must be a string" });
+      return;
+    }
     if (rejectExternalProviderType(req.body?.providerType, res)) {
       return;
     }

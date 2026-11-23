@@ -459,7 +459,10 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
         await run();
         filled.push(...fields);
       } catch (err) {
-        if (!(err instanceof DocspaceApiHttpError) || err.status >= 500) {
+        // A failure of the portal fails the request only while nothing has been written: after
+        // the first write landed, a bare 5xx would hide it and a retry would pay for the model
+        // again.
+        if (!(err instanceof DocspaceApiHttpError) || (err.status >= 500 && filled.length === 0)) {
           throw err;
         }
         logger.warn(
@@ -476,7 +479,7 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
     if (refusal && filled.length === 0) {
       throw refusal;
     }
-    const after = filled.length > 0 ? await getEntryMetadata(input.kind, input.id) : metadata;
+    const after = filled.length > 0 ? await metadataAfterWrite(input, metadata) : metadata;
     return {
       dryRun: false,
       metadata: after,
@@ -489,5 +492,25 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
     clearTimeout(timer);
     // Stops the readers still polling when the request ends early.
     controller.abort();
+  }
+}
+
+// The entry's metadata as the portal holds it after the write. The values are stored by now,
+// so a read that fails does not fail the request: the answer names what was written in
+// `filled` and carries the metadata as it was read before the write.
+async function metadataAfterWrite(
+  input: Pick<FillMetaInput, "kind" | "id">,
+  before: EntryMetadata,
+): Promise<EntryMetadata> {
+  try {
+    return await getEntryMetadata(input.kind, input.id);
+  } catch (err) {
+    if (!(err instanceof DocspaceApiHttpError)) {
+      throw err;
+    }
+    logger.warn(
+      `meta.fill: the values of ${input.kind} ${input.id} were written, reading them back failed with ${err.status}`,
+    );
+    return before;
   }
 }

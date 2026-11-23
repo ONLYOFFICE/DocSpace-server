@@ -207,8 +207,10 @@ export const documentAgentTools: ToolsAdapter = {
       // Contract: a failure is a result, never a throw — a throw aborts the chat stream.
       const message = err instanceof Error ? err.message : String(err);
       logger.warn(`${DOCUMENT_AGENT_TOOL_NAME} failed: ${message}`);
+      // The message of a Files API error names the internal address it was read from: the
+      // model, its provider and the stored history get the status only.
       if (err instanceof DocspaceApiHttpError) {
-        return `The workspace could not be reached: ${message}.`;
+        return `The workspace could not be reached: it answered ${err.status}.`;
       }
       if (err instanceof DocumentAgentError) {
         return `The document agent is unavailable: ${message}.`;

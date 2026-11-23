@@ -218,14 +218,9 @@ const forwardingFetch: FetchLike = async (url, init) => {
     if (res.ok) {
       logger.info(`MCP fetch <- ${res.status} ${res.statusText} for ${url}`);
     } else {
-      // Read a clone so the MCP client can still consume the original body.
-      let body = "";
-      try {
-        body = (await res.clone().text()).slice(0, 500);
-      } catch {
-        // ignore — body not readable
-      }
-      logger.warn(`MCP fetch <- ${res.status} ${res.statusText} for ${url} body=${body}`);
+      // The status only: the body of a server's error answer is that server's to word, and it
+      // may quote the request.
+      logger.warn(`MCP fetch <- ${res.status} ${res.statusText} for ${url}`);
     }
     return res;
   } catch (err) {

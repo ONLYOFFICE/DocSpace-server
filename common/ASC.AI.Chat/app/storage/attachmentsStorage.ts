@@ -198,10 +198,7 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
     });
     if (!res.ok) {
       const text = await errorBodyText(res);
-      logger.error(
-        `insertGeneratedImage: POST ${url} -> ${res.status} ${res.statusText}; ` +
-          `body=${text.slice(0, 1000)}`,
-      );
+      logger.error(`insertGeneratedImage: POST ${url} -> ${res.status} ${res.statusText}`);
       throw new AiServiceHttpError(res.status, res.statusText, text, url);
     }
     const json: unknown = await res.json();
