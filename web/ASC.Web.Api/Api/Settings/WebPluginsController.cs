@@ -59,16 +59,16 @@ public class WebPluginsController(
     /// domains of a personal plugin apply to the caller's own pages only. The call returns 400 for a bad package or
     /// manifest, a `pluginName` another plugin uses, or a personal plugin that takes the `name` or `pluginName` of a
     /// portal plugin. A portal holds at most 100 plugins and a member 10 personal ones by default. A request signed
-    /// in by the `asc_auth_key` cookie or Basic credentials returns 403 unless it carries `Sec-Fetch-Site:
-    /// same-origin` or the portal's `Origin`; a script uploads with a Bearer token or an API key instead. To list
-    /// plugins, use `GET api/2.0/settings/webplugins`.
+    /// in by the `asc_auth_key` cookie or Basic credentials returns 403 unless it carries `Sec-Fetch-Site`
+    /// `same-origin` or `none`, or the portal's `Origin`; a script uploads with a Bearer token or an API key
+    /// instead. To list plugins, use `GET api/2.0/settings/webplugins`.
     /// </remarks>
     /// <summary>Add a web plugin</summary>
     /// <path>api/2.0/settings/webplugins</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The installed web plugin, enabled, with the `url` its script is served from", typeof(WebPluginDto))]
     [SwaggerResponse(400, "The uploaded package is missing, more than one file was sent, the package is of the wrong type, empty or too large, the archive or its manifest is rejected, a personal plugin takes the name of a portal or installation-wide plugin, `personal` is combined with `system`, or the portal or the caller already holds the maximum number of plugins")]
-    [SwaggerResponse(403, "The caller has no portal-settings right, or for a personal plugin is a guest or personal plugins are switched off; the request is not a form, the request is signed in by the session cookie or Basic credentials and carries neither `Sec-Fetch-Site: same-origin` nor the portal's `Origin`, web plugins or plugin uploads are switched off for the installation, `system` was requested outside a standalone installation, or the domains the plugin declares would push the Content Security Policy header over its size limit")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or for a personal plugin is a guest or personal plugins are switched off; the request is not a form, the request is signed in by the session cookie or Basic credentials and carries neither `Sec-Fetch-Site` `same-origin` or `none` nor the portal's `Origin`, web plugins or plugin uploads are switched off for the installation, `system` was requested outside a standalone installation, or the domains the plugin declares would push the Content Security Policy header over its size limit")]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
@@ -97,7 +97,7 @@ public class WebPluginsController(
 
         messageService.Send(MessageAction.WebpluginUploaded, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
-        if (webPlugin.Personal)
+        if (inDto.Personal)
         {
             await SyncPersonalCspCookieAsync(tenant.Id);
         }
@@ -223,7 +223,7 @@ public class WebPluginsController(
 
         messageService.Send(MessageAction.WebpluginUpdated, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
-        if (webPlugin.Personal)
+        if (inDto.Personal)
         {
             await SyncPersonalCspCookieAsync(tenant.Id);
         }
@@ -300,7 +300,7 @@ public class WebPluginsController(
 
         messageService.Send(MessageAction.WebpluginDeleted, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
-        if (webPlugin.Personal)
+        if (inDto.Personal)
         {
             await SyncPersonalCspCookieAsync(tenant.Id);
         }
@@ -370,7 +370,7 @@ public class WebPluginsController(
             Response.Cookies.Append(WebPluginManager.PersonalCspCookieName, "1", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = Uri.UriSchemeHttps.Equals(Request.Url().Scheme, StringComparison.OrdinalIgnoreCase),
+                Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddYears(1)
             });
