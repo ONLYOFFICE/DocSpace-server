@@ -35,8 +35,9 @@
 namespace ASC.Web.Api.Billing.Tests.Tests.Tariff;
 
 /// <summary>
-/// What of a paid tariff (<c>GET portal/tariff</c>) each role reads: the state for everybody, the due dates from Room
-/// admin up, the payment id, the customer and the quotas only with the portal-settings right.
+/// What of a paid tariff (<c>GET portal/tariff</c>) each role reads: the state and whether the tariff is restricted for
+/// everybody, the due dates from Room admin up, the payment id, the customer and the quotas only with the portal-settings
+/// right.
 /// </summary>
 public class TariffRoleTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -53,6 +54,7 @@ public class TariffRoleTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         tariff.State.Should().Be(TariffState.Paid);
+        tariff.Restricted.Should().BeFalse();
         tariff.Id.Should().NotBe(0);
         tariff.CustomerId.Should().Be(Owner.Email);
         tariff.DueDate.UtcTime.Date.Should().Be(_endDate);
@@ -72,6 +74,7 @@ public class TariffRoleTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         tariff.State.Should().Be(TariffState.Paid);
+        tariff.Restricted.Should().BeFalse();
         tariff.DueDate.Should().NotBeNull();
         tariff.DueDate.UtcTime.Date.Should().Be(_endDate);
         tariff.Id.Should().Be(0);
@@ -94,9 +97,33 @@ public class TariffRoleTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         tariff.State.Should().Be(TariffState.Paid);
+        tariff.Restricted.Should().BeFalse();
         tariff.DueDate.Should().BeNull();
         tariff.DelayDueDate.Should().BeNull();
         tariff.CustomerId.Should().BeNull();
         tariff.Quotas.Should().BeNullOrEmpty();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.Guest)]
+    public async Task GetPortalTariff_GracePeriodWithACard_EveryRoleReadsThatItIsRestricted(EmployeeType? employeeType)
+    {
+        // Arrange: the member joins before the grace period, which refuses counted members
+        var member = employeeType.HasValue ? await InviteMember(employeeType.Value) : Owner;
+        Payments.Paid(Plans.AdminProductId, quantity: 10, DateTime.UtcNow.Date.AddDays(-2), Owner.Email).Customer(Owner.Email);
+        await _webApiClient.Authenticate(Owner);
+        await _paymentApi.GetCustomerInfoAsync(true, TestContext.Current.CancellationToken);
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(member);
+
+        // Act
+        var tariff = (await _portalQuotaApi.GetPortalTariffAsync(false, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        tariff.State.Should().Be(TariffState.Delay);
+        tariff.Restricted.Should().BeTrue("every role reads the restriction, the stripped tariff included");
     }
 }

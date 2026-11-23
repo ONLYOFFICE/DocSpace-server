@@ -85,6 +85,7 @@ public class PortalTariffTests(
         response.Should().NotBeNull();
         response.Id.Should().BeGreaterThanOrEqualTo(0);
         response.State.Should().Be(TariffState.Paid);
+        response.Restricted.Should().BeFalse();
         // No DueDate assertion: the standalone-style default tariff of this integration host has
         // no expiry, unlike the SaaS trial/paid tariffs the TS suite runs against.
         // No per-quota id bound: quota ids are negative for the built-in plans (-1 default here,

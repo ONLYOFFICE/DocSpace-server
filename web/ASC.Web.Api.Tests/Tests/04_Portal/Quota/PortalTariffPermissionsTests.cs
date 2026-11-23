@@ -74,5 +74,6 @@ public class PortalTariffPermissionsTests(
         // Assert
         tariff.Id.Should().Be(0);
         tariff.State.Should().Be(TariffState.Paid);
+        tariff.Restricted.Should().BeFalse();
     }
 }

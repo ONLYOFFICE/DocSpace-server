@@ -219,15 +219,10 @@ public class GracePeriodTests(AspireAppFixture fixture) : BaseTest(fixture)
         return PaymentCalls.Count(call => call.Route == CustomerRoute);
     }
 
-    /// <summary>
-    /// The state of the tariff through the SDK, and <c>restricted</c> from the raw answer of the same operation: the
-    /// SDK does not carry the field until it is generated again from the new OpenAPI document.
-    /// </summary>
     private async Task<(TariffState? State, bool Restricted)> ReadTariffAsync(bool refresh = true)
     {
-        var state = (await _portalQuotaApi.GetPortalTariffAsync(refresh, TestContext.Current.CancellationToken)).Response.State;
-        var raw = await RawResponseAsync(HttpMethod.Get, "api/2.0/portal/tariff");
+        var tariff = (await _portalQuotaApi.GetPortalTariffAsync(refresh, TestContext.Current.CancellationToken)).Response;
 
-        return (state, raw.GetProperty("restricted").GetBoolean());
+        return (tariff.State, tariff.Restricted);
     }
 }

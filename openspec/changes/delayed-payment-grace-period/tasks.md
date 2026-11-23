@@ -64,11 +64,12 @@
 - [x] 4.8 `Tests/Checkout/SubscriptionBalanceTests.cs:43-73`: keep the card case of the grace period (402 "Tariff is
   not paid") and add the delayed-method case (no 402); update the `verification.md` row of "Moving the subscription
   balance to the wallet".
-- [ ] 4.9 Tests citing the modified "Reading the tariff" (`BT/Tariff/TariffRoleTests.cs:45-101`,
+- [x] 4.9 Tests citing the modified "Reading the tariff" (`BT/Tariff/TariffRoleTests.cs:45-101`,
   `web/ASC.Web.Api.Tests/.../Quota/PortalTariffTests.cs:41-62`, `Quota/PortalTariffPermissionsTests.cs:47-77`):
-  assert `restricted` false on a paid plan, once the SDK carries the field (raw JSON until then). Open: the billing
-  suite asserts it on a paid plan (`GracePeriodTests.PaidPlan_IsNotRestricted`, raw JSON); the cited tests wait for
-  the regenerated SDK of the follow-up.
+  assert `restricted` false on a paid plan, once the SDK carries the field (raw JSON until then). Done with the
+  regenerated C# SDK (`TariffDto.Restricted`), `GracePeriodTests` moved off raw JSON too. A missing field reads as
+  false, so the guard that every role gets it is a new case of `TariffRoleTests`: in a grace period with a card the
+  owner, a Room admin, a User and a Guest read `restricted` true.
 - [x] 4.10 Update the CODE-ONLY rows that describe the grace period refusals (`billing` "Payment gate…" grace row,
   `quotas` row of the grace / not-paid refusal, `backup-and-restore` "Running the schedule") with the new tests.
 
