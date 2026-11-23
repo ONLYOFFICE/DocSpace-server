@@ -46,7 +46,7 @@ public sealed class WebhookReceiver
     /// leaves open (<c>Constants.WebhookTestBlacklist</c>), so <c>localhost</c> stays refused as in production.
     /// </summary>
     private static readonly string _baseUri =
-        $"http://{ASC.AppHost.Configuration.Constants.WebhookReceiverHost}:{ASC.AppHost.Configuration.Constants.WebhookReceiverPort}";
+        $"http://{ASC.AppHost.Configuration.Constants.WebhookReceiverHost}:{ASC.AppHost.Configuration.HostPorts.Of(ASC.AppHost.Configuration.Constants.WebhookReceiverPort)}";
 
     private static readonly Lazy<WireMockServer> _server = new(() => WireMockServer.Start(new WireMockServerSettings { Urls = [_baseUri] }));
 

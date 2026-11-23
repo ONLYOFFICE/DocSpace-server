@@ -77,4 +77,5 @@ global using Xunit;
 // Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
 global using AppHostConstants = ASC.AppHost.Configuration.Constants;
 global using AppPaths = ASC.AppHost.Configuration.AppPaths;
+global using HostPorts = ASC.AppHost.Configuration.HostPorts;
 global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;

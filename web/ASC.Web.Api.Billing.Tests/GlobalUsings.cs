@@ -80,6 +80,7 @@ global using ZiggyCreatures.Caching.Fusion;
 global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 
 global using AuditTrailDataApi = DocSpace.API.SDK.Api.Security.AuditTrailDataApi;
+global using CSPApi = DocSpace.API.SDK.Api.Security.CSPApi;
 global using HttpMethodAttribute = Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute;
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
 global using PaymentController = ASCWebApi::ASC.Web.Api.Controllers.PaymentController;

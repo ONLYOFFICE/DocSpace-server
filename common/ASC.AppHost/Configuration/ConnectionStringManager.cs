@@ -63,6 +63,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
     private bool WebhookTestSettings { get; set; }
 
+    /// <summary>The editing-state volume of a development stack (<see cref="AddEditors"/>).</summary>
+    public const string EditorsStateVolume = "docspace-editors-state";
+
     // Set by UsePaymentServices: the stub the billing, accounting and docscloud services are pointed at, "" for none;
     // null leaves the services with whatever buildtools/config says.
     private string? PaymentServicesUrl { get; set; }
@@ -88,7 +91,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
 
         var mysqlResourceBuilder = builder.AddMySql("mysql", password: mysqlRootPassword)
-            .WithEndpoint("tcp", endpoint => endpoint.Port = 33306)
+            .WithEndpoint("tcp", endpoint => endpoint.Port = Constants.MySqlPort)
             // performance_schema alone holds ~220 MiB of a fresh mysql:9 (433 -> 211 MiB measured); the
             // buffer pool is pinned at the server default so the figure does not drift with the image.
             .WithArgs("--performance-schema=OFF", "--innodb-buffer-pool-size=128M");
@@ -296,8 +299,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithBindMount(configPath, "/etc/otelcol-contrib/config.yaml")
             .WithBindMount(logsPath, "/logs")
             .WithArgs("--config=/etc/otelcol-contrib/config.yaml")
-            .WithHttpEndpoint(port: Constants.OtelCollectorGrpcPort, targetPort: Constants.OtelCollectorGrpcPort, name: "otlp-grpc", isProxied: false)
-            .WithHttpEndpoint(port: Constants.OtelCollectorHttpPort, targetPort: Constants.OtelCollectorHttpPort, name: "otlp-http", isProxied: false);
+            .WithHttpEndpoint(port: HostPorts.Of(Constants.OtelCollectorGrpcPort), targetPort: Constants.OtelCollectorGrpcPort, name: "otlp-grpc", isProxied: false)
+            .WithHttpEndpoint(port: HostPorts.Of(Constants.OtelCollectorHttpPort), targetPort: Constants.OtelCollectorHttpPort, name: "otlp-http", isProxied: false);
 
         return this;
     }
@@ -333,7 +336,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         });
 
 
-    public ConnectionStringManager AddEditors()
+    /// <param name="stateVolume">
+    /// The named volume of the editing state (see below); <c>null</c> keeps the image's anonymous volume, which goes
+    /// with the container. A test run passes <c>null</c>: its database lives only as long as the run, so there is no
+    /// state to keep, and two runs, or a run and a development stack, never share the cached files of their documents.
+    /// </param>
+    public ConnectionStringManager AddEditors(string? stateVolume = EditorsStateVolume)
     {
         var forTesting = builder.Configuration["APP_EDITOR_TEST"] == "true";
         var image = builder.Configuration["APP_EDITION"] switch
@@ -377,17 +385,21 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 "documentserver-admin $cmd --password-file \"$f\" </dev/null; rm -f \"$f\" ) & " +
                 "exec /app/ds/run-document-server.sh")
             .WithResetAdminPasswordCommand(adminPanelPassword, builder.Configuration["ASPIRE_CONTAINER_RUNTIME"] ?? "docker")
-            // Editing state has two halves that must survive a restart together: the task_result/doc_changes
-            // rows (in the AppHost MySQL since the external-DB change above, so they persist) and the cached
-            // document files under /var/lib/onlyoffice (an anonymous volume on the image, so a new container
-            // starts without them). Rows without files made every document that was open at shutdown fail
-            // to reopen and get re-saved damaged (2026-10-09). Production mounts the same path as ds_state
-            // (buildtools/install/docker/ds.yml); the name carries no tag because the data is not version-bound.
-            .WithVolume("docspace-editors-state", "/var/lib/onlyoffice")
             // Give the document service time to finish the saves in flight before the container is killed -
             // the production compose uses the same 60 s stop_grace_period.
             .WithContainerRuntimeArgs("--stop-timeout", "60")
             .WithMemoryLimit(ContainerMemoryExtensions.EditorsLimit);
+
+        // Editing state has two halves that must survive a restart together: the task_result/doc_changes
+        // rows (in the AppHost MySQL since the external-DB change above, so they persist) and the cached
+        // document files under /var/lib/onlyoffice (an anonymous volume on the image, so a new container
+        // starts without them). Rows without files made every document that was open at shutdown fail
+        // to reopen and get re-saved damaged (2026-10-09). Production mounts the same path as ds_state
+        // (buildtools/install/docker/ds.yml); the name carries no tag because the data is not version-bound.
+        if (stateVolume is not null)
+        {
+            EditorResource.WithVolume(stateVolume, "/var/lib/onlyoffice");
+        }
 
         // The image bundles its own PostgreSQL, RabbitMQ and Redis and starts each one only when the matching
         // host still says "localhost" after the environment is read. Pointing them at the AppHost's own
@@ -423,7 +435,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithImage("onlyoffice-opensearch")
             .WithImageTag(Constants.OpensearchVersion)
             .WithBuildArg("OPENSEARCH_VERSION", Constants.OpensearchVersion)
-            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http", isProxied: isProxied)
+            .WithHttpEndpoint(port: HostPorts.Of(Constants.OpensearchPort), targetPort: Constants.OpensearchPort, name: "http", isProxied: isProxied)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
             .WithEnvironment("discovery.type", "single-node")
@@ -520,7 +532,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{HostPorts.Of(Constants.AppHostPort).ToString(CultureInfo.InvariantCulture)}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithExplicitStart();
 
@@ -653,7 +665,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{HostPorts.Of(Constants.AppHostPort).ToString(CultureInfo.InvariantCulture)}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.E2ETestsUiPort.ToString())
             .WithExplicitStart();
@@ -671,7 +683,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public string GetOtelCollectorEndpoint(bool isDocker) => isDocker
         ? $"http://{Constants.OtelCollectorContainer}:{Constants.OtelCollectorGrpcPort}"
-        : $"http://localhost:{Constants.OtelCollectorGrpcPort}";
+        : $"http://localhost:{HostPorts.Of(Constants.OtelCollectorGrpcPort)}";
 
     public void AddWaitFor<T>(
         IResourceBuilder<T> resourceBuilder,
@@ -733,10 +745,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         resourceBuilder
             .WithEnvironment("openTelemetry:enable", "true")
-            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + Constants.AppHostPort)
-            .WithEnvironment("files:docservice:url:public", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath")
+            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + HostPorts.Of(Constants.AppHostPort).ToString(CultureInfo.InvariantCulture))
+            .WithEnvironment("files:docservice:url:public", $"http://localhost:{HostPorts.Of(Constants.AppHostPort).ToString(CultureInfo.InvariantCulture)}/ds-vpath")
             // The editors' admin panel is served by the editors container at /admin, reachable only through the proxy.
-            .WithEnvironment("externalresources:adminpanel:default:domain", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath/admin");
+            .WithEnvironment("externalresources:adminpanel:default:domain", $"http://localhost:{HostPorts.Of(Constants.AppHostPort).ToString(CultureInfo.InvariantCulture)}/ds-vpath/admin");
 
         if (MySqlDatabaseResource != null)
         {
@@ -878,7 +890,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 // 127.0.0.1, not localhost: Windows tries ::1 first, the port Docker publishes listens on IPv4
                 // only, and every new connection to the index waited ~2 s for that refusal.
                 .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : IPAddress.Loopback.ToString()))
-                .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
+                .WithEnvironment("elastic:Port", () => (isDocker ? Constants.OpensearchPort : HostPorts.Of(Constants.OpensearchPort)).ToString(CultureInfo.InvariantCulture))
                 .WithEnvironment("elastic:Threads", () => "1")
                 // Goes with the 512 MiB OpenSearch heap - see ContainerMemoryExtensions.
                 .WithEnvironment("elastic:MaxContentLength", ContainerMemoryExtensions.IndexerMaxContentLength.ToString());
