@@ -8,7 +8,8 @@ paths:
 
 The Node service in `common/ASC.AI.Chat` is a thin HTTP layer: the engine and its DTOs come from
 `@onlyoffice/ai-chat/core`, the data lives in the .NET AI, Files and People services. What a failed
-step leaves behind is in `ts-ai-failure-paths.md`, tests are in `ts-ai-tests.md`; `claims.md` covers
+step leaves behind is in `ts-ai-failure-paths.md`, the Express application itself (middleware order,
+the error handler, shutdown, the proxy in front) in `ts-ai-express.md`, tests in `ts-ai-tests.md`; `claims.md` covers
 the texts in `app/openapi.ts`, `app/apiCatalog.ts` and `scripts/schema/` like any other text that
 states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
 
@@ -62,7 +63,8 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
 - The `message` of an upstream error holds the internal URL and the upstream body: it goes to the
   log, never into a response.
 - After the headers are sent (a stream) an error is a frame of the stream without details
-  (`streamNdjson`, `streamOpenAiSse`), not a status.
+  (`streamNdjson`, `streamOpenAiSse`), not a status; see `ts-ai-express.md` §1 for an answer that is
+  not a stream.
 
 ## Upstream calls
 

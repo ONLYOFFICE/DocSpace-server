@@ -297,8 +297,8 @@ edit here. Distribute every applicable rule to a reviewer:
   `[LoggerMessage]` with camelCase parameters (the analyzer is blind to partial-method parameters),
   FusionCache with explicit duration and `tenantId` in key and tag, tags through `CacheExtention`,
   no new named `HttpClient`, JSON options cached, no sync-over-async.
-- **A-TS** — `ts-ai-style.md`, `ts-ai-failure-paths.md` and `ts-ai-tests.md`, only if the branch
-  changes `.ts` files of `common/ASC.AI.Chat`. Includes: a `.catch()` that answers a constant, a
+- **A-TS** — `ts-ai-style.md`, `ts-ai-failure-paths.md`, `ts-ai-express.md` and `ts-ai-tests.md`,
+  only if the branch changes `.ts` files of `common/ASC.AI.Chat`. Includes: a `.catch()` that answers a constant, a
   refusal of the engine sent with 200, work before the access gate, a cast on a body field, an
   answer that echoes a storage object, a new entry or a larger count in `eslint-suppressions.json`,
   a fix without a test that fails without it.
