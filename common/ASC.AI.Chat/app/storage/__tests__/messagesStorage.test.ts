@@ -221,13 +221,15 @@ describe("readById", () => {
     await expect(storage.readById("m")).rejects.toMatchObject({ status });
   });
 
-  // DEFECT stor2-3: a GET messages/{id} answer of the wrong shape (no id, an empty body) is read as "the message does not exist" — expected it to be rethrown as unknown, since the C# action answers 404 for an absent message (ts-ai-failure-paths.md §1)
   it.each([
     ["an empty answer", noContent()],
     ["a DTO without id", docspace({ contents: "{}" })],
-  ])("reads %s as absent", async (_name, answer) => {
+  ])("rejects %s as an answer of an unknown shape", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/messages/:id", () => answer));
-    await expect(storage.readById("m")).resolves.toBeNull();
+    await expect(storage.readById("m")).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 });
 
@@ -244,9 +246,16 @@ describe("readThreadId", () => {
     ["threadId a number", docspace(messageDto({ threadId: 7 }))],
     ["an empty answer", noContent()],
     ["a list", docspace([])],
-    ["a 404", docspaceError(404)],
-  ])("answers null for %s", async (_name, answer) => {
+  ])("rejects %s as an answer of an unknown shape", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/messages/:id", () => answer));
+    await expect(storage.readThreadId("m")).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
+  });
+
+  it("answers null for a 404", async () => {
+    upstream.use(http.get("*/internal/ai/messages/:id", () => docspaceError(404)));
     await expect(storage.readThreadId("m")).resolves.toBeNull();
   });
 

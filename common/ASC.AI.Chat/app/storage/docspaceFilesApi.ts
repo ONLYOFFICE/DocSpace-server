@@ -43,6 +43,7 @@ import { isObject, getNumber, getObject, getString, getEntityId } from "../narro
 import logger from "../log.js";
 import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 import { clientFault } from "../httpErrors.js";
+import { mapped } from "./upstreamShape.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
@@ -271,11 +272,7 @@ export async function getFolderInfo(folderId: string): Promise<DocspaceFolderInf
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    const parsed = parseFolderInfo(await res.json());
-    if (!parsed) {
-      logger.warn(`getFolderInfo(${folderId}) -> unparseable response from ${url}`);
-    }
-    return parsed;
+    return mapped(parseFolderInfo(await res.json()), "GET files/folder/{id}");
   } finally {
     cancel();
   }
@@ -417,11 +414,7 @@ export async function getFileInfo(fileId: string): Promise<DocspaceFileInfo | un
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    const parsed = parseFileInfo(await res.json());
-    if (!parsed) {
-      logger.warn(`getFileInfo(${fileId}) -> unparseable response from ${url}`);
-    }
-    return parsed;
+    return mapped(parseFileInfo(await res.json()), "GET files/file/{id}");
   } finally {
     cancel();
   }

@@ -54,6 +54,7 @@ import {
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
 import { errorBodyText } from "./errorBody.js";
+import { listAnswer, mapped } from "./upstreamShape.js";
 
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
@@ -259,12 +260,9 @@ function logResolvedProfile(id: string, profile: Profile | undefined, source: un
 // Every other read goes without the flag and keeps the secrets.
 const CLIENT_READ = { query: { forClient: true } };
 
-function parseProfileList(raw: unknown): Profile[] {
-  if (!Array.isArray(raw)) {
-    return [];
-  }
+function parseProfileList(raw: unknown, call: string): Profile[] {
   const result: Profile[] = [];
-  for (const item of raw) {
+  for (const item of listAnswer(raw, call)) {
     const profile = dtoToProfile(item);
     if (profile) {
       result.push(profile);
@@ -289,11 +287,8 @@ export class HttpProfilesStorage implements ProfilesStorage {
       profiles: profiles.map(toCreateBody),
     });
     invalidateChatContext("profiles");
-    if (!Array.isArray(raw)) {
-      return [];
-    }
     const result: Profile[] = [];
-    for (const item of raw) {
+    for (const item of listAnswer(raw, "POST profiles/batch")) {
       const profile = dtoToProfile(item);
       if (profile) {
         result.push(profile);
@@ -316,7 +311,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       const profile = withOnlyofficeProviderOverrides(dtoToProfile(raw));
       logResolvedProfile(id, profile, raw);
-      return profile;
+      return mapped(profile, "GET profiles/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         logger.warn(`HttpProfilesStorage.readById(${id}) -> 404 NOT FOUND`);
@@ -340,7 +335,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
     }
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`, CLIENT_READ);
-      return dtoToProfile(raw);
+      return mapped(dtoToProfile(raw), "GET profiles/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         logger.warn(`HttpProfilesStorage.readByIdRaw(${id}) -> 404 NOT FOUND`);
@@ -357,7 +352,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // from the round snapshot, which carries the secrets for in-process use.
   // An AI service that predates the flag ignores it and answers in full.
   async readAllForClient(): Promise<Profile[]> {
-    return parseProfileList(await aiService.get(PATH, CLIENT_READ));
+    return parseProfileList(await aiService.get(PATH, CLIENT_READ), "GET profiles");
   }
 
   async readAll(): Promise<Profile[]> {
@@ -366,7 +361,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
       return snapshot.profiles;
     }
     reportChatContextMiss("profiles.readAll");
-    return parseProfileList(await aiService.get(PATH));
+    return parseProfileList(await aiService.get(PATH), "GET profiles");
   }
 
   async update(profile: Profile): Promise<void> {

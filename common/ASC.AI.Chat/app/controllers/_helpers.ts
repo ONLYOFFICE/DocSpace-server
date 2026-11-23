@@ -37,6 +37,7 @@ import { AiServiceHttpError } from "../storage/httpClient.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 import { isObject, readProp } from "../narrow.js";
 import type { SourceKind } from "../storage/docspaceFilesApi.js";
+import { UpstreamShapeError } from "../storage/upstreamShape.js";
 
 // Mirror of the widget composer's per-kind attachment cap (ATTACHMENT_LIMIT
 // in the chat library's attachments store): at most 5 file parts and 5
@@ -185,6 +186,10 @@ function clientError(err: unknown): { status: number; message: string } {
   // internal proxy URL, so relay only the status/reason phrase.
   if (err instanceof DocspaceApiHttpError) {
     return { status: err.status, message: err.statusText || "Upstream error" };
+  }
+  // The message names the upstream call: it goes to the log, like any other 5xx detail.
+  if (err instanceof UpstreamShapeError) {
+    return { status: err.status, message: "Bad Gateway" };
   }
   const status = readProp(err, "status");
   const expose = readProp(err, "expose") === true;

@@ -89,7 +89,6 @@ describe("the PromptDto mapping (read by id)", () => {
     expect(upstream.seen[0]?.path).toBe("/internal/ai/prompts/p%2F1");
   });
 
-  // DEFECT stor2-5: a GET prompts/{id} answer of the wrong shape (a field missing, null or of another type) is read as "the prompt does not exist" — expected it to be rethrown as unknown, since the C# action answers 404 for an absent prompt (ts-ai-failure-paths.md §1)
   it.each([
     ["id", MISSING],
     ["id", null],
@@ -107,15 +106,24 @@ describe("the PromptDto mapping (read by id)", () => {
     ["updatedAt", MISSING],
     ["updatedAt", null],
     ["updatedAt", "1"],
-  ])("reads a DTO whose %s is %s as absent", async (field, value) => {
+  ])("rejects a DTO whose %s is %s as an answer of an unknown shape", async (field, value) => {
     answerGet(dtoWith(field, value));
-    await expect(storage.readById("p")).resolves.toBeNull();
+    await expect(storage.readById("p")).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
-  it.each([null, "prompt", [promptDto()]])("reads an answer %j as absent", async (body) => {
-    answerGet(body);
-    await expect(storage.readById("p")).resolves.toBeNull();
-  });
+  it.each([null, "prompt", [promptDto()]])(
+    "rejects an answer %j as one of an unknown shape",
+    async (body) => {
+      answerGet(body);
+      await expect(storage.readById("p")).rejects.toMatchObject({
+        name: "UpstreamShapeError",
+        status: 502,
+      });
+    },
+  );
 
   it("takes an empty name and text", async () => {
     answerGet(promptDto({ name: "", text: "" }));

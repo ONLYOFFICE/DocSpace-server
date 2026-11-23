@@ -414,14 +414,14 @@ describe("the profile", () => {
 
   // products/ASC.AI/Server/Models/ResponseDto/ProfileDto.cs: each required field of the DTO
   // missing, null and of the wrong type.
-  // DEFECT passthrough-4: an AI-service answer of the wrong shape is read as "no such profile" and answered 404 "Profile not found" — expected a 5xx, a body of the wrong shape is unknown, not absent (ts-ai-failure-paths.md §1)
+  // DEFECT passthrough-4: the 502 of an AI-service answer of the wrong shape is the application's `{ error }`, not the OpenAI envelope the operation publishes — expected the envelope, as for every other refusal of the route (the published responses of aiOpenaiChatCompletions)
   it.each(
     ["id", "name", "providerType", "baseUrl", "modelId", "createdAt"].flatMap((field) => [
       [field, "missing", undefined],
       [field, "null", null],
       [field, "of the wrong type", field === "createdAt" ? "1767225600000" : 42],
     ]),
-  )("answers 404 when the profile's %s is %s", async (field, _what, value) => {
+  )("answers 502 when the profile's %s is %s", async (field, _what, value) => {
     const dto = profileDto();
     if (value === undefined) {
       delete dto[field as string];
@@ -432,8 +432,8 @@ describe("the profile", () => {
 
     const reply = await post(CHAT, "{}");
 
-    expect(reply.status).toBe(404);
-    expect(json(reply)).toEqual(envelope("Profile not found", "invalid_request_error"));
+    expect(reply.status).toBe(502);
+    expect(json(reply)).toEqual({ error: "Bad Gateway" });
   });
 
   it.each([
@@ -456,12 +456,12 @@ describe("the profile", () => {
     expect(calls[0]?.headers).toEqual({ "content-type": "application/json" });
   });
 
-  it("answers 404 for a profile whose answer is not an object", async () => {
+  it("answers 502 for a profile whose answer is not an object", async () => {
     useProfile("a string");
 
     const reply = await post(CHAT, "{}");
 
-    expect(reply.status).toBe(404);
+    expect(reply.status).toBe(502);
   });
 });
 

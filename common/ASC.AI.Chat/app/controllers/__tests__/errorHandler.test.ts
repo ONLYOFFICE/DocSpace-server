@@ -37,6 +37,7 @@ import request from "supertest";
 import logger from "../../log.js";
 import { clientFault } from "../../httpErrors.js";
 import { errorHandler } from "../_helpers.js";
+import { UpstreamShapeError } from "../../storage/upstreamShape.js";
 
 /** An app whose only route hands `err` to Express, as a middleware that failed would. */
 function appThatFails(err: unknown, writeFirst = false): express.Express {
@@ -69,6 +70,19 @@ describe("errorHandler", () => {
     expect(reply.status).toBe(409);
     expect(reply.body).toEqual({ error: "already there" });
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it("answers an upstream body of an unknown shape with 502, logs the call and names it to nobody", async () => {
+    const reply = await request(appThatFails(new UpstreamShapeError("GET threads/{id}"))).get(
+      "/fail",
+    );
+
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
+    expect(reply.text).not.toContain("threads");
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining("GET threads/{id}: the answer has an unexpected shape"),
+    );
   });
 
   it("answers a value that is not an error with 500", async () => {

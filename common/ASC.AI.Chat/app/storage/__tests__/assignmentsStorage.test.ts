@@ -158,14 +158,16 @@ describe("readAll", () => {
     expect(upstream.seen).toMatchObject([{ method: "GET", path: "/internal/ai/assignments" }]);
   });
 
-  // DEFECT stor2-8: a GET assignments answer that is not an object (a list, null, an empty body) is read as "no assignment at all" — expected it to be rethrown as unknown, since the C# action always answers a dictionary (ts-ai-failure-paths.md §1)
   it.each([
     ["a list", () => docspace([PROFILE_ID])],
     ["null", () => docspace(null)],
     ["an empty answer", noContent],
-  ])("reads %s as no assignment", async (_name, answer) => {
+  ])("rejects %s as an answer of an unknown shape", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/assignments", answer));
-    await expect(storage.readAll()).resolves.toEqual({});
+    await expect(storage.readAll()).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it("rethrows a 500", async () => {

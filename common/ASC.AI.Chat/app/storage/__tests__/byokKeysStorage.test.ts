@@ -109,14 +109,16 @@ describe("readAll", () => {
     expect(Object.keys(key ?? {}).sort()).toEqual(["id", "image", "name", "provider"]);
   });
 
-  // DEFECT stor2-9: a GET byok or GET byok/providers answer that is not a list (an object, null, an empty body) is read as "no key" / "no provider" — expected it to be rethrown as unknown, since the C# actions always answer a list (ts-ai-failure-paths.md §1)
   it.each([
     ["an object", () => docspace({ items: [keyDto()] })],
     ["null", () => docspace(null)],
     ["an empty answer", noContent],
-  ])("reads %s as no key", async (_name, answer) => {
+  ])("rejects %s as an answer of an unknown shape", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/byok", answer));
-    await expect(storage.readAll()).resolves.toEqual([]);
+    await expect(storage.readAll()).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it.each([403, 500])("rethrows a %i", async (status) => {
@@ -185,9 +187,12 @@ describe("readProviders", () => {
   it.each([
     ["an object", () => docspace({})],
     ["an empty answer", noContent],
-  ])("reads %s as no provider", async (_name, answer) => {
+  ])("rejects %s as a provider list of an unknown shape", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/byok/providers", answer));
-    await expect(storage.readProviders()).resolves.toEqual([]);
+    await expect(storage.readProviders()).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it("rethrows a 500", async () => {

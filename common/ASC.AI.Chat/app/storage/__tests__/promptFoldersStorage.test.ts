@@ -84,7 +84,6 @@ describe("the PromptFolderDto mapping (read by id)", () => {
     expect(upstream.seen[0]?.path).toBe("/internal/ai/prompt-folders/f%2F1");
   });
 
-  // DEFECT stor2-6: a GET prompt-folders/{id} answer of the wrong shape is read as "the folder does not exist" — expected it to be rethrown as unknown, since the C# action answers 404 for an absent folder (ts-ai-failure-paths.md §1)
   it.each([
     ["id", MISSING],
     ["id", null],
@@ -99,19 +98,25 @@ describe("the PromptFolderDto mapping (read by id)", () => {
     ["updatedAt", MISSING],
     ["updatedAt", null],
     ["updatedAt", "1"],
-  ])("reads a DTO whose %s is %s as absent", async (field, value) => {
+  ])("rejects a DTO whose %s is %s as an answer of an unknown shape", async (field, value) => {
     upstream.use(
       http.get("*/internal/ai/prompt-folders/:id", () => docspace(dtoWith(field, value))),
     );
-    await expect(storage.readById("f")).resolves.toBeNull();
+    await expect(storage.readById("f")).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it.each([
     ["an empty answer", noContent()],
     ["a list", docspace([folderDto()])],
-  ])("reads %s as absent", async (_name, answer) => {
+  ])("rejects %s as an answer of an unknown shape", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/prompt-folders/:id", () => answer));
-    await expect(storage.readById("f")).resolves.toBeNull();
+    await expect(storage.readById("f")).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it("reads a 404 as absent and rethrows a 500", async () => {

@@ -358,8 +358,7 @@ describe("the document agent's MCP server", () => {
 
   it.each([
     ["404", () => docspaceError(404), "file 30 not found"],
-    // DEFECT docagent-1: a 200 whose body is no FileDto (no id) is answered "not found" — expected an unknown failure, as for a 5xx (ts-ai-failure-paths.md §1)
-    ["a body without an id", () => docspace({ title: "x" }), "file 30 not found"],
+    ["a body without an id", () => docspace({ title: "x" }), "file 30 could not be read"],
     ["403", () => docspaceError(403), "file 30 cannot be read by the current user"],
     ["500", () => docspaceError(500, "db down"), "file 30: the workspace answered 500"],
     ["a dropped connection", () => HttpResponse.error(), "file 30 could not be read"],

@@ -201,7 +201,6 @@ describe("readById", () => {
     await expect(read(attachmentDto(overrides))).resolves.toStrictEqual(expected);
   });
 
-  // DEFECT stor1-15: a 200 whose body is not an AttachmentDto is answered null, the value of a 404 (a dangling ref) — expected the unknown shape to be rethrown (ts-ai-failure-paths.md §1)
   it.each([
     ["id is missing", attachmentDto({ id: undefined })],
     ["id is null", attachmentDto({ id: null })],
@@ -212,15 +211,13 @@ describe("readById", () => {
     ["kind is a number", attachmentDto({ kind: 1 })],
     ["the answer is a list", [attachmentDto()]],
     ["the answer is null", null],
-  ])("answers null and warns when %s", async (_case, response) => {
-    await expect(read(response)).resolves.toBeNull();
-    expect(logged("warn")).toEqual([
-      expect.stringMatching(
-        new RegExp(
-          `^HttpAttachmentsStorage\\.readById\\(${ATTACHMENT_ID}\\): unusable payload \\(missing id/title/kind\\) raw=`,
-        ),
-      ),
-    ]);
+  ])("rejects the answer as one of an unknown shape when %s", async (_case, response) => {
+    await expect(read(response)).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+      message: "GET attachments/{id}: the answer has an unexpected shape",
+    });
+    expect(logged("warn")).toEqual([]);
   });
 
   it("answers null and warns for a 404", async () => {
@@ -443,19 +440,19 @@ describe("readManyByIds and findMissingIds", () => {
     ]);
   });
 
-  // DEFECT stor1-16: an answer of `POST attachments/read` that is not a list reads as "none of them exist" — every id a dangling ref — expected the unknown shape to be rethrown (ts-ai-failure-paths.md §1)
   it.each([
     ["an object", attachmentDto()],
     ["null", null],
-  ])("reads every record as missing when the answer is %s", async (_case, response) => {
+  ])("rejects the answer as one of an unknown shape when it is %s", async (_case, response) => {
     readMany(response);
 
-    await expect(new HttpAttachmentsStorage().readManyByIds([ATTACHMENT_ID])).resolves.toEqual([
-      null,
-    ]);
-    await expect(new HttpAttachmentsStorage().findMissingIds([ATTACHMENT_ID])).resolves.toEqual([
-      ATTACHMENT_ID,
-    ]);
+    const shape = { name: "UpstreamShapeError", status: 502 };
+    await expect(new HttpAttachmentsStorage().readManyByIds([ATTACHMENT_ID])).rejects.toMatchObject(
+      shape,
+    );
+    await expect(
+      new HttpAttachmentsStorage().findMissingIds([ATTACHMENT_ID]),
+    ).rejects.toMatchObject(shape);
   });
 
   it.each([404, 500])("rejects a %i", async (status) => {

@@ -229,13 +229,15 @@ describe("readById", () => {
     await expect(storage.readById("t")).rejects.toMatchObject({ status: 500 });
   });
 
-  // DEFECT stor2-4: a GET threads/{id} answer of the wrong shape (an empty body, no title) is read as "the thread does not exist" — expected it to be rethrown as unknown, since the C# action answers 404 for an absent thread (ts-ai-failure-paths.md §1)
   it.each([
     ["an empty answer", noContent()],
     ["a DTO without title", docspace({ id: "t", lastEditDate: 1 })],
-  ])("reads %s as absent", async (_name, answer) => {
+  ])("rejects %s as an answer of an unknown shape", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/threads/:id", () => answer));
-    await expect(storage.readById("t")).resolves.toBeNull();
+    await expect(storage.readById("t")).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it("serves the round's thread from the snapshot, null included, without a request", async () => {

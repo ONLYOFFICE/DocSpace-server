@@ -314,21 +314,20 @@ describe("skillsController.create", () => {
     expect(requested()).toEqual(["GET /api/2.0/files/folder/42"]);
   });
 
-  // DEFECT ctl-40: a folder read answered 200 with a body of the wrong shape (no `response`, or a `response` without an id) is read by getFolderInfo as "the folder does not exist" and answered 404 — expected a 5xx, as the answer is unknown (ts-ai-failure-paths.md §1; docspaceFilesApi.ts getFolderInfo, generateSkill.ts assertInstructionsRoom)
   it.each([
     ["a body without the envelope", () => HttpResponse.json(INSTRUCTIONS_ROOM_DTO)],
     ["a response without an id", () => docspace({ ...INSTRUCTIONS_ROOM_DTO, id: undefined })],
     ["a response with a null id", () => docspace({ ...INSTRUCTIONS_ROOM_DTO, id: null })],
     ["a response that is a string", () => docspace("Skills")],
-  ])("answers 404 for a folder read with %s", async (_what, answer) => {
+  ])("answers 502 for a folder read with %s", async (_what, answer) => {
     upstream.use(folderRoute(answer));
 
     const reply = await invoke(skillsController.create, {
       body: { destId: "42", title: "Sales report" },
     });
 
-    expect(reply.status).toBe(404);
-    expect(reply.body).toEqual({ error: "The folder does not exist" });
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
   });
 
   // FolderDto fields one at a time: what the room check makes of each.

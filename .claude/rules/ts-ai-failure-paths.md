@@ -20,6 +20,11 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
 - `.catch(() => undefined)`, `null`, `[]`, `{}` or `false` on an upstream call is refused by ESLint.
   Where an outage may degrade one optional part of an answer, write a `try/catch` that tests the
   status and says in a comment why unknown is safe to read as absent there.
+- A 200 whose body the mapper cannot read is unknown too: a single-entity read passes its result
+  through `mapped(value, call)` and a list read through `listAnswer(raw, call)`
+  (`storage/upstreamShape.ts`). Both throw `UpstreamShapeError`, which the error boundary answers
+  as `502 { error: "Bad Gateway" }` and logs with the name of the call. Dropping one malformed
+  element of a list is fine; reading the whole answer as "none" is not.
 - A check that protects money or access fails closed: a read that failed does not count as "paid",
   "allowed" or "enabled".
 - Never recognize an error by the text of its `message`; test its class and its `status`.

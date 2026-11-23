@@ -41,6 +41,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { mapped } from "./upstreamShape.js";
 
 const THREADS_PATH = "/threads";
 const MESSAGES_PATH = "/messages";
@@ -156,7 +157,7 @@ export class HttpMessagesStorage implements MessagesStorage {
   async readById(messageId: string): Promise<ThreadMessageLike | null> {
     try {
       const raw = await aiService.get(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
-      return dtoToMessage(raw);
+      return mapped(dtoToMessage(raw), "GET messages/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;
@@ -172,7 +173,7 @@ export class HttpMessagesStorage implements MessagesStorage {
   async readThreadId(messageId: string): Promise<string | null> {
     try {
       const raw = await aiService.get(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
-      return (isObject(raw) ? getString(raw, "threadId") : undefined) ?? null;
+      return mapped(isObject(raw) ? getString(raw, "threadId") : undefined, "GET messages/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;

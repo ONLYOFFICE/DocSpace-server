@@ -43,6 +43,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { mapped } from "./upstreamShape.js";
 
 // A thread belongs to the AI project it was started in (`entityId`, the
 // project's id) or to none. The C# storage keeps the two apart: a list asked
@@ -160,7 +161,7 @@ export class HttpThreadsStorage implements ThreadsStorage {
     reportChatContextMiss(`threads.readById(${threadId})`);
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(threadId)}`);
-      return dtoToThread(raw);
+      return mapped(dtoToThread(raw), "GET threads/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;

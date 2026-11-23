@@ -329,7 +329,6 @@ describe("getFolderInfo", () => {
     },
   );
 
-  // DEFECT stor1-2: a 200 whose body is not a FolderDto (no id, no response, a list) is answered undefined, the same value as a 404 — expected the unknown shape to be rethrown so the caller answers 5xx (ts-ai-failure-paths.md §1)
   it.each([
     ["id is missing", folderDto({ id: undefined })],
     ["id is null", folderDto({ id: null })],
@@ -340,11 +339,12 @@ describe("getFolderInfo", () => {
     ["response is a list", { response: [folderDto()["response"]] }],
     ["response is a string", { response: "30" }],
     ["the body is a list", [folderDto()]],
-  ])("answers undefined and warns when %s", async (_case, body) => {
-    await expect(readFolder(body)).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(
-      `getFolderInfo(30) -> unparseable response from ${FILES}/folder/30`,
-    );
+  ])("rejects the answer as one of an unknown shape when %s", async (_case, body) => {
+    await expect(readFolder(body)).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+      message: "GET files/folder/{id}: the answer has an unexpected shape",
+    });
   });
 
   it("answers undefined for a 404 without a warning", async () => {
@@ -427,7 +427,6 @@ describe("getFileInfo", () => {
     await expect(readFile(fileDto(overrides))).resolves.toStrictEqual(expected);
   });
 
-  // DEFECT stor1-3: a 200 whose body is not a FileDto is answered undefined, the same value as a 404 — expected the unknown shape to be rethrown (ts-ai-failure-paths.md §1)
   it.each([
     ["id is missing", fileDto({ id: undefined })],
     ["id is null", fileDto({ id: null })],
@@ -436,11 +435,12 @@ describe("getFileInfo", () => {
     ["response is missing", { status: 0 }],
     ["response is null", { response: null }],
     ["the body is a string", "x"],
-  ])("answers undefined and warns when %s", async (_case, body) => {
-    await expect(readFile(body)).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(
-      `getFileInfo(40) -> unparseable response from ${FILES}/file/40`,
-    );
+  ])("rejects the answer as one of an unknown shape when %s", async (_case, body) => {
+    await expect(readFile(body)).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+      message: "GET files/file/{id}: the answer has an unexpected shape",
+    });
   });
 
   it("answers undefined for a 404", async () => {
@@ -892,13 +892,12 @@ describe("assertEntityAccessible", () => {
     expect(await failure(assertEntityAccessible("30"))).toBeInstanceOf(TypeError);
   });
 
-  // DEFECT stor1-5: a 200 whose body is not a FolderDto refuses the entity with 404 "not found" — expected a 5xx, the read is unknown, not absent (ts-ai-failure-paths.md §1)
-  it("refuses a folder whose DTO cannot be read with 404", async () => {
+  it("answers 502, not 404, for a folder whose DTO cannot be read", async () => {
     upstream.use(http.get(`${FILES}/folder/30`, () => HttpResponse.json({ response: {} })));
 
     expect(await failure(assertEntityAccessible("30"))).toMatchObject({
-      status: 404,
-      message: 'Entity "30" not found',
+      name: "UpstreamShapeError",
+      status: 502,
     });
   });
 });

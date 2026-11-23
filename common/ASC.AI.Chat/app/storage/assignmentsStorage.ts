@@ -40,6 +40,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { UpstreamShapeError } from "./upstreamShape.js";
 
 // The action -> profile bindings are one map per portal. The `entityId` the
 // library passes with every call (the folder the chat is opened from) is
@@ -116,7 +117,7 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     reportChatContextMiss("assignments.readAll");
     const raw = await aiService.get(PATH);
     if (!isObject(raw)) {
-      return {};
+      throw new UpstreamShapeError("GET assignments");
     }
     const result: Partial<Record<ActionType, string>> = {};
     for (const [key, value] of Object.entries(raw)) {

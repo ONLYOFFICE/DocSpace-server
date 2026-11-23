@@ -34,6 +34,7 @@ import { aiService } from "./httpClient.js";
 import { getObjectArray, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import { invalidateChatContext } from "./chatContextSnapshot.js";
+import { listAnswer } from "./upstreamShape.js";
 
 const PATH = "/byok";
 
@@ -75,10 +76,7 @@ export interface ByokProvider {
 
 export class HttpByokKeysStorage {
   async readAll(): Promise<ByokKey[]> {
-    const raw = await aiService.get(PATH);
-    if (!Array.isArray(raw)) {
-      return [];
-    }
+    const raw = listAnswer(await aiService.get(PATH), "GET byok");
     return raw.filter(isObject).flatMap((item) => {
       const key = dtoToByokKey(item);
       return key ? [key] : [];
@@ -101,10 +99,7 @@ export class HttpByokKeysStorage {
   }
 
   async readProviders(): Promise<ByokProvider[]> {
-    const raw = await aiService.get(`${PATH}/providers`);
-    if (!Array.isArray(raw)) {
-      return [];
-    }
+    const raw = listAnswer(await aiService.get(`${PATH}/providers`), "GET byok/providers");
     return raw.filter(isObject).flatMap((item) => {
       const provider = dtoToByokProvider(item);
       return provider ? [provider] : [];

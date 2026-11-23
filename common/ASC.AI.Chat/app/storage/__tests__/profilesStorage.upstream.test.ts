@@ -489,15 +489,17 @@ describe("HttpProfilesStorage.createMany", () => {
     });
   });
 
-  // DEFECT stor1-11: an answer of `POST profiles/batch` that is not a list is answered as "nothing created", although the profiles were written — expected the unknown shape to be rethrown (ts-ai-failure-paths.md §1, §6)
   it.each([
     ["an object", { id: ID }],
     ["null", null],
     ["a string", "ok"],
-  ])("answers an empty list when the answer is %s", async (_case, response) => {
+  ])("rejects the answer as one of an unknown shape when it is %s", async (_case, response) => {
     upstream.use(http.post(`${PROFILES}/batch`, () => docspace(response)));
 
-    await expect(new HttpProfilesStorage().createMany([input])).resolves.toEqual([]);
+    await expect(new HttpProfilesStorage().createMany([input])).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it("marks the profiles of a primed round stale", async () => {
@@ -613,7 +615,6 @@ describe("HttpProfilesStorage.readById", () => {
     });
   });
 
-  // DEFECT stor1-12: a 200 whose body is not a ProfileDto is answered undefined, the value of a 404, which the routes turn into "the AI profile does not exist" — expected the unknown shape to be rethrown (ts-ai-failure-paths.md §1)
   it.each([
     [
       "a field is missing",
@@ -622,15 +623,21 @@ describe("HttpProfilesStorage.readById", () => {
     ],
     ["the answer is null", null, "fields=[object]"],
     ["the answer is a string", "x", "fields=[string]"],
-  ])("answers undefined and logs the field names when %s", async (_case, response, fields) => {
-    upstream.use(http.get(`${PROFILES}/:id`, () => docspace(response)));
+  ])(
+    "rejects the answer as one of an unknown shape and logs the field names when %s",
+    async (_case, response, fields) => {
+      upstream.use(http.get(`${PROFILES}/:id`, () => docspace(response)));
 
-    await expect(new HttpProfilesStorage().readById(ID)).resolves.toBeUndefined();
-    expect(logger.info).toHaveBeenCalledWith(
-      `HttpProfilesStorage.readById(${ID}) -> UNUSABLE payload (a required field is missing): ${fields}`,
-    );
-    expect(JSON.stringify(vi.mocked(logger.info).mock.calls)).not.toContain("sk-secret");
-  });
+      await expect(new HttpProfilesStorage().readById(ID)).rejects.toMatchObject({
+        name: "UpstreamShapeError",
+        status: 502,
+      });
+      expect(logger.info).toHaveBeenCalledWith(
+        `HttpProfilesStorage.readById(${ID}) -> UNUSABLE payload (a required field is missing): ${fields}`,
+      );
+      expect(JSON.stringify(vi.mocked(logger.info).mock.calls)).not.toContain("sk-secret");
+    },
+  );
 
   it("serves a primed round from the snapshot, with the gateway override, without a read", async () => {
     const stored = profileOf({ providerType: "onlyoffice" });
@@ -711,11 +718,13 @@ describe("HttpProfilesStorage.readByIdRaw", () => {
     expect(await failure(new HttpProfilesStorage().readByIdRaw(ID))).toMatchObject({ status });
   });
 
-  // DEFECT stor1-13: a 200 whose body is not a ProfileDto is answered undefined, the value of a 404 — expected the unknown shape to be rethrown (ts-ai-failure-paths.md §1)
-  it("answers undefined when the answer is not a profile", async () => {
+  it("rejects an answer that is not a profile as one of an unknown shape", async () => {
     upstream.use(http.get(`${PROFILES}/:id`, () => docspace({ id: ID })));
 
-    await expect(new HttpProfilesStorage().readByIdRaw(ID)).resolves.toBeUndefined();
+    await expect(new HttpProfilesStorage().readByIdRaw(ID)).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it("serves a primed round from the snapshot as it is stored, without a read and without a miss", async () => {
@@ -780,15 +789,15 @@ describe("HttpProfilesStorage.readAllForClient and readAll", () => {
     expect(upstream.seen[0]?.path).toBe("/internal/ai/profiles");
   });
 
-  // DEFECT stor1-14: a list answered in a shape that is not a list reads as "no profiles" — expected the unknown shape to be rethrown (ts-ai-failure-paths.md §1)
   it.each([
     ["an object", { id: ID }],
     ["null", null],
-  ])("answers an empty list when the answer is %s", async (_case, response) => {
+  ])("rejects a list of an unknown shape when the answer is %s", async (_case, response) => {
     upstream.use(http.get(PROFILES, () => docspace(response)));
 
-    await expect(new HttpProfilesStorage().readAll()).resolves.toEqual([]);
-    await expect(new HttpProfilesStorage().readAllForClient()).resolves.toEqual([]);
+    const shape = { name: "UpstreamShapeError", status: 502 };
+    await expect(new HttpProfilesStorage().readAll()).rejects.toMatchObject(shape);
+    await expect(new HttpProfilesStorage().readAllForClient()).rejects.toMatchObject(shape);
   });
 
   it.each([500, 403])("rejects a %i", async (status) => {

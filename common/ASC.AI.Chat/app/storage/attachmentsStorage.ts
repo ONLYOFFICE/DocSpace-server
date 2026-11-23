@@ -53,6 +53,7 @@ import { copyManyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 import { errorBodyText } from "./errorBody.js";
 import { clientFault } from "../httpErrors.js";
+import { listAnswer, mapped } from "./upstreamShape.js";
 
 const PATH = "/attachments";
 
@@ -727,14 +728,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
   async readById(id: string): Promise<Attachment | null> {
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
-      const a = dtoToAttachment(raw);
-      if (!a) {
-        logger.warn(
-          `HttpAttachmentsStorage.readById(${id}): unusable payload (missing id/title/kind) ` +
-            `raw=${JSON.stringify(raw).slice(0, 500)}`,
-        );
-        return a;
-      }
+      const a = mapped(dtoToAttachment(raw), "GET attachments/{id}");
       await inlineImagesAsync([a]);
       logger.info(
         `HttpAttachmentsStorage.readById(${id}) -> kind=${a.kind} title=${a.title} ` +
@@ -780,7 +774,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
 
     const byId = new Map<string, Attachment>();
     const raw = await aiService.post(`${PATH}/read`, { ids });
-    const list = Array.isArray(raw) ? raw : [];
+    const list = listAnswer(raw, "POST attachments/read");
     for (const item of list) {
       const a = dtoToAttachment(item);
       if (a) {
