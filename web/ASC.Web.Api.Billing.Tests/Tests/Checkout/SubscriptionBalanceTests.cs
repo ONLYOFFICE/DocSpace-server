@@ -36,7 +36,8 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Checkout;
 
 /// <summary>
 /// The unused balance of the subscription (<c>GET payment/subscription/balance</c>): refused for a plan that is not
-/// in the paid state, before billing is asked about the subscription.
+/// paid or in a grace period that restricts it, before billing is asked about the subscription. A grace period whose
+/// customer pays by SEPA is not restricted, so its balance is read from billing.
 /// </summary>
 public class SubscriptionBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -70,5 +71,25 @@ public class SubscriptionBalanceTests(AspireAppFixture fixture) : BaseTest(fixtu
         // Assert
         exception.ErrorCode.Should().Be(402);
         exception.ErrorContent!.ToString().Should().Contain("Tariff is not paid");
+    }
+
+    [Fact]
+    public async Task GetSubscriptionBalanceInfo_GracePeriodOfADelayedPaymentMethod_ReturnsTheBalance()
+    {
+        // Arrange: the customer pays by SEPA, so the grace period does not restrict the portal
+        Payments.Paid(Plans.AdminProductId, quantity: 10, DateTime.UtcNow.Date.AddDays(-2), Owner.Email)
+            .Customer(Owner.Email, delayedPaymentMethod: true)
+            .On(PaymentService.Billing, "POST", "/billing/GetSubscriptionBalanceInfo",
+                """{"totalCost":200,"currency":"USD","periodStart":"2026-10-01T00:00:00","periodEnd":"2026-11-01T00:00:00","periodUsedUntil":"2026-10-20T00:00:00","daysElapsed":19,"remainingBalance":77.5,"remainingBalanceInWalletCurrency":77.5,"walletCurrency":"USD"}""");
+        await _paymentApi.GetCustomerInfoAsync(true, TestContext.Current.CancellationToken);
+        (await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken)).Response.State.Should().Be(TariffState.Delay);
+
+        // Act
+        var balance = (await _paymentApi.GetSubscriptionBalanceInfoAsync(TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        balance.RemainingBalance.Should().Be(77.5);
+        balance.Currency.Should().Be("USD");
+        PaymentCalls.Should().Contain(call => call.Route == "/billing/GetSubscriptionBalanceInfo");
     }
 }

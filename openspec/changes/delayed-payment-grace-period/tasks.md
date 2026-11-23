@@ -2,65 +2,73 @@
 
 ## 1. The restriction decision
 
-- [ ] 1.1 Add `DelayedPaymentMethod` (worked out on every read, so neither cached nor serialized) and the computed
+- [x] 1.1 Add `DelayedPaymentMethod` (worked out on every read, so neither cached nor serialized) and the computed
   `IsRestricted` and lane state to the tariff (`common/ASC.Core.Common/Billing/Tariff.cs`); verified by the unit test of 4.1.
-- [ ] 1.2 Write the last known `isDelayedPaymentMethod` on every answer of billing to the customer request (false
+- [x] 1.2 Write the last known `isDelayedPaymentMethod` on every answer of billing to the customer request (false
   for "cannot find", a portal that is not a customer) to its own key of the distributed cache, kept for the grace days plus one; write nothing on a failure;
   keep the key out of the tariff cache clearing. Verified by the unit test of 4.2 and the integration test of 4.6.
-- [ ] 1.3 When the written answer differs from the stored one (absent counts as false), send `change-tariff` to the
+- [x] 1.3 When the written answer differs from the stored one (absent counts as false), send `change-tariff` to the
   portal's quota room after the write, best effort in its own `try/catch` with a `[LoggerMessage]` warning, without
-  reading the tariff. Verified by the integration test of 4.7.
-- [ ] 1.4 In the state computation, fill `DelayedPaymentMethod` from that key when the state is Delay on a hosted
+  reading the tariff. Verified by the unit test of 4.2 (the event queued for the socket service); the billing stack
+  runs no socket service, so 4.7 checks the effect on the tariff only.
+- [x] 1.4 In the state computation, fill `DelayedPaymentMethod` from that key when the state is Delay on a hosted
   installation (after the cached customer read), reset it to false otherwise. Verified by 4.3 and 4.5.
 
 ## 2. The checks
 
-- [ ] 2.1 Replace `State > Paid` with `IsRestricted` in the count checkers (`CountPaidUserChecker`,
-  `CountUserChecker`, `CountRoomChecker`, `CountAIAgentChecker`); verified by 4.4 and 4.5.
+- [x] 2.1 Replace `State > Paid` with `IsRestricted` in the count checkers (`CountPaidUserChecker`,
+  `CountUserChecker`, `CountRoomChecker`, `CountAIAgentChecker`); verified by 4.4 (the Room admin checker) and by
+  the unit test of 4.1 (the decision of the room and AI agent checkers, see 4.5).
 - [ ] 2.2 Replace the state checks of `updateWalletPayment` (add-on), the subscription balance helper (Trial or
   restricted), `startDocsCloudTrial`, the Dev Pack preparation and the add-on wallet renewal with `IsRestricted`;
   verified by 4.8 and by the unchanged tests of those operations.
 - [ ] 2.3 Run the backup schedule when the tariff is not restricted instead of below Delay; verified by the unit test
   of 4.1 (the decision) and the backup suite staying green.
-- [ ] 2.4 Pass the lane state instead of `State` from the socket client, the audit event handler, the thumbnail
+- [x] 2.4 Pass the lane state instead of `State` from the socket client, the audit event handler, the thumbnail
   handler and the tariff change notification; verified by build and the unit test of 4.1.
-- [ ] 2.5 `findReferences` on the tariff state once more over the solution: no check that refuses an action in the
+- [x] 2.5 `findReferences` on the tariff state once more over the solution: no check that refuses an action in the
   grace period is left on `State`; the list of the ones deliberately kept (letters, retention, audit cleaner,
   payment URL, billing sync) goes into the commit message.
 
 ## 3. The tariff response
 
-- [ ] 3.1 Add `restricted` to `TariffDto` with `<summary>` and `<example>` by `.claude/rules/openapi-dto-docs.md`,
+- [x] 3.1 Add `restricted` to `TariffDto` with `<summary>` and `<example>` by `.claude/rules/openapi-dto-docs.md`,
   filled for every member in `getPortalTariff`; update the remarks of `getPortalTariff`, `updateWalletPayment`,
   `getSubscriptionBalanceInfo`, `moveSubscriptionToWallet`, `startDocsCloudTrial`, `calculateDevPack`,
   `switchToDevPack` where they name the grace period; verified by a build of `ASC.Web.Api` with no new warnings.
 
 ## 4. Tests
 
-- [ ] 4.1 Unit test (`common/Tests/ASC.Core.Common.Tests`): `IsRestricted` and the lane state for Trial, Paid,
+- [x] 4.1 Unit test (`common/Tests/ASC.Core.Common.Tests`): `IsRestricted` and the lane state for Trial, Paid,
   Delay with and without a delayed method, NotPaid with and without one; proven red with `prove-red.sh`.
-- [ ] 4.2 Unit test of the last known answer: a delayed answer, a card answer, no customer, a failure after a delayed
+- [x] 4.2 Unit test of the last known answer: a delayed answer, a card answer, no customer, a failure after a delayed
   answer, a failure with no earlier answer; proven red.
-- [ ] 4.3 Extend the billing stub's `Payments.Customer(...)` with the delayed payment method as `GetCustomerInfo`
+- [x] 4.3 Extend the billing stub's `Payments.Customer(...)` with the delayed payment method as `GetCustomerInfo`
   returns it (`isDelayedPaymentMethod`), and its failure answer (500).
-- [ ] 4.4 Billing suite, new folder `Tests/GracePeriod/`: grace period with a delayed method — `getPortalTariff`
+- [x] 4.4 Billing suite, new folder `Tests/GracePeriod/`: grace period with a delayed method — `getPortalTariff`
   `state` Delay and `restricted` false; `addMember` of a User and the invitation link of a Room admin answer 200.
   Grace period with a card — `restricted` true and 402 "Your pricing plan does not support this option". Grace
-  period over with a delayed method — `state` NotPaid, `restricted` true, the gate answers 402.
-- [ ] 4.5 Room creation in the grace period with a delayed method (200) and with a card (402): add the Files service
+  period over with a delayed method — `state` NotPaid, `restricted` true, the gate answers 402. Done as
+  `GracePeriodTests`: the counted action is the invitation link of a Room admin and `addMember` of a Room admin,
+  which keeps that type (a User is checked by no count checker); the gate is checked on `GET settings/logo`.
+- [x] 4.5 Room creation in the grace period with a delayed method (200) and with a card (402): add the Files service
   to the billing suite as a lazy resource, or, if the suite cannot start it, cover the room checker by the unit test
-  of 4.1 and write the wiring as not proven in the commit.
-- [ ] 4.6 Billing suite: billing answers the customer request with 500 after a delayed answer — `restricted` stays
+  of 4.1 and write the wiring as not proven in the commit. The suite starts no Files service: the room checker is
+  covered by the unit test of 4.1, its wiring is not proven.
+- [x] 4.6 Billing suite: billing answers the customer request with 500 after a delayed answer — `restricted` stays
   false; with no earlier answer — `restricted` true.
-- [ ] 4.7 Billing suite, with `PortalSocket`: switching the customer to a delayed method and calling `getCustomerInfo`
-  with `refresh=true` delivers `change-tariff` to the quota room and `getPortalTariff` reports `restricted` false.
-- [ ] 4.8 `Tests/Checkout/SubscriptionBalanceTests.cs:43-73`: keep the card case of the grace period (402 "Tariff is
+- [x] 4.7 Billing suite: switching the customer to a delayed method and calling `getCustomerInfo` with `refresh=true`
+  makes the cached tariff report `restricted` false. The stack runs no socket service or router, so `PortalSocket`
+  cannot connect there; the `change-tariff` event is checked by the unit test of 4.2.
+- [x] 4.8 `Tests/Checkout/SubscriptionBalanceTests.cs:43-73`: keep the card case of the grace period (402 "Tariff is
   not paid") and add the delayed-method case (no 402); update the `verification.md` row of "Moving the subscription
   balance to the wallet".
 - [ ] 4.9 Tests citing the modified "Reading the tariff" (`BT/Tariff/TariffRoleTests.cs:45-101`,
   `web/ASC.Web.Api.Tests/.../Quota/PortalTariffTests.cs:41-62`, `Quota/PortalTariffPermissionsTests.cs:47-77`):
-  assert `restricted` false on a paid plan, once the SDK carries the field (raw JSON until then).
-- [ ] 4.10 Update the CODE-ONLY rows that describe the grace period refusals (`billing` "Payment gate…" grace row,
+  assert `restricted` false on a paid plan, once the SDK carries the field (raw JSON until then). Open: the billing
+  suite asserts it on a paid plan (`GracePeriodTests.PaidPlan_IsNotRestricted`, raw JSON); the cited tests wait for
+  the regenerated SDK of the follow-up.
+- [x] 4.10 Update the CODE-ONLY rows that describe the grace period refusals (`billing` "Payment gate…" grace row,
   `quotas` row of the grace / not-paid refusal, `backup-and-restore` "Running the schedule") with the new tests.
 
 ## 5. Checks

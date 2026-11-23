@@ -1610,7 +1610,7 @@ public class TariffService(
     /// place; a portal billing never answered about is taken as paying by card. For the tariff computation, which
     /// must not fail because of the customer: a failure here is logged and gives the last answer, or false.
     /// </summary>
-    private async Task<bool> IsDelayedPaymentMethodAsync(int tenantId)
+    internal async Task<bool> IsDelayedPaymentMethodAsync(int tenantId)
     {
         try
         {

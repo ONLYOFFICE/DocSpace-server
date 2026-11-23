@@ -475,19 +475,31 @@ public sealed class PortalPayments(string portalId)
     /// <summary>
     /// The portal is a billing customer whose e-mail is <paramref name="email"/> - the portal user with that e-mail is
     /// its payer - with a payment method set, or in the state <paramref name="paymentMethodStatus"/> (0 none, 1 set,
-    /// 2 expired).
+    /// 2 expired). With <paramref name="delayedPaymentMethod"/> the customer pays by SEPA direct debit, whose money reaches
+    /// billing days after the charge; billing then answers <c>IsDelayedPaymentMethod</c> true, and false for a card.
     /// </summary>
-    public PortalPayments Customer(string email, int paymentMethodStatus = 1)
+    public PortalPayments Customer(string email, int paymentMethodStatus = 1, bool delayedPaymentMethod = false)
     {
         var customer = new JsonObject
         {
             ["PortalId"] = PortalId,
             ["PaymentMethodStatus"] = paymentMethodStatus,
-            ["PaymentMethodType"] = "card",
+            ["PaymentMethodType"] = delayedPaymentMethod ? "sepa_debit" : "card",
+            ["IsDelayedPaymentMethod"] = delayedPaymentMethod,
             ["Email"] = email
         };
 
         return On(PaymentService.Billing, "POST", "/billing/GetCustomerInfo", customer.ToJsonString());
+    }
+
+    /// <summary>
+    /// Billing fails the customer request of the portal with a 500, as it does while it is down: the stack learns nothing
+    /// about the customer, neither that it is one nor that it is not.
+    /// </summary>
+    public PortalPayments CustomerUnavailable()
+    {
+        return On(PaymentService.Billing, "POST", "/billing/GetCustomerInfo", """{"Message":"Internal Server Error"}""",
+            HttpStatusCode.InternalServerError);
     }
 
     /// <summary>

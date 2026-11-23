@@ -47,5 +47,5 @@ spending limit (`billing`, "Spending limits on the AI services").
 
 #### Scenario: Counted action in the grace period of a delayed payment method
 
-- **WHEN** a hosted portal is in the grace period, its billing customer has a delayed payment method, and the owner creates a room or invites a User below the limits
-- **THEN** the action succeeds as on a paid tariff, and the room limit still answers 402 "The number of rooms should not exceed <limit>" once reached
+- **WHEN** a hosted portal is in the grace period, its billing customer has a delayed payment method, and the owner adds a Room admin or creates the invitation link of a Room admin below the paid-user limit
+- **THEN** the action succeeds as on a paid tariff, and the Room admin keeps that type

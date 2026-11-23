@@ -85,5 +85,6 @@ global using HttpMethodAttribute = Microsoft.AspNetCore.Mvc.Routing.HttpMethodAt
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
 global using PaymentController = ASCWebApi::ASC.Web.Api.Controllers.PaymentController;
 global using PortalQuotaApi = DocSpace.API.SDK.Api.Portal.QuotaApi;
+global using PortalUsersApi = DocSpace.API.SDK.Api.Portal.UsersApi;
 global using Task = System.Threading.Tasks.Task;
 global using User = ASC.Tests.Common.Data.User;

@@ -13,18 +13,18 @@ period of a self-hosted installation SHALL always be restricted.
 
 - **WHEN** the due date of a hosted portal's plan was two days ago and its billing customer has a delayed payment method
 - **THEN** `getPortalTariff` reports `state` Delay and `restricted` false
-- **AND** the owner creates a room, invites a User and reads the invitation link of a Room admin with 200
+- **AND** the owner creates the invitation link of a Room admin with 200 and adds a Room admin, who keeps that type
 
 #### Scenario: Grace period without a delayed payment method
 
 - **WHEN** the due date of a hosted portal's plan was two days ago and its billing customer pays by card
 - **THEN** `getPortalTariff` reports `state` Delay and `restricted` true
-- **AND** creating a room answers 402 "Your pricing plan does not support this option"
+- **AND** creating the invitation link of a Room admin answers 402 "Your pricing plan does not support this option"
 
 #### Scenario: Grace period over with a delayed payment method
 
 - **WHEN** the due date of a hosted portal's plan passed more than the grace days ago and its billing customer has a delayed payment method
-- **THEN** `getPortalTariff` reports `state` NotPaid and `restricted` true, and the payment gate answers 402 to listing a folder
+- **THEN** `getPortalTariff` reports `state` NotPaid and `restricted` true, and the payment gate answers 402 to reading the portal logo
 
 #### Scenario: Portal that is not a billing customer
 
@@ -41,7 +41,7 @@ portal's quota room.
 #### Scenario: Billing fails after a delayed answer
 
 - **WHEN** billing reported a delayed payment method for a portal in the grace period and then answers the customer request with 500
-- **THEN** `getPortalTariff` keeps reporting `restricted` false and creating a room answers 200
+- **THEN** `getPortalTariff` keeps reporting `restricted` false and creating the invitation link of a Room admin answers 200
 
 #### Scenario: Billing fails with no earlier answer
 
