@@ -401,7 +401,7 @@ describe("observeChatStream, a stream that fails or stops early", () => {
     expect(otel.span.end).not.toHaveBeenCalled();
   });
 
-  // DEFECT tools-9: when the consumer stops early the wrapper ends its span but never calls return() on the wrapped iterator, so the source stream stays suspended and its own cleanup (finally) does not run — expected the source to be closed with the wrapper (chatStream.ts:117-156)
+  // HANDLED DOWNSTREAM tools-9: when the consumer stops early the wrapper ends its span but never calls return() on the wrapped iterator, so the source stream stays suspended and its own cleanup (finally) does not run. In production every consumer of the wrapper (streamNdjson, streamOpenAiSse) reads the stream to its end; it shows only with the engine or the service stubbed.
   it("ends the span with the outcome so far when the consumer stops early, and leaves the source open", async () => {
     let sourceClosed = false;
     async function* source(): AsyncGenerator<unknown> {

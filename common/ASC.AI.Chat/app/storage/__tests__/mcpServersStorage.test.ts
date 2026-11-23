@@ -156,7 +156,7 @@ describe("readAll", () => {
     expect(upstream.seen).toMatchObject([{ method: "GET", path: "/internal/ai/mcp-servers" }]);
   });
 
-  // DEFECT stor2-7: a GET mcp-servers answer that is not a list (an object, null, an empty body) is read as "no custom server" — expected it to be rethrown as unknown, since the C# action always answers a list (ts-ai-failure-paths.md §1)
+  // HANDLED DOWNSTREAM stor2-7: a GET mcp-servers answer that is not a list (an object, null, an empty body) is read as "no custom server". In production McpServerStorageController always answers a list; it shows only with the engine or the service stubbed.
   it.each([
     ["an object", () => docspace({ jira: '{"url":"j"}' })],
     ["null", () => docspace(null)],

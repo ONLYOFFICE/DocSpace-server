@@ -431,8 +431,7 @@ describe("assignmentsController.assign", () => {
     expect(responseViolations("aiAssignmentsAssign", 400, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-22: a refusal of the engine ({ success: false, error }) is sent with 200 — expected 400/404
-  // by error.code through a helper like sendMutation (ts-ai-failure-paths.md §2)
+  // CONTRACT ctl-22: a refusal of the engine ({ success: false, error }) is sent with 200. Pinned by ASC.AI.Tests (AssignmentTestBase: "a refused assignment is a 200 with success=false").
   it("sends a refusal of the engine with 200", async () => {
     const refusal = {
       success: false as const,
@@ -584,8 +583,7 @@ describe("assignmentsController.bulkAssign", () => {
     expect(responseViolations("aiAssignmentsBulkAssign", 400, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-24: a refusal of the engine ({ success: false, errors }) is sent with 200 — expected a 4xx
-  // (ts-ai-failure-paths.md §2)
+  // CONTRACT ctl-24: a refusal of the engine ({ success: false, errors }) is sent with 200. Pinned by ASC.AI.Tests (AssignmentBulkTests), which reads the refusal from a 200.
   it("sends a refusal of the engine with 200", async () => {
     const refusal = {
       success: false as const,

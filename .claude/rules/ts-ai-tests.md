@@ -167,6 +167,16 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   `grep -rn "// DEFECT" common/ASC.AI.Chat/app` lists them (138 when the suite was written). The
   fix of one changes its test to the expected behaviour and removes the comment; a new one found
   while writing a test gets the next number of its area.
+- A DEFECT comment is a claim about the whole system, and a vitest test sees one service with the
+  rest stubbed. Before writing one, and before fixing one, read the route in
+  `openspec/specs/ai-agents/spec.md` and in `products/ASC.AI/ASC.AI.Tests`, and the C# that
+  answers behind it. Two other labels say what such a reading found, in the same place and form:
+  `// CONTRACT <id>: <what it does>. Pinned by <spec line or .NET test>.` for behaviour the spec
+  or the .NET suite pins (a refusal answered 200 with `success: false`, `200 null` for an unknown
+  prompt), which changes only through an OpenSpec change with the .NET tests; and
+  `// HANDLED DOWNSTREAM <id>: <what it does>. In production <who refuses or prevents it>.` for
+  what the AI service or the engine refuses itself, so that only the stubbed test shows it.
+  `grep -rn "// DEFECT"` then lists what is open (36 on 2026-11-24).
 - A defect that touches security (a secret or a credential in an answer or a log, a credential
   sent to another host, a missing access check, a request to an address the caller chose) is not
   pinned and not described in the repository: it goes to the private register

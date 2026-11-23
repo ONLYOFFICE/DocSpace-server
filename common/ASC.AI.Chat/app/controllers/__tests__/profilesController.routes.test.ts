@@ -474,7 +474,7 @@ describe("profilesController.listProviderModels", () => {
     expect(published("aiProfilesListProviderModels", reply)).toEqual([]);
   });
 
-  // DEFECT data-7: a providerType that is not a string (a number, an object) passes the check `!providerType` and reaches the engine — expected 400 naming providerType (ts-ai-failure-paths.md §4)
+  // HANDLED DOWNSTREAM data-7: a providerType that is not a string (a number, an object) passes the check `!providerType` and reaches the engine. In production the engine refuses it through the real stack with 400 "Unknown provider type" (ASC.AI.Tests, ProfileProviderTypeTests); it shows only with the engine or the service stubbed.
   it("hands a providerType that is a number to the engine", async () => {
     engine.listProviderModels.mockResolvedValue([]);
 

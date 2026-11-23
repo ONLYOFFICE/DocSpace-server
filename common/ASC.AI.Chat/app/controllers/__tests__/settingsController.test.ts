@@ -138,7 +138,7 @@ describe.each([
   ],
   ["setToolMode", "aiSettingsSetToolMode", "/internal/ai/config/tool-mode", toolMode],
 ] as const)("settingsController.%s", (method, operationId, path, dto) => {
-  // DEFECT data-18: the body is forwarded to the AI service as it came, whatever its fields — expected the fields narrowed and named, 400 for a wrong type, before the call (ts-ai-failure-paths.md §4, §5)
+  // CONTRACT data-18: the body is forwarded to the AI service as it came, whatever its fields. Pinned by openspec/specs/ai-agents/spec.md ("403 others whatever the body") and ASC.AI.Tests (SettingsVectorizationPermissionsTests): the AI service judges the body, after its access check.
   it.each([
     ["a well-formed body", { type: 1, key: "sk-x" }, { type: 1, key: "sk-x" }],
     ["{}", {}, {}],

@@ -614,7 +614,7 @@ describe("promptsController.getById and getFolderById", () => {
     expect(published("aiPromptsGetById", reply)).toEqual([]);
   });
 
-  // DEFECT data-3: an unknown prompt id answers 200 with a null body — expected 404, as threads/get-by-id answers since Bug 82718 (ts-ai-failure-paths.md §1; aiPromptsGetById publishes no 404)
+  // CONTRACT data-3: an unknown prompt id answers 200 with a null body. Pinned by openspec/specs/ai-agents/spec.md ("`aiPromptsGetById` answers 200 with an empty body for an unknown id") and ASC.AI.Tests (PromptLifecycleTests).
   it("answers 200 with null for an unknown prompt", async () => {
     engine.getById.mockResolvedValue(null);
 
@@ -639,7 +639,7 @@ describe("promptsController.getById and getFolderById", () => {
     expect(published("aiPromptsGetFolderById", reply)).toEqual([]);
   });
 
-  // DEFECT data-4: an unknown folder id answers 200 with a null body, while delete-folder answers 404 for the same id — expected 404 (ts-ai-failure-paths.md §1; Bug 83138 made delete-folder answer 404)
+  // CONTRACT data-4: an unknown folder id answers 200 with a null body, while delete-folder answers 404 for the same id. Pinned by openspec/specs/ai-agents/spec.md and ASC.AI.Tests (PromptFolderLifecycleTests: "a well-formed unknown id is 200 null").
   it("answers 200 with null for an unknown folder", async () => {
     engine.getFolderById.mockResolvedValue(null);
 

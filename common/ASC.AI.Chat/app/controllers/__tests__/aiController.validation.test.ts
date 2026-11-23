@@ -479,7 +479,7 @@ describe.each([
     expect(h.engine[name]).not.toHaveBeenCalled();
   });
 
-  // DEFECT ai-3: the route checks nothing of the body (threadId, messageId, toolCallId) and runs the engine on it — expected 400 naming the field (ts-ai-failure-paths.md §4)
+  // HANDLED DOWNSTREAM ai-3: the route checks nothing of the body (threadId, messageId, toolCallId) and runs the engine on it. In production the AI service refuses the missing ids (a Guid route parameter, 400) and the engine a tool call that is not pending (409); it shows only with the engine or the service stubbed.
   it.each([
     ["a string", "hello"],
     ["an array", ["t1", "m1"]],
@@ -491,7 +491,7 @@ describe.each([
     expect(upstream.seen).toEqual([]);
   });
 
-  // DEFECT ai-3: the route checks nothing of the body (threadId, messageId, toolCallId) and runs the engine on it — expected 400 naming the field (ts-ai-failure-paths.md §4)
+  // HANDLED DOWNSTREAM ai-3: the route checks nothing of the body (threadId, messageId, toolCallId) and runs the engine on it. In production the AI service refuses the missing ids (a Guid route parameter, 400) and the engine a tool call that is not pending (409); it shows only with the engine or the service stubbed.
   it("hands an empty object to the engine with only the round's own additions", async () => {
     const reply = await route({});
 

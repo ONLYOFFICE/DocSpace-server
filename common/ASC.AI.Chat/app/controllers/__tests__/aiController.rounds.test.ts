@@ -365,7 +365,7 @@ describe("the abort signal handed to the engine", () => {
     expect(ndjsonFrames(reply.body)).toEqual([START]);
   });
 
-  // DEFECT ai-6: after the close the stream helper still pulls the generator to its end and writes into the closed response; only an engine that honours the signal stops — expected the close to end the iteration (ts-ai-express.md §3)
+  // HANDLED DOWNSTREAM ai-6: after the close the stream helper still pulls the generator to its end and writes into the closed response; only an engine that honours the signal stops. In production the real engine honours the abort signal and stops (ASC.AI.Tests, MessageStopTests); it shows only with the engine or the service stubbed.
   it("keeps pulling the engine's stream after the client went away", async () => {
     const held = h.heldStream([START], [DELTA, END]);
     h.engine.sendWithStream.mockReturnValue(held.stream as never);
@@ -705,7 +705,7 @@ describe.each([
     expect(reply.status).toBe(200);
   });
 
-  // DEFECT ai-8: a failed /config read counts as "paid" and the round opens its stream — expected the check that protects money to fail closed or the read to fail the call (ts-ai-failure-paths.md §1)
+  // HANDLED DOWNSTREAM ai-8: a failed /config read counts as "paid" and the round opens its stream. In production the gateway refuses an unpaid portal itself (AiGateway.cs, 403), so nothing is billed: the caller gets an error frame instead of the 402; it shows only with the engine or the service stubbed.
   it("runs when /config cannot be read", async () => {
     config(() => HttpResponse.json({ error: "down" }, { status: 503 }));
 

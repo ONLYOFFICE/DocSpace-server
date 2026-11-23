@@ -86,7 +86,7 @@ describe("vectorizationController.startTask", () => {
     expect(reply.body).toEqual({ ...envelope, response: null });
   });
 
-  // DEFECT passthrough-15: the body is not checked here (`req.body ?? {}` is forwarded whatever it is) — expected the body narrowed and a 400 naming `files` before the call (ts-ai-failure-paths.md §4)
+  // HANDLED DOWNSTREAM passthrough-15: the body is not checked here (`req.body ?? {}` is forwarded whatever it is). In production the AI service binds `files` as a set of integers and refuses anything else, an empty list included, with 400 (VectorizationStartRequestDto, VectorizationTaskPublisher); it shows only with the engine or the service stubbed.
   it.each([
     ["a string", "files"],
     ["an array", [1, 2]],
@@ -127,7 +127,7 @@ describe("vectorizationController.startTask", () => {
     expect(responseViolations("aiVectorizationStartTask", status, reply.body)).toEqual([]);
   });
 
-  // DEFECT passthrough-17: an AI service that answers 204 or a body that is not JSON is relayed as 200 with `null` or a JSON string, which does not match the published envelope — expected the envelope, or a 5xx for an answer of the wrong shape (ts-ai-failure-paths.md §1; ts-ai-tests.md §2)
+  // HANDLED DOWNSTREAM passthrough-17: an AI service that answers 204 or a body that is not JSON is relayed as 200 with `null` or a JSON string, which does not match the published envelope. In production the C# action answers through the response wrapper: always 200 with the envelope, never 204 or text; it shows only with the engine or the service stubbed.
   it.each([
     ["204 without a body", () => new HttpResponse(null, { status: 204 }), null],
     ["a text body", () => new HttpResponse("ok", { status: 200 }), "ok"],

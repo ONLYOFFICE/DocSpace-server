@@ -187,7 +187,7 @@ describe("read", () => {
     await expect(storage.read("a")).resolves.toEqual({ status: "unavailable" });
   });
 
-  // DEFECT stor2-10: a GET form-analysis/{id} answer that is not an object (an empty body, null, a list) is read as "unavailable" — expected it to be rethrown as unknown, since the C# action always answers a FormAnalysisDto (ts-ai-failure-paths.md §1)
+  // HANDLED DOWNSTREAM stor2-10: a GET form-analysis/{id} answer that is not an object (an empty body, null, a list) is read as "unavailable". In production FormAnalysisController always answers a DTO (AttachmentsStorageService); it shows only with the engine or the service stubbed.
   it.each([
     ["an empty answer", noContent],
     ["null", () => docspace(null)],

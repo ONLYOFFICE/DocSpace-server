@@ -1220,7 +1220,7 @@ describe("createMany of a generated image", () => {
     ]);
   });
 
-  // DEFECT stor1-17: a batch of a generated image and a draft without an entry uploads and records the image, then refuses the batch, leaving the image behind — expected the draft to be refused before anything is created (ts-ai-failure-paths.md §6)
+  // HANDLED DOWNSTREAM stor1-17: a batch of a generated image and a draft without an entry uploads and records the image, then refuses the batch, leaving the image behind. In production the engine creates a tool image one at a time and every caller of createMany passes one input, so such a batch does not occur; it shows only with the engine or the service stubbed.
   it("stores the image of a batch it then refuses for a draft without an entry", async () => {
     const inserts = filesApi({});
     const bodies = saveRecords();

@@ -242,7 +242,7 @@ describe("threadsController.create", () => {
     expect(engine.create).not.toHaveBeenCalled();
   });
 
-  // DEFECT data-10: threads/create narrows nothing — a body without a title, with a title of the wrong type or a body that is not an object is handed to the engine and stored, although the comment of threads/rename says create refuses a missing or empty title — expected 400 naming title (ts-ai-failure-paths.md §4; comment in threadsController.ts rename, Bug 83094)
+  // HANDLED DOWNSTREAM data-10: threads/create narrows nothing — a body without a title, with a title of the wrong type or a body that is not an object is handed to the engine and stored, although the comment of threads/rename says create refuses a missing or empty title. In production the AI service refuses these bodies with 400 (CreateThreadRequestDto: a required Title of at most 255 characters; ASC.AI.Tests, ThreadsCreateTests); it shows only with the engine or the service stubbed.
   it.each([
     ["{}", {}],
     ["null", null],
@@ -541,7 +541,7 @@ describe("threadsController.appendUserMessage", () => {
     expect(engine.appendUserMessage).toHaveBeenCalledWith("t1", userMessage, profileId);
   });
 
-  // DEFECT data-12: a text of any length is stored; the route has no limit of its own besides the 100 KB of the JSON parser — expected a named limit on the message (ts-ai-failure-paths.md §4)
+  // CONTRACT data-12: a text of any length is stored; the route has no limit of its own besides the 100 KB of the JSON parser. Pinned by openspec/specs/ai-agents/spec.md ("store a user message verbatim") and ASC.AI.Tests (ThreadMessagesAppendTests stores a text of 20 000 characters).
   it("stores a part list of 1 000 text parts", async () => {
     engine.appendUserMessage.mockResolvedValue(storedMessage);
     const content = Array.from({ length: 1000 }, () => ({ type: "text", text: "x" }));
@@ -617,7 +617,7 @@ describe("threadsController.rename", () => {
     expect(published("aiThreadsRename", reply)).toEqual([]);
   });
 
-  // DEFECT data-13: a title of any length is stored — expected a named limit (ts-ai-failure-paths.md §4)
+  // HANDLED DOWNSTREAM data-13: a title of any length is stored. In production the AI service refuses a title over 255 characters with 400 (UpdateThreadRequestDto; ASC.AI.Tests, ThreadTitleLengthTests); it shows only with the engine or the service stubbed.
   it("renames the thread to a title of 10 000 characters", async () => {
     const reply = await invoke(threadsController.rename, { body: ["t1", "t".repeat(10_000)] });
 
@@ -844,7 +844,7 @@ describe("threadsController.list", () => {
     expect(engine.list).toHaveBeenCalledWith(undefined, undefined, parsed, undefined);
   });
 
-  // DEFECT data-15: `count` has no bounds — a negative, a huge or a half-numeric value ("20abc" read as 20) goes to the engine, a value that is not a number is dropped silently — expected 400 or a clamp to a named limit (ts-ai-failure-paths.md §4, §9: the page limit of the .NET route)
+  // HANDLED DOWNSTREAM data-15: `count` has no bounds — a negative, a huge or a half-numeric value ("20abc" read as 20) goes to the engine, a value that is not a number is dropped silently. In production the AI service bounds `count` with 400 (ReadAllThreadsRequestDto: Range(1, 1000); ASC.AI.Tests, ThreadsListTests); it shows only with the engine or the service stubbed.
   it.each([
     ["-5", -5],
     ["1000000", 1000000],

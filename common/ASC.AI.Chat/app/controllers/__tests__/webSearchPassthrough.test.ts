@@ -285,7 +285,7 @@ describe("the ONLYOFFICE gateway as the portal's provider", () => {
     );
   });
 
-  // DEFECT passthrough-6: a key stored with the ONLYOFFICE config goes out as `Authorization: Bearer <key>` next to the caller's own `authorization`, and the two merge into one comma-joined header — expected one Authorization (the library's OnlyOfficeProvider contract, "profile headers win")
+  // HANDLED DOWNSTREAM passthrough-6: a key stored with the ONLYOFFICE config goes out as `Authorization: Bearer <key>` next to the caller's own `authorization`, and the two merge into one comma-joined header. In production with the gateway configured the AI service answers the onlyoffice config without a key (WebSearchStorageService), so the two values cannot meet; it shows only with the engine or the service stubbed.
   it("joins the stored key and the caller's Authorization into one header", async () => {
     useConfig(configDto({ provider: "onlyoffice", key: "stored-key" }));
     const calls = useSearch(`${GATEWAY}/search`, () => HttpResponse.json(results));
@@ -350,9 +350,7 @@ describe("another provider with a base URL of its own", () => {
     expect(upstream.seen).toHaveLength(1);
   });
 
-  // DEFECT passthrough-7: a stored config marked as a cloud provider but without a base URL takes the provider name for a URL, `new URL` throws, and the route answers 500 — expected the 404 "Web search is not configured" the same branch gives a config without a base URL (ts-ai-failure-paths.md §4: a wrong input is never a 500)
-  // Not reachable with the AI service of this repository: WebSearchConfigDto has no
-  // isCloudProvider (contract.dotnet.test.ts), so a stored config never carries it.
+  // HANDLED DOWNSTREAM passthrough-7: a stored config marked as a cloud provider but without a base URL takes the provider name for a URL, `new URL` throws, and the route answers 500. In production WebSearchConfigDto has no `isCloudProvider`, so the AI service of this repository cannot answer such a config; it shows only with the engine or the service stubbed.
   it("answers 500 for a cloud provider without a base URL", async () => {
     useConfig(configDto({ provider: "exa", isCloudProvider: true }));
 
@@ -396,7 +394,7 @@ describe("the portal's web-search config", () => {
   });
 
   // products/ASC.AI/Server/Models/ResponseDto/WebSearchConfigDto.cs: the required `provider`.
-  // DEFECT passthrough-8: an AI-service answer whose provider is missing, null, empty or not a string is read as "not configured" and answered 404 — expected a 5xx, a body of the wrong shape is unknown, not absent (ts-ai-failure-paths.md §1)
+  // HANDLED DOWNSTREAM passthrough-8: an AI-service answer whose provider is missing, null, empty or not a string is read as "not configured" and answered 404. In production `Provider` is required on WebSearchConfigDto, so the AI service never answers a config without it; it shows only with the engine or the service stubbed.
   it.each([
     ["missing", undefined],
     ["null", null],

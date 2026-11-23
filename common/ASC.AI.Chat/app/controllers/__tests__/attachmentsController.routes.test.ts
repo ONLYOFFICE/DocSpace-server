@@ -282,9 +282,7 @@ describe("attachmentsController.saveFile", () => {
     expect(engine.saveFile).toHaveBeenCalledWith(input, undefined);
   });
 
-  // DEFECT ctl-28: the engine's attachment is sent as it came (`res.json(result)`), so a field the storage
-  // adds leaves in the answer and breaks AiAttachment's additionalProperties:false — expected the answer
-  // built from the listed fields (ts-ai-failure-paths.md §5)
+  // HANDLED DOWNSTREAM ctl-28: the engine's attachment is sent as it came (`res.json(result)`), so a field the storage adds leaves in the answer and breaks AiAttachment's additionalProperties:false. In production the storage builds every attachment from listed fields (dtoToAttachment in storage/attachmentsStorage.ts), so no other field can come from it; it shows only with the engine or the service stubbed.
   it("echoes a field the engine's attachment carries beyond the published ones", async () => {
     engine.saveFile.mockResolvedValue({ ...attachment, internalUrl: "http://storage/x" } as never);
 

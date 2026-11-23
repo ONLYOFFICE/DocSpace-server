@@ -144,7 +144,7 @@ describe.each([
     expect(engineCall()).toHaveBeenCalledWith("My CRM (prod)!", { url: URL_A }, undefined);
   });
 
-  // DEFECT ctl-1: a refusal of the engine ({ success: false, error }) is sent with 200 — expected a 4xx mapped from error.code, as sendMutation in promptsController does ([ts-ai-failure-paths.md §2])
+  // CONTRACT ctl-1: a refusal of the engine ({ success: false, error }) is sent with 200. Pinned by the "Soft refusals" scenario of openspec/specs/ai-agents/spec.md and ASC.AI.Tests (McpServerCreateTests, McpServerNameTests), which read the refusal from a 200.
   it("sends a refusal of the engine with 200", async () => {
     const refusal = {
       success: false as const,
@@ -790,7 +790,7 @@ describe("toolsController.replaceAllCustomServers", () => {
     expect(upstream.seen.map((r) => r.path)).toEqual(["/api/2.0/files/folder/42"]);
   });
 
-  // DEFECT ctl-5: a refusal of the engine ({ success: false, errors }) is sent with 200 — expected a 4xx ([ts-ai-failure-paths.md §2])
+  // CONTRACT ctl-5: a refusal of the engine ({ success: false, errors }) is sent with 200. Pinned by ASC.AI.Tests (McpServerReplaceAllTests), which reads the refusal and its `errors` from a 200.
   it("sends a refusal of the engine with 200", async () => {
     const refusal = {
       success: false as const,
@@ -1095,7 +1095,7 @@ describe("toolsController.setDisabled", () => {
     },
   );
 
-  // DEFECT ctl-8: toolNames has no limit and repeated names are not collapsed; 1000 names with duplicates reach the engine as sent — expected a named limit and de-duplication ([ts-ai-failure-paths.md §4])
+  // HANDLED DOWNSTREAM ctl-8: toolNames has no limit and repeated names are not collapsed; 1000 names with duplicates reach the engine as sent. In production the AI service stores the names as a set (UpsertToolPrefsRequestDto: HashSet), so repeated names collapse; the size is bounded by the JSON parser; it shows only with the engine or the service stubbed.
   it("hands 1000 tool names with duplicates to the engine as sent", async () => {
     engine.setDisabled.mockResolvedValue(undefined);
     const toolNames = Array.from({ length: 1000 }, (_v, i) => `t${i % 10}`);

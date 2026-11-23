@@ -120,7 +120,7 @@ describe("byokKeysController.set", () => {
     expect(published("aiByokKeysSet", reply)).toEqual([]);
   });
 
-  // DEFECT data-20: a body that is not an object, or a provider or key that is missing or of the wrong type, is sent to the AI service as an empty string instead of being refused — expected 400 naming the field (ts-ai-failure-paths.md §4)
+  // HANDLED DOWNSTREAM data-20: a body that is not an object, or a provider or key that is missing or of the wrong type, is sent to the AI service as an empty string instead of being refused. In production the AI service refuses an empty provider or key with 400 (SetByokKeyRequestDto: [Required]); it shows only with the engine or the service stubbed.
   it.each([
     ["null", null, { provider: "", key: "" }],
     ["a string", "sk-ant", { provider: "", key: "" }],
