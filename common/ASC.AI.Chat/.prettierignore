@@ -4,3 +4,4 @@ yarn.lock
 *.tgz
 app/generated
 templates
+eslint-suppressions.json

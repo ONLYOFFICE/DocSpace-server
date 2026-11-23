@@ -1,0 +1,250 @@
+{
+  "app.ts": {
+    "no-restricted-syntax": {
+      "count": 2
+    }
+  },
+  "app/controllers/__tests__/documentAgentController.test.ts": {
+    "@typescript-eslint/only-throw-error": {
+      "count": 1
+    }
+  },
+  "app/controllers/_helpers.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 6
+    },
+    "@typescript-eslint/no-misused-promises": {
+      "count": 1
+    }
+  },
+  "app/controllers/aiController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 3
+    },
+    "no-restricted-syntax": {
+      "count": 3
+    }
+  },
+  "app/controllers/attachmentsController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 5
+    }
+  },
+  "app/controllers/editorToolsController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 2
+    }
+  },
+  "app/controllers/openaiPassthroughController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 5
+    },
+    "no-restricted-globals": {
+      "count": 1
+    },
+    "no-restricted-syntax": {
+      "count": 2
+    }
+  },
+  "app/controllers/profilesController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 4
+    }
+  },
+  "app/controllers/promptsController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 4
+    }
+  },
+  "app/controllers/textToDocxController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  },
+  "app/controllers/threadsController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 7
+    }
+  },
+  "app/controllers/toolsController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 18
+    }
+  },
+  "app/controllers/webSearchController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 4
+    }
+  },
+  "app/controllers/webSearchPassthroughController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    },
+    "no-restricted-globals": {
+      "count": 1
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "app/meta/common.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "app/meta/fillMeta.ts": {
+    "@typescript-eslint/switch-exhaustiveness-check": {
+      "count": 2
+    }
+  },
+  "app/meta/portalFiles.ts": {
+    "no-restricted-globals": {
+      "count": 3
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "app/meta/portalMetadata.ts": {
+    "no-restricted-globals": {
+      "count": 1
+    }
+  },
+  "app/skills/generateSkill.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "app/storage/__tests__/documentAgentSettingsStorage.test.ts": {
+    "@typescript-eslint/only-throw-error": {
+      "count": 1
+    }
+  },
+  "app/storage/attachmentsStorage.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "no-restricted-globals": {
+      "count": 2
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "app/storage/chatContext.ts": {
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "app/storage/contextFolders.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "app/storage/docspaceFileTransfer.ts": {
+    "no-restricted-globals": {
+      "count": 1
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "app/storage/docspaceFilesApi.ts": {
+    "no-restricted-globals": {
+      "count": 5
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "app/storage/docspacePeopleApi.ts": {
+    "no-restricted-globals": {
+      "count": 1
+    }
+  },
+  "app/storage/httpClient.ts": {
+    "no-restricted-syntax": {
+      "count": 4
+    }
+  },
+  "app/storage/profilesStorage.ts": {
+    "no-restricted-globals": {
+      "count": 1
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "app/storage/projectAttachments.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "no-restricted-globals": {
+      "count": 1
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "app/storage/roomSkills.ts": {
+    "no-restricted-globals": {
+      "count": 4
+    },
+    "no-restricted-syntax": {
+      "count": 2
+    }
+  },
+  "app/storage/threadFiles.ts": {
+    "no-restricted-globals": {
+      "count": 1
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "app/telemetry/sdk.ts": {
+    "no-restricted-syntax": {
+      "count": 2
+    }
+  },
+  "app/templates/catalog.ts": {
+    "no-restricted-syntax": {
+      "count": 2
+    }
+  },
+  "app/tools/documentAgent.ts": {
+    "no-restricted-syntax": {
+      "count": 2
+    }
+  },
+  "app/tools/documentAgentClient.ts": {
+    "@typescript-eslint/switch-exhaustiveness-check": {
+      "count": 2
+    }
+  },
+  "app/tools/systemTools.ts": {
+    "no-restricted-globals": {
+      "count": 1
+    }
+  },
+  "scripts/generate-openapi.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "scripts/lib/dotnet-schemas.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "scripts/lib/draft-to-openapi.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "scripts/lib/generate-schemas.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  }
+}

@@ -31,7 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { AssignmentsEngine, ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
+import type { ActionType } from "@onlyoffice/ai-chat/core";
+import { AssignmentsEngine, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asActionType, asString, isObject } from "../narrow.js";
