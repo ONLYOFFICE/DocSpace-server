@@ -19,11 +19,12 @@
 - [x] 2.1 Replace `State > Paid` with `IsRestricted` in the count checkers (`CountPaidUserChecker`,
   `CountUserChecker`, `CountRoomChecker`, `CountAIAgentChecker`); verified by 4.4 (the Room admin checker) and by
   the unit test of 4.1 (the decision of the room and AI agent checkers, see 4.5).
-- [ ] 2.2 Replace the state checks of `updateWalletPayment` (add-on), the subscription balance helper (Trial or
+- [x] 2.2 Replace the state checks of `updateWalletPayment` (add-on), the subscription balance helper (Trial or
   restricted), `startDocsCloudTrial`, the Dev Pack preparation and the add-on wallet renewal with `IsRestricted`;
-  verified by 4.8 and by the unchanged tests of those operations.
-- [ ] 2.3 Run the backup schedule when the tariff is not restricted instead of below Delay; verified by the unit test
-  of 4.1 (the decision) and the backup suite staying green.
+  verified by 4.8 and by the unchanged tests of those operations (the whole billing suite: the wallet services,
+  Docs Connect and renewal classes pass).
+- [x] 2.3 Run the backup schedule when the tariff is not restricted instead of below Delay; verified by the unit test
+  of 4.1 (the decision) and the backup suite staying green (359 tests: none failed, 3 skipped).
 - [x] 2.4 Pass the lane state instead of `State` from the socket client, the audit event handler, the thumbnail
   handler and the tariff change notification; verified by build and the unit test of 4.1.
 - [x] 2.5 `findReferences` on the tariff state once more over the solution: no check that refuses an action in the
@@ -73,14 +74,18 @@
 
 ## 5. Checks
 
-- [ ] 5.1 `dotnet build` of every touched project with `--no-dependencies --no-incremental` and `dotnet format style
-  --verify-no-changes` on the edited files: no new warnings.
-- [ ] 5.2 Run the new and touched test classes (billing suite, `ASC.Core.Common.Tests`, the Web.Api tariff tests);
-  all green.
-- [ ] 5.3 `openspec validate --specs --no-interactive`, and `python -I -X utf8
+- [x] 5.1 `dotnet build` of every touched project with `--no-dependencies --no-incremental` and `dotnet format style
+  --verify-no-changes` on the edited files: no new warnings (the two `xUnit1051` of
+  `LegacyAiProvidersMigrationGateTests.cs` come from the base).
+- [x] 5.2 Run the new and touched test classes (billing suite, `ASC.Core.Common.Tests`, the Web.Api tariff tests);
+  all green, except what fails without the change too: 11 billing tests of `TopUpDepositOutcomeTests`,
+  `TopUpSettingsCurrencyTests`, `CustomerDepositsFailureTests`, `RestrictedAiModelsAccessTests` and
+  `QuotaSettingsTariffTests` (4 of them marked `Category=Bug`) fail the same with the product code of the base, and
+  `AiAgentsMigrationConfigurationTests` failed once in the parallel unit run and passes alone.
+- [x] 5.3 `openspec validate --specs --no-interactive`, and `python -I -X utf8
   .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec <capability>` for `billing`, `quotas`,
   `backup-and-restore`, `storage-and-integrations`: every operation of the change is called by a test. No new
-  operationId; the new field `restricted` of `getPortalTariff` is asserted by 4.4 and 4.9.
+  operationId; the new field `restricted` of `getPortalTariff` is asserted by 4.4 (4.9 waits for the SDK).
 
 ## Workflow follow-up
 
