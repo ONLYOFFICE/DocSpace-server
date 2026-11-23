@@ -13,7 +13,8 @@ See proposal.md (Why). Facts the design builds on:
   (`billing`, "Payment gate while the portal is not paid") reads another helper and is left alone.
 - `getCustomerInfo` (`billing`, "Billing account page and payment method") already reads `isDelayedPaymentMethod`
   from billing and keeps the answer in the distributed cache for 10 minutes. After a failure it keeps an empty
-  answer for 10 minutes, the same empty answer billing gives for a portal that is not a customer.
+  answer for 10 minutes. For a portal that is not its customer billing answers "error: cannot find", which the
+  client raises as a not-found billing error and which the cache keeps as the same empty answer.
 
 ## Goals / Non-Goals
 
@@ -45,10 +46,11 @@ See proposal.md (Why). Facts the design builds on:
    *Alternative:* a fifth tariff state. Rejected: `state` Delay is what the client must keep showing, and every
    existing comparison of states would change meaning.
 
-2. **The last known answer is written on success only.** Every successful `getCustomerInfo` answer from billing,
-   a customer or an empty one, writes `isDelayedPaymentMethod` (false for no customer) to its own key of the
-   distributed cache, kept for the grace days plus one so that it outlives any grace period. A failure writes
-   nothing there. The state computation asks for the customer as `getCustomerInfo` does (cached, 10 minutes)
+2. **The last known answer is written on an answer only.** Every answer of billing to the customer request, a
+   customer or "cannot find", writes `isDelayedPaymentMethod` (false for no customer) to its own key of the
+   distributed cache, kept for the grace days plus one so that it outlives any grace period. A failure
+   (a timeout, another error, an unreadable body) writes nothing there. The state computation asks for the
+   customer as `getCustomerInfo` does (cached, 10 minutes)
    and then reads that key; an absent key means restricted. So a failure keeps the last answer, a portal that
    stopped being a customer is restricted, and the empty answer kept after a failure needs no new meaning. The
    key is in the distributed cache because one process may read billing and another decide; it is not removed

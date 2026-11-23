@@ -70,6 +70,12 @@ internal static partial class TariffServiceLogger
     [LoggerMessage(LogLevel.Warning, "The clients of tenant {tenantId} could not be told that its tariff changed")]
     public static partial void WarningTariffChangedNotification(this ILogger<TariffService> logger, int tenantId, Exception exception);
 
+    [LoggerMessage(LogLevel.Warning, "The billing customer of tenant {tenantId} could not be read for its grace period; the last answer about a delayed payment method decides")]
+    public static partial void WarningDelayedPaymentMethodRead(this ILogger<TariffService> logger, int tenantId, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "The answer of billing about a delayed payment method of tenant {tenantId} could not be kept; the earlier one keeps deciding its grace period")]
+    public static partial void WarningDelayedPaymentMethodRemember(this ILogger<TariffService> logger, int tenantId, Exception exception);
+
     [LoggerMessage(LogLevel.Warning, "The quota values of the tariff of tenant {tenantId} could not be read for its clients; only the tariff change is sent")]
     public static partial void WarningTariffQuotaValues(this ILogger<TariffService> logger, int tenantId, Exception exception);
 

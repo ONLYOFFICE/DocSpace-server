@@ -124,6 +124,30 @@ public class Tariff
     [ProtoMember(8)]
     public List<Quota> OverdueQuotas { get; set; }
 
+    /// <summary>
+    /// Whether the billing customer of a hosted portal in the grace period pays by a delayed payment method (SEPA),
+    /// whose money reaches billing days after the charge. It is worked out again on every read of the tariff and is
+    /// true only in the grace period, so it is neither cached nor shown with the tariff.
+    /// </summary>
+    [JsonIgnore]
+    public bool DelayedPaymentMethod { get; set; }
+
+    /// <summary>
+    /// Whether the tariff refuses what the grace period refuses: it is not paid, or it is in the grace period and the
+    /// customer does not pay by a delayed payment method. A grace period of a delayed payment method is not
+    /// restricted: the money of the renewal is on its way, so the portal works as on a paid tariff until the grace
+    /// period ends.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsRestricted => State == TariffState.NotPaid || State == TariffState.Delay && !DelayedPaymentMethod;
+
+    /// <summary>
+    /// The state that picks the queue of a background service, where paid portals have a queue of their own: a grace
+    /// period that is not restricted gets the queue of a paid tariff.
+    /// </summary>
+    [JsonIgnore]
+    public TariffState LaneState => State == TariffState.Delay && !IsRestricted ? TariffState.Paid : State;
+
     public override int GetHashCode()
     {
         return DueDate.GetHashCode();

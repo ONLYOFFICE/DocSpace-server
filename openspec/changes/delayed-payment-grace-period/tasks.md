@@ -2,10 +2,10 @@
 
 ## 1. The restriction decision
 
-- [ ] 1.1 Add `DelayedPaymentMethod` (next protobuf member) and the computed `IsRestricted` and lane state to the
-  tariff (`common/ASC.Core.Common/Billing/Tariff.cs`); verified by the unit test of 4.1.
-- [ ] 1.2 Write the last known `isDelayedPaymentMethod` on every successful customer answer from billing (false for
-  no customer) to its own key of the distributed cache, kept for the grace days plus one; write nothing on a failure;
+- [ ] 1.1 Add `DelayedPaymentMethod` (worked out on every read, so neither cached nor serialized) and the computed
+  `IsRestricted` and lane state to the tariff (`common/ASC.Core.Common/Billing/Tariff.cs`); verified by the unit test of 4.1.
+- [ ] 1.2 Write the last known `isDelayedPaymentMethod` on every answer of billing to the customer request (false
+  for "cannot find", a portal that is not a customer) to its own key of the distributed cache, kept for the grace days plus one; write nothing on a failure;
   keep the key out of the tariff cache clearing. Verified by the unit test of 4.2 and the integration test of 4.6.
 - [ ] 1.3 When the written answer differs from the stored one (absent counts as false), send `change-tariff` to the
   portal's quota room after the write, best effort in its own `try/catch` with a `[LoggerMessage]` warning, without

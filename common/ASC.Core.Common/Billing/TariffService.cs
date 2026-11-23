@@ -72,6 +72,8 @@ public class TariffService(
 
     private const int DefaultTrialPeriod = 30;
     private const int MaxTopUpAttempts = 5;
+    // The longest grace period the last answer about a delayed payment method is kept for: ten years
+    internal const int MaxDelayedPaymentMethodGraceDays = 3650;
 
     private static readonly TimeSpan _participantServiceLimitsCacheDuration = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan _participantServiceLimitsFailureCacheDuration = TimeSpan.FromMinutes(1);
@@ -1195,6 +1197,8 @@ public class TariffService(
     private async Task<Tariff> CalculateTariffAsync(int tenantId, Tariff tariff)
     {
         tariff.State = TariffState.Paid;
+        // The tariff may come from the cache with the value of an earlier read
+        tariff.DelayedPaymentMethod = false;
 
         if (tariff.Quotas.Count == 0)
         {
@@ -1267,6 +1271,13 @@ public class TariffService(
             tariff.DueDate != DateTime.MaxValue && tariff.DueDate.Date < DateTime.UtcNow.Date.AddDays(-delay))
         {
             tariff.State = lifetime ? TariffState.Paid : TariffState.NotPaid;
+        }
+
+        // A hosted portal whose customer pays by SEPA has its renewal charged before the money arrives, so its grace
+        // period does not restrict it (Tariff.IsRestricted). Only a portal in the grace period asks for its customer
+        if (tariff.State == TariffState.Delay && !coreBaseSettings.Standalone)
+        {
+            tariff.DelayedPaymentMethod = await IsDelayedPaymentMethodAsync(tenantId);
         }
 
         return tariff;
@@ -1559,21 +1570,112 @@ public class TariffService(
 
             if (billingClient.Configured)
             {
+                // Billing answers "cannot find" for a portal that is not its customer: an answer, unlike a failure
+                var answered = false;
+
                 try
                 {
                     var portalId = await coreSettings.GetKeyAsync(tenantId);
                     customerInfo = await billingClient.GetCustomerInfoAsync(portalId);
+                    answered = true;
                     await hybridCache.SetAsync(cacheKey, customerInfo, TimeSpan.FromMinutes(10));
                 }
                 catch (Exception error)
                 {
+                    answered |= error is BillingNotFoundException;
                     LogError(error, tenantId.ToString());
                     await hybridCache.SetAsync(cacheKey, new CustomerInfo(), TimeSpan.FromMinutes(10));
+                }
+
+                // Only an answer of billing is remembered: after a failure the last answer keeps deciding the grace period
+                if (answered)
+                {
+                    await RememberDelayedPaymentMethodAsync(tenantId, customerInfo is { IsDelayedPaymentMethod: true });
                 }
             }
         }
 
         return customerInfo;
+    }
+
+    internal static string GetDelayedPaymentMethodCacheKey(int tenantId)
+    {
+        return $"{tenantId}:billing:delayedpaymentmethod";
+    }
+
+    /// <summary>
+    /// Whether the last answer of billing says that the customer of the portal pays by a delayed payment method (SEPA).
+    /// The customer is read as <see cref="GetCustomerInfoAsync"/> reads it, from its cache of 10 minutes, so an
+    /// expired entry asks billing and remembers its answer. Billing that does not answer leaves the last answer in
+    /// place; a portal billing never answered about is taken as paying by card. For the tariff computation, which
+    /// must not fail because of the customer: a failure here is logged and gives the last answer, or false.
+    /// </summary>
+    private async Task<bool> IsDelayedPaymentMethodAsync(int tenantId)
+    {
+        try
+        {
+            await GetCustomerInfoAsync(tenantId);
+        }
+        catch (Exception ex)
+        {
+            logger.WarningDelayedPaymentMethodRead(tenantId, ex);
+        }
+
+        return await GetFromCache<bool?>(GetDelayedPaymentMethodCacheKey(tenantId)) == true;
+    }
+
+    /// <summary>
+    /// Keeps the answer of billing about a delayed payment method for the grace days plus one, so it outlives any
+    /// grace period that starts while it is known, and tells the clients of the portal to read the tariff again when
+    /// it changed. The tariff is not read here: this runs inside the tariff computation, under the lock of the tariff
+    /// read, so the event goes to the queue of portals that are not paid.
+    /// </summary>
+    private async Task RememberDelayedPaymentMethodAsync(int tenantId, bool delayed)
+    {
+        var key = GetDelayedPaymentMethodCacheKey(tenantId);
+
+        try
+        {
+            var known = await GetFromCache<bool?>(key);
+            await hybridCache.SetAsync(key, delayed, GetDelayedPaymentMethodCacheDuration(PaymentDelay));
+
+            if (!DelayedPaymentMethodChanged(known, delayed))
+            {
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.WarningDelayedPaymentMethodRemember(tenantId, ex);
+            return;
+        }
+
+        try
+        {
+            await serviceProvider.GetRequiredService<QuotaSocketManager>().ChangeTariffAsync(tenantId, TariffState.Delay);
+        }
+        catch (Exception ex)
+        {
+            logger.WarningTariffChangedNotification(tenantId, ex);
+        }
+    }
+
+    /// <summary>
+    /// How long the last answer about a delayed payment method is kept: the grace days plus one. The grace days are
+    /// taken between 0 and <see cref="MaxDelayedPaymentMethodGraceDays"/>, so a misconfigured delay neither expires
+    /// the answer at once nor overflows the duration.
+    /// </summary>
+    internal static TimeSpan GetDelayedPaymentMethodCacheDuration(int paymentDelay)
+    {
+        return TimeSpan.FromDays(Math.Clamp(paymentDelay, 0, MaxDelayedPaymentMethodGraceDays) + 1);
+    }
+
+    /// <summary>
+    /// Whether a new answer of billing changes what the portal is taken to pay by: no earlier answer means card.
+    /// </summary>
+    internal static bool DelayedPaymentMethodChanged(bool? known, bool delayed)
+    {
+        return (known ?? false) != delayed;
     }
 
     public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null, bool waitForChanges = false)
