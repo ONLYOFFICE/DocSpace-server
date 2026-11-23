@@ -812,8 +812,14 @@ class Analyzer:
         """Why a throw `hops` service calls away from the action is only a hint, or "" when it counts. These are the
         throws whose trigger is almost never the request: a null guard, the fallback arm of a switch (an
         exhaustiveness guard), and a framework exception two or more services deep (an internal consistency check);
-        the repository's own exception types are thrown on purpose for a response, at any depth."""
-        if hops < 1 or exc is None:
+        the repository's own exception types are thrown on purpose for a response, at any depth. A throw the handler
+        answers with 503 (a busy distributed lock) is a hint at any depth: the document filter gives every operation
+        the same 503."""
+        if exc is None:
+            return ""
+        if self.exc_code(exc)[0] == 503:
+            return "a busy lock: the generic 503 of the document filter (conventions §1)"
+        if hops < 1:
             return ""
         if self.exc_code(exc)[0] == 401:
             return "a sign-in check in a service: the pipeline's 401 (conventions §1)"

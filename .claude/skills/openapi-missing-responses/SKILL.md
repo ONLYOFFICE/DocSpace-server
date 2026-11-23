@@ -51,7 +51,7 @@ counts such actions and `--all` lists them):
   of the action's own project (`FilesControllerHelper`) is the controller's layer and costs no hop. Each line says
   how far: `[service hop N]`. A service finding counts like one in the action, except these, which stay hints
   with the reason in `[hint: …]`: a null guard, a throw that is itself the `_ =>` or `default:` arm of a switch, a
-  framework (non-repository) exception two or more services deep, a 401 (conventions §1), and a code that only
+  framework (non-repository) exception two or more services deep, a 401 and a 503 of a busy lock (conventions §1), and a code that only
   some of the bodies a call resolves to produce (implementations of an interface, overloads with the same number
   of parameters);
 - a `throw` inside a `try` whose `catch` takes it without rethrowing is not counted, at every call on the path;
