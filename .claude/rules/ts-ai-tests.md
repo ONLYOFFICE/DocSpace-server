@@ -42,9 +42,9 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   | the frames of an NDJSON or SSE answer, a value against a named schema | `ndjsonFrames`, `sseFrames` in `frames.ts`, `schemaViolations(name, value)` in `schema.ts` | ajv |
   | bytes of an answer as they arrive, a chunked body, a client that hangs up | `listen(app)`, `send(port, request)` in `rawHttp.ts` | node:net |
   | an MCP server the library's own client talks to | `mcpStub.ts` | msw |
-  | `FolderDto`, `FileDto`, `EmployeeFullDto` of the Files and People API | `fixtures/filesApi.ts` | |
+  | `FolderDto` and `FileDto` of the Files API, a round's folder snapshot | `fixtures/filesApi.ts` (`folderDto`, `fileDto`, `snapshotWithFolders`) | |
   | the chat context aggregate and a primed round | `fixtures/chatContext.ts` (`chatContextDto`, `inRound`) | |
-  | `ProfileDto` and a model provider | `fixtures/providers.ts` | |
+  | `ProfileDto` and a stubbed model provider | `fixtures/providers.ts` (`profileDto`, `useProfile`, `useProvider`) | |
   | the whole app: parsers, gate, routes, 404 | `request(createApp())` | supertest |
   | waits between polls and retries | `useFastTimers()` in `time.ts` | vitest fake timers |
 
