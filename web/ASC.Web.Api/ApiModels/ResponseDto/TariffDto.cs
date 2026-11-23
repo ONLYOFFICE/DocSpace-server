@@ -43,6 +43,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 ///   "developer": false,
 ///   "id": 1,
 ///   "state": "Paid",
+///   "restricted": false,
 ///   "dueDate": "2024-01-15T10:30:00Z",
 ///   "delayDueDate": "2024-01-15T10:30:00Z",
 ///   "licenseDate": "2024-01-15T10:30:00Z",
@@ -88,6 +89,15 @@ public class TariffDto
     /// </summary>
     /// <example>Paid</example>
     public TariffState State { get; set; }
+
+    /// <summary>
+    /// Whether the subscription limits the portal now: true while the portal cannot add members, rooms or paid
+    /// services. It is true when the subscription is unpaid, and inside the grace period unless the billing
+    /// customer pays by SEPA direct debit, whose money arrives days after the charge. Every caller gets it, like
+    /// `state`; a client shows the grace period by `state` and limits its controls by this flag.
+    /// </summary>
+    /// <example>false</example>
+    public bool Restricted { get; set; }
 
     /// <summary>
     /// When the current period ends, in the portal time zone. It is filled in for a room or DocSpace

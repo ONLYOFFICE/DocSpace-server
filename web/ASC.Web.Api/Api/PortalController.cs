@@ -544,11 +544,11 @@ public class PortalController(
 
     /// <remarks>
     /// Returns the tariff of the portal, with its state, the end of the current period, and its quotas. Any signed-in
-    /// user can call it, including a guest. Every caller gets `state`. A room admin or a DocSpace admin also gets
-    /// `dueDate` and `delayDueDate`. Only a caller with the EditPortalSettings permission gets the other fields. The
-    /// portal owner and DocSpace admins have this permission. The call is read-only and also works while the portal
-    /// is unpaid. With `refresh` set to `true`, the call reads the tariff from the billing system instead of the
-    /// cache. To see what the next period costs, use `GET api/2.0/portal/tariff/upcoming`.
+    /// user can call it, including a guest. Every caller gets `state` and `restricted`. A room admin or a DocSpace
+    /// admin also gets `dueDate` and `delayDueDate`. Only a caller with the EditPortalSettings permission gets the
+    /// other fields. The portal owner and DocSpace admins have this permission. The call is read-only and also works
+    /// while the portal is unpaid. With `refresh` set to `true`, the call reads the tariff from the billing system
+    /// instead of the cache. To see what the next period costs, use `GET api/2.0/portal/tariff/upcoming`.
     /// </remarks>
     /// <summary>
     /// Get the portal tariff
@@ -565,7 +565,8 @@ public class PortalController(
 
         var result = new TariffDto
         {
-            State = source.State
+            State = source.State,
+            Restricted = source.IsRestricted
         };
 
         var currentUserType = await userManager.GetUserTypeAsync(securityContext.CurrentAccount.ID);

@@ -74,7 +74,8 @@ public class DocsCloudController(
     /// `GET api/2.0/portal/tariff` with `refresh=true` before you call again. The call never buys a paid plan. To move
     /// a paid Docs Connect subscription to Docs Connect Dev Pack, use `POST api/2.0/settings/docscloud/switchtodevpack`.
     /// The call returns 400 if the portal already has a Docs Connect trial, Docs Connect, or Docs Connect Dev Pack. It
-    /// returns 402 if the tariff is delayed or not paid. It returns 403 if the billing service is not configured. If
+    /// returns 402 if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. It returns 403
+    /// if the billing service is not configured. If
     /// the installation has no Docs Connect trial quota, the call returns 404. After a granted trial, the call returns
     /// 403 if the server address makes the Content Security Policy header too long. The trial then stays granted.
     /// </remarks>
@@ -85,7 +86,7 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "Boolean value: true if the trial subscription is activated, false if the billing service declines it or its answer could not be read", typeof(bool))]
     [SwaggerResponse(400, "The portal already has a Docs Connect trial, Docs Connect or Docs Connect Dev Pack subscription")]
-    [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the trial cannot be started")]
+    [SwaggerResponse(402, "The portal tariff is restricted, so the trial cannot be started")]
     [SwaggerResponse(403, "The caller has no portal-settings right, the billing service is not configured, or the trial was granted but the address of the assigned Docs Connect server would push the Content Security Policy header over its size limit")]
     [SwaggerResponse(404, "The Docs Connect trial quota is not available on this installation")]
     [HttpPost("trial")]
@@ -160,9 +161,9 @@ public class DocsCloudController(
     /// the number of users, or to return to Docs Connect at the next billing period, use
     /// `PUT api/2.0/portal/payment/updatewallet`. The call returns 400 if the body cannot be read. It also returns 400
     /// without an active Docs Connect subscription. It also returns 400 if the portal already has Docs Connect Dev Pack, or
-    /// `quantity` is below its minimum. It returns 402 if the tariff is delayed or not paid. It returns 403 if the
-    /// billing service is not configured. It returns 404 for a portal without a billing customer, or an installation
-    /// without these wallet products.
+    /// `quantity` is below its minimum. It returns 402 if the tariff is restricted, as `restricted` of
+    /// `GET api/2.0/portal/tariff` shows. It returns 403 if the billing service is not configured. It returns 404
+    /// for a portal without a billing customer, or an installation without these wallet products.
     /// </remarks>
     /// <summary>
     /// Switch Docs Connect to Docs Connect Dev Pack
@@ -171,7 +172,7 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "Boolean value: true if the subscription is switched to Docs Connect Dev Pack, false if the billing service declines it", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read, the quantity is below the allowed minimum, the portal has no active Docs Connect subscription, or it already has a Docs Connect Dev Pack subscription")]
-    [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the subscription cannot be switched")]
+    [SwaggerResponse(402, "The portal tariff is restricted, so the subscription cannot be switched")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the billing service is not configured")]
     [SwaggerResponse(404, "The portal is not registered as a billing customer, or the Docs Connect and Docs Connect Dev Pack wallet products are not configured on this installation")]
     [HttpPost("switchtodevpack")]
@@ -200,9 +201,9 @@ public class DocsCloudController(
     /// response. To price a new number of users for an existing subscription, use
     /// `PUT api/2.0/portal/payment/calculatewallet`. The call returns 400 if the body cannot be read, or the portal
     /// has no active Docs Connect subscription. It also returns 400 if the portal already has Docs Connect Dev Pack,
-    /// or `quantity` is below its minimum. It returns 402 if the tariff is delayed or not paid. It returns 403 if the
-    /// billing service is not configured. It returns 404 for a portal without a billing customer, or an installation
-    /// without these wallet products.
+    /// or `quantity` is below its minimum. It returns 402 if the tariff is restricted, as `restricted` of
+    /// `GET api/2.0/portal/tariff` shows. It returns 403 if the billing service is not configured. It returns 404
+    /// for a portal without a billing customer, or an installation without these wallet products.
     /// </remarks>
     /// <summary>
     /// Calculate the Docs Connect Dev Pack switch cost
@@ -211,7 +212,7 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "The cost of switching to Docs Connect Dev Pack for the requested quantity, or an empty result if the billing service could not price it", typeof(PaymentCalculationDto))]
     [SwaggerResponse(400, "The request body cannot be read, the quantity is below the allowed minimum, the portal has no active Docs Connect subscription, or it already has a Docs Connect Dev Pack subscription")]
-    [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the switch cannot be priced")]
+    [SwaggerResponse(402, "The portal tariff is restricted, so the switch cannot be priced")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the billing service is not configured")]
     [SwaggerResponse(404, "The portal is not registered as a billing customer, or the Docs Connect and Docs Connect Dev Pack wallet products are not configured on this installation")]
     [HttpPost("calculatedevpack")]

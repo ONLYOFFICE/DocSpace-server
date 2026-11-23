@@ -227,7 +227,8 @@ public class PaymentController(
     /// returns 404. A wallet that was never topped up has no sub-account. If the bonus cannot be read, the call goes
     /// on. If the wallet balance cannot be read, the call returns 404. The wallet money and the bonus balance together must cover the price. The bonus is spent first. If the
     /// billing service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402
-    /// for an add-on to the plan if the plan payment is overdue. A trial plan passes this check. The call returns 400
+    /// for an add-on if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows.
+    /// A trial plan passes this check. The call returns 400
     /// if the quantity is below the minimum of the service. By default, the minimum is 100 units for disk storage and
     /// 10 for Docs Connect Dev Pack. With `Add`, the minimum for admins is the number
     /// of admins the portal already has. With `Add`, the call checks the minimum only while the portal does not have
@@ -247,7 +248,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the units were bought or the change was scheduled; `false` only in the `Set` form, when the portal does not have the service or the change could not be saved", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, or that service is already set")]
-    [SwaggerResponse(402, "The payment for the plan of the portal is overdue and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
+    [SwaggerResponse(402, "The tariff of the portal is restricted and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or in the `Add` form the wallet balance cannot be read or the portal is known to have neither a wallet sub-account nor a bonus that has not ended in the accounting currency")]
     [HttpPut("updatewallet")]
@@ -417,7 +418,8 @@ public class PaymentController(
     /// that `POST api/2.0/portal/payment/subscription/movetowallet` moves to the wallet. If the portal has no billing
     /// customer, the call returns 404. The payer is the portal user whose email is the email of the billing customer.
     /// Only the payer can call it. Other callers get 403. The call also returns 403 if the installation has no
-    /// billing service. The call is read-only. If the plan is not paid, the call returns 402. It also returns 402 if
+    /// billing service. The call is read-only. If the plan is a trial, the call returns 402. It also returns 402 if
+    /// the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. It also returns 402 if
     /// the billing service fails or cannot be reached. If the paid plan has no subscription, the call returns 404. If
     /// the paid plan is a wallet product or has no product ID, the call returns 400. The figures are for the moment
     /// of the call, so they change between calls.
@@ -429,7 +431,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The unused balance of the current subscription period with its period boundaries and currencies", typeof(SubscriptionBalanceDto))]
     [SwaggerResponse(400, "The plan currently paid is a wallet product or has no product identifier")]
-    [SwaggerResponse(402, "The plan of the portal is not in the paid state, or the billing service answers with an error or cannot be reached")]
+    [SwaggerResponse(402, "The plan of the portal is a trial, its tariff is restricted, or the billing service answers with an error or cannot be reached")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its paid plan has no subscription")]
     [HttpGet("subscription/balance")]
@@ -458,7 +460,8 @@ public class PaymentController(
     /// the portal has no billing customer or its paid plan has no subscription. The call returns 400 if `quantity`
     /// names a product other than the admins wallet service. It also returns 400 for zero admins or fewer than the
     /// portal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan
-    /// is not paid or the balance cannot be moved. Two errors come after the subscription has ended. If the wallet and
+    /// is a trial or the balance cannot be moved. It also returns 402 if the tariff is restricted, as `restricted` of
+    /// `GET api/2.0/portal/tariff` shows. Two errors come after the subscription has ended. If the wallet and
     /// the bonus still fall short after the top-up, the call returns 402. If the wallet balance cannot be read, the
     /// call returns 404.
     /// </remarks>
@@ -469,7 +472,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the balance was moved to the wallet and the administrators were bought; `false` when the subscription has ended and the balance was moved, but the purchase of the administrators failed", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or does not name the administrators wallet product, the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier")]
-    [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet and the bonus are still short of the price after the top-up")]
+    [SwaggerResponse(402, "The plan of the portal is a trial, its tariff is restricted, the balance could not be moved, or the wallet and the bonus are still short of the price after the top-up")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
     [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, or after the move the wallet balance cannot be read")]
     [HttpPost("subscription/movetowallet")]
