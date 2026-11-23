@@ -58,7 +58,7 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
 - `req.body` and the fields of `unpackPositional(...)` are `unknown`. Read each field through
   `app/narrow.ts` (`asString`, `getArray`, `isObject`, ...) and answer 400 naming the field when it
   has the wrong type. A wrong body is never a 500 and never a 200 that stored something else.
-- The JSON parser runs with `strict: false` (`app.ts`), so a body can be `null`, a string or a
+- The JSON parser runs with `strict: false` (`app/createApp.ts`), so a body can be `null`, a string or a
   number: test `isObject(req.body)` before reading a field.
 - Every array in the input has a named limit (`MAX_ATTACHMENTS_PER_REQUEST`), and repeated ids are
   collapsed before the upstream call.

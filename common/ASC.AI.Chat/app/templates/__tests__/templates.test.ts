@@ -35,9 +35,6 @@ import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 vi.mock("../../storage/docspaceFileTransfer.js", () => ({
   uploadFile: vi.fn(),
   mediaTypeOf: (title: string) => (title.endsWith(".md") ? "text/markdown" : "application/docx"),

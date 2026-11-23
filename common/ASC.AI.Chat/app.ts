@@ -36,17 +36,9 @@ process.env["NODE_ENV"] = process.env["NODE_ENV"] ?? "development";
 // Must stay the first import — patches node:http before anything uses it.
 import "./app/telemetry/sdk.js";
 import http from "http";
-import express from "express";
-import morgan from "morgan";
-import cookieParser from "cookie-parser";
-import bodyParser from "body-parser";
-import cors from "cors";
-import logger, { logStream } from "./app/log.js";
-import { coreCors, getAppConfig } from "./config/index.js";
-import { corsOptions } from "./app/cors.js";
-import registerRoutes, { API_PREFIX } from "./app/routes.js";
-import { requestContextMiddleware } from "./app/requestContext.js";
-import { DOCUMENT_AGENT_OUTPUTS_PATH } from "./app/tools/documentAgentFiles.js";
+import logger from "./app/log.js";
+import { getAppConfig } from "./config/index.js";
+import { createApp } from "./app/createApp.js";
 import { storage } from "./app/storage/index.js";
 
 const config = getAppConfig();
@@ -54,79 +46,7 @@ const config = getAppConfig();
 await storage.init();
 logger.info("Storage initialized");
 
-const app = express();
-
-// Server-Timing header so DevTools can tell server time from network time;
-// set at header flush, so for streamed replies it is time-to-first-byte.
-app.use((_req, res, next) => {
-  const startedAt = process.hrtime.bigint();
-  const writeHead = res.writeHead.bind(res);
-  res.writeHead = ((...args: Parameters<typeof writeHead>) => {
-    if (!res.headersSent) {
-      const elapsedMs = (process.hrtime.bigint() - startedAt) / 1_000_000n;
-      res.setHeader("Server-Timing", `express-request-time;dur=${elapsedMs}ms`);
-    }
-    return writeHead(...args);
-  }) as typeof res.writeHead;
-  next();
-});
-
-// strict:false lets bare JSON primitives through; @onlyoffice/ai-chat's
-// ApiProvider serializes single-arg routes as `JSON.stringify(arg)` — e.g.
-// `DELETE profiles/delete` arrives with body `"uuid"`, which strict-mode
-// would reject. Handlers normalize via `unpackPositional` afterwards.
-const jsonParser = bodyParser.json({ strict: false });
-
-// The OpenAI passthrough (`openaiPassthroughController`) forwards the raw
-// request bytes to the provider, so its body must stay unparsed — both to
-// avoid a lossy parse/re-serialize hop and because vision/OCR payloads
-// (base64 data URLs) easily exceed the parser's 100kb default limit.
-const OPENAI_PASSTHROUGH_PREFIX = `${API_PREFIX}/openai/`;
-
-// The docx export carries a whole thread transcript in one request, so a
-// long thread blows past the parser's 100kb default and 413s before the
-// handler runs (Bug 83096). User messages are capped by the default parser
-// on their own routes, so only assistant replies grow a transcript — 15mb
-// covers even extreme threads. The downstream .NET hop accepts ~28mb
-// (Kestrel default); a front proxy's own body cap still applies before us.
-const TEXT_TO_DOCX_PATH = `${API_PREFIX}/text-to-docx`;
-const docxJsonParser = bodyParser.json({ strict: false, limit: "15mb" });
-
-// The document agent delivers result files as raw bodies of their own media
-// type (see documentAgentFiles.ts receive); a .json file would otherwise be
-// parsed here and the handler left with no bytes to save.
-
-app
-  .use(morgan("combined", { stream: logStream }))
-  .use(cookieParser())
-  .use((req, res, next) => {
-    if (
-      req.path.startsWith(OPENAI_PASSTHROUGH_PREFIX) ||
-      req.path === DOCUMENT_AGENT_OUTPUTS_PATH
-    ) {
-      next();
-      return;
-    }
-    if (req.path === TEXT_TO_DOCX_PATH) {
-      docxJsonParser(req, res, next);
-      return;
-    }
-    jsonParser(req, res, next);
-  })
-  .use(bodyParser.urlencoded({ extended: false }));
-
-// CORS as the .NET services have it, from `core:cors` (see `app/cors.ts`).
-// Before the routes and their auth gate: a preflight carries no
-// credentials, and `cors()` answers it here and ends it.
-const corsPolicy = corsOptions(coreCors());
-if (corsPolicy) {
-  app.use(cors(corsPolicy));
-}
-logger.info(corsPolicy ? `CORS enabled for ${coreCors()}` : "CORS disabled");
-
-app.use(requestContextMiddleware);
-
-registerRoutes(app);
+const app = createApp();
 
 const httpServer = http.createServer(app);
 

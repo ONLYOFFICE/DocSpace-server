@@ -1,6 +1,7 @@
 ---
 paths:
   - "common/ASC.AI.Chat/app.ts"
+  - "common/ASC.AI.Chat/app/createApp.ts"
   - "common/ASC.AI.Chat/server.js"
   - "common/ASC.AI.Chat/app/routes.ts"
   - "common/ASC.AI.Chat/app/cors.ts"
@@ -15,7 +16,7 @@ The service follows the production guidance of the Express documentation: "Produ
 Practices: Security", "Production best practices: performance and reliability", "Error Handling",
 "Health Checks and Graceful Shutdown" and "Express behind proxies" (expressjs.com). Each section
 says what that guidance asks, how it applies to a JSON API that sits behind the portal's nginx, and
-what a change to `app.ts`, `routes.ts` or a controller has to keep. §8 lists where the code does not
+what a change to `app/createApp.ts`, `routes.ts` or a controller has to keep. §8 lists where the code does not
 meet it yet. Cite this file as `[ts-ai-express.md §N]`.
 
 ## 1. Errors reach one place
@@ -39,7 +40,7 @@ meet it yet. Cite this file as `[ts-ai-express.md §N]`.
 
 ## 2. The order of middleware is part of the contract
 
-- The order in `app.ts` and `registerRoutes`: body parsers, CORS, the request context, the open
+- The order in `createApp` (`app/createApp.ts`) and `registerRoutes`: body parsers, CORS, the request context, the open
   routes (`/isLife`, `/health`, `/openapi.json`, `/docs`), the authentication gate, the routes, the
   404 handler, the error handler. A middleware added in the wrong place runs for requests it must
   not see, or after the answer was sent.
@@ -53,8 +54,11 @@ meet it yet. Cite this file as `[ts-ai-express.md §N]`.
 - The parser is picked by the path, the route by Express's own matching (case-insensitive, with or
   without a trailing slash). Compare paths the way the router does, or the bigger limit and the raw
   body apply to one spelling of the path only.
+- `app.ts` only starts what `createApp()` builds: telemetry, the storage, the port. Middleware and
+  routes go into `createApp`, so that a test gets the same application through supertest.
 - Guard: a test through the real app for each: 401 without credentials, the open routes without
-  them, a preflight, the limit of each parser, an unknown path.
+  them, a preflight, the limit of each parser, an unknown path (`app/__tests__/app.test.ts` has the
+  first, second and last).
 
 ## 3. Synchronous work stays out of a request
 
@@ -77,7 +81,7 @@ meet it yet. Cite this file as `[ts-ai-express.md §N]`.
   address from them by hand.
 - The service answers JSON and one HTML page (`/docs`). Response headers that harden a browser
   (`helmet`) and the removal of `X-Powered-By` (`app.disable("x-powered-by")`) are set once in
-  `app.ts`, not per route.
+  `createApp`, not per route.
 
 ## 5. The process
 
@@ -111,7 +115,7 @@ meet it yet. Cite this file as `[ts-ai-express.md §N]`.
 
 ## 8. Where the code stands (2026-11-23)
 
-Read from `app.ts`, `app/routes.ts`, `controllers/_helpers.ts`, `app/telemetry/sdk.ts` and
+Read from `app.ts`, `app/createApp.ts`, `app/routes.ts`, `controllers/_helpers.ts`, `app/telemetry/sdk.ts` and
 `package.json` on that date. A change that closes a line removes it here in the same commit.
 
 | Guidance | Now |

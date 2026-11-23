@@ -33,9 +33,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 const engine = { touch: vi.fn(), openOrCreate: vi.fn() };
 vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@onlyoffice/ai-chat/core")>();

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useFastTimers } from "../../__tests__/helpers/time.js";
 import {
   FakeDocspaceApiHttpError,
   fakeFetch,
@@ -112,6 +113,8 @@ describe("textTargetFor", () => {
 });
 
 describe("PortalTextReader", () => {
+  // The reader waits 500 ms between polls and 1.5 s between retries of a start.
+  useFastTimers();
   beforeEach(() => vi.unstubAllGlobals());
 
   it("converts through bulkdownload, polls the operation and downloads the text through the proxy", async () => {

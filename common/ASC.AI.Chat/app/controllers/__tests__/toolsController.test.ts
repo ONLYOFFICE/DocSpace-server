@@ -33,9 +33,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 const getCustomServer = vi.fn();
 const listCustomServers = vi.fn();
 const updateCustomServer = vi.fn();

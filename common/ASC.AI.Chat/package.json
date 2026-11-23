@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "yarn typecheck && yarn lint && yarn format:check && yarn test"
@@ -58,12 +59,18 @@
     "@types/morgan": "^1.9.9",
     "@types/nconf": "^0.10.6",
     "@types/node": "^20.12.0",
+    "@types/supertest": "^7.2.1",
+    "@vitest/coverage-v8": "^3",
     "eslint": "^9",
+    "msw": "^2",
+    "node-mocks-http": "^1.18.1",
     "prettier": "^3.4.2",
+    "supertest": "^7.3.2",
     "ts-json-schema-generator": "^2.9.0",
     "typescript": "^5.6.0",
     "typescript-eslint": "^8",
-    "vitest": "^3"
+    "vitest": "^3",
+    "vitest-mock-extended": "^3"
   },
   "engines": {
     "node": ">=20",

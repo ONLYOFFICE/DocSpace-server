@@ -33,10 +33,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
-
 const filesApiGet = vi.fn();
 const resolveAiProjectEntityId = vi.fn();
 const getMyDocumentsFolderId = vi.fn();

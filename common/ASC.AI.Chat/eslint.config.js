@@ -32,7 +32,14 @@ const processEnv = {
 
 export default tseslint.config(
   {
-    ignores: ["node_modules/**", ".yarn/**", "app/generated/**", "templates/**", "server.js"],
+    ignores: [
+      "node_modules/**",
+      ".yarn/**",
+      "app/generated/**",
+      "templates/**",
+      "coverage/**",
+      "server.js",
+    ],
   },
   {
     files: ["**/*.ts"],

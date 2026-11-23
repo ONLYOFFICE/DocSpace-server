@@ -34,9 +34,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { getFolderInfoCached } = vi.hoisted(() => ({ getFolderInfoCached: vi.fn() }));
 
-vi.mock("../../log.js", () => ({
-  default: { warn: vi.fn(), info: vi.fn(), debug: vi.fn(), error: vi.fn() },
-}));
 vi.mock("../docspaceFilesApi.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../docspaceFilesApi.js")>()),
   getFolderInfoCached,

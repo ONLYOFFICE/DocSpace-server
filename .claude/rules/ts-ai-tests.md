@@ -8,7 +8,7 @@ paths:
 
 Unit tests of the Node service live next to the code, in `app/**/__tests__/*.test.ts`
 (`vitest.config.ts` includes nothing else). `yarn test` runs them all, `yarn vitest run <file>` one
-file, `-t "<name>"` one test. They are not part of `dotnet test ASC.Tests.slnx`. The service came
+file, `-t "<name>"` one test, `yarn test:coverage` writes the coverage report to `coverage/`. They are not part of `dotnet test ASC.Tests.slnx`. The service came
 without tests until October 2026: none of the 35 fixes before vitest arrived brought one, 30 of the
 39 after it did. Style rules (`ts-ai-style.md`) apply to tests too; ESLint leaves them `any`, `!`
 and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
@@ -26,20 +26,36 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
 
 ## 2. Mock the boundary, not the subject
 
-- Mock what the module talks to: `fetch` (`vi.stubGlobal`), `log.js`, the engine class of
-  `@onlyoffice/ai-chat/core`, the storage a controller reads. Never mock the module under test or
-  the function the test is about.
-- `requestContext.js` and `storage/httpClient.js` are mocked by most tests, so no test of another
-  module shows which headers are forwarded, what a timeout does or how a status is mapped. A test
-  about those behaviours runs the real module over a stubbed `fetch`.
+- Mock what the module talks to: the network, the engine class of `@onlyoffice/ai-chat/core`, the
+  storage a controller reads. Never mock the module under test or the function the test is about.
+- The harness is in `app/__tests__/helpers/` and stands on libraries; use it instead of a
+  hand-made request, response, `fetch` stub or engine class:
+
+  | Need | Helper | Library |
+  |---|---|---|
+  | call one handler, read status, body and headers | `invoke(handler, { body, query, headers })` in `http.ts` | node-mocks-http |
+  | run code inside the real request context | `inRequestContext(headers, fn)` in `http.ts` | node-mocks-http |
+  | answer the AI, Files or People service, a provider | `useUpstream()`, `http`, `docspace`, `docspaceError` in `upstream.ts` | msw |
+  | stand in for an engine class | `engineMock<Engine>()`, `engineClass(engine)` in `engine.ts` | vitest-mock-extended |
+  | the whole app: parsers, gate, routes, 404 | `request(createApp())` | supertest |
+  | waits between polls and retries | `useFastTimers()` in `time.ts` | vitest fake timers |
+
+  `promptsController.test.ts`, `storage/__tests__/httpClient.test.ts` and `app/__tests__/app.test.ts`
+  show one of each.
+- The logger is stubbed once for every file by `app/__tests__/setup.ts`. A test that asserts on a
+  line imports the logger and reads the spy; do not declare the same `vi.mock` again.
+- `useUpstream()` runs the real `httpClient.js` and fails the test on a request no handler answers.
+  Prefer it to `vi.mock("../httpClient.js")` and to `vi.stubGlobal("fetch")`: most older tests mock
+  `requestContext.js` and `storage/httpClient.js`, so they show nothing about which headers are
+  forwarded, what a timeout does or how a status is mapped.
 - A stub answers what the test tells it to. It cannot show that the .NET route exists or that its
   answer has this shape: say which C# action the stubbed route is (a comment with its path), and
   leave the contract to the .NET suite (`ts-ai-failure-paths.md` §9).
-- A stub of an engine class lists only the methods the test needs; type it against the real class
-  (`Pick<InstanceType<typeof Engine>, ...>`), so a method the library renames stops compiling
-  instead of leaving the test green.
-- `app/meta/__tests__/mocks.ts` has the shared pieces (`fakeFetch`, `portalJson`, `textResponse`):
-  use them before writing another copy.
+- `engineMock` is typed against the real class, so a method the library renames stops the test
+  from compiling instead of leaving it green. `restoreMocks` does not reset it: call
+  `mockReset(engine)` in `beforeEach`.
+- Before adding a helper or a test library, look for it in the table; a new one is added to the
+  table in the same commit.
 
 ## 3. A test that cannot fail proves nothing
 
@@ -56,14 +72,17 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
 
 - A test name states the behaviour as a sentence: `it("answers 400 when toolNames is a string")`.
 - A test written for a tracked defect carries the number in its name, `(Bug 84402)`, so the test of
-  a bug can be found by its number. The 356 tests written so far carry none.
+  a bug can be found by its number. No test written before this rule carries one.
 
 ## 5. Time and the network
 
-- No test reaches the network or DNS: `fetch` is stubbed, `dns/promises` is mocked.
-- Anything that waits (a timeout, a poll, a retry, the stream heartbeat) runs on
-  `vi.useFakeTimers()`. `app/meta/__tests__/portalFiles.test.ts` waits on real timers and takes 20
-  of the suite's 20.5 seconds; do not add a second one.
+- No test reaches the network or DNS: `useUpstream()` fails on a request nobody answers,
+  `dns/promises` is mocked.
+- Anything that waits (a timeout, a poll, a retry, the stream heartbeat) runs on fake timers:
+  `useFastTimers()` when only the outcome matters, `vi.useFakeTimers()` with
+  `vi.advanceTimersByTimeAsync()` when the test asserts the moment. One file waiting on real
+  timers took 20 of the suite's 20.5 seconds until it moved to `useFastTimers()`; the whole suite
+  now runs in about 2 seconds, keep it there.
 - `restoreMocks: true` resets spies between tests. Module state (a cache, a memoized promise) is
   not reset: re-import the module (`vi.resetModules()`), or the tests depend on their order.
 

@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 class FakeAiServiceHttpError extends Error {
   constructor(
     public readonly status: number,

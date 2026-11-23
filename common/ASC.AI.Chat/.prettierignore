@@ -5,3 +5,4 @@ yarn.lock
 app/generated
 templates
 eslint-suppressions.json
+coverage
