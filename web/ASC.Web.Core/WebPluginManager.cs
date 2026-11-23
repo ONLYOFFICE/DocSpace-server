@@ -381,6 +381,8 @@ public class WebPluginManager(
             .Select(x => x.Clone())
             .ToList();
 
+        webPlugins.ForEach(x => x.Personal = true);
+
         await ApplyWebPluginStatesAsync(webPlugins, true);
 
         return webPlugins;
