@@ -23,7 +23,8 @@ portal, but should not limit it until it ends and the tariff becomes NotPaid.
   member like `state`: true in the grace period without a delayed payment method and in NotPaid, false otherwise.
   The client shows the grace period by `state` and limits its controls by `restricted`.
 - When billing does not answer `getCustomerInfo`, the portal keeps the last answer billing gave (kept for the
-  grace days plus one); with no answer ever received, the grace period restricts as today.
+  grace days plus one after it was given); with no answer ever received, or one older than that, the grace period
+  restricts as today. A read of a cached tariff never waits for billing: it decides by the cached customer.
 - When that last answer changes, the portal's clients are told that the tariff changed (the existing tariff
   socket event), so they re-read `getPortalTariff`.
 - NotPaid is unchanged: the payment gate answers 402 to every call outside the allowed list, whatever the

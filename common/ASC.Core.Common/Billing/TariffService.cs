@@ -122,7 +122,7 @@ public class TariffService(
                 }
 
                 tariff = await GetBillingInfoAsync(tenantId) ?? await CreateDefaultAsync();
-                tariff = await CalculateTariffAsync(tenantId, tariff);
+                tariff = await CalculateTariffAsync(tenantId, tariff, askBilling: billingClient.Configured && withRequestToPaymentSystem, refresh);
                 await InsertToCache(tenantId, tariff);
 
                 if (billingClient.Configured && withRequestToPaymentSystem)
@@ -231,7 +231,7 @@ public class TariffService(
 
                         if (await SaveBillingInfoAsync(tenantId, asynctariff))
                         {
-                            asynctariff = await CalculateTariffAsync(tenantId, asynctariff);
+                            asynctariff = await CalculateTariffAsync(tenantId, asynctariff, askBilling: true);
                             tariff = asynctariff;
                         }
 
@@ -247,7 +247,7 @@ public class TariffService(
 
                             if (await SaveBillingInfoAsync(tenantId, tariff))
                             {
-                                tariff = await CalculateTariffAsync(tenantId, tariff);
+                                tariff = await CalculateTariffAsync(tenantId, tariff, askBilling: true);
                                 await InsertToCache(tenantId, tariff);
                             }
                         }
@@ -269,7 +269,7 @@ public class TariffService(
 
                         if (await SaveBillingInfoAsync(tenantId, asynctariff))
                         {
-                            asynctariff = await CalculateTariffAsync(tenantId, asynctariff);
+                            asynctariff = await CalculateTariffAsync(tenantId, asynctariff, askBilling: true);
                             tariff = asynctariff;
                         }
 
@@ -1194,11 +1194,13 @@ public class TariffService(
     }
 
 
-    private async Task<Tariff> CalculateTariffAsync(int tenantId, Tariff tariff)
+    // askBilling: the read already asks billing (a missed or refreshed tariff read with a request to the payment
+    // system, each of its calculations), so in the grace period it may ask for the customer too; any other read decides
+    // from the cached customer or the last answer of billing. refresh is passed to the first calculation only, so one
+    // read asks billing for the customer at most once.
+    private async Task<Tariff> CalculateTariffAsync(int tenantId, Tariff tariff, bool askBilling = false, bool refresh = false)
     {
         tariff.State = TariffState.Paid;
-        // The tariff may come from the cache with the value of an earlier read
-        tariff.DelayedPaymentMethod = false;
 
         if (tariff.Quotas.Count == 0)
         {
@@ -1274,11 +1276,13 @@ public class TariffService(
         }
 
         // A hosted portal whose customer pays by SEPA has its renewal charged before the money arrives, so its grace
-        // period does not restrict it (Tariff.IsRestricted). Only a portal in the grace period asks for its customer
-        if (tariff.State == TariffState.Delay && !coreBaseSettings.Standalone)
-        {
-            tariff.DelayedPaymentMethod = await IsDelayedPaymentMethodAsync(tenantId);
-        }
+        // period does not restrict it (Tariff.IsRestricted). Only a portal in the grace period asks for its customer.
+        // The tariff may be the instance the cache shares with other requests: the flag is written once, after the
+        // customer is known, so no reader sees it reset while the customer is read. The state above is still
+        // assigned step by step on that instance, as before this flag existed.
+        var delayedPaymentMethod = tariff.State == TariffState.Delay && !coreBaseSettings.Standalone
+            && await IsDelayedPaymentMethodAsync(tenantId, askBilling, refresh);
+        tariff.DelayedPaymentMethod = delayedPaymentMethod;
 
         return tariff;
     }
@@ -1604,17 +1608,31 @@ public class TariffService(
     }
 
     /// <summary>
-    /// Whether the last answer of billing says that the customer of the portal pays by a delayed payment method (SEPA).
-    /// The customer is read as <see cref="GetCustomerInfoAsync"/> reads it, from its cache of 10 minutes, so an
-    /// expired entry asks billing and remembers its answer. Billing that does not answer leaves the last answer in
-    /// place; a portal billing never answered about is taken as paying by card. For the tariff computation, which
-    /// must not fail because of the customer: a failure here is logged and gives the last answer, or false.
+    /// Whether the customer of the portal pays by a delayed payment method (SEPA). The customer known now decides: the
+    /// one billing gives with <paramref name="askBilling"/>, otherwise the one in the cache of
+    /// <see cref="GetCustomerInfoAsync"/> (10 minutes). Without a customer (billing failed, the entry expired, or the
+    /// portal is not a customer) the last answer of billing decides, and with none the portal is taken as paying by
+    /// card. Only a read that already asks billing passes <paramref name="askBilling"/>, so a read of a cached tariff
+    /// never waits for billing or the lock of the customer. For the tariff computation, which must not fail because of
+    /// the customer: a failure here is logged and gives the last answer, or false.
     /// </summary>
-    internal async Task<bool> IsDelayedPaymentMethodAsync(int tenantId)
+    internal async Task<bool> IsDelayedPaymentMethodAsync(int tenantId, bool askBilling = false, bool refresh = false)
     {
+        if (!billingClient.Configured)
+        {
+            return false;
+        }
+
         try
         {
-            await GetCustomerInfoAsync(tenantId);
+            var customerInfo = askBilling
+                ? await GetCustomerInfoAsync(tenantId, refresh)
+                : await GetFromCache<CustomerInfo>(GetBillingCustomerCacheKey(tenantId));
+
+            if (customerInfo is { } customer && !customer.IsDefault())
+            {
+                return customer.IsDelayedPaymentMethod;
+            }
         }
         catch (Exception ex)
         {
@@ -1625,9 +1643,12 @@ public class TariffService(
     }
 
     /// <summary>
-    /// Keeps the answer of billing about a delayed payment method for the grace days plus one, so it outlives any
-    /// grace period that starts while it is known, and tells the clients of the portal to read the tariff again when
-    /// it changed. The tariff is not read here: this runs inside the tariff computation, under the lock of the tariff
+    /// Keeps an answer of billing about a delayed payment method for the grace days plus one after the answer, and
+    /// tells the clients of the portal to read the tariff again when it changed. It runs on every answer to
+    /// <see cref="GetCustomerInfoAsync"/>, whatever the state of the tariff, so the event may also reach a portal that
+    /// is not in the grace period; it is only a nudge to read again. An answer older than that no longer decides: a
+    /// portal whose billing stopped answering before its grace period started is restricted once the answer expires.
+    /// The tariff is not read here, as the call may run inside the tariff computation under the lock of the tariff
     /// read, so the event goes to the queue of portals that are not paid.
     /// </summary>
     private async Task RememberDelayedPaymentMethodAsync(int tenantId, bool delayed)

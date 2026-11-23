@@ -91,10 +91,11 @@ public class TariffDto
     public TariffState State { get; set; }
 
     /// <summary>
-    /// Whether the subscription limits the portal now: true while the portal cannot add members, rooms or paid
-    /// services. It is true when the subscription is unpaid, and inside the grace period unless the billing
-    /// customer pays by SEPA direct debit, whose money arrives days after the charge. Every caller gets it, like
-    /// `state`; a client shows the grace period by `state` and limits its controls by this flag.
+    /// Whether the subscription limits the portal now. While it is true, the portal cannot add admins, room admins,
+    /// guests, rooms or AI agents, or buy paid services. It is true when the subscription is unpaid. Inside
+    /// the grace period it is false only for a customer whose payment method settles days after the charge. That
+    /// needs an answer from billing in the last grace days plus one. A client shows the grace period by `state`
+    /// and limits its controls by this flag.
     /// </summary>
     /// <example>false</example>
     public bool Restricted { get; set; }

@@ -127,7 +127,8 @@ public class Tariff
     /// <summary>
     /// Whether the billing customer of a hosted portal in the grace period pays by a delayed payment method (SEPA),
     /// whose money reaches billing days after the charge. It is worked out again on every read of the tariff and is
-    /// true only in the grace period, so it is neither cached nor shown with the tariff.
+    /// true only in the grace period. The in-memory cache keeps it on the instance it shares, but it is never
+    /// serialized, so the distributed cache and the API do not carry it.
     /// </summary>
     [JsonIgnore]
     public bool DelayedPaymentMethod { get; set; }

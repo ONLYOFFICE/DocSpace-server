@@ -44,10 +44,8 @@ namespace ASC.Web.Api.Billing.Tests.Tests.GracePeriod;
 /// which asks the paid-user checker; this suite starts no Files service, so the room checker, which takes the same
 /// decision (<c>Tariff.IsRestricted</c>), is covered by the unit test of that decision.
 /// </remarks>
-public class GracePeriodTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class GracePeriodTests(AspireAppFixture fixture) : GracePeriodTestBase(fixture)
 {
-    private const string CustomerRoute = "/billing/GetCustomerInfo";
-
     private PortalUsersApi PortalUsers => field ??= new PortalUsersApi(_webApiClient,
         new Configuration { BasePath = _webApiClient.BaseAddress!.ToString().TrimEnd('/') });
 
@@ -184,6 +182,24 @@ public class GracePeriodTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task GracePeriod_CustomerSwitchesToADelayedPaymentMethod_RefreshOfTheTariffLiftsTheRestriction()
+    {
+        // Arrange
+        await StartGracePeriodAsync(delayedPaymentMethod: false);
+        (await ReadTariffAsync()).Restricted.Should().BeTrue();
+        var customerCallsBefore = CustomerCalls();
+
+        // Act: only the tariff is read again; the customer is not
+        Payments.Customer(Owner.Email, delayedPaymentMethod: true);
+        var (state, restricted) = await ReadTariffAsync(refresh: true);
+
+        // Assert
+        CustomerCalls().Should().BeGreaterThan(customerCallsBefore, "a refresh of the tariff reads the customer again");
+        state.Should().Be(TariffState.Delay);
+        restricted.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task PaidPlan_IsNotRestricted()
     {
         // Arrange
@@ -195,34 +211,5 @@ public class GracePeriodTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Assert
         state.Should().Be(TariffState.Paid);
         restricted.Should().BeFalse();
-    }
-
-    /// <summary>
-    /// The plan lapsed two days ago, inside the grace days of the stack, and billing knows the owner as the customer
-    /// paying by SEPA or by card. The customer is read again, as the cached one is up to 10 minutes old.
-    /// </summary>
-    private async Task StartGracePeriodAsync(bool delayedPaymentMethod)
-    {
-        Payments.Paid(Plans.AdminProductId, quantity: 10, DateTime.UtcNow.Date.AddDays(-2), Owner.Email)
-            .Customer(Owner.Email, delayedPaymentMethod: delayedPaymentMethod);
-        await RefreshCustomerAsync();
-    }
-
-    private async Task RefreshCustomerAsync()
-    {
-        await _webApiClient.Authenticate(Owner);
-        await _paymentApi.GetCustomerInfoAsync(true, TestContext.Current.CancellationToken);
-    }
-
-    private int CustomerCalls()
-    {
-        return PaymentCalls.Count(call => call.Route == CustomerRoute);
-    }
-
-    private async Task<(TariffState? State, bool Restricted)> ReadTariffAsync(bool refresh = true)
-    {
-        var tariff = (await _portalQuotaApi.GetPortalTariffAsync(refresh, TestContext.Current.CancellationToken)).Response;
-
-        return (tariff.State, tariff.Restricted);
     }
 }

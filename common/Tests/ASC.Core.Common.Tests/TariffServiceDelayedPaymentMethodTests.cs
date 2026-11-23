@@ -79,6 +79,8 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
     private readonly System.Threading.Channels.Channel<SocketData> _socketChannel = System.Threading.Channels.Channel.CreateUnbounded<SocketData>();
     private readonly FusionCache _hybridCache = new(new FusionCacheOptions());
     private readonly HttpStub _billing;
+    private readonly IConfiguration _configuration;
+    private readonly IServiceProvider _serviceProvider;
     private readonly TariffService _tariffService;
     private Func<StubResponse> _billingAnswer = Failure;
 
@@ -88,7 +90,7 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
             ? _billingAnswer()
             : Reply(HttpStatusCode.NotFound, """{"Message":"error: unexpected request"}"""));
 
-        var configuration = new ConfigurationBuilder()
+        _configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["core:payment:delay"] = GraceDays.ToString(CultureInfo.InvariantCulture),
@@ -101,20 +103,14 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
             StubProxy<ITariffService>.Create([]),
             null!,
             _socketChannel.Writer,
-            new MachinePseudoKeys(configuration),
-            configuration);
+            new MachinePseudoKeys(_configuration),
+            _configuration);
 
-        var serviceProvider = new ServiceCollection()
+        _serviceProvider = new ServiceCollection()
             .AddSingleton(quotaSocketManager)
             .BuildServiceProvider();
 
-        _tariffService = CreateTariffService(
-            billingClient: CreateBillingClient(_billing).client,
-            hybridCache: _hybridCache,
-            coreSettings: CreateCoreSettings(PaymentRegion),
-            configuration: configuration,
-            serviceProvider: serviceProvider,
-            distributedLockProvider: new InMemoryLockProvider());
+        _tariffService = CreateService(_hybridCache, CreateBillingClient(_billing).client, new InMemoryLockProvider());
     }
 
     public void Dispose()
@@ -124,11 +120,11 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
     }
 
     [Fact]
-    public async Task IsDelayedPaymentMethodAsync_BillingAnswersDelayed_IsTrueAndTellsTheClients()
+    public async Task IsDelayedPaymentMethodAsync_ReadThatAsksBillingGetsDelayed_IsTrueAndTellsTheClients()
     {
         _billingAnswer = () => Customer(delayed: true);
 
-        (await _tariffService.IsDelayedPaymentMethodAsync(TenantId)).Should().BeTrue();
+        (await _tariffService.IsDelayedPaymentMethodAsync(TenantId, askBilling: true)).Should().BeTrue();
 
         (await RememberedAsync()).Should().BeTrue();
         await ShouldHaveSentChangeTariffAsync();
@@ -136,11 +132,11 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
     }
 
     [Fact]
-    public async Task IsDelayedPaymentMethodAsync_BillingAnswersCard_IsFalseAndRemembersIt()
+    public async Task IsDelayedPaymentMethodAsync_ReadThatAsksBillingGetsCard_IsFalseAndRemembersIt()
     {
         _billingAnswer = () => Customer(delayed: false);
 
-        (await _tariffService.IsDelayedPaymentMethodAsync(TenantId)).Should().BeFalse();
+        (await _tariffService.IsDelayedPaymentMethodAsync(TenantId, askBilling: true)).Should().BeFalse();
 
         // No earlier answer counts as a card, so this answer changes nothing the clients show
         (await RememberedAsync()).Should().BeFalse();
@@ -183,11 +179,11 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
     }
 
     [Fact]
-    public async Task IsDelayedPaymentMethodAsync_BillingFailsWithNoEarlierAnswer_IsFalseAndRemembersNothing()
+    public async Task IsDelayedPaymentMethodAsync_ReadThatAsksBillingFailsWithNoEarlierAnswer_IsFalseAndRemembersNothing()
     {
         _billingAnswer = Failure;
 
-        (await _tariffService.IsDelayedPaymentMethodAsync(TenantId)).Should().BeFalse();
+        (await _tariffService.IsDelayedPaymentMethodAsync(TenantId, askBilling: true)).Should().BeFalse();
 
         _billing.CallCount.Should().BeGreaterThan(0);
         (await RememberedAsync()).Should().BeNull();
@@ -221,6 +217,77 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
     }
 
     [Theory]
+    [InlineData("unreadable")]
+    [InlineData("dropped")]
+    public async Task GetCustomerInfoAsync_UnknownOutcomeAfterADelayedAnswer_KeepsTheDelayedAnswer(string outcome)
+    {
+        _billingAnswer = () => Customer(delayed: true);
+        await _tariffService.GetCustomerInfoAsync(TenantId, refresh: true);
+        await ShouldHaveSentChangeTariffAsync();
+
+        // A body that is not the customer, or a dropped connection, says nothing about the payment method
+        _billingAnswer = outcome == "unreadable"
+            ? () => Reply(HttpStatusCode.OK, "<html><body>Bad gateway</body></html>")
+            : TransportFault;
+        var callsBefore = _billing.CallCount;
+        (await _tariffService.GetCustomerInfoAsync(TenantId, refresh: true)).Should().BeNull();
+
+        _billing.CallCount.Should().BeGreaterThan(callsBefore);
+        (await RememberedAsync()).Should().BeTrue();
+        (await _tariffService.IsDelayedPaymentMethodAsync(TenantId)).Should().BeTrue();
+        _socketChannel.Reader.TryRead(out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task IsDelayedPaymentMethodAsync_ReadOfACachedTariff_UsesTheCachedCustomerWithoutAskingBilling()
+    {
+        // A customer cached with no answer remembered: the previous version cached it, or the answer has expired
+        await _hybridCache.SetAsync(TariffService.GetBillingCustomerCacheKey(TenantId), CachedCustomer(delayed: true), TimeSpan.FromMinutes(10),
+            token: TestContext.Current.CancellationToken);
+        _billingAnswer = () => Customer(delayed: false);
+
+        (await _tariffService.IsDelayedPaymentMethodAsync(TenantId)).Should().BeTrue("the customer known now decides");
+
+        _billing.CallCount.Should().Be(0, "a read of a cached tariff never waits for billing");
+        (await RememberedAsync()).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task IsDelayedPaymentMethodAsync_ReadOfACachedTariffWithNothingKnown_IsFalseWithoutAskingBilling()
+    {
+        _billingAnswer = () => Customer(delayed: true);
+
+        (await _tariffService.IsDelayedPaymentMethodAsync(TenantId)).Should().BeFalse();
+
+        _billing.CallCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task IsDelayedPaymentMethodAsync_BillingNotConfigured_IsFalseWithoutTakingTheLock()
+    {
+        var (locks, lockCalls) = RecordingProxy<IDistributedLockProvider>.Create(null);
+        var service = CreateService(_hybridCache, BuildProvider().GetRequiredService<BillingClient>(), locks);
+
+        (await service.IsDelayedPaymentMethodAsync(TenantId, askBilling: true)).Should().BeFalse();
+
+        lockCalls.Calls.Should().BeEmpty("a portal on an installation without billing takes no lock on a tariff read");
+    }
+
+    [Fact]
+    public async Task GetCustomerInfoAsync_DelayedAnswer_IsKeptForTheGraceDaysPlusOne()
+    {
+        var (cache, cacheCalls) = RecordingProxy<IFusionCache>.Create(_hybridCache);
+        var service = CreateService(cache, CreateBillingClient(_billing).client, new InMemoryLockProvider());
+        _billingAnswer = () => Customer(delayed: true);
+
+        await service.GetCustomerInfoAsync(TenantId, refresh: true);
+
+        var write = cacheCalls.Calls.Single(call => call.Method.Name == nameof(IFusionCache.SetAsync)
+                                                    && Equals(call.Args[0], TariffService.GetDelayedPaymentMethodCacheKey(TenantId)));
+        write.Args.OfType<FusionCacheEntryOptions>().Single().Duration.Should().Be(TimeSpan.FromDays(GraceDays + 1));
+    }
+
+    [Theory]
     [InlineData(GraceDays, GraceDays + 1)]
     [InlineData(0, 1)]
     [InlineData(-5, 1)]
@@ -247,6 +314,29 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
     {
         return Reply(HttpStatusCode.OK,
             $$"""{"PortalId":"{{PaymentRegion}}{{TenantId}}","PaymentMethodStatus":1,"PaymentMethodType":"{{(delayed ? "sepa_debit" : "card")}}","IsDelayedPaymentMethod":{{(delayed ? "true" : "false")}},"Email":"owner@example.com"}""");
+    }
+
+    private static CustomerInfo CachedCustomer(bool delayed)
+    {
+        return new CustomerInfo
+        {
+            PortalId = $"{PaymentRegion}{TenantId}",
+            PaymentMethodStatus = PaymentMethodStatus.Set,
+            PaymentMethodType = delayed ? "sepa_debit" : "card",
+            IsDelayedPaymentMethod = delayed,
+            Email = "owner@example.com"
+        };
+    }
+
+    private TariffService CreateService(IFusionCache cache, BillingClient billingClient, IDistributedLockProvider lockProvider)
+    {
+        return CreateTariffService(
+            billingClient: billingClient,
+            hybridCache: cache,
+            coreSettings: CreateCoreSettings(PaymentRegion),
+            configuration: _configuration,
+            serviceProvider: _serviceProvider,
+            distributedLockProvider: lockProvider);
     }
 
     private static StubResponse Failure()

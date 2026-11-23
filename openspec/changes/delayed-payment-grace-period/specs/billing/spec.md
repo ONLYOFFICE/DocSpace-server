@@ -6,8 +6,9 @@
 
 A hosted portal in the grace period SHALL be restricted unless its billing customer pays by a delayed method
 (`isDelayedPaymentMethod` of `getCustomerInfo`). A restricted tariff refuses what the grace period refuses; an
-unrestricted one SHALL answer as a paid tariff, keeping `state` Delay and `delayDueDate`. NotPaid and the grace
-period of a self-hosted installation SHALL always be restricted.
+unrestricted one SHALL let those actions through as a paid tariff does, keeping `state` Delay, `delayDueDate`,
+the grace letters and the payment URL. NotPaid and the grace period of a self-hosted installation SHALL always be
+restricted.
 
 #### Scenario: Grace period with a delayed payment method
 
@@ -33,10 +34,10 @@ period of a self-hosted installation SHALL always be restricted.
 
 ### Requirement: Delayed payment method when billing does not answer
 
-When billing does not answer the customer request, the last answer it gave for the portal SHALL decide, kept
-for the grace days plus one; with none, the grace period SHALL be restricted. A changed answer SHALL take effect
-within 10 minutes, at once after `getCustomerInfo` with `refresh=true`, and SHALL send `change-tariff` to the
-portal's quota room.
+Without a customer answer, the last answer of billing for the portal SHALL decide for the grace days plus one
+after it was given, while the distributed cache answers; with none, the grace period SHALL be restricted. A
+changed answer SHALL take effect within 15 minutes, at once after `getCustomerInfo` or `getPortalTariff` with
+`refresh=true`, and SHALL send `change-tariff` to the portal's quota room.
 
 #### Scenario: Billing fails after a delayed answer
 
@@ -52,6 +53,11 @@ portal's quota room.
 
 - **WHEN** the billing customer of a portal in the grace period switches from card to a delayed payment method and a DocSpace admin calls `getCustomerInfo` with `refresh=true`
 - **THEN** the portal's clients receive `change-tariff` and `getPortalTariff` reports `restricted` false
+
+#### Scenario: Refresh of the tariff after a switch
+
+- **WHEN** the billing customer of a portal in the grace period switches from card to a delayed payment method and a member calls `getPortalTariff` with `refresh=true`
+- **THEN** it reports `restricted` false
 
 ### Requirement: Restricted flag of the tariff
 

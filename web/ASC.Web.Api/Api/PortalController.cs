@@ -547,8 +547,10 @@ public class PortalController(
     /// user can call it, including a guest. Every caller gets `state` and `restricted`. A room admin or a DocSpace
     /// admin also gets `dueDate` and `delayDueDate`. Only a caller with the EditPortalSettings permission gets the
     /// other fields. The portal owner and DocSpace admins have this permission. The call is read-only and also works
-    /// while the portal is unpaid. With `refresh` set to `true`, the call reads the tariff from the billing system
-    /// instead of the cache. To see what the next period costs, use `GET api/2.0/portal/tariff/upcoming`.
+    /// while the portal is unpaid. With `refresh` set to `true`, the call reads the tariff from billing, not from the
+    /// cache. In the grace period it also reads the billing customer. Otherwise `restricted` can lag a new payment
+    /// method by up to 15 minutes. To see
+    /// what the next period costs, use `GET api/2.0/portal/tariff/upcoming`.
     /// </remarks>
     /// <summary>
     /// Get the portal tariff

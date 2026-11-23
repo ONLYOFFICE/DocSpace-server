@@ -2,7 +2,8 @@
 
 ## 1. The restriction decision
 
-- [x] 1.1 Add `DelayedPaymentMethod` (worked out on every read, so neither cached nor serialized) and the computed
+- [x] 1.1 Add `DelayedPaymentMethod` (worked out on every read; never serialized, kept only on the shared in-memory
+  instance) and the computed
   `IsRestricted` and lane state to the tariff (`common/ASC.Core.Common/Billing/Tariff.cs`); verified by the unit test of 4.1.
 - [x] 1.2 Write the last known `isDelayedPaymentMethod` on every answer of billing to the customer request (false
   for "cannot find", a portal that is not a customer) to its own key of the distributed cache, kept for the grace days plus one; write nothing on a failure;
@@ -11,8 +12,13 @@
   portal's quota room after the write, best effort in its own `try/catch` with a `[LoggerMessage]` warning, without
   reading the tariff. Verified by the unit test of 4.2 (the event queued for the socket service); the billing stack
   runs no socket service, so 4.7 checks the effect on the tariff only.
-- [x] 1.4 In the state computation, fill `DelayedPaymentMethod` from that key when the state is Delay on a hosted
-  installation (after the cached customer read), reset it to false otherwise. Verified by 4.3 and 4.5.
+- [x] 1.4 In the state computation, fill `DelayedPaymentMethod` when the state is Delay on a hosted installation,
+  false otherwise, written once: the customer known now decides, then that key (1.5). Verified by 4.4 and 4.6.
+- [x] 1.5 Ask billing for the customer only on a tariff read that already asks billing (a missed or refreshed tariff
+  read with a request to the payment system, each of its calculations, in the grace period); any other read decides from the cached customer, then the last answer, and
+  never waits for billing or the customer lock. The customer known now wins over the last answer. Skip all of it
+  when billing is not configured. Write the flag once, after the customer is known, since the in-memory cache shares
+  the tariff object. Verified by 4.12.
 
 ## 2. The checks
 
@@ -72,6 +78,17 @@
   owner, a Room admin, a User and a Guest read `restricted` true.
 - [x] 4.10 Update the CODE-ONLY rows that describe the grace period refusals (`billing` "Payment gate…" grace row,
   `quotas` row of the grace / not-paid refusal, `backup-and-restore` "Running the schedule") with the new tests.
+- [x] 4.11 Billing suite, `Tests/GracePeriod/GracePeriodPaymentsTests.cs`: the modified requirements of money
+  operations with a delayed method and with a card — `updateWalletPayment` `Set` of an add-on (`false` / 402),
+  `startDocsCloudTrial` (granted / 402), `calculateDevPack` (priced / 402); update their `verification.md` rows. The
+  add-on renewal and the backup schedule decide the same way in background services this stack cannot drive: their
+  decision is the unit test of 4.1, their wiring is not proven.
+- [x] 4.12 Unit tests of 1.5 and of the last answer: a read of a cached tariff asks no billing and uses the cached
+  customer; billing not configured takes no lock; an unreadable answer or a dropped connection after a delayed
+  answer keeps it; the answer is cached for the grace days plus one (`RecordingProxy` over the cache). Billing suite:
+  `getPortalTariff` with `refresh=true` after a switch to a delayed method reports `restricted` false. Not proven: that
+  the reads of a cached tariff pass no `askBilling` (the unit tests call the customer decision directly, and no API
+  drops the customer entry while the tariff stays cached).
 
 ## 5. Checks
 
@@ -86,7 +103,7 @@
 - [x] 5.3 `openspec validate --specs --no-interactive`, and `python -I -X utf8
   .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec <capability>` for `billing`, `quotas`,
   `backup-and-restore`, `storage-and-integrations`: every operation of the change is called by a test. No new
-  operationId; the new field `restricted` of `getPortalTariff` is asserted by 4.4 (4.9 waits for the SDK).
+  operationId; the new field `restricted` of `getPortalTariff` is asserted by 4.4 and 4.9.
 
 ## Workflow follow-up
 

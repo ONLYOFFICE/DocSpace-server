@@ -22,7 +22,8 @@ See proposal.md (Why). Facts the design builds on:
 
 - One decision, "is the tariff restricted", made from the tariff alone, so every check reads a property and a
   unit test covers the decision with all its inputs.
-- No new call to billing on a paid portal; at most one cached customer read per tariff read in the grace period.
+- No new call to billing on a paid portal, and no wait for billing on a read of a cached tariff: only a read that
+  already asks billing (a missed or refreshed tariff read with a request to the payment system) asks for the customer, and only in the grace period.
 
 **Non-Goals:**
 
@@ -33,9 +34,11 @@ See proposal.md (Why). Facts the design builds on:
 
 ## Decisions
 
-1. **The flag lives on the tariff.** The tariff gains a `DelayedPaymentMethod` value, filled in the state
-   computation only when the state is Delay on a hosted installation and reset to false otherwise (the
-   object comes from the cache), and a computed `IsRestricted`: NotPaid, or Delay without a delayed method.
+1. **The flag lives on the tariff.** The tariff gains a `DelayedPaymentMethod` value, worked out in the state
+   computation, true only when the state is Delay on a hosted installation and the customer pays by a delayed
+   method, and a computed `IsRestricted`: NotPaid, or Delay without a delayed method. The in-memory cache shares
+   the tariff object between requests, so the value is written once, after the customer is known; the state is
+   still assigned step by step on that object, as before the change.
    Each check replaces `State > Paid` with `IsRestricted`; the subscription balance check
    (`State != Paid`) becomes "Trial or restricted"; the backup scheduler (`State < Delay`) becomes "not
    restricted". The queue lanes take a computed lane state: Paid for an unrestricted grace period, the state
@@ -48,11 +51,15 @@ See proposal.md (Why). Facts the design builds on:
 
 2. **The last known answer is written on an answer only.** Every answer of billing to the customer request, a
    customer or "cannot find", writes `isDelayedPaymentMethod` (false for no customer) to its own key of the
-   distributed cache, kept for the grace days plus one so that it outlives any grace period. A failure
-   (a timeout, another error, an unreadable body) writes nothing there. The state computation asks for the
-   customer as `getCustomerInfo` does (cached, 10 minutes)
-   and then reads that key; an absent key means restricted. So a failure keeps the last answer, a portal that
-   stopped being a customer is restricted, and the empty answer kept after a failure needs no new meaning. The
+   distributed cache, kept for the grace days plus one after the answer. While billing answers, every customer
+   read in the grace period renews it; an answer older than that no longer decides, so a portal whose billing
+   stopped answering before its grace period started can be restricted before the grace period ends. A failure
+   (a timeout, another error, an unreadable body) writes nothing there. The state computation decides by the
+   customer known now: the one billing gives on a read that already asks billing (a missed tariff cache with a
+   request to the payment system, refreshed or not), otherwise the one cached by `getCustomerInfo` (10 minutes).
+   Without a customer it reads that key; an absent key means restricted. So a failure keeps the last answer, a
+   portal that stopped being a customer is restricted, a read of a cached tariff never waits for billing or the
+   customer lock, and the empty answer kept after a failure needs no new meaning. The
    key is in the distributed cache because one process may read billing and another decide; it is not removed
    when the tariff cache is cleared.
    *Alternative:* the tariff row (`comment` column). Rejected: a row is written only when the due date or the
@@ -71,10 +78,15 @@ See proposal.md (Why). Facts the design builds on:
 
 - [A customer who pays by SEPA and does not pay keeps full functionality for the whole grace period] → it is
   what the user asked for; NotPaid ends it on the same day as for any other portal.
-- [A customer read inside the tariff computation adds a billing call on a cache miss, once per 10 minutes per
-  portal in the grace period] → bounded by the existing customer cache and its lock; paid portals never ask.
-- [A switch of the payment method takes effect within 10 minutes] → `getCustomerInfo` with `refresh=true`
-  applies it at once; stated in the spec.
+- [A read that already asks billing now also asks for the customer in the grace period, under the tariff lock:
+  once per 10 minutes per portal, and on every call with `refresh`] → it adds to a billing call that read makes
+  anyway; reads of a cached tariff, the payment gate among them, never ask; paid portals never ask.
+- [A switch of the payment method takes effect within 15 minutes: the customer cache, then the tariff cache] →
+  `getCustomerInfo` or `getPortalTariff` with `refresh=true` applies it at once; stated in the spec.
+- [The last answer expires the grace days plus one after it was given] → billing silent since before the grace
+  period started restricts the portal once it expires, as with no answer at all; stated in the spec.
+- [The distributed cache does not answer] → the read of the last answer gives none, so the portal is restricted
+  while it fails; stated in the spec.
 - [The web client disables controls from `state` Delay until it reads `restricted`] → the server goes first;
   the PR description names the field and the event for the frontend.
 

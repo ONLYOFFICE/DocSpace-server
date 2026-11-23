@@ -134,17 +134,17 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | **Encryption progress** | `ST/EncryptionAccessTests.cs:94` (owner, no run: empty), `BS/HostedStorageTests.cs:110` (hosted: 415) | TEST-CONFIRMED [run: PASS] |
 | **Access to Docs Connect tenant operations** | | |
 | 403 "Access denied" for the three roles, 401 anonymous | `DC/DocsCloudTrialPermissionsTests.cs:50,57`, `DC/DocsCloudTenantGetPermissionsTests.cs:48,55`, `DC/DocsCloudTenantInfoPermissionsTests.cs:48,55`, `DC/DocsCloudTenantConfigGetPermissionsTests.cs:48,55`, `DC/DocsCloudTenantConfigUpdatePermissionsTests.cs:48,56`, `DC/DocsCloudTenantQuotaPermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportCreatePermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportGetPermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportTerminatePermissionsTests.cs:48,55`, `DC/DocsCloudTenantUsagePermissionsTests.cs:48,55`; assertions in `DC/DocsCloudTestBase.cs` | TEST-CONFIRMED [run: PASS] |
-| **Docs Connect trial** | `BT/DocsCloudTrialTests.cs:42` (a portal paying for Docs Connect: 400 "Quota is already set"); the grant, the tenant read and the CSP change stay CODE-ONLY (`DCC:89-140`, `DCC:530-544`) | TEST-CONFIRMED [run: PASS] (partly) |
+| **Docs Connect trial** | `BT/DocsCloudTrialTests.cs:42` (a portal paying for Docs Connect: 400 "Quota is already set"); `BT/GracePeriod/GracePeriodPaymentsTests.cs:81-111` (grace period: granted with SEPA, 402 "Tariff is not paid" with a card and billing not asked); the tenant read and the CSP change stay CODE-ONLY (`DCC:93-149`, `DCC:540-561`) | TEST-CONFIRMED [run: PASS] (partly), TEST-CONFIRMED (the grace period) |
 | Unreadable billing answer gives false and clears the caches | `common/Tests/ASC.Core.Common.Tests/TariffServiceDocsCloudTrialTests.cs:45` (unit test) | TEST-CONFIRMED [run: PASS] |
 | **Moving to Dev Pack** | | |
 | Anonymous 401 | `DC/DocsCloudCalculateDevPackPermissionsTests.cs:56`, `DC/DocsCloudSwitchToDevPackPermissionsTests.cs:56` | TEST-CONFIRMED [run: PASS] |
 | No billing service 403 for every signed-in caller | `DC/DocsCloudDevPackUnconfiguredTests.cs:44` (owner, both operations, 403 "Tariff service is not configured"); other roles by `PH:143-147` | TEST-CONFIRMED [run: PASS] |
-| Preconditions and minimum: no subscription 400 "DocsCloud subscription is not active"; below the minimum 400 "Invalid quantity", no billing call | `BT/DocsCloudDevPackTests.cs:71-101`; `DCC:554-` (`PrepareSwitchAsync`) | TEST-CONFIRMED [run: PASS] |
+| Preconditions and minimum: a restricted tariff 402 "Tariff is not paid" (a grace period with a card; with SEPA the switch is priced), no subscription 400 "DocsCloud subscription is not active"; below the minimum 400 "Invalid quantity", no billing call | `BT/DocsCloudDevPackTests.cs:71-101`; `BT/GracePeriod/GracePeriodPaymentsTests.cs:113-141` (`calculateDevPack` in a grace period); `DCC:589-631` (`PrepareSwitchAsync`) | TEST-CONFIRMED [run: PASS], TEST-CONFIRMED (the grace period) |
 | Calculate and switch send the product ids and quantity to billing | `BT/DocsCloudDevPackTests.cs:45-128` | TEST-CONFIRMED [run: PASS] |
 | A DocSpace admin who is not the owner may calculate and switch | `BT/DocsCloudDevPackTests.cs:130-171` | TEST-CONFIRMED [run: PASS] |
 | Non-administrators 403 "Access denied", nothing charged | `BT/DocsCloudDevPackTests.cs:173-206` | TEST-CONFIRMED [run: PASS] |
-| Serialized switches | `DCC:177-182`; not done: needs concurrent calls against the billing stub | CODE-ONLY |
-| **Reading the tenant** | `DCC:241-246`, `DCC:263-294`, `DCC:322-327`, `DCC:382-387`, `DCC:522`, yaml | |
+| Serialized switches | `DCC:178-183`; not done: needs concurrent calls against the billing stub | CODE-ONLY |
+| **Reading the tenant** | `DCC:242-247`, `DCC:264-295`, `DCC:323-328`, `DCC:383-388`, `DCC:523`, yaml | |
 | `getTenant` asked for the portal; null when never activated | `BT/DocsCloudTenantTests.cs:47-75` | TEST-CONFIRMED [run: PASS] |
 | Trial licence shown; not trial once the portal pays; `getTenantInfo` without a tenant 400 "DocsCloud resource not found" | `BT/DocsCloudTenantTests.cs:76-116` | TEST-CONFIRMED [run: PASS] |
 | Tenant quota: editors and viewers of the period | `BT/DocsCloudTenantTests.cs:147-160` | TEST-CONFIRMED [run: PASS] |
