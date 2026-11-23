@@ -50,7 +50,9 @@ function recorder(kind: string) {
   };
 }
 
-vi.mock("../../../config/index.js", () => ({
+// The settings file is replaced; the readers of the environment stay the real ones.
+vi.mock("../../../config/index.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../config/index.js")>()),
   default: { get: (key: string): unknown => otel.config[key] },
 }));
 vi.mock("@opentelemetry/sdk-node", () => ({
@@ -249,16 +251,19 @@ describe("telemetry switched on", () => {
     expect(sdkOptions().serviceName).toBe(expected);
   });
 
-  // DEFECT tools-10: OTEL_METRIC_EXPORT_INTERVAL is read from process.env outside config/index.ts with parseInt10 and no bounds, so "0" and "-5" reach the metric reader and "5s" becomes 5 ms — expected a bounded reader in config/index.ts that falls back to the default ([ts-ai-style.md, Config])
   it.each<[string | undefined, number]>([
     [undefined, 15_000],
     ["", 15_000],
     ["abc", 15_000],
     ["5000", 5_000],
-    ["5s", 5],
-    ["0", 0],
-    ["-5", -5],
-    ["99999999999", 99_999_999_999],
+    ["1000", 1_000],
+    ["3600000", 3_600_000],
+    ["5s", 15_000],
+    ["0", 15_000],
+    ["-5", 15_000],
+    ["999", 15_000],
+    ["3600001", 15_000],
+    ["99999999999", 15_000],
   ])("exports metrics every interval for OTEL_METRIC_EXPORT_INTERVAL=%j", async (env, expected) => {
     vi.stubEnv("OTEL_METRIC_EXPORT_INTERVAL", env);
 

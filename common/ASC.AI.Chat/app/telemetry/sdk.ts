@@ -40,9 +40,8 @@ import { NodeSDK } from "@opentelemetry/sdk-node";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { UndiciInstrumentation } from "@opentelemetry/instrumentation-undici";
-import nconf from "../../config/index.js";
+import nconf, { getMetricExportIntervalMs } from "../../config/index.js";
 import logger from "../log.js";
-import { parseInt10 } from "../narrow.js";
 
 function otelEnabled(): boolean {
   const value: unknown = nconf.get("openTelemetry:enable");
@@ -101,7 +100,7 @@ if (otelEnabled() && otlpEndpoint) {
     traceExporter,
     metricReader: new PeriodicExportingMetricReader({
       exporter: metricExporter,
-      exportIntervalMillis: parseInt10(process.env["OTEL_METRIC_EXPORT_INTERVAL"], 15_000),
+      exportIntervalMillis: getMetricExportIntervalMs(),
     }),
     instrumentations: [
       new HttpInstrumentation({

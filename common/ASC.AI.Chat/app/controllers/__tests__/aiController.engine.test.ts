@@ -143,7 +143,6 @@ afterEach(() => {
 });
 
 describe("the engine the controller builds", () => {
-  // DEFECT ai-12: the interval is read with parseInt10 and no upper bound, so "30s" saves every 30 ms and a huge value never saves mid-stream — expected a reader with both bounds in config/index.ts (ts-ai-style.md, Config)
   it.each([
     ["absent", undefined, 10_000],
     ["empty", "", 10_000],
@@ -151,9 +150,13 @@ describe("the engine the controller builds", () => {
     ["zero", "0", 10_000],
     ["negative", "-5", 10_000],
     ["a positive integer", "2500", 2500],
-    ["a number with a unit", "30s", 30],
-    ["a fraction", "1.9", 1],
-    ["very large", "999999999999", 999_999_999_999],
+    ["the lower bound", "50", 50],
+    ["under the lower bound", "49", 10_000],
+    ["the upper bound", "600000", 600_000],
+    ["over the upper bound", "600001", 10_000],
+    ["a number with a unit", "30s", 10_000],
+    ["a fraction", "1.9", 10_000],
+    ["very large", "999999999999", 10_000],
   ])(
     "saves a streaming message every AI_CHAT_PERSIST_INTERVAL_MS ms when it is %s",
     async (_w, value, ms) => {

@@ -71,7 +71,7 @@ import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { readStoredProfile } from "./storedProfile.js";
-import { asActionType, getString, isObject, parseInt10 } from "../narrow.js";
+import { asActionType, getString, isObject } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
@@ -81,7 +81,7 @@ import {
 import { systemToolsSource } from "../tools/systemTools.js";
 import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
 import { documentAgentTools } from "../tools/documentAgent.js";
-import { DOCUMENT_AGENT_TYPE, getCompaction } from "../../config/index.js";
+import { DOCUMENT_AGENT_TYPE, getCompaction, getPersistIntervalMs } from "../../config/index.js";
 import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
@@ -410,11 +410,7 @@ function customScopeOf(body: unknown): string | undefined {
 // Override with `AI_CHAT_PERSIST_INTERVAL_MS`; anything that is not a
 // positive integer keeps the default here rather than falling through to
 // the library's 150 ms fallback.
-const DEFAULT_PERSIST_INTERVAL_MS = 10_000;
-const PERSIST_INTERVAL_MS = ((): number => {
-  const configured = parseInt10(process.env["AI_CHAT_PERSIST_INTERVAL_MS"]);
-  return configured !== undefined && configured > 0 ? configured : DEFAULT_PERSIST_INTERVAL_MS;
-})();
+const PERSIST_INTERVAL_MS = getPersistIntervalMs();
 
 const toolsAdapter = new HttpToolsAdapter();
 const engine = new AIEngine({

@@ -101,11 +101,12 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
   `process.env` anywhere else. Env variables are read in bracket notation
   (`process.env["AI_SERVICE_URL"]`) and override the file.
 - A value goes through a reader that knows its bounds and falls back to a default in the code when
-  the value is absent or malformed: `positiveInt`, `nonNegativeInt`, `unitFraction`, `flag` in
-  `config/index.ts` are the pattern. A number has a lower and an upper bound; a duration says its
-  unit in the name. An optional value never stops the service.
-- Seen in the code: `AI_CHAT_UPSTREAM_TIMEOUT_MS` is read in `storage/httpClient.ts` with
-  `parseInt10` and no bounds, so `0` or `30s` (parsed as 30) aborts every call to the AI service.
+  the value is absent, malformed or out of range: `intWithin(value, min, max)`, `unitFraction`,
+  `flag` in `config/index.ts` are the pattern. A number has a lower and an upper bound; a duration
+  says its unit in the name. An optional value never stops the service.
+- Seen in the code: `AI_CHAT_UPSTREAM_TIMEOUT_MS` was read in `storage/httpClient.ts` with
+  `parseInt10` and no bounds, so `0` or `30s` (parsed as 30) aborted every call to the AI service;
+  it is `getUpstreamTimeoutMs()` now, a second to an hour.
 - Guard: a vitest table over absent, empty, non-numeric, zero, negative and too large, as in
   `app/__tests__/compactionConfig.test.ts`.
 

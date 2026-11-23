@@ -22,7 +22,7 @@
       "count": 1
     },
     "no-restricted-syntax": {
-      "count": 3
+      "count": 2
     }
   },
   "app/controllers/attachmentsController.ts": {
@@ -118,7 +118,7 @@
   },
   "app/storage/httpClient.ts": {
     "no-restricted-syntax": {
-      "count": 3
+      "count": 2
     }
   },
   "app/storage/profilesStorage.ts": {
@@ -143,7 +143,7 @@
   },
   "app/telemetry/sdk.ts": {
     "no-restricted-syntax": {
-      "count": 2
+      "count": 1
     }
   },
   "app/templates/catalog.ts": {

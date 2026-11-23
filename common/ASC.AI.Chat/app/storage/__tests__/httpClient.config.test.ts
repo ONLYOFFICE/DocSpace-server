@@ -42,7 +42,9 @@ async function load(env: Record<string, string>, app?: unknown): Promise<HttpCli
   for (const [name, value] of Object.entries(env)) {
     vi.stubEnv(name, value);
   }
-  vi.doMock("../../../config/index.js", () => ({
+  // The settings file is replaced; the readers of the environment stay the real ones.
+  vi.doMock("../../../config/index.js", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("../../../config/index.js")>()),
     default: { get: (key: string) => (key === "app" ? app : undefined) },
   }));
   return import("../httpClient.js");
@@ -105,27 +107,31 @@ describe("AI_CHAT_UPSTREAM_TIMEOUT_MS", () => {
     ["empty", "", "Error: upstream timeout after 300000ms"],
     ["not a number", "soon", "Error: upstream timeout after 300000ms"],
     ["a number", "45000", "Error: upstream timeout after 45000ms"],
+    ["the lower bound", "1000", "Error: upstream timeout after 1000ms"],
+    ["the upper bound", "3600000", "Error: upstream timeout after 3600000ms"],
   ])("when %s sets the default timeout", async (_case, value, reason) => {
     expect(await timeoutOf(value)).toBe(reason);
   });
 
-  // DEFECT stor1-1: AI_CHAT_UPSTREAM_TIMEOUT_MS is read with parseInt10 and no bounds, so "30s" is 30 ms, "0" aborts every call at once and a negative value does the same — expected a bounded reader that falls back to 300000 for a value out of range or with a unit (ts-ai-style.md, Config)
   it.each([
-    ["a value with a unit", "30s", "Error: upstream timeout after 30ms"],
-    ["zero", "0", "Error: upstream timeout after 0ms"],
-    ["a negative value", "-5", "Error: upstream timeout after -5ms"],
-    ["a value too large for a timer", "99999999999", "Error: upstream timeout after 99999999999ms"],
-  ])("when %s is taken as it is", async (_case, value, reason) => {
-    expect(await timeoutOf(value)).toBe(reason);
+    ["a value with a unit", "30s"],
+    ["zero", "0"],
+    ["a negative value", "-5"],
+    ["under a second", "999"],
+    ["a fraction", "1500.5"],
+    ["over an hour", "3600001"],
+    ["a value too large for a timer", "99999999999"],
+  ])("when %s keeps the default timeout", async (_case, value) => {
+    expect(await timeoutOf(value)).toBe("Error: upstream timeout after 300000ms");
   });
 
-  it("aborts a call after a millisecond when the value is too large for a timer, as zero does", async () => {
+  it("does not abort a call at once for a value a timer cannot hold or for zero", async () => {
     for (const value of ["0", "99999999999"]) {
       const client = await load({ AI_CHAT_UPSTREAM_TIMEOUT_MS: value }, undefined);
       vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
       const { signal, cancel } = client.withTimeout(undefined);
-      vi.advanceTimersByTime(1);
-      expect(signal.aborted).toBe(true);
+      vi.advanceTimersByTime(299_999);
+      expect(signal.aborted).toBe(false);
       cancel();
       vi.useRealTimers();
     }

@@ -125,10 +125,46 @@ export function allowPrivateBaseUrl(): boolean {
 // The largest image an attachment is inlined from, in bytes: `ai:maxImageSize`
 // of appsettings, the size the Files service lets a chat take an image up to.
 const DEFAULT_MAX_IMAGE_SIZE = 20 * 1024 * 1024;
+const MAX_IMAGE_SIZE_LIMIT = 1024 * 1024 * 1024;
 
 export function getMaxImageSize(): number {
-  const value = Number(nconf.get("ai:maxImageSize"));
-  return Number.isFinite(value) && value > 0 ? value : DEFAULT_MAX_IMAGE_SIZE;
+  return intWithin(nconf.get("ai:maxImageSize"), 1, MAX_IMAGE_SIZE_LIMIT) ?? DEFAULT_MAX_IMAGE_SIZE;
+}
+
+// Hard ceiling for a single round-trip to the AI service, the Files API or an MCP server, so
+// that a hung upstream cannot pin a socket and the caller's request. Generous by default, as a
+// tool call proxied through the .NET service can be slow. It bounds request/response calls
+// only: a chat stream is bounded by the client's abort signal.
+const DEFAULT_UPSTREAM_TIMEOUT_MS = 300_000;
+
+/** `AI_CHAT_UPSTREAM_TIMEOUT_MS`: a second to an hour, in milliseconds. */
+export function getUpstreamTimeoutMs(): number {
+  return (
+    intWithin(process.env["AI_CHAT_UPSTREAM_TIMEOUT_MS"], 1_000, 3_600_000) ??
+    DEFAULT_UPSTREAM_TIMEOUT_MS
+  );
+}
+
+// How often a streaming reply is saved while its round is in progress. The library's default
+// (150 ms) is tuned for a local adapter; here every write is an HTTP hop.
+const DEFAULT_PERSIST_INTERVAL_MS = 10_000;
+
+/** `AI_CHAT_PERSIST_INTERVAL_MS`: 50 ms to ten minutes. */
+export function getPersistIntervalMs(): number {
+  return (
+    intWithin(process.env["AI_CHAT_PERSIST_INTERVAL_MS"], 50, 600_000) ??
+    DEFAULT_PERSIST_INTERVAL_MS
+  );
+}
+
+const DEFAULT_METRIC_EXPORT_INTERVAL_MS = 15_000;
+
+/** `OTEL_METRIC_EXPORT_INTERVAL`: a second to an hour, in milliseconds. */
+export function getMetricExportIntervalMs(): number {
+  return (
+    intWithin(process.env["OTEL_METRIC_EXPORT_INTERVAL"], 1_000, 3_600_000) ??
+    DEFAULT_METRIC_EXPORT_INTERVAL_MS
+  );
 }
 
 // The portal's own MCP server (docspace-mcp, the `ai.mcp` entry named
@@ -210,12 +246,16 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
     return undefined;
   }
   const timeout =
-    positiveInt(process.env["AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS"]) ??
-    positiveInt(setting?.taskTimeoutSeconds) ??
+    intWithin(
+      process.env["AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS"],
+      1,
+      MAX_TASK_TIMEOUT_SECONDS,
+    ) ??
+    intWithin(setting?.taskTimeoutSeconds, 1, MAX_TASK_TIMEOUT_SECONDS) ??
     DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS;
   const maxToolCalls =
-    positiveInt(process.env["AI__DOCUMENT_AGENT__MAX_TOOL_CALLS"]) ??
-    positiveInt(setting?.maxToolCalls);
+    intWithin(process.env["AI__DOCUMENT_AGENT__MAX_TOOL_CALLS"], 1, MAX_TOOL_CALLS_LIMIT) ??
+    intWithin(setting?.maxToolCalls, 1, MAX_TOOL_CALLS_LIMIT);
   const share = process.env["AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS"];
   const shareSystemServers =
     share !== undefined && share !== ""
@@ -254,9 +294,17 @@ function envOrSetting(name: string, setting: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function positiveInt(value: unknown): number | undefined {
+// The upper bounds of the numbers below: a value above one is a slip of the keyboard, and the
+// default serves better than a day-long timeout or a context window no model has.
+const MAX_TASK_TIMEOUT_SECONDS = 24 * 60 * 60;
+const MAX_TOOL_CALLS_LIMIT = 10_000;
+const MAX_KEEP_RECENT = 10_000;
+const MAX_CONTEXT_WINDOW = 100_000_000;
+
+/** A whole number within `[min, max]`, given as a number or as its text; anything else is not a setting. */
+function intWithin(value: unknown, min: number, max: number): number | undefined {
   const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
-  return Number.isInteger(n) && n > 0 ? n : undefined;
+  return Number.isInteger(n) && n >= min && n <= max ? n : undefined;
 }
 
 /** The library's `CompactionOptions`, as the host resolves them. */
@@ -282,11 +330,11 @@ export function getCompaction(): CompactionConfig {
   const threshold =
     unitFraction(process.env["AI__COMPACTION__THRESHOLD"]) ?? unitFraction(setting?.threshold);
   const keepRecent =
-    nonNegativeInt(process.env["AI__COMPACTION__KEEP_RECENT"]) ??
-    nonNegativeInt(setting?.keepRecent);
+    intWithin(process.env["AI__COMPACTION__KEEP_RECENT"], 0, MAX_KEEP_RECENT) ??
+    intWithin(setting?.keepRecent, 0, MAX_KEEP_RECENT);
   const defaultContextWindow =
-    positiveInt(process.env["AI__COMPACTION__DEFAULT_CONTEXT_WINDOW"]) ??
-    positiveInt(setting?.defaultContextWindow);
+    intWithin(process.env["AI__COMPACTION__DEFAULT_CONTEXT_WINDOW"], 1, MAX_CONTEXT_WINDOW) ??
+    intWithin(setting?.defaultContextWindow, 1, MAX_CONTEXT_WINDOW);
   return {
     enabled,
     ...(threshold !== undefined ? { threshold } : {}),
@@ -307,11 +355,6 @@ function flag(value: string | undefined): boolean | undefined {
 function unitFraction(value: unknown): number | undefined {
   const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
   return Number.isFinite(n) && n > 0 && n <= 1 ? n : undefined;
-}
-
-function nonNegativeInt(value: unknown): number | undefined {
-  const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
-  return Number.isInteger(n) && n >= 0 ? n : undefined;
 }
 
 // Group key for the form-analysis sub-agent's single delegating tool

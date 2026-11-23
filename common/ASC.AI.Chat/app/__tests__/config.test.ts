@@ -291,20 +291,14 @@ describe("getMaxImageSize", () => {
     ["an object", { a: 1 }, DEFAULT],
     ["a number", 5242880, 5242880],
     ["a numeric string", "1048576", 1048576],
-    ["true", true, 1],
+    ["true", true, DEFAULT],
+    ["a fraction of a byte", 0.5, DEFAULT],
+    ["a fraction", 1048576.5, DEFAULT],
+    ["one byte", 1, 1],
+    ["the upper bound", 1024 ** 3, 1024 ** 3],
+    ["over the upper bound", 1024 ** 3 + 1, DEFAULT],
+    ["far too large", 1e15, DEFAULT],
   ])("is %s -> as configured or the default", (_what, value, expected) => {
-    settings({ ai: { maxImageSize: value } });
-
-    expect(config.getMaxImageSize()).toBe(expected);
-  });
-
-  // DEFECT app-10: `ai:maxImageSize` has a lower bound only: a fraction of a byte and a size of
-  // 1e15 are taken as they are — expected an integer with an upper bound, falling back to the
-  // default (ts-ai-style.md, Config: "A number has a lower and an upper bound").
-  it.each([
-    [0.5, 0.5],
-    [1e15, 1e15],
-  ])("takes %s bytes as configured", (value, expected) => {
     settings({ ai: { maxImageSize: value } });
 
     expect(config.getMaxImageSize()).toBe(expected);
@@ -488,13 +482,23 @@ describe("getDocumentAgent beyond the URL and the token", () => {
     expect(config.getDocumentAgent()?.maxToolCalls).toBe(expected);
   });
 
-  // DEFECT app-11: the integer readers (`positiveInt`, `nonNegativeInt`) have no upper bound: a
-  // task timeout of 1e12 seconds or a context window of 1e12 is taken as configured — expected
-  // an upper bound with a fallback to the default (ts-ai-style.md, Config).
-  it("takes an unbounded task timeout", () => {
-    settings({ ai: { documentAgent: { ...AGENT, taskTimeoutSeconds: 1e12 } } });
+  it.each([
+    [86_400, 86_400],
+    [86_401, 1800],
+    [1e12, 1800],
+  ])("bounds the task timeout at a day: %s -> %s", (value, expected) => {
+    settings({ ai: { documentAgent: { ...AGENT, taskTimeoutSeconds: value } } });
 
-    expect(config.getDocumentAgent()?.taskTimeoutSeconds).toBe(1e12);
+    expect(config.getDocumentAgent()?.taskTimeoutSeconds).toBe(expected);
+  });
+
+  it.each([
+    [10_000, 10_000],
+    [10_001, undefined],
+  ])("bounds the tool calls of a task: %s -> %s", (value, expected) => {
+    settings({ ai: { documentAgent: { ...AGENT, maxToolCalls: value } } });
+
+    expect(config.getDocumentAgent()?.maxToolCalls).toBe(expected);
   });
 
   it.each([
@@ -588,7 +592,9 @@ describe("getCompaction beyond the existing table", () => {
   it.each([
     ["0", undefined],
     ["64000", 64000],
-    ["1e12", 1e12],
+    ["100000000", 100_000_000],
+    ["100000001", undefined],
+    ["1e12", undefined],
     ["-1", undefined],
   ])("reads the default context window %j", (env, expected) => {
     vi.stubEnv("AI__COMPACTION__DEFAULT_CONTEXT_WINDOW", env);

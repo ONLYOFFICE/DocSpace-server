@@ -31,9 +31,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import nconf from "../../config/index.js";
+import nconf, { getUpstreamTimeoutMs } from "../../config/index.js";
 import { countUpstreamCall, countUpstreamRead, getForwardedHeaders } from "../requestContext.js";
-import { isObject, parseInt10 } from "../narrow.js";
+import { isObject } from "../narrow.js";
 import type { AppConfig } from "../types.js";
 import { errorBodyText } from "./errorBody.js";
 
@@ -43,8 +43,7 @@ import { errorBodyText } from "./errorBody.js";
 // can be slow; override with `AI_CHAT_UPSTREAM_TIMEOUT_MS`. Note this guards
 // request/response calls only — long-lived chat *streams* are bounded by
 // the client-driven abort signal, not by this timeout.
-const UPSTREAM_TIMEOUT_MS =
-  parseInt10(process.env["AI_CHAT_UPSTREAM_TIMEOUT_MS"], 300_000) ?? 300_000;
+const UPSTREAM_TIMEOUT_MS = getUpstreamTimeoutMs();
 
 /**
  * Build an {@link AbortSignal} that fires on a timeout, on an upstream
