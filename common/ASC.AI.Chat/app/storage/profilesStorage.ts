@@ -102,12 +102,12 @@ export function dtoToProfile(raw: unknown): DocspaceProfile | undefined {
   const modelId = getString(raw, "modelId");
   const createdAt = getNumber(raw, "createdAt");
   if (
-    id === undefined
-    || name === undefined
-    || providerType === undefined
-    || baseUrl === undefined
-    || modelId === undefined
-    || createdAt === undefined
+    id === undefined ||
+    name === undefined ||
+    providerType === undefined ||
+    baseUrl === undefined ||
+    modelId === undefined ||
+    createdAt === undefined
   ) {
     return undefined;
   }
@@ -225,8 +225,10 @@ function describeReasoningSupport(profile: Profile): string {
   if (!support) {
     return profile.reasoning === undefined ? "-" : String(profile.reasoning);
   }
-  return `${support.thinks ? "thinks" : "no"}/${support.canDisable ? "off" : "always"}/` +
-    `[${support.depths.join(",")}]`;
+  return (
+    `${support.thinks ? "thinks" : "no"}/${support.canDisable ? "off" : "always"}/` +
+    `[${support.depths.join(",")}]`
+  );
 }
 
 function logResolvedProfile(id: string, profile: Profile | undefined, source: unknown): void {
@@ -238,11 +240,13 @@ function logResolvedProfile(id: string, profile: Profile | undefined, source: un
           `capabilities=${profile.capabilities ?? "-"} canUseTool=${profile.canUseTool ?? "-"} ` +
           `reasoning=${describeReasoningSupport(profile)} ` +
           `useProxy=${profile.useProxy ?? "-"} isCloud=${profile.isCloudProvider ?? "-"} ` +
-          `headers=[${Object.keys(profile.headers ?? {}).sort().join(",")}]`
+          `headers=[${Object.keys(profile.headers ?? {})
+            .sort()
+            .join(",")}]`
       : source === "chat-context"
         ? `HttpProfilesStorage.readById(${id}) via chat-context -> NOT FOUND`
         : `HttpProfilesStorage.readById(${id}) -> UNUSABLE payload (a required field is missing): ` +
-            `fields=[${isObject(source) ? Object.keys(source).sort().join(",") : typeof source}]`,
+          `fields=[${isObject(source) ? Object.keys(source).sort().join(",") : typeof source}]`,
   );
 }
 
@@ -302,9 +306,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
     // resolves there or does not exist for this user.
     const snapshot = readChatContext("profiles");
     if (snapshot) {
-      const profile = withOnlyofficeProviderOverrides(
-        snapshot.profiles.find((p) => p.id === id),
-      );
+      const profile = withOnlyofficeProviderOverrides(snapshot.profiles.find((p) => p.id === id));
       logResolvedProfile(id, profile, "chat-context");
       return profile;
     }
@@ -468,7 +470,10 @@ function mapGatewayModel(raw: unknown): Model | undefined {
 //
 // The result is the C# wire shape, so it goes through the same
 // `reasoningConfigToSupport` as a profile read from the C# storage.
-function mapGatewayReasoning(raw: unknown, hasReasoningCapability: boolean): Record<string, unknown> {
+function mapGatewayReasoning(
+  raw: unknown,
+  hasReasoningCapability: boolean,
+): Record<string, unknown> {
   const reasoning = isObject(raw) ? raw : null;
   const depths: string[] = [];
   for (const effort of getArray(reasoning ?? {}, "supported_efforts") ?? []) {
@@ -522,9 +527,7 @@ export async function listOnlyofficeGatewayModels(signal?: AbortSignal): Promise
     if (!data) {
       throw new Error(`gateway models listing returned no data array (${url})`);
     }
-    return data
-      .map(mapGatewayModel)
-      .filter((m): m is Model => m !== undefined);
+    return data.map(mapGatewayModel).filter((m): m is Model => m !== undefined);
   } finally {
     cancel();
   }

@@ -1,48 +1,40 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { SystemToolsSource } from "@onlyoffice/ai-chat/core";
-import type {
-  FetchLike,
-  McpHttpServerConfig,
-  ToolsAdapter,
-} from "@onlyoffice/ai-chat/core";
+import type { FetchLike, McpHttpServerConfig, ToolsAdapter } from "@onlyoffice/ai-chat/core";
 import type { TMCPItem } from "@onlyoffice/ai-chat";
-import {
-  getMcpServers,
-  mcpPortalBaseUrl,
-  PORTAL_MCP_SERVER_NAME,
-} from "../../config/index.js";
+import { getMcpServers, mcpPortalBaseUrl, PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { withTimeout } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
@@ -141,9 +133,7 @@ export function authorizationValue(headers: Record<string, string>): string | un
 // request (a duplicate / combined Accept makes the server answer 406).
 const NEGOTIATION_HEADERS = ["accept", "accept-encoding", "accept-language"];
 
-function stripNegotiation(
-  headers: Record<string, string>,
-): Record<string, string> {
+function stripNegotiation(headers: Record<string, string>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key, value] of Object.entries(headers)) {
     if (!NEGOTIATION_HEADERS.includes(key.toLowerCase())) {
@@ -206,9 +196,7 @@ const forwardingFetch: FetchLike = async (url, init) => {
   logger.info(
     `MCP fetch -> ${method} ${url} (authorization=${Boolean(
       authorization,
-    )}, referer=${referer ?? "-"}, headers=[${Object.keys(forwarded)
-      .sort()
-      .join(",")}])`,
+    )}, referer=${referer ?? "-"}, headers=[${Object.keys(forwarded).sort().join(",")}])`,
   );
   // Bound the connect/header phase so an unreachable or hung MCP server
   // can't pin the request forever; the timer is cleared once the response
@@ -237,17 +225,13 @@ const forwardingFetch: FetchLike = async (url, init) => {
       } catch {
         // ignore — body not readable
       }
-      logger.warn(
-        `MCP fetch <- ${res.status} ${res.statusText} for ${url} body=${body}`,
-      );
+      logger.warn(`MCP fetch <- ${res.status} ${res.statusText} for ${url} body=${body}`);
     }
     return res;
   } catch (err) {
     cancel();
     logger.error(
-      `MCP fetch failed for ${url}: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
+      `MCP fetch failed for ${url}: ${err instanceof Error ? err.message : String(err)}`,
     );
     throw err;
   }
@@ -275,9 +259,7 @@ const serverNames = Object.keys(servers);
  * the real endpoint instead of trusting a client-provided config — so such
  * an entry never shadows the system group with a broken connection.
  */
-export function getSystemServerConfig(
-  name: string,
-): McpHttpServerConfig | undefined {
+export function getSystemServerConfig(name: string): McpHttpServerConfig | undefined {
   // Own-property only — belt to the null-prototype braces above; a name
   // that is not a configured system server must yield undefined so the
   // caller's own config is validated instead (Bug 82986).
@@ -307,18 +289,12 @@ const source = new SystemToolsSource({
 // flag is kept for the catalog's other consumer, `editor-tools/list`, whose
 // clients read `requireApproval` rather than the annotations. Mutating
 // tools keep prompting through the systemServerTypes approval flow.
-function withReadOnlyAutoAllow(
-  grouped: Record<string, TMCPItem[]>,
-): Record<string, TMCPItem[]> {
+function withReadOnlyAutoAllow(grouped: Record<string, TMCPItem[]>): Record<string, TMCPItem[]> {
   const result: Record<string, TMCPItem[]> = {};
   for (const [type, items] of Object.entries(grouped)) {
     result[type] = items.map((tool) => {
-      const annotations = (
-        tool as { annotations?: { readOnlyHint?: unknown } }
-      ).annotations;
-      return annotations?.readOnlyHint === true
-        ? { ...tool, requireApproval: false }
-        : tool;
+      const annotations = (tool as { annotations?: { readOnlyHint?: unknown } }).annotations;
+      return annotations?.readOnlyHint === true ? { ...tool, requireApproval: false } : tool;
     });
   }
   return result;
@@ -355,9 +331,7 @@ function describeToolErrorResult(result: unknown): string | undefined {
   if (Array.isArray(content)) {
     const first = content.find(
       (part): part is { text: string } =>
-        !!part &&
-        typeof part === "object" &&
-        typeof (part as { text?: unknown }).text === "string",
+        !!part && typeof part === "object" && typeof (part as { text?: unknown }).text === "string",
     );
     text = first?.text ?? "";
   }
@@ -421,9 +395,7 @@ export const systemToolsSource: ToolsAdapter & {
         : await source.callTool(toolName, args);
       const failure = describeToolErrorResult(result);
       if (failure) {
-        logger.warn(
-          `systemTools.callTool name=${toolName} returned an error result: ${failure}`,
-        );
+        logger.warn(`systemTools.callTool name=${toolName} returned an error result: ${failure}`);
       } else {
         logger.info(`systemTools.callTool name=${toolName} ok`);
       }

@@ -334,10 +334,7 @@ export const threadsController = {
   }),
 
   regenerateTitle: asyncHandler(async (req, res) => {
-    const args = unpackPositional(
-      req.body,
-      ["threadId", "profile", "entityMeta"] as const,
-    );
+    const args = unpackPositional(req.body, ["threadId", "profile", "entityMeta"] as const);
     // The engine dereferences `profile` (and needs a real threadId); a missing
     // profile makes it throw a TypeError → 500 (Bug 82828). Validate both up
     // front and return a clean 400.

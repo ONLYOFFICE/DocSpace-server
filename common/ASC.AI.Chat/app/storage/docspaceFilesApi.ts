@@ -258,9 +258,7 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
  * response cannot be parsed; propagates other HTTP failures as
  * {@link DocspaceApiHttpError}.
  */
-export async function getFolderInfo(
-  folderId: string,
-): Promise<DocspaceFolderInfo | undefined> {
+export async function getFolderInfo(folderId: string): Promise<DocspaceFolderInfo | undefined> {
   const url = `${proxyBaseUrl}/api/2.0/files/folder/${encodeURIComponent(folderId)}`;
   const { signal, cancel } = withTimeout(undefined);
   countFilesApiRead();
@@ -356,8 +354,8 @@ export function folderSourceType(info: DocspaceFolderInfo): SourceType {
     return "Form";
   }
   if (
-    (folderType !== undefined && FOLDER_TYPES_ROOM.has(folderType))
-    || (roomType !== undefined && ROOM_TYPES_ROOM.has(roomType))
+    (folderType !== undefined && FOLDER_TYPES_ROOM.has(folderType)) ||
+    (roomType !== undefined && ROOM_TYPES_ROOM.has(roomType))
   ) {
     return "Room";
   }
@@ -564,9 +562,7 @@ export async function resolveAiProjectEntityId(
  * location, an upload target). Used to gate thread creation and the
  * settings writes that still take an `entityId`.
  */
-export async function assertEntityAccessible(
-  entityId: string | undefined,
-): Promise<void> {
+export async function assertEntityAccessible(entityId: string | undefined): Promise<void> {
   if (typeof entityId !== "string" || entityId.length === 0) {
     return;
   }

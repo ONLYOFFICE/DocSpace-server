@@ -26,7 +26,9 @@ describe("buildSkillTemplate", () => {
   it("starts with the frontmatter the Files service requires and a body to fill in", () => {
     const text = buildSkillTemplate("Sales report: Q3 <draft>");
     expect(
-      text.startsWith('---\nname: "sales-report-q3-draft"\ndescription: "Sales report: Q3"\n---\n\n'),
+      text.startsWith(
+        '---\nname: "sales-report-q3-draft"\ndescription: "Sales report: Q3"\n---\n\n',
+      ),
     ).toBe(true);
     expect(text).toContain("# Sales report: Q3 <draft>\n");
     expect(text).toContain("## Instructions");

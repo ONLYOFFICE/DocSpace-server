@@ -720,7 +720,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "The attachment payload is malformed, or `input.path` is missing or empty.",
   },
   aiAttachmentsSaveFilesMany: {
-    "400": "`inputs` is not an array, names more than 100 files, or one of its entries is malformed.",
+    "400":
+      "`inputs` is not an array, names more than 100 files, or one of its entries is malformed.",
   },
   aiAttachmentsGet: { "400": "The attachment ID is missing." },
   aiAttachmentsGetSuggestedQuestions: { "400": "The attachment ID is missing." },

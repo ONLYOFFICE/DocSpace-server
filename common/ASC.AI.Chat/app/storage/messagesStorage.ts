@@ -201,10 +201,10 @@ export class HttpMessagesStorage implements MessagesStorage {
     // service — they are never part of a round.
     const snapshot = readChatContext("messages");
     if (
-      snapshot
-      && snapshot.messages !== null
-      && wireCursor === undefined
-      && threadId === snapshot.requested.threadId
+      snapshot &&
+      snapshot.messages !== null &&
+      wireCursor === undefined &&
+      threadId === snapshot.requested.threadId
     ) {
       return [...snapshot.messages];
     }

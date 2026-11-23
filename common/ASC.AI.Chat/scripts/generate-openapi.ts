@@ -59,13 +59,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Concrete request/response schemas are also written here as a committed
 // artifact so the live service (`routes.ts`) serves the typed document
 // without running the generator at startup.
-const SCHEMAS_ARTIFACT = path.resolve(
-  __dirname,
-  "..",
-  "app",
-  "generated",
-  "openapi-schemas.json",
-);
+const SCHEMAS_ARTIFACT = path.resolve(__dirname, "..", "app", "generated", "openapi-schemas.json");
 
 // Default output: the ASC.Api.Documentation `json/` folder consumed by the
 // joiner (../../Tools/... relative to this script). Overridable with
@@ -104,8 +98,8 @@ for (const [name, schema] of Object.entries(proxySchemas.components)) {
   const existing = schemas.components[name];
   if (existing !== undefined && JSON.stringify(existing) !== JSON.stringify(schema)) {
     throw new Error(
-      `Schema name collision while merging .NET proxy schemas: "${name}" `
-      + "already exists with different content.",
+      `Schema name collision while merging .NET proxy schemas: "${name}" ` +
+        "already exists with different content.",
     );
   }
   schemas.components[name] = schema;
@@ -130,12 +124,14 @@ mkdirSync(path.dirname(output), { recursive: true });
 // Trailing newline: matches the repo's `insert_final_newline` convention.
 writeFileSync(output, `${JSON.stringify(document, null, 2)}\n`, "utf8");
 
-const operationCount = Object.values(document["paths"] as Record<string, object>)
-  .reduce((sum, item) => sum + Object.keys(item).length, 0);
+const operationCount = Object.values(document["paths"] as Record<string, object>).reduce(
+  (sum, item) => sum + Object.keys(item).length,
+  0,
+);
 const componentCount = Object.keys(schemas.components).length;
 const typedOperationCount = Object.keys(schemas.operations).length;
 
 console.log(
-  `Wrote OpenAPI document (${operationCount} operations, ${typedOperationCount} typed, `
-  + `${componentCount} shared schemas) to ${output}`,
+  `Wrote OpenAPI document (${operationCount} operations, ${typedOperationCount} typed, ` +
+    `${componentCount} shared schemas) to ${output}`,
 );

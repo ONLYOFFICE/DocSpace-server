@@ -233,7 +233,9 @@ describe("applyAiProjectChatContext inside a project", () => {
     const body: Record<string, unknown> = { entityId: "42", actionArgs: { folderContexts } };
     expect(await applyAiProjectChatContext(body)).toBeNull();
     expect(body["contextEntityId"]).toBe("555");
-    expect((body["actionArgs"] as Record<string, unknown>)["folderContexts"]).toEqual(folderContexts);
+    expect((body["actionArgs"] as Record<string, unknown>)["folderContexts"]).toEqual(
+      folderContexts,
+    );
     expect(getMyDocumentsFolderId).not.toHaveBeenCalled();
   });
 

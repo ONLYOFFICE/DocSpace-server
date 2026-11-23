@@ -404,7 +404,11 @@ function savedFileId(url: string): string | undefined {
 }
 
 /** The outputs endpoint of this service with the folder the files go into and, for results, their conversation. */
-function outputsUrl(config: DocumentAgentConfig, folderId: string, threadId?: string | null): string {
+function outputsUrl(
+  config: DocumentAgentConfig,
+  folderId: string,
+  threadId?: string | null,
+): string {
   const url = new URL(`${config.filesUrl}${DOCUMENT_AGENT_OUTPUTS_PATH}`);
   url.searchParams.set(DOCUMENT_AGENT_OUTPUTS_FOLDER_PARAM, folderId);
   if (threadId) {
@@ -443,7 +447,9 @@ async function resolveLogTarget(tenant: TenantSettings, resultsFolderId: string)
 // as the C# storage serves it: the in-process override would point an
 // `onlyoffice` profile at this service's own address, which the agent, on
 // another host, cannot reach (see modelSettings).
-async function resolveProfile(pickedProfileId: string | null): Promise<DocspaceProfile | undefined> {
+async function resolveProfile(
+  pickedProfileId: string | null,
+): Promise<DocspaceProfile | undefined> {
   if (pickedProfileId) {
     const picked = await storage.profiles.readByIdRaw(pickedProfileId);
     if (picked) {

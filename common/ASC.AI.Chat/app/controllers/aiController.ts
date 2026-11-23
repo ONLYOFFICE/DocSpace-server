@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { Response } from "express";
@@ -138,7 +138,8 @@ function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
       continue;
     }
     const id = room["id"];
-    const parsed = typeof id === "string" ? Number.parseInt(id, 10) : typeof id === "number" ? id : NaN;
+    const parsed =
+      typeof id === "string" ? Number.parseInt(id, 10) : typeof id === "number" ? id : NaN;
     if (Number.isInteger(parsed) && parsed > 0 && !ids.includes(parsed)) {
       ids.push(parsed);
     }
@@ -226,10 +227,7 @@ function sourceScopeOf(body: unknown): string | undefined {
 // own), and the attachments of the thread's last user message, the one the
 // resumed round answers. Best-effort: a failed read leaves the document
 // agent tool to its own fallbacks.
-async function primeRoundFromThread(
-  threadId: unknown,
-  requestedProfileId: unknown,
-): Promise<void> {
+async function primeRoundFromThread(threadId: unknown, requestedProfileId: unknown): Promise<void> {
   if (typeof threadId !== "string" || threadId.length === 0) {
     return;
   }
@@ -505,13 +503,10 @@ function describeChatError(error: unknown): string {
 function describeToolCallPending(event: Record<string, unknown>): string {
   const idx = typeof event["idx"] === "number" ? event["idx"] : -1;
   const message = isObject(event["message"]) ? event["message"] : null;
-  const content =
-    message && Array.isArray(message["content"]) ? message["content"] : [];
+  const content = message && Array.isArray(message["content"]) ? message["content"] : [];
   const part = idx >= 0 && isObject(content[idx]) ? content[idx] : null;
-  const toolName =
-    part && typeof part["toolName"] === "string" ? part["toolName"] : "?";
-  const toolCallId =
-    part && typeof part["toolCallId"] === "string" ? part["toolCallId"] : "?";
+  const toolName = part && typeof part["toolName"] === "string" ? part["toolName"] : "?";
+  const toolCallId = part && typeof part["toolCallId"] === "string" ? part["toolCallId"] : "?";
   return `tool=${toolName} callId=${toolCallId} idx=${idx} serverExecuted=${
     event["serverExecuted"] === true
   } autoAllow=${event["autoAllow"] === true}`;
@@ -601,10 +596,7 @@ function trackToolCalls(
 // a broken stream is invisible from the server side — it only shows up in
 // the browser DevTools network tab. Also traces tool-call lifecycle so a
 // tool that hangs (pending surfaced, stream never completes) is visible.
-async function* logStreamErrors<T>(
-  route: string,
-  iter: AsyncIterable<T>,
-): AsyncIterable<T> {
+async function* logStreamErrors<T>(route: string, iter: AsyncIterable<T>): AsyncIterable<T> {
   let eventCount = 0;
   const toolCalls = new Map<string, boolean>();
   const loggedResults = new Set<string>();
@@ -620,22 +612,16 @@ async function* logStreamErrors<T>(
             `${route}: provider returned message-incomplete — ${describeChatError(status["error"])}`,
           );
         } else if (status) {
-          logger.warn(
-            `${route}: message-incomplete reason=${String(status["reason"])}`,
-          );
+          logger.warn(`${route}: message-incomplete reason=${String(status["reason"])}`);
         }
       } else if (isObject(event) && event["type"] === "tool-call-pending") {
-        logger.info(
-          `${route}: tool-call-pending — ${describeToolCallPending(event)}`,
-        );
+        logger.info(`${route}: tool-call-pending — ${describeToolCallPending(event)}`);
       }
       yield event;
     }
     const toolSummary =
       toolCalls.size > 0
-        ? [...toolCalls]
-            .map(([name, executed]) => `${name}(executed=${executed})`)
-            .join(", ")
+        ? [...toolCalls].map(([name, executed]) => `${name}(executed=${executed})`).join(", ")
         : "<none>";
     logger.info(
       `${route}: stream completed after ${eventCount} event(s); toolCalls=${toolSummary}; ` +
@@ -694,9 +680,9 @@ function hasPromptContent(userMessage: unknown): boolean {
       return true;
     }
     if (
-      part["type"] === "text"
-      && typeof part["text"] === "string"
-      && part["text"].trim().length > 0
+      part["type"] === "text" &&
+      typeof part["text"] === "string" &&
+      part["text"].trim().length > 0
     ) {
       return true;
     }
@@ -710,9 +696,7 @@ function hasPromptContent(userMessage: unknown): boolean {
 // makes the C# lookup fail with 400; that is just as much "no such profile"
 // to the caller, so both collapse to the same message. A lookup that fails
 // any other way is the service failing, and is passed on with its status.
-async function unknownProfileIdError(
-  profileId: string | undefined,
-): Promise<string | null> {
+async function unknownProfileIdError(profileId: string | undefined): Promise<string | null> {
   if (!profileId) {
     return null;
   }
@@ -787,8 +771,7 @@ async function preflightStreamRound(body: SendStreamInput, res: Response): Promi
 // unknown-profile validation error (400) in unknownProfileIdError's single
 // string channel. Never sent as-is: the 402 body carries the portal's
 // localized wording, see aiToolsUnpaidMessage.
-const AI_TOOLS_UNPAID_ERROR =
-  "The AI Tools service is not paid for the current portal";
+const AI_TOOLS_UNPAID_ERROR = "The AI Tools service is not paid for the current portal";
 
 // The 402 body for the unpaid gateway. The C# settings (`aiNotReadyMessage`)
 // carry the reason in the user's culture; this service has no resources of
@@ -802,9 +785,7 @@ async function aiToolsUnpaidMessage(): Promise<string> {
     return primed;
   }
   const config = await aiService.get("/config").catch(() => undefined);
-  const message = isObject(config)
-    ? getString(config, "aiNotReadyMessage")
-    : undefined;
+  const message = isObject(config) ? getString(config, "aiNotReadyMessage") : undefined;
   return message || AI_TOOLS_UNPAID_ERROR;
 }
 
@@ -815,9 +796,7 @@ async function aiToolsUnpaidMessage(): Promise<string> {
 // AiAccessibility status) is false here in exactly one reachable state —
 // the unpaid gateway wallet: the admin kill-switch already failed the
 // profile read above with 403, and non-gateway providers have no wallet.
-async function aiToolsUnpaidError(
-  providerType: string | undefined,
-): Promise<string | null> {
+async function aiToolsUnpaidError(providerType: string | undefined): Promise<string | null> {
   if (providerType !== "onlyoffice") {
     return null;
   }
@@ -1003,10 +982,7 @@ export const aiController = {
         `entityId=${req.body.entityId ?? "-"} contextEntityId=${req.body.contextEntityId ?? "-"} ` +
         `profileId=${req.body.profileId ?? "-"}`,
     );
-    await streamNdjson(
-      res,
-      tapStream("ai/send-with-stream", engine.sendWithStream(body)),
-    );
+    await streamNdjson(res, tapStream("ai/send-with-stream", engine.sendWithStream(body)));
   }),
 
   // OpenAI-compatible streaming chat: same input as sendWithStream, but the
@@ -1080,10 +1056,7 @@ export const aiController = {
     const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
-    await streamNdjson(
-      res,
-      tapStream("ai/regenerate-stream", engine.regenerateStream(body)),
-    );
+    await streamNdjson(res, tapStream("ai/regenerate-stream", engine.regenerateStream(body)));
   }),
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
@@ -1135,9 +1108,6 @@ export const aiController = {
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
     const body = await withSourceMetadata(withRequestSignal(res, req.body));
-    await streamNdjson(
-      res,
-      tapStream("ai/deny-tool-call", engine.denyToolCall(body)),
-    );
+    await streamNdjson(res, tapStream("ai/deny-tool-call", engine.denyToolCall(body)));
   }),
 };

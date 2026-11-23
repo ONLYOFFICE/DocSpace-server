@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { ToolsEngine, isToolPrefsScope } from "@onlyoffice/ai-chat/core";
@@ -41,15 +41,9 @@ import {
   IMAGE_GENERATION_TYPE,
   DOCUMENT_AGENT_TYPE,
 } from "../../config/index.js";
-import {
-  customToolsSource,
-  resolveCustomServers,
-} from "../tools/customTools.js";
+import { customToolsSource, resolveCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
-import {
-  systemToolsSource,
-  getSystemServerConfig,
-} from "../tools/systemTools.js";
+import { systemToolsSource, getSystemServerConfig } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
@@ -74,15 +68,9 @@ function assertRoutableServerName(rawName: unknown): string {
       expose: true,
     });
   }
-  if (
-    rawName === "." ||
-    rawName === ".." ||
-    UNSAFE_NAME_CHARS.test(rawName)
-  ) {
+  if (rawName === "." || rawName === ".." || UNSAFE_NAME_CHARS.test(rawName)) {
     throw Object.assign(
-      new Error(
-        'name must not be ".", "..", or contain a path separator or control character',
-      ),
+      new Error('name must not be ".", "..", or contain a path separator or control character'),
       { status: 400, expose: true },
     );
   }
@@ -114,10 +102,10 @@ async function resolveConfig(
   if (portal) {
     return portal;
   }
-  throw Object.assign(
-    new Error(`No config provided and no portal-level server named "${name}"`),
-    { status: 400, expose: true },
-  );
+  throw Object.assign(new Error(`No config provided and no portal-level server named "${name}"`), {
+    status: 400,
+    expose: true,
+  });
 }
 
 // No read answers a server's headers (see withoutHeaders below), so a config
@@ -155,10 +143,7 @@ function withoutHeaders(config: McpServerConfig): McpServerConfig {
 // the internal endpoint must not leak. The name still round-trips: saving
 // the whole map from the chat config editor re-pins the entry through
 // resolveConfig.
-function redactSystemServer(
-  name: string,
-  config: McpServerConfig,
-): McpServerConfig {
+function redactSystemServer(name: string, config: McpServerConfig): McpServerConfig {
   return getSystemServerConfig(name) ? {} : config;
 }
 
@@ -170,9 +155,7 @@ const INVALID_SCOPE = Symbol("invalid tool-prefs scope");
 // service folds into every user's list on read). Anything else is a 400
 // rather than a silent fall-back to the user list, so a settings screen
 // cannot believe it switched a tool off for everyone when it did not.
-function parseToolPrefsScope(
-  value: unknown,
-): ToolPrefsScope | undefined | typeof INVALID_SCOPE {
+function parseToolPrefsScope(value: unknown): ToolPrefsScope | undefined | typeof INVALID_SCOPE {
   if (value === undefined || value === null || value === "") {
     return undefined;
   }
@@ -421,10 +404,12 @@ export const toolsController = {
   }),
 
   setAllowAlways: asyncHandler(async (req, res) => {
-    const args = unpackPositional(
-      req.body,
-      ["serverType", "toolName", "value", "entityId"] as const,
-    );
+    const args = unpackPositional(req.body, [
+      "serverType",
+      "toolName",
+      "value",
+      "entityId",
+    ] as const);
     // Same accessibility gate as the server writes above (Bug 82975).
     await assertEntityAccessible(args.entityId as string | undefined);
     if (!isNonEmptyString(args.serverType)) {

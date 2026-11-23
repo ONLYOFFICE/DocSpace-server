@@ -111,8 +111,7 @@ function buildUpstream(
   source: SourceMeta | undefined,
 ): UpstreamRequest | undefined {
   if (usesOnlyofficeBranch(config)) {
-    const baseUrl =
-      config.baseUrl || (config.isCloudProvider ? config.provider : "");
+    const baseUrl = config.baseUrl || (config.isCloudProvider ? config.provider : "");
     if (!baseUrl) {
       return undefined;
     }
@@ -167,9 +166,9 @@ function bodyError(
     }
     const numResults = body["numResults"];
     if (
-      numResults !== undefined
-      && numResults !== null
-      && (!Number.isInteger(numResults) || (numResults as number) < 1)
+      numResults !== undefined &&
+      numResults !== null &&
+      (!Number.isInteger(numResults) || (numResults as number) < 1)
     ) {
       return { error: "numResults must be a positive integer", field: "numResults" };
     }
@@ -177,9 +176,9 @@ function bodyError(
   }
   const urls = body["urls"];
   if (
-    !Array.isArray(urls)
-    || urls.length === 0
-    || !urls.every((u) => typeof u === "string" && u.trim().length > 0)
+    !Array.isArray(urls) ||
+    urls.length === 0 ||
+    !urls.every((u) => typeof u === "string" && u.trim().length > 0)
   ) {
     return { error: "urls is required and must be a non-empty array of strings", field: "urls" };
   }

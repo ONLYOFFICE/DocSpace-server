@@ -143,7 +143,10 @@ function generatedImageName(mime: string): string {
 }
 
 /** The generated image as an artifact of its conversation; `undefined` when the conversation takes none. */
-async function insertThreadArtifactImage(threadId: string, base64: string): Promise<string | undefined> {
+async function insertThreadArtifactImage(
+  threadId: string,
+  base64: string,
+): Promise<string | undefined> {
   const { bytes, mime } = decodeImagePayload(base64);
   const artifact = await uploadThreadArtifact(threadId, generatedImageName(mime), bytes, mime);
   return artifact?.id;
@@ -175,7 +178,11 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
   // all, since a lost request context uploads anonymously and answers 401.
   logger.info(
     `insertGeneratedImage: POST ${url} title=${fileName} mime=${mime} bytes=${bytes.length} ` +
-      `auth=[${Object.keys(headers).filter((h) => h === "cookie" || h === "authorization").join(",") || "NONE"}] ` +
+      `auth=[${
+        Object.keys(headers)
+          .filter((h) => h === "cookie" || h === "authorization")
+          .join(",") || "NONE"
+      }] ` +
       `forwarded=[${Object.keys(headers).sort().join(",")}]`,
   );
   const { signal, cancel } = withTimeout(undefined);
@@ -521,10 +528,10 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         // does not exist, or one the caller cannot read), so a missing match
         // is a client error, not a service fault — answer 404 instead of
         // collapsing to a generic 500 (Bug 82893).
-        throw Object.assign(
-          new Error(`attachment entry not found or inaccessible: ${entryId}`),
-          { status: 404, expose: true },
-        );
+        throw Object.assign(new Error(`attachment entry not found or inaccessible: ${entryId}`), {
+          status: 404,
+          expose: true,
+        });
       }
       // The caller's own `type` wins over the title-derived one from
       // `dtoToAttachment`: it comes from the same `c_oAscFileType` table but
@@ -595,7 +602,9 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         : undefined;
       if (artifact !== undefined) {
         stage = "attachment-record";
-        const [record] = await this.createMany([{ kind: "image", title: input.title, path: artifact }]);
+        const [record] = await this.createMany([
+          { kind: "image", title: input.title, path: artifact },
+        ]);
         if (!record) {
           throw new Error("failed to create attachment for the thread artifact");
         }
@@ -614,7 +623,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
           `uploadToolImage: folder-info entityId=${input.entityId} -> ` +
             (folderInfo
               ? `title=${folderInfo.title ?? "-"} ` +
-                  `folderType=${folderInfo.folderType ?? "?"} canCreate=${folderInfo.canCreate ?? "?"}`
+                `folderType=${folderInfo.folderType ?? "?"} canCreate=${folderInfo.canCreate ?? "?"}`
               : "NOT FOUND (404 or unparseable) — the scope is not a folder this user can read"),
         );
       }

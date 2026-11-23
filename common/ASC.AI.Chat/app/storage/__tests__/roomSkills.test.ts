@@ -26,7 +26,14 @@ vi.mock("../../requestContext.js", () => ({
   getForwardedHeaders: () => ({}),
 }));
 
-const { getContextFolders, getKnowledgeFolders, getRoomSkill, getRoomSkills, getRoomsSkills, readBodyCapped } = await import("../roomSkills.js");
+const {
+  getContextFolders,
+  getKnowledgeFolders,
+  getRoomSkill,
+  getRoomSkills,
+  getRoomsSkills,
+  readBodyCapped,
+} = await import("../roomSkills.js");
 
 const fetchMock = vi.fn();
 

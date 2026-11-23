@@ -101,8 +101,7 @@ export const editorToolsController = {
           // Server-type policy, overridable per tool: read-only (GET) MCP
           // operations arrive with `requireApproval: false` from
           // systemToolsSource and run without a dialog.
-          requireApproval:
-            approval.has(serverType) && item.requireApproval !== false,
+          requireApproval: approval.has(serverType) && item.requireApproval !== false,
         });
       }
     }
@@ -114,11 +113,8 @@ export const editorToolsController = {
     markForwardHeadersToProvider();
     const body = isObject(req.body) ? req.body : {};
     const name = typeof body["name"] === "string" ? body["name"].trim() : "";
-    const args = isObject(body["arguments"])
-      ? (body["arguments"] as Record<string, unknown>)
-      : {};
-    const entityId =
-      typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+    const args = isObject(body["arguments"]) ? (body["arguments"] as Record<string, unknown>) : {};
+    const entityId = typeof body["entityId"] === "string" ? body["entityId"] : undefined;
 
     if (!name || EXCLUDED_TOOLS.has(name)) {
       res.status(400).json({ error: "Unknown tool name" });

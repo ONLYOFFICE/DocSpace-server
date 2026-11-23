@@ -83,7 +83,10 @@ const run = async (name: keyof typeof assignmentsController, req: Record<string,
   await (assignmentsController[name] as unknown as Handler)({ query: {}, ...req }, res, next);
   const failure = next.mock.calls[0];
   if (failure) throw failure[0];
-  return { status: res.status.mock.calls[0]?.[0] as number | undefined, body: res.json.mock.calls[0]?.[0] };
+  return {
+    status: res.status.mock.calls[0]?.[0] as number | undefined,
+    body: res.json.mock.calls[0]?.[0],
+  };
 };
 
 describe("assignmentsController resolve operations", () => {

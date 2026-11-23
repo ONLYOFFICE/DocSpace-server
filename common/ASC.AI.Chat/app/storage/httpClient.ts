@@ -42,7 +42,8 @@ import type { AppConfig } from "../types.js";
 // can be slow; override with `AI_CHAT_UPSTREAM_TIMEOUT_MS`. Note this guards
 // request/response calls only — long-lived chat *streams* are bounded by
 // the client-driven abort signal, not by this timeout.
-const UPSTREAM_TIMEOUT_MS = parseInt10(process.env["AI_CHAT_UPSTREAM_TIMEOUT_MS"], 300_000) ?? 300_000;
+const UPSTREAM_TIMEOUT_MS =
+  parseInt10(process.env["AI_CHAT_UPSTREAM_TIMEOUT_MS"], 300_000) ?? 300_000;
 
 /**
  * Build an {@link AbortSignal} that fires on a timeout, on an upstream
@@ -55,10 +56,7 @@ export function withTimeout(
   ms: number = UPSTREAM_TIMEOUT_MS,
 ): { signal: AbortSignal; cancel: () => void } {
   const controller = new AbortController();
-  const timer = setTimeout(
-    () => controller.abort(new Error(`upstream timeout after ${ms}ms`)),
-    ms,
-  );
+  const timer = setTimeout(() => controller.abort(new Error(`upstream timeout after ${ms}ms`)), ms);
   const onAbort = (): void => controller.abort((external as { reason?: unknown })?.reason);
   if (external) {
     if (external.aborted) {

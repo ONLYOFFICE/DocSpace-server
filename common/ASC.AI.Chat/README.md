@@ -38,12 +38,12 @@ stored as an ordinary message of the thread (the marker lives in its `contents`)
 needs nothing new. On by default; switched off with `ai.compaction.enabled: false` in
 `appsettings.json` or `AI__COMPACTION__ENABLED=false` (or `0`). The environment wins over the file:
 
-| `appsettings.json`                   | Environment                             | Default   |
-| ------------------------------------ | --------------------------------------- | --------- |
-| `ai.compaction.enabled`              | `AI__COMPACTION__ENABLED`               | `true`    |
-| `ai.compaction.threshold`            | `AI__COMPACTION__THRESHOLD`             | `0.8`     |
-| `ai.compaction.keepRecent`           | `AI__COMPACTION__KEEP_RECENT`           | `4`       |
-| `ai.compaction.defaultContextWindow` | `AI__COMPACTION__DEFAULT_CONTEXT_WINDOW` | `128000`  |
+| `appsettings.json`                   | Environment                              | Default  |
+| ------------------------------------ | ---------------------------------------- | -------- |
+| `ai.compaction.enabled`              | `AI__COMPACTION__ENABLED`                | `true`   |
+| `ai.compaction.threshold`            | `AI__COMPACTION__THRESHOLD`              | `0.8`    |
+| `ai.compaction.keepRecent`           | `AI__COMPACTION__KEEP_RECENT`            | `4`      |
+| `ai.compaction.defaultContextWindow` | `AI__COMPACTION__DEFAULT_CONTEXT_WINDOW` | `128000` |
 
 The window of a model comes from the library's id-based table, else the default above. The gateway
 catalogue's `context_length` reaches the model list, but a saved profile does not keep it yet (the

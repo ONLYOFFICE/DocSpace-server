@@ -35,11 +35,11 @@ import { randomUUID } from "crypto";
 import { aiService } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
 import {
-    getKnowledgeRoomIds,
-    getResolvedFormId,
-    setResolvedFormId,
-    getResolvedAttachmentId,
-    setResolvedAttachmentId,
+  getKnowledgeRoomIds,
+  getResolvedFormId,
+  setResolvedFormId,
+  getResolvedAttachmentId,
+  setResolvedAttachmentId,
 } from "../requestContext.js";
 import { getArray, getString, isObject, parseInt10 } from "../narrow.js";
 import logger from "../log.js";
@@ -63,14 +63,14 @@ import {
 export { DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE };
 
 const APPROVAL_TOOL_NAMES = new Set<string>([
-    "onlyoffice_generate_docx",
-    "onlyoffice_generate_presentation",
-    "onlyoffice_generate_form",
+  "onlyoffice_generate_docx",
+  "onlyoffice_generate_presentation",
+  "onlyoffice_generate_form",
 ]);
 
 type ToolsList = {
-    tools: TMCPItem[];
-    prompt: string;
+  tools: TMCPItem[];
+  prompt: string;
 };
 
 // Relative editor link for a DocSpace file — the same shape the knowledge
@@ -79,33 +79,37 @@ type ToolsList = {
 // resolves against the current page and opens something else than the file
 // (Bug 84152).
 export function fileEditorUrl(fileId: string | number): string {
-    return `/doceditor?fileId=${encodeURIComponent(String(fileId))}`;
+  return `/doceditor?fileId=${encodeURIComponent(String(fileId))}`;
 }
 
 const GENERATED_FILE_LINK_HINT =
-    "The result contains `url`, the relative link to the created file. " +
-    "When you mention the file in your reply, link it exactly as " +
-    "`[<title>](<url>)`, copying `url` verbatim — never invent, shorten or " +
-    "rewrite the link, and never link to the file by its id or title alone.";
+  "The result contains `url`, the relative link to the created file. " +
+  "When you mention the file in your reply, link it exactly as " +
+  "`[<title>](<url>)`, copying `url` verbatim — never invent, shorten or " +
+  "rewrite the link, and never link to the file by its id or title alone.";
 
 // Attach `url` to a generate-tool result so the model has a real link to
 // quote. C# `ToolResponse<GeneratedFileResult>` serializes as
 // `{ data: { id, title, parentId, parentTitle } }` (camelCase; PascalCase
 // tolerated for older servers). Anything else passes through untouched.
 export function withGeneratedFileUrl(value: unknown): unknown {
-    if (!isObject(value)) {
-        return value;
-    }
-    const data = isObject(value["data"]) ? value["data"] : isObject(value["Data"]) ? value["Data"] : null;
-    if (!data) {
-        return value;
-    }
-    const id = data["id"] ?? data["Id"];
-    if ((typeof id !== "number" && typeof id !== "string") || id === "") {
-        return value;
-    }
-    const dataKey = "data" in value ? "data" : "Data";
-    return { ...value, [dataKey]: { ...data, url: fileEditorUrl(id) } };
+  if (!isObject(value)) {
+    return value;
+  }
+  const data = isObject(value["data"])
+    ? value["data"]
+    : isObject(value["Data"])
+      ? value["Data"]
+      : null;
+  if (!data) {
+    return value;
+  }
+  const id = data["id"] ?? data["Id"];
+  if ((typeof id !== "number" && typeof id !== "string") || id === "") {
+    return value;
+  }
+  const dataKey = "data" in value ? "data" : "Data";
+  return { ...value, [dataKey]: { ...data, url: fileEditorUrl(id) } };
 }
 
 // `ToolContext` on the C# side — `{ folderId, formId, attachmentId, knowledgeRoomId, knowledgeRoomIds }`.
@@ -114,27 +118,27 @@ export function withGeneratedFileUrl(value: unknown): unknown {
 // `knowledgeRoomIds` are the knowledge rooms the composer connected; `knowledgeRoomId` is the
 // first of them (0 = none), what an older .NET side reads.
 type ToolContextDto = {
-    folderId: number;
-    formId: number;
-    attachmentId: string;
-    formSubAgent: boolean;
-    knowledgeRoomId: number;
-    knowledgeRoomIds: number[];
+  folderId: number;
+  formId: number;
+  attachmentId: string;
+  formSubAgent: boolean;
+  knowledgeRoomId: number;
+  knowledgeRoomIds: number[];
 };
 
 // A ref-carrying content part encodes `{ref, title, kind}` as JSON in
 // `mimeType` (file parts) or `image` (image parts) — mirrors
 // `@onlyoffice/ai-chat/core`'s internal (unexported) `extractRefIdsFromMessage`.
 function parseRef(value: unknown): string | null {
-    if (typeof value !== "string" || value.length === 0 || value[0] !== "{") {
-        return null;
-    }
-    try {
-        const parsed: unknown = JSON.parse(value);
-        return isObject(parsed) && typeof parsed["ref"] === "string" ? parsed["ref"] : null;
-    } catch {
-        return null;
-    }
+  if (typeof value !== "string" || value.length === 0 || value[0] !== "{") {
+    return null;
+  }
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return isObject(parsed) && typeof parsed["ref"] === "string" ? parsed["ref"] : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -144,29 +148,31 @@ function parseRef(value: unknown): string | null {
  * message) the same attachment context.
  */
 export function extractAttachmentRefIds(message: unknown): string[] {
-    if (!isObject(message)) {
-        return [];
+  if (!isObject(message)) {
+    return [];
+  }
+  const content = message["content"];
+  if (!Array.isArray(content)) {
+    return [];
+  }
+  const ids: string[] = [];
+  const seen = new Set<string>();
+  for (const part of content) {
+    if (!isObject(part)) {
+      continue;
     }
-    const content = message["content"];
-    if (!Array.isArray(content)) {
-        return [];
+    const ref =
+      part["type"] === "file"
+        ? parseRef(part["mimeType"])
+        : part["type"] === "image"
+          ? parseRef(part["image"])
+          : null;
+    if (ref && !seen.has(ref)) {
+      seen.add(ref);
+      ids.push(ref);
     }
-    const ids: string[] = [];
-    const seen = new Set<string>();
-    for (const part of content) {
-        if (!isObject(part)) {
-            continue;
-        }
-        const ref =
-            part["type"] === "file" ? parseRef(part["mimeType"]) :
-            part["type"] === "image" ? parseRef(part["image"]) :
-            null;
-        if (ref && !seen.has(ref)) {
-            seen.add(ref);
-            ids.push(ref);
-        }
-    }
-    return ids;
+  }
+  return ids;
 }
 
 // Resolve an attachment ref id to the DocSpace numeric file id the C# side
@@ -177,29 +183,29 @@ export function extractAttachmentRefIds(message: unknown): string[] {
 // (`FormDataToolsFactory.TryInitAsync`); a non-form id resolves to an empty
 // tool bundle.
 async function resolveForm(
-    attachmentId: string[] | undefined,
+  attachmentId: string[] | undefined,
 ): Promise<{ formId: number; attachmentId: string }> {
-    if (!attachmentId || attachmentId.length === 0) {
-        return { formId: 0, attachmentId: "" };
-    }
-    try {
-        const records = await storage.attachments.readManyByIds(attachmentId);
-        for (const record of records) {
-            const entryId = record?.path?.split("/", 1)[0];
-            const numeric = parseInt10(entryId, 0) ?? 0;
-            if (numeric > 0) {
-                // The attachment id keys the analyze intent on the C# side.
-                return { formId: numeric, attachmentId: record?.id ?? "" };
-            }
-        }
-    } catch (err) {
-        logger.warn(
-            `resolveForm: failed to resolve attachment(s) [${attachmentId.join(",")}]: ${
-                err instanceof Error ? err.message : String(err)
-            }`,
-        );
-    }
+  if (!attachmentId || attachmentId.length === 0) {
     return { formId: 0, attachmentId: "" };
+  }
+  try {
+    const records = await storage.attachments.readManyByIds(attachmentId);
+    for (const record of records) {
+      const entryId = record?.path?.split("/", 1)[0];
+      const numeric = parseInt10(entryId, 0) ?? 0;
+      if (numeric > 0) {
+        // The attachment id keys the analyze intent on the C# side.
+        return { formId: numeric, attachmentId: record?.id ?? "" };
+      }
+    }
+  } catch (err) {
+    logger.warn(
+      `resolveForm: failed to resolve attachment(s) [${attachmentId.join(",")}]: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+  return { formId: 0, attachmentId: "" };
 }
 
 // Resolve the round's form context from the attachment refs the controller
@@ -208,83 +214,83 @@ async function resolveForm(
 // context so the engine's later `getTools` and same-turn `callTool` (whose
 // signatures carry no attachment refs) reuse the same value.
 async function toContext(
-    entityId: string | undefined,
-    attachmentId?: string[],
-    formSubAgent = false,
+  entityId: string | undefined,
+  attachmentId?: string[],
+  formSubAgent = false,
 ): Promise<ToolContextDto> {
-    const folderId = parseInt10(entityId, 0) ?? 0;
-    const knowledgeRoomIds = getKnowledgeRoomIds();
-    const knowledgeRoomId = knowledgeRoomIds[0] ?? 0;
-    if (attachmentId && attachmentId.length > 0) {
-        const resolved = await resolveForm(attachmentId);
-        if (resolved.formId > 0) {
-            setResolvedFormId(resolved.formId);
-            setResolvedAttachmentId(resolved.attachmentId);
-        }
-        return {
-            folderId,
-            formId: resolved.formId,
-            attachmentId: resolved.attachmentId,
-            formSubAgent,
-            knowledgeRoomId,
-            knowledgeRoomIds,
-        };
+  const folderId = parseInt10(entityId, 0) ?? 0;
+  const knowledgeRoomIds = getKnowledgeRoomIds();
+  const knowledgeRoomId = knowledgeRoomIds[0] ?? 0;
+  if (attachmentId && attachmentId.length > 0) {
+    const resolved = await resolveForm(attachmentId);
+    if (resolved.formId > 0) {
+      setResolvedFormId(resolved.formId);
+      setResolvedAttachmentId(resolved.attachmentId);
     }
     return {
-        folderId,
-        formId: getResolvedFormId() ?? 0,
-        attachmentId: getResolvedAttachmentId() ?? "",
-        formSubAgent,
-        knowledgeRoomId,
-        knowledgeRoomIds,
+      folderId,
+      formId: resolved.formId,
+      attachmentId: resolved.attachmentId,
+      formSubAgent,
+      knowledgeRoomId,
+      knowledgeRoomIds,
     };
+  }
+  return {
+    folderId,
+    formId: getResolvedFormId() ?? 0,
+    attachmentId: getResolvedAttachmentId() ?? "",
+    formSubAgent,
+    knowledgeRoomId,
+    knowledgeRoomIds,
+  };
 }
 
 // `ToolDescriptor` on the C# side — `{ name, description, parameters }`,
 // where `parameters` is the JSON Schema. Falls back to the schema's own
 // `description` for older servers that didn't expose the dedicated field.
 function parseTool(raw: unknown): TMCPItem | null {
-    if (!isObject(raw)) {
-        return null;
-    }
-    const name = getString(raw, "name") ?? getString(raw, "Name");
-    if (!name) {
-        return null;
-    }
-    const schema = raw["parameters"] ?? raw["Parameters"];
-    const inputSchema = isObject(schema) ? schema : {};
-    const description =
-        getString(raw, "description") ??
-        getString(raw, "Description") ??
-        getString(inputSchema, "description") ??
-        "";
-    return { name, description, inputSchema, enabled: true };
+  if (!isObject(raw)) {
+    return null;
+  }
+  const name = getString(raw, "name") ?? getString(raw, "Name");
+  if (!name) {
+    return null;
+  }
+  const schema = raw["parameters"] ?? raw["Parameters"];
+  const inputSchema = isObject(schema) ? schema : {};
+  const description =
+    getString(raw, "description") ??
+    getString(raw, "Description") ??
+    getString(inputSchema, "description") ??
+    "";
+  return { name, description, inputSchema, enabled: true };
 }
 
 function parseList(raw: unknown): ToolsList {
-    if (!isObject(raw)) {
-        return { tools: [], prompt: "" };
+  if (!isObject(raw)) {
+    return { tools: [], prompt: "" };
+  }
+  const rawTools = getArray(raw, "tools") ?? getArray(raw, "Tools") ?? [];
+  const tools: TMCPItem[] = [];
+  for (const item of rawTools) {
+    const tool = parseTool(item);
+    if (tool) {
+      tools.push(tool);
     }
-    const rawTools = getArray(raw, "tools") ?? getArray(raw, "Tools") ?? [];
-    const tools: TMCPItem[] = [];
-    for (const item of rawTools) {
-        const tool = parseTool(item);
-        if (tool) {
-            tools.push(tool);
-        }
-    }
-    const prompt = getString(raw, "prompt") ?? getString(raw, "Prompt") ?? "";
-    return { tools, prompt };
+  }
+  const prompt = getString(raw, "prompt") ?? getString(raw, "Prompt") ?? "";
+  return { tools, prompt };
 }
 
 // Tell the model how to link the file a generate tool created; the C# tool
 // descriptions say nothing about links, so without this it improvises one.
 function withLinkHints(tools: TMCPItem[]): TMCPItem[] {
-    return tools.map((tool) =>
-        APPROVAL_TOOL_NAMES.has(tool.name)
-            ? { ...tool, description: `${tool.description} ${GENERATED_FILE_LINK_HINT}`.trim() }
-            : tool,
-    );
+  return tools.map((tool) =>
+    APPROVAL_TOOL_NAMES.has(tool.name)
+      ? { ...tool, description: `${tool.description} ${GENERATED_FILE_LINK_HINT}`.trim() }
+      : tool,
+  );
 }
 
 /**
@@ -296,156 +302,150 @@ function withLinkHints(tools: TMCPItem[]): TMCPItem[] {
  * dialog before running them.
  */
 export class HttpToolsAdapter implements ToolsAdapter {
-    // Set by the form-analysis sub-agent so C# emits the form-data tools for it only; false for main.
-    constructor(private readonly formSubAgent = false) {}
+  // Set by the form-analysis sub-agent so C# emits the form-data tools for it only; false for main.
+  constructor(private readonly formSubAgent = false) {}
 
-    // `_config.attachmentId` (the engine's whole-thread ref collection) is
-    // unused: the controller already resolved the formId into the request
-    // context, which this `list` reads back through `toContext`.
-    async getTools(
-        entityId?: string,
-        _config?: { attachmentId: string[] },
-    ): Promise<Record<string, TMCPItem[]>> {
-        const { tools } = await this.list(entityId);
-        if (tools.length === 0) {
-            return {};
-        }
-        // Split into the silent group and the approval-required group so the
-        // engine shows an approval dialog only for `APPROVAL_TOOL_NAMES`.
-        const silent: TMCPItem[] = [];
-        const approval: TMCPItem[] = [];
-        for (const tool of tools) {
-            (APPROVAL_TOOL_NAMES.has(tool.name) ? approval : silent).push(tool);
-        }
-        const grouped: Record<string, TMCPItem[]> = {};
-        if (silent.length > 0) {
-            grouped[SERVER_TYPE] = silent;
-        }
-        if (approval.length > 0) {
-            grouped[DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE] = approval;
-        }
-        return grouped;
+  // `_config.attachmentId` (the engine's whole-thread ref collection) is
+  // unused: the controller already resolved the formId into the request
+  // context, which this `list` reads back through `toContext`.
+  async getTools(
+    entityId?: string,
+    _config?: { attachmentId: string[] },
+  ): Promise<Record<string, TMCPItem[]>> {
+    const { tools } = await this.list(entityId);
+    if (tools.length === 0) {
+      return {};
     }
+    // Split into the silent group and the approval-required group so the
+    // engine shows an approval dialog only for `APPROVAL_TOOL_NAMES`.
+    const silent: TMCPItem[] = [];
+    const approval: TMCPItem[] = [];
+    for (const tool of tools) {
+      (APPROVAL_TOOL_NAMES.has(tool.name) ? approval : silent).push(tool);
+    }
+    const grouped: Record<string, TMCPItem[]> = {};
+    if (silent.length > 0) {
+      grouped[SERVER_TYPE] = silent;
+    }
+    if (approval.length > 0) {
+      grouped[DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE] = approval;
+    }
+    return grouped;
+  }
 
-    async callTool(
-        toolName: string,
-        args: Record<string, unknown>,
-        entityId?: string,
-    ): Promise<unknown> {
-        const body = {
-            ...(await toContext(entityId, undefined, this.formSubAgent)),
-            calls: [{ id: randomUUID(), name: toolName, arguments: args }],
-        };
-        // Verbose lifecycle logging: DocSpace integration tools run silently
-        // in-engine, so without this a tool that stalls the C# round-trip
-        // (up to the 60s upstream timeout) is invisible — the UI just shows a
-        // hanging tool card. Log start, elapsed, and the result classification
-        // (no-result / failed / ok) so the stall point is pinpointable.
-        const started = Date.now();
-        logger.info(
-            `docspaceTools.callTool name=${toolName} args=[${Object.keys(
-                args,
-            ).join(",")}] entityId=${entityId ?? "-"} -> ${CALL_PATH}`,
-        );
-        let raw: unknown;
-        try {
-            raw = await aiService.post(CALL_PATH, body);
-        } catch (err) {
-            logger.error(
-                `docspaceTools.callTool name=${toolName} threw after ${
-                    Date.now() - started
-                }ms: ${err instanceof Error ? err.message : String(err)}`,
-            );
-            throw err;
-        }
-        const results = Array.isArray(raw) ? raw : [];
-        const result = results.find((r) => isObject(r)) ?? results[0];
-        if (!isObject(result)) {
-            logger.warn(
-                `docspaceTools.callTool name=${toolName} no-result after ${
-                    Date.now() - started
-                }ms`,
-            );
-            return `Tool "${toolName}" returned no result`;
-        }
-        const error = getString(result, "error") ?? getString(result, "Error");
-        if (error) {
-            // Contract: stringify failures into the result so the model can
-            // react instead of aborting the stream.
-            logger.warn(
-                `docspaceTools.callTool name=${toolName} failed after ${
-                    Date.now() - started
-                }ms: ${error}`,
-            );
-            return `Tool "${toolName}" failed: ${error}`;
-        }
-        const rawValue = "result" in result ? result["result"] : result["Result"];
-        const value = APPROVAL_TOOL_NAMES.has(toolName) ? withGeneratedFileUrl(rawValue) : rawValue;
-        // Contract: a tool result must reach the engine as a string — the
-        // same shape MCP tools produce. An object here would be spliced
-        // verbatim into the tool message's `content` and break providers
-        // that expect text (or text-part arrays).
-        const text = typeof value === "string" ? value : JSON.stringify(value ?? null);
-        logger.info(
-            `docspaceTools.callTool name=${toolName} ok in ${
-                Date.now() - started
-            }ms (resultLength=${text.length})`,
-        );
-        return text;
+  async callTool(
+    toolName: string,
+    args: Record<string, unknown>,
+    entityId?: string,
+  ): Promise<unknown> {
+    const body = {
+      ...(await toContext(entityId, undefined, this.formSubAgent)),
+      calls: [{ id: randomUUID(), name: toolName, arguments: args }],
+    };
+    // Verbose lifecycle logging: DocSpace integration tools run silently
+    // in-engine, so without this a tool that stalls the C# round-trip
+    // (up to the 60s upstream timeout) is invisible — the UI just shows a
+    // hanging tool card. Log start, elapsed, and the result classification
+    // (no-result / failed / ok) so the stall point is pinpointable.
+    const started = Date.now();
+    logger.info(
+      `docspaceTools.callTool name=${toolName} args=[${Object.keys(args).join(
+        ",",
+      )}] entityId=${entityId ?? "-"} -> ${CALL_PATH}`,
+    );
+    let raw: unknown;
+    try {
+      raw = await aiService.post(CALL_PATH, body);
+    } catch (err) {
+      logger.error(
+        `docspaceTools.callTool name=${toolName} threw after ${
+          Date.now() - started
+        }ms: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      throw err;
     }
+    const results = Array.isArray(raw) ? raw : [];
+    const result = results.find((r) => isObject(r)) ?? results[0];
+    if (!isObject(result)) {
+      logger.warn(
+        `docspaceTools.callTool name=${toolName} no-result after ${Date.now() - started}ms`,
+      );
+      return `Tool "${toolName}" returned no result`;
+    }
+    const error = getString(result, "error") ?? getString(result, "Error");
+    if (error) {
+      // Contract: stringify failures into the result so the model can
+      // react instead of aborting the stream.
+      logger.warn(
+        `docspaceTools.callTool name=${toolName} failed after ${Date.now() - started}ms: ${error}`,
+      );
+      return `Tool "${toolName}" failed: ${error}`;
+    }
+    const rawValue = "result" in result ? result["result"] : result["Result"];
+    const value = APPROVAL_TOOL_NAMES.has(toolName) ? withGeneratedFileUrl(rawValue) : rawValue;
+    // Contract: a tool result must reach the engine as a string — the
+    // same shape MCP tools produce. An object here would be spliced
+    // verbatim into the tool message's `content` and break providers
+    // that expect text (or text-part arrays).
+    const text = typeof value === "string" ? value : JSON.stringify(value ?? null);
+    logger.info(
+      `docspaceTools.callTool name=${toolName} ok in ${
+        Date.now() - started
+      }ms (resultLength=${text.length})`,
+    );
+    return text;
+  }
 
-    /**
-     * System-prompt fragment that accompanies the tool list. Consumed by
-     * the controller to append to the chat's system prompt. `attachmentId`
-     * lets the caller (which runs before the engine's own `getTools` call)
-     * pass the current message's attachment refs so the fragment reflects
-     * the form actually attached to this turn.
-     */
-    async getPrompt(entityId?: string, attachmentId?: string[]): Promise<string> {
-        const { prompt } = await this.list(entityId, attachmentId);
-        return prompt;
-    }
+  /**
+   * System-prompt fragment that accompanies the tool list. Consumed by
+   * the controller to append to the chat's system prompt. `attachmentId`
+   * lets the caller (which runs before the engine's own `getTools` call)
+   * pass the current message's attachment refs so the fragment reflects
+   * the form actually attached to this turn.
+   */
+  async getPrompt(entityId?: string, attachmentId?: string[]): Promise<string> {
+    const { prompt } = await this.list(entityId, attachmentId);
+    return prompt;
+  }
 
-    // Tools + prompt in one `tools/list` hit, flat (ungrouped) — for the form-analysis sub-agent,
-    // which needs both and passes the tools straight to the model (no approval split needed).
-    async listToolset(entityId?: string): Promise<{ tools: TMCPItem[]; prompt: string }> {
-        return this.list(entityId);
-    }
+  // Tools + prompt in one `tools/list` hit, flat (ungrouped) — for the form-analysis sub-agent,
+  // which needs both and passes the tools straight to the model (no approval split needed).
+  async listToolset(entityId?: string): Promise<{ tools: TMCPItem[]; prompt: string }> {
+    return this.list(entityId);
+  }
 
-    private async list(entityId: string | undefined, attachmentId?: string[]): Promise<ToolsList> {
-        // Runs on every stream (tool list + prompt fragment) before the
-        // assistant reply starts; a stalled list here delays the whole chat,
-        // so time it and report the tool count.
-        const started = Date.now();
-        const context = await toContext(entityId, attachmentId, this.formSubAgent);
-        logger.info(
-            `docspaceTools.list entityId=${entityId ?? "-"} -> ${LIST_PATH} context=${JSON.stringify(context)}`,
-        );
-        let raw: unknown;
-        try {
-            raw = await aiService.post(LIST_PATH, context);
-        } catch (err) {
-            logger.error(
-                `docspaceTools.list entityId=${entityId ?? "-"} request failed after ${Date.now() - started}ms: ${err instanceof Error ? err.message : String(err)}`,
-            );
-            throw err;
-        }
-        logger.info(
-            `docspaceTools.list raw response: ${JSON.stringify(raw).slice(0, 1000)}`,
-        );
-        const parsed = parseList(raw);
-        // The generate tools only create an empty file; with a document agent
-        // configured the model gets `document_agent` instead, which fills it.
-        if (getDocumentAgent()) {
-            parsed.tools = parsed.tools.filter((tool) => !APPROVAL_TOOL_NAMES.has(tool.name));
-        }
-        parsed.tools = withLinkHints(parsed.tools);
-        const names = parsed.tools.map((t) => t.name).join(", ") || "<none>";
-        logger.info(
-            `docspaceTools.list entityId=${entityId ?? "-"} -> ${parsed.tools.length} tool(s) in ${Date.now() - started}ms: [${names}]`,
-        );
-        return parsed;
+  private async list(entityId: string | undefined, attachmentId?: string[]): Promise<ToolsList> {
+    // Runs on every stream (tool list + prompt fragment) before the
+    // assistant reply starts; a stalled list here delays the whole chat,
+    // so time it and report the tool count.
+    const started = Date.now();
+    const context = await toContext(entityId, attachmentId, this.formSubAgent);
+    logger.info(
+      `docspaceTools.list entityId=${entityId ?? "-"} -> ${LIST_PATH} context=${JSON.stringify(context)}`,
+    );
+    let raw: unknown;
+    try {
+      raw = await aiService.post(LIST_PATH, context);
+    } catch (err) {
+      logger.error(
+        `docspaceTools.list entityId=${entityId ?? "-"} request failed after ${Date.now() - started}ms: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      throw err;
     }
+    logger.info(`docspaceTools.list raw response: ${JSON.stringify(raw).slice(0, 1000)}`);
+    const parsed = parseList(raw);
+    // The generate tools only create an empty file; with a document agent
+    // configured the model gets `document_agent` instead, which fills it.
+    if (getDocumentAgent()) {
+      parsed.tools = parsed.tools.filter((tool) => !APPROVAL_TOOL_NAMES.has(tool.name));
+    }
+    parsed.tools = withLinkHints(parsed.tools);
+    const names = parsed.tools.map((t) => t.name).join(", ") || "<none>";
+    logger.info(
+      `docspaceTools.list entityId=${entityId ?? "-"} -> ${parsed.tools.length} tool(s) in ${Date.now() - started}ms: [${names}]`,
+    );
+    return parsed;
+  }
 }
 
 /**
@@ -453,19 +453,16 @@ export class HttpToolsAdapter implements ToolsAdapter {
  * fetch leaves the system prompt unchanged.
  */
 export async function safeGetToolsPrompt(
-    adapter: HttpToolsAdapter,
-    entityId: string | undefined,
-    attachmentId?: string[],
+  adapter: HttpToolsAdapter,
+  entityId: string | undefined,
+  attachmentId?: string[],
 ): Promise<string> {
-    try {
-        return await adapter.getPrompt(entityId, attachmentId);
-    } catch (err) {
-        logger.warn(
-            `tools/list prompt fetch failed: ${
-                err instanceof Error ? err.message : String(err)
-            }`,
-        );
-        return "";
-    }
+  try {
+    return await adapter.getPrompt(entityId, attachmentId);
+  } catch (err) {
+    logger.warn(
+      `tools/list prompt fetch failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return "";
+  }
 }
-
