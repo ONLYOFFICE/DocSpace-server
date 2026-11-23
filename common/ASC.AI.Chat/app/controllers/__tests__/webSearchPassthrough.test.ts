@@ -564,8 +564,7 @@ describe("the provider's answer", () => {
     expect(reply.body).toBe("raw");
   });
 
-  // DEFECT passthrough-10: the provider's answer is read whole with `arrayBuffer()`, with no byte limit — expected a capped read (ts-ai-failure-paths.md §7)
-  it("relays an answer of any size whole", async () => {
+  it("relays an answer of 3 MB whole", async () => {
     useConfig();
     const big = { results: [{ text: "x".repeat(3 * 1024 * 1024) }] };
     useSearch(`${EXA}/search`, () => HttpResponse.json(big));
@@ -573,6 +572,38 @@ describe("the provider's answer", () => {
     const reply = await post(SEARCH, { query: "q" });
 
     expect(reply.body.length).toBe(JSON.stringify(big).length);
+  });
+
+  it("answers 502 for an answer over 10 MB instead of reading it whole", async () => {
+    useConfig();
+    // Eleven megabytes without a declared length: the relay learns the size only by reading.
+    let sent = 0;
+    const megabyte = new Uint8Array(1024 * 1024).fill(0x78);
+    useSearch(
+      `${EXA}/search`,
+      () =>
+        new HttpResponse(
+          new ReadableStream<Uint8Array>({
+            pull(controller) {
+              sent += 1;
+              if (sent > 11) {
+                controller.close();
+                return;
+              }
+              controller.enqueue(megabyte);
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+    );
+
+    const reply = await post(SEARCH, { query: "q" });
+
+    expect(reply.status).toBe(502);
+    expect(json(reply)).toEqual({ error: "Upstream request failed" });
+    expect(logger.error).toHaveBeenCalledWith(
+      "web-search passthrough search: the answer is over 10485760 bytes",
+    );
   });
 
   it("answers a provider 5xx with a fixed 502 and keeps its body in the log", async () => {
@@ -608,8 +639,7 @@ describe("the provider's answer", () => {
 });
 
 describe("a provider that does not answer", () => {
-  // DEFECT passthrough-11: the call to the search provider has no timeout: a provider that stalls holds the request until the client goes away — expected a bounded call, `withTimeout` with `cancel()` in a `finally` (ts-ai-style.md, Upstream calls; ts-ai-failure-paths.md §7)
-  it("waits for it until the client goes away, then aborts the call and logs nothing", async () => {
+  it("gives it the upstream timeout, then answers 502; a client that left earlier ends the call", async () => {
     vi.useFakeTimers({
       toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
     });
@@ -626,18 +656,31 @@ describe("a provider that does not answer", () => {
       });
       await until(() => calls.length === 1);
 
-      await vi.advanceTimersByTimeAsync(3_600_000);
+      await vi.advanceTimersByTimeAsync(299_000);
       for (let i = 0; i < 30; i += 1) {
         await new Promise((resolve) => setImmediate(resolve));
       }
       expect(exchange.current()).toBeUndefined();
 
-      exchange.abort();
-      await until(() => calls[0]?.signal.aborted === true);
+      await vi.advanceTimersByTimeAsync(2_000);
+      const reply = await exchange.done;
+
+      expect(reply.status).toBe(502);
+      expect(JSON.parse(reply.body)).toEqual({ error: "Upstream request failed" });
+      expect(calls[0]?.signal.aborted).toBe(true);
+      expect(logger.error).toHaveBeenCalledWith(
+        "web-search passthrough: upstream fetch failed: Error: upstream timeout after 300000ms",
+      );
+
+      // The client that goes away before the timeout: the call is aborted and nothing is logged.
+      vi.mocked(logger.error).mockClear();
+      const early = send(server.port, { path: SEARCH, headers: CALLER, body: '{"query":"q"}' });
+      await until(() => calls.length === 2);
+      early.abort();
+      await until(() => calls[1]?.signal.aborted === true);
       for (let i = 0; i < 30; i += 1) {
         await new Promise((resolve) => setImmediate(resolve));
       }
-
       expect(logger.error).not.toHaveBeenCalled();
     } finally {
       vi.useRealTimers();

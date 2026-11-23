@@ -304,6 +304,27 @@ export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknow
   };
 }
 
+/**
+ * Writes one chunk of a stream and, when the response says its buffer is full, waits until it
+ * has drained before the next chunk is pulled: a client that reads slowly then slows the
+ * stream down instead of having all of it buffered in memory. A response that is closed has
+ * nothing to drain.
+ */
+async function writeAndDrain(res: Response, chunk: string): Promise<void> {
+  if (res.write(chunk) !== false || res.destroyed || res.writableEnded) {
+    return;
+  }
+  await new Promise<void>((resolve) => {
+    const done = (): void => {
+      res.off("drain", done);
+      res.off("close", done);
+      resolve();
+    };
+    res.once("drain", done);
+    res.once("close", done);
+  });
+}
+
 // Idle interval after which a keep-alive frame is emitted on an otherwise
 // silent stream. A slow tool call (e.g. `generate_image`) can pause token
 // output for tens of seconds; without traffic an upstream proxy's read-timeout
@@ -372,7 +393,7 @@ export async function streamNdjson(
     let current = first;
     while (!current.done) {
       const event = current.value;
-      res.write(`${JSON.stringify(event)}\n`);
+      await writeAndDrain(res, `${JSON.stringify(event)}\n`);
       heartbeat.touch();
       current = await iterator.next();
     }
@@ -412,7 +433,7 @@ export async function streamOpenAiSse(
     let current = first;
     while (!current.done) {
       const chunk = current.value;
-      res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+      await writeAndDrain(res, `data: ${JSON.stringify(chunk)}\n\n`);
       heartbeat.touch();
       current = await iterator.next();
     }

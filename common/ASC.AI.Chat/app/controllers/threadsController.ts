@@ -54,6 +54,9 @@ import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 import { readStoredProfile, resolveStoredProfile } from "./storedProfile.js";
 import { clientFault } from "../httpErrors.js";
 
+// A profile id as the AI service binds it (`Guid`): with or without hyphens, braces allowed.
+const UUID = /^[{(]?[0-9a-f]{8}-?(?:[0-9a-f]{4}-?){3}[0-9a-f]{12}[)}]?$/i;
+
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
 // values degrade to `undefined` — an unpaginated read — rather than 400,
@@ -254,6 +257,19 @@ export const threadsController = {
     const limitError = attachmentLimitError(message);
     if (limitError) {
       res.status(400).json({ error: limitError });
+      return;
+    }
+    // The engine stores the message and binds the profile to the thread side by side, and the
+    // AI service refuses a profile id that is no UUID: checked here, or the message is stored
+    // while the caller is told 400. `null` and "" stay what they were: no profile sent.
+    const sentProfileId: unknown = args.profileId;
+    if (
+      sentProfileId !== undefined &&
+      sentProfileId !== null &&
+      sentProfileId !== "" &&
+      (typeof sentProfileId !== "string" || !UUID.test(sentProfileId))
+    ) {
+      res.status(400).json({ error: "profileId must be the id of a profile (a UUID)" });
       return;
     }
     const messageId = await engine.appendUserMessage(

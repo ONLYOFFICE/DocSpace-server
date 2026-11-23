@@ -736,8 +736,7 @@ describe("the outputs endpoint", () => {
     );
   });
 
-  // DEFECT docagent-3: a file delivered as application/x-www-form-urlencoded is parsed by the application's urlencoded parser before the handler and saved as an empty file with 201 — expected its bytes saved, as for any other media type (ts-ai-express.md §2: no parser without a reader; createApp.ts keeps only the JSON parser off this path)
-  it("saves a file delivered as form-urlencoded with no bytes", async () => {
+  it("saves a file delivered as form-urlencoded with its bytes: no parser runs on this path", async () => {
     inserted();
 
     const reply = await deliver(
@@ -751,10 +750,10 @@ describe("the outputs endpoint", () => {
 
     expect(reply.status).toBe(201);
     expect(filePart(calledOut()[0]!.body)).toContain(
-      'filename="data.txt"\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n\r\n',
+      'filename="data.txt"\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\na=1&b=2\r\n',
     );
     expect(vi.mocked(logger.info)).toHaveBeenCalledWith(
-      "documentAgentFiles: data.txt (0 bytes) saved into folder 5 as file 901 (Report.docx)",
+      "documentAgentFiles: data.txt (7 bytes) saved into folder 5 as file 901 (Report.docx)",
     );
   });
 

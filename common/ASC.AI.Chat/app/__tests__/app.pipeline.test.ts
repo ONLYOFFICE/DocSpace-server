@@ -436,8 +436,8 @@ describe("the body parsers", () => {
     expect(reply.body).toEqual({ error: "not found" });
   });
 
-  // DEFECT app-6: `bodyParser.urlencoded` is mounted for every route though no handler reads a
-  // form body — expected no parser without a reader (ts-ai-express.md §2, §8).
+  // A form body is parsed on the JSON routes: a handler reads `req.body` whatever parser made
+  // it, so a caller that posts a form (curl -d) is served like one that posts JSON.
   it("parses a form body on every route: one over 100 kB answers 413", async () => {
     const reply = await request(app)
       .post(`${API_PREFIX}/threads/create`)
@@ -447,15 +447,13 @@ describe("the body parsers", () => {
     expect(reply.status).toBe(413);
   });
 
-  // DEFECT app-6: the same parser runs on the raw passthrough — expected none there either
-  // (ts-ai-express.md §2, §8).
-  it("parses a form body even on the OpenAI passthrough", async () => {
+  it("leaves a form body unparsed on the OpenAI passthrough: one over 100 kB reaches the gate", async () => {
     const reply = await request(app)
       .post(`${API_PREFIX}/openai/p1/v1/chat/completions`)
       .set("Content-Type", "application/x-www-form-urlencoded")
       .send(`a=${"x".repeat(100 * 1024)}`);
 
-    expect(reply.status).toBe(413);
+    expect(reply.status).toBe(401);
   });
 });
 

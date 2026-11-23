@@ -41,6 +41,8 @@ import type { SourceMeta } from "../storage/docspaceFilesApi.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, ENTITY_ID_PARAM, ENTITY_KIND_PARAM, sourceKindOf } from "./_helpers.js";
 import { errorBodyText } from "../storage/errorBody.js";
+import { withTimeout } from "../storage/httpClient.js";
+import { readBodyCapped } from "../storage/roomSkills.js";
 
 // Web-search passthrough for the document editor's AI plugin.
 //
@@ -66,6 +68,11 @@ import { errorBodyText } from "../storage/errorBody.js";
 // sends no entry, or names one the caller cannot see, yields no metadata.
 
 const EXA_BASE_URL = "https://api.exa.ai";
+
+// The largest answer of a search provider that is relayed. A page of results with their
+// texts is far below it; the provider is another party's server, so its answer is not read
+// without a bound.
+const MAX_ANSWER_BYTES = 10 * 1024 * 1024;
 
 function queryParam(originalUrl: string, name: string): string | undefined {
   const queryIndex = originalUrl.indexOf("?");
@@ -220,44 +227,70 @@ function passthrough(subPath: "search" | "contents") {
       }
     });
 
-    let response: globalThis.Response;
+    // One bound for the call and for the reading of its answer: a provider that stalls would
+    // otherwise hold the request until the client gives up.
+    const { signal, cancel } = withTimeout(controller.signal);
     try {
-      response = await fetch(upstream.url, {
-        method: "POST",
-        headers: upstream.headers,
-        body: upstream.body,
-        signal: controller.signal,
-      });
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
+      let response: globalThis.Response;
+      try {
+        response = await fetch(upstream.url, {
+          method: "POST",
+          headers: upstream.headers,
+          body: upstream.body,
+          signal,
+        });
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+        // Detail stays in the log — the error can carry the provider URL.
+        logger.error(`web-search passthrough: upstream fetch failed: ${err}`);
+        res.status(502).json({ error: "Upstream request failed" });
         return;
       }
-      // Detail stays in the log — the error can carry the provider URL.
-      logger.error(`web-search passthrough: upstream fetch failed: ${err}`);
-      res.status(502).json({ error: "Upstream request failed" });
-      return;
-    }
 
-    // A 5xx from the gateway, or from the AI service in front of it, is not
-    // relayed: its body carries internals (a stack trace, Go type names). The
-    // detail goes to the log and the client gets a fixed 502; 4xx answers
-    // still pass through for the plugin's `formatResponse`.
-    if (response.status >= 500) {
-      const detail = await errorBodyText(response);
-      logger.error(
-        `web-search passthrough ${subPath}: upstream answered ${response.status}: ${detail.slice(0, 1000)}`,
-      );
-      res.status(502).json({ error: "Upstream request failed" });
-      return;
-    }
+      // A 5xx from the gateway, or from the AI service in front of it, is not
+      // relayed: its body carries internals (a stack trace, Go type names). The
+      // detail goes to the log and the client gets a fixed 502; 4xx answers
+      // still pass through for the plugin's `formatResponse`.
+      if (response.status >= 500) {
+        const detail = await errorBodyText(response);
+        logger.error(
+          `web-search passthrough ${subPath}: upstream answered ${response.status}: ${detail.slice(0, 1000)}`,
+        );
+        res.status(502).json({ error: "Upstream request failed" });
+        return;
+      }
 
-    res.status(response.status);
-    const contentType = response.headers.get("content-type");
-    if (contentType) {
-      res.setHeader("Content-Type", contentType);
+      let answer: Uint8Array | null;
+      try {
+        answer = await readBodyCapped(response, MAX_ANSWER_BYTES);
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+        logger.error(`web-search passthrough ${subPath}: reading the answer failed: ${err}`);
+        res.status(502).json({ error: "Upstream request failed" });
+        return;
+      }
+      if (answer === null) {
+        logger.error(
+          `web-search passthrough ${subPath}: the answer is over ${MAX_ANSWER_BYTES} bytes`,
+        );
+        res.status(502).json({ error: "Upstream request failed" });
+        return;
+      }
+
+      res.status(response.status);
+      const contentType = response.headers.get("content-type");
+      if (contentType) {
+        res.setHeader("Content-Type", contentType);
+      }
+      res.setHeader("Cache-Control", "no-cache, no-transform");
+      res.send(Buffer.from(answer));
+    } finally {
+      cancel();
     }
-    res.setHeader("Cache-Control", "no-cache, no-transform");
-    res.send(Buffer.from(await response.arrayBuffer()));
   });
 }
 

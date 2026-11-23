@@ -111,6 +111,9 @@ beforeEach(() => {
   readAiProjectChatContext.mockResolvedValue(undefined);
 });
 
+// A profile id as the AI service issues it.
+const PROFILE_UUID = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+
 describe("the threads engine", () => {
   it("resolves the source of a title request from the request context", () => {
     expect(threadsEngineDeps).toHaveLength(1);
@@ -384,8 +387,8 @@ describe("threadsController.openOrCreate", () => {
 
 describe("threadsController.appendUserMessage", () => {
   it.each([
-    ["a named body", { threadId: "t1", message: userMessage, profileId: "p1" }],
-    ["a positional body", ["t1", userMessage, "p1"]],
+    ["a named body", { threadId: "t1", message: userMessage, profileId: PROFILE_UUID }],
+    ["a positional body", ["t1", userMessage, PROFILE_UUID]],
   ])("stores a user message from %s", async (_what, body) => {
     engine.appendUserMessage.mockResolvedValue(storedMessage);
 
@@ -393,7 +396,7 @@ describe("threadsController.appendUserMessage", () => {
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ messageId: storedMessageJson });
-    expect(engine.appendUserMessage).toHaveBeenCalledWith("t1", userMessage, "p1");
+    expect(engine.appendUserMessage).toHaveBeenCalledWith("t1", userMessage, PROFILE_UUID);
     expect(published("aiThreadsAppendUserMessage", reply)).toEqual([]);
   });
 
@@ -501,16 +504,41 @@ describe("threadsController.appendUserMessage", () => {
     expect(published("aiThreadsAppendUserMessage", reply)).toEqual([]);
   });
 
-  // DEFECT data-11: a profileId of the wrong type (a number, an object) is cast and handed to the engine — expected 400 naming profileId (ts-ai-failure-paths.md §4)
-  it("hands a profileId that is a number to the engine", async () => {
+  // The engine writes the message and binds the profile side by side, and the AI service
+  // refuses a profile id that is no UUID: without this check the message would be stored
+  // while the caller reads 400.
+  it.each([
+    ["a number", 7],
+    ["an object", { id: "p1" }],
+    ["a string that is no UUID", "p1"],
+  ])(
+    "answers 400 for a profileId that is %s, before anything is stored",
+    async (_what, profileId) => {
+      const reply = await invoke(threadsController.appendUserMessage, {
+        body: ["t1", userMessage, profileId],
+      });
+
+      expect(reply.status).toBe(400);
+      expect(reply.body).toEqual({ error: "profileId must be the id of a profile (a UUID)" });
+      expect(engine.appendUserMessage).not.toHaveBeenCalled();
+      expect(published("aiThreadsAppendUserMessage", reply)).toEqual([]);
+    },
+  );
+
+  it.each([
+    ["a UUID", PROFILE_UUID],
+    ["a UUID without hyphens", "3fa85f6457174562b3fc2c963f66afa6"],
+    ["null, as the widget sends an omitted argument", null],
+    ["an empty string", ""],
+  ])("hands a profileId that is %s to the engine as it came", async (_what, profileId) => {
     engine.appendUserMessage.mockResolvedValue(storedMessage);
 
     const reply = await invoke(threadsController.appendUserMessage, {
-      body: ["t1", userMessage, 7],
+      body: ["t1", userMessage, profileId],
     });
 
     expect(reply.status).toBe(200);
-    expect(engine.appendUserMessage).toHaveBeenCalledWith("t1", userMessage, 7);
+    expect(engine.appendUserMessage).toHaveBeenCalledWith("t1", userMessage, profileId);
   });
 
   // DEFECT data-12: a text of any length is stored; the route has no limit of its own besides the 100 KB of the JSON parser — expected a named limit on the message (ts-ai-failure-paths.md §4)

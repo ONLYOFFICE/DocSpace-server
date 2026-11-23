@@ -165,15 +165,36 @@ describe("streamNdjson", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  // DEFECT ai-14: the result of res.write is never read, so a slow client buffers the whole stream in memory — expected a wait for `drain` when write answers false (ts-ai-express.md §3)
-  it("keeps writing when the response asks it to wait", async () => {
+  it("waits for drain before the next event when the response asks it to wait", async () => {
     const res = response();
-    const write = vi.fn(() => false);
+    const order: string[] = [];
+    const write = vi.fn((chunk: string) => {
+      order.push(`write ${chunk.trim()}`);
+      setImmediate(() => {
+        order.push("drain");
+        res.emit("drain");
+      });
+      return false;
+    });
     res.write = write as never;
 
     await streamNdjson(res, events(1, 2, 3));
 
-    expect(write).toHaveBeenCalledTimes(3);
+    expect(order).toEqual(["write 1", "drain", "write 2", "drain", "write 3", "drain"]);
+    expect(res.listenerCount("drain")).toBe(0);
+    expect(res.listenerCount("close")).toBe(0);
+  });
+
+  it("does not wait for a drain that cannot come: the response closes instead", async () => {
+    const res = response();
+    res.write = vi.fn(() => {
+      setImmediate(() => res.emit("close"));
+      return false;
+    }) as never;
+
+    await streamNdjson(res, events(1, 2));
+
+    expect(res.write).toHaveBeenCalledTimes(2);
     expect(res.listenerCount("drain")).toBe(0);
   });
 });

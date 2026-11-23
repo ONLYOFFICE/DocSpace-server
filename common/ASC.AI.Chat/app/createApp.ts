@@ -74,6 +74,7 @@ export function createApp(): Express {
   // `DELETE profiles/delete` arrives with body `"uuid"`, which strict-mode
   // would reject. Handlers normalize via `unpackPositional` afterwards.
   const jsonParser = bodyParser.json({ strict: false });
+  const formParser = bodyParser.urlencoded({ extended: false });
 
   // The OpenAI passthrough (`openaiPassthroughController`) forwards the raw
   // request bytes to the provider, so its body must stay unparsed — both to
@@ -103,17 +104,21 @@ export function createApp(): Express {
       const path = req.path.toLowerCase();
       const names = (route: string): boolean =>
         path === route.toLowerCase() || path === `${route.toLowerCase()}/`;
+      // The routes that take the raw bytes get no parser at all, the form parser included: it
+      // would consume a body sent as a form and leave the handler nothing to relay or save.
       if (path.startsWith(OPENAI_PASSTHROUGH_PREFIX) || names(DOCUMENT_AGENT_OUTPUTS_PATH)) {
         next();
         return;
       }
-      if (names(TEXT_TO_DOCX_PATH)) {
-        docxJsonParser(req, res, next);
-        return;
-      }
-      jsonParser(req, res, next);
-    })
-    .use(bodyParser.urlencoded({ extended: false }));
+      const parseJson = names(TEXT_TO_DOCX_PATH) ? docxJsonParser : jsonParser;
+      parseJson(req, res, (err?: unknown) => {
+        if (err !== undefined) {
+          next(err);
+          return;
+        }
+        formParser(req, res, next);
+      });
+    });
 
   // CORS as the .NET services have it, from `core:cors` (see `app/cors.ts`).
   // Before the routes and their auth gate: a preflight carries no
