@@ -109,10 +109,9 @@ describe("getOnlyofficeFileType", () => {
     expect(getOnlyofficeFileType(name)).toBe(code);
   });
 
-  // DEFECT stor1-6: the table is a plain object, so an extension that names a member of Object.prototype answers that member instead of 0 — "notes.constructor" answers the Object function and "x.__proto__" Object.prototype, which dtoToAttachment then stores as Attachment.type — expected 0 for any name not in the table (the function's own doc comment, onlyofficeFileType.ts:110)
-  it("answers a member of Object.prototype for an extension that names one", () => {
-    expect(getOnlyofficeFileType("notes.constructor")).toBe(Object);
-    expect(getOnlyofficeFileType("x.__proto__")).toBe(Object.prototype);
+  it("answers 0 for an extension that names a member of Object.prototype", () => {
+    expect(getOnlyofficeFileType("notes.constructor")).toBe(0);
+    expect(getOnlyofficeFileType("x.__proto__")).toBe(0);
     expect(getOnlyofficeFileType("hasOwnProperty")).toBe(0);
   });
 });

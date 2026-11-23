@@ -321,8 +321,12 @@ export const promptsController = {
     // values from the URL, so the backend cannot distinguish them.
     // Per spec, treat key-absent as `null` (root-level prompts).
     const folderIdRaw = req.query["folderId"];
-    const folderId =
-      folderIdRaw === undefined || folderIdRaw === "" ? null : (asString(folderIdRaw) ?? null);
+    // A parameter given twice is a list: it names no folder, and it is not the root either.
+    if (folderIdRaw !== undefined && typeof folderIdRaw !== "string") {
+      res.status(400).json({ error: "folderId must be a single value" });
+      return;
+    }
+    const folderId = folderIdRaw === undefined || folderIdRaw === "" ? null : folderIdRaw;
     const result = await engine.list(folderId);
     res.json(result);
   }),

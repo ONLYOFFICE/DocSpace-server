@@ -928,6 +928,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "The folder ID is missing.",
     "404": "No prompt folder has this ID.",
   },
+  aiPromptsList: { "400": "`folderId` is given more than once." },
   aiPromptsGetById: { "400": "The prompt ID is missing." },
   aiPromptsGetFolderById: { "400": "The folder ID is missing." },
 

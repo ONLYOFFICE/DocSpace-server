@@ -70,7 +70,11 @@ export const textToDocxController = {
       res.status(400).json({ error: "title and content are required" });
       return;
     }
-    if (typeof folderId !== "number" && typeof folderId !== "string") {
+    if (
+      (typeof folderId !== "number" && typeof folderId !== "string") ||
+      // The Files side reads a number as an integer id; a fraction made it throw.
+      (typeof folderId === "number" && !Number.isInteger(folderId))
+    ) {
       res.status(400).json({ error: "folderId is required" });
       return;
     }

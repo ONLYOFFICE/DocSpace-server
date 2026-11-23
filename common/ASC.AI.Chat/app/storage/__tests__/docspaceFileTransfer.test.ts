@@ -119,9 +119,8 @@ describe("mediaTypeOf", () => {
     expect(mediaTypeOf(title)).toBe(type);
   });
 
-  // DEFECT stor1-7: the table is a plain object, so an extension that names a member of Object.prototype answers that member, not a media type — expected application/octet-stream (the function's doc comment, docspaceFileTransfer.ts:65)
-  it("answers a member of Object.prototype for an extension that names one", () => {
-    expect(mediaTypeOf("notes.constructor")).toBe(Object);
+  it("answers octet-stream for an extension that names a member of Object.prototype", () => {
+    expect(mediaTypeOf("notes.constructor")).toBe("application/octet-stream");
   });
 });
 

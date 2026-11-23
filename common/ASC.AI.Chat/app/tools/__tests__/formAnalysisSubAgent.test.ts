@@ -506,7 +506,6 @@ describe("formAnalysisSubAgent.callTool analysis", () => {
     ]);
   });
 
-  // DEFECT tools-7: the round budget is 20 while the comment above MAX_ROUNDS says "10 matches common agent defaults" — expected the comment and the constant to agree (formAnalysisSubAgent.ts:54-56, [claims.md §1])
   it("stops after 20 rounds without an answer", async () => {
     useProfile("p-forms");
     answerFormTools();

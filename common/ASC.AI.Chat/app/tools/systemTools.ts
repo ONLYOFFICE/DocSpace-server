@@ -371,7 +371,7 @@ export const systemToolsSource: ToolsAdapter & {
         `systemTools.getTools server=${type} -> ${items.length} tool(s) in ${Date.now() - started}ms: [${names}]`,
       );
     }
-    if (Object.keys(grouped).length === 0) {
+    if (Object.values(grouped).every((items) => items.length === 0)) {
       logger.warn(`systemTools.getTools(entityId=${entityId ?? "-"}) -> no tools from any server`);
     }
     return grouped;

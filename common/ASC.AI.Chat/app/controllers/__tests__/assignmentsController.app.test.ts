@@ -59,19 +59,17 @@ beforeEach(() => {
 const AUTH = { Authorization: "Bearer t" };
 
 describe("assignments routes through the whole app", () => {
-  // DEFECT ctl-26: body-parser leaves `req.body` as `{}` for a request without a body, unpackPositional
-  // wraps that `{}` as the actionType, and `?? req.query.actionType` never runs — so the query form the
-  // controller reads answers 400 — expected `DELETE assignments/unassign?actionType=Chat` to unassign, as
-  // cascade-profile-delete does with its query (assignmentsController.ts unassign; ts-ai-failure-paths.md §4)
-  it("answers 400 to an unassign that names the action in the query only", async () => {
+  it("unassigns the action named in the query of a request without a body, as the document says", async () => {
+    engine.unassign.mockResolvedValue(undefined);
+
     const reply = await request(app)
       .delete(`${API_PREFIX}/assignments/unassign?actionType=Chat`)
       .set(AUTH);
 
-    expect(reply.status).toBe(400);
-    expect(reply.body).toEqual({ error: "actionType required" });
-    expect(engine.unassign).not.toHaveBeenCalled();
-    expect(responseViolations("aiAssignmentsUnassign", 400, reply.body)).toEqual([]);
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual({ success: true });
+    expect(engine.unassign).toHaveBeenCalledWith("Chat");
+    expect(responseViolations("aiAssignmentsUnassign", 200, reply.body)).toEqual([]);
   });
 
   it("unassigns the action sent as a JSON string body", async () => {

@@ -767,16 +767,14 @@ describe("threadsController.regenerateTitle", () => {
     expect(published("aiThreadsRegenerateTitle", reply)).toEqual([]);
   });
 
-  // DEFECT data-14: an empty threadId passes (`typeof === "string"` only) and reaches the engine — expected 400 as every other threads route answers for an empty threadId (ts-ai-failure-paths.md §4)
-  it("hands an empty threadId to the engine", async () => {
-    engine.regenerateTitle.mockResolvedValue("T");
-
+  it("answers 400 for an empty threadId, before the engine", async () => {
     const reply = await invoke(threadsController.regenerateTitle, {
       body: ["", { id: profile.id }],
     });
 
-    expect(reply.status).toBe(200);
-    expect(engine.regenerateTitle).toHaveBeenCalledWith("", profile);
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "threadId (string) and profile (object) are required" });
+    expect(engine.regenerateTitle).not.toHaveBeenCalled();
   });
 
   it("answers 404 for a profile the store does not have", async () => {

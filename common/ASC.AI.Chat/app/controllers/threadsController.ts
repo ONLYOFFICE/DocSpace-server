@@ -346,7 +346,11 @@ export const threadsController = {
     // The engine dereferences `profile` (and needs a real threadId); a missing
     // profile makes it throw a TypeError → 500 (Bug 82828). Validate both up
     // front and return a clean 400.
-    if (typeof args.threadId !== "string" || !isObject(args.profile)) {
+    if (
+      typeof args.threadId !== "string" ||
+      args.threadId.length === 0 ||
+      !isObject(args.profile)
+    ) {
       res.status(400).json({
         error: "threadId (string) and profile (object) are required",
       });

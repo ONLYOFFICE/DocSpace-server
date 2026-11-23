@@ -5531,6 +5531,16 @@
               }
             }
           },
+          "400": {
+            "description": "`folderId` is given more than once.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
             "content": {

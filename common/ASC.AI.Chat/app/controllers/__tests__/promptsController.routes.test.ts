@@ -379,17 +379,16 @@ describe("promptsController.list", () => {
     expect(published("aiPromptsList", reply)).toEqual([]);
   });
 
-  // DEFECT data-1: a folderId repeated in the query (`?folderId=a&folderId=b`) lists the root prompts with 200 — expected 400 naming folderId (ts-ai-failure-paths.md §4: a field of the wrong type answers 400, never a 200 with something else)
-  it("lists the root prompts when folderId is repeated in the query", async () => {
-    engine.list.mockResolvedValue([]);
-
+  it("answers 400 when folderId is repeated in the query, instead of listing the root", async () => {
     const reply = await invoke(promptsController.list, {
       method: "GET",
       query: { folderId: ["f1", "f2"] },
     });
 
-    expect(reply.status).toBe(200);
-    expect(engine.list).toHaveBeenCalledWith(null);
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "folderId must be a single value" });
+    expect(responseViolations("aiPromptsList", 400, reply.body)).toEqual([]);
+    expect(engine.list).not.toHaveBeenCalled();
   });
 });
 

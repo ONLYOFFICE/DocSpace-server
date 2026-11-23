@@ -146,7 +146,11 @@ export const assignmentsController = {
 
   unassign: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["actionType"] as const);
-    const raw = args.actionType ?? asString(req.query["actionType"]);
+    // A request without a body reaches here as `{}`, which is no action type: the query
+    // parameter the document promises is read then.
+    const sent: unknown = args.actionType;
+    const noBody = sent === undefined || (isObject(sent) && Object.keys(sent).length === 0);
+    const raw = noBody ? asString(req.query["actionType"]) : sent;
     const actionType = asActionType(raw);
     if (!actionType) {
       res.status(400).json({ error: "actionType required" });

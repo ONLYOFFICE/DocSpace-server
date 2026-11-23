@@ -107,18 +107,26 @@ describe("textToDocxController.start", () => {
     expect(upstream.seen[0]?.body).toEqual({ ...valid, folderId: "my" });
   });
 
-  // DEFECT passthrough-14: an empty, negative or fractional folderId passes the check (any string or number does) and is published — expected 400 naming folderId, a positive integer or a non-empty id (ts-ai-failure-paths.md §4; TextToDocxController.PublishAsync reads a number with GetInt32)
+  // The AI service refuses these with 400 (MdTextToDocxTaskQueue; ASC.AI.Tests, TextToDocxPublishTests).
   it.each([
     ["an empty string", ""],
     ["a negative number", -1],
-    ["a fraction", 1.5],
-  ])("publishes a folderId that is %s", async (_what, folderId) => {
+  ])("hands a folderId that is %s to the AI service, which refuses it", async (_what, folderId) => {
     aiAnswers(204);
 
     const reply = await start({ ...valid, folderId });
 
     expect(reply.status).toBe(202);
     expect(upstream.seen[0]?.body).toEqual({ ...valid, folderId });
+  });
+
+  // The Files side reads a number as an integer: a fraction made it throw instead of refuse.
+  it("answers 400 for a folderId that is a fraction, before the call", async () => {
+    const reply = await start({ ...valid, folderId: 1.5 });
+
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "folderId is required" });
+    expect(upstream.seen).toEqual([]);
   });
 
   const required = { error: "title and content are required" };

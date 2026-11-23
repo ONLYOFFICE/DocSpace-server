@@ -500,8 +500,6 @@ describe("assignmentsController.unassign", () => {
     ["an array", ["Chat"], {}],
     ["a named null", { actionType: null }, {}],
     ["a named number", { actionType: 3 }, {}],
-    // `{}` lacks the key, so unpackPositional wraps the whole object as the value and the query is not read.
-    ["{} with the action in the query", {}, { actionType: "Chat" }],
     ["a named number with the action in the query", { actionType: 3 }, { actionType: "Chat" }],
     ["an unknown action in the query", undefined, { actionType: "Painting" }],
     ["an array in the query", undefined, { actionType: ["Chat"] }],
@@ -512,6 +510,20 @@ describe("assignmentsController.unassign", () => {
     expect(reply.body).toEqual({ error: "actionType required" });
     expect(engine.unassign).not.toHaveBeenCalled();
     expect(responseViolations("aiAssignmentsUnassign", 400, reply.body)).toEqual([]);
+  });
+
+  // A request without a body arrives as `{}`: the action is then read from the query.
+  it("unassigns the action named in the query when the body is {}", async () => {
+    engine.unassign.mockResolvedValue(undefined);
+
+    const reply = await invoke(handler, {
+      method: "DELETE",
+      query: { actionType: "Chat" },
+      body: {},
+    });
+
+    expect(reply.status).toBe(200);
+    expect(engine.unassign).toHaveBeenCalledWith("Chat");
   });
 
   it("answers 500 when the engine fails", async () => {

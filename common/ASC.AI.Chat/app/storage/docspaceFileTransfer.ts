@@ -66,7 +66,11 @@ const MEDIA_TYPES: Record<string, string> = {
 /** The media type a file name implies, or octet-stream. */
 export function mediaTypeOf(title: string): string {
   const ext = title.includes(".") ? title.split(".").pop()?.toLowerCase() : undefined;
-  return (ext === undefined ? undefined : MEDIA_TYPES[ext]) ?? "application/octet-stream";
+  // An own entry only: "notes.constructor" must not answer a member of Object.prototype.
+  return (
+    (ext !== undefined && Object.hasOwn(MEDIA_TYPES, ext) ? MEDIA_TYPES[ext] : undefined) ??
+    "application/octet-stream"
+  );
 }
 
 /**

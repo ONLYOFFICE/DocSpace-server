@@ -458,8 +458,7 @@ describe("systemToolsSource.getTools", () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  // DEFECT tools-4: when every configured server fails the answer is `{ docspace: [], other: [] }` and the "no tools from any server" warning is not written — it fires only when no server is configured (systemTools.ts:379)
-  it("does not warn about missing tools when every server fails", async () => {
+  it("warns about missing tools when every server fails", async () => {
     upstream.use(
       http.post(DOCSPACE_URL, () => HttpResponse.error()),
       http.post(OTHER_URL, () => HttpResponse.error()),
@@ -470,8 +469,8 @@ describe("systemToolsSource.getTools", () => {
       `MCP fetch failed for ${DOCSPACE_URL}: Failed to fetch`,
     );
     expect(logger.error).toHaveBeenCalledWith(`MCP fetch failed for ${OTHER_URL}: Failed to fetch`);
-    expect(logger.warn).not.toHaveBeenCalledWith(
-      expect.stringContaining("no tools from any server"),
+    expect(logger.warn).toHaveBeenCalledWith(
+      "systemTools.getTools(entityId=1) -> no tools from any server",
     );
   });
 
