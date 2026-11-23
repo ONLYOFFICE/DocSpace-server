@@ -27,7 +27,7 @@ const swallowingCatch = [
 const processEnv = {
   selector: "MemberExpression[object.name='process'][property.name='env']",
   message:
-    "Read the environment in config/index.ts, through a reader with both bounds and a default (ts-ai-config.md §1).",
+    "Read the environment in config/index.ts, through a reader with both bounds and a default (ts-ai-style.md, Config).",
 };
 
 export default tseslint.config(

@@ -297,6 +297,11 @@ edit here. Distribute every applicable rule to a reviewer:
   `[LoggerMessage]` with camelCase parameters (the analyzer is blind to partial-method parameters),
   FusionCache with explicit duration and `tenantId` in key and tag, tags through `CacheExtention`,
   no new named `HttpClient`, JSON options cached, no sync-over-async.
+- **A-TS** — `ts-ai-style.md`, `ts-ai-failure-paths.md` and `ts-ai-tests.md`, only if the branch
+  changes `.ts` files of `common/ASC.AI.Chat`. Includes: a `.catch()` that answers a constant, a
+  refusal of the engine sent with 200, work before the access gate, a cast on a body field, an
+  answer that echoes a storage object, a new entry or a larger count in `eslint-suppressions.json`,
+  a fix without a test that fails without it.
 - **A2** — `openapi-endpoint-docs.md` and `openapi-dto-docs.md`, only if controllers, DTOs,
   `ApiModels` or enums changed. Walk each rule's **Definition of done** checklist per changed
   operation/property; `<summary>` = title, `<remarks>` = description (inverted!), every code named
@@ -593,6 +598,13 @@ dotnet build <csproj> --no-dependencies -p:EnforceCodeStyleInBuild=true
 dotnet format style <csproj> --include <changed .cs files> --verify-no-changes
 ```
 
+For a branch that changes `common/ASC.AI.Chat`, run the service's own gate as well; a failure of
+any of its four steps is a finding under `ts-ai-style.md` (Checks):
+
+```bash
+cd common/ASC.AI.Chat && yarn check    # typecheck, lint, format:check, tests
+```
+
 New warnings in the changed files are findings under `csharp-style.md`. `dotnet format` is the
 only check that sees naming (IDE1006); neither sees partial-method parameters of `*Logger` classes —
 eyeball those.
@@ -770,7 +782,8 @@ Hand-over check
   re-check of the round with its fresh reviewer: .. new>; all fixed in one batch, re-checked: .. new
 - lenses run once: A (rules: ..), A0, C, F, S; matrices with rows: M2 = .., M4 = .., ...
 - open: 0 blockers, 0 rule violations; remarks and questions not fixed: under Known limitations
-- gate: scan.py --gate exit 0 on the final tree; built without new warnings: <projects | no .cs changed>
+- gate: scan.py --gate exit 0 on the final tree; built without new warnings: <projects | no .cs changed>;
+  yarn check: <green | not run: no ASC.AI.Chat change>
 - coverage: files no pass read in full: <list | none>
 - not verified: <suites, platforms, profiles>
 
