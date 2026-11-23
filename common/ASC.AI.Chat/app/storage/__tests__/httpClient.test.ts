@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
 import {
   delay,
@@ -132,20 +132,27 @@ describe("aiService", () => {
 });
 
 describe("withTimeout", () => {
-  it("aborts with the timeout as the reason once the time is up", async () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("aborts with the timeout as the reason once the time is up", () => {
     const { signal, cancel } = withTimeout(undefined, 10);
 
-    await new Promise((resolve) => signal.addEventListener("abort", resolve, { once: true }));
+    vi.advanceTimersByTime(10);
 
     expect(String(signal.reason)).toContain("upstream timeout after 10ms");
     cancel();
   });
 
-  it("does not fire after cancel", async () => {
+  it("does not fire after cancel", () => {
     const { signal, cancel } = withTimeout(undefined, 10);
     cancel();
 
-    await new Promise((resolve) => setTimeout(resolve, 30));
+    vi.advanceTimersByTime(30);
 
     expect(signal.aborted).toBe(false);
   });

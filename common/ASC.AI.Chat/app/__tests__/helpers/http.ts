@@ -62,18 +62,23 @@ export interface Reply {
  * Calls one Express handler (a controller method, a middleware) with a request and a response
  * made by node-mocks-http, waits for it, and answers what a client would have received.
  * Whatever sits in front of the handler in the real app (parsers, the auth gate, the request
- * context) is not run: for those, hand `createApp()` to supertest.
+ * context) is not run: for those, hand `createApp()` to supertest. It answers when the handler
+ * returns, so a stream the client closes half-way needs a response of the test's own.
  */
 export async function invoke(handler: unknown, init: CallInit = {}): Promise<Reply> {
   const req = createRequest({
     method: init.method ?? "POST",
     url: init.url ?? "/",
-    body: init.body as never,
     query: init.query ?? {},
     params: init.params ?? {},
     headers: init.headers ?? {},
     cookies: init.cookies ?? {},
   });
+  // Set after the request is made: node-mocks-http replaces a falsy body (null, "", 0, false)
+  // with {}, and those bodies are what the strict:false JSON parser of the app lets through.
+  if ("body" in init) {
+    req.body = init.body;
+  }
   const res = createResponse({ eventEmitter: EventEmitter, req });
   let nextError: unknown;
   await (handler as RequestHandler)(req, res, (err?: unknown) => {

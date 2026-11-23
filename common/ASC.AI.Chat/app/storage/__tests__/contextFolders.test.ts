@@ -31,6 +31,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import logger from "../../log.js";
 
 const { getFolderInfoCached } = vi.hoisted(() => ({ getFolderInfoCached: vi.fn() }));
 
@@ -182,6 +183,28 @@ describe("resolveLocation", () => {
     expect(await resolveLocation("4")).toEqual({ id: "4" });
     getFolderInfoCached.mockResolvedValueOnce(undefined);
     expect(await resolveLocation("4")).toEqual({ id: "4" });
+  });
+});
+
+describe("a read that rejects with something other than an Error", () => {
+  beforeEach(() => {
+    getFolderInfoCached.mockReset();
+  });
+
+  it("leaves the context folder out and logs what was thrown", async () => {
+    getFolderInfoCached.mockRejectedValue("down");
+    expect(await resolveContextFolders(["1"])).toEqual([]);
+    expect(vi.mocked(logger.warn).mock.calls).toEqual([
+      ["context folders: folder 1 not readable by the caller, left out: down"],
+    ]);
+  });
+
+  it("keeps the location by its id and logs what was thrown", async () => {
+    getFolderInfoCached.mockRejectedValue("down");
+    expect(await resolveLocation("4")).toEqual({ id: "4" });
+    expect(vi.mocked(logger.warn).mock.calls).toEqual([
+      ["context: location 4 not readable by the caller, described by its id: down"],
+    ]);
   });
 });
 

@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import logger from "../../log.js";
 
 const filesApiGet = vi.fn();
 const resolveAiProjectEntityId = vi.fn();
@@ -128,6 +129,17 @@ describe("applyAiProjectChatContext outside a project", () => {
     expect(body.actionArgs.contextRooms[0]?.skills).toEqual(sent);
   });
 
+  it("keeps the skills sent when the catalog read rejects with something other than an Error", async () => {
+    getRoomsSkills.mockRejectedValue("down");
+    const sent = [{ id: "f1", name: "old", description: "" }];
+    const body = { actionArgs: { contextRooms: [{ cloud: "docspace", id: "7", skills: sent }] } };
+    expect(await applyAiProjectChatContext(body)).toBeNull();
+    expect(body.actionArgs.contextRooms[0]?.skills).toEqual(sent);
+    expect(vi.mocked(logger.warn).mock.calls).toEqual([
+      ["context rooms 7: skills not refreshed, the round keeps the ones sent: down"],
+    ]);
+  });
+
   it("leaves a body without context rooms alone", async () => {
     const body = {
       entityId: "3",
@@ -207,6 +219,24 @@ describe("applyAiProjectChatContext inside a project", () => {
     expect(await applyAiProjectChatContext(body)).toBeNull();
     expect((body["actionArgs"] as Record<string, unknown>)["contextRooms"]).toEqual([
       { cloud: "docspace", id: "7", skills: [] },
+    ]);
+  });
+
+  it("runs the round without the skills when the catalog read rejects with something other than an Error", async () => {
+    const notAnError: unknown = "down";
+    filesApiGet.mockImplementation((path: string) => {
+      if (path === "rooms/42") return Promise.resolve(projectRoom());
+      if (path === "rooms/42/sources") return Promise.resolve(sources);
+      if (path === "rooms/42/model") return Promise.resolve({ profileId: null });
+      return Promise.reject(notAnError as Error);
+    });
+    const body: Record<string, unknown> = { entityId: "42", actionArgs: {} };
+    expect(await applyAiProjectChatContext(body)).toBeNull();
+    expect((body["actionArgs"] as Record<string, unknown>)["contextRooms"]).toEqual([
+      { cloud: "docspace", id: "7", skills: [] },
+    ]);
+    expect(vi.mocked(logger.warn).mock.calls).toEqual([
+      ["AI project 42: skills not read, the round runs without them: down"],
     ]);
   });
 

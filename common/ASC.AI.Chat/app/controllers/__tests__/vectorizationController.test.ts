@@ -1,0 +1,176 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+import { describe, expect, it, vi } from "vitest";
+import { invoke } from "../../__tests__/helpers/http.js";
+import {
+  docspaceError,
+  http,
+  HttpResponse,
+  useUpstream,
+} from "../../__tests__/helpers/upstream.js";
+import { responseViolations } from "../../__tests__/helpers/schema.js";
+import { listen, send } from "./openaiPassthrough.harness.js";
+
+// The vectorization proxy: the body goes as it came to `POST internal/ai/vectorization/tasks`
+// (products/ASC.AI/Server/Api/VectorizationController.cs, StartTaskAsync), stubbed with msw,
+// and its answer comes back in the DocSpace envelope.
+
+const upstream = useUpstream();
+const { aiServiceBaseUrl } = await import("../../storage/httpClient.js");
+const { vectorizationController } = await import("../vectorizationController.js");
+
+// CORS from the developer's appsettings would add headers to every answer.
+vi.stubEnv("core__cors", "");
+// The access log is not what these tests are about.
+vi.mock("morgan", () => ({
+  default: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+const { createApp } = await import("../../createApp.js");
+
+const TASKS = `${aiServiceBaseUrl}/internal/ai/vectorization/tasks`;
+
+// The envelope the .NET API wraps the empty result of StartTaskAsync in.
+const envelope = { count: 0, status: 0, statusCode: 200 };
+
+const startTask = (body: unknown) => invoke(vectorizationController.startTask, { body });
+
+describe("vectorizationController.startTask", () => {
+  it("forwards the body and answers the envelope as it came", async () => {
+    upstream.use(http.post(TASKS, () => HttpResponse.json(envelope)));
+
+    const reply = await startTask({ files: [1, 2] });
+
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual(envelope);
+    expect(responseViolations("aiVectorizationStartTask", 200, reply.body)).toEqual([]);
+    expect(upstream.seen).toEqual([
+      {
+        method: "POST",
+        path: "/internal/ai/vectorization/tasks",
+        headers: { "content-type": "application/json" },
+        body: { files: [1, 2] },
+      },
+    ]);
+  });
+
+  it("keeps a response field of the envelope", async () => {
+    upstream.use(http.post(TASKS, () => HttpResponse.json({ ...envelope, response: null })));
+
+    const reply = await startTask({ files: [1] });
+
+    expect(reply.body).toEqual({ ...envelope, response: null });
+  });
+
+  // DEFECT passthrough-15: the body is not checked here (`req.body ?? {}` is forwarded whatever it is) — expected the body narrowed and a 400 naming `files` before the call (ts-ai-failure-paths.md §4)
+  it.each([
+    ["a string", "files"],
+    ["an array", [1, 2]],
+    ["an empty object", {}],
+    ["files that are not a list", { files: "1" }],
+    ["an empty files list", { files: [] }],
+  ])("forwards a body that is %s to the AI service unchecked", async (_what, body) => {
+    upstream.use(http.post(TASKS, () => HttpResponse.json(envelope)));
+
+    await startTask(body);
+
+    expect(upstream.seen[0]?.body).toEqual(body);
+  });
+
+  // DEFECT passthrough-16: the AI service's 400 (no files) and 404 (a file that does not exist) are relayed with their status, which aiVectorizationStartTask does not publish — expected them in the published responses (ts-ai-tests.md §2; VectorizationController.StartTaskAsync declares 400, 403 and 404)
+  it.each([
+    [400, "Bad Request"],
+    [404, "Not Found"],
+  ])("relays the AI service's %i, which the operation does not publish", async (status, error) => {
+    upstream.use(http.post(TASKS, () => docspaceError(status)));
+
+    const reply = await startTask({ files: [1] });
+
+    expect(reply.status).toBe(status);
+    expect(reply.body).toEqual({ error });
+    expect(responseViolations("aiVectorizationStartTask", status, reply.body)).toEqual([
+      `aiVectorizationStartTask publishes no JSON schema for status ${status}`,
+    ]);
+  });
+
+  it.each([
+    [403, "Forbidden"],
+    [500, "Internal Server Error"],
+  ])("answers the AI service's %i with its reason phrase only", async (status, error) => {
+    upstream.use(http.post(TASKS, () => docspaceError(status, "at Vectorization.Publish()")));
+
+    const reply = await startTask({ files: [1] });
+
+    expect(reply.status).toBe(status);
+    expect(reply.body).toEqual({ error });
+    expect(responseViolations("aiVectorizationStartTask", status, reply.body)).toEqual([]);
+  });
+
+  // DEFECT passthrough-17: an AI service that answers 204 or a body that is not JSON is relayed as 200 with `null` or a JSON string, which does not match the published envelope — expected the envelope, or a 5xx for an answer of the wrong shape (ts-ai-failure-paths.md §1; ts-ai-tests.md §2)
+  it.each([
+    ["204 without a body", () => new HttpResponse(null, { status: 204 }), null],
+    ["a text body", () => new HttpResponse("ok", { status: 200 }), "ok"],
+  ])("relays an answer of %s as 200", async (_what, answer, body) => {
+    upstream.use(http.post(TASKS, answer));
+
+    const reply = await startTask({ files: [1] });
+
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual(body);
+    expect(responseViolations("aiVectorizationStartTask", 200, reply.body)).toEqual([
+      "/ must be object",
+    ]);
+  });
+});
+
+describe("POST vectorization/tasks through the application", () => {
+  // Through a raw socket: supertest's own request would be intercepted by msw.
+  it("forwards an empty object for a JSON null body", async () => {
+    upstream.use(http.post(TASKS, () => HttpResponse.json(envelope)));
+    const server = await listen(createApp());
+    try {
+      const reply = await send(server.port, {
+        path: "/api/2.0/ai/vectorization/tasks",
+        headers: { Authorization: "Bearer caller-token", "Content-Type": "application/json" },
+        body: "null",
+      }).done;
+
+      expect(reply.status).toBe(200);
+      expect(JSON.parse(reply.body)).toEqual(envelope);
+      expect(upstream.seen.map((r) => r.body)).toEqual([{}]);
+    } finally {
+      await server.close();
+      vi.unstubAllEnvs();
+    }
+  });
+});

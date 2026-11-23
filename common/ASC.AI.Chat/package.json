@@ -16,7 +16,7 @@
     "test:coverage": "vitest run --coverage",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "yarn typecheck && yarn lint && yarn format:check && yarn test"
+    "check": "yarn typecheck && yarn lint && yarn format:check && yarn test:coverage"
   },
   "dependencies": {
     "@a2a-js/sdk": "^1.3.0",
