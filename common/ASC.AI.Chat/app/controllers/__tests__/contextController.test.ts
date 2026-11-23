@@ -32,10 +32,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { ContextEngine } from "@onlyoffice/ai-chat/core";
+import { invoke } from "../../__tests__/helpers/http.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import type { Reply } from "../../__tests__/helpers/http.js";
-import { call } from "./promptsControllerData.helpers.js";
 
 const engine = engineMock<ContextEngine>();
 vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
@@ -71,7 +71,7 @@ describe.each([
   it("answers the folders the engine lists", async () => {
     engine[method].mockResolvedValue(folders);
 
-    const reply = await call(contextController[method], { method: "GET" });
+    const reply = await invoke(contextController[method], { method: "GET" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(folders);
@@ -83,7 +83,7 @@ describe.each([
       new DocspaceApiHttpError(403, "Forbidden", "http://proxy.internal/api"),
     );
 
-    const reply = await call(contextController[method], { method: "GET" });
+    const reply = await invoke(contextController[method], { method: "GET" });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -99,7 +99,7 @@ describe("contextController.getRoomSkills", () => {
   ])("lists the skills of the room %s", async (_what, query, cloud) => {
     engine.getRoomSkills.mockResolvedValue(skills);
 
-    const reply = await call(contextController.getRoomSkills, { method: "GET", query });
+    const reply = await invoke(contextController.getRoomSkills, { method: "GET", query });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(skills);
@@ -110,7 +110,7 @@ describe("contextController.getRoomSkills", () => {
   it.each([[{}], [{ roomId: "" }], [{ roomId: ["5", "6"] }]])(
     "answers 400 for the query %j",
     async (query) => {
-      const reply = await call(contextController.getRoomSkills, { method: "GET", query });
+      const reply = await invoke(contextController.getRoomSkills, { method: "GET", query });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: "roomId required" });
@@ -124,7 +124,7 @@ describe("contextController.getRoomSkills", () => {
       new DocspaceApiHttpError(404, "Not Found", "http://proxy.internal"),
     );
 
-    const reply = await call(contextController.getRoomSkills, {
+    const reply = await invoke(contextController.getRoomSkills, {
       method: "GET",
       query: { roomId: "9" },
     });
@@ -142,7 +142,7 @@ describe("contextController.getRoomSkill", () => {
   ])("answers the Markdown of the skill %s", async (_what, query, cloud) => {
     engine.getRoomSkill.mockResolvedValue("---\nname: contract-review\n---\nBody");
 
-    const reply = await call(contextController.getRoomSkill, { method: "GET", query });
+    const reply = await invoke(contextController.getRoomSkill, { method: "GET", query });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toBe("---\nname: contract-review\n---\nBody");
@@ -158,7 +158,7 @@ describe("contextController.getRoomSkill", () => {
     [{ roomId: "5", skillId: "" }],
     [{ roomId: "5", skillId: ["1", "2"] }],
   ])("answers 400 for the query %j", async (query) => {
-    const reply = await call(contextController.getRoomSkill, { method: "GET", query });
+    const reply = await invoke(contextController.getRoomSkill, { method: "GET", query });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "roomId and skillId required" });
@@ -169,7 +169,7 @@ describe("contextController.getRoomSkill", () => {
   it("answers 500 without details when the read fails", async () => {
     engine.getRoomSkill.mockRejectedValue(new Error("read failed at http://proxy.internal"));
 
-    const reply = await call(contextController.getRoomSkill, {
+    const reply = await invoke(contextController.getRoomSkill, {
       method: "GET",
       query: { roomId: "5", skillId: "5678" },
     });

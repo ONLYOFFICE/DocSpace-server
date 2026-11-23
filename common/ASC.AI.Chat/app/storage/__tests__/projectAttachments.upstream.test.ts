@@ -42,7 +42,7 @@ import {
   MAX_COPY_BYTES,
   uploadInChunks,
 } from "../projectAttachments.js";
-import { fileDto, inRequest } from "./docspaceFilesApi.fixtures.js";
+import { fileDto, inRequest } from "../../__tests__/fixtures/filesApi.js";
 
 // The copy of a portal file into an AI project over a stubbed network: the real httpClient.js,
 // requestContext.js, docspaceFilesApi.js and roomSkills.js download run. Routes:

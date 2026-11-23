@@ -31,7 +31,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import os from "node:os";
+import path from "node:path";
 import { vi } from "vitest";
+
+// The service reads the appsettings of the installation it runs in (config/config.json points
+// at ../buildtools/config). A test must see the same values on every machine, so the directory
+// is pointed at one that does not exist: CORS off, no document agent, no MCP servers, the
+// defaults of the code everywhere. A test that needs a setting stubs its environment variable.
+process.env["app:appsettings"] = path.join(os.tmpdir(), "asc-ai-chat-no-appsettings");
+
+// config/index.ts prints these two lines each time it is loaded, and tests reload it often.
+// Not a spy: `restoreMocks` would undo one before the first test. Everything else still prints.
+const log = console.log.bind(console);
+console.log = (...args: unknown[]): void => {
+  const first = args[0];
+  if (typeof first === "string" && /^(NODE_ENV|environment): /.test(first)) {
+    return;
+  }
+  log(...args);
+};
 
 // One logger stub for every test file (vitest.config.ts, setupFiles): the real one creates
 // the log directory and writes files. A test that asserts on a line imports the logger and

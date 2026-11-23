@@ -43,7 +43,7 @@ import {
 import { getChatContextMisses } from "../../requestContext.js";
 import { AiServiceHttpError } from "../httpClient.js";
 import { HttpToolPrefsStorage } from "../toolPrefsStorage.js";
-import { inRound, scopeOf, snapshotOf } from "./chatContext.fixtures.js";
+import { inRound, scopeOf, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // GET internal/ai/tool-prefs, PUT internal/ai/tool-prefs/disabled, PUT
 // internal/ai/tool-prefs/allow-always: products/ASC.AI/Server/Api/ToolPreferenceStorageController.cs.

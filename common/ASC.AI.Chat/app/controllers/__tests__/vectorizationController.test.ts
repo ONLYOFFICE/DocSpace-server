@@ -40,7 +40,7 @@ import {
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
-import { listen, send } from "./openaiPassthrough.harness.js";
+import { listen, send } from "../../__tests__/helpers/rawHttp.js";
 
 // The vectorization proxy: the body goes as it came to `POST internal/ai/vectorization/tasks`
 // (products/ASC.AI/Server/Api/VectorizationController.cs, StartTaskAsync), stubbed with msw,
@@ -51,7 +51,6 @@ const { aiServiceBaseUrl } = await import("../../storage/httpClient.js");
 const { vectorizationController } = await import("../vectorizationController.js");
 
 // CORS from the developer's appsettings would add headers to every answer.
-vi.stubEnv("core__cors", "");
 // The access log is not what these tests are about.
 vi.mock("morgan", () => ({
   default: () => (_req: unknown, _res: unknown, next: () => void) => next(),

@@ -174,18 +174,6 @@ beforeEach(() => {
   answerAll();
 });
 
-/** Calls the handler with exactly this body: node-mocks-http turns a falsy body into `{}`. */
-function withBody(handler: unknown, body: unknown) {
-  return (req: { body: unknown }, res: unknown, next: unknown) => {
-    req.body = body;
-    return (handler as (req: unknown, res: unknown, next: unknown) => Promise<void>)(
-      req,
-      res,
-      next,
-    );
-  };
-}
-
 const forbidden = () => new AiServiceHttpError(403, "Forbidden", "AI is off", "http://ai/x");
 const AGENT = "agents/document/contract-reviewer";
 
@@ -325,7 +313,7 @@ describe("templatesController.install", () => {
   it("answers 403 from the AI access gate for any body, before any upstream call", async () => {
     mocks.readDisabled.mockRejectedValue(forbidden());
 
-    const reply = await invoke(withBody(templatesController.install, null));
+    const reply = await invoke(templatesController.install, { body: null });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -344,7 +332,7 @@ describe("templatesController.install", () => {
       ),
     );
 
-    const reply = await invoke(withBody(templatesController.install, "nonsense"));
+    const reply = await invoke(templatesController.install, { body: "nonsense" });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual(ROLE_REFUSAL);
@@ -423,7 +411,7 @@ describe("templatesController.install", () => {
   ])(
     "answers 400 for a body that is %s, after the role check, making no room",
     async (_what, body) => {
-      const reply = await invoke(withBody(templatesController.install, body));
+      const reply = await invoke(templatesController.install, { body });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual(BAD_ID);

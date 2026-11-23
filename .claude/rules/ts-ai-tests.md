@@ -28,8 +28,9 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
 
 - Mock what the module talks to: the network, the engine class of `@onlyoffice/ai-chat/core`, the
   storage a controller reads. Never mock the module under test or the function the test is about.
-- The harness is in `app/__tests__/helpers/` and stands on libraries; use it instead of a
-  hand-made request, response, `fetch` stub or engine class:
+- The harness is in `app/__tests__/helpers/`, shared fixtures of upstream DTOs in
+  `app/__tests__/fixtures/`. Both stand on libraries; use them instead of a hand-made request,
+  response, `fetch` stub, engine class or DTO literal:
 
   | Need | Helper | Library |
   |---|---|---|
@@ -38,13 +39,22 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   | answer the AI, Files or People service, a provider | `useUpstream()`, `http`, `docspace`, `docspaceError` in `upstream.ts` | msw |
   | stand in for an engine class | `engineMock<Engine>()`, `engineClass(engine)` in `engine.ts` | vitest-mock-extended |
   | an answer or a body against the published OpenAPI schema | `responseViolations(operationId, status, body)`, `requestViolations` in `schema.ts` | ajv |
+  | the frames of an NDJSON or SSE answer, a value against a named schema | `ndjsonFrames`, `sseFrames` in `frames.ts`, `schemaViolations(name, value)` in `schema.ts` | ajv |
+  | bytes of an answer as they arrive, a chunked body, a client that hangs up | `listen(app)`, `send(port, request)` in `rawHttp.ts` | node:net |
+  | an MCP server the library's own client talks to | `mcpStub.ts` | msw |
+  | `FolderDto`, `FileDto`, `EmployeeFullDto` of the Files and People API | `fixtures/filesApi.ts` | |
+  | the chat context aggregate and a primed round | `fixtures/chatContext.ts` (`chatContextDto`, `inRound`) | |
+  | `ProfileDto` and a model provider | `fixtures/providers.ts` | |
   | the whole app: parsers, gate, routes, 404 | `request(createApp())` | supertest |
   | waits between polls and retries | `useFastTimers()` in `time.ts` | vitest fake timers |
 
   `promptsController.test.ts`, `storage/__tests__/httpClient.test.ts` and `app/__tests__/app.test.ts`
   show one of each.
-- The logger is stubbed once for every file by `app/__tests__/setup.ts`. A test that asserts on a
-  line imports the logger and reads the spy; do not declare the same `vi.mock` again.
+- `app/__tests__/setup.ts` runs before every file. It stubs the logger (a test that asserts on a
+  line imports the logger and reads the spy; do not declare the same `vi.mock` again) and points
+  the appsettings directory at one that does not exist, so every machine sees the defaults of the
+  code: CORS off, no document agent, no MCP servers. A test that needs a setting stubs its
+  environment variable; none pins the defaults again.
 - `invoke` hands the body over as given, `null` and `""` included. It answers when the handler
   returns: a stream the client closes half-way needs a response double of the test's own
   (`controllers/__tests__/aiController.harness.ts`).
@@ -53,9 +63,9 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   request is aborted and reads an answer to its end: a stalled or over-long body is a
   `ReadableStream` the handler drives from `request.signal`. A client that does not use the global
   `fetch` (the A2A SDK over undici) is not intercepted; mock its class.
-- A file that mocks an engine class with `vi.mock` imports `helpers/schema.js` dynamically, after
-  the controller: a static import loads `@onlyoffice/ai-chat/core` before the mock's variable
-  exists.
+- A file that mocks an engine class with `vi.mock` and also imports `helpers/schema.js` passes a
+  function, `engineClass(() => engine)`: the schema helper loads `@onlyoffice/ai-chat/core`, and
+  with it the mock's factory, before `engine` is initialized.
 - `useUpstream()` runs the real `httpClient.js` and fails the test on a request no handler answers.
   Prefer it to `vi.mock("../httpClient.js")` and to `vi.stubGlobal("fetch")`: most older tests mock
   `requestContext.js` and `storage/httpClient.js`, so they show nothing about which headers are
@@ -82,6 +92,11 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
 
 ## 4. Names and bug numbers
 
+- A module's tests are `<module>.test.ts`; a second file for one aspect of it is
+  `<module>.<aspect>.test.ts`, the aspect being what it exercises: `routes` (a controller's
+  handlers and their DTO tables), `upstream` (the real clients over the network stub), `stream`,
+  `edge` (the cases a first suite left). A helper used by one area stays next to its tests without
+  the `.test` suffix; one a second area needs moves to `app/__tests__/helpers/` or `fixtures/`.
 - A test name states the behaviour as a sentence: `it("answers 400 when toolNames is a string")`.
 - A test written for a tracked defect carries the number in its name, `(Bug 84402)`, so the test of
   a bug can be found by its number. No test written before this rule carries one.

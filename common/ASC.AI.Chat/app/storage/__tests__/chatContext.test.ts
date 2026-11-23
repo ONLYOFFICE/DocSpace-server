@@ -51,7 +51,12 @@ import { describeChatContextUsage, parseChatContext, primeChatContext } from "..
 import type { ChatContextRequest } from "../chatContext.js";
 import { AiServiceHttpError, aiService } from "../httpClient.js";
 import { dtoToProfile } from "../profilesStorage.js";
-import { chatContextDto, MESSAGE_ID, PROFILE_ID, THREAD_ID } from "./chatContext.fixtures.js";
+import {
+  chatContextDto,
+  MESSAGE_ID,
+  PROFILE_ID,
+  THREAD_ID,
+} from "../../__tests__/fixtures/chatContext.js";
 
 // GET internal/ai/chat-context: products/ASC.AI/Server/Api/ChatContextController.cs ReadAsync.
 const upstream = useUpstream();

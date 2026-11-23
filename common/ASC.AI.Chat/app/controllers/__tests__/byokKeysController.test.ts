@@ -31,11 +31,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { invoke } from "../../__tests__/helpers/http.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Reply } from "../../__tests__/helpers/http.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
 import { AiServiceHttpError } from "../../storage/httpClient.js";
-import { call } from "./promptsControllerData.helpers.js";
 
 const byokKeys = {
   readAll: vi.fn<() => Promise<unknown>>(),
@@ -71,7 +71,7 @@ describe("byokKeysController.list and providers", () => {
   it("answers the keys as the storage reads them", async () => {
     byokKeys.readAll.mockResolvedValue([key]);
 
-    const reply = await call(byokKeysController.list, { method: "GET" });
+    const reply = await invoke(byokKeysController.list, { method: "GET" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual([key]);
@@ -81,7 +81,7 @@ describe("byokKeysController.list and providers", () => {
   it("answers the providers as the storage reads them", async () => {
     byokKeys.readProviders.mockResolvedValue([provider]);
 
-    const reply = await call(byokKeysController.providers, { method: "GET" });
+    const reply = await invoke(byokKeysController.providers, { method: "GET" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual([provider]);
@@ -96,7 +96,7 @@ describe("byokKeysController.list and providers", () => {
       new AiServiceHttpError(403, "Forbidden", dotnetError("secret"), "u"),
     );
 
-    const reply = await call(byokKeysController[method], { method: "GET" });
+    const reply = await invoke(byokKeysController[method], { method: "GET" });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -108,7 +108,7 @@ describe("byokKeysController.set", () => {
   it("sets the key of the model named in the path", async () => {
     byokKeys.set.mockResolvedValue(key);
 
-    const reply = await call(byokKeysController.set, {
+    const reply = await invoke(byokKeysController.set, {
       method: "PUT",
       params: { id: "rev-1" },
       body: { provider: "anthropic", key: "sk-ant", extra: 1 },
@@ -135,7 +135,7 @@ describe("byokKeysController.set", () => {
   ])("sends a body that is %s with empty strings", async (_what, body, input) => {
     byokKeys.set.mockResolvedValue(key);
 
-    const reply = await call(byokKeysController.set, { params: { id: "rev-1" }, body });
+    const reply = await invoke(byokKeysController.set, { params: { id: "rev-1" }, body });
 
     expect(reply.status).toBe(200);
     expect(byokKeys.set).toHaveBeenCalledWith("rev-1", input);
@@ -144,7 +144,7 @@ describe("byokKeysController.set", () => {
   it("sends an empty id when the path has none", async () => {
     byokKeys.set.mockResolvedValue(key);
 
-    await call(byokKeysController.set, { body: { provider: "anthropic", key: "sk" } });
+    await invoke(byokKeysController.set, { body: { provider: "anthropic", key: "sk" } });
 
     expect(byokKeys.set).toHaveBeenCalledWith("", { provider: "anthropic", key: "sk" });
   });
@@ -160,7 +160,7 @@ describe("byokKeysController.set", () => {
       ),
     );
 
-    const reply = await call(byokKeysController.set, {
+    const reply = await invoke(byokKeysController.set, {
       params: { id: "rev-1" },
       body: { provider: "anthropic", key: "bad" },
     });
@@ -183,7 +183,7 @@ describe("byokKeysController.set", () => {
     async (_what, body) => {
       byokKeys.set.mockRejectedValue(new AiServiceHttpError(400, "Bad Request", body, "u"));
 
-      const reply = await call(byokKeysController.set, { params: { id: "rev-1" }, body: {} });
+      const reply = await invoke(byokKeysController.set, { params: { id: "rev-1" }, body: {} });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: "Bad Request" });
@@ -195,7 +195,7 @@ describe("byokKeysController.set", () => {
       new AiServiceHttpError(403, "Forbidden", dotnetError("secret"), "u"),
     );
 
-    const reply = await call(byokKeysController.set, { params: { id: "rev-1" }, body: {} });
+    const reply = await invoke(byokKeysController.set, { params: { id: "rev-1" }, body: {} });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -205,7 +205,7 @@ describe("byokKeysController.set", () => {
   it("answers 500 for an answer of the AI service the storage cannot map", async () => {
     byokKeys.set.mockRejectedValue(new Error("ai service returned invalid byok key"));
 
-    const reply = await call(byokKeysController.set, { params: { id: "rev-1" }, body: {} });
+    const reply = await invoke(byokKeysController.set, { params: { id: "rev-1" }, body: {} });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -218,7 +218,7 @@ describe("byokKeysController.delete", () => {
   it("deletes the key of the model named in the path and answers 204", async () => {
     byokKeys.delete.mockResolvedValue(undefined);
 
-    const reply = await call(byokKeysController.delete, {
+    const reply = await invoke(byokKeysController.delete, {
       method: "DELETE",
       params: { id: "rev-1" },
     });
@@ -235,7 +235,7 @@ describe("byokKeysController.delete", () => {
   it("sends an empty id when the path has none", async () => {
     byokKeys.delete.mockResolvedValue(undefined);
 
-    await call(byokKeysController.delete, { method: "DELETE" });
+    await invoke(byokKeysController.delete, { method: "DELETE" });
 
     expect(byokKeys.delete).toHaveBeenCalledWith("");
   });
@@ -243,7 +243,10 @@ describe("byokKeysController.delete", () => {
   it("relays a 404 of the AI service", async () => {
     byokKeys.delete.mockRejectedValue(new AiServiceHttpError(404, "Not Found", "", "u"));
 
-    const reply = await call(byokKeysController.delete, { method: "DELETE", params: { id: "x" } });
+    const reply = await invoke(byokKeysController.delete, {
+      method: "DELETE",
+      params: { id: "x" },
+    });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "Not Found" });

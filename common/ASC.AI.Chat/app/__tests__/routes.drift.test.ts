@@ -39,7 +39,6 @@ import { openApiDocument, publishedOperations } from "./helpers/schema.js";
 // document are built from the same catalog (`apiCatalog.ts`); these tests catch a route
 // registered in `routes.ts` without a `CUSTOM_ROUTE_DOCS` entry, and the reverse.
 
-vi.stubEnv("core__cors", "");
 const { createApp } = await import("../createApp.js");
 const { API_PREFIX, CUSTOM_ROUTE_DOCS, CUSTOM_TAG_DOCS, ENGINE_DOCS } =
   await import("../apiCatalog.js");

@@ -32,12 +32,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { ProfilesEngine } from "@onlyoffice/ai-chat/core";
+import { invoke } from "../../__tests__/helpers/http.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import type { Reply } from "../../__tests__/helpers/http.js";
 import { docspace, docspaceError, http, useUpstream } from "../../__tests__/helpers/upstream.js";
 import logger from "../../log.js";
-import { call } from "./promptsControllerData.helpers.js";
 
 const engine = engineMock<ProfilesEngine>();
 vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
@@ -118,7 +118,7 @@ describe.each([
     portalConfig(false);
     engineCall().mockResolvedValue({ success: true, profile: stored });
 
-    const reply = await call(profilesController[method], { body });
+    const reply = await invoke(profilesController[method], { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true, profile: stored });
@@ -131,7 +131,7 @@ describe.each([
   it("answers 403 on a portal whose profiles the AI gateway manages, before any other work (Bug 83112)", async () => {
     portalConfig(true);
 
-    const reply = await call(profilesController[method], {
+    const reply = await invoke(profilesController[method], {
       body: { ...body, baseUrl: "http://127.0.0.1", providerType: "external" },
     });
 
@@ -152,7 +152,7 @@ describe.each([
     async (_what, answer, status, error) => {
       upstream.use(http.get("*/internal/ai/config", answer));
 
-      const reply = await call(profilesController[method], { body });
+      const reply = await invoke(profilesController[method], { body });
 
       expect(reply.status).toBe(status);
       expect(reply.body).toEqual({ error });
@@ -166,7 +166,7 @@ describe.each([
     upstream.use(http.get("*/internal/ai/config", () => docspace("text")));
     engineCall().mockResolvedValue({ success: true, profile: stored });
 
-    const reply = await call(profilesController[method], { body });
+    const reply = await invoke(profilesController[method], { body });
 
     expect(reply.status).toBe(200);
   });
@@ -174,7 +174,7 @@ describe.each([
   it("refuses the external provider type with 400 (Bug 83114)", async () => {
     portalConfig(false);
 
-    const reply = await call(profilesController[method], {
+    const reply = await invoke(profilesController[method], {
       body: { ...body, providerType: "external" },
     });
 
@@ -202,7 +202,7 @@ describe.each([
   ])("answers 400 for a baseUrl that is %s", async (_what, baseUrl, error) => {
     portalConfig(false);
 
-    const reply = await call(profilesController[method], { body: { ...body, baseUrl } });
+    const reply = await invoke(profilesController[method], { body: { ...body, baseUrl } });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error });
@@ -214,7 +214,7 @@ describe.each([
     portalConfig(false);
     lookup.mockResolvedValue([{ address: "10.0.0.5", family: 4 }]);
 
-    const reply = await call(profilesController[method], { body });
+    const reply = await invoke(profilesController[method], { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "baseUrl host is not allowed" });
@@ -226,7 +226,7 @@ describe.each([
       Object.assign(new Error("getaddrinfo ENOTFOUND"), { code: "ENOTFOUND" }),
     );
 
-    const reply = await call(profilesController[method], { body });
+    const reply = await invoke(profilesController[method], { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "baseUrl host could not be resolved" });
@@ -241,7 +241,7 @@ describe.each([
   ])("refuses a key with %s as the engine's own refusal shape (Bug 84428)", async (_what, key) => {
     portalConfig(false);
 
-    const reply = await call(profilesController[method], { body: { ...body, key } });
+    const reply = await invoke(profilesController[method], { body: { ...body, key } });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({
@@ -265,7 +265,7 @@ describe.each([
     portalConfig(false);
     engineCall().mockResolvedValue({ success: true, profile: stored });
 
-    const reply = await call(profilesController[method], { body: { ...body, key } });
+    const reply = await invoke(profilesController[method], { body: { ...body, key } });
 
     expect(reply.status).toBe(200);
     expect(engineCall()).toHaveBeenCalledTimes(1);
@@ -280,7 +280,7 @@ describe.each([
     };
     engineCall().mockResolvedValue(refusal);
 
-    const reply = await call(profilesController[method], { body });
+    const reply = await invoke(profilesController[method], { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(refusal);
@@ -304,7 +304,7 @@ describe.each([
     portalConfig(false);
     engineCall().mockResolvedValue({ success: true, profile: stored });
 
-    const reply = await call(profilesController[method], { body: sent });
+    const reply = await invoke(profilesController[method], { body: sent });
 
     expect(reply.status).toBe(200);
     expect(engineCall()).toHaveBeenCalledWith(sent);
@@ -314,7 +314,7 @@ describe.each([
     portalConfig(false);
     engineCall().mockRejectedValue(new Error("probe failed for https://api.openai.com"));
 
-    const reply = await call(profilesController[method], { body });
+    const reply = await invoke(profilesController[method], { body });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -330,7 +330,7 @@ describe("profilesController.delete", () => {
   ])("deletes the profile named by %s", async (_what, init) => {
     engine.delete.mockResolvedValue(undefined);
 
-    const reply = await call(profilesController.delete, { method: "DELETE", ...init });
+    const reply = await invoke(profilesController.delete, { method: "DELETE", ...init });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -345,7 +345,7 @@ describe("profilesController.delete", () => {
     ["an id that is a number", { body: { id: 1 } }],
     ["a repeated query id", { query: { id: ["a", "b"] } }],
   ])("answers 400 for %s", async (_what, init) => {
-    const reply = await call(profilesController.delete, init);
+    const reply = await invoke(profilesController.delete, init);
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "id required" });
@@ -356,7 +356,7 @@ describe("profilesController.delete", () => {
   it("relays a 403 of the AI service", async () => {
     engine.delete.mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "x", "u"));
 
-    const reply = await call(profilesController.delete, { body: "p1" });
+    const reply = await invoke(profilesController.delete, { body: "p1" });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -370,7 +370,7 @@ describe("profilesController.listProviderModels", () => {
   it("lists the models of the provider named in the body", async () => {
     engine.listProviderModels.mockResolvedValue([model]);
 
-    const reply = await call(profilesController.listProviderModels, { body });
+    const reply = await invoke(profilesController.listProviderModels, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual([model]);
@@ -382,7 +382,7 @@ describe("profilesController.listProviderModels", () => {
   it("sends an empty key when the body has none", async () => {
     engine.listProviderModels.mockResolvedValue([]);
 
-    await call(profilesController.listProviderModels, { body: { ...body, apiKey: undefined } });
+    await invoke(profilesController.listProviderModels, { body: { ...body, apiKey: undefined } });
 
     expect(engine.listProviderModels).toHaveBeenCalledWith({ ...body, apiKey: "" });
   });
@@ -391,7 +391,7 @@ describe("profilesController.listProviderModels", () => {
     readDisabled.mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "", "u"));
 
     for (const sent of [null, {}, body, { ...body, baseUrl: "http://127.0.0.1" }]) {
-      const reply = await call(profilesController.listProviderModels, { body: sent });
+      const reply = await invoke(profilesController.listProviderModels, { body: sent });
 
       expect(reply.status).toBe(403);
       expect(reply.body).toEqual({ error: "Forbidden" });
@@ -435,7 +435,7 @@ describe("profilesController.listProviderModels", () => {
   ])(
     "answers 400 naming the field for a body that is %s (Bug 83116)",
     async (_what, sent, error, field) => {
-      const reply = await call(profilesController.listProviderModels, { body: sent });
+      const reply = await invoke(profilesController.listProviderModels, { body: sent });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error, field });
@@ -451,7 +451,9 @@ describe("profilesController.listProviderModels", () => {
   ])("answers 400 without a field for a baseUrl that is %s", async (_what, baseUrl, error) => {
     lookup.mockResolvedValue([{ address: "127.0.0.1", family: 4 }]);
 
-    const reply = await call(profilesController.listProviderModels, { body: { ...body, baseUrl } });
+    const reply = await invoke(profilesController.listProviderModels, {
+      body: { ...body, baseUrl },
+    });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error });
@@ -463,7 +465,7 @@ describe("profilesController.listProviderModels", () => {
   it("hands a providerType that is a number to the engine", async () => {
     engine.listProviderModels.mockResolvedValue([]);
 
-    const reply = await call(profilesController.listProviderModels, {
+    const reply = await invoke(profilesController.listProviderModels, {
       body: { ...body, providerType: 5 },
     });
 
@@ -474,7 +476,7 @@ describe("profilesController.listProviderModels", () => {
   it("serves the onlyoffice provider from the gateway catalog (Bug 83113)", async () => {
     listOnlyofficeGatewayModels.mockResolvedValue([{ ...model, provider: "onlyoffice" }]);
 
-    const reply = await call(profilesController.listProviderModels, {
+    const reply = await invoke(profilesController.listProviderModels, {
       body: { ...body, providerType: "onlyoffice" },
     });
 
@@ -493,7 +495,7 @@ describe("profilesController.listProviderModels", () => {
       listOnlyofficeGatewayModels.mockRejectedValue(failure);
       engine.listProviderModels.mockResolvedValue([model]);
 
-      const reply = await call(profilesController.listProviderModels, {
+      const reply = await invoke(profilesController.listProviderModels, {
         body: { ...body, providerType: "onlyoffice" },
       });
 
@@ -576,7 +578,7 @@ describe("profilesController.listProviderModels", () => {
   ])("answers %s as %i", async (_what, failure, status, error) => {
     engine.listProviderModels.mockRejectedValue(failure);
 
-    const reply = await call(profilesController.listProviderModels, { body });
+    const reply = await invoke(profilesController.listProviderModels, { body });
 
     expect(reply.status).toBe(status);
     expect(reply.body).toEqual({ error });
@@ -600,7 +602,7 @@ describe("profilesController.listModels", () => {
     readByIdRaw.mockResolvedValue(stored);
     engine.listModels.mockResolvedValue([model]);
 
-    const reply = await call(profilesController.listModels, { method: "GET", query });
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual([model]);
@@ -612,7 +614,7 @@ describe("profilesController.listModels", () => {
   it.each([[{}], [{ profileId: "" }], [{ profileId: ["a", "b"] }]])(
     "answers 400 for the query %j",
     async (sent) => {
-      const reply = await call(profilesController.listModels, { method: "GET", query: sent });
+      const reply = await invoke(profilesController.listModels, { method: "GET", query: sent });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: "profileId required" });
@@ -624,7 +626,7 @@ describe("profilesController.listModels", () => {
   it("answers 404 for a profile the store does not have (Bug 84426)", async () => {
     readByIdRaw.mockResolvedValue(undefined);
 
-    const reply = await call(profilesController.listModels, { method: "GET", query });
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "Profile not found" });
@@ -645,7 +647,7 @@ describe("profilesController.listModels", () => {
     async (_what, failure, status, error) => {
       readByIdRaw.mockRejectedValue(failure);
 
-      const reply = await call(profilesController.listModels, { method: "GET", query });
+      const reply = await invoke(profilesController.listModels, { method: "GET", query });
 
       expect(reply.status).toBe(status);
       expect(reply.body).toEqual({ error });
@@ -657,7 +659,7 @@ describe("profilesController.listModels", () => {
     readByIdRaw.mockResolvedValue(stored);
     engine.listModels.mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "x", "u"));
 
-    const reply = await call(profilesController.listModels, { method: "GET", query });
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -676,7 +678,7 @@ describe("profilesController.listModels", () => {
     readByIdRaw.mockResolvedValue(stored);
     engine.listModels.mockRejectedValue(failure);
 
-    const reply = await call(profilesController.listModels, { method: "GET", query });
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
 
     expect(reply.status).toBe(status);
     expect(reply.body).toEqual({ error });
@@ -696,7 +698,7 @@ describe("profilesController.testConnection", () => {
     readByIdRaw.mockResolvedValue(stored);
     engine.testConnection.mockResolvedValue(true);
 
-    const reply = await call(profilesController.testConnection, init);
+    const reply = await invoke(profilesController.testConnection, init);
 
     expect(reply.status).toBe(200);
     expect(reply.body).toBe(true);
@@ -709,7 +711,7 @@ describe("profilesController.testConnection", () => {
     readByIdRaw.mockResolvedValue(stored);
     engine.testConnection.mockResolvedValue({ field: "key", message: "Invalid API key" });
 
-    const reply = await call(profilesController.testConnection, { body: stored.id });
+    const reply = await invoke(profilesController.testConnection, { body: stored.id });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ field: "key", message: "Invalid API key" });
@@ -727,7 +729,7 @@ describe("profilesController.testConnection", () => {
     ["an empty id", { body: "" }],
     ["an id that is a number", { body: { profileId: 1 } }],
   ])("answers 400 for %s", async (_what, init) => {
-    const reply = await call(profilesController.testConnection, init);
+    const reply = await invoke(profilesController.testConnection, init);
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "profileId required" });
@@ -737,7 +739,7 @@ describe("profilesController.testConnection", () => {
   it("answers 404 for a profile the store does not have (Bug 84427)", async () => {
     readByIdRaw.mockResolvedValue(undefined);
 
-    const reply = await call(profilesController.testConnection, { body: stored.id });
+    const reply = await invoke(profilesController.testConnection, { body: stored.id });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "Profile not found" });
@@ -748,7 +750,7 @@ describe("profilesController.testConnection", () => {
   it("answers 500, not 404, when the profile read fails", async () => {
     readByIdRaw.mockRejectedValue(new AiServiceHttpError(500, "Internal Server Error", "", "u"));
 
-    const reply = await call(profilesController.testConnection, { body: stored.id });
+    const reply = await invoke(profilesController.testConnection, { body: stored.id });
 
     expect(reply.status).toBe(500);
     expect(engine.testConnection).not.toHaveBeenCalled();
@@ -763,7 +765,7 @@ describe("profilesController.getById", () => {
       headers: { "X-Api": "MARKER-H" },
     });
 
-    const reply = await call(profilesController.getById, {
+    const reply = await invoke(profilesController.getById, {
       method: "GET",
       query: { id: stored.id },
     });
@@ -775,7 +777,7 @@ describe("profilesController.getById", () => {
   });
 
   it.each([[{}], [{ id: "" }], [{ id: ["a"] }]])("answers 400 for the query %j", async (query) => {
-    const reply = await call(profilesController.getById, { method: "GET", query });
+    const reply = await invoke(profilesController.getById, { method: "GET", query });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "id required" });
@@ -786,7 +788,7 @@ describe("profilesController.getById", () => {
   it("answers 404 for a profile the store does not have", async () => {
     readByIdRaw.mockResolvedValue(undefined);
 
-    const reply = await call(profilesController.getById, { method: "GET", query: { id: "x" } });
+    const reply = await invoke(profilesController.getById, { method: "GET", query: { id: "x" } });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "Profile not found" });
@@ -796,7 +798,7 @@ describe("profilesController.getById", () => {
   it("answers 500, not 404, when the read fails", async () => {
     readByIdRaw.mockRejectedValue(new AiServiceHttpError(500, "Internal Server Error", "", "u"));
 
-    const reply = await call(profilesController.getById, { method: "GET", query: { id: "x" } });
+    const reply = await invoke(profilesController.getById, { method: "GET", query: { id: "x" } });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal Server Error" });
@@ -807,7 +809,7 @@ describe("profilesController.list", () => {
   it("answers the profiles as the store reads them for a client", async () => {
     readAllForClient.mockResolvedValue([stored]);
 
-    const reply = await call(profilesController.list, { method: "GET" });
+    const reply = await invoke(profilesController.list, { method: "GET" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual([stored]);
@@ -817,7 +819,7 @@ describe("profilesController.list", () => {
   it("relays a 403 of the AI service", async () => {
     readAllForClient.mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "", "u"));
 
-    const reply = await call(profilesController.list, { method: "GET" });
+    const reply = await invoke(profilesController.list, { method: "GET" });
 
     expect(reply.status).toBe(403);
     expect(published("aiProfilesList", reply)).toEqual([]);

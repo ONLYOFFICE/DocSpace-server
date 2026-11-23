@@ -31,9 +31,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { inRequestContext } from "../../__tests__/helpers/http.js";
+import { inRequestContext } from "../helpers/http.js";
 import { setChatContextSnapshot } from "../../requestContext.js";
-import type { ChatContextScope, ChatContextSnapshot } from "../chatContextSnapshot.js";
+import type { ChatContextScope, ChatContextSnapshot } from "../../storage/chatContextSnapshot.js";
 
 /** A global scope with nothing in it; the fields a test needs are overridden. */
 export function scopeOf(overrides: Partial<ChatContextScope> = {}): ChatContextScope {

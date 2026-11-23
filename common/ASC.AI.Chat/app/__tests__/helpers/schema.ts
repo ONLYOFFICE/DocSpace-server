@@ -147,3 +147,13 @@ export function requestViolations(operationId: string, body: unknown): string[] 
   const validate = validatorFor(`${operationId}:request`, schema);
   return validate(body) ? [] : describe(validate.errors);
 }
+
+/**
+ * How `value` differs from `#/components/schemas/<name>` of the published document. For what a
+ * route answers outside a JSON body of its own: the frames of a stream, which are published as
+ * `application/x-ndjson` and `text/event-stream`.
+ */
+export function schemaViolations(name: string, value: unknown): string[] {
+  const validate = validatorFor(`component:${name}`, { $ref: `#/components/schemas/${name}` });
+  return validate(value) ? [] : describe(validate.errors);
+}

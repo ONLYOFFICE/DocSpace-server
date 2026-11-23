@@ -32,10 +32,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { PromptsEngine } from "@onlyoffice/ai-chat/core";
+import { invoke } from "../../__tests__/helpers/http.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import type { Reply } from "../../__tests__/helpers/http.js";
-import { call } from "./promptsControllerData.helpers.js";
 import logger from "../../log.js";
 
 const engine = engineMock<PromptsEngine>();
@@ -77,7 +77,7 @@ describe("promptsController.create", () => {
   it("passes only name, text and folderId to the engine", async () => {
     engine.create.mockResolvedValue({ success: true, prompt });
 
-    const reply = await call(promptsController.create, { body: { ...body, extra: "x" } });
+    const reply = await invoke(promptsController.create, { body: { ...body, extra: "x" } });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true, prompt });
@@ -88,7 +88,7 @@ describe("promptsController.create", () => {
   it("passes an absent folderId as undefined", async () => {
     engine.create.mockResolvedValue({ success: true, prompt });
 
-    await call(promptsController.create, { body: { name: "n", text: "t" } });
+    await invoke(promptsController.create, { body: { name: "n", text: "t" } });
 
     expect(engine.create).toHaveBeenCalledWith({ name: "n", text: "t", folderId: undefined });
   });
@@ -106,7 +106,7 @@ describe("promptsController.create", () => {
     ["folderId a number", { ...body, folderId: 7 }, "name", "folderId must be a string or null"],
     ["folderId an array", { ...body, folderId: [] }, "name", "folderId must be a string or null"],
   ])("answers 400 naming the field for a body with %s", async (_what, sent, field, message) => {
-    const reply = await call(promptsController.create, { body: sent });
+    const reply = await invoke(promptsController.create, { body: sent });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ success: false, error: { field, message, code: "invalid" } });
@@ -125,7 +125,7 @@ describe("promptsController.create", () => {
       error: { field: "name", message: "Name is required", code: "required" },
     });
 
-    const reply = await call(promptsController.create, { body: sent });
+    const reply = await invoke(promptsController.create, { body: sent });
 
     expect(engine.create).toHaveBeenCalledTimes(1);
     expect(reply.status).toBe(400);
@@ -142,7 +142,7 @@ describe("promptsController.create", () => {
     const refusal = { success: false as const, error: { field: "name" as const, message } };
     engine.create.mockResolvedValue(refusal);
 
-    const reply = await call(promptsController.create, { body });
+    const reply = await invoke(promptsController.create, { body });
 
     expect(reply.status).toBe(status);
     expect(reply.body).toEqual(refusal);
@@ -156,7 +156,7 @@ describe("promptsController.create", () => {
     };
     engine.create.mockResolvedValue(refusal);
 
-    const reply = await call(promptsController.create, { body });
+    const reply = await invoke(promptsController.create, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual(refusal);
@@ -165,7 +165,7 @@ describe("promptsController.create", () => {
   it("answers 500 without details when the engine throws, and logs the failure", async () => {
     engine.create.mockRejectedValue(new Error("socket hang up at http://ai.internal:5157"));
 
-    const reply = await call(promptsController.create, { body, url: "/prompts/create" });
+    const reply = await invoke(promptsController.create, { body, url: "/prompts/create" });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -179,7 +179,7 @@ describe("promptsController.create", () => {
       new AiServiceHttpError(403, "Forbidden", "secret body", "http://ai.internal/prompts"),
     );
 
-    const reply = await call(promptsController.create, { body });
+    const reply = await invoke(promptsController.create, { body });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -190,7 +190,7 @@ describe("promptsController.create", () => {
   it("answers 'Upstream error' for a failed AI service call without a reason phrase", async () => {
     engine.create.mockRejectedValue(new AiServiceHttpError(502, "", "", "http://ai.internal"));
 
-    const reply = await call(promptsController.create, { body });
+    const reply = await invoke(promptsController.create, { body });
 
     expect(reply.status).toBe(502);
     expect(reply.body).toEqual({ error: "Upstream error" });
@@ -206,7 +206,7 @@ describe("promptsController.update", () => {
   ])("updates the prompt from %s", async (_what, body) => {
     engine.update.mockResolvedValue(updated);
 
-    const reply = await call(promptsController.update, { method: "PUT", body });
+    const reply = await invoke(promptsController.update, { method: "PUT", body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(updated);
@@ -217,9 +217,9 @@ describe("promptsController.update", () => {
   it("sends only the fields the updates carry, and none for absent updates", async () => {
     engine.update.mockResolvedValue(updated);
 
-    await call(promptsController.update, { body: { id: "p1", updates: { text: "T", x: 1 } } });
-    await call(promptsController.update, { body: { id: "p1" } });
-    await call(promptsController.update, { body: { id: "p1", updates: null } });
+    await invoke(promptsController.update, { body: { id: "p1", updates: { text: "T", x: 1 } } });
+    await invoke(promptsController.update, { body: { id: "p1" } });
+    await invoke(promptsController.update, { body: { id: "p1", updates: null } });
 
     expect(engine.update.mock.calls).toEqual([
       ["p1", { text: "T" }],
@@ -248,7 +248,7 @@ describe("promptsController.update", () => {
       "folderId must be a string or null",
     ],
   ])("answers 400 for a body with %s", async (_what, body, field, message) => {
-    const reply = await call(promptsController.update, { body });
+    const reply = await invoke(promptsController.update, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ success: false, error: { field, message, code: "invalid" } });
@@ -267,7 +267,7 @@ describe("promptsController.update", () => {
     };
     engine.update.mockResolvedValue(refusal);
 
-    const reply = await call(promptsController.update, { body: { id: "p1", updates: {} } });
+    const reply = await invoke(promptsController.update, { body: { id: "p1", updates: {} } });
 
     expect(reply.status).toBe(status);
     expect(reply.body).toEqual(refusal);
@@ -285,7 +285,7 @@ describe("promptsController.move", () => {
   ])("moves the prompt for %s", async (_what, body, folderId) => {
     engine.move.mockResolvedValue({ success: true, prompt });
 
-    const reply = await call(promptsController.move, { method: "PUT", body });
+    const reply = await invoke(promptsController.move, { method: "PUT", body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true, prompt });
@@ -302,7 +302,7 @@ describe("promptsController.move", () => {
     ["folderId a number", { id: "p1", folderId: 5 }, "folderId must be a string or null"],
     ["folderId an object", { id: "p1", folderId: {} }, "folderId must be a string or null"],
   ])("answers 400 for a body with %s", async (_what, body, message) => {
-    const reply = await call(promptsController.move, { body });
+    const reply = await invoke(promptsController.move, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({
@@ -323,7 +323,7 @@ describe("promptsController.move", () => {
     };
     engine.move.mockResolvedValue(refusal);
 
-    const reply = await call(promptsController.move, { body: { id: "p1", folderId: "f2" } });
+    const reply = await invoke(promptsController.move, { body: { id: "p1", folderId: "f2" } });
 
     expect(reply.status).toBe(status);
     expect(published("aiPromptsMove", reply)).toEqual([]);
@@ -339,7 +339,7 @@ describe("promptsController.delete", () => {
   ])("deletes the prompt named by %s", async (_what, init) => {
     engine.delete.mockResolvedValue(undefined);
 
-    const reply = await call(promptsController.delete, { method: "DELETE", ...init });
+    const reply = await invoke(promptsController.delete, { method: "DELETE", ...init });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -354,7 +354,7 @@ describe("promptsController.delete", () => {
     ["an id that is a number", { body: { id: 1 } }],
     ["a query id given twice", { query: { id: ["a", "b"] } }],
   ])("answers 400 for %s", async (_what, init) => {
-    const reply = await call(promptsController.delete, init);
+    const reply = await invoke(promptsController.delete, init);
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "id required" });
@@ -371,7 +371,7 @@ describe("promptsController.list", () => {
   ])("lists the prompts for %s", async (_what, query, folderId) => {
     engine.list.mockResolvedValue([prompt]);
 
-    const reply = await call(promptsController.list, { method: "GET", query });
+    const reply = await invoke(promptsController.list, { method: "GET", query });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual([prompt]);
@@ -383,7 +383,7 @@ describe("promptsController.list", () => {
   it("lists the root prompts when folderId is repeated in the query", async () => {
     engine.list.mockResolvedValue([]);
 
-    const reply = await call(promptsController.list, {
+    const reply = await invoke(promptsController.list, {
       method: "GET",
       query: { folderId: ["f1", "f2"] },
     });
@@ -400,7 +400,7 @@ describe("promptsController.createFolder", () => {
   ])("creates the folder from %s", async (_what, body) => {
     engine.createFolder.mockResolvedValue({ success: true, folder });
 
-    const reply = await call(promptsController.createFolder, { body });
+    const reply = await invoke(promptsController.createFolder, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true, folder });
@@ -415,7 +415,7 @@ describe("promptsController.createFolder", () => {
     ["a name that is a number", { name: 5 }],
     ["a name that is null", { name: null }],
   ])("answers 400 for a body that is %s", async (_what, body) => {
-    const reply = await call(promptsController.createFolder, { body });
+    const reply = await invoke(promptsController.createFolder, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({
@@ -433,7 +433,7 @@ describe("promptsController.createFolder", () => {
     };
     engine.createFolder.mockResolvedValue(refusal);
 
-    const reply = await call(promptsController.createFolder, { body: "Contracts" });
+    const reply = await invoke(promptsController.createFolder, { body: "Contracts" });
 
     expect(reply.status).toBe(409);
     expect(reply.body).toEqual(refusal);
@@ -447,7 +447,7 @@ describe("promptsController.createFolder", () => {
       error: { field: "name", message: "gone", code: "not_found" },
     });
 
-    const reply = await call(promptsController.createFolder, { body: "Contracts" });
+    const reply = await invoke(promptsController.createFolder, { body: "Contracts" });
 
     expect(reply.status).toBe(404);
     expect(published("aiPromptsCreateFolder", reply)).toEqual([
@@ -463,7 +463,7 @@ describe("promptsController.renameFolder", () => {
   ])("renames the folder from %s", async (_what, body) => {
     engine.renameFolder.mockResolvedValue({ success: true, folder });
 
-    const reply = await call(promptsController.renameFolder, { method: "PUT", body });
+    const reply = await invoke(promptsController.renameFolder, { method: "PUT", body });
 
     expect(reply.status).toBe(200);
     expect(engine.renameFolder).toHaveBeenCalledWith("f1", "New");
@@ -480,7 +480,7 @@ describe("promptsController.renameFolder", () => {
     ["name null", ["f1", null], "name is required and must be a string"],
     ["name a number", { id: "f1", name: 2 }, "name is required and must be a string"],
   ])("answers 400 for a body with %s", async (_what, body, message) => {
-    const reply = await call(promptsController.renameFolder, { body });
+    const reply = await invoke(promptsController.renameFolder, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({
@@ -501,7 +501,7 @@ describe("promptsController.renameFolder", () => {
       error: { field: "name", message: "refused", code: code as "conflict" },
     });
 
-    const reply = await call(promptsController.renameFolder, { body: ["f1", "New"] });
+    const reply = await invoke(promptsController.renameFolder, { body: ["f1", "New"] });
 
     expect(reply.status).toBe(status);
     expect(published("aiPromptsRenameFolder", reply)).toEqual([]);
@@ -517,7 +517,7 @@ describe("promptsController.deleteFolder", () => {
     readFolderById.mockResolvedValue(folder);
     engine.deleteFolder.mockResolvedValue(undefined);
 
-    const reply = await call(promptsController.deleteFolder, { method: "DELETE", ...init });
+    const reply = await invoke(promptsController.deleteFolder, { method: "DELETE", ...init });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -531,7 +531,7 @@ describe("promptsController.deleteFolder", () => {
     ["an empty id", { body: "" }],
     ["an id that is a number", { body: { id: 3 } }],
   ])("answers 400 for %s and reads nothing", async (_what, init) => {
-    const reply = await call(promptsController.deleteFolder, init);
+    const reply = await invoke(promptsController.deleteFolder, init);
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "id required" });
@@ -542,7 +542,7 @@ describe("promptsController.deleteFolder", () => {
   it("answers 404 for a folder the store does not show the caller (Bug 83138)", async () => {
     readFolderById.mockResolvedValue(null);
 
-    const reply = await call(promptsController.deleteFolder, { body: "f9" });
+    const reply = await invoke(promptsController.deleteFolder, { body: "f9" });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "Folder not found: f9" });
@@ -553,7 +553,7 @@ describe("promptsController.deleteFolder", () => {
   it("deletes a folder the store answers undefined for, as only null means absent", async () => {
     readFolderById.mockResolvedValue(undefined);
 
-    const reply = await call(promptsController.deleteFolder, { body: "f1" });
+    const reply = await invoke(promptsController.deleteFolder, { body: "f1" });
 
     expect(reply.status).toBe(200);
     expect(engine.deleteFolder).toHaveBeenCalledWith("f1");
@@ -565,7 +565,7 @@ describe("promptsController.deleteFolder", () => {
   ])("answers 5xx, not 404, when the folder read fails with %s", async (_what, error) => {
     readFolderById.mockRejectedValue(error);
 
-    const reply = await call(promptsController.deleteFolder, { body: "f1" });
+    const reply = await invoke(promptsController.deleteFolder, { body: "f1" });
 
     expect(reply.status).toBe(500);
     expect(engine.deleteFolder).not.toHaveBeenCalled();
@@ -577,7 +577,7 @@ describe("promptsController.listFolders and export", () => {
   it("answers the folders as the engine lists them", async () => {
     engine.listFolders.mockResolvedValue([folder]);
 
-    const reply = await call(promptsController.listFolders, { method: "GET" });
+    const reply = await invoke(promptsController.listFolders, { method: "GET" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual([folder]);
@@ -588,7 +588,7 @@ describe("promptsController.listFolders and export", () => {
     const bundle = { version: 1 as const, folders: [folder], prompts: [prompt] };
     engine.export.mockResolvedValue(bundle);
 
-    const reply = await call(promptsController.export, { method: "GET" });
+    const reply = await invoke(promptsController.export, { method: "GET" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(bundle);
@@ -598,7 +598,7 @@ describe("promptsController.listFolders and export", () => {
   it("answers 500 when the export fails", async () => {
     engine.export.mockRejectedValue(new Error("boom"));
 
-    const reply = await call(promptsController.export, { method: "GET" });
+    const reply = await invoke(promptsController.export, { method: "GET" });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -610,7 +610,7 @@ describe("promptsController.getById and getFolderById", () => {
   it("answers the prompt of the id in the query", async () => {
     engine.getById.mockResolvedValue(prompt);
 
-    const reply = await call(promptsController.getById, { method: "GET", query: { id: "p1" } });
+    const reply = await invoke(promptsController.getById, { method: "GET", query: { id: "p1" } });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(prompt);
@@ -622,7 +622,7 @@ describe("promptsController.getById and getFolderById", () => {
   it("answers 200 with null for an unknown prompt", async () => {
     engine.getById.mockResolvedValue(null);
 
-    const reply = await call(promptsController.getById, { method: "GET", query: { id: "p9" } });
+    const reply = await invoke(promptsController.getById, { method: "GET", query: { id: "p9" } });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toBeNull();
@@ -632,7 +632,7 @@ describe("promptsController.getById and getFolderById", () => {
   it("answers the folder of the id in the query", async () => {
     engine.getFolderById.mockResolvedValue(folder);
 
-    const reply = await call(promptsController.getFolderById, {
+    const reply = await invoke(promptsController.getFolderById, {
       method: "GET",
       query: { id: "f1" },
     });
@@ -647,7 +647,7 @@ describe("promptsController.getById and getFolderById", () => {
   it("answers 200 with null for an unknown folder", async () => {
     engine.getFolderById.mockResolvedValue(null);
 
-    const reply = await call(promptsController.getFolderById, {
+    const reply = await invoke(promptsController.getFolderById, {
       method: "GET",
       query: { id: "f9" },
     });
@@ -662,7 +662,7 @@ describe("promptsController.getById and getFolderById", () => {
     ["getFolderById", "aiPromptsGetFolderById"],
   ] as const)("%s answers 400 without an id or with a repeated one", async (method, op) => {
     for (const query of [{}, { id: "" }, { id: ["a", "b"] }]) {
-      const reply = await call(promptsController[method], { method: "GET", query });
+      const reply = await invoke(promptsController[method], { method: "GET", query });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: "id required" });

@@ -32,10 +32,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { PreferencesEngine } from "@onlyoffice/ai-chat/core";
+import { invoke } from "../../__tests__/helpers/http.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import type { Reply } from "../../__tests__/helpers/http.js";
-import { call } from "./promptsControllerData.helpers.js";
 
 const engine = engineMock<PreferencesEngine>();
 vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
@@ -100,7 +100,7 @@ describe.each([
     async (_what, entityId, scope) => {
       engine[method].mockResolvedValue(value as never);
 
-      const reply = await call(preferencesController[method], {
+      const reply = await invoke(preferencesController[method], {
         method: "GET",
         query: entityId === undefined ? {} : { entityId },
       });
@@ -115,7 +115,7 @@ describe.each([
   it.each(refusedScopes)(
     "answers 400 for an entityId that is %s (Bug 84417)",
     async (_what, entityId) => {
-      const reply = await call(preferencesController[method], {
+      const reply = await invoke(preferencesController[method], {
         method: "GET",
         query: { entityId },
       });
@@ -130,7 +130,7 @@ describe.each([
   it("relays a 403 of the AI service", async () => {
     engine[method].mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "", "u"));
 
-    const reply = await call(preferencesController[method], { method: "GET" });
+    const reply = await invoke(preferencesController[method], { method: "GET" });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -142,7 +142,7 @@ describe.each([
 it("takes the string 0 as a scope", async () => {
   engine.getDeepMode.mockResolvedValue(false);
 
-  const reply = await call(preferencesController.getDeepMode, {
+  const reply = await invoke(preferencesController.getDeepMode, {
     method: "GET",
     query: { entityId: "0" },
   });
@@ -157,7 +157,7 @@ describe("preferencesController.setDeepMode", () => {
     ["a positional body", [true, 12], true, "12"],
     ["a positional body without a scope", [true], true, undefined],
   ])("stores the value of %s", async (_what, body, value, scope) => {
-    const reply = await call(preferencesController.setDeepMode, { method: "PUT", body });
+    const reply = await invoke(preferencesController.setDeepMode, { method: "PUT", body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -174,7 +174,7 @@ describe("preferencesController.setDeepMode", () => {
     ["a value that is null", { value: null }],
     ["a value that is 1", [1]],
   ])("answers 400 for a body that is %s", async (_what, body) => {
-    const reply = await call(preferencesController.setDeepMode, { body });
+    const reply = await invoke(preferencesController.setDeepMode, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "value is required and must be a boolean" });
@@ -183,7 +183,7 @@ describe("preferencesController.setDeepMode", () => {
   });
 
   it.each(refusedScopes)("answers 400 for an entityId that is %s", async (_what, entityId) => {
-    const reply = await call(preferencesController.setDeepMode, {
+    const reply = await invoke(preferencesController.setDeepMode, {
       body: { value: true, entityId },
     });
 
@@ -201,7 +201,7 @@ describe("preferencesController.clearDeepMode", () => {
     ["the bare id", "12", "12"],
     ["a named body", { entityId: 12 }, "12"],
   ])("clears the value for %s", async (_what, body, scope) => {
-    const reply = await call(preferencesController.clearDeepMode, { method: "DELETE", body });
+    const reply = await invoke(preferencesController.clearDeepMode, { method: "DELETE", body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -214,7 +214,7 @@ describe("preferencesController.clearDeepMode", () => {
     ["an object without entityId", { scope: "12" }],
     ["an array", ["12"]],
   ])("answers 400 for a body that is %s", async (_what, body) => {
-    const reply = await call(preferencesController.clearDeepMode, { body });
+    const reply = await invoke(preferencesController.clearDeepMode, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual(badScope);
@@ -227,7 +227,7 @@ describe("preferencesController.getReasoningLevel", () => {
   it("answers the stored level in one read", async () => {
     readReasoningLevel.mockResolvedValue("high");
 
-    const reply = await call(preferencesController.getReasoningLevel, {
+    const reply = await invoke(preferencesController.getReasoningLevel, {
       method: "GET",
       query: { entityId: "12" },
     });
@@ -242,7 +242,7 @@ describe("preferencesController.getReasoningLevel", () => {
   it("answers off when nothing is stored", async () => {
     readReasoningLevel.mockResolvedValue(undefined);
 
-    const reply = await call(preferencesController.getReasoningLevel, { method: "GET" });
+    const reply = await invoke(preferencesController.getReasoningLevel, { method: "GET" });
 
     expect(reply.body).toBe("off");
     expect(published("aiPreferencesGetReasoningLevel", reply)).toEqual([]);
@@ -251,14 +251,14 @@ describe("preferencesController.getReasoningLevel", () => {
   it("answers off when the storage cannot read a level", async () => {
     delete preferences.readReasoningLevel;
 
-    const reply = await call(preferencesController.getReasoningLevel, { method: "GET" });
+    const reply = await invoke(preferencesController.getReasoningLevel, { method: "GET" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toBe("off");
   });
 
   it("answers 400 for an entityId that is not a room id", async () => {
-    const reply = await call(preferencesController.getReasoningLevel, {
+    const reply = await invoke(preferencesController.getReasoningLevel, {
       method: "GET",
       query: { entityId: "abc" },
     });
@@ -274,7 +274,7 @@ describe("preferencesController.getReasoningLevel", () => {
       new AiServiceHttpError(500, "Internal Server Error", "", "u"),
     );
 
-    const reply = await call(preferencesController.getReasoningLevel, { method: "GET" });
+    const reply = await invoke(preferencesController.getReasoningLevel, { method: "GET" });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal Server Error" });
@@ -283,7 +283,7 @@ describe("preferencesController.getReasoningLevel", () => {
 
 describe("preferencesController.setReasoningLevel", () => {
   it.each(["off", "low", "medium", "high", "max"])("stores the level %s", async (value) => {
-    const reply = await call(preferencesController.setReasoningLevel, {
+    const reply = await invoke(preferencesController.setReasoningLevel, {
       method: "PUT",
       body: [value, "12"],
     });
@@ -298,7 +298,7 @@ describe("preferencesController.setReasoningLevel", () => {
   it("answers success without a write when the storage cannot store a level", async () => {
     delete preferences.upsertReasoningLevel;
 
-    const reply = await call(preferencesController.setReasoningLevel, { body: { value: "low" } });
+    const reply = await invoke(preferencesController.setReasoningLevel, { body: { value: "low" } });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -312,7 +312,7 @@ describe("preferencesController.setReasoningLevel", () => {
     ["a level that is a number", [2]],
     ["a level that is null", { value: null }],
   ])("answers 400 for a body that is %s", async (_what, body) => {
-    const reply = await call(preferencesController.setReasoningLevel, { body });
+    const reply = await invoke(preferencesController.setReasoningLevel, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({
@@ -323,7 +323,7 @@ describe("preferencesController.setReasoningLevel", () => {
   });
 
   it("answers 400 for an entityId that is not a room id", async () => {
-    const reply = await call(preferencesController.setReasoningLevel, { body: ["low", "t-1"] });
+    const reply = await invoke(preferencesController.setReasoningLevel, { body: ["low", "t-1"] });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual(badScope);
@@ -333,7 +333,7 @@ describe("preferencesController.setReasoningLevel", () => {
 
 describe("preferencesController.setToolPermissionMode", () => {
   it.each(["ask", "auto", "allow"])("stores the mode %s", async (value) => {
-    const reply = await call(preferencesController.setToolPermissionMode, {
+    const reply = await invoke(preferencesController.setToolPermissionMode, {
       method: "PUT",
       body: { value, entityId: 7 },
     });
@@ -351,7 +351,7 @@ describe("preferencesController.setToolPermissionMode", () => {
     ["the C# spelling", { value: "Auto" }],
     ["the C# number", { value: 1 }],
   ])("answers 400 for a body that is %s", async (_what, body) => {
-    const reply = await call(preferencesController.setToolPermissionMode, { body });
+    const reply = await invoke(preferencesController.setToolPermissionMode, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "value is required and must be one of: ask, auto, allow" });
@@ -360,7 +360,7 @@ describe("preferencesController.setToolPermissionMode", () => {
   });
 
   it("answers 400 for an entityId that is not a room id", async () => {
-    const reply = await call(preferencesController.setToolPermissionMode, { body: ["ask", -1] });
+    const reply = await invoke(preferencesController.setToolPermissionMode, { body: ["ask", -1] });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual(badScope);

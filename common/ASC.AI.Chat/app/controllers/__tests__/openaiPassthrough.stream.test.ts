@@ -34,8 +34,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { delay, http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
-import { ioTurn, listen, send, until } from "./openaiPassthrough.harness.js";
-import type { Exchange } from "./openaiPassthrough.harness.js";
+import { ioTurn, listen, send, until } from "../../__tests__/helpers/rawHttp.js";
+import type { Exchange } from "../../__tests__/helpers/rawHttp.js";
 import {
   CALLER,
   CHAT,
@@ -46,14 +46,13 @@ import {
   profileDto,
   useProfile,
   useProvider,
-} from "./openaiPassthrough.fixtures.js";
+} from "../../__tests__/fixtures/providers.js";
 
 // The OpenAI passthrough over time: the SSE relay and its keep-alive, the grace window before
 // the provider's headers (10 s for SSE, 20 s for the padded JSON of images/generations), what
 // is written after the 200 is committed, and a client that goes away. The clock is fake and
 // driven by the test; socket I/O runs on the real event loop (`until`, `ioTurn`).
 
-vi.stubEnv("core__cors", "");
 // The access log is not what these tests are about.
 vi.mock("morgan", () => ({
   default: () => (_req: unknown, _res: unknown, next: () => void) => next(),

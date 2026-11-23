@@ -68,8 +68,6 @@ const settingsRoute = {
   answer: () => portalJson(SETTINGS),
 };
 
-type Route = { match: (url: string, init?: RequestInit) => boolean; answer: () => Response };
-
 function operation(id: string, extra: Record<string, unknown> = {}) {
   return { id, operation: 3, progress: 0, error: "", processed: "0", finished: false, ...extra };
 }

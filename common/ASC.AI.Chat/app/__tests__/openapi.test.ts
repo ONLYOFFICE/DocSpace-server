@@ -41,7 +41,6 @@ import { openApiDocument } from "./helpers/schema.js";
 
 type Json = Record<string, unknown>;
 
-vi.stubEnv("core__cors", "");
 const { createApp } = await import("../createApp.js");
 const servedApp = createApp();
 vi.unstubAllEnvs();

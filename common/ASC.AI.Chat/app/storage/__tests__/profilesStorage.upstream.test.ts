@@ -55,7 +55,7 @@ import {
   withOnlyofficeProviderOverrides,
 } from "../profilesStorage.js";
 import type { DocspaceProfile } from "../profilesStorage.js";
-import { inRequest, snapshotWithFolders } from "./docspaceFilesApi.fixtures.js";
+import { inRequest, snapshotWithFolders } from "../../__tests__/fixtures/filesApi.js";
 
 // The profile storage over a stubbed AI service, with the real httpClient.js and
 // requestContext.js. Routes: ProfileStorageController (products/ASC.AI/Server/Api/

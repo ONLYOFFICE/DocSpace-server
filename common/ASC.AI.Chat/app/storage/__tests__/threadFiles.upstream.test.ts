@@ -36,7 +36,7 @@ import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstrea
 import logger from "../../log.js";
 import { AiServiceHttpError, aiServiceBaseUrl } from "../httpClient.js";
 import { uploadThreadArtifact } from "../threadFiles.js";
-import { fileDto, fileDtoBody, inRequest } from "./docspaceFilesApi.fixtures.js";
+import { fileDto, fileDtoBody, inRequest } from "../../__tests__/fixtures/filesApi.js";
 
 // A conversation's artifacts over a stubbed network, with the real httpClient.js and
 // requestContext.js. The route is ThreadArtifactsController.UploadAsync,

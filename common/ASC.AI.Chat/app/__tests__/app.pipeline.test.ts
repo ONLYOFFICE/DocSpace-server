@@ -32,16 +32,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import request from "supertest";
-import { passthrough } from "msw";
-import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { http, useUpstream } from "./helpers/upstream.js";
+import { afterAll, describe, expect, it, vi } from "vitest";
+import { useUpstream } from "./helpers/upstream.js";
 import { publishedOperations, responseViolations } from "./helpers/schema.js";
 
 // The whole application through supertest, with the parts of the configuration it reads pinned
 // by the environment, so that the developer's appsettings (`core:cors`, `ai.documentAgent`)
 // cannot change what these tests see: CORS off, the document agent off.
 
-vi.stubEnv("core__cors", "");
 vi.stubEnv("AI__DOCUMENT_AGENT__URL", "");
 vi.stubEnv("AI__DOCUMENT_AGENT__TOKEN", "");
 
@@ -49,16 +47,11 @@ const { default: logger } = await import("../log.js");
 const { createApp } = await import("../createApp.js");
 const { API_PREFIX } = await import("../routes.js");
 
-const upstream = useUpstream();
+const upstream = useUpstream({ localApp: true });
 const app = createApp();
 
-// msw sees supertest's own requests to the app on 127.0.0.1 too: they are let through, and
-// `calledOut()` is what the app itself sent anywhere else (the AI service is `localhost:5157`).
-beforeEach(() => {
-  upstream.use(http.all(/^http:\/\/127\.0\.0\.1:\d+\//, () => passthrough()));
-});
-const calledOut = () =>
-  upstream.seen.filter((r) => !/^127\.0\.0\.1:\d+$/.test(r.headers["host"] ?? ""));
+// What the app itself sent anywhere; supertest's own requests to it are not listed.
+const calledOut = () => upstream.seen;
 
 afterAll(() => {
   vi.unstubAllEnvs();

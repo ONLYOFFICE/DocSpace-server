@@ -50,7 +50,7 @@ import { AiServiceHttpError } from "../../storage/httpClient.js";
 import { DocspaceApiHttpError } from "../../storage/docspaceFilesApi.js";
 import { buildContextFoldersLines, buildLocationLines } from "../../storage/contextFolders.js";
 import * as h from "./aiController.harness.js";
-import { ndjsonFrames, schemaViolations, sseFrames } from "./aiController.frames.js";
+import { ndjsonFrames, schemaViolations, sseFrames } from "../../__tests__/helpers/frames.js";
 
 // The boundary of the controller: the engine class, the storage, the chat-context aggregate,
 // the AI-project binding, the Files reads of the context folders and of the source, the custom

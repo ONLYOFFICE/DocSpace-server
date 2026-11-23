@@ -31,39 +31,24 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// Shared by the controller suites of the prompts, profiles, threads, preferences, settings,
-// BYOK and context routes.
+// Reading a stream answer frame by frame; a frame is checked against its published schema with
+// `schemaViolations`.
 
-import { EventEmitter } from "node:events";
-import type { RequestHandler } from "express";
-import { createRequest, createResponse } from "node-mocks-http";
-import type { CallInit, Reply } from "../../__tests__/helpers/http.js";
+export { schemaViolations } from "./schema.js";
 
-/**
- * `invoke` of `helpers/http.ts`, except that the body reaches the handler exactly as given.
- * node-mocks-http replaces a falsy body (`null`, `""`, `0`, `false`) with `{}`, while the
- * app's JSON parser runs with `strict: false` and hands those values to the handler as they
- * are; a table over bad bodies needs the real value.
- */
-export async function call(handler: unknown, init: CallInit = {}): Promise<Reply> {
-  const req = createRequest({
-    method: init.method ?? "POST",
-    url: init.url ?? "/",
-    query: init.query ?? {},
-    params: init.params ?? {},
-    headers: init.headers ?? {},
-  });
-  req.body = init.body;
-  const res = createResponse({ eventEmitter: EventEmitter, req });
-  let nextError: unknown;
-  await (handler as RequestHandler)(req, res, (err?: unknown) => {
-    nextError = err;
-  });
-  return {
-    status: res.statusCode,
-    body: res._isJSON() ? res._getJSONData() : res._getData(),
-    headers: res._getHeaders(),
-    ended: res._isEndCalled(),
-    nextError,
-  };
+/** The frames of an NDJSON answer, blank keep-alive lines left out. */
+export function ndjsonFrames(text: unknown): unknown[] {
+  return String(text)
+    .split("\n")
+    .filter((line) => line.length > 0)
+    .map((line) => JSON.parse(line) as unknown);
+}
+
+/** The `data:` payloads of an SSE answer, `[DONE]` kept as the string. */
+export function sseFrames(text: unknown): unknown[] {
+  return String(text)
+    .split("\n\n")
+    .filter((frame) => frame.startsWith("data: "))
+    .map((frame) => frame.slice("data: ".length))
+    .map((data) => (data === "[DONE]" ? data : (JSON.parse(data) as unknown)));
 }

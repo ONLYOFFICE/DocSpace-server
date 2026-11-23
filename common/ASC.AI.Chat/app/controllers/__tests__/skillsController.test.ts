@@ -158,18 +158,6 @@ function answerUpload(dto: unknown = UPLOADED_FILE_DTO): void {
 
 const requested = (): string[] => calls.map((c) => `${c.method} ${c.path}`);
 
-/** Calls the handler with exactly this body: node-mocks-http turns a falsy body into `{}`. */
-function withBody(handler: unknown, body: unknown) {
-  return (req: { body: unknown }, res: unknown, next: unknown) => {
-    req.body = body;
-    return (handler as (req: unknown, res: unknown, next: unknown) => Promise<void>)(
-      req,
-      res,
-      next,
-    );
-  };
-}
-
 beforeEach(() => {
   calls.length = 0;
   mocks.readDisabled.mockReset().mockResolvedValue({});
@@ -218,7 +206,7 @@ describe("skillsController.create", () => {
   it("answers 403 from the AI access gate for any body, before any upstream call", async () => {
     mocks.readDisabled.mockRejectedValue(forbidden());
 
-    const reply = await invoke(withBody(skillsController.create, null));
+    const reply = await invoke(skillsController.create, { body: null });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -264,7 +252,7 @@ describe("skillsController.create", () => {
       "title must contain a letter or a digit",
     ],
   ])("answers 400 for a body with %s and calls out to nothing", async (_what, body, error) => {
-    const reply = await invoke(withBody(skillsController.create, body));
+    const reply = await invoke(skillsController.create, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error });
@@ -592,7 +580,7 @@ describe("skillsController.generate", () => {
       DESCRIPTION,
     ],
   ])("answers 400 for a body with %s and calls out to nothing", async (_what, input, error) => {
-    const reply = await invoke(withBody(skillsController.generate, input));
+    const reply = await invoke(skillsController.generate, { body: input });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error });

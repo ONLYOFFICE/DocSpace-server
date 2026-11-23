@@ -55,11 +55,17 @@ export function engineMock<T extends object>(): DeepMockProxy<T> {
   return mockDeep<T>();
 }
 
-/** A class whose `new` answers `instance`, to put in place of the library's class. */
-export function engineClass<T extends object>(instance: T): new (...args: unknown[]) => T {
+/**
+ * A class whose `new` answers `instance`, to put in place of the library's class. Pass a
+ * function, `engineClass(() => engine)`, in a file that also imports `helpers/schema.js`: that
+ * import loads the library, and with it the mock's factory, before `engine` is initialized.
+ */
+export function engineClass<T extends object>(
+  instance: T | (() => T),
+): new (...args: unknown[]) => T {
   return class {
     constructor() {
-      return instance;
+      return typeof instance === "function" ? instance() : instance;
     }
   } as unknown as new (...args: unknown[]) => T;
 }

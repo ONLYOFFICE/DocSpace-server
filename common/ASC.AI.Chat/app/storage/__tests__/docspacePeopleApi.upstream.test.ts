@@ -37,7 +37,7 @@ import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstrea
 import { DocspaceApiHttpError } from "../docspaceFilesApi.js";
 import { getSelf, isPortalAdmin, mayCreateAiRooms } from "../docspacePeopleApi.js";
 import { proxyBaseUrl } from "../httpClient.js";
-import { inRequest } from "./docspaceFilesApi.fixtures.js";
+import { inRequest } from "../../__tests__/fixtures/filesApi.js";
 
 // The People API client over a stubbed network, with the real httpClient.js and requestContext.js.
 const upstream = useUpstream();

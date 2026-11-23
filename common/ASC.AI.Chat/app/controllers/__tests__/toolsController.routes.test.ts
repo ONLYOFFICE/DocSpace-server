@@ -32,9 +32,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { ToolsEngine } from "@onlyoffice/ai-chat/core";
-import type { RequestHandler } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { engineMock, mockReset } from "../../__tests__/helpers/engine.js";
+import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import { invoke } from "../../__tests__/helpers/http.js";
 import type { CallInit } from "../../__tests__/helpers/http.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
@@ -56,12 +55,7 @@ import {
 const engine = engineMock<ToolsEngine>();
 vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ...(await original<typeof import("@onlyoffice/ai-chat/core")>()),
-  // Evaluated lazily: the schema helper imports the library before `engine` exists.
-  ToolsEngine: class {
-    constructor() {
-      return engine;
-    }
-  },
+  ToolsEngine: engineClass(() => engine),
 }));
 const mcpServers = vi.hoisted(() => ({ readByName: vi.fn(), readAll: vi.fn() }));
 vi.mock("../../storage/index.js", () => ({ storage: { mcpServers } }));
@@ -91,17 +85,8 @@ function folderAnswers(response: Response | (() => Response)): void {
 }
 const folderOk = () => docspace({ id: 42, title: "Room", type: 6, roomType: 2 });
 
-// invoke() cannot send a null or absent body (node-mocks-http makes it `{}`), so the body is set on
-// the request itself.
-function withBody(handler: unknown, body: unknown): RequestHandler {
-  return (req, res, next) => {
-    req.body = body;
-    return (handler as RequestHandler)(req, res, next);
-  };
-}
-
 async function send(handler: unknown, body: unknown, init: CallInit = {}) {
-  return invoke(withBody(handler, body), init);
+  return invoke(handler, { ...init, body });
 }
 
 beforeEach(() => {

@@ -38,7 +38,7 @@ import logger from "../../log.js";
 import { setAnalyzeEntryIds } from "../../requestContext.js";
 import { HttpAttachmentsStorage } from "../attachmentsStorage.js";
 import { AiServiceHttpError, aiServiceBaseUrl, proxyBaseUrl } from "../httpClient.js";
-import { fileDto, folderDto, inRequest } from "./docspaceFilesApi.fixtures.js";
+import { fileDto, folderDto, inRequest } from "../../__tests__/fixtures/filesApi.js";
 
 // The attachment storage over a stubbed network, with the real httpClient.js, requestContext.js,
 // docspaceFilesApi.js, threadFiles.js, projectAttachments.js and the download of roomSkills.js.

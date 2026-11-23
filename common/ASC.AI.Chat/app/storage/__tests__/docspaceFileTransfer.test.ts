@@ -36,7 +36,7 @@ import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstrea
 import logger from "../../log.js";
 import { mediaTypeOf, uploadFile } from "../docspaceFileTransfer.js";
 import { AiServiceHttpError, proxyBaseUrl } from "../httpClient.js";
-import { fileDto, fileDtoBody, inRequest } from "./docspaceFilesApi.fixtures.js";
+import { fileDto, fileDtoBody, inRequest } from "../../__tests__/fixtures/filesApi.js";
 
 // The upload of the document agent's files over a stubbed network, with the real httpClient.js
 // and requestContext.js. The route is FilesController.InsertFile, `POST api/2.0/files/{folderId}/insert`,

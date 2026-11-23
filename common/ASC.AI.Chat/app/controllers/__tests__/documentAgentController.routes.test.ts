@@ -87,18 +87,6 @@ function route(method: "get" | "put", answer: () => Response | Promise<Response>
   });
 }
 
-/** Calls the handler with exactly this body: node-mocks-http turns a falsy body into `{}`. */
-function withBody(handler: unknown, body: unknown) {
-  return (req: { body: unknown }, res: unknown, next: unknown) => {
-    req.body = body;
-    return (handler as (req: unknown, res: unknown, next: unknown) => Promise<void>)(
-      req,
-      res,
-      next,
-    );
-  };
-}
-
 function resetCalls(): void {
   calls.length = 0;
 }
@@ -382,7 +370,7 @@ describe("documentAgentController.setSettings", () => {
   ])("answers 400 for a body with %s and writes nothing", async (_what, body, issues) => {
     resetCalls();
 
-    const reply = await invoke(withBody(documentAgentController.setSettings, body));
+    const reply = await invoke(documentAgentController.setSettings, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: `Invalid settings: ${issues}` });

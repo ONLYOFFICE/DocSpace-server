@@ -42,7 +42,12 @@ import {
 import { getChatContextMisses } from "../../requestContext.js";
 import { AiServiceHttpError } from "../httpClient.js";
 import { dtoToMessage, HttpMessagesStorage } from "../messagesStorage.js";
-import { inRound, MESSAGE_ID, snapshotOf, THREAD_ID } from "./chatContext.fixtures.js";
+import {
+  inRound,
+  MESSAGE_ID,
+  snapshotOf,
+  THREAD_ID,
+} from "../../__tests__/fixtures/chatContext.js";
 
 // products/ASC.AI/Server/Api/MessageStorageController.cs: POST threads/{threadId}/messages,
 // GET messages/{id}, GET threads/{threadId}/messages, PUT messages/{id}, DELETE messages/{id},

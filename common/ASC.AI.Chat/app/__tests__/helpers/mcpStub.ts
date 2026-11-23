@@ -34,8 +34,8 @@
 // An MCP server over the streamable HTTP transport, stubbed at the network with msw: the
 // JSON-RPC client of @onlyoffice/ai-chat (SystemToolsSource) runs for real against it.
 
-import { http, HttpResponse } from "../../__tests__/helpers/upstream.js";
-import type { useUpstream } from "../../__tests__/helpers/upstream.js";
+import { http, HttpResponse } from "./upstream.js";
+import type { useUpstream } from "./upstream.js";
 
 export interface McpStubOptions {
   /** `tools` of the `tools/list` result. */

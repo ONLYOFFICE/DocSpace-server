@@ -40,7 +40,7 @@ import {
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
 import { HttpByokKeysStorage } from "../byokKeysStorage.js";
-import { inRound, snapshotOf } from "./chatContext.fixtures.js";
+import { inRound, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // products/ASC.AI/Server/Api/ByokKeysController.cs: GET byok/providers, GET byok, PUT byok/{id},
 // DELETE byok/{id}.

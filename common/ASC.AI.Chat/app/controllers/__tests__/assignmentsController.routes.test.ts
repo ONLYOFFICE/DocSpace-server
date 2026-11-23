@@ -32,9 +32,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { AssignmentsEngine } from "@onlyoffice/ai-chat/core";
-import type { RequestHandler } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { engineMock, mockReset } from "../../__tests__/helpers/engine.js";
+import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import { invoke } from "../../__tests__/helpers/http.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
 import {
@@ -52,12 +51,7 @@ import {
 const engine = engineMock<AssignmentsEngine>();
 vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ...(await original<typeof import("@onlyoffice/ai-chat/core")>()),
-  // Evaluated lazily: the schema helper imports the library before `engine` exists.
-  AssignmentsEngine: class {
-    constructor() {
-      return engine;
-    }
-  },
+  AssignmentsEngine: engineClass(() => engine),
 }));
 const profiles = vi.hoisted(() => ({ readByIdRaw: vi.fn(), readAllForClient: vi.fn() }));
 vi.mock("../../storage/index.js", () => ({ storage: { profiles } }));
@@ -104,16 +98,6 @@ function folderAnswers(response: Response | (() => Response)): void {
   );
 }
 const folderOk = () => docspace({ id: 42, title: "Room", type: 6, roomType: 2 });
-
-// invoke() cannot send a null or absent body (node-mocks-http makes it `{}`), so the body is set on
-// the request itself; through the real app body-parser also turns an absent body into `{}`
-// (assignmentsController.app.test.ts).
-function withBody(handler: unknown, body: unknown): RequestHandler {
-  return (req, res, next) => {
-    req.body = body;
-    return (handler as RequestHandler)(req, res, next);
-  };
-}
 
 beforeEach(() => {
   mockReset(engine);
@@ -403,7 +387,7 @@ describe("assignmentsController.assign", () => {
   ])("assigns with %s and answers the engine's result", async (_what, body) => {
     engine.assign.mockResolvedValue({ success: true });
 
-    const reply = await invoke(withBody(handler, body), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -415,7 +399,7 @@ describe("assignmentsController.assign", () => {
     engine.assign.mockResolvedValue({ success: true });
     const long = "p".repeat(10_000);
 
-    const reply = await invoke(withBody(handler, ["Chat", long]), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body: ["Chat", long] });
 
     expect(reply.status).toBe(200);
     expect(engine.assign).toHaveBeenCalledWith("Chat", long);
@@ -439,7 +423,7 @@ describe("assignmentsController.assign", () => {
     ["with profileId empty", { actionType: "Chat", profileId: "" }],
     ["a positional array missing the profileId", ["Chat"]],
   ])("answers 400 for a body that is %s and does not reach the engine", async (_what, body) => {
-    const reply = await invoke(withBody(handler, body), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "actionType and profileId required" });
@@ -456,7 +440,7 @@ describe("assignmentsController.assign", () => {
     };
     engine.assign.mockResolvedValue(refusal);
 
-    const reply = await invoke(withBody(handler, ["Chat", "p1"]), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body: ["Chat", "p1"] });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(refusal);
@@ -468,7 +452,7 @@ describe("assignmentsController.assign", () => {
       new AiServiceHttpError(403, "Forbidden", "MARKER", "http://ai/x"),
     );
 
-    const reply = await invoke(withBody(handler, ["Chat", "p1"]), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body: ["Chat", "p1"] });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -483,7 +467,7 @@ describe("assignmentsController.assign", () => {
       new AiServiceHttpError(503, "Service Unavailable", "MARKER", "http://ai/x"),
     );
 
-    const reply = await invoke(withBody(handler, ["Chat", "p1"]), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body: ["Chat", "p1"] });
 
     expect(reply.status).toBe(503);
     expect(reply.body).toEqual({ error: "Service Unavailable" });
@@ -505,7 +489,7 @@ describe("assignmentsController.unassign", () => {
   ])("unassigns the action given as %s", async (_what, body, query) => {
     engine.unassign.mockResolvedValue(undefined);
 
-    const reply = await invoke(withBody(handler, body), { method: "DELETE", query });
+    const reply = await invoke(handler, { method: "DELETE", query, body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -527,7 +511,7 @@ describe("assignmentsController.unassign", () => {
     ["an unknown action in the query", undefined, { actionType: "Painting" }],
     ["an array in the query", undefined, { actionType: ["Chat"] }],
   ])("answers 400 for %s", async (_what, body, query) => {
-    const reply = await invoke(withBody(handler, body), { method: "DELETE", query });
+    const reply = await invoke(handler, { method: "DELETE", query, body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "actionType required" });
@@ -538,7 +522,7 @@ describe("assignmentsController.unassign", () => {
   it("answers 500 when the engine fails", async () => {
     engine.unassign.mockRejectedValue(new Error("down"));
 
-    const reply = await invoke(withBody(handler, "Chat"), { method: "DELETE" });
+    const reply = await invoke(handler, { method: "DELETE", body: "Chat" });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -552,7 +536,7 @@ describe("assignmentsController.bulkAssign", () => {
   it("hands the whole map to the engine and answers its result", async () => {
     engine.bulkAssign.mockResolvedValue({ success: true });
 
-    const reply = await invoke(withBody(handler, { Chat: "p1", Default: "p2" }), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body: { Chat: "p1", Default: "p2" } });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -563,8 +547,8 @@ describe("assignmentsController.bulkAssign", () => {
   it("hands an empty map and an empty profileId to the engine as they are", async () => {
     engine.bulkAssign.mockResolvedValue({ success: true });
 
-    await invoke(withBody(handler, {}), { method: "PUT" });
-    await invoke(withBody(handler, { Chat: "" }), { method: "PUT" });
+    await invoke(handler, { method: "PUT", body: {} });
+    await invoke(handler, { method: "PUT", body: { Chat: "" } });
 
     expect(engine.bulkAssign.mock.calls).toEqual([[{}], [{ Chat: "" }]]);
   });
@@ -585,7 +569,7 @@ describe("assignmentsController.bulkAssign", () => {
       'profileId for actionType "Chat" must be a string',
     ],
   ])("answers 400 for a body that is %s and writes nothing", async (_what, body, error) => {
-    const reply = await invoke(withBody(handler, body), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error });
@@ -607,7 +591,7 @@ describe("assignmentsController.bulkAssign", () => {
     };
     engine.bulkAssign.mockResolvedValue(refusal);
 
-    const reply = await invoke(withBody(handler, { Chat: "p1" }), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body: { Chat: "p1" } });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(refusal);
@@ -617,7 +601,7 @@ describe("assignmentsController.bulkAssign", () => {
   it("answers 500 when the engine fails", async () => {
     engine.bulkAssign.mockRejectedValue(new Error("down"));
 
-    const reply = await invoke(withBody(handler, { Chat: "p1" }), { method: "PUT" });
+    const reply = await invoke(handler, { method: "PUT", body: { Chat: "p1" } });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -829,7 +813,7 @@ describe("assignmentsController.cascadeProfileDelete", () => {
   ])("takes the id when %s", async (_what, body, query) => {
     engine.cascadeProfileDelete.mockResolvedValue(undefined);
 
-    const reply = await invoke(withBody(handler, body), { method: "DELETE", query });
+    const reply = await invoke(handler, { method: "DELETE", query, body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -845,7 +829,7 @@ describe("assignmentsController.cascadeProfileDelete", () => {
     ["an empty string in the query", undefined, { profileId: "" }],
     ["an array in the query", undefined, { profileId: ["p1"] }],
   ])("answers 400 for a body that is %s", async (_what, body, query) => {
-    const reply = await invoke(withBody(handler, body), { method: "DELETE", query });
+    const reply = await invoke(handler, { method: "DELETE", query, body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "profileId required" });
@@ -856,7 +840,7 @@ describe("assignmentsController.cascadeProfileDelete", () => {
   it("answers 500 when the engine fails", async () => {
     engine.cascadeProfileDelete.mockRejectedValue(new Error("down"));
 
-    const reply = await invoke(withBody(handler, "p1"), { method: "DELETE" });
+    const reply = await invoke(handler, { method: "DELETE", body: "p1" });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });

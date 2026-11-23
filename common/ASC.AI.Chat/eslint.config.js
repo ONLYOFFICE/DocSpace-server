@@ -106,6 +106,11 @@ export default tseslint.config(
     rules: { "no-console": "off", "no-restricted-syntax": "off", "no-restricted-globals": "off" },
   },
   {
+    // The one place that wraps console.log, to drop the two lines config/index.ts prints.
+    files: ["app/__tests__/setup.ts"],
+    rules: { "no-console": "off" },
+  },
+  {
     files: ["**/__tests__/**/*.ts"],
     rules: {
       "@typescript-eslint/no-non-null-assertion": "off",

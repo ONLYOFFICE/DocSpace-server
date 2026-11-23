@@ -41,7 +41,7 @@ import {
   resolveContextFolders,
   resolveLocation,
 } from "../contextFolders.js";
-import { inRound, scopeOf, snapshotOf } from "./chatContext.fixtures.js";
+import { inRound, scopeOf, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // GET api/2.0/files/folder/{id}: FoldersController.GetFolderInfo (products/ASC.Files), answering
 // `FolderDto` (products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) in the Files API envelope.

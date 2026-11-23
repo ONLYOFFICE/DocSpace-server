@@ -32,9 +32,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { AttachmentsEngine } from "@onlyoffice/ai-chat/core";
-import type { RequestHandler } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { engineMock, mockReset } from "../../__tests__/helpers/engine.js";
+import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import { inRequestContext, invoke } from "../../__tests__/helpers/http.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
 
@@ -45,12 +44,7 @@ import { responseViolations } from "../../__tests__/helpers/schema.js";
 const engine = engineMock<AttachmentsEngine>();
 vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ...(await original<typeof import("@onlyoffice/ai-chat/core")>()),
-  // Evaluated lazily: the schema helper imports the library before `engine` exists.
-  AttachmentsEngine: class {
-    constructor() {
-      return engine;
-    }
-  },
+  AttachmentsEngine: engineClass(() => engine),
 }));
 const store = vi.hoisted(() => ({
   readThreadId: vi.fn(),
@@ -70,15 +64,6 @@ vi.mock("../../forms/suggestedQuestions.js", () => ({
 const { attachmentsController } = await import("../attachmentsController.js");
 const { getAnalyzeEntryIds } = await import("../../requestContext.js");
 const { AiServiceHttpError } = await import("../../storage/httpClient.js");
-
-// invoke() cannot send a null or absent body (node-mocks-http makes it `{}`), so the body is set
-// on the request itself.
-function withBody(handler: unknown, body: unknown): RequestHandler {
-  return (req, res, next) => {
-    req.body = body;
-    return (handler as RequestHandler)(req, res, next);
-  };
-}
 
 // An attachment as the engine answers it, the shape HttpAttachmentsStorage maps from the AI
 // service's attachment DTO (products/ASC.AI/Server/Models/ResponseDto/AttachmentDto.cs).
@@ -216,7 +201,7 @@ describe("attachmentsController.saveFile", () => {
   ])("saves the input given as %s and answers the engine's attachment", async (_what, body) => {
     engine.saveFile.mockResolvedValue(attachment);
 
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(attachment);
@@ -248,7 +233,7 @@ describe("attachmentsController.saveFile", () => {
   ])("passes the engine %s", async (_what, given, passed) => {
     engine.saveFile.mockResolvedValue(attachment);
 
-    const reply = await invoke(withBody(handler, [given]));
+    const reply = await invoke(handler, { body: [given] });
 
     expect(reply.status).toBe(200);
     expect(engine.saveFile).toHaveBeenCalledWith(passed, undefined);
@@ -260,7 +245,7 @@ describe("attachmentsController.saveFile", () => {
     ["an empty array", []],
     ["a number", 5],
   ])("answers 400 for a body that is %s", async (_what, body) => {
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "input is required and must be an object" });
@@ -268,7 +253,7 @@ describe("attachmentsController.saveFile", () => {
   });
 
   it.each(badInputs)("answers 400 for an input that is %s", async (_what, bad, error) => {
-    const reply = await invoke(withBody(handler, { input: bad, entityId: "42" }));
+    const reply = await invoke(handler, { body: { input: bad, entityId: "42" } });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error });
@@ -284,7 +269,7 @@ describe("attachmentsController.saveFile", () => {
   ])("hands an entityId that is %s to the engine unchecked", async (_what, entityId) => {
     engine.saveFile.mockResolvedValue(attachment);
 
-    const reply = await invoke(withBody(handler, [input, entityId]));
+    const reply = await invoke(handler, { body: [input, entityId] });
 
     expect(reply.status).toBe(200);
     expect(engine.saveFile).toHaveBeenCalledWith(input, entityId);
@@ -296,7 +281,7 @@ describe("attachmentsController.saveFile", () => {
   it("echoes a field the engine's attachment carries beyond the published ones", async () => {
     engine.saveFile.mockResolvedValue({ ...attachment, internalUrl: "http://storage/x" } as never);
 
-    const reply = await invoke(withBody(handler, [input]));
+    const reply = await invoke(handler, { body: [input] });
 
     expect(reply.body).toEqual({ ...attachment, internalUrl: "http://storage/x" });
     expect(responseViolations("aiAttachmentsSaveFile", 200, reply.body)).toEqual([
@@ -309,7 +294,7 @@ describe("attachmentsController.saveFile", () => {
       new AiServiceHttpError(500, "Internal Server Error", "MARKER", "http://ai/x"),
     );
 
-    const reply = await invoke(withBody(handler, [input]));
+    const reply = await invoke(handler, { body: [input] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal Server Error" });
@@ -319,7 +304,7 @@ describe("attachmentsController.saveFile", () => {
   it("answers 500 when the engine throws a plain Error", async () => {
     engine.saveFile.mockRejectedValue(new Error("draft without a path"));
 
-    const reply = await invoke(withBody(handler, [input]));
+    const reply = await invoke(handler, { body: [input] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -339,7 +324,7 @@ describe("attachmentsController.saveFilesMany", () => {
     ];
 
     const { reply, marked } = await inRequestContext({}, async () => {
-      const r = await invoke(withBody(handler, [inputs, "42"]));
+      const r = await invoke(handler, { body: [inputs, "42"] });
       return { reply: r, marked: getAnalyzeEntryIds() };
     });
 
@@ -357,7 +342,7 @@ describe("attachmentsController.saveFilesMany", () => {
     engine.saveFilesMany.mockResolvedValue([]);
 
     const { reply, marked } = await inRequestContext({}, async () => {
-      const r = await invoke(withBody(handler, { inputs: [] }));
+      const r = await invoke(handler, { body: { inputs: [] } });
       return { reply: r, marked: getAnalyzeEntryIds() };
     });
 
@@ -377,7 +362,7 @@ describe("attachmentsController.saveFilesMany", () => {
     ["with inputs a string", { inputs: "1234" }],
     ["a positional array whose first item is not a list", [input, "42"]],
   ])("answers 400 for a body that is %s", async (_what, body) => {
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "inputs must be an array" });
@@ -388,7 +373,7 @@ describe("attachmentsController.saveFilesMany", () => {
   it("answers 400 for 101 inputs before reading any of them", async () => {
     const list = Array.from({ length: 101 }, () => null);
 
-    const reply = await invoke(withBody(handler, [list]));
+    const reply = await invoke(handler, { body: [list] });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "inputs may name at most 100 files (got 101)" });
@@ -398,7 +383,7 @@ describe("attachmentsController.saveFilesMany", () => {
   it.each(badInputs)(
     "answers 400 naming the index for an element that is %s",
     async (_what, bad, error) => {
-      const reply = await invoke(withBody(handler, [[input, input, bad]]));
+      const reply = await invoke(handler, { body: [[input, input, bad]] });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: `inputs[2]: ${error}` });
@@ -409,7 +394,7 @@ describe("attachmentsController.saveFilesMany", () => {
 
   it("does not mark the analysis subjects when an element is refused", async () => {
     const marked = await inRequestContext({}, async () => {
-      await invoke(withBody(handler, [[{ ...input, analyzeOnly: true }, null]]));
+      await invoke(handler, { body: [[{ ...input, analyzeOnly: true }, null]] });
       return getAnalyzeEntryIds();
     });
 
@@ -420,7 +405,7 @@ describe("attachmentsController.saveFilesMany", () => {
   it("hands an entityId that is a number to the engine unchecked", async () => {
     engine.saveFilesMany.mockResolvedValue([]);
 
-    await invoke(withBody(handler, [[input], 42]));
+    await invoke(handler, { body: [[input], 42] });
 
     expect(engine.saveFilesMany).toHaveBeenCalledWith([input], 42);
   });
@@ -428,7 +413,7 @@ describe("attachmentsController.saveFilesMany", () => {
   it("answers 500 when the engine fails", async () => {
     engine.saveFilesMany.mockRejectedValue(new Error("down"));
 
-    const reply = await invoke(withBody(handler, [[input]]));
+    const reply = await invoke(handler, { body: [[input]] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -458,7 +443,7 @@ describe.each(idRoutes)("attachmentsController.%s id validation", (route, operat
     ["a named number", { id: 5 }],
     ["a named empty string", { id: "" }],
   ])("answers 400 when the id is %s", async (_what, body) => {
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "id is required" });
@@ -478,7 +463,7 @@ describe("attachmentsController.get", () => {
   ])("answers the attachment read by %s", async (_what, body) => {
     engine.get.mockResolvedValue(attachment);
 
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(attachment);
@@ -489,7 +474,7 @@ describe("attachmentsController.get", () => {
   it("answers null with 200 for an attachment the engine does not find", async () => {
     engine.get.mockResolvedValue(null);
 
-    const reply = await invoke(withBody(handler, "a1"));
+    const reply = await invoke(handler, { body: "a1" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toBeNull();
@@ -501,7 +486,7 @@ describe("attachmentsController.get", () => {
       new AiServiceHttpError(500, "Internal Server Error", "MARKER", "http://ai/x"),
     );
 
-    const reply = await invoke(withBody(handler, "a1"));
+    const reply = await invoke(handler, { body: "a1" });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal Server Error" });
@@ -518,7 +503,7 @@ describe("attachmentsController.getMany", () => {
   ])("answers the engine's list for %s", async (_what, body) => {
     engine.getMany.mockResolvedValue([attachment, null]);
 
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual([attachment, null]);
@@ -530,7 +515,7 @@ describe("attachmentsController.getMany", () => {
     engine.getMany.mockResolvedValue([]);
     const ids = Array.from({ length: 100 }, (_, i) => `a${i}`);
 
-    const reply = await invoke(withBody(handler, ids));
+    const reply = await invoke(handler, { body: ids });
 
     expect(reply.status).toBe(200);
     expect(engine.getMany).toHaveBeenCalledWith(ids);
@@ -546,7 +531,7 @@ describe("attachmentsController.getMany", () => {
     ["a named string", { ids: "a1" }],
     ["a named empty list", { ids: [] }],
   ])("answers 400 for a body that is %s", async (_what, body) => {
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "ids is required and must be a non-empty array" });
@@ -555,12 +540,7 @@ describe("attachmentsController.getMany", () => {
   });
 
   it("answers 400 for 101 ids", async () => {
-    const reply = await invoke(
-      withBody(
-        handler,
-        Array.from({ length: 101 }, (_, i) => `a${i}`),
-      ),
-    );
+    const reply = await invoke(handler, { body: Array.from({ length: 101 }, (_, i) => `a${i}`) });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "ids may name at most 100 attachments (got 101)" });
@@ -572,7 +552,7 @@ describe("attachmentsController.getMany", () => {
   it("hands ids that are not strings to the engine unchecked", async () => {
     engine.getMany.mockResolvedValue([]);
 
-    const reply = await invoke(withBody(handler, { ids: [5, null, { id: "a1" }] }));
+    const reply = await invoke(handler, { body: { ids: [5, null, { id: "a1" }] } });
 
     expect(reply.status).toBe(200);
     expect(engine.getMany).toHaveBeenCalledWith([5, null, { id: "a1" }]);
@@ -581,7 +561,7 @@ describe("attachmentsController.getMany", () => {
   it("answers 500 when the engine fails", async () => {
     engine.getMany.mockRejectedValue(new Error("down"));
 
-    const reply = await invoke(withBody(handler, ["a1"]));
+    const reply = await invoke(handler, { body: ["a1"] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -601,7 +581,7 @@ describe("attachmentsController.getSuggestedQuestions", () => {
   ])("answers the %s result for the attachment id", async (_what, result) => {
     store.getSuggestedQuestions.mockResolvedValue(result);
 
-    const reply = await invoke(withBody(handler, "a1"));
+    const reply = await invoke(handler, { body: "a1" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(result);
@@ -612,7 +592,7 @@ describe("attachmentsController.getSuggestedQuestions", () => {
   it("answers 500 when the generator fails", async () => {
     store.getSuggestedQuestions.mockRejectedValue(new Error("model down"));
 
-    const reply = await invoke(withBody(handler, { id: "a1" }));
+    const reply = await invoke(handler, { body: { id: "a1" } });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -626,7 +606,7 @@ describe("attachmentsController.delete", () => {
   it("deletes by a named id", async () => {
     engine.delete.mockResolvedValue(undefined);
 
-    const reply = await invoke(withBody(handler, { id: "a1" }));
+    const reply = await invoke(handler, { body: { id: "a1" } });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -639,7 +619,7 @@ describe("attachmentsController.delete", () => {
       new AiServiceHttpError(403, "Forbidden", "MARKER", "http://ai/x"),
     );
 
-    const reply = await invoke(withBody(handler, "a1"));
+    const reply = await invoke(handler, { body: "a1" });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -659,7 +639,7 @@ describe("attachmentsController.deleteMany", () => {
   ])("deletes %s", async (_what, body, ids) => {
     engine.deleteMany.mockResolvedValue(undefined);
 
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -679,7 +659,7 @@ describe("attachmentsController.deleteMany", () => {
   ])("hands a body that is %s to the engine unchecked", async (_what, body, passed) => {
     engine.deleteMany.mockResolvedValue(undefined);
 
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(200);
     expect(engine.deleteMany).toHaveBeenCalledWith(passed);
@@ -689,7 +669,7 @@ describe("attachmentsController.deleteMany", () => {
     engine.deleteMany.mockResolvedValue(undefined);
     const ids = Array.from({ length: 1000 }, (_, i) => `a${i}`);
 
-    const reply = await invoke(withBody(handler, ids));
+    const reply = await invoke(handler, { body: ids });
 
     expect(reply.status).toBe(200);
     expect(engine.deleteMany).toHaveBeenCalledWith(ids);
@@ -698,7 +678,7 @@ describe("attachmentsController.deleteMany", () => {
   it("answers 500 when the engine fails", async () => {
     engine.deleteMany.mockRejectedValue(new Error("down"));
 
-    const reply = await invoke(withBody(handler, ["a1"]));
+    const reply = await invoke(handler, { body: ["a1"] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -722,7 +702,7 @@ describe("attachmentsController.linkToMessage", () => {
   ])(
     "binds the attachments given as %s after checking the message and the records",
     async (_what, body) => {
-      const reply = await invoke(withBody(handler, body));
+      const reply = await invoke(handler, { body });
 
       expect(reply.status).toBe(200);
       expect(reply.body).toEqual({ success: true });
@@ -736,7 +716,7 @@ describe("attachmentsController.linkToMessage", () => {
   it("binds exactly 100 ids", async () => {
     const ids = Array.from({ length: 100 }, (_, i) => `a${i}`);
 
-    const reply = await invoke(withBody(handler, [ids, "m1", "t1"]));
+    const reply = await invoke(handler, { body: [ids, "m1", "t1"] });
 
     expect(reply.status).toBe(200);
     expect(engine.linkToMessage).toHaveBeenCalledWith(ids, "m1", "t1");
@@ -765,7 +745,7 @@ describe("attachmentsController.linkToMessage", () => {
       { ids: Array.from({ length: 101 }, () => "a"), threadId: "t1" },
     ],
   ])("answers 400 for a body that is %s and reads nothing", async (_what, body) => {
-    const reply = await invoke(withBody(handler, body));
+    const reply = await invoke(handler, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: shapeError });
@@ -777,7 +757,7 @@ describe("attachmentsController.linkToMessage", () => {
   it("answers 400 for 101 ids and reads nothing", async () => {
     const ids = Array.from({ length: 101 }, (_, i) => `a${i}`);
 
-    const reply = await invoke(withBody(handler, [ids, "m1", "t1"]));
+    const reply = await invoke(handler, { body: [ids, "m1", "t1"] });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "ids may name at most 100 attachments (got 101)" });
@@ -787,7 +767,7 @@ describe("attachmentsController.linkToMessage", () => {
   it("answers 404 for a message that does not exist and binds nothing", async () => {
     store.readThreadId.mockResolvedValue(null);
 
-    const reply = await invoke(withBody(handler, [["a1"], "m1", "t1"]));
+    const reply = await invoke(handler, { body: [["a1"], "m1", "t1"] });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "message not found" });
@@ -799,7 +779,7 @@ describe("attachmentsController.linkToMessage", () => {
   it("answers 400 for a message of another thread and binds nothing", async () => {
     store.readThreadId.mockResolvedValue("t2");
 
-    const reply = await invoke(withBody(handler, [["a1"], "m1", "t1"]));
+    const reply = await invoke(handler, { body: [["a1"], "m1", "t1"] });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "messageId does not belong to the given threadId" });
@@ -810,7 +790,7 @@ describe("attachmentsController.linkToMessage", () => {
   it("answers 404 naming every missing attachment and binds nothing", async () => {
     store.findMissingIds.mockResolvedValue(["a2", "a3"]);
 
-    const reply = await invoke(withBody(handler, [["a1", "a2", "a3"], "m1", "t1"]));
+    const reply = await invoke(handler, { body: [["a1", "a2", "a3"], "m1", "t1"] });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "attachment(s) not found: a2, a3" });
@@ -823,7 +803,7 @@ describe("attachmentsController.linkToMessage", () => {
       new AiServiceHttpError(500, "Internal Server Error", "MARKER", "http://ai/x"),
     );
 
-    const reply = await invoke(withBody(handler, [["a1"], "m1", "t1"]));
+    const reply = await invoke(handler, { body: [["a1"], "m1", "t1"] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal Server Error" });
@@ -836,7 +816,7 @@ describe("attachmentsController.linkToMessage", () => {
       new DOMException("The operation timed out.", "TimeoutError"),
     );
 
-    const reply = await invoke(withBody(handler, [["a1"], "m1", "t1"]));
+    const reply = await invoke(handler, { body: [["a1"], "m1", "t1"] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -847,7 +827,7 @@ describe("attachmentsController.linkToMessage", () => {
       new AiServiceHttpError(500, "Internal Server Error", "MARKER", "http://ai/x"),
     );
 
-    const reply = await invoke(withBody(handler, [["a1"], "m1", "t1"]));
+    const reply = await invoke(handler, { body: [["a1"], "m1", "t1"] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal Server Error" });
@@ -857,7 +837,7 @@ describe("attachmentsController.linkToMessage", () => {
   it("answers 500 when the binding itself fails", async () => {
     engine.linkToMessage.mockRejectedValue(new Error("down"));
 
-    const reply = await invoke(withBody(handler, [["a1"], "m1", "t1"]));
+    const reply = await invoke(handler, { body: [["a1"], "m1", "t1"] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -866,7 +846,7 @@ describe("attachmentsController.linkToMessage", () => {
   // DEFECT ctl-31: the elements of `ids` are cast (`args.ids as string[]`), so a number or null reaches the
   // record check and the binding — expected 400 naming ids for a non-string element (ts-ai-failure-paths.md §4)
   it("hands ids that are not strings to the record check and the engine unchecked", async () => {
-    const reply = await invoke(withBody(handler, [[5, null, 5], "m1", "t1"]));
+    const reply = await invoke(handler, { body: [[5, null, 5], "m1", "t1"] });
 
     expect(reply.status).toBe(200);
     expect(store.findMissingIds).toHaveBeenCalledWith([5, null]);

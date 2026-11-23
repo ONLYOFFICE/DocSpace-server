@@ -33,9 +33,8 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { passthrough } from "msw";
 import request from "supertest";
-import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import { publishedOperations } from "../../__tests__/helpers/schema.js";
 import {
   HttpResponse,
@@ -49,7 +48,6 @@ import {
 // (parsers, request context, 404), with the Files and AI services stubbed at the network.
 // The document agent is configured from the environment, which wins over appsettings.
 
-vi.stubEnv("core__cors", "");
 vi.stubEnv("AI__DOCUMENT_AGENT__URL", "http://agent:9838");
 vi.stubEnv("AI__DOCUMENT_AGENT__TOKEN", "secret");
 
@@ -58,15 +56,11 @@ const { createApp } = await import("../../createApp.js");
 const { DOCUMENT_AGENT_FILES_PATH, DOCUMENT_AGENT_OUTPUTS_PATH, MAX_FILE_BYTES } =
   await import("../documentAgentFiles.js");
 
-const upstream = useUpstream();
+const upstream = useUpstream({ localApp: true });
 const app = createApp();
 
-// msw sees supertest's own requests to the app on 127.0.0.1 too: they are let through.
-beforeEach(() => {
-  upstream.use(http.all(/^http:\/\/127\.0\.0\.1:\d+\//, () => passthrough()));
-});
-const calledOut = () =>
-  upstream.seen.filter((r) => !/^127\.0\.0\.1:\d+$/.test(r.headers["host"] ?? ""));
+// What the app itself sent anywhere; supertest's own requests to it are not listed.
+const calledOut = () => upstream.seen;
 
 afterAll(() => {
   vi.unstubAllEnvs();

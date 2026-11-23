@@ -41,15 +41,14 @@ import {
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
-import { listen, send, until } from "./openaiPassthrough.harness.js";
-import type { RawReply } from "./openaiPassthrough.harness.js";
-import { useFile, useFolder } from "./openaiPassthrough.fixtures.js";
+import { listen, send, until } from "../../__tests__/helpers/rawHttp.js";
+import type { RawReply } from "../../__tests__/helpers/rawHttp.js";
+import { useFile, useFolder } from "../../__tests__/fixtures/providers.js";
 
 // The web-search passthrough of the editor plugin through the whole application (the JSON
 // parser, the gate, the request context): the portal's web-search config read from the AI
 // service, the source entry from the Files API, the search provider stubbed with msw.
 
-vi.stubEnv("core__cors", "");
 // The access log is not what these tests are about.
 vi.mock("morgan", () => ({
   default: () => (_req: unknown, _res: unknown, next: () => void) => next(),

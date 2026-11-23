@@ -43,7 +43,7 @@ import {
 import logger from "../../log.js";
 import { getChatContextMisses } from "../../requestContext.js";
 import { HttpAssignmentsStorage } from "../assignmentsStorage.js";
-import { inRound, PROFILE_ID, scopeOf, snapshotOf } from "./chatContext.fixtures.js";
+import { inRound, PROFILE_ID, scopeOf, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // products/ASC.AI/Server/Api/AssignmentsStorageController.cs: POST assignments,
 // GET assignments/{actionType} (`Guid?`), GET assignments (`Dictionary<string, Guid>`),

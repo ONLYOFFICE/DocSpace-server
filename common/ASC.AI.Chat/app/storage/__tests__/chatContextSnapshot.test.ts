@@ -42,7 +42,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "../chatContextSnapshot.js";
-import { inRound, scopeOf, snapshotOf } from "./chatContext.fixtures.js";
+import { inRound, scopeOf, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // The per-request snapshot of the chat-context aggregate, run in the real request context.
 

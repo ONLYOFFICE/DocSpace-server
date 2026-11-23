@@ -41,7 +41,7 @@ import {
 } from "../../__tests__/helpers/upstream.js";
 import { getChatContextMisses } from "../../requestContext.js";
 import { HttpMcpServersStorage, parseMcpServerConfig } from "../mcpServersStorage.js";
-import { inRound, scopeOf, snapshotOf } from "./chatContext.fixtures.js";
+import { inRound, scopeOf, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // products/ASC.AI/Server/Api/McpServerStorageController.cs: POST mcp-servers,
 // GET mcp-servers/{name}, GET mcp-servers, PUT mcp-servers/{name}, PUT mcp-servers,

@@ -43,7 +43,12 @@ import {
 import { getChatContextMisses, getRoundThreadId } from "../../requestContext.js";
 import { DocspaceApiHttpError } from "../docspaceFilesApi.js";
 import { dtoToThread, HttpThreadsStorage } from "../threadsStorage.js";
-import { inRound, PROFILE_ID, snapshotOf, THREAD_ID } from "./chatContext.fixtures.js";
+import {
+  inRound,
+  PROFILE_ID,
+  snapshotOf,
+  THREAD_ID,
+} from "../../__tests__/fixtures/chatContext.js";
 
 // The real httpClient and Files API client over a stubbed network.
 // products/ASC.AI/Server/Api/ThreadStorageController.cs: POST threads, GET threads/{id},

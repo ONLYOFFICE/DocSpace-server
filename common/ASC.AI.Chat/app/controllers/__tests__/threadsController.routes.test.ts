@@ -32,10 +32,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { AssignmentsEngine, ThreadsEngine } from "@onlyoffice/ai-chat/core";
+import { invoke } from "../../__tests__/helpers/http.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import type { Reply } from "../../__tests__/helpers/http.js";
-import { call } from "./promptsControllerData.helpers.js";
 
 const engine = engineMock<ThreadsEngine>();
 const assignments = engineMock<AssignmentsEngine>();
@@ -124,7 +124,7 @@ describe("threadsController.create", () => {
   it("creates the thread with an explicit profile that exists", async () => {
     engine.create.mockResolvedValue(thread);
 
-    const reply = await call(threadsController.create, { body });
+    const reply = await invoke(threadsController.create, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(thread);
@@ -141,7 +141,7 @@ describe("threadsController.create", () => {
       new DocspaceApiHttpError(403, "Forbidden", "http://x"),
     );
 
-    const reply = await call(threadsController.create, { body });
+    const reply = await invoke(threadsController.create, { body });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "Forbidden" });
@@ -152,7 +152,7 @@ describe("threadsController.create", () => {
   it("answers 403 to a caller who may not chat in the AI project", async () => {
     readAiProjectChatContext.mockResolvedValue({ canChat: false });
 
-    const reply = await call(threadsController.create, { body });
+    const reply = await invoke(threadsController.create, { body });
 
     expect(reply.status).toBe(403);
     expect(reply.body).toEqual({ error: "You cannot chat in this AI project" });
@@ -167,7 +167,7 @@ describe("threadsController.create", () => {
   ])("answers 409 for an AI project with %s", async (_what, project) => {
     readAiProjectChatContext.mockResolvedValue(project);
 
-    const reply = await call(threadsController.create, { body });
+    const reply = await invoke(threadsController.create, { body });
 
     expect(reply.status).toBe(409);
     expect(reply.body).toEqual({ error: "The model of this AI project is not available" });
@@ -185,7 +185,7 @@ describe("threadsController.create", () => {
     });
     engine.create.mockResolvedValue(thread);
 
-    const reply = await call(threadsController.create, { body });
+    const reply = await invoke(threadsController.create, { body });
 
     expect(reply.status).toBe(200);
     expect(readProfile).not.toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe("threadsController.create", () => {
     assignments.tryResolveForAction.mockResolvedValue({ profile } as never);
     engine.create.mockResolvedValue(thread);
 
-    const reply = await call(threadsController.create, { body: sent });
+    const reply = await invoke(threadsController.create, { body: sent });
 
     expect(reply.status).toBe(200);
     expect(assignments.tryResolveForAction).toHaveBeenCalledWith(ActionType.Chat, undefined);
@@ -215,7 +215,7 @@ describe("threadsController.create", () => {
   ])("answers 404 when the Chat assignment resolves %s", async (_what, resolved) => {
     assignments.tryResolveForAction.mockResolvedValue(resolved as never);
 
-    const reply = await call(threadsController.create, { body: { title: "T", entityId: "5" } });
+    const reply = await invoke(threadsController.create, { body: { title: "T", entityId: "5" } });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "no AI profile is available for this thread" });
@@ -234,7 +234,7 @@ describe("threadsController.create", () => {
   ])("answers 500, not 404, when the profile read fails with %s", async (_what, failure, error) => {
     readProfile.mockRejectedValue(failure);
 
-    const reply = await call(threadsController.create, { body });
+    const reply = await invoke(threadsController.create, { body });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error });
@@ -256,7 +256,7 @@ describe("threadsController.create", () => {
     assignments.tryResolveForAction.mockResolvedValue({ profile } as never);
     engine.create.mockResolvedValue(thread);
 
-    const reply = await call(threadsController.create, { body: sent });
+    const reply = await invoke(threadsController.create, { body: sent });
 
     expect(reply.status).toBe(200);
     expect(engine.create).toHaveBeenCalledWith(sent);
@@ -270,7 +270,9 @@ describe("threadsController.openOrCreate", () => {
     const result = { threadId: "t1", title: "Report", priorMessages: [storedMessage] };
     engine.openOrCreate.mockResolvedValue(result);
 
-    const reply = await call(threadsController.openOrCreate, { body: { ...body, threadId: "t1" } });
+    const reply = await invoke(threadsController.openOrCreate, {
+      body: { ...body, threadId: "t1" },
+    });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ ...result, priorMessages: [storedMessageJson] });
@@ -284,7 +286,7 @@ describe("threadsController.openOrCreate", () => {
   it("gates the creation of a new thread like threads/create", async () => {
     readAiProjectChatContext.mockResolvedValue({ canChat: false });
 
-    const reply = await call(threadsController.openOrCreate, { body });
+    const reply = await invoke(threadsController.openOrCreate, { body });
 
     expect(reply.status).toBe(403);
     expect(readAiProjectChatContext).toHaveBeenCalledWith("12");
@@ -295,7 +297,7 @@ describe("threadsController.openOrCreate", () => {
   it("checks the stored profile's id when it creates outside a project", async () => {
     engine.openOrCreate.mockResolvedValue({ threadId: "t2", title: "", priorMessages: [] });
 
-    const reply = await call(threadsController.openOrCreate, {
+    const reply = await invoke(threadsController.openOrCreate, {
       body: { profile: { id: profile.id } },
     });
 
@@ -314,7 +316,7 @@ describe("threadsController.openOrCreate", () => {
     ["a profile that is null", { profile: null }],
     ["a profile that is an array", { profile: [profile] }],
   ])("answers 404 for a body that is %s", async (_what, sent) => {
-    const reply = await call(threadsController.openOrCreate, { body: sent });
+    const reply = await invoke(threadsController.openOrCreate, { body: sent });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "an AI profile is required to open or create a thread" });
@@ -334,7 +336,7 @@ describe("threadsController.openOrCreate", () => {
       readProfile.mockRejectedValue(new AiServiceHttpError(400, "Bad Request", "", "u"));
     }
 
-    const reply = await call(threadsController.openOrCreate, { body: sent });
+    const reply = await invoke(threadsController.openOrCreate, { body: sent });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "the AI profile does not exist" });
@@ -352,7 +354,7 @@ describe("threadsController.openOrCreate", () => {
   ])("answers 500, not 404, when the profile read fails with %s", async (_what, failure, error) => {
     readProfile.mockRejectedValue(failure);
 
-    const reply = await call(threadsController.openOrCreate, { body });
+    const reply = await invoke(threadsController.openOrCreate, { body });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error });
@@ -364,7 +366,7 @@ describe("threadsController.openOrCreate", () => {
       new DocspaceApiHttpError(404, "Not Found", "http://x"),
     );
 
-    const reply = await call(threadsController.openOrCreate, { body });
+    const reply = await invoke(threadsController.openOrCreate, { body });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "Not Found" });
@@ -374,7 +376,7 @@ describe("threadsController.openOrCreate", () => {
   it("ignores an entityId that is not a string", async () => {
     engine.openOrCreate.mockResolvedValue({ threadId: "t2", title: "", priorMessages: [] });
 
-    await call(threadsController.openOrCreate, {
+    await invoke(threadsController.openOrCreate, {
       body: { profile: { id: profile.id }, entityId: 12 },
     });
 
@@ -390,7 +392,7 @@ describe("threadsController.appendUserMessage", () => {
   ])("stores a user message from %s", async (_what, body) => {
     engine.appendUserMessage.mockResolvedValue(storedMessage);
 
-    const reply = await call(threadsController.appendUserMessage, { body });
+    const reply = await invoke(threadsController.appendUserMessage, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ messageId: storedMessageJson });
@@ -412,7 +414,7 @@ describe("threadsController.appendUserMessage", () => {
   ])("stores a message whose content is %s", async (_what, content) => {
     engine.appendUserMessage.mockResolvedValue(storedMessage);
 
-    const reply = await call(threadsController.appendUserMessage, {
+    const reply = await invoke(threadsController.appendUserMessage, {
       body: ["t1", { role: "user", content }],
     });
 
@@ -494,7 +496,7 @@ describe("threadsController.appendUserMessage", () => {
       "a message may carry at most 5 file and 5 image attachments (got 0 file(s), 6 image(s))",
     ],
   ])("answers 400 for a body with %s", async (_what, body, error) => {
-    const reply = await call(threadsController.appendUserMessage, { body });
+    const reply = await invoke(threadsController.appendUserMessage, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error });
@@ -506,7 +508,9 @@ describe("threadsController.appendUserMessage", () => {
   it("hands a profileId that is a number to the engine", async () => {
     engine.appendUserMessage.mockResolvedValue(storedMessage);
 
-    const reply = await call(threadsController.appendUserMessage, { body: ["t1", userMessage, 7] });
+    const reply = await invoke(threadsController.appendUserMessage, {
+      body: ["t1", userMessage, 7],
+    });
 
     expect(reply.status).toBe(200);
     expect(engine.appendUserMessage).toHaveBeenCalledWith("t1", userMessage, 7);
@@ -517,7 +521,7 @@ describe("threadsController.appendUserMessage", () => {
     engine.appendUserMessage.mockResolvedValue(storedMessage);
     const content = Array.from({ length: 1000 }, () => ({ type: "text", text: "x" }));
 
-    const reply = await call(threadsController.appendUserMessage, {
+    const reply = await invoke(threadsController.appendUserMessage, {
       body: ["t1", { role: "user", content }],
     });
 
@@ -532,7 +536,7 @@ describe("threadsController.touch", () => {
   ])("touches the thread named by %s", async (_what, body, profileId) => {
     engine.touch.mockResolvedValue(undefined);
 
-    const reply = await call(threadsController.touch, { body });
+    const reply = await invoke(threadsController.touch, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -543,7 +547,7 @@ describe("threadsController.touch", () => {
   it.each([[null], ["t1"], [{}], [{ threadId: "" }], [{ threadId: 7 }]])(
     "answers 400 for the body %j",
     async (body) => {
-      const reply = await call(threadsController.touch, { body });
+      const reply = await invoke(threadsController.touch, { body });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: "threadId is required" });
@@ -559,7 +563,7 @@ describe("threadsController.rename", () => {
   ])("renames the thread from %s", async (_what, body) => {
     engine.rename.mockResolvedValue(undefined);
 
-    const reply = await call(threadsController.rename, { method: "PUT", body });
+    const reply = await invoke(threadsController.rename, { method: "PUT", body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -580,7 +584,7 @@ describe("threadsController.rename", () => {
     ["a blank title", ["t1", "   "], noTitle],
     ["a title that is a number", ["t1", 5], noTitle],
   ])("answers 400 for a body with %s", async (_what, body, error) => {
-    const reply = await call(threadsController.rename, { body });
+    const reply = await invoke(threadsController.rename, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error });
@@ -590,7 +594,7 @@ describe("threadsController.rename", () => {
 
   // DEFECT data-13: a title of any length is stored — expected a named limit (ts-ai-failure-paths.md §4)
   it("renames the thread to a title of 10 000 characters", async () => {
-    const reply = await call(threadsController.rename, { body: ["t1", "t".repeat(10_000)] });
+    const reply = await invoke(threadsController.rename, { body: ["t1", "t".repeat(10_000)] });
 
     expect(reply.status).toBe(200);
     expect(engine.rename).toHaveBeenCalledWith("t1", "t".repeat(10_000));
@@ -605,7 +609,7 @@ describe("threadsController.delete", () => {
   ])("deletes a thread that exists, named by %s", async (_what, init) => {
     readThread.mockResolvedValue(thread);
 
-    const reply = await call(threadsController.delete, { method: "DELETE", ...init });
+    const reply = await invoke(threadsController.delete, { method: "DELETE", ...init });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -620,7 +624,7 @@ describe("threadsController.delete", () => {
     ["{}", { body: {} }],
     ["an id that is a number", { body: { threadId: 3 } }],
   ])("answers 400 for %s", async (_what, init) => {
-    const reply = await call(threadsController.delete, init);
+    const reply = await invoke(threadsController.delete, init);
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "threadId required" });
@@ -631,7 +635,7 @@ describe("threadsController.delete", () => {
   it("answers 404 for a thread the store does not have (Bug 83095)", async () => {
     readThread.mockResolvedValue(null);
 
-    const reply = await call(threadsController.delete, { body: "t9" });
+    const reply = await invoke(threadsController.delete, { body: "t9" });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "thread not found" });
@@ -645,7 +649,7 @@ describe("threadsController.delete", () => {
   ])("answers 500, not 404, when the thread read fails with %s", async (_what, failure) => {
     readThread.mockRejectedValue(failure);
 
-    const reply = await call(threadsController.delete, { body: "t1" });
+    const reply = await invoke(threadsController.delete, { body: "t1" });
 
     expect(reply.status).toBe(500);
     expect(engine.delete).not.toHaveBeenCalled();
@@ -664,7 +668,7 @@ describe("threadsController.clearMessages and deleteMessage", () => {
         { body: { [field]: "x1" } },
         { query: { [field]: "x1" } },
       ]) {
-        const reply = await call(threadsController[method], { method: "DELETE", ...init });
+        const reply = await invoke(threadsController[method], { method: "DELETE", ...init });
 
         expect(reply.status).toBe(200);
         expect(reply.body).toEqual({ success: true });
@@ -684,7 +688,7 @@ describe("threadsController.clearMessages and deleteMessage", () => {
       { body: { [field]: 1 } },
       { query: { [field]: [] } },
     ]) {
-      const reply = await call(threadsController[method], init);
+      const reply = await invoke(threadsController[method], init);
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: `${field} required` });
@@ -711,7 +715,7 @@ describe("threadsController.regenerateTitle", () => {
   ])("regenerates the title with the stored profile, for %s", async (_what, body, entityId) => {
     engine.regenerateTitle.mockResolvedValue("Quarterly report");
 
-    const reply = await call(threadsController.regenerateTitle, { body });
+    const reply = await invoke(threadsController.regenerateTitle, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ title: "Quarterly report" });
@@ -730,7 +734,7 @@ describe("threadsController.regenerateTitle", () => {
     ["a profile that is a string", ["t1", profile.id]],
     ["a profile that is null", ["t1", null]],
   ])("answers 400 for a body that is %s", async (_what, body) => {
-    const reply = await call(threadsController.regenerateTitle, { body });
+    const reply = await invoke(threadsController.regenerateTitle, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: required });
@@ -742,7 +746,9 @@ describe("threadsController.regenerateTitle", () => {
   it("hands an empty threadId to the engine", async () => {
     engine.regenerateTitle.mockResolvedValue("T");
 
-    const reply = await call(threadsController.regenerateTitle, { body: ["", { id: profile.id }] });
+    const reply = await invoke(threadsController.regenerateTitle, {
+      body: ["", { id: profile.id }],
+    });
 
     expect(reply.status).toBe(200);
     expect(engine.regenerateTitle).toHaveBeenCalledWith("", profile);
@@ -751,7 +757,7 @@ describe("threadsController.regenerateTitle", () => {
   it("answers 404 for a profile the store does not have", async () => {
     readProfile.mockResolvedValue(undefined);
 
-    const reply = await call(threadsController.regenerateTitle, { body: ["t1", { id: "p9" }] });
+    const reply = await invoke(threadsController.regenerateTitle, { body: ["t1", { id: "p9" }] });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "the AI profile does not exist" });
@@ -764,7 +770,7 @@ describe("threadsController.list", () => {
   it("lists with every parameter of the query", async () => {
     engine.list.mockResolvedValue([thread]);
 
-    const reply = await call(threadsController.list, {
+    const reply = await invoke(threadsController.list, {
       method: "GET",
       query: {
         entityId: "12",
@@ -807,7 +813,7 @@ describe("threadsController.list", () => {
   ])("reads a cursor that is %s", async (_what, cursor, parsed) => {
     engine.list.mockResolvedValue([]);
 
-    await call(threadsController.list, {
+    await invoke(threadsController.list, {
       method: "GET",
       query: cursor === undefined ? {} : { cursor },
     });
@@ -824,7 +830,7 @@ describe("threadsController.list", () => {
   ])("hands a count of %j to the engine as %j", async (count, parsed) => {
     engine.list.mockResolvedValue([]);
 
-    const reply = await call(threadsController.list, { method: "GET", query: { count } });
+    const reply = await invoke(threadsController.list, { method: "GET", query: { count } });
 
     expect(reply.status).toBe(200);
     expect(engine.list).toHaveBeenCalledWith(undefined, parsed, undefined, undefined);
@@ -833,7 +839,7 @@ describe("threadsController.list", () => {
   it("ignores repeated entityId and query parameters", async () => {
     engine.list.mockResolvedValue([]);
 
-    await call(threadsController.list, {
+    await invoke(threadsController.list, {
       method: "GET",
       query: { entityId: ["1", "2"], query: ["a"] },
     });
@@ -846,7 +852,7 @@ describe("threadsController.readMessages", () => {
   it("reads with every parameter of the query", async () => {
     engine.readMessages.mockResolvedValue([storedMessage]);
 
-    const reply = await call(threadsController.readMessages, {
+    const reply = await invoke(threadsController.readMessages, {
       method: "GET",
       query: {
         threadId: "t1",
@@ -876,7 +882,7 @@ describe("threadsController.readMessages", () => {
   ])("reads the cursor %j as %j", async (cursor, parsed) => {
     engine.readMessages.mockResolvedValue([]);
 
-    await call(threadsController.readMessages, {
+    await invoke(threadsController.readMessages, {
       method: "GET",
       query: { threadId: "t1", cursor },
     });
@@ -889,7 +895,7 @@ describe("threadsController.readMessages", () => {
     async (direction) => {
       engine.readMessages.mockResolvedValue([]);
 
-      await call(threadsController.readMessages, {
+      await invoke(threadsController.readMessages, {
         method: "GET",
         query: { threadId: "t1", direction },
       });
@@ -901,7 +907,7 @@ describe("threadsController.readMessages", () => {
   it.each([[{}], [{ threadId: "" }], [{ threadId: ["t1"] }]])(
     "answers 400 for the query %j (Bug 84408)",
     async (query) => {
-      const reply = await call(threadsController.readMessages, { method: "GET", query });
+      const reply = await invoke(threadsController.readMessages, { method: "GET", query });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: "threadId required" });
@@ -915,7 +921,7 @@ describe("threadsController.getById and getMessageById", () => {
   it("answers the thread", async () => {
     engine.getById.mockResolvedValue(thread);
 
-    const reply = await call(threadsController.getById, {
+    const reply = await invoke(threadsController.getById, {
       method: "GET",
       query: { threadId: "t1" },
     });
@@ -929,7 +935,7 @@ describe("threadsController.getById and getMessageById", () => {
   it("answers 404 for a thread the store does not have (Bug 82718)", async () => {
     engine.getById.mockResolvedValue(null);
 
-    const reply = await call(threadsController.getById, {
+    const reply = await invoke(threadsController.getById, {
       method: "GET",
       query: { threadId: "t9" },
     });
@@ -942,7 +948,7 @@ describe("threadsController.getById and getMessageById", () => {
   it("answers the message", async () => {
     engine.getMessageById.mockResolvedValue(storedMessage);
 
-    const reply = await call(threadsController.getMessageById, {
+    const reply = await invoke(threadsController.getMessageById, {
       method: "GET",
       query: { messageId: "m1" },
     });
@@ -956,7 +962,7 @@ describe("threadsController.getById and getMessageById", () => {
   it("answers 404 for a message the store does not have (Bug 84411)", async () => {
     engine.getMessageById.mockResolvedValue(null);
 
-    const reply = await call(threadsController.getMessageById, {
+    const reply = await invoke(threadsController.getMessageById, {
       method: "GET",
       query: { messageId: "m9" },
     });
@@ -971,7 +977,7 @@ describe("threadsController.getById and getMessageById", () => {
     ["getMessageById", "messageId", "aiThreadsGetMessageById"],
   ] as const)("%s answers 400 without an id", async (method, field, op) => {
     for (const query of [{}, { [field]: "" }, { [field]: ["a"] }]) {
-      const reply = await call(threadsController[method], { method: "GET", query });
+      const reply = await invoke(threadsController[method], { method: "GET", query });
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: `${field} required` });
@@ -988,7 +994,7 @@ describe("threadsController.updateMessage", () => {
   ])("replaces the message from %s", async (_what, body) => {
     readMessage.mockResolvedValue(storedMessage);
 
-    const reply = await call(threadsController.updateMessage, { method: "PUT", body });
+    const reply = await invoke(threadsController.updateMessage, { method: "PUT", body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ success: true });
@@ -1001,7 +1007,7 @@ describe("threadsController.updateMessage", () => {
     readMessage.mockResolvedValue({ ...storedMessage, role: "assistant" });
     const message = { role: "assistant", content: [{ type: "tool-call", toolCallId: "c1" }] };
 
-    const reply = await call(threadsController.updateMessage, { body: ["m1", message] });
+    const reply = await invoke(threadsController.updateMessage, { body: ["m1", message] });
 
     expect(reply.status).toBe(200);
     expect(engine.updateMessage).toHaveBeenCalledWith("m1", message);
@@ -1024,7 +1030,7 @@ describe("threadsController.updateMessage", () => {
       "message.role must be one of user, assistant, system",
     ],
   ])("answers 400 for a body with %s, before reading the message", async (_what, body, error) => {
-    const reply = await call(threadsController.updateMessage, { body });
+    const reply = await invoke(threadsController.updateMessage, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error });
@@ -1035,7 +1041,7 @@ describe("threadsController.updateMessage", () => {
   it("answers 400 when the role differs from the stored one", async () => {
     readMessage.mockResolvedValue(storedMessage);
 
-    const reply = await call(threadsController.updateMessage, {
+    const reply = await invoke(threadsController.updateMessage, {
       body: ["m1", { role: "assistant", content: "x" }],
     });
 
@@ -1048,7 +1054,7 @@ describe("threadsController.updateMessage", () => {
   it("answers 404 for a message the store does not have", async () => {
     readMessage.mockResolvedValue(null);
 
-    const reply = await call(threadsController.updateMessage, { body: ["m9", userMessage] });
+    const reply = await invoke(threadsController.updateMessage, { body: ["m9", userMessage] });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "message not found" });
@@ -1061,7 +1067,7 @@ describe("threadsController.updateMessage", () => {
   ])("answers 500, not 404, when the message read fails with %s", async (_what, failure) => {
     readMessage.mockRejectedValue(failure);
 
-    const reply = await call(threadsController.updateMessage, { body: ["m1", userMessage] });
+    const reply = await invoke(threadsController.updateMessage, { body: ["m1", userMessage] });
 
     expect(reply.status).toBe(500);
     expect(engine.updateMessage).not.toHaveBeenCalled();

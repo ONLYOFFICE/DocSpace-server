@@ -31,8 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { docspace, http } from "../../__tests__/helpers/upstream.js";
-import type { useUpstream } from "../../__tests__/helpers/upstream.js";
+import { docspace, http } from "../helpers/upstream.js";
+import type { useUpstream } from "../helpers/upstream.js";
 import { aiServiceBaseUrl, proxyBaseUrl } from "../../storage/httpClient.js";
 
 // Fixtures of the OpenAI passthrough tests (openaiPassthrough*.test.ts).

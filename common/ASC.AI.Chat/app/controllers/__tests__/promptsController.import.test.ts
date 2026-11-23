@@ -32,10 +32,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { PromptsEngine } from "@onlyoffice/ai-chat/core";
+import { invoke } from "../../__tests__/helpers/http.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import type { Reply } from "../../__tests__/helpers/http.js";
-import { call } from "./promptsControllerData.helpers.js";
 
 const engine = engineMock<PromptsEngine>();
 vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
@@ -85,7 +85,7 @@ describe("promptsController.importBundle with a well-formed bundle", () => {
     ["options { mode: replace }", [bundle, { mode: "replace" }], { mode: "replace" }],
     ["the bare mode as options", [bundle, "replace"], { mode: "replace" }],
   ])("imports it for %s", async (_what, body, options) => {
-    const reply = await call(promptsController.importBundle, { body });
+    const reply = await invoke(promptsController.importBundle, { body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(imported);
@@ -103,7 +103,7 @@ describe("promptsController.importBundle with a well-formed bundle", () => {
       ],
     };
 
-    const reply = await call(promptsController.importBundle, { body: { bundle: loose } });
+    const reply = await invoke(promptsController.importBundle, { body: { bundle: loose } });
 
     expect(reply.status).toBe(200);
     expect(engine.importBundle).toHaveBeenCalledWith(loose, undefined);
@@ -131,7 +131,7 @@ describe("promptsController.importBundle with a well-formed bundle", () => {
     };
     engine.importBundle.mockResolvedValue(result);
 
-    const reply = await call(promptsController.importBundle, {
+    const reply = await invoke(promptsController.importBundle, {
       body: mode === undefined ? [bundle] : [bundle, { mode }],
     });
 
@@ -149,7 +149,7 @@ describe("promptsController.importBundle with a well-formed bundle", () => {
       ],
     });
 
-    const reply = await call(promptsController.importBundle, { body: [bundle] });
+    const reply = await invoke(promptsController.importBundle, { body: [bundle] });
 
     expect(reply.status).toBe(400);
     expect(published(reply)).toEqual([]);
@@ -158,7 +158,7 @@ describe("promptsController.importBundle with a well-formed bundle", () => {
   it("answers 400 for a failure that lists no refusal", async () => {
     engine.importBundle.mockResolvedValue({ success: false, errors: [] });
 
-    const reply = await call(promptsController.importBundle, { body: [bundle] });
+    const reply = await invoke(promptsController.importBundle, { body: [bundle] });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ success: false, errors: [] });
@@ -167,7 +167,7 @@ describe("promptsController.importBundle with a well-formed bundle", () => {
   it("answers 500 when the engine throws", async () => {
     engine.importBundle.mockRejectedValue(new Error("boom"));
 
-    const reply = await call(promptsController.importBundle, { body: [bundle] });
+    const reply = await invoke(promptsController.importBundle, { body: [bundle] });
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal server error" });
@@ -217,7 +217,7 @@ describe("promptsController.importBundle refuses a malformed request before the 
       ],
     ],
   ])("answers 400 for a body that is %s", async (_what, body, errors) => {
-    const reply = await call(promptsController.importBundle, { body });
+    const reply = await invoke(promptsController.importBundle, { body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ success: false, errors });
@@ -234,7 +234,7 @@ describe("promptsController.importBundle refuses a malformed request before the 
     ["no name", { id: "f1" }],
     ["a name that is null", { id: "f1", name: null }],
   ])("answers 400 naming the index of a folder that is %s", async (_what, entry) => {
-    const reply = await call(promptsController.importBundle, {
+    const reply = await invoke(promptsController.importBundle, {
       body: { bundle: { version: 1, folders: [folder, entry], prompts: [] } },
     });
 
@@ -257,7 +257,7 @@ describe("promptsController.importBundle refuses a malformed request before the 
     ["a text that is null", { id: "a", name: "A", text: null }],
     ["a folderId that is a number", { id: "a", name: "A", text: "t", folderId: 1 }],
   ])("answers 400 naming the index of a prompt that is %s", async (_what, entry) => {
-    const reply = await call(promptsController.importBundle, {
+    const reply = await invoke(promptsController.importBundle, {
       body: { bundle: { version: 1, folders: [], prompts: [entry] } },
     });
 
@@ -270,7 +270,7 @@ describe("promptsController.importBundle refuses a malformed request before the 
   });
 
   it("lists every malformed entry of folders and prompts in one answer", async () => {
-    const reply = await call(promptsController.importBundle, {
+    const reply = await invoke(promptsController.importBundle, {
       body: { bundle: { version: 1, folders: [1, 2], prompts: [null] } },
     });
 
@@ -294,7 +294,7 @@ describe("promptsController.importBundle refuses a malformed request before the 
     ["an array", ["merge"]],
     ["false", false],
   ])("answers 400 for options with %s", async (_what, options) => {
-    const reply = await call(promptsController.importBundle, { body: { bundle, options } });
+    const reply = await invoke(promptsController.importBundle, { body: { bundle, options } });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ success: false, errors: badMode });
@@ -305,7 +305,7 @@ describe("promptsController.importBundle refuses a malformed request before the 
   it("checks the options before the twins of the bundle", async () => {
     const twins = { version: 1, folders: [folder, { ...folder, id: "f2" }], prompts: [] };
 
-    const reply = await call(promptsController.importBundle, { body: [twins, "x"] });
+    const reply = await invoke(promptsController.importBundle, { body: [twins, "x"] });
 
     expect(reply.body).toEqual({ success: false, errors: badMode });
   });
@@ -323,7 +323,7 @@ describe("promptsController.importBundle refuses twins inside the bundle", () =>
       prompts: [],
     };
 
-    const reply = await call(promptsController.importBundle, { body: [twins] });
+    const reply = await invoke(promptsController.importBundle, { body: [twins] });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({
@@ -348,7 +348,7 @@ describe("promptsController.importBundle refuses twins inside the bundle", () =>
       ],
     };
 
-    const reply = await call(promptsController.importBundle, { body: [twins] });
+    const reply = await invoke(promptsController.importBundle, { body: [twins] });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({
@@ -373,7 +373,7 @@ describe("promptsController.importBundle refuses twins inside the bundle", () =>
       ],
     };
 
-    const reply = await call(promptsController.importBundle, { body: [blanks] });
+    const reply = await invoke(promptsController.importBundle, { body: [blanks] });
 
     expect(reply.status).toBe(200);
     expect(engine.importBundle).toHaveBeenCalledWith(blanks, undefined);

@@ -41,7 +41,7 @@ import {
 } from "../../__tests__/helpers/upstream.js";
 import { getChatContextMisses } from "../../requestContext.js";
 import { HttpPreferencesStorage } from "../preferencesStorage.js";
-import { inRound, scopeOf, snapshotOf } from "./chatContext.fixtures.js";
+import { inRound, scopeOf, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // GET/PUT/DELETE internal/ai/preferences: products/ASC.AI/Server/Api/PreferencesStorageController.cs;
 // GET/PUT internal/ai/config/tool-mode: products/ASC.AI/Server/Api/SettingsController.cs.

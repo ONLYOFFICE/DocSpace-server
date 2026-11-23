@@ -47,7 +47,7 @@ import {
   parseWebSearchConfig,
   withWebSearchProviderOverrides,
 } from "../webSearchStorage.js";
-import { inRound, snapshotOf } from "./chatContext.fixtures.js";
+import { inRound, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // GET/PUT/DELETE internal/ai/web-search: products/ASC.AI/Server/Api/WebSearchStorageController.cs.
 const upstream = useUpstream();

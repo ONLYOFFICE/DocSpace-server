@@ -35,7 +35,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
 import { delay, http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
 import logger from "../../log.js";
-import { mcpServer } from "./systemToolsMcpStub.js";
+import { mcpServer } from "../../__tests__/helpers/mcpStub.js";
 
 const DOCSPACE_URL = "http://mcp.test/mcp";
 const OTHER_URL = "http://other.test/mcp";

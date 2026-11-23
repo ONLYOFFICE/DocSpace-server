@@ -44,7 +44,7 @@ import logger from "../../log.js";
 import { getCustomServerNames } from "../../requestContext.js";
 import { AiServiceHttpError } from "../../storage/httpClient.js";
 import { storage } from "../../storage/index.js";
-import { mcpServer } from "./systemToolsMcpStub.js";
+import { mcpServer } from "../../__tests__/helpers/mcpStub.js";
 
 vi.mock("../../../config/index.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../config/index.js")>()),

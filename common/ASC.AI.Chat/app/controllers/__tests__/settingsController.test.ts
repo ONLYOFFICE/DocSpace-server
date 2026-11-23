@@ -1,3 +1,4 @@
+import { invoke } from "../../__tests__/helpers/http.js";
 // Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
@@ -43,7 +44,6 @@ import {
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
 import { settingsController } from "../settingsController.js";
-import { call } from "./promptsControllerData.helpers.js";
 
 // Nothing is mocked here: the real httpClient.js calls the AI service, which msw answers.
 const upstream = useUpstream();
@@ -82,7 +82,7 @@ describe.each([
   it("answers the AI service's answer with its envelope", async () => {
     upstream.use(http.get(`*${path}`, () => docspace(dto)));
 
-    const reply = await call(settingsController[method], { method: "GET" });
+    const reply = await invoke(settingsController[method], { method: "GET" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(envelope(dto));
@@ -96,7 +96,7 @@ describe.each([
   ])("relays a %i of the AI service without its body", async (status, error) => {
     upstream.use(http.get(`*${path}`, () => docspaceError(status, "secret detail")));
 
-    const reply = await call(settingsController[method], { method: "GET" });
+    const reply = await invoke(settingsController[method], { method: "GET" });
 
     expect(reply.status).toBe(status);
     expect(reply.body).toEqual({ error });
@@ -109,7 +109,7 @@ it("forwards the caller's credentials to the AI service", async () => {
   upstream.use(http.get("*/internal/ai/config/user", () => docspace(userSettings)));
 
   await inRequestContext({ cookie: "asc_auth_key=abc", authorization: "Bearer t" }, () =>
-    call(settingsController.getUserSettings, { method: "GET" }),
+    invoke(settingsController.getUserSettings, { method: "GET" }),
   );
 
   expect(upstream.seen[0]?.headers).toMatchObject({
@@ -122,7 +122,7 @@ it("forwards the caller's credentials to the AI service", async () => {
 it("relays a text answer of the AI service as a JSON string", async () => {
   upstream.use(http.get("*/internal/ai/config", () => HttpResponse.text("<html>proxy</html>")));
 
-  const reply = await call(settingsController.getAiSettings, { method: "GET" });
+  const reply = await invoke(settingsController.getAiSettings, { method: "GET" });
 
   expect(reply.status).toBe(200);
   expect(reply.body).toBe("<html>proxy</html>");
@@ -150,7 +150,7 @@ describe.each([
   ])("forwards %s to the AI service and answers its envelope", async (_what, body, sent) => {
     upstream.use(http.put(`*${path}`, () => docspace(dto)));
 
-    const reply = await call(settingsController[method], { method: "PUT", body });
+    const reply = await invoke(settingsController[method], { method: "PUT", body });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(envelope(dto));
@@ -163,7 +163,7 @@ describe.each([
       http.put(`*${path}`, () => docspaceError(400, "The mode is not one of the declared members")),
     );
 
-    const reply = await call(settingsController[method], { method: "PUT", body: { mode: 9 } });
+    const reply = await invoke(settingsController[method], { method: "PUT", body: { mode: 9 } });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "Bad Request" });
@@ -184,7 +184,7 @@ describe("settingsController.setUserSettings", () => {
       ),
     );
 
-    const reply = await call(settingsController.setUserSettings, {
+    const reply = await invoke(settingsController.setUserSettings, {
       method: "PUT",
       body: { chatRecommendedModelVisible: value },
     });
@@ -204,7 +204,7 @@ describe("settingsController.setUserSettings", () => {
   it("forwards the other fields of the body as they came", async () => {
     upstream.use(http.put("*/internal/ai/config/user", () => docspace(userSettings)));
 
-    await call(settingsController.setUserSettings, {
+    await invoke(settingsController.setUserSettings, {
       body: { chatRecommendedModelVisible: true, toolPermissionMode: 2, x: 1 },
     });
 
@@ -225,7 +225,7 @@ describe("settingsController.setUserSettings", () => {
     ["the string true", { chatRecommendedModelVisible: "true" }],
     ["the number 1", { chatRecommendedModelVisible: 1 }],
   ])("answers 400 for a body that is %s, with no call", async (_what, body) => {
-    const reply = await call(settingsController.setUserSettings, { method: "PUT", body });
+    const reply = await invoke(settingsController.setUserSettings, { method: "PUT", body });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({

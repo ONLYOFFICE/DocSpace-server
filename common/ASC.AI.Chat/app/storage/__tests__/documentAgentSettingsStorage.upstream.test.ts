@@ -42,7 +42,7 @@ import {
   readDocumentAgentSettings,
   readDocumentAgentSettingsForTask,
 } from "../documentAgentSettingsStorage.js";
-import { snapshotOf } from "./chatContext.fixtures.js";
+import { snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // GET internal/ai/document-agent/settings: products/ASC.AI/Server/Api/DocumentAgentController.cs.
 const upstream = useUpstream();

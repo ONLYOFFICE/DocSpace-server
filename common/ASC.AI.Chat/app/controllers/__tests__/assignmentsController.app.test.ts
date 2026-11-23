@@ -34,10 +34,9 @@
 import type { AssignmentsEngine } from "@onlyoffice/ai-chat/core";
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { engineMock, mockReset } from "../../__tests__/helpers/engine.js";
+import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
-import { http, useUpstream } from "../../__tests__/helpers/upstream.js";
-import { passthrough } from "msw";
+import { useUpstream } from "../../__tests__/helpers/upstream.js";
 
 // The query fallback of the single-argument assignment routes, through the real
 // parsers: body-parser sets `req.body` to `{}` for a request without a body.
@@ -45,28 +44,16 @@ import { passthrough } from "msw";
 const engine = engineMock<AssignmentsEngine>();
 vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ...(await original<typeof import("@onlyoffice/ai-chat/core")>()),
-  // Evaluated lazily: the schema helper imports the library before `engine` exists.
-  AssignmentsEngine: class {
-    constructor() {
-      return engine;
-    }
-  },
+  AssignmentsEngine: engineClass(() => engine),
 }));
 
-const upstream = useUpstream();
+const upstream = useUpstream({ localApp: true });
 const { createApp } = await import("../../createApp.js");
 const { API_PREFIX } = await import("../../routes.js");
 const app = createApp();
 
 beforeEach(() => {
   mockReset(engine);
-  // supertest's own request to the app on a local port.
-  upstream.use(
-    http.all(
-      ({ request }) => new URL(request.url).hostname === "127.0.0.1",
-      () => passthrough(),
-    ),
-  );
 });
 
 const AUTH = { Authorization: "Bearer t" };
@@ -128,6 +115,6 @@ describe("assignments routes through the whole app", () => {
   it("calls no upstream for any of these requests", async () => {
     await request(app).delete(`${API_PREFIX}/assignments/unassign?actionType=Chat`).set(AUTH);
 
-    expect(upstream.seen.filter((r) => !r.headers["host"]?.startsWith("127.0.0.1"))).toEqual([]);
+    expect(upstream.seen).toEqual([]);
   });
 });

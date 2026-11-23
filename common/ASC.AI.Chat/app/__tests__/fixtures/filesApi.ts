@@ -35,10 +35,10 @@
 // primed request for the chat-context snapshot. Shared by the storage suites of
 // docspaceFilesApi, attachmentsStorage, projectAttachments and docspacePeopleApi.
 
-import { inRequestContext } from "../../__tests__/helpers/http.js";
+import { inRequestContext } from "../helpers/http.js";
 import { setChatContextSnapshot } from "../../requestContext.js";
-import type { ChatContextSnapshot } from "../chatContextSnapshot.js";
-import type { DocspaceFolderInfo } from "../docspaceFilesApi.js";
+import type { ChatContextSnapshot } from "../../storage/chatContextSnapshot.js";
+import type { DocspaceFolderInfo } from "../../storage/docspaceFilesApi.js";
 
 /** A primed snapshot that describes `folders` as the round's entity and context entity. */
 export function snapshotWithFolders(

@@ -54,11 +54,10 @@ import {
 import { proxyBaseUrl } from "../httpClient.js";
 import {
   fileDto,
-  fileDtoBody,
   folderDto,
   inRequest,
   snapshotWithFolders,
-} from "./docspaceFilesApi.fixtures.js";
+} from "../../__tests__/fixtures/filesApi.js";
 
 // The Files API client over a stubbed network: the real httpClient.js (base URL, timeout) and
 // requestContext.js (forwarded headers, per-request caches, the snapshot) run. A stub of a

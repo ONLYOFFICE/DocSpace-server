@@ -33,15 +33,14 @@
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  docspace,
   docspaceError,
   http,
   HttpResponse,
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
-import { listen, send, until } from "./openaiPassthrough.harness.js";
-import type { RawReply, RawRequest } from "./openaiPassthrough.harness.js";
+import { listen, send, until } from "../../__tests__/helpers/rawHttp.js";
+import type { RawReply, RawRequest } from "../../__tests__/helpers/rawHttp.js";
 import {
   CALLER,
   CHAT,
@@ -58,7 +57,7 @@ import {
   useFolder,
   useProfile as profileStub,
   useProvider as providerStub,
-} from "./openaiPassthrough.fixtures.js";
+} from "../../__tests__/fixtures/providers.js";
 
 // The OpenAI-compatible passthrough through the whole application: the body parser left out
 // for `/openai/*`, the gate, the request context, the real profile read and Files API lookup.
@@ -66,7 +65,6 @@ import {
 // socket (openaiPassthrough.harness.ts), so the unparsed body reaches the handler as sent.
 
 // CORS from the developer's appsettings would add headers to every answer.
-vi.stubEnv("core__cors", "");
 // The access log is not what these tests are about.
 vi.mock("morgan", () => ({
   default: () => (_req: unknown, _res: unknown, next: () => void) => next(),
