@@ -78,6 +78,7 @@ public class WebPluginManager(
     AuthContext authContext,
     UserManager userManager,
     TempPath tempPath,
+    MachinePseudoKeys machinePseudoKeys,
     ILogger<WebPluginManager> log,
     IFusionCacheProvider cacheProvider)
 {
@@ -120,7 +121,7 @@ public class WebPluginManager(
 
     private async Task<bool> IsPersonalWebPluginsAllowedAsync()
     {
-        return webPluginConfigSettings.PersonalEnabled && !await userManager.IsGuestAsync(authContext.CurrentAccount.ID);
+        return webPluginConfigSettings.Personal && !await userManager.IsGuestAsync(authContext.CurrentAccount.ID);
     }
 
     private async Task<IDataStore> GetPluginStorageAsync(int tenantId)
@@ -171,7 +172,7 @@ public class WebPluginManager(
     }
 
     // The cache holds the plugin manifests read from the storage, not the enabled state and the settings of a portal,
-    // so it is reset only when the storage changes
+    // so it is reset when the storage changes and otherwise expires after an hour
     private ValueTask ResetWebPluginsCacheAsync(int tenantId, Guid? owner = null)
     {
         return owner.HasValue
@@ -242,10 +243,10 @@ public class WebPluginManager(
 
             tempDirToDelete = tempPath;
 
-            var maxCount = owner.HasValue ? webPluginConfigSettings.MaxPersonalCount : webPluginConfigSettings.MaxCount;
+            var maxCount = owner.HasValue ? webPluginConfigSettings.PersonalMaxCount : webPluginConfigSettings.MaxCount;
 
             if (existingWebPlugins.Count + 1 > maxCount &&
-                !existingWebPlugins.Exists(x => x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+                !existingWebPlugins.Exists(x => string.Equals(x.Name, webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new InvalidOperationException(Resource.ErrorWebPluginMaxCount);
             }
@@ -254,7 +255,7 @@ public class WebPluginManager(
 
             var basePath = GetBasePath(owner);
 
-            await CopyPluginFromTempToStore(webPlugin, tempPath, storage, basePath);
+            await CopyPluginFromTempToStore(webPlugin, tempPath, storage, basePath, owner.HasValue ? ACL.Private : ACL.Auto);
 
             await ResetWebPluginsCacheAsync(system ? Tenant.DefaultTenant : tenantId, owner);
 
@@ -402,6 +403,13 @@ public class WebPluginManager(
         webPlugins.AddRange(personalWebPlugins.Where(x => !ClashesWith(x, webPlugins)).ToList());
 
         return webPlugins;
+    }
+
+    public string GetPersonalCspToken(int tenantId)
+    {
+        var data = Encoding.UTF8.GetBytes($"{tenantId}:{authContext.CurrentAccount.ID}");
+
+        return Convert.ToHexStringLower(HMACSHA256.HashData(machinePseudoKeys.GetMachineConstant(), data));
     }
 
     public async Task<List<string>> GetPersonalCspDomainsAsync(int tenantId)
@@ -951,7 +959,7 @@ public class WebPluginManager(
         }
     }
 
-    private async Task CopyPluginFromTempToStore(WebPlugin webPlugin, string tempPath, IDataStore storage, string basePath)
+    private async Task CopyPluginFromTempToStore(WebPlugin webPlugin, string tempPath, IDataStore storage, string basePath, ACL acl)
     {
         var pluginPath = Path.Combine(basePath, webPlugin.Name);
 
@@ -966,7 +974,7 @@ public class WebPluginManager(
         {
             await using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
             var path = Path.Combine(pluginPath, file.Replace(tempPath, string.Empty).TrimStart('/').TrimStart('\\'));
-            await storage.SaveAsync(path, stream);
+            await storage.SaveAsync(string.Empty, path, stream, acl);
         }
     }
 }

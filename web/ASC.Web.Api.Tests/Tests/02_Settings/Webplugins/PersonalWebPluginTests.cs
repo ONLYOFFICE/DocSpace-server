@@ -85,7 +85,7 @@ public class PersonalWebPluginTests(
         portalResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         personalResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         (await personalResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
-            .Should().Contain("already installed for the whole portal");
+            .Should().Contain("Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal");
     }
 
     [Fact]
@@ -128,6 +128,8 @@ public class PersonalWebPluginTests(
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
+            .Should().Contain("Personal plugins disabled");
     }
 
     [Theory]
@@ -146,6 +148,8 @@ public class PersonalWebPluginTests(
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
+            .Should().Contain("The request comes from another origin");
     }
 
     [Fact]
@@ -192,13 +196,81 @@ public class PersonalWebPluginTests(
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task UploadPersonalWebPlugin_WithCspDomains_OnlyOwnerGetsThemInCspHeader()
+    {
+        // Arrange
+        const string cspDomain = "https://personal-csp.autotest.example";
+        var owner = await InviteMember(EmployeeType.User);
+        var otherUser = await InviteMember(EmployeeType.User);
+        var manifest = WebPluginsTestData.Manifest("personal-csp-autotest");
+        manifest["cspDomains"] = cspDomain;
+
+        await _webApiClient.Authenticate(owner);
+        using var uploadResponse = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, manifest, true, TestContext.Current.CancellationToken);
+        using var listResponse = await _webApiClient.GetAsync("api/2.0/settings/webplugins", TestContext.Current.CancellationToken);
+        var personalCspCookie = GetPersonalCspCookie(listResponse);
+
+        // Act
+        var ownerCsp = await GetCspAsync(personalCspCookie);
+        var ownerCspWithoutCookie = await GetCspAsync(null);
+
+        await _webApiClient.Authenticate(otherUser);
+        var otherUserCsp = await GetCspAsync(personalCspCookie);
+
+        // Assert
+        uploadResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        personalCspCookie.Should().MatchRegex("^[0-9a-f]{64}$");
+        ownerCsp.Header.Should().Contain(cspDomain);
+        ownerCsp.Domains.Should().NotContain(cspDomain);
+        ownerCspWithoutCookie.Header.Should().NotContain(cspDomain);
+        otherUserCsp.Header.Should().NotContain(cspDomain);
+    }
+
     private static (string Name, string Value) AuthCookie(User user)
     {
         return ("Cookie", $"asc_auth_key={user.Token}");
     }
 
+    private static string GetPersonalCspCookie(HttpResponseMessage response)
+    {
+        const string prefix = "asc_personal_csp=";
+
+        var cookie = response.Headers.TryGetValues("Set-Cookie", out var values)
+            ? values.FirstOrDefault(x => x.StartsWith(prefix, StringComparison.Ordinal))
+            : null;
+
+        return cookie?[prefix.Length..].Split(';')[0] ?? string.Empty;
+    }
+
     /// <summary>
-    /// Lists the plugins over raw HTTP: the generated SDK has no <c>personal</c> parameter on the list operation yet.
+    /// Reads the CSP over raw HTTP: the generated SDK cannot send the <c>asc_personal_csp</c> cookie.
+    /// </summary>
+    private async Task<(string Header, List<string> Domains)> GetCspAsync(string personalCspCookie)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "api/2.0/security/csp");
+
+        if (!string.IsNullOrEmpty(personalCspCookie))
+        {
+            request.Headers.TryAddWithoutValidation("Cookie", $"asc_personal_csp={personalCspCookie}");
+        }
+
+        using var response = await _webApiClient.SendAsync(request, TestContext.Current.CancellationToken);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        using var json = JsonDocument.Parse(body);
+        var csp = json.RootElement.GetProperty("response");
+
+        return (
+            csp.GetProperty("header").GetString() ?? string.Empty,
+            csp.GetProperty("domains").EnumerateArray().Select(x => x.GetString() ?? string.Empty).ToList());
+    }
+
+    /// <summary>
+    /// Lists the plugins over raw HTTP: the generated SDK has no <c>personal</c> parameter on the list operation yet,
+    /// and its plugin model fails on a plugin without the optional fields (P8 of the plugins spec).
     /// </summary>
     private async Task<List<(string Name, bool Personal)>> GetPluginsAsync(bool personal)
     {

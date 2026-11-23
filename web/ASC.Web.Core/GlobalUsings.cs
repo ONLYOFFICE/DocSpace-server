@@ -142,4 +142,5 @@ global using Twilio.Types;
 
 global using ZiggyCreatures.Caching.Fusion;
 
+global using ACL = ASC.Data.Storage.Configuration.ACL;
 global using SecurityContext = ASC.Core.SecurityContext;

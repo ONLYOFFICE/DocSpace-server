@@ -48,9 +48,111 @@ public class CspSettingsHelper(
     IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration)
 {
+    private static readonly TimeSpan _personalHeaderDuration = TimeSpan.FromDays(1);
+
     public async Task<string> SaveAsync(IEnumerable<string> domains, bool updateInDb = true, bool forNewTenant = false)
     {
         var tenant = tenantManager.GetCurrentTenant();
+        var headerKeys = await GetHeaderKeysAsync(tenant);
+
+        var headerValue = await CreateHeaderAsync(domains);
+        var defaultOptions = configuration.GetSection("csp:default").Get<CspOptions>();
+        if (!string.IsNullOrEmpty(headerValue) && Encoding.UTF8.GetByteCount(headerValue) > defaultOptions.MaxSize)
+        {
+            throw new InvalidOperationException($"CSP header size exceeds maximum allowed size of {defaultOptions.MaxSize} bytes.");
+        }
+
+        if (!string.IsNullOrEmpty(headerValue))
+        {
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.SetAsync(headerKey, headerValue, token: cs));
+        }
+        else
+        {
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.RemoveAsync(headerKey, token: cs));
+        }
+
+        await RemovePersonalHeadersAsync(tenant.Id, headerKeys);
+
+        if (updateInDb)
+        {
+            if (forNewTenant)
+            {
+                // a freshly registered tenant has no CSP settings row yet, so the
+                // load-modify-save roundtrips of ManageAsync can be skipped
+                var settings = settingsManager.GetDefault<CspSettings>();
+                settings.Domains = domains;
+
+                await settingsManager.SaveForNewTenantAsync(settings, tenant.Id);
+            }
+            else
+            {
+                await settingsManager.ManageAsync<CspSettings>(current =>
+                {
+                    current.Domains = domains;
+                });
+            }
+        }
+
+        return headerValue;
+    }
+
+    public async Task SavePersonalAsync(string personalToken, IEnumerable<string> personalDomains)
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+        var headerKeys = await GetHeaderKeysAsync(tenant);
+
+        var settings = await LoadAsync();
+        var headerValue = await CreateHeaderAsync((settings.Domains ?? []).Concat(personalDomains));
+
+        await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) =>
+            await hybridCache.SetAsync(GetPersonalKey(headerKey, personalToken), headerValue, _personalHeaderDuration, token: cs));
+
+        var personalTokens = await GetPersonalTokensAsync(tenant.Id);
+        personalTokens.Add(personalToken);
+
+        await hybridCache.SetAsync(GetPersonalTokensKey(tenant.Id), string.Join(';', personalTokens), _personalHeaderDuration);
+    }
+
+    public async Task RemovePersonalAsync(string personalToken)
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+        var headerKeys = await GetHeaderKeysAsync(tenant);
+
+        await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) =>
+            await hybridCache.RemoveAsync(GetPersonalKey(headerKey, personalToken), token: cs));
+
+        var personalTokens = await GetPersonalTokensAsync(tenant.Id);
+
+        if (personalTokens.Remove(personalToken))
+        {
+            await hybridCache.SetAsync(GetPersonalTokensKey(tenant.Id), string.Join(';', personalTokens), _personalHeaderDuration);
+        }
+    }
+
+    private async Task RemovePersonalHeadersAsync(int tenantId, HashSet<string> headerKeys)
+    {
+        var personalTokens = await GetPersonalTokensAsync(tenantId);
+
+        if (personalTokens.Count == 0)
+        {
+            return;
+        }
+
+        var personalKeys = headerKeys.SelectMany(headerKey => personalTokens.Select(personalToken => GetPersonalKey(headerKey, personalToken)));
+
+        await Parallel.ForEachAsync(personalKeys, async (personalKey, cs) => await hybridCache.RemoveAsync(personalKey, token: cs));
+        await hybridCache.RemoveAsync(GetPersonalTokensKey(tenantId));
+    }
+
+    private async Task<HashSet<string>> GetPersonalTokensAsync(int tenantId)
+    {
+        var value = await hybridCache.GetOrDefaultAsync<string>(GetPersonalTokensKey(tenantId));
+
+        return string.IsNullOrEmpty(value) ? [] : value.Split(';', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+    }
+
+    private async Task<HashSet<string>> GetHeaderKeysAsync(Tenant tenant)
+    {
         var domain = tenant.GetTenantDomain(coreSettings);
         HashSet<string> headerKeys = [GetKey(domain)];
 
@@ -116,43 +218,7 @@ public class CspSettingsHelper(
             }
         }
 
-        var headerValue = await CreateHeaderAsync(domains);
-        var defaultOptions = configuration.GetSection("csp:default").Get<CspOptions>();
-        if (!string.IsNullOrEmpty(headerValue) && Encoding.UTF8.GetByteCount(headerValue) > defaultOptions.MaxSize)
-        {
-            throw new InvalidOperationException($"CSP header size exceeds maximum allowed size of {defaultOptions.MaxSize} bytes.");
-        }
-
-        if (!string.IsNullOrEmpty(headerValue))
-        {
-            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.SetAsync(headerKey, headerValue, token: cs));
-        }
-        else
-        {
-            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.RemoveAsync(headerKey, token: cs));
-        }
-
-        if (updateInDb)
-        {
-            if (forNewTenant)
-            {
-                // a freshly registered tenant has no CSP settings row yet, so the
-                // load-modify-save roundtrips of ManageAsync can be skipped
-                var settings = settingsManager.GetDefault<CspSettings>();
-                settings.Domains = domains;
-
-                await settingsManager.SaveForNewTenantAsync(settings, tenant.Id);
-            }
-            else
-            {
-                await settingsManager.ManageAsync<CspSettings>(current =>
-                {
-                    current.Domains = domains;
-                });
-            }
-        }
-
-        return headerValue;
+        return headerKeys;
     }
 
     public async Task<CspSettings> LoadAsync(DateTime? lastModified = null)
@@ -379,6 +445,16 @@ public class CspSettingsHelper(
     private static string GetKey(string domain)
     {
         return $"csp:{domain}";
+    }
+
+    private static string GetPersonalKey(string headerKey, string personalToken)
+    {
+        return $"{headerKey}:{personalToken}";
+    }
+
+    private static string GetPersonalTokensKey(int tenantId)
+    {
+        return $"csp-personal-tokens:{tenantId}";
     }
 }
 
