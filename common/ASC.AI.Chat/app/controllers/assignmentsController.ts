@@ -34,7 +34,7 @@
 import type { ActionType } from "@onlyoffice/ai-chat/core";
 import { AssignmentsEngine, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { asyncHandler, unpackPositional } from "./_helpers.js";
+import { asyncHandler, sendEngineResult, unpackPositional } from "./_helpers.js";
 import { asActionType, asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
@@ -140,8 +140,7 @@ export const assignmentsController = {
       res.status(400).json({ error: "actionType and profileId required" });
       return;
     }
-    const result = await engine.assign(actionType, profileId);
-    res.json(result);
+    sendEngineResult(res, await engine.assign(actionType, profileId));
   }),
 
   unassign: asyncHandler(async (req, res) => {
@@ -184,8 +183,7 @@ export const assignmentsController = {
       }
       map[actionType] = v;
     }
-    const result = await engine.bulkAssign(map);
-    res.json(result);
+    sendEngineResult(res, await engine.bulkAssign(map));
   }),
 
   getAssignment: asyncHandler(async (req, res) => {

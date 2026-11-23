@@ -36,7 +36,7 @@ import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-c
 import { storage } from "../storage/index.js";
 import { listOnlyofficeGatewayModels } from "../storage/profilesStorage.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
-import { asyncHandler, unpackPositional } from "./_helpers.js";
+import { asyncHandler, sendEngineResult, unpackPositional } from "./_helpers.js";
 import { assertAiAccess } from "./aiAccess.js";
 import { asString, isObject, readProp } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
@@ -210,8 +210,7 @@ export const profilesController = {
       sendKeyRefusal(res, keyError);
       return;
     }
-    const result = await engine.create(req.body);
-    res.json(result);
+    sendEngineResult(res, await engine.create(req.body));
   }),
 
   update: asyncHandler<Profile>(async (req, res) => {
@@ -225,8 +224,7 @@ export const profilesController = {
       sendKeyRefusal(res, keyError);
       return;
     }
-    const result = await engine.update(req.body);
-    res.json(result);
+    sendEngineResult(res, await engine.update(req.body));
   }),
 
   delete: asyncHandler(async (req, res) => {

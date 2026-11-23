@@ -431,21 +431,22 @@ describe("assignmentsController.assign", () => {
     expect(responseViolations("aiAssignmentsAssign", 400, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-22: a refusal of the engine ({ success: false, error }) is sent with 200 — expected 400/404
-  // by error.code through a helper like sendMutation (ts-ai-failure-paths.md §2)
-  it("sends a refusal of the engine with 200", async () => {
-    const refusal = {
-      success: false as const,
-      error: { field: "name" as const, message: "unknown profile" },
-    };
-    engine.assign.mockResolvedValue(refusal);
+  it.each([
+    ["without a code", { field: "name" as const, message: "unknown profile" }, 400],
+    ["saying not found", { field: "name" as const, message: "Profile not found" }, 404],
+  ])(
+    "sends a refusal of the engine %s with its 4xx, body unchanged",
+    async (_what, error, status) => {
+      const refusal = { success: false as const, error };
+      engine.assign.mockResolvedValue(refusal);
 
-    const reply = await invoke(handler, { method: "PUT", body: ["Chat", "p1"] });
+      const reply = await invoke(handler, { method: "PUT", body: ["Chat", "p1"] });
 
-    expect(reply.status).toBe(200);
-    expect(reply.body).toEqual(refusal);
-    expect(responseViolations("aiAssignmentsAssign", 200, reply.body)).toEqual([]);
-  });
+      expect(reply.status).toBe(status);
+      expect(reply.body).toEqual(refusal);
+      expect(responseViolations("aiAssignmentsAssign", status, reply.body)).toEqual([]);
+    },
+  );
 
   it("relays an AI service 403 of the engine's write with its reason phrase only", async () => {
     engine.assign.mockRejectedValue(
@@ -577,9 +578,7 @@ describe("assignmentsController.bulkAssign", () => {
     expect(responseViolations("aiAssignmentsBulkAssign", 400, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-24: a refusal of the engine ({ success: false, errors }) is sent with 200 — expected a 4xx
-  // (ts-ai-failure-paths.md §2)
-  it("sends a refusal of the engine with 200", async () => {
+  it("sends a refusal of the engine with 400, body unchanged", async () => {
     const refusal = {
       success: false as const,
       errors: [
@@ -593,9 +592,9 @@ describe("assignmentsController.bulkAssign", () => {
 
     const reply = await invoke(handler, { method: "PUT", body: { Chat: "p1" } });
 
-    expect(reply.status).toBe(200);
+    expect(reply.status).toBe(400);
     expect(reply.body).toEqual(refusal);
-    expect(responseViolations("aiAssignmentsBulkAssign", 200, reply.body)).toEqual([]);
+    expect(responseViolations("aiAssignmentsBulkAssign", 400, reply.body)).toEqual([]);
   });
 
   it("answers 500 when the engine fails", async () => {
