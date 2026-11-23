@@ -30,8 +30,9 @@ document filter, a separate task; mixing them in buries the batch's own diff:
   service on that path is the same 401);
 - tenant resolution failing before any action code runs;
 - 503 from the exception handler for a distributed lock that is not acquired in time: any action whose services
-  take a lock can get it, and the document filter (`SwaggerCustomDocumentFilter`) gives every operation a generic
-  503 whose text names this case;
+  take a lock can get it, and the document filter (`ErrorResponseFilter` in
+  `common/ASC.Common/Utils/SwaggerCustomDocumentFilter.cs`) gives every operation a generic 503 whose text names
+  this case;
 - a callee that repeats, for the same caller in the same request, a check the authentication handler or a filter
   has already passed — it cannot fail where the first one did not;
 - generic binding failures that any action with such a parameter has: a value of the wrong type in the route or
