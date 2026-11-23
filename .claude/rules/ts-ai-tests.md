@@ -37,6 +37,7 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   | run code inside the real request context | `inRequestContext(headers, fn)` in `http.ts` | node-mocks-http |
   | answer the AI, Files or People service, a provider | `useUpstream()`, `http`, `docspace`, `docspaceError` in `upstream.ts` | msw |
   | stand in for an engine class | `engineMock<Engine>()`, `engineClass(engine)` in `engine.ts` | vitest-mock-extended |
+  | an answer or a body against the published OpenAPI schema | `responseViolations(operationId, status, body)`, `requestViolations` in `schema.ts` | ajv |
   | the whole app: parsers, gate, routes, 404 | `request(createApp())` | supertest |
   | waits between polls and retries | `useFastTimers()` in `time.ts` | vitest fake timers |
 
