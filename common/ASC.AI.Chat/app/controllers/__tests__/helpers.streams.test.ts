@@ -218,7 +218,7 @@ describe("streamOpenAiSse", () => {
     await streamOpenAiSse(res, failing(new Error("provider key sk-999 rejected"), { id: "c1" }));
 
     expect(res._getData()).toBe(
-      'data: {"id":"c1"}\n\ndata: {"error":{"message":"stream error","type":"server_error"}}\n\n',
+      'data: {"id":"c1"}\n\ndata: {"error":{"message":"stream error","type":"server_error","code":null,"param":null}}\n\n',
     );
     expect(res._isEndCalled()).toBe(true);
     expect(vi.mocked(logger.error)).toHaveBeenCalledWith(

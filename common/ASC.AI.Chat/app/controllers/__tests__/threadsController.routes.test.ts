@@ -160,7 +160,6 @@ describe("threadsController.create", () => {
     expect(published("aiThreadsCreate", reply)).toEqual([]);
   });
 
-  // DEFECT data-9: threads/create answers 409 while the AI project's model is unavailable, a status aiThreadsCreate does not publish (open-or-create publishes it) — expected 409 in the published responses (published responses of aiThreadsCreate)
   it.each([
     ["no available model", { canChat: true, profileAvailable: false, effectiveProfileId: "p" }],
     ["no effective profile", { canChat: true, profileAvailable: true }],
@@ -172,9 +171,7 @@ describe("threadsController.create", () => {
     expect(reply.status).toBe(409);
     expect(reply.body).toEqual({ error: "The model of this AI project is not available" });
     expect(engine.create).not.toHaveBeenCalled();
-    expect(published("aiThreadsCreate", reply)).toEqual([
-      "aiThreadsCreate publishes no JSON schema for status 409",
-    ]);
+    expect(published("aiThreadsCreate", reply)).toEqual([]);
   });
 
   it("creates the thread in an AI project whose model is available, without reading the profile", async () => {

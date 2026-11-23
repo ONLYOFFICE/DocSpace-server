@@ -101,20 +101,17 @@ describe("vectorizationController.startTask", () => {
     expect(upstream.seen[0]?.body).toEqual(body);
   });
 
-  // DEFECT passthrough-16: the AI service's 400 (no files) and 404 (a file that does not exist) are relayed with their status, which aiVectorizationStartTask does not publish — expected them in the published responses (ts-ai-tests.md §2; VectorizationController.StartTaskAsync declares 400, 403 and 404)
   it.each([
     [400, "Bad Request"],
     [404, "Not Found"],
-  ])("relays the AI service's %i, which the operation does not publish", async (status, error) => {
+  ])("relays the AI service's %i, as published", async (status, error) => {
     upstream.use(http.post(TASKS, () => docspaceError(status)));
 
     const reply = await startTask({ files: [1] });
 
     expect(reply.status).toBe(status);
     expect(reply.body).toEqual({ error });
-    expect(responseViolations("aiVectorizationStartTask", status, reply.body)).toEqual([
-      `aiVectorizationStartTask publishes no JSON schema for status ${status}`,
-    ]);
+    expect(responseViolations("aiVectorizationStartTask", status, reply.body)).toEqual([]);
   });
 
   it.each([

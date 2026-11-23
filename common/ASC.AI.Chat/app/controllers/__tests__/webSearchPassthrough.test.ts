@@ -433,7 +433,6 @@ describe("the request body", () => {
     field: "urls",
   };
 
-  // DEFECT passthrough-9: a refused body is answered `{ error, field }`, while both operations publish AiErrorResponse for 400, which allows no other property — expected the published shape, or `field` in the schema (ts-ai-tests.md §2)
   it.each([
     ["null", "null", queryError],
     ["a string", '"docspace"', queryError],
@@ -477,9 +476,7 @@ describe("the request body", () => {
 
       expect(reply.status).toBe(400);
       expect(json(reply)).toEqual(error);
-      expect(responseViolations("aiWebSearchPassthroughSearch", 400, json(reply))).toEqual([
-        "/ must NOT have additional properties",
-      ]);
+      expect(responseViolations("aiWebSearchPassthroughSearch", 400, json(reply))).toEqual([]);
       expect(upstream.seen).toHaveLength(1);
     },
   );
@@ -505,9 +502,7 @@ describe("the request body", () => {
 
     expect(reply.status).toBe(400);
     expect(json(reply)).toEqual(error);
-    expect(responseViolations("aiWebSearchPassthroughContents", 400, json(reply))).toEqual([
-      "/ must NOT have additional properties",
-    ]);
+    expect(responseViolations("aiWebSearchPassthroughContents", 400, json(reply))).toEqual([]);
     expect(upstream.seen).toHaveLength(1);
   });
 

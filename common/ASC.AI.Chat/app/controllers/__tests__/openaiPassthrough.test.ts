@@ -276,7 +276,6 @@ describe("chat/completions to a third-party provider", () => {
     expect(responseViolations("aiOpenaiChatCompletions", 429, json(reply))).toEqual([]);
   });
 
-  // DEFECT passthrough-1: a provider 400 is relayed as 400, a status aiOpenaiChatCompletions does not publish — expected the 400 in the published responses, as aiOpenaiImagesGenerations has it (ts-ai-tests.md §2: every answer matches the published schema)
   it("relays a provider 400, which the operation does not publish", async () => {
     useProfile();
     const providerError = {
@@ -295,9 +294,7 @@ describe("chat/completions to a third-party provider", () => {
 
     expect(reply.status).toBe(400);
     expect(json(reply)).toEqual(providerError);
-    expect(responseViolations("aiOpenaiChatCompletions", 400, json(reply))).toEqual([
-      "aiOpenaiChatCompletions publishes no JSON schema for status 400",
-    ]);
+    expect(responseViolations("aiOpenaiChatCompletions", 400, json(reply))).toEqual([]);
   });
 
   it("relays a provider 4xx without a content type with none", async () => {

@@ -215,8 +215,6 @@ const PARAM_DOCS: Readonly<Record<string, string>> = {
 // Per-operation overrides, keyed by `operationId` then parameter name. Needed
 // for `id`, which the engines reuse for four different entities.
 const OPERATION_PARAM_DOCS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
-  aiProjectsGetModel: { id: "The AI project (room) identifier." },
-  aiProjectsSetModel: { id: "The AI project (room) identifier." },
   aiProfilesGetById: { id: "The AI provider profile identifier." },
   aiPromptsGetById: { id: "The saved prompt identifier." },
   aiPromptsGetFolderById: { id: "The prompt folder identifier." },
@@ -249,8 +247,6 @@ const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
 // Per-operation examples for `id`, which the engines reuse for four entities,
 // and for the project routes, whose `id` is an integer room ID rather than a UUID.
 const OPERATION_PARAM_EXAMPLES: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
-  aiProjectsGetModel: { id: EXAMPLE_IDS.project },
-  aiProjectsSetModel: { id: EXAMPLE_IDS.project },
   aiProfilesGetById: { id: EXAMPLE_IDS.profile },
   aiPromptsGetById: { id: EXAMPLE_IDS.prompt },
   aiPromptsGetFolderById: { id: EXAMPLE_IDS.promptFolder },
@@ -314,10 +310,6 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Projects - the model of an AI project, a room of type 12 managed through
   // the Files API; stored as the project-scoped Chat assignment.
-  aiProjectsGetModel:
-    "Returns the model of an AI project: `profile` is the chat profile stored for the project (`id`, `name`, `provider`, and `available`, false when the profile is gone or cannot chat), or `null` when the project runs on the portal's `Chat` assignment. The project is read with the caller's credentials first, so a room the caller cannot read answers 403 and a room that is not an AI project 404. A member who is not the owner, a project manager or a content creator cannot read the stored model yet and gets `null`.",
-  aiProjectsSetModel:
-    "Sets the model of an AI project. `profileId` is the UUID of an existing profile that can chat, or `null` for the portal default. Owner and project managers only (the room's `security.EditRoom`). There is no scoped delete on the server, so `null` on a project that has a model of its own pins the portal's current `Chat` profile to it; a later change of the portal default does not reach the project until its model is set again. Answers the model as `GET` does.",
 
   // Assignments - which profile serves which AI action.
   aiAssignmentsResolveForAction:
@@ -619,7 +611,11 @@ const ERROR_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "413": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
   "429": "Relayed verbatim from the AI provider, which is rate-limiting this portal's key.",
   "500": "Unhandled failure. The reason is logged server-side and never echoed back.",
-  "502": "The AI provider could not be reached, or answered with a failure of its own.",
+  "502":
+    "The AI provider could not be reached or answered with a failure of its own, or a DocSpace " +
+    "service answered with a body this service cannot read.",
+  "503":
+    "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
 };
 
 // `true` uses the shared text above; a string replaces it for this operation.
@@ -631,7 +627,9 @@ type ErrorSpec = Readonly<Record<string, string | true>>;
 //   403 - the AI-feature and guest gates of the .NET service, relayed by any
 //         handler that touches its storage;
 //   413 - the body parser, on every operation that carries a request body.
-const ALWAYS_ERRORS: readonly string[] = ["403", "500"];
+//   502, 503 - a DocSpace service that failed: every handler relays the status of a failed
+//         call to the AI service or the Files API, and answers 502 for a body it cannot read.
+const ALWAYS_ERRORS: readonly string[] = ["403", "500", "502", "503"];
 
 // Per-operation codes beyond the four above, keyed by `operationId`. There is
 // deliberately no fallback: an operation missing from this table declares only
@@ -657,6 +655,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiRegenerateStream: {
+    "404": "The thread does not exist or is not the caller's.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
@@ -667,19 +666,6 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiDenyToolCall: {
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
-  },
-
-  aiProjectsGetModel: {
-    "400": "The project id is not a positive integer.",
-    "403": "The caller cannot read the project.",
-    "404": "The project does not exist or is not an AI project.",
-  },
-  aiProjectsSetModel: {
-    "400":
-      "The project id is not a positive integer, or `profileId` is missing, not a UUID, names no " +
-      "profile, or names a profile that cannot chat.",
-    "403": "The caller cannot read the project, or is neither its owner nor a project manager.",
-    "404": "The project does not exist or is not an AI project.",
   },
 
   // Assignments - every write validates its action type first; reading all
@@ -821,6 +807,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // OpenAI passthrough - the provider's answer is relayed as it stands, so any
   // status it returns can reach the caller, 429 included.
   aiOpenaiChatCompletions: {
+    "400": "Relayed from the provider, which refused the request body.",
     "404": "No profile with this identifier exists for the caller.",
     "413": "The request body is larger than this route accepts.",
     "429": true,
@@ -917,6 +904,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
   aiPromptsCreateFolder: {
     "400": "`name` is missing, empty or not a string.",
+    "404": "The engine refused the folder with the code `not_found`.",
     "409": "A folder of that name already exists.",
   },
   aiPromptsRenameFolder: {
@@ -939,6 +927,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
 
   // Threads - the create pair resolves both the room and a live profile.
   aiThreadsCreate: {
+    "409": "`entityId` names an AI project whose model is gone or cannot chat.",
     "404":
       "The `entityId` names a room the caller cannot open, or no live AI profile is bound " +
       "to it, so there is no model to run the thread against.",
@@ -1046,6 +1035,18 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "429": true,
     "502":
       "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+  },
+
+  // Relays of the DocSpace AI service: its refusals keep their status.
+  aiByokKeysSet: {
+    "400": "The AI service refused the key; `error` carries its message.",
+    "404": "Relayed from the AI service, which answered 404 for this model id.",
+  },
+  aiByokKeysDelete: { "404": "Relayed from the AI service, which answered 404 for this id." },
+  aiSettingsSetVectorization: { "400": "The AI service refused the settings." },
+  aiVectorizationStartTask: {
+    "400": "The AI service refused the request, for instance one that names no file.",
+    "404": "A file named in the request does not exist.",
   },
 };
 
@@ -1407,9 +1408,6 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "The assistant's reply as one message, or a newline-delimited stream of chat events when " +
     "`isStream` was set. Nothing was persisted.",
 
-  aiProjectsGetModel: "The project's model, or `null` for the portal default.",
-  aiProjectsSetModel: "The project's model after the change.",
-
   aiAssignmentsResolveForAction: "The profile that will serve the action.",
   aiAssignmentsTryResolveForAction:
     "The profile that will serve the action, or an empty result when none is configured.",
@@ -1598,6 +1596,56 @@ const PROVIDER_RELAY_SCHEMA: Json = {
 // operations do not return what their engine method returns - the controller wraps
 // it, replaces it, or relays somebody else's body - so the shape is declared here
 // and wins over the generated one. Every entry was read off the controller.
+const DOCUMENT_AGENT_ENVELOPE_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    response: {
+      type: "object",
+      description: "The document agent settings of the portal.",
+      additionalProperties: true,
+    },
+    count: {
+      type: "integer",
+      description: "Envelope field from the internal service.",
+      examples: [1],
+    },
+    status: {
+      type: "integer",
+      description: "Envelope status flag from the internal service.",
+      examples: [0],
+    },
+    statusCode: {
+      type: "integer",
+      description: "HTTP status the internal service answered with.",
+      examples: [200],
+    },
+  },
+  required: ["response", "count", "status", "statusCode"],
+  additionalProperties: true,
+};
+
+// What this service writes into a chat stream that failed after its headers were sent: the
+// last line of the stream, in place of the engine's own closing event. The reason stays in the
+// server log.
+export const STREAM_ERROR_EVENT_COMPONENT = "AiStreamErrorEvent";
+const STREAM_ERROR_EVENT_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    type: {
+      type: "string",
+      const: "error",
+      description: "Marks the line as the failure of the stream.",
+    },
+    message: {
+      type: "string",
+      description: "A generic text; it never carries the cause.",
+      examples: ["stream error"],
+    },
+  },
+  required: ["type", "message"],
+  additionalProperties: false,
+};
+
 const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
   // `get-all-assignments` answers one of two shapes, chosen by `expand=profile`.
   // The generated union is an `anyOf`; the two are exclusive (the expanded one
@@ -1741,6 +1789,10 @@ const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
     additionalProperties: true,
   },
 
+  // Relayed from the .NET service with `raw: true`: the DocSpace envelope with the settings.
+  aiSettingsGetDocumentAgent: DOCUMENT_AGENT_ENVELOPE_SCHEMA,
+  aiSettingsSetDocumentAgent: DOCUMENT_AGENT_ENVELOPE_SCHEMA,
+
   aiOpenaiChatCompletions: PROVIDER_RELAY_SCHEMA,
   aiOpenaiImagesGenerations: PROVIDER_RELAY_SCHEMA,
   aiWebSearchPassthroughSearch: PROVIDER_RELAY_SCHEMA,
@@ -1819,6 +1871,59 @@ const IMPORT_REFUSAL_SCHEMA: Json = { $ref: "#/components/schemas/AiImportResult
 const PROFILE_OR_PLAIN_ERROR_SCHEMA: Json = {
   anyOf: [{ $ref: "#/components/schemas/AiProfileMutationResult" }, ERROR_RESPONSE_REF],
 };
+// The refusal of a round in an AI project whose model is gone: `code` lets the client tell it
+// from any other 409.
+const PROJECT_MODEL_ERROR_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    error: {
+      type: "string",
+      description: "The reason, ready to be shown to the caller.",
+      examples: ["The model of this AI project is not available"],
+    },
+    code: {
+      type: "string",
+      description: "`projectModelUnavailable` for this refusal.",
+      examples: ["projectModelUnavailable"],
+    },
+  },
+  required: ["error"],
+  additionalProperties: false,
+};
+const PROJECT_MODEL_ERRORS: Readonly<Record<string, Json>> = { "409": PROJECT_MODEL_ERROR_SCHEMA };
+
+// A metadata route that could read none of the content says which entries it left out.
+const SKIPPED_CONTENT_ERROR_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    error: {
+      type: "string",
+      description: "The reason, ready to be shown to the caller.",
+      examples: ["None of the selected files could be read as text"],
+    },
+    skipped: {
+      type: "array",
+      description: "The entries that were left out, each with the reason.",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string", description: "The id of the entry.", examples: ["42"] },
+          title: { type: "string", description: "Its title, when it was read." },
+          reason: {
+            type: "string",
+            description: "`unsupported`, `limit`, `forbidden`, `not_found`, `empty` or `failed`.",
+            examples: ["unsupported"],
+          },
+        },
+        required: ["id", "reason"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["error", "skipped"],
+  additionalProperties: false,
+};
+
 const WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA: Json = {
   anyOf: [{ $ref: "#/components/schemas/AiWebSearchMutationResult" }, ERROR_RESPONSE_REF],
 };
@@ -1853,11 +1958,19 @@ const MODEL_CALL_ERROR_SCHEMA: Json = {
   required: ["error", "code"],
   additionalProperties: false,
 };
+// A 502 of these routes is the model call's failure, or the plain relay of a DocSpace service
+// that failed before the model was called.
 const MODEL_CALL_ERRORS: Readonly<Record<string, Json>> = {
   "402": MODEL_CALL_ERROR_SCHEMA,
   "429": MODEL_CALL_ERROR_SCHEMA,
-  "502": MODEL_CALL_ERROR_SCHEMA,
+  "502": { anyOf: [MODEL_CALL_ERROR_SCHEMA, ERROR_RESPONSE_REF] },
   "504": MODEL_CALL_ERROR_SCHEMA,
+};
+// A 422 names the entries left out when content could not be read, and is a plain refusal when
+// there was nothing to work on.
+const META_ERRORS: Readonly<Record<string, Json>> = {
+  ...MODEL_CALL_ERRORS,
+  "422": { anyOf: [SKIPPED_CONTENT_ERROR_SCHEMA, ERROR_RESPONSE_REF] },
 };
 
 // operationId -> status code -> schema, with `*` standing for every code of that
@@ -1883,7 +1996,11 @@ const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, J
     "404": PROMPT_REFUSAL_SCHEMA,
     "409": PROMPT_REFUSAL_SCHEMA,
   },
-  aiPromptsCreateFolder: { "400": FOLDER_REFUSAL_SCHEMA, "409": FOLDER_REFUSAL_SCHEMA },
+  aiPromptsCreateFolder: {
+    "400": FOLDER_REFUSAL_SCHEMA,
+    "404": FOLDER_REFUSAL_SCHEMA,
+    "409": FOLDER_REFUSAL_SCHEMA,
+  },
   aiPromptsRenameFolder: {
     "400": FOLDER_REFUSAL_SCHEMA,
     "404": FOLDER_REFUSAL_SCHEMA,
@@ -1891,9 +2008,17 @@ const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, J
   },
   aiPromptsImportBundle: { "400": IMPORT_REFUSAL_SCHEMA, "409": IMPORT_REFUSAL_SCHEMA },
   aiWebSearchConfigure: { "400": WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA },
-  aiMetaGenerate: MODEL_CALL_ERRORS,
-  aiMetaFill: MODEL_CALL_ERRORS,
+  aiMetaGenerate: META_ERRORS,
+  aiMetaFill: META_ERRORS,
   aiSkillsGenerate: MODEL_CALL_ERRORS,
+  aiSendWithStream: PROJECT_MODEL_ERRORS,
+  aiSendWithStreamOpenAI: PROJECT_MODEL_ERRORS,
+  aiRegenerateStream: PROJECT_MODEL_ERRORS,
+  aiApproveToolCall: PROJECT_MODEL_ERRORS,
+  aiDenyToolCall: PROJECT_MODEL_ERRORS,
+  aiSend: PROJECT_MODEL_ERRORS,
+  aiWebSearchPassthroughSearch: { "400": FIELD_OR_PLAIN_ERROR_SCHEMA },
+  aiWebSearchPassthroughContents: { "400": FIELD_OR_PLAIN_ERROR_SCHEMA },
 };
 
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {
@@ -1903,9 +2028,19 @@ function responseFor(operations: OperationSchemaLookup, operationId: string): Js
   if (streaming && schema !== undefined) {
     // The schema types a single streamed item; the media type frames the
     // stream. (A JSON `content` block would misrepresent the wire format.)
+    // An NDJSON stream of chat events may end with this service's own error line.
+    const item: Json =
+      streaming.mediaType === "application/x-ndjson"
+        ? {
+            anyOf: [
+              schema as Json,
+              { $ref: `#/components/schemas/${STREAM_ERROR_EVENT_COMPONENT}` },
+            ],
+          }
+        : (schema as Json);
     return {
       description: streaming.description,
-      content: { [streaming.mediaType]: { schema: schema as Json } },
+      content: { [streaming.mediaType]: { schema: item } },
     };
   }
   const description = SUCCESS_DESCRIPTIONS[operationId] ?? "Success.";
@@ -2291,7 +2426,11 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
       },
       // Shared named types referenced by the inlined operation schemas, plus
       // the request bodies promoted to `<OperationId>Request`.
-      schemas: { ...sharedSchemas, ...requestComponents } as Json,
+      schemas: {
+        ...sharedSchemas,
+        ...requestComponents,
+        [STREAM_ERROR_EVENT_COMPONENT]: STREAM_ERROR_EVENT_SCHEMA,
+      } as Json,
     },
   };
 }

@@ -296,7 +296,6 @@ describe("the prologue of every round", () => {
     },
   );
 
-  // DEFECT ai-4: the 409 body carries `code`, which the published AiErrorResponse (additionalProperties: false) does not allow — expected the published schema to list `code` for this answer (brief, response DTOs; app/openapi.ts OPERATION_ERROR_SCHEMAS)
   it.each([...ROUNDS, "send"] as const)(
     "%s answers 409 with the code when the project's model is gone",
     async (name) => {
@@ -310,9 +309,7 @@ describe("the prologue of every round", () => {
 
       expect(reply.status).toBe(409);
       expect(reply.body).toEqual(refusal);
-      expect(responseViolations(OPERATION[name], 409, reply.body)).toEqual([
-        "/ must NOT have additional properties",
-      ]);
+      expect(responseViolations(OPERATION[name], 409, reply.body)).toEqual([]);
       expect(h.engine[name]).not.toHaveBeenCalled();
     },
   );
@@ -333,7 +330,6 @@ describe("the prologue of every round", () => {
     },
   );
 
-  // DEFECT ai-5: every chat route relays the status of a failed upstream call, and the published document lists no 503 for any of them — expected the 5xx the route answers to be published (brief, response DTOs)
   it.each([...ROUNDS, "send", "sendCustom"] as const)(
     "%s answers an AI service outage of the chat context with its status",
     async (name) => {
@@ -345,9 +341,7 @@ describe("the prologue of every round", () => {
 
       expect(reply.status).toBe(503);
       expect(reply.body).toEqual({ error: "Service Unavailable" });
-      expect(responseViolations(OPERATION[name], 503, reply.body)).toEqual([
-        `${OPERATION[name]} publishes no JSON schema for status 503`,
-      ]);
+      expect(responseViolations(OPERATION[name], 503, reply.body)).toEqual([]);
     },
   );
 });
@@ -1015,7 +1009,6 @@ describe("sendWithStream", () => {
     }
   });
 
-  // DEFECT ai-10: the error frame's type `error` is not one of the AiChatEvent types the document publishes for the stream — expected the frame to be a published event (e.g. `message-incomplete`) or the published schema to list it (brief, response DTOs)
   it("ends a stream that fails mid-way with a generic error frame and status 200", async () => {
     h.engine.sendWithStream.mockReturnValue(
       h.failingStream(new Error("provider said http://10.1.2.3 secret"), START) as never,
@@ -1028,10 +1021,7 @@ describe("sendWithStream", () => {
     const frames = ndjsonFrames(reply.body);
     expect(frames).toEqual([START, { type: "error", message: "stream error" }]);
     expect(String(reply.body)).not.toContain("10.1.2.3");
-    expect(schemaViolations("AiChatEvent", frames[1])).toEqual([
-      "/type must be equal to one of the allowed values",
-      "/message must be object",
-    ]);
+    expect(schemaViolations("AiStreamErrorEvent", frames[1])).toEqual([]);
     expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
       expect.stringMatching(
         /^ai\/send-with-stream: stream threw after 1 event\(s\): provider said http:\/\/10\.1\.2\.3 secret\nError: provider said/,
@@ -1103,7 +1093,6 @@ describe("sendWithStreamOpenAI", () => {
     );
   });
 
-  // DEFECT ai-11: the error frame lacks `code` and `param`, which the published AiOpenAIStreamError requires — expected `code: null, param: null` in the frame or the schema to make them optional (brief, response DTOs)
   it("ends a stream that fails mid-way with an OpenAI error frame and no [DONE]", async () => {
     h.engine.sendWithStreamOpenAI.mockReturnValue(
       h.failingStream(new Error("socket reset by 10.0.0.9"), CHUNK) as never,
@@ -1113,11 +1102,12 @@ describe("sendWithStreamOpenAI", () => {
 
     expect(reply.status).toBe(200);
     const frames = sseFrames(reply.body);
-    expect(frames).toEqual([CHUNK, { error: { message: "stream error", type: "server_error" } }]);
+    expect(frames).toEqual([
+      CHUNK,
+      { error: { message: "stream error", type: "server_error", code: null, param: null } },
+    ]);
     expect(String(reply.body)).not.toContain("10.0.0.9");
-    expect(schemaViolations("AiOpenAIStreamChunk", frames[1])).toEqual(
-      expect.arrayContaining(["/error must have required property 'code'"]),
-    );
+    expect(schemaViolations("AiOpenAIStreamError", frames[1])).toEqual([]);
     expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
       expect.stringMatching(/^openai stream aborted: Error: socket reset/),
     );
@@ -1175,7 +1165,6 @@ describe("regenerateStream", () => {
     expect(h.engineInput("regenerateStream")["profileId"]).toBeUndefined();
   });
 
-  // DEFECT ai-5: the route relays a 404 the published document does not list for it — expected the status to be published (brief, response DTOs)
   it("answers the status of a thread read the AI service refuses", async () => {
     h.storage.threads.readById.mockRejectedValue(new AiServiceHttpError(404, "Not Found", "", "u"));
 
@@ -1183,9 +1172,7 @@ describe("regenerateStream", () => {
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "Not Found" });
-    expect(responseViolations("aiRegenerateStream", 404, reply.body)).toEqual([
-      "aiRegenerateStream publishes no JSON schema for status 404",
-    ]);
+    expect(responseViolations("aiRegenerateStream", 404, reply.body)).toEqual([]);
     expect(h.engine.regenerateStream).not.toHaveBeenCalled();
   });
 

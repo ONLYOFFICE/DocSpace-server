@@ -398,16 +398,6 @@ type SaveFileInput = {
   /** Optional display title. */
   title?: string;
 };
-/** An image attachment draft to persist. */
-type SaveImageInput = {
-  /** Image name. */
-  name: string;
-  /** Full `data:image/...;base64,…` data URL. */
-  base64: string;
-  /** Optional display title. */
-  title?: string;
-};
-
 export type Req_aiAttachmentsSaveFile = {
   input: SaveFileInput;
   /** Optional entity (room) scope. */
@@ -419,16 +409,6 @@ export type Req_aiAttachmentsSaveFilesMany = {
   entityId?: string;
 };
 export type Res_aiAttachmentsSaveFilesMany = Attachment[];
-export type Req_aiAttachmentsSaveImage = {
-  input: SaveImageInput;
-  entityId?: string;
-};
-export type Res_aiAttachmentsSaveImage = Attachment;
-export type Req_aiAttachmentsSaveImagesMany = {
-  inputs: SaveImageInput[];
-  entityId?: string;
-};
-export type Res_aiAttachmentsSaveImagesMany = Attachment[];
 export type Req_aiAttachmentsGet = string;
 export type Res_aiAttachmentsGet = Attachment | null;
 export type Req_aiAttachmentsGetMany = string[];
@@ -514,7 +494,14 @@ export type Req_aiProfilesListProviderModels = {
 };
 export type Res_aiProfilesListProviderModels = Model[];
 export type Req_aiProfilesTestConnection = string;
-export type Res_aiProfilesTestConnection = true | { message?: string };
+export type Res_aiProfilesTestConnection =
+  | true
+  | {
+      /** The field of the profile the provider refused, when the engine can tell. */
+      field?: string;
+      /** Why the test failed. */
+      message?: string;
+    };
 // `key` and `headers` are stripped from the HTTP response (Bug 82821) —
 // see profilesController.getById.
 export type Res_aiProfilesGetById = Omit<Profile, "key" | "headers">;
@@ -707,7 +694,14 @@ export type Res_aiToolsIsAllowAlways = boolean;
 export type Res_aiWebSearchGetActiveConfig = WebSearchConfig | null;
 export type Res_aiWebSearchIsConfigured = boolean;
 export type Req_aiWebSearchTestConnection = WebSearchConfig;
-export type Res_aiWebSearchTestConnection = true | { message?: string };
+export type Res_aiWebSearchTestConnection =
+  | true
+  | {
+      /** The field of the configuration the provider refused, when the engine can tell. */
+      field?: string;
+      /** Why the test failed. */
+      message?: string;
+    };
 export type Req_aiWebSearchConfigure = {
   config: WebSearchConfig;
   entityId?: string;
@@ -927,36 +921,3 @@ export type Res_aiMetaFill = {
     reason: "unsupported" | "limit" | "forbidden" | "not_found" | "empty" | "failed";
   }[];
 };
-
-/* --------------------------- Project model ------------------------------ */
-// A project is a Files room of type 12; its model is the project-scoped Chat
-// assignment, served here until the Files API serves it.
-
-export type Req_aiProjectsSetModel = {
-  /** The UUID of a chat profile, or `null` for the portal default. */
-  profileId: string | null;
-};
-
-/** The project's own model; `null` when the project runs on the portal default. */
-export type AiProjectModel = {
-  profile: {
-    /** The profile id. */
-    id: string;
-    /** The profile name; empty when the profile is gone. */
-    name: string;
-    /** The provider type of the profile; `null` when the profile is gone. */
-    provider: string | null;
-    /** `false` when the profile is gone or cannot chat: the project's rounds are refused. */
-    available: boolean;
-  } | null;
-};
-
-export type Res_aiProjectsGetModel = {
-  response: AiProjectModel;
-  count: number;
-  /** 0 on success. */
-  status: number;
-  /** The HTTP status, 200 on success. */
-  statusCode: number;
-};
-export type Res_aiProjectsSetModel = Res_aiProjectsGetModel;

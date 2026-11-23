@@ -212,7 +212,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "The reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model of this AI project is not available"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "`projectModelUnavailable` for this refusal.",
+                      "examples": [
+                        "projectModelUnavailable"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -229,6 +249,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -329,6 +369,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -357,7 +417,14 @@
             "content": {
               "application/x-ndjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiChatEvent"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiChatEvent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiStreamErrorEvent"
+                    }
+                  ]
                 }
               }
             }
@@ -417,7 +484,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "The reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model of this AI project is not available"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "`projectModelUnavailable` for this refusal.",
+                      "examples": [
+                        "projectModelUnavailable"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -434,6 +521,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -520,7 +627,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "The reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model of this AI project is not available"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "`projectModelUnavailable` for this refusal.",
+                      "examples": [
+                        "projectModelUnavailable"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -537,6 +664,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -573,7 +720,14 @@
             "content": {
               "application/x-ndjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiChatEvent"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiChatEvent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiStreamErrorEvent"
+                    }
+                  ]
                 }
               }
             }
@@ -598,12 +752,42 @@
               }
             }
           },
+          "404": {
+            "description": "The thread does not exist or is not the caller's.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "409": {
             "description": "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "The reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model of this AI project is not available"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "`projectModelUnavailable` for this refusal.",
+                      "examples": [
+                        "projectModelUnavailable"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -620,6 +804,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -655,7 +859,14 @@
             "content": {
               "application/x-ndjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiChatEvent"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiChatEvent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiStreamErrorEvent"
+                    }
+                  ]
                 }
               }
             }
@@ -685,7 +896,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "The reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model of this AI project is not available"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "`projectModelUnavailable` for this refusal.",
+                      "examples": [
+                        "projectModelUnavailable"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -702,6 +933,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -737,7 +988,14 @@
             "content": {
               "application/x-ndjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiChatEvent"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiChatEvent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiStreamErrorEvent"
+                    }
+                  ]
                 }
               }
             }
@@ -767,7 +1025,27 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "The reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model of this AI project is not available"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "`projectModelUnavailable` for this refusal.",
+                      "examples": [
+                        "projectModelUnavailable"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -784,6 +1062,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -867,6 +1165,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -979,6 +1297,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -1077,6 +1415,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -1152,6 +1510,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1235,6 +1613,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1328,6 +1726,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -1404,6 +1822,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1509,6 +1947,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -1585,6 +2043,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1677,6 +2155,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -1759,6 +2257,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1863,6 +2381,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -1956,6 +2494,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -2026,6 +2584,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2136,6 +2714,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -2218,6 +2816,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -2288,6 +2906,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -2336,6 +2974,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2411,6 +3069,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2511,6 +3189,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -2595,6 +3293,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2688,6 +3406,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -2763,6 +3501,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2847,6 +3605,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -2916,6 +3694,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3009,6 +3807,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -3074,6 +3892,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3167,6 +4005,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -3249,6 +4107,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3346,6 +4224,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -3422,6 +4320,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3521,7 +4439,17 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3648,7 +4576,17 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3692,8 +4630,13 @@
                     {
                       "type": "object",
                       "properties": {
+                        "field": {
+                          "type": "string",
+                          "description": "The field of the profile the provider refused, when the engine can tell."
+                        },
                         "message": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Why the test failed."
                         }
                       },
                       "additionalProperties": false
@@ -3755,6 +4698,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3919,6 +4882,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -3981,6 +4964,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4073,6 +5076,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4183,6 +5206,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -4285,6 +5328,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -4367,6 +5430,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -4430,6 +5513,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4504,6 +5607,16 @@
               }
             }
           },
+          "404": {
+            "description": "The engine refused the folder with the code `not_found`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
+                }
+              }
+            }
+          },
           "409": {
             "description": "A folder of that name already exists.",
             "content": {
@@ -4526,6 +5639,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4640,6 +5773,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -4732,6 +5885,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -4802,6 +5975,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -4847,6 +6040,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4936,6 +6149,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -5008,6 +6241,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5098,6 +6351,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -5165,6 +6438,16 @@
               }
             }
           },
+          "409": {
+            "description": "`entityId` names an AI project whose model is gone or cannot chat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -5177,6 +6460,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5276,6 +6579,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -5368,6 +6691,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -5450,6 +6793,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -5525,6 +6888,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5624,6 +7007,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -5704,6 +7107,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5821,6 +7244,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -5879,6 +7322,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5994,6 +7457,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6130,6 +7613,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -6216,6 +7719,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6319,6 +7842,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -6394,6 +7937,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6498,6 +8061,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -6583,6 +8166,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6682,6 +8285,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -6754,6 +8377,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6835,6 +8478,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6940,6 +8603,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -7029,6 +8712,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7128,6 +8831,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -7199,6 +8922,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7283,6 +9026,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7410,6 +9173,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -7468,6 +9251,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7544,6 +9347,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7668,6 +9491,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -7754,6 +9597,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -7794,8 +9657,13 @@
                     {
                       "type": "object",
                       "properties": {
+                        "field": {
+                          "type": "string",
+                          "description": "The field of the configuration the provider refused, when the engine can tell."
+                        },
                         "message": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Why the test failed."
                         }
                       },
                       "additionalProperties": false
@@ -7847,6 +9715,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7954,6 +9842,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -8046,6 +9954,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -8111,6 +10039,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8205,6 +10153,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8427,7 +10395,60 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The reason, ready to be shown to the caller.",
+                          "examples": [
+                            "None of the selected files could be read as text"
+                          ]
+                        },
+                        "skipped": {
+                          "type": "array",
+                          "description": "The entries that were left out, each with the reason.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "The id of the entry.",
+                                "examples": [
+                                  "42"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "Its title, when it was read."
+                              },
+                              "reason": {
+                                "type": "string",
+                                "description": "`unsupported`, `limit`, `forbidden`, `not_found`, `empty` or `failed`.",
+                                "examples": [
+                                  "unsupported"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "reason"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "skipped"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -8485,35 +10506,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "description": "Short reason, ready to be shown to the caller.",
-                      "examples": [
-                        "The model provider refused the request for lack of credit"
-                      ]
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "Short reason, ready to be shown to the caller.",
+                          "examples": [
+                            "The model provider refused the request for lack of credit"
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                          "examples": [
+                            "insufficient_funds"
+                          ]
+                        },
+                        "providerMessage": {
+                          "type": "string",
+                          "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                          "examples": [
+                            "402 Insufficient Balance"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "code"
+                      ],
+                      "additionalProperties": false
                     },
-                    "code": {
-                      "type": "string",
-                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
-                      "examples": [
-                        "insufficient_funds"
-                      ]
-                    },
-                    "providerMessage": {
-                      "type": "string",
-                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
-                      "examples": [
-                        "402 Insufficient Balance"
-                      ]
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
                     }
-                  },
-                  "required": [
-                    "error",
-                    "code"
-                  ],
-                  "additionalProperties": false
+                  ]
                 }
               }
             }
@@ -8826,7 +10854,60 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The reason, ready to be shown to the caller.",
+                          "examples": [
+                            "None of the selected files could be read as text"
+                          ]
+                        },
+                        "skipped": {
+                          "type": "array",
+                          "description": "The entries that were left out, each with the reason.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "The id of the entry.",
+                                "examples": [
+                                  "42"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "Its title, when it was read."
+                              },
+                              "reason": {
+                                "type": "string",
+                                "description": "`unsupported`, `limit`, `forbidden`, `not_found`, `empty` or `failed`.",
+                                "examples": [
+                                  "unsupported"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "reason"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "skipped"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -8884,35 +10965,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "description": "Short reason, ready to be shown to the caller.",
-                      "examples": [
-                        "The model provider refused the request for lack of credit"
-                      ]
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "Short reason, ready to be shown to the caller.",
+                          "examples": [
+                            "The model provider refused the request for lack of credit"
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                          "examples": [
+                            "insufficient_funds"
+                          ]
+                        },
+                        "providerMessage": {
+                          "type": "string",
+                          "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                          "examples": [
+                            "402 Insufficient Balance"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "code"
+                      ],
+                      "additionalProperties": false
                     },
-                    "code": {
-                      "type": "string",
-                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
-                      "examples": [
-                        "insufficient_funds"
-                      ]
-                    },
-                    "providerMessage": {
-                      "type": "string",
-                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
-                      "examples": [
-                        "402 Insufficient Balance"
-                      ]
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
                     }
-                  },
-                  "required": [
-                    "error",
-                    "code"
-                  ],
-                  "additionalProperties": false
+                  ]
                 }
               }
             }
@@ -9158,35 +11246,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "description": "Short reason, ready to be shown to the caller.",
-                      "examples": [
-                        "The model provider refused the request for lack of credit"
-                      ]
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "Short reason, ready to be shown to the caller.",
+                          "examples": [
+                            "The model provider refused the request for lack of credit"
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                          "examples": [
+                            "insufficient_funds"
+                          ]
+                        },
+                        "providerMessage": {
+                          "type": "string",
+                          "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                          "examples": [
+                            "402 Insufficient Balance"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "code"
+                      ],
+                      "additionalProperties": false
                     },
-                    "code": {
-                      "type": "string",
-                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
-                      "examples": [
-                        "insufficient_funds"
-                      ]
-                    },
-                    "providerMessage": {
-                      "type": "string",
-                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
-                      "examples": [
-                        "402 Insufficient Balance"
-                      ]
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
                     }
-                  },
-                  "required": [
-                    "error",
-                    "code"
-                  ],
-                  "additionalProperties": false
+                  ]
                 }
               }
             }
@@ -9338,6 +11433,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9587,6 +11702,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -9774,6 +11909,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -9836,6 +11991,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -9888,6 +12063,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -9905,6 +12100,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiVectorizationSettingsWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The AI service refused the settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -9941,6 +12146,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10006,6 +12231,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10083,6 +12328,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -10141,6 +12406,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10218,6 +12503,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -10254,7 +12559,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiSuccessResponse"
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "object",
+                      "description": "The document agent settings of the portal.",
+                      "additionalProperties": true
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Envelope field from the internal service.",
+                      "examples": [
+                        1
+                      ]
+                    },
+                    "status": {
+                      "type": "integer",
+                      "description": "Envelope status flag from the internal service.",
+                      "examples": [
+                        0
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "description": "HTTP status the internal service answered with.",
+                      "examples": [
+                        200
+                      ]
+                    }
+                  },
+                  "required": [
+                    "response",
+                    "count",
+                    "status",
+                    "statusCode"
+                  ],
+                  "additionalProperties": true
                 }
               }
             }
@@ -10288,6 +12628,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -10304,7 +12664,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiSuccessResponse"
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "object",
+                      "description": "The document agent settings of the portal.",
+                      "additionalProperties": true
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Envelope field from the internal service.",
+                      "examples": [
+                        1
+                      ]
+                    },
+                    "status": {
+                      "type": "integer",
+                      "description": "Envelope status flag from the internal service.",
+                      "examples": [
+                        0
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "description": "HTTP status the internal service answered with.",
+                      "examples": [
+                        200
+                      ]
+                    }
+                  },
+                  "required": [
+                    "response",
+                    "count",
+                    "status",
+                    "statusCode"
+                  ],
+                  "additionalProperties": true
                 }
               }
             }
@@ -10361,6 +12756,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10444,6 +12859,16 @@
               }
             }
           },
+          "400": {
+            "description": "The AI service refused the request, for instance one that names no file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
             "content": {
@@ -10464,6 +12889,16 @@
               }
             }
           },
+          "404": {
+            "description": "A file named in the request does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -10476,6 +12911,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10548,6 +13003,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -10602,6 +13077,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -10620,6 +13115,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiByokKey"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The AI service refused the key; `error` carries its message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -10644,6 +13149,16 @@
               }
             }
           },
+          "404": {
+            "description": "Relayed from the AI service, which answered 404 for this model id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -10656,6 +13171,26 @@
           },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10724,8 +13259,38 @@
               }
             }
           },
+          "404": {
+            "description": "Relayed from the AI service, which answered 404 for this id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10764,6 +13329,57 @@
                   "type": "object",
                   "description": "Relayed from the provider unchanged. The shape is the provider's, not this service's, and it varies by provider and model.",
                   "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Relayed from the provider, which refused the request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "Human-readable description of the failure."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "OpenAI error class, for example `invalid_request_error`.",
+                          "examples": [
+                            "invalid_request_error"
+                          ]
+                        },
+                        "code": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Machine-readable code, when the provider supplies one."
+                        },
+                        "param": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The request parameter at fault, when the failure names one."
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -11035,6 +13651,57 @@
           },
           "502": {
             "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "Human-readable description of the failure."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "OpenAI error class, for example `invalid_request_error`.",
+                          "examples": [
+                            "invalid_request_error"
+                          ]
+                        },
+                        "code": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Machine-readable code, when the provider supplies one."
+                        },
+                        "param": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The request parameter at fault, when the failure names one."
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11501,6 +14168,57 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "Human-readable description of the failure."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "OpenAI error class, for example `invalid_request_error`.",
+                          "examples": [
+                            "invalid_request_error"
+                          ]
+                        },
+                        "code": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Machine-readable code, when the provider supplies one."
+                        },
+                        "param": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The request parameter at fault, when the failure names one."
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -11625,6 +14343,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -11707,6 +14445,26 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -11748,7 +14506,35 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The error message, ready to be shown to the caller.",
+                          "examples": [
+                            "providerType required"
+                          ]
+                        },
+                        "field": {
+                          "type": "string",
+                          "description": "Name of the request field that was missing or rejected.",
+                          "examples": [
+                            "providerType"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "field"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -11815,6 +14601,16 @@
           },
           "502": {
             "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11865,7 +14661,35 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The error message, ready to be shown to the caller.",
+                          "examples": [
+                            "providerType required"
+                          ]
+                        },
+                        "field": {
+                          "type": "string",
+                          "description": "Name of the request field that was missing or rejected.",
+                          "examples": [
+                            "providerType"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "field"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -11932,6 +14756,16 @@
           },
           "502": {
             "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14583,50 +17417,6 @@
         ],
         "additionalProperties": false
       },
-      "AiProjectModel": {
-        "type": "object",
-        "properties": {
-          "profile": {
-            "type": [
-              "object",
-              "null"
-            ],
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The profile id."
-              },
-              "name": {
-                "type": "string",
-                "description": "The profile name; empty when the profile is gone."
-              },
-              "provider": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "description": "The provider type of the profile; `null` when the profile is gone."
-              },
-              "available": {
-                "type": "boolean",
-                "description": "`false` when the profile is gone or cannot chat: the project's rounds are refused."
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "provider",
-              "available"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "required": [
-          "profile"
-        ],
-        "additionalProperties": false,
-        "description": "The project's own model; `null` when the project runs on the portal default."
-      },
       "AiToolPermissionModeWrapper": {
         "type": "object",
         "properties": {
@@ -15995,6 +18785,28 @@
             "entityId": "1234"
           }
         ]
+      },
+      "AiStreamErrorEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "error",
+            "description": "Marks the line as the failure of the stream."
+          },
+          "message": {
+            "type": "string",
+            "description": "A generic text; it never carries the cause.",
+            "examples": [
+              "stream error"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "message"
+        ],
+        "additionalProperties": false
       }
     }
   }

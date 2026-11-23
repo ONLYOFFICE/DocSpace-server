@@ -76,6 +76,33 @@ const FAILED = json(
   "Unhandled failure. The reason is logged server-side and never echoed back.",
   ERROR_REF,
 );
+const BAD_GATEWAY = json(
+  "The AI provider could not be reached or answered with a failure of its own, or a DocSpace " +
+    "service answered with a body this service cannot read.",
+  ERROR_REF,
+);
+const UNAVAILABLE = json(
+  "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+  ERROR_REF,
+);
+// The line this service writes into a chat stream that failed: declared by the document itself.
+const STREAM_ERROR_EVENT = {
+  type: "object",
+  properties: {
+    type: {
+      type: "string",
+      const: "error",
+      description: "Marks the line as the failure of the stream.",
+    },
+    message: {
+      type: "string",
+      description: "A generic text; it never carries the cause.",
+      examples: ["stream error"],
+    },
+  },
+  required: ["type", "message"],
+  additionalProperties: false,
+};
 const TOO_LARGE = json(
   "The request body is larger than 100 KB, the JSON parser's limit on this route.",
   ERROR_REF,
@@ -124,7 +151,7 @@ describe("buildOpenApiDocument with no routes", () => {
             description: "Bearer token or API key for programmatic callers.",
           },
         },
-        schemas: {},
+        schemas: { AiStreamErrorEvent: STREAM_ERROR_EVENT },
       },
     });
   });
@@ -150,6 +177,8 @@ describe("an engine operation", () => {
           "401": UNAUTHORIZED,
           "403": FORBIDDEN,
           "500": FAILED,
+          "502": BAD_GATEWAY,
+          "503": UNAVAILABLE,
         },
         parameters: [
           {
@@ -188,6 +217,8 @@ describe("an engine operation", () => {
         "403": FORBIDDEN,
         "413": TOO_LARGE,
         "500": FAILED,
+        "502": BAD_GATEWAY,
+        "503": UNAVAILABLE,
       },
       requestBody: {
         required: true,
@@ -252,7 +283,10 @@ describe("request bodies from the schema bundle", () => {
       required: true,
       content: { "application/json": { schema: { $ref: "#/components/schemas/AiWSaveRequest" } } },
     });
-    expect((doc["components"] as Json)["schemas"]).toEqual({ AiWSaveRequest: schema });
+    expect((doc["components"] as Json)["schemas"]).toEqual({
+      AiWSaveRequest: schema,
+      AiStreamErrorEvent: STREAM_ERROR_EVENT,
+    });
   });
 
   it("names a $ref body after the referenced type", () => {
@@ -308,7 +342,10 @@ describe("request bodies from the schema bundle", () => {
     expect(pathsOf(doc)["/p/w/get"]?.["get"]?.["responses"]).toMatchObject({
       "200": json("Success.", { type: "number" }),
     });
-    expect((doc["components"] as Json)["schemas"]).toEqual({ AiShared: { type: "string" } });
+    expect((doc["components"] as Json)["schemas"]).toEqual({
+      AiShared: { type: "string" },
+      AiStreamErrorEvent: STREAM_ERROR_EVENT,
+    });
   });
 });
 
@@ -335,6 +372,8 @@ describe("a custom operation", () => {
         "401": UNAUTHORIZED,
         "403": FORBIDDEN,
         "500": FAILED,
+        "502": BAD_GATEWAY,
+        "503": UNAVAILABLE,
       },
       parameters: [{ name: "thingId", in: "path", required: true, schema: { type: "string" } }],
     });
@@ -411,7 +450,16 @@ describe("the served document", () => {
   it("answers text-to-docx with 202", () => {
     const responses = pathsOf(openApiDocument)["/api/2.0/ai/text-to-docx"]?.["post"]?.["responses"];
 
-    expect(Object.keys(responses as Json)).toEqual(["202", "400", "401", "403", "413", "500"]);
+    expect(Object.keys(responses as Json)).toEqual([
+      "202",
+      "400",
+      "401",
+      "403",
+      "413",
+      "500",
+      "502",
+      "503",
+    ]);
   });
 });
 

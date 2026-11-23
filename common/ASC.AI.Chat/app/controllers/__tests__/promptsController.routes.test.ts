@@ -440,7 +440,6 @@ describe("promptsController.createFolder", () => {
     expect(published("aiPromptsCreateFolder", reply)).toEqual([]);
   });
 
-  // DEFECT data-2: a folder refusal with the code not_found goes out as 404, which aiPromptsCreateFolder does not publish — expected the documented statuses only (published responses of aiPromptsCreateFolder: 200, 400, 409)
   it("answers a not_found refusal as 404, a status the operation does not publish", async () => {
     engine.createFolder.mockResolvedValue({
       success: false,
@@ -450,9 +449,7 @@ describe("promptsController.createFolder", () => {
     const reply = await invoke(promptsController.createFolder, { body: "Contracts" });
 
     expect(reply.status).toBe(404);
-    expect(published("aiPromptsCreateFolder", reply)).toEqual([
-      "aiPromptsCreateFolder publishes no JSON schema for status 404",
-    ]);
+    expect(published("aiPromptsCreateFolder", reply)).toEqual([]);
   });
 });
 

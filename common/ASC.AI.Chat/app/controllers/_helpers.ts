@@ -422,7 +422,7 @@ export async function streamOpenAiSse(
     // Generic message only — detail stays in the server log.
     res.write(
       `data: ${JSON.stringify({
-        error: { message: "stream error", type: "server_error" },
+        error: { message: "stream error", type: "server_error", code: null, param: null },
       })}\n\n`,
     );
   } finally {

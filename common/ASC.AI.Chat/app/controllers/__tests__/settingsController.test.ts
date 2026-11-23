@@ -167,12 +167,7 @@ describe.each([
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "Bad Request" });
-    // DEFECT data-19: set-vectorization relays the 400 of the AI service, a status aiSettingsSetVectorization does not publish — expected 400 in its published responses (published responses of aiSettingsSetVectorization)
-    expect(published(operationId, reply)).toEqual(
-      method === "setVectorizationSettings"
-        ? ["aiSettingsSetVectorization publishes no JSON schema for status 400"]
-        : [],
-    );
+    expect(published(operationId, reply)).toEqual([]);
   });
 });
 

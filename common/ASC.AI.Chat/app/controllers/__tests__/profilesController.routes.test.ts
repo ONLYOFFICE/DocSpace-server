@@ -706,7 +706,6 @@ describe("profilesController.testConnection", () => {
     expect(published("aiProfilesTestConnection", reply)).toEqual([]);
   });
 
-  // DEFECT data-8: a failed connection test answers the engine's TErrorData `{ field, message }` as it came, while the published 200 schema admits `{ message }` only — expected the answer and the schema to agree (published schema of aiProfilesTestConnection)
   it("answers a failed test with the engine's error data and 200", async () => {
     readByIdRaw.mockResolvedValue(stored);
     engine.testConnection.mockResolvedValue({ field: "key", message: "Invalid API key" });
@@ -715,12 +714,7 @@ describe("profilesController.testConnection", () => {
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ field: "key", message: "Invalid API key" });
-    expect(published("aiProfilesTestConnection", reply)).toEqual([
-      "/ must be boolean",
-      "/ must be equal to constant",
-      "/ must NOT have additional properties",
-      "/ must match a schema in anyOf",
-    ]);
+    expect(published("aiProfilesTestConnection", reply)).toEqual([]);
   });
 
   it.each([

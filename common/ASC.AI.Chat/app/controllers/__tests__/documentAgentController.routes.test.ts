@@ -113,20 +113,13 @@ describe("documentAgentController.getSettings", () => {
     ]);
   });
 
-  // DEFECT ctl-42: GET and PUT document-agent/settings answer the portal envelope `{ response, count, status, statusCode }` with 200, while the published 200 schema of aiSettingsGetDocumentAgent / aiSettingsSetDocumentAgent is `AiSuccessResponse` (`{ success }`, no other property) — expected the published schema to describe the envelope and the settings it carries (TEST-BRIEF response DTOs; app/apiCatalog.ts)
-  it("answers a 200 that does not match the published schema", async () => {
+  it("answers the portal envelope the operation publishes", async () => {
     resetCalls();
     upstream.use(route("get", () => docspace(SETTINGS)));
 
     const reply = await invoke(documentAgentController.getSettings, { method: "GET" });
 
-    expect(responseViolations("aiSettingsGetDocumentAgent", 200, reply.body)).toEqual([
-      "/ must have required property 'success'",
-      "/ must NOT have additional properties",
-      "/ must NOT have additional properties",
-      "/ must NOT have additional properties",
-      "/ must NOT have additional properties",
-    ]);
+    expect(responseViolations("aiSettingsGetDocumentAgent", 200, reply.body)).toEqual([]);
   });
 
   it("relays an answer without the envelope as it came", async () => {
@@ -174,7 +167,7 @@ describe("documentAgentController.getSettings", () => {
     expect(reply.status).toBe(status);
     expect(reply.body).toEqual({ error });
     expect(responseViolations("aiSettingsGetDocumentAgent", status, reply.body)).toEqual(
-      status === 404 || status === 503
+      status === 404
         ? [`aiSettingsGetDocumentAgent publishes no JSON schema for status ${status}`]
         : [],
     );
@@ -218,7 +211,7 @@ describe("documentAgentController.setSettings", () => {
         body: SETTINGS,
       },
     ]);
-    expect(responseViolations("aiSettingsSetDocumentAgent", 200, reply.body)).toHaveLength(5);
+    expect(responseViolations("aiSettingsSetDocumentAgent", 200, reply.body)).toEqual([]);
   });
 
   it("drops the fields it does not know before the write", async () => {

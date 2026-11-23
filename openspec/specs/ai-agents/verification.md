@@ -608,7 +608,7 @@ No test was run. `Integration` is `common/ASC.AI.Integration/Profiles/`; `Gw` is
 | Undecryptable key: warning logged, no credentials, the BYOK route answers 404 (`94d7b02c21`); the catalogue still marks the profile as BYOK | `Integration/ByokKeyStorage.cs` (`DecryptKeyAsync`); `ProfileStorageService.ReadByokCredentialsAsync` | CODE-ONLY |
 | A gateway profile carries `byokProvider` from the AI service; whether `aiProfilesList` passes it on is not traced; absent from yaml `AiProfile` | `AI/Server/Models/ResponseDto/ProfileDto.cs`; `Chat/storage/profilesStorage.ts` (`dtoToProfile`) | NOT TRACED |
 | Wallet billing of BYOK usage (`ai-tools-byok`, `ai-search-byok`, BYOK marks in `getAiPrices`) | `billing` spec | CROSS-REFERENCE |
-| Contract: `aiByokKeysDelete` documented 200 with a success body, Chat answers 204 without a body; `aiByokKeysSet` documents neither 400 nor 404; list and providers document no 404 | yaml `/api/2.0/ai/byok/{id}`; `byokKeysController.ts` (`delete`) | CODE-ONLY; spec follows the server |
+| Contract: `aiByokKeysDelete` answers the documented 200 with a success body (it answered 204 without a body until 2026-11-23); `aiByokKeysSet` documents 400 and 404, `aiByokKeysDelete` 404; list and providers document no 404 | yaml `/api/2.0/ai/byok/{id}`; `byokKeysController.ts` (`delete`); at unit level `byokKeysController.test.ts` | CODE-ONLY; spec follows the server |
 | No .NET test covers a BYOK route | `products/ASC.AI/ASC.AI.Tests` (no `byok` match) | GAP |
 
 ## Suspected defects

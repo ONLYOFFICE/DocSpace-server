@@ -254,7 +254,6 @@ describe("webSearchController.testConnection", () => {
     expect(paths()).toEqual(["GET /internal/ai/web-search"]);
   });
 
-  // DEFECT passthrough-12: a refused probe is answered 200 with the engine's TErrorData `{ field, message }`, while the operation publishes for 200 only `true` or an object with `message` alone — expected the published shape (ts-ai-tests.md §2; apiCatalog/openapi aiWebSearchTestConnection)
   it("answers a refused probe with 200 and the engine's field error", async () => {
     gateAnswers(200);
     engine.testConnection.mockResolvedValue({ field: "key", message: "Invalid key" });
@@ -263,12 +262,7 @@ describe("webSearchController.testConnection", () => {
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ field: "key", message: "Invalid key" });
-    expect(responseViolations("aiWebSearchTestConnection", 200, reply.body)).toEqual([
-      "/ must be boolean",
-      "/ must be equal to constant",
-      "/ must NOT have additional properties",
-      "/ must match a schema in anyOf",
-    ]);
+    expect(responseViolations("aiWebSearchTestConnection", 200, reply.body)).toEqual([]);
   });
 
   it("takes null optional fields as not set", async () => {

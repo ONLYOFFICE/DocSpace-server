@@ -41,6 +41,11 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
 - The engine reports a refusal as a value, `{ success: false, error }`, instead of throwing.
   `res.json(result)` sends it with 200. Send a `*MutationResult` or `*BulkResult` through a helper
   that maps `error.code` to 400, 404 or 409, as `sendMutation` in `promptsController.ts` does.
+- Where a refusal already goes out with 200, the status is contract: the "Soft refusals" scenario
+  of `openspec/specs/ai-agents/spec.md` and the suites in `products/ASC.AI/ASC.AI.Tests` (MCP
+  servers, profiles, assignments) read `{ success: false }` from a 200 through the generated
+  client, which throws on a 4xx. Moving such a route to a 4xx is an OpenSpec change
+  (`openspec-propose`) with the .NET tests in the same branch, not a fix made in this service alone.
 - A plain `Error` the engine throws for a state the caller caused (an unknown id, a missing field)
   is caught and mapped to its 4xx; left alone it becomes a 500.
 - Seen in review: prompt refusals went out with 200 (d50e326b63), and so did a refused

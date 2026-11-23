@@ -163,18 +163,8 @@ describe("the generated schema bundle", () => {
   };
   const published = new Set(publishedOperations().map((op) => op.operationId));
 
-  // DEFECT app-8: app/generated/openapi-schemas.json keeps request/response schemas for four
-  // operations the service does not publish (the unmounted save-image routes, Bug 83289, and two
-  // `aiProjects*` operations no route serves) — expected every key of `operations` to name a
-  // published operationId; the file is written by `yarn openapi` from scripts/schema/schemaTypes.ts
-  // (ts-ai-style.md, Checks).
-  it("carries schemas for operations nobody publishes", () => {
-    expect(Object.keys(bundle.operations).filter((id) => !published.has(id))).toEqual([
-      "aiAttachmentsSaveImage",
-      "aiAttachmentsSaveImagesMany",
-      "aiProjectsSetModel",
-      "aiProjectsGetModel",
-    ]);
+  it("carries schemas for published operations only", () => {
+    expect(Object.keys(bundle.operations).filter((id) => !published.has(id))).toEqual([]);
   });
 });
 

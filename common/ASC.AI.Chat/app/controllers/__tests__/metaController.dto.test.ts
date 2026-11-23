@@ -246,7 +246,6 @@ describe("metaController.generate answers", () => {
     expect(responseViolations("aiMetaGenerate", status, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-70: generate answers 422 as { error, skipped } while the published 422 schema is the closed AiErrorResponse — expected the published schema to declare `skipped` (the 422 description itself says "`skipped` says why") (app/openapi.ts OPERATION_ERROR_SCHEMAS; ts-ai-tests.md §2 schema check)
   it("answers 422 with the skipped list when nothing could be read", async () => {
     generateMeta.mockRejectedValue(new NoContentError([{ id: "1", reason: "unsupported" }]));
 
@@ -257,9 +256,7 @@ describe("metaController.generate answers", () => {
       error: "None of the selected files could be read as text",
       skipped: [{ id: "1", reason: "unsupported" }],
     });
-    expect(responseViolations("aiMetaGenerate", 422, reply.body)).toEqual([
-      "/ must NOT have additional properties",
-    ]);
+    expect(responseViolations("aiMetaGenerate", 422, reply.body)).toEqual([]);
   });
 
   it("answers 503 when no model is bound", async () => {
@@ -403,7 +400,6 @@ describe("metaController.fill answers", () => {
     expect(responseViolations("aiMetaFill", 422, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-71: fill answers 422 as { error, skipped } while the published 422 schema is the closed AiErrorResponse — expected the published schema to declare `skipped` (app/openapi.ts OPERATION_ERROR_SCHEMAS; ts-ai-tests.md §2 schema check)
   it("answers 422 with the skipped list when the content could not be read", async () => {
     fillMeta.mockRejectedValue(new NoContentError([]));
 
@@ -411,9 +407,7 @@ describe("metaController.fill answers", () => {
 
     expect(reply.status).toBe(422);
     expect(reply.body).toEqual({ error: "The selection holds no files", skipped: [] });
-    expect(responseViolations("aiMetaFill", 422, reply.body)).toEqual([
-      "/ must NOT have additional properties",
-    ]);
+    expect(responseViolations("aiMetaFill", 422, reply.body)).toEqual([]);
   });
 
   it("answers 503 when no model is bound and a model-call failure with its status", async () => {

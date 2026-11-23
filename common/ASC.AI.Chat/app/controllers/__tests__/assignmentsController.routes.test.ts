@@ -459,9 +459,6 @@ describe("assignmentsController.assign", () => {
     expect(responseViolations("aiAssignmentsAssign", 403, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-23: an upstream status the route does not publish (here 503, likewise 404/409/502) is relayed
-  // as is, so the answer has no published schema — expected the published statuses only, or the
-  // relayed ones documented (app/apiCatalog.ts CUSTOM/ENGINE docs; brief "answer contradicts the published schema")
   it("relays an AI service 503 although the route does not publish it", async () => {
     engine.assign.mockRejectedValue(
       new AiServiceHttpError(503, "Service Unavailable", "MARKER", "http://ai/x"),
@@ -471,9 +468,7 @@ describe("assignmentsController.assign", () => {
 
     expect(reply.status).toBe(503);
     expect(reply.body).toEqual({ error: "Service Unavailable" });
-    expect(responseViolations("aiAssignmentsAssign", 503, reply.body)).toEqual([
-      "aiAssignmentsAssign publishes no JSON schema for status 503",
-    ]);
+    expect(responseViolations("aiAssignmentsAssign", 503, reply.body)).toEqual([]);
   });
 });
 

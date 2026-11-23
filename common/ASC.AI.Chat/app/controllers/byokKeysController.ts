@@ -92,6 +92,6 @@ export const byokKeysController = {
 
   delete: asyncHandler(async (req, res) => {
     await storage.byokKeys.delete(req.params["id"] ?? "");
-    res.status(204).end();
+    res.json({ success: true });
   }),
 };

@@ -149,7 +149,6 @@ describe("byokKeysController.set", () => {
     expect(byokKeys.set).toHaveBeenCalledWith("", { provider: "anthropic", key: "sk" });
   });
 
-  // DEFECT data-21: a refused key answers 400, a status aiByokKeysSet does not publish — expected 400 in the published responses (published responses of aiByokKeysSet)
   it("answers a 400 of the AI service with the message the service wrote", async () => {
     byokKeys.set.mockRejectedValue(
       new AiServiceHttpError(
@@ -167,9 +166,7 @@ describe("byokKeysController.set", () => {
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "The key is not valid for anthropic" });
-    expect(published("aiByokKeysSet", reply)).toEqual([
-      "aiByokKeysSet publishes no JSON schema for status 400",
-    ]);
+    expect(published("aiByokKeysSet", reply)).toEqual([]);
   });
 
   it.each([
@@ -214,8 +211,7 @@ describe("byokKeysController.set", () => {
 });
 
 describe("byokKeysController.delete", () => {
-  // DEFECT data-22: a deleted key answers 204 with no body, while aiByokKeysDelete publishes 200 with `{ success }` — expected the answer and the schema to agree (published responses of aiByokKeysDelete)
-  it("deletes the key of the model named in the path and answers 204", async () => {
+  it("deletes the key of the model named in the path and answers the published { success }", async () => {
     byokKeys.delete.mockResolvedValue(undefined);
 
     const reply = await invoke(byokKeysController.delete, {
@@ -223,13 +219,10 @@ describe("byokKeysController.delete", () => {
       params: { id: "rev-1" },
     });
 
-    expect(reply.status).toBe(204);
-    expect(reply.body).toBe("");
-    expect(reply.ended).toBe(true);
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual({ success: true });
     expect(byokKeys.delete).toHaveBeenCalledWith("rev-1");
-    expect(published("aiByokKeysDelete", reply)).toEqual([
-      "aiByokKeysDelete publishes no JSON schema for status 204",
-    ]);
+    expect(published("aiByokKeysDelete", reply)).toEqual([]);
   });
 
   it("sends an empty id when the path has none", async () => {
@@ -250,8 +243,6 @@ describe("byokKeysController.delete", () => {
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "Not Found" });
-    expect(published("aiByokKeysDelete", reply)).toEqual([
-      "aiByokKeysDelete publishes no JSON schema for status 404",
-    ]);
+    expect(published("aiByokKeysDelete", reply)).toEqual([]);
   });
 });
