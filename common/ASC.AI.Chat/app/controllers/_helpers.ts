@@ -35,7 +35,7 @@ import type { ErrorRequestHandler, Request, Response, NextFunction, RequestHandl
 import logger from "../log.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
-import { asString, isObject, readProp } from "../narrow.js";
+import { isObject, readProp } from "../narrow.js";
 import type { SourceKind } from "../storage/docspaceFilesApi.js";
 import { UpstreamShapeError } from "../storage/upstreamShape.js";
 
@@ -261,34 +261,6 @@ function errorDetails(err: unknown): string {
   } catch {
     return String(err);
   }
-}
-
-/**
- * The HTTP status of a refusal the engine reports as a value, `{ success: false, error }`:
- * `code` says why when the library sets it, and the wording of the message is the fallback for
- * a library that predates the field (Bugs 84307-84311).
- */
-export function refusalStatus(error: unknown): number {
-  const code = readProp(error, "code");
-  if (code === "not_found") return 404;
-  if (code === "conflict") return 409;
-  if (code !== undefined) return 400;
-  const message = asString(readProp(error, "message")) ?? "";
-  if (/not found/i.test(message)) return 404;
-  if (/already exists/i.test(message)) return 409;
-  return 400;
-}
-
-/**
- * Sends what an engine mutation answered, with the status that says whether it was done. The
- * engine reports a refusal as a value instead of throwing, and `res.json(result)` would send
- * it with 200. The body is the engine's result either way, so a client reads a refusal the
- * way it reads a success. A bulk refusal (`errors`, one per entry) is a 400.
- */
-export function sendEngineResult(res: Response, result: unknown): void {
-  const refused = isObject(result) && result["success"] === false;
-  const status = !refused ? 200 : "error" in result ? refusalStatus(result["error"]) : 400;
-  res.status(status).json(result);
 }
 
 /**

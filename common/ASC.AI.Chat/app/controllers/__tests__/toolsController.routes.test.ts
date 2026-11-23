@@ -144,26 +144,20 @@ describe.each([
     expect(engineCall()).toHaveBeenCalledWith("My CRM (prod)!", { url: URL_A }, undefined);
   });
 
-  it.each([
-    ["invalid", 400],
-    ["not_found", 404],
-    ["conflict", 409],
-  ] as const)(
-    "sends a refusal of the engine with code %s as %i, body unchanged",
-    async (code, status) => {
-      const refusal = {
-        success: false as const,
-        error: { field: "url" as const, message: "url is invalid", code },
-      };
-      engineCall().mockResolvedValue(refusal as never);
+  // DEFECT ctl-1: a refusal of the engine ({ success: false, error }) is sent with 200 — expected a 4xx mapped from error.code, as sendMutation in promptsController does ([ts-ai-failure-paths.md §2])
+  it("sends a refusal of the engine with 200", async () => {
+    const refusal = {
+      success: false as const,
+      error: { field: "url" as const, message: "url is invalid", code: "invalid" as const },
+    };
+    engineCall().mockResolvedValue(refusal as never);
 
-      const reply = await send(handler, { name: "crm", config: { url: "nope" } });
+    const reply = await send(handler, { name: "crm", config: { url: "nope" } });
 
-      expect(reply.status).toBe(status);
-      expect(reply.body).toEqual(refusal);
-      expect(responseViolations(operationId, status, reply.body)).toEqual([]);
-    },
-  );
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual(refusal);
+    expect(responseViolations(operationId, 200, reply.body)).toEqual([]);
+  });
 
   it("pins an entry named after a system server to the system config, whatever is sent", async () => {
     engineCall().mockResolvedValue({ success: true });
@@ -796,7 +790,8 @@ describe("toolsController.replaceAllCustomServers", () => {
     expect(upstream.seen.map((r) => r.path)).toEqual(["/api/2.0/files/folder/42"]);
   });
 
-  it("sends a refusal of the engine with 400, body unchanged", async () => {
+  // DEFECT ctl-5: a refusal of the engine ({ success: false, errors }) is sent with 200 — expected a 4xx ([ts-ai-failure-paths.md §2])
+  it("sends a refusal of the engine with 200", async () => {
     const refusal = {
       success: false as const,
       errors: [{ name: "crm", error: { field: "url" as const, message: "url is invalid" } }],
@@ -805,9 +800,9 @@ describe("toolsController.replaceAllCustomServers", () => {
 
     const reply = await send(handler, { map: { crm: { url: "nope" } } });
 
-    expect(reply.status).toBe(400);
+    expect(reply.status).toBe(200);
     expect(reply.body).toEqual(refusal);
-    expect(responseViolations(operationId, 400, reply.body)).toEqual([]);
+    expect(responseViolations(operationId, 200, reply.body)).toEqual([]);
   });
 
   it.each([

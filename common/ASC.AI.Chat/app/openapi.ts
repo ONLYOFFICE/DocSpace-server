@@ -704,16 +704,12 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "`actionType` is missing or unknown.",
     "404": "`entityId` names a room that does not exist.",
   },
-  aiAssignmentsAssign: {
-    "400": "`actionType` or `profileId` is missing, or the engine refused the assignment.",
-    "404": "The engine refused the assignment because what it names does not exist.",
-    "409": "The engine refused the assignment because it clashes with a stored one.",
-  },
+  aiAssignmentsAssign: { "400": "`actionType` or `profileId` is missing." },
   aiAssignmentsUnassign: { "400": "`actionType` is missing." },
   aiAssignmentsBulkAssign: {
     "400":
-      "The body is not a map of action type to profile ID, one of its keys is not a known " +
-      "action type, or the engine refused an entry (`errors` names each).",
+      "The body is not a map of action type to profile ID, or one of its keys is not a " +
+      "known action type.",
   },
   aiAssignmentsGetAssignment: { "400": "`actionType` is missing." },
   aiAssignmentsGetAllAssignments: { "404": true },
@@ -987,24 +983,17 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // Tools - every operation that names a custom server validates the name,
   // and every one that is room-scoped resolves the room.
   aiToolsAddCustomServer: {
-    "400":
-      "The server name is missing or is not routable, or the engine refused the configuration.",
-    "404": "`entityId` names a room that does not exist, or the engine found nothing to change.",
-    "409": "The engine refused the server because one with this name is already registered.",
+    "400": "The server name is missing or is not routable.",
+    "404": true,
   },
   aiToolsUpdateCustomServer: {
-    "400":
-      "The server name is missing or is not routable, or the engine refused the configuration.",
-    "404":
-      "`entityId` names a room that does not exist, or the engine found no server of this name.",
-    "409": "The engine refused the change because it clashes with another server.",
+    "400": "The server name is missing or is not routable.",
+    "404": true,
   },
   aiToolsRemoveCustomServer: { "400": "The server name is missing.", "404": true },
   aiToolsGetCustomServer: { "400": "The server name is missing." },
   aiToolsReplaceAllCustomServers: {
-    "400":
-      "The body is not a map of server name to configuration, a name is not routable, or the " +
-      "engine refused an entry (`errors` names each).",
+    "400": "The body is not a map of server name to configuration, or a name is not routable.",
     "404": true,
   },
   aiToolsSetDisabled: {
@@ -1830,11 +1819,6 @@ const IMPORT_REFUSAL_SCHEMA: Json = { $ref: "#/components/schemas/AiImportResult
 const PROFILE_OR_PLAIN_ERROR_SCHEMA: Json = {
   anyOf: [{ $ref: "#/components/schemas/AiProfileMutationResult" }, ERROR_RESPONSE_REF],
 };
-const refusalOrPlain = (component: string): Json => ({
-  anyOf: [{ $ref: `#/components/schemas/${component}` }, ERROR_RESPONSE_REF],
-});
-const TOOLS_REFUSAL: Json = refusalOrPlain("AiToolsMutationResult");
-const ASSIGNMENT_REFUSAL: Json = refusalOrPlain("AiAssignmentMutationResult");
 const WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA: Json = {
   anyOf: [{ $ref: "#/components/schemas/AiWebSearchMutationResult" }, ERROR_RESPONSE_REF],
 };
@@ -1907,15 +1891,6 @@ const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, J
   },
   aiPromptsImportBundle: { "400": IMPORT_REFUSAL_SCHEMA, "409": IMPORT_REFUSAL_SCHEMA },
   aiWebSearchConfigure: { "400": WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA },
-  aiToolsAddCustomServer: { "400": TOOLS_REFUSAL, "404": TOOLS_REFUSAL, "409": TOOLS_REFUSAL },
-  aiToolsUpdateCustomServer: { "400": TOOLS_REFUSAL, "404": TOOLS_REFUSAL, "409": TOOLS_REFUSAL },
-  aiToolsReplaceAllCustomServers: { "400": refusalOrPlain("AiToolsBulkResult") },
-  aiAssignmentsAssign: {
-    "400": ASSIGNMENT_REFUSAL,
-    "404": ASSIGNMENT_REFUSAL,
-    "409": ASSIGNMENT_REFUSAL,
-  },
-  aiAssignmentsBulkAssign: { "400": refusalOrPlain("AiBulkAssignmentResult") },
   aiMetaGenerate: MODEL_CALL_ERRORS,
   aiMetaFill: MODEL_CALL_ERRORS,
   aiSkillsGenerate: MODEL_CALL_ERRORS,

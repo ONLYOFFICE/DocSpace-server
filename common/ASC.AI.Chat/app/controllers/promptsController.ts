@@ -43,7 +43,7 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import type { Response } from "express";
 import { storage } from "../storage/index.js";
-import { asyncHandler, refusalStatus, sendEngineResult, unpackPositional } from "./_helpers.js";
+import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject, readProp } from "../narrow.js";
 
 const engine = new PromptsEngine({ storage });
@@ -53,6 +53,22 @@ const engine = new PromptsEngine({ storage });
 // status is the controller's to pick (Bugs 84307-84311): `code` says why
 // when the library sets it, and the message wording is the fallback for a
 // library that predates the field.
+type RefusalError = ImportError["error"];
+
+function refusalStatus(error: RefusalError): number {
+  const code = readProp(error, "code");
+  if (code === "not_found") return 404;
+  if (code === "conflict") return 409;
+  if (code !== undefined) return 400;
+  if (/not found/i.test(error.message)) return 404;
+  if (/already exists/i.test(error.message)) return 409;
+  return 400;
+}
+
+function sendMutation(res: Response, result: PromptMutationResult | FolderMutationResult): void {
+  res.status(result.success ? 200 : refusalStatus(result.error)).json(result);
+}
+
 // An import answers 409 only when every refusal is a clash with the
 // caller's library, and 400 for anything else (a bad version, a dangling
 // folder reference, an empty entry), so a client offers "merge anyway" only
@@ -242,7 +258,7 @@ export const promptsController = {
       text: body["text"],
       folderId: body["folderId"],
     };
-    sendEngineResult(res, await engine.create(input));
+    sendMutation(res, await engine.create(input));
   }),
 
   update: asyncHandler(async (req, res) => {
@@ -272,7 +288,7 @@ export const promptsController = {
     if (updates["name"] !== undefined) patch.name = updates["name"];
     if (updates["text"] !== undefined) patch.text = updates["text"];
     if (updates["folderId"] !== undefined) patch.folderId = updates["folderId"];
-    sendEngineResult(res, await engine.update(args.id, patch));
+    sendMutation(res, await engine.update(args.id, patch));
   }),
 
   move: asyncHandler(async (req, res) => {
@@ -286,7 +302,7 @@ export const promptsController = {
       return;
     }
     const folderId = args.folderId === undefined ? null : args.folderId;
-    sendEngineResult(res, await engine.move(args.id, folderId));
+    sendMutation(res, await engine.move(args.id, folderId));
   }),
 
   delete: asyncHandler(async (req, res) => {
@@ -317,7 +333,7 @@ export const promptsController = {
       shapeRefusal(res, "name", "name is required and must be a string");
       return;
     }
-    sendEngineResult(res, await engine.createFolder(args.name));
+    sendMutation(res, await engine.createFolder(args.name));
   }),
 
   renameFolder: asyncHandler(async (req, res) => {
@@ -330,7 +346,7 @@ export const promptsController = {
       shapeRefusal(res, "name", "name is required and must be a string");
       return;
     }
-    sendEngineResult(res, await engine.renameFolder(args.id, args.name));
+    sendMutation(res, await engine.renameFolder(args.id, args.name));
   }),
 
   deleteFolder: asyncHandler(async (req, res) => {

@@ -271,7 +271,8 @@ describe.each([
     expect(engineCall()).toHaveBeenCalledTimes(1);
   });
 
-  it("answers a refusal of the engine with 400, body unchanged", async () => {
+  // DEFECT data-5: the engine's refusal `{ success: false, error }` is sent with 200 by `res.json(result)` — expected 400 (or 404/409 by error.code) as sendMutation does for prompts (ts-ai-failure-paths.md §2)
+  it("answers a refusal of the engine with 200", async () => {
     portalConfig(false);
     const refusal = {
       success: false as const,
@@ -281,7 +282,7 @@ describe.each([
 
     const reply = await invoke(profilesController[method], { body });
 
-    expect(reply.status).toBe(400);
+    expect(reply.status).toBe(200);
     expect(reply.body).toEqual(refusal);
     expect(published(operationId, reply)).toEqual([]);
   });

@@ -44,7 +44,7 @@ import {
 import { customToolsSource, resolveCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { systemToolsSource, getSystemServerConfig } from "../tools/systemTools.js";
-import { asyncHandler, sendEngineResult, unpackPositional } from "./_helpers.js";
+import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 import { clientFault } from "../httpErrors.js";
@@ -196,7 +196,7 @@ export const toolsController = {
       await resolveConfig(name, args.config as McpServerConfig | undefined),
       args.entityId as string | undefined,
     );
-    sendEngineResult(res, result);
+    res.json(result);
   }),
 
   updateCustomServer: asyncHandler(async (req, res) => {
@@ -209,7 +209,7 @@ export const toolsController = {
       await resolveConfig(name, args.config as McpServerConfig | undefined),
       args.entityId as string | undefined,
     );
-    sendEngineResult(res, result);
+    res.json(result);
   }),
 
   removeCustomServer: asyncHandler(async (req, res) => {
@@ -321,7 +321,7 @@ export const toolsController = {
       normalized,
       args.entityId as string | undefined,
     );
-    sendEngineResult(res, result);
+    res.json(result);
   }),
 
   setDisabled: asyncHandler(async (req, res) => {
