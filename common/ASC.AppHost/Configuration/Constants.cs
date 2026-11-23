@@ -33,6 +33,16 @@
 
 namespace ASC.AppHost.Configuration;
 
+// The ports below are those a development run binds. A test run binds free ones in their place: the port a listener
+// of the run uses is HostPorts.Of(<the constant>), which a host-side address a test profile builds goes through - the
+// listener's own endpoint and every address of it the others are given. A port inside a container (the right-hand
+// side of a published port, RESTY_HTTP_PORT, an address on the container network) stays the constant, and so does a
+// proxied endpoint's port (MySQL, the forms PostgreSQL, the service containers of the docker mode): under the test
+// fixture the testing builder replaces it with one of its own, while an AppHost started on its own with a test
+// profile binds the constant. The resources no test
+// profile starts - SsoAuth, the document agent, WebDav, the DocSpace MCP server, the Playwright UIs - listen on their
+// constants whatever the run. A test run in the docker mode (Docker=true) does not take free ports: HostPorts.Of gives
+// the constants (Program.cs), and only the testing builder's proxied ports differ.
 public static class Constants
 {
     public const int AppHostPort = 8092;
@@ -64,6 +74,7 @@ public static class Constants
     public const int NotifyPort = 5005;
     public const int StudioNotifyPort = 5006;
     public const int OpensearchPort = 9200;
+    public const int MySqlPort = 33306;
     public const int DocSpaceMcpPort = 8000;
     public const int PlaywrightUiPort = 3333;
     public const int E2ETestsUiPort = 3334;
@@ -109,13 +120,15 @@ public static class Constants
 
     // Where the webhook tests run the WireMock they subscribe to, in the test process: on a loopback alias the
     // integration-test blacklist leaves open (ConnectionStringManager.AddBaseConfig) while 127.0.0.1 stays blocked.
+    // The port is HostPorts.Of(WebhookReceiverPort), like every other one of a test run.
     public const int WebhookReceiverPort = 18089;
     public const string WebhookReceiverHost = "127.0.0.2";
 
     // Where the integration-test-billing profile points the billing, accounting and docscloud services
     // (ConnectionStringManager.UsePaymentServices): one WireMock the billing tests run in the test process, started
     // before the stack, since the services ask billing as soon as a portal is registered. Each path is the base URL
-    // that service's client joins its routes to, so the three stay apart on the one server.
+    // that service's client joins its routes to, so the three stay apart on the one server. The port is
+    // HostPorts.Of(PaymentStubPort), like every other one of a test run.
     public const string PaymentStubHost = "127.0.0.1";
     public const int PaymentStubPort = 18090;
     public const string PaymentStubBillingPath = "/billing/api";
