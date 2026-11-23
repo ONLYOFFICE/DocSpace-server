@@ -57,7 +57,8 @@ public class DocsCloudController(
     CommonLinkUtility commonLinkUtility,
     IEventBus eventBus,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    ILogger<DocsCloudController> logger)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -65,14 +66,16 @@ public class DocsCloudController(
     /// Docs Connect server to the Content Security Policy settings. To check the subscriptions and the tariff state
     /// first, use `GET api/2.0/portal/tariff`. Requires the EditPortalSettings permission, which the portal owner and
     /// DocSpace admins have. Other callers get 403. The call changes data, and a repeated call returns 400. It
-    /// returns `true` if the trial is granted. It returns `false` if the billing service declines it, for example
-    /// after an earlier trial. Then nothing changes. It also returns `false` if the billing service does not answer,
-    /// or the portal cannot read its answer. Then the trial may be granted. So check `GET api/2.0/portal/tariff` with
-    /// `refresh=true` before you call again. The call never buys a paid plan. To move a paid Docs Connect
-    /// subscription to Docs Connect Dev Pack, use `POST api/2.0/settings/docscloud/switchtodevpack`. The call returns
-    /// 400 if the portal already has a Docs Connect trial, Docs Connect, or Docs Connect Dev Pack. It returns 402 if
-    /// the tariff is delayed or not paid. It returns 403 if the billing service is not configured. If the
-    /// installation has no Docs Connect trial quota, the call returns 404. After a granted trial, the call returns
+    /// returns `true` if the trial is granted. It also returns `true` if the portal cannot get the server from Docs
+    /// Connect. Then the Content Security Policy stays unchanged. To check that Docs Connect is active, use
+    /// `GET api/2.0/settings/docscloud/tenant`. The call returns `false` if the billing service declines the trial,
+    /// for example after an earlier trial. Then nothing changes. It also returns `false` if the billing service does
+    /// not answer, or the portal cannot read its answer. Then the trial may be granted. So check
+    /// `GET api/2.0/portal/tariff` with `refresh=true` before you call again. The call never buys a paid plan. To move
+    /// a paid Docs Connect subscription to Docs Connect Dev Pack, use `POST api/2.0/settings/docscloud/switchtodevpack`.
+    /// The call returns 400 if the portal already has a Docs Connect trial, Docs Connect, or Docs Connect Dev Pack. It
+    /// returns 402 if the tariff is delayed or not paid. It returns 403 if the billing service is not configured. If
+    /// the installation has no Docs Connect trial quota, the call returns 404. After a granted trial, the call returns
     /// 403 if the server address makes the Content Security Policy header too long. The trial then stays granted.
     /// </remarks>
     /// <summary>
@@ -131,9 +134,14 @@ public class DocsCloudController(
 
         if (result)
         {
-            var docsCloudTenant = await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), true);
+            // The trial is granted at this point, so a Docs Connect tenant that cannot be read must not turn the
+            // answer into an error: the client would show the trial as not started, and a repeated call gets 400.
+            var docsCloudTenant = await ReadTrialTenantAsync(tenant.Id);
 
-            await ChangeCspSettingsAsync(docsCloudTenant);
+            if (docsCloudTenant != null)
+            {
+                await ChangeCspSettingsAsync(tenant.Id, docsCloudTenant);
+            }
         }
 
         return result;
@@ -527,10 +535,36 @@ public class DocsCloudController(
         return (await docsCloudClient.GetTenantUsageAsync(await GetPortalIdAsync(), refresh))?.Map();
     }
 
-    private async Task ChangeCspSettingsAsync(DocsCloudTenant docsCloudTenant)
+    // Returns null when Docs Connect has no tenant for the portal or cannot be asked: the trial itself is already granted.
+    private async Task<DocsCloudTenant> ReadTrialTenantAsync(int tenantId)
+    {
+        DocsCloudTenant docsCloudTenant;
+
+        try
+        {
+            docsCloudTenant = await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), true);
+        }
+        catch (Exception e) when (e is DocsCloudException or PaymentServiceContractException)
+        {
+            logger.WarningDocsCloudTrialTenantNotRead(tenantId, e);
+
+            return null;
+        }
+
+        if (docsCloudTenant == null)
+        {
+            logger.WarningDocsCloudTrialTenantNotFound(tenantId);
+        }
+
+        return docsCloudTenant;
+    }
+
+    private async Task ChangeCspSettingsAsync(int tenantId, DocsCloudTenant docsCloudTenant)
     {
         if (docsCloudTenant.IsDefault() || !Uri.IsWellFormedUriString(docsCloudTenant.Address, UriKind.Absolute))
         {
+            logger.WarningDocsCloudTenantAddressInvalid(tenantId, docsCloudTenant.Address);
+
             return;
         }
 

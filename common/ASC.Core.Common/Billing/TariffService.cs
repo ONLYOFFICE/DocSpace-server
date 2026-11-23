@@ -552,6 +552,8 @@ public class TariffService(
     {
         if (!billingClient.Configured)
         {
+            logger.WarningDocsCloudTrialBillingNotConfigured(tenantId);
+
             return false;
         }
 
@@ -561,7 +563,12 @@ public class TariffService(
         {
             portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            var result = await billingClient.GetDocsCloudTrialAsync(portalId, customer);
+            var (result, answer) = await billingClient.GetDocsCloudTrialAsync(portalId, customer);
+
+            if (!result)
+            {
+                logger.WarningDocsCloudTrialDeclined(tenantId, answer);
+            }
 
             await ClearCacheAsync(tenantId);
 
@@ -573,6 +580,8 @@ public class TariffService(
         {
             // The answer could not be read, so the trial may have been granted all the same: the cached tariff and
             // DocsCloud tenant are dropped as after any answer, or they would hide the new quota until they expire.
+            logger.WarningDocsCloudTrialAnswerUnreadable(tenantId);
+
             LogError(error, tenantId.ToString());
 
             await ClearCacheAsync(tenantId);
