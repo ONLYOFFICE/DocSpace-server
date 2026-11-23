@@ -156,6 +156,8 @@ public sealed class TestRunIsolationTests : IDisposable
     [Fact]
     public void HostPorts_InATestRun_AreFreeOnesKeptAndReservedForTheRun()
     {
+        Assert.SkipWhen(AspireAppFixture.IsDocker("integration-test"), "A run in the docker mode keeps the fixed ports.");
+
         // Act
         var webApi = ASC.AppHost.Configuration.HostPorts.Of(ASC.AppHost.Configuration.Constants.WebApiPort);
         var router = ASC.AppHost.Configuration.HostPorts.Of(ASC.AppHost.Configuration.Constants.AppHostPort);
@@ -224,6 +226,46 @@ public sealed class TestRunIsolationTests : IDisposable
             File.SetAttributes(path, FileAttributes.Normal);
             File.Delete(path);
         }
+    }
+
+    [Fact]
+    public void HostPorts_ALockFileWhoseDeleteIsPending_IsHeldNotAFailure()
+    {
+        Assert.SkipUnless(OperatingSystem.IsWindows(), "A pending delete is a Windows state.");
+
+        // Arrange: another run's lock file, closed by it (DeleteOnClose) while an indexer or antivirus still has a handle
+        // on its attributes - the file stays, its delete pending, and every open of it is refused
+        var (port, held) = HoldReservationOfAnUnreservedPort();
+        var path = ASC.AppHost.Configuration.HostPorts.GetReservationPath(port);
+        bool reserved;
+
+        using (var attributes = NativeMethods.OpenAttributesOnly(path))
+        {
+            attributes.IsInvalid.Should().BeFalse();
+            held.Dispose();
+
+            // Act
+            reserved = ASC.AppHost.Configuration.HostPorts.TryReserve(port);
+        }
+
+        // Assert: skipped like a held port, not an error that would stop the caller
+        reserved.Should().BeFalse();
+    }
+
+    private static class NativeMethods
+    {
+        private const uint FileReadAttributes = 0x80;
+        private const uint FileShareAll = 0x7;
+        private const uint OpenExisting = 3;
+
+        public static Microsoft.Win32.SafeHandles.SafeFileHandle OpenAttributesOnly(string path)
+        {
+            return CreateFileW(path, FileReadAttributes, FileShareAll, IntPtr.Zero, OpenExisting, 0, IntPtr.Zero);
+        }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern Microsoft.Win32.SafeHandles.SafeFileHandle CreateFileW(string name, uint access, uint share, IntPtr securityAttributes,
+            uint disposition, uint flags, IntPtr template);
     }
 
     private static (int Port, FileStream Held) HoldReservationOfAnUnreservedPort()

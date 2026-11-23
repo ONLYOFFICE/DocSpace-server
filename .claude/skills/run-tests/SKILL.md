@@ -46,11 +46,15 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filt
 - Within one checkout, run suites one after another: two runs of the *same* suite share its
   storage, and the first to finish deletes it; two different suites share the log files, so
   `SocketContractTests` of one also counts the socket refusals of the other.
-- This holds for the default, non-docker runs. A run with the environment variable `Docker=true`
-  (the fixture hands it to the AppHost, whose launch profile it overrides) takes no free ports: its
-  listeners use the fixed ones the containers of the docker mode publish (only MySQL and the forms
-  PostgreSQL get ports from the testing builder), so it cannot run next to a development stack or
-  another test run. A `Docker` variable set on the machine for another tool switches it on too.
+- This holds for the default, non-docker runs. The docker mode of a test run is switched on by the
+  environment variable `Docker=true` of the test process, or, when that is not set, by
+  `"Docker": "true"` in the suite's profile in `common/ASC.AppHost/Properties/launchSettings.json`
+  (`AspireHostFixture.IsDocker`); the fixture hands the value it decided by to the AppHost. A `Docker`
+  variable set on the machine for another tool switches it on too.
+  Such a run takes no free ports: the socket, the router, identity and the other unproxied listeners
+  keep their constants; the proxied endpoints - MySQL, the forms PostgreSQL and the service
+  containers of the docker mode - get ports from the testing builder. It cannot run next to a
+  development stack or another test run.
 - Every test registers its own portal (via the `Origin` header); the DB is NOT cleaned between
   tests — test classes run in parallel and must not depend on each other's data.
 
@@ -76,8 +80,12 @@ writes there, NOT to the regular `../Logs/`; a run from a git worktree writes to
 ## Regression or flake
 
 Compare against a baseline using `git stash push --include-untracked` in the same working
-tree, then `git stash pop`. A git worktree at the base commit works too, and can run at the same
-time (its own ports, storage and logs), when it has what a worktree run needs: `buildtools` found
-from it, the `common/resources/DocStore` submodule initialised, and the Files templates built from it
-(`products/ASC.Files/Server/DocStore`) — without them file creation fails and gives false reds. If the list of failures matches the baseline name-by-name,
-it is a flake, not a regression.
+tree, then `git stash pop`. A git worktree at the base commit works too, when it has what a
+worktree run needs: `buildtools` found from it, the `common/resources/DocStore` submodule
+initialised, and the Files templates built from it (`products/ASC.Files/Server/DocStore`) — without
+them file creation fails and gives false reds. Run it at the same time as another run only when its
+commit already has the per-run ports, storage and logs (`HostPorts`, `AppPaths.GetTestStorageRoot`
+per checkout). An older commit binds the fixed ports, logs to the shared `Logs/test`, and deletes the
+whole `Data/test` of its base when it ends, the storage of a run next to it included: run such a
+baseline after the other run, not alongside it. If the list of failures matches the baseline
+name-by-name, it is a flake, not a regression.

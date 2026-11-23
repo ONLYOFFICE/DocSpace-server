@@ -137,13 +137,51 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     protected virtual bool Standalone => true;
 
     /// <summary>
-    /// Whether the services run as containers (the AppHost's docker mode): the <c>Docker</c> environment variable of
-    /// the test process set to <c>true</c>. The AppHost gets this value as an argument, which wins over the launch
-    /// profile's, so the fixture and the AppHost agree on it - and so on whether the run takes free ports
-    /// (<see cref="HostPorts.UseFreePorts"/>) or the fixed ones, which the containers of the docker mode publish.
+    /// Whether this suite's services run as containers (the AppHost's docker mode): see <see cref="IsDocker"/>.
     /// </summary>
-    protected static bool Docker =>
-        string.Equals(Environment.GetEnvironmentVariable("Docker"), "true", StringComparison.OrdinalIgnoreCase);
+    protected bool Docker => IsDocker(LaunchProfile);
+
+    /// <summary>
+    /// Whether a run of <paramref name="launchProfile"/> is in the docker mode: the <c>Docker</c> environment variable
+    /// of the test process when it is set, otherwise the <c>Docker</c> value of the profile's
+    /// <c>environmentVariables</c> in the AppHost's <c>launchSettings.json</c>, otherwise not - the order in which the
+    /// AppHost would read them, where the testing builder adds a profile's values only for keys nothing else set. The
+    /// fixture decides it before the AppHost starts, because it decides whether the run takes free ports
+    /// (<see cref="HostPorts.UseFreePorts"/>) or the fixed ones, and hands the AppHost the value it decided by.
+    /// </summary>
+    public static bool IsDocker(string launchProfile)
+    {
+        var value = Environment.GetEnvironmentVariable("Docker");
+
+        if (string.IsNullOrEmpty(value))
+        {
+            value = ReadLaunchProfileVariable(launchProfile, "Docker");
+        }
+
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // For the AppHost itself Aspire generates ProjectPath as the project directory.
+    private static string? ReadLaunchProfileVariable(string launchProfile, string name)
+    {
+        var path = Path.Combine(Projects.ASC_AppHost.ProjectPath, "Properties", "launchSettings.json");
+
+        if (!File.Exists(path))
+        {
+            return null;
+        }
+
+        using var document = JsonDocument.Parse(File.ReadAllText(path),
+            new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+
+        return document.RootElement.TryGetProperty("profiles", out var profiles)
+               && profiles.TryGetProperty(launchProfile, out var profile)
+               && profile.TryGetProperty("environmentVariables", out var variables)
+               && variables.TryGetProperty(name, out var value)
+               && value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
+    }
 
     /// <summary>Builds the suite's own client bundle for a freshly registered portal.</summary>
     protected abstract TClients CreateClients(PortalContext context);
@@ -200,7 +238,9 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // endpoints get one from DCP, so a run of another checkout or a development stack can run at the same time.
         // The AppHost runs in this process and reads the same table. Not in the docker mode, whose containers publish
         // their fixed ports: the AppHost is handed this decision (Docker below), so both sides read the same ports.
-        if (!Docker)
+        var docker = Docker;
+
+        if (!docker)
         {
             HostPorts.UseFreePorts();
         }
@@ -213,7 +253,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // is scoped to its own freshly registered portal; see Standalone for the SaaS stack.
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
             [$"DOTNET_LAUNCH_PROFILE={LaunchProfile}", "SKIP_CLIENT=true", $"APP_HOSTING_STANDALONE={(Standalone ? "true" : "false")}",
-             $"Docker={(Docker ? "true" : "false")}"]);
+             $"Docker={(docker ? "true" : "false")}"]);
 
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";

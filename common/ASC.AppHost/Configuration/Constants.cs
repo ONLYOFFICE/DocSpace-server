@@ -37,8 +37,9 @@ namespace ASC.AppHost.Configuration;
 // of the run uses is HostPorts.Of(<the constant>), which a host-side address a test profile builds goes through - the
 // listener's own endpoint and every address of it the others are given. A port inside a container (the right-hand
 // side of a published port, RESTY_HTTP_PORT, an address on the container network) stays the constant, and so does a
-// proxied endpoint's port (MySQL, the forms PostgreSQL): under the test fixture the testing builder replaces it with
-// one of its own, while an AppHost started on its own with a test profile binds the constant. The resources no test
+// proxied endpoint's port (MySQL, the forms PostgreSQL, the service containers of the docker mode): under the test
+// fixture the testing builder replaces it with one of its own, while an AppHost started on its own with a test
+// profile binds the constant. The resources no test
 // profile starts - SsoAuth, the document agent, WebDav, the DocSpace MCP server, the Playwright UIs - listen on their
 // constants whatever the run. A test run in the docker mode (Docker=true) does not take free ports: HostPorts.Of gives
 // the constants (Program.cs), and only the testing builder's proxied ports differ.

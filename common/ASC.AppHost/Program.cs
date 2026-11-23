@@ -49,8 +49,9 @@ var isIntegrationTest = launchProfile is "integration-test" or "notify-test" or 
 // A test run binds free ports instead of the fixed ones of a development stack, so runs from checkouts on different
 // branches, and a test run next to a development stack, do not compete for them (HostPorts). Before anything reads a
 // port; the test fixture has already switched them on in its own process, which this AppHost runs in. Not in the
-// docker mode: its service, socket and AI chat containers publish their fixed ports, and the fixture passes the same
-// Docker value it decided by.
+// docker mode: the socket and the other unproxied listeners keep their constants there (the testing builder still
+// re-ports the proxied ones, the service containers included), and the fixture passes the same Docker value it
+// decided by.
 if (isIntegrationTest && !isDocker)
 {
     HostPorts.UseFreePorts();
@@ -59,7 +60,7 @@ else if (isDocker && HostPorts.FreePorts)
 {
     throw new InvalidOperationException(
         "Docker=true keeps the fixed ports, but this process was switched to free ones before the AppHost started: " +
-        "pass the same Docker value to both (AspireHostFixture.Docker).");
+        "pass the same Docker value to both (AspireHostFixture.IsDocker).");
 }
 
 // A test run keeps no editing state of the editors across runs, nor shares the development stack's: its database is
