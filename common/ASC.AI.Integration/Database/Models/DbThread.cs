@@ -44,9 +44,12 @@ public class DbThread : BaseEntity
 
     public Guid? ProfileId { get; init; }
     public int? EntryId { get; init; }
+    public int? ArtifactsFolderId { get; init; }
+    public int? AttachmentsFolderId { get; init; }
     public Guid CreatedBy { get; init; }
     public DateTime LastEditDate { get; init; }
     public DateTime CreatedAt { get; init; }
+    public DateTime? DeletedOn { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
 
@@ -104,6 +107,14 @@ public static class DbThreadExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("int");
 
+            entity.Property(e => e.ArtifactsFolderId)
+                .HasColumnName("artifacts_folder_id")
+                .HasColumnType("int");
+
+            entity.Property(e => e.AttachmentsFolderId)
+                .HasColumnName("attachments_folder_id")
+                .HasColumnType("int");
+
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")
                 .HasColumnType("char(36)")
@@ -118,6 +129,10 @@ public static class DbThreadExtension
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
 
+            entity.Property(e => e.DeletedOn)
+                .HasColumnName("deleted_on")
+                .HasColumnType("datetime");
+
             entity.HasIndex(e => new { e.TenantId, e.LastEditDate })
                 .HasDatabaseName("IX_tenant_id_last_edit_date");
 
@@ -126,6 +141,12 @@ public static class DbThreadExtension
 
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.EntryId, e.LastEditDate, e.Id })
                 .HasDatabaseName("IX_tenant_id_created_by_entry_id_last_edit_date_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("IX_tenant_id_entry_id");
+
+            entity.HasIndex(e => new { e.DeletedOn, e.Id })
+                .HasDatabaseName("IX_deleted_on_id");
         });
     }
 
@@ -159,6 +180,14 @@ public static class DbThreadExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("integer");
 
+            entity.Property(e => e.ArtifactsFolderId)
+                .HasColumnName("artifacts_folder_id")
+                .HasColumnType("integer");
+
+            entity.Property(e => e.AttachmentsFolderId)
+                .HasColumnName("attachments_folder_id")
+                .HasColumnType("integer");
+
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")
                 .HasColumnType("uuid");
@@ -171,6 +200,10 @@ public static class DbThreadExtension
                 .HasColumnName("created_at")
                 .HasColumnType("timestamp without time zone");
 
+            entity.Property(e => e.DeletedOn)
+                .HasColumnName("deleted_on")
+                .HasColumnType("timestamp without time zone");
+
             entity.HasIndex(e => new { e.TenantId, e.LastEditDate })
                 .HasDatabaseName("IX_ai_integration_threads_tenant_id_last_edit_date");
 
@@ -179,6 +212,12 @@ public static class DbThreadExtension
 
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.EntryId, e.LastEditDate, e.Id })
                 .HasDatabaseName("IX_ai_integration_threads_created_by_entry_id_last_edit_date");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("IX_ai_integration_threads_tenant_id_entry_id");
+
+            entity.HasIndex(e => new { e.DeletedOn, e.Id })
+                .HasDatabaseName("IX_ai_integration_threads_deleted_on_id");
         });
     }
 }

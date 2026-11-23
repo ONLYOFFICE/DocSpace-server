@@ -27,7 +27,7 @@ helper). The legacy `common/Tests/ASC.Webhooks.Tests` project was deleted. The d
 MySQL of the integration-test profile for states no API call produces (`ExecuteSqlAsync`); the profile retries
 3 times, 500 ms apart, with a 12 s request timeout (`common/ASC.AppHost/Configuration/Constants.cs`
 `WebhookTestRetryCount`, `WebhookTestRetryInterval`, `WebhookTestRequestTimeout`), and narrows the blacklist's
-loopback range to `127.0.0.1/32` so that the receiver on `127.0.0.2:18089` is reachable (`WebhookTestBlacklist`,
+loopback range to `127.0.0.1/32` so that the receiver on `127.0.0.2` (on the run's free port for `WebhookReceiverPort`, `HostPorts`) is reachable (`WebhookTestBlacklist`,
 checked against the default by `WebhookTestProfileTests`).
 
 ## Requirement rows

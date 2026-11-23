@@ -119,18 +119,21 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Audited (scenario) | `AI/Server/Service/AssignmentsStorageService.cs` (`AiProfileAssigned`, `AiProfileUnassigned`) | CODE-ONLY |
 | **The AI rooms section** | | |
 | Created by owner / admin / Room admin, User 403; section root (scenario "Section listing") | `Hub/AiHubRootTests.cs:48,63,124`; `Hub/AiProjectRoomTests.cs:46,63,77,87,101,132,164` | TEST-CONFIRMED [run: PASS] |
-| Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,69,80,93,106` | TEST-CONFIRMED [run: PASS] |
+| Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,82,93,106,119`; a private project 400: `Hub/AiHubRoomSettingsTests.cs:69` (not run yet) | TEST-CONFIRMED [run: PASS] |
 | Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED [run: PASS] |
 | Knowledge room needs vectorization 403 | `Security:1424,1443`; `AI/Core/Settings` | CODE-ONLY |
 | **Members of the AI rooms** | | |
-| Guest not in a project (scenario); User joins through a link as Member | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
-| Member reads, manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,95,124`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
+| Content creator reads, Room manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
+| DocSpace admin outside the project reads its model, sources and skills (scenario) | `Hub/AiRoomOutsiderAccessTests.cs:55` | TEST-CONFIRMED (not run yet) |
 | Role sets of Instructions and Knowledge rooms | `Security` (`GetAccesses`); `products/ASC.Files/Core/Helpers` | CODE-ONLY |
+| **Users only in an AI project** | | |
+| Guest not in a project (scenario); User joins through a link as Content creator | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
+| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED (not run yet) |
 | **The model of an AI project** | | |
-| Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,111,185` | TEST-CONFIRMED [run: PASS] |
-| Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:124,141,155,168` | TEST-CONFIRMED [run: PASS] |
+| Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,93,167` | TEST-CONFIRMED [run: PASS] |
+| Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:106,123,137,150` | TEST-CONFIRMED [run: PASS] |
 | Image profile refused (scenario) | `T/ChatTests/ChatProjectModelTests.cs:238,255` | TEST-CONFIRMED [run: PASS] |
-| Member reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60` | TEST-CONFIRMED [run: PASS] (`ChatProjectModelTests.GetModel_ProjectMember_…` fails later, at the round on the project's model: A16, not this claim) |
+| Content creator reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60` | TEST-CONFIRMED [run: PASS] (`ChatProjectModelTests.GetModel_ProjectMember_…` fails later, at the round on the project's model: A16, not this claim) |
 | Model moved (scenario) | `T/ChatTests/ChatProjectModelTests.cs:94` | TEST-CONFIRMED [run: PASS] |
 | Audited, pushed | `products/ASC.Files/Server/Api/VirtualRoomsController.cs` (`setProjectModel`) | CODE-ONLY |
 | **Sources of an AI project** | | |
@@ -140,9 +143,38 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Manager only | `Hub/AiProjectSourcesLinkTests.cs:231`; `Hub/AiProjectSourcesUnlinkTests.cs:73,91` | TEST-CONFIRMED [run: PASS] |
 | Audited and pushed | `products/ASC.Files/Core` (share and socket calls in the link service) | CODE-ONLY |
 | **Access through a project** | | |
-| Member and group read linked room; non-member 403; not listed in members | `Hub/AiProjectMemberAccessTests.cs:45,67,85,160` | TEST-CONFIRMED [run: PASS] |
-| Unlink / removal ends it (scenario); own role not lowered | `Hub/AiProjectMemberAccessTests.cs:103,122,140` | TEST-CONFIRMED [run: PASS] |
+| Member reads linked room; non-member 403; not listed in members | `Hub/AiProjectMemberAccessTests.cs:45,67,142` | TEST-CONFIRMED [run: PASS] |
+| Unlink / removal ends it (scenario); own role not lowered | `Hub/AiProjectMemberAccessTests.cs:85,104,122` | TEST-CONFIRMED [run: PASS] |
 | Skills for a member | `Hub/AiProjectMemberAccessTests.cs:177`; `Hub/AiRoomSkillsTests.cs:62` | TEST-CONFIRMED [run: PASS] |
+| **Number of projects that use a room** | | |
+| Room linked to two projects (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:46` | TEST-CONFIRMED (not run yet) |
+| Room linked to no project (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:58` | TEST-CONFIRMED (not run yet) |
+| Room changed (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:69` | TEST-CONFIRMED (not run yet) |
+| Rooms of other types (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:80` | TEST-CONFIRMED (not run yet) |
+| Reader of the room outside the projects (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:96` | TEST-CONFIRMED (not run yet) |
+| Number follows the links (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:109` | TEST-CONFIRMED (not run yet) |
+| The same for a Knowledge room: the tests use an Instructions room, the stand has no vectorization | `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs` (`CarriesLinkedProjectsCount`) | CODE-ONLY |
+| **Listing the projects that use a room** | | |
+| Projects sorted by title (scenario) | `Hub/AiRoomProjectsListTests.cs:45` | TEST-CONFIRMED (not run yet) |
+| Projects with one title (scenario) | `Hub/AiRoomProjectsListTests.cs:58` | TEST-CONFIRMED (not run yet) |
+| Room linked to no project (scenario) | `Hub/AiRoomProjectsListTests.cs:69` | TEST-CONFIRMED (not run yet) |
+| Id that is no Knowledge or Instructions room (scenario) | `Hub/AiRoomProjectsListTests.cs:84` | TEST-CONFIRMED (not run yet) |
+| Caller who cannot read the room (scenario) | `Hub/AiRoomProjectsListTests.cs:102` | TEST-CONFIRMED (not run yet) |
+| One page (scenario) | `Hub/AiRoomProjectsPagingTests.cs:46` | TEST-CONFIRMED (not run yet) |
+| Start index past the end (scenario) | `Hub/AiRoomProjectsPagingTests.cs:58` | TEST-CONFIRMED (not run yet) |
+| Count of zero, negative count, count above the maximum, empty count, negative start index (scenarios) | `Hub/AiRoomProjectsPagingTests.cs:73,85` | TEST-CONFIRMED (not run yet) |
+| Largest count (scenario) | `Hub/AiRoomProjectsPagingTests.cs:97` | TEST-CONFIRMED (not run yet) |
+| **Who is listed among the projects of a room** | | |
+| Member of one of two projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:47` | TEST-CONFIRMED (not run yet) |
+| Reader of the room outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:66` | TEST-CONFIRMED (not run yet) |
+| Member who reads the room through a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:83` | TEST-CONFIRMED (not run yet) |
+| DocSpace admin outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:98` | TEST-CONFIRMED (not run yet) |
+| Creator of a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:111` | TEST-CONFIRMED (not run yet) |
+| **Clients are told when the number of projects of a room changes** | | |
+| Room linked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:46` | TEST-CONFIRMED (not run yet) |
+| Room unlinked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:63` | TEST-CONFIRMED (not run yet) |
+| Project deleted (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:81` | TEST-CONFIRMED (not run yet) |
+| Nothing linked anew (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:100` | TEST-CONFIRMED (not run yet) |
 | **Skills of an Instructions room** | | |
 | Front matter rules, upload, chunked, new version (scenario "Invalid name") | `Instr/SkillUploadTests.cs:41-221` | TEST-CONFIRMED [run: PASS] |
 | Copy and move refused; no folder | `Instr/SkillMoveCopyTests.cs:58,90,107`; `Instr/InstructionsRoomFolderTests.cs:41,56,75,91` | TEST-CONFIRMED [run: PASS] |
@@ -153,7 +185,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | `getRoomSkills` | `Hub/AiRoomSkillsTests.cs:46,62,82,95,108,118,134` | TEST-CONFIRMED [run: PASS] |
 | `getRoomsSkills` (scenario "Unreadable room left out") | `Hub/RoomsSkillsTests.cs:41,61,76,94,107,120,137,147` | TEST-CONFIRMED [run: PASS] |
 | `getRoomAiFolder` (scenario "Room without a skill") | `T/SkillTests/SkillFolderListingTests.cs:48,58,69` | TEST-CONFIRMED [run: PASS] |
-| `getRoomAiFolder` non-reader 403; `withAiFolder` (scenario) | `products/ASC.Files/Server/Api/VirtualRoomsController.cs`; yaml 30261; `Hub/AiRoomOutsiderAccessTests.cs:75,91,107,129` | TEST-CONFIRMED [run: FAIL-BUG] for the 403 and the reader's 200 (`AiRoomOutsiderAccessTests.cs:75,91`) and for `withAiFolder` with `searchArea=AiHub` (`:77`); for `withAiFolder` alone as the operation's description advises (`:99`, A34) |
+| `getRoomAiFolder` non-reader 403; `withAiFolder` (scenario) | `products/ASC.Files/Server/Api/VirtualRoomsController.cs`; yaml 30261; `Hub/AiRoomOutsiderAccessTests.cs:75,91,107,129` | TEST-CONFIRMED [run: FAIL-BUG] for the 403 and the reader's 200 (`AiRoomOutsiderAccessTests.cs:75,91`) and for `withAiFolder` with `searchArea=AiHub` (`:107`); for `withAiFolder` alone as the operation's description advises (`:129`, A34) |
 | **Using the skills in a chat** | | |
 | Index and `read_skill`; body only on request (scenario "Model reads one skill") | `T/SkillTests/SkillChatTests.cs:46,73,93` | TEST-CONFIRMED [run: PASS] |
 | Member yes, outsider, Guest, revoked no (scenario "Outsider") | `T/SkillTests/SkillPermissionTests.cs:80,98,138,153,183,209` | TEST-CONFIRMED [run: PASS] |
@@ -179,6 +211,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Thread privacy** | | |
 | Creator only on every route (scenario "Two members") | `T/ThreadStorageTests/ThreadsPermissionTests.cs:67`; `ThreadsLifecycleTests.cs:209`; `T/ChatTests/ChatPermissionIsolationTests.cs:77`; `ChatPermissionIsolationSendTests.cs:51` | TEST-CONFIRMED [run: PASS] |
 | Removed member (scenario) | `T/ChatTests/ChatPermissionRevokedTests.cs:52,67,90` | TEST-CONFIRMED [run: PASS] |
+| Member removed from an AI project (scenario) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:43` | TEST-CONFIRMED |
 | Regeneration by a fellow member (scenario) | `T/MessageStorageTests/MessageRegenerateAccessTests.cs:55,79` | TEST-CONFIRMED [run: PASS] |
 | **One thread list per user** | | |
 | Rooms share one list (scenario); third-party | `T/ChatTests/ChatEntityContextTests.cs:71,108,139`; `ChatGlobalEntryTests.cs:146`; `T/ThirdPartyTests/ThirdPartyThreadTests.cs:68` (bug 82855, by design) | TEST-CONFIRMED [run: PASS] |
@@ -337,14 +370,17 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Batch (scenarios "Batch with one bad element", "Batch") | `T/AttachmentTests/AttachmentSaveFilesManyTests.cs:45,97,141,214,230`; `AttachmentCrossUserTests.cs:236` | TEST-CONFIRMED [run: PASS] |
 | Fields stored as sent (scenario) | `T/AttachmentTests/AttachmentSaveFileTypeTests.cs:47,75`; `AttachmentSaveFileValidationTests.cs:155`; `AttachmentSaveFileTests.cs:115` | TEST-CONFIRMED [run: PASS] |
 | **Reading and deleting attachments** | | |
-| Another user's draft (scenario); mixed delete (scenario) | `T/AttachmentTests/AttachmentCrossUserTests.cs:57,77,186,209` | TEST-CONFIRMED [run: PASS] |
-| Unknown, malformed, empty, missing body | `T/AttachmentTests/AttachmentGetManyTests.cs:45,74,86,119`; `AttachmentGetTests.cs:72,85,106`; `AttachmentDeleteTests.cs:71,103,131` | TEST-CONFIRMED [run: PASS] |
-| Immediately readable, gone; source kept | `T/AttachmentTests/AttachmentGetManyTests.cs:130,151`; `AttachmentDeleteTests.cs:85,172` | TEST-CONFIRMED [run: PASS] |
+| Another user's draft (scenario); mixed delete (scenario) | `T/AttachmentTests/AttachmentCrossUserTests.cs:57,77,186,209` | TEST-CONFIRMED |
+| Unknown, malformed, empty, missing body | `T/AttachmentTests/AttachmentGetManyTests.cs:45,74,86,119`; `AttachmentGetTests.cs:72,85,106`; `AttachmentDeleteTests.cs:72,104,132` | TEST-CONFIRMED |
+| Immediately readable; deleted draft gone after the background pass, source kept (scenario "Deleted draft") | `T/AttachmentTests/AttachmentGetManyTests.cs:130,151`; `AttachmentDeleteTests.cs:86,173` | TEST-CONFIRMED |
+| Linked attachment (scenario) | `T/AttachmentTests/AttachmentDeleteTests.cs:209` | TEST-CONFIRMED |
 | Draft does not reach the model (scenario) | failure text of `AttachmentSendTests.SendWithStream_DraftPassedAsAttachmentsIdOnly_ReachesTheModel` and `SendWithStream_FullyInlinedAttachmentRecord_ReachesTheModelToo` in run 365d87fe60 (bug 82773, A30); `T/ReasoningTests/ReasoningAttachTests.cs:48` passes and does not decide it; run 2026-11-10: both red again | TEST-CONFIRMED [run: FAIL-BUG] - `T/AttachmentTests/AttachmentSendTests.cs:68,91` (A30) |
 | Unpaid portal (scenario) | `TS/attachments/attachments.ai-disabled.spec.ts` | TS-ONLY |
 | **Linking attachments to a message** | | |
 | Dies with the message (scenario), thread | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:68,89,199,218` | TEST-CONFIRMED [run: PASS] |
 | 400 / 404 / 403 refusals; foreign draft | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:111,122,133,145,156,166,177,190`; `AttachmentCrossUserTests.cs:139,265` | TEST-CONFIRMED [run: PASS] |
+| **Which drafts a link binds** | | |
+| Deleted draft is not linked; draft of another thread; another message of the same thread (scenarios), on the AI binding the operation calls | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:352,370,395`; `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`UpdateAttachmentBindingsByIdsAsync`) | TEST-CONFIRMED |
 | **Suggested questions for a form attachment** | | |
 | 200 status and list; unknown (scenario); foreign; bad id; anonymous; AI off | `T/AttachmentTests/AttachmentSuggestedQuestionsTests.cs:63,87,98,106,119,133`; `AttachmentAiDisabledTests.cs:225` | TEST-CONFIRMED [run: PASS] |
 | **Exporting markdown into a document** | | |
@@ -408,6 +444,143 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | AI access, profile, assign, server, vectorization, web search, user settings, project, quota | `SettingsController.cs`; `ProfileStorageService.cs`; `AssignmentsStorageService.cs`; `McpServerStorageService.cs`; `AiSettingsService.cs`; `WebSearchStorageService.cs` | CODE-ONLY |
 | Switch audited (scenario) | `SettingsController.cs` (`MessageAction`); `Web/05_Security/AuditTrail/` tests the audit API only | CODE-ONLY |
 | Reads not audited (scenario); socket events | absence of a message in read paths; `AI/Server/Service/AiSocketManager.cs:46-52` | CODE-ONLY |
+| **Files of a project thread** |  |  |
+| A set per thread (scenario "Two threads of one project"); one folder for saves made at the same moment (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:105,88`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:298` | TEST-CONFIRMED |
+| The thread does not name its folders (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:186` | TEST-CONFIRMED |
+| A thread of another entry has neither set | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:315` | TEST-CONFIRMED |
+| **Saving an artifact of a thread** |  |  |
+| Saved and listed (scenario); same title twice (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:41,56,72` | TEST-CONFIRMED |
+| Thread outside a project 400, unknown thread 404, thread of another member 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123,133,141` | TEST-CONFIRMED |
+| Empty file 400, file over 100 MB 400 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:158,172` | TEST-CONFIRMED |
+| **Listing the files of a thread** |  |  |
+| Thread without files; one page with the total (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:200,212` | TEST-CONFIRMED |
+| Project owner asks for a member's thread 404 (scenario); thread of another project 404; caller outside the project 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:226,247,260`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:429` | TEST-CONFIRMED |
+| Deleted thread 404 | `T/ThreadDeletionTests/ThreadDeletionTests.cs:61` | TEST-CONFIRMED |
+| Attachment that was not sent (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:415` | TEST-CONFIRMED |
+| `count` 0 and 101 and `startIndex` -1 answer 400; `count` 100 answers 200 (scenarios) | `T/ThreadArtifactsTests/ThreadFilesListBoundsTests.cs:47,60` | TEST-CONFIRMED |
+| `count` is 100 when omitted | `products/ASC.Files/Server/ApiModels/RequestDto/GetAiThreadFilesRequestDto.cs:61` | CODE-ONLY |
+| **Uploading an attachment into a project** |  |  |
+| Member uploads (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:44,54` | TEST-CONFIRMED |
+| Caller outside the project 403, relative path 403, unsupported format 400, upload in one request 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:67,80,90,100` | TEST-CONFIRMED |
+| **Copying a portal file into a project** |  |  |
+| Member copies; same file twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:112,124,183` | TEST-CONFIRMED |
+| Caller outside the project 403, folder 403, unsupported format 415, move 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:138,154,170,196` | TEST-CONFIRMED |
+| **Attachment of a file stored in a project** |  |  |
+| Document attached twice; picture attached twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:209,225` | TEST-CONFIRMED |
+| Deleted attachment attached again (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:69` | TEST-CONFIRMED |
+| **A sent attachment is kept with its thread** |  |  |
+| Linked file is listed; copy outlives the original; two messages of one thread; threads of one project; thread outside a project (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:239,258,283,298,315` | TEST-CONFIRMED |
+| Deleted draft in a project (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:333` | TEST-CONFIRMED |
+| **Privacy of the contents of a project** |  |  |
+| Artifact, thread folder and file not sent of another member 403 to a member, the owner and a DocSpace admin (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesStrangerAccessTests.cs:51,67,83,100,116,132` | TEST-CONFIRMED |
+| Creator reads, downloads and copies (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:41,52,63` | TEST-CONFIRMED |
+| Creator cannot change the file (scenario); creator opens the editor (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:78,92,107,132,146`; `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:121` | TEST-CONFIRMED |
+| **Used space of a project** |  |  |
+| Used space of a project (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:51`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:371-374` | TEST-CONFIRMED |
+| Used space in a room webhook (scenario) | `web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/WebhookEntryContextTests.cs:255`; `products/ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDtoHelper.cs` (`RestrictForSubscriberAsync`) | TEST-CONFIRMED [run: PASS] |
+| Sorting by used space (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:82`; `products/ASC.Files/Core/Utils/EntryManager.cs:1112,1255-1258` | TEST-CONFIRMED |
+| **The contents of a project are not listed** |  |  |
+| Listing; search inside the project (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:51,69,80` | TEST-CONFIRMED |
+| Counters of the project; sources and skills (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:96,107` | TEST-CONFIRMED |
+| **The rooms roots list nothing inside a project** |  |  |
+| Listing the AI rooms root; filtering it by the title of a thread folder (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:53,86,103`; `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:69` | TEST-CONFIRMED |
+| Listing the rooms root across all sections (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:126` | TEST-CONFIRMED |
+| **Recipients of an upload into a project** |  |  |
+| Uploader is told; others are not told (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:52,68` | TEST-CONFIRMED |
+| Owner's new items (scenario) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:106` | TEST-CONFIRMED |
+| Upload notification (scenario): the decision by room type | `CoreTests/DocSpaceHelperAnnouncementTests.cs:39,53` | TEST-CONFIRMED |
+| Upload notification (scenario): the decision is applied where the upload event is published and where it is handled | `products/ASC.Files/Server/Api/UploadController.cs`; `products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs`; `products/ASC.Files/Server/Helpers/FilesHelperBase.cs`; `products/ASC.Files/Worker/IntegrationEvents/EventHandling/RoomNotifyIntegrationEventHandler.cs` (calls of `AnnouncesEntriesToMembers`) | CODE-ONLY |
+| Shared users of a file (scenario) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:91` | TEST-CONFIRMED |
+| **Activity digests leave out AI projects** |  |  |
+| Activity digests (scenario): the decision by room type | `CoreTests/DocSpaceHelperAnnouncementTests.cs:59,74` | TEST-CONFIRMED |
+| Activity digests (scenario): the decision is applied to every digest event of a room | `products/ASC.Files/Core/Configuration/ProductEntryPoint.cs` (`GetAuditEventsAsync`, call of `ReportsActivityInDigest`) | CODE-ONLY |
+| **Deleting a thread of a project** |  |  |
+| Gone at once (scenario) | `T/ThreadDeletionTests/ThreadDeletionTests.cs:41,61` | TEST-CONFIRMED |
+| Files removed by the background pass; other thread of the project; project deleted afterwards (scenarios) | `T/ThreadDeletionTests/ThreadDeletionTests.cs:90,111,135` | TEST-CONFIRMED |
+| The pass runs every 5 minutes by default | `products/ASC.AI/Worker/BackgroundServices/DeletedThreadsCleanerService.cs` (`_defaultPeriod`) | CODE-ONLY |
+| **Losing access to a project deletes the member's threads** |  |  |
+| Member removed by the owner; member leaves; deactivated member removed (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:43,64,83` | TEST-CONFIRMED |
+| Other members; invited again (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:105,125` | TEST-CONFIRMED |
+| Owner and member remove the project from the list (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:148,172` | TEST-CONFIRMED |
+| Owner changed (scenario) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:192` | TEST-CONFIRMED |
+| **Converting a member to Guest removes them from the projects** |  |  |
+| Member converted; thread closed when the job completes (scenarios) | `T/GuestConversionTests/GuestConversionTests.cs:43,66` | TEST-CONFIRMED |
+| Other members; owner of a project converted (scenarios) | `T/GuestConversionTests/GuestConversionTests.cs:85,105` | TEST-CONFIRMED |
+| Member of an agent converted (scenario) | `T/GuestConversionTests/GuestConversionTests.cs:126` | TEST-CONFIRMED |
+| **Thread list of an AI project** |  |  |
+| Thread started in a project; thread started in a room (scenarios) | `T/ChatTests/ChatProjectThreadListTests.cs:41,62` | TEST-CONFIRMED |
+| **Deleting a profile deletes its project threads** |  |  |
+| Data of a member removed; owner of the project before the background pass (scenarios) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:43,62` | TEST-CONFIRMED |
+| Member deleted at once; owner of the project deleted (scenarios) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:79,99` | TEST-CONFIRMED |
+| Data transferred with the profile deleted (scenario) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:126` | TEST-CONFIRMED |
+| **Transferring data keeps the contents of a project with their creator** |  |  |
+| Member's data transferred to the project's owner (scenario) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:146` | TEST-CONFIRMED |
+| **Transferring a project deletes its former owner's threads** |  |  |
+| Owner's data transferred; members of the transferred project (scenarios) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:166,190` | TEST-CONFIRMED |
+| Former owner's thread in another project (scenario) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:213` | TEST-CONFIRMED |
+| **Pinned projects in the root folders** |  |  |
+| Only pinned projects are listed, `total`/`count` 2, `startIndex` 0 (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:44` | TEST-CONFIRMED |
+| Nothing pinned; only an Instructions room pinned (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:68,84` | TEST-CONFIRMED |
+| Paging and filters do not cut the list; `sortBy=AZ` orders it by title (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:102` | TEST-CONFIRMED |
+| Unpinned project leaves the list (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:128` | TEST-CONFIRMED |
+| Other sections are not changed (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:146` | TEST-CONFIRMED |
+| **Who finds a pinned project in the root folders** |  |  |
+| Member pins a project; the owner without a pin does not see it (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:169` | TEST-CONFIRMED |
+| Member loses access and regains it (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:192` | TEST-CONFIRMED |
+| DocSpace admin outside the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:224` | TEST-CONFIRMED |
+| Creator of the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:244` | TEST-CONFIRMED |
+| A share held through a group does not count | `products/ASC.Files/Core/Core/EF/Queries/FolderQueries.cs` (`AiProjectsWithOwnRecordAsync`, `s.Subject == userId`); no test: the API refuses a group on a project | CODE-ONLY |
+| **Drafts that are not sent are removed** |  |  |
+| Sent attachment older than the lifetime (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:142` | TEST-CONFIRMED |
+| The pass runs every 15 minutes and a draft lives 2 hours by default | `products/ASC.AI/Worker/BackgroundServices/OrphanAttachmentsCleanerService.cs` (`_defaultPeriod`, `_defaultLifetime`) | CODE-ONLY |
+| A draft linked before the pass takes it keeps its file; a link after that leaves the draft unlinked | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:125`; `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`MarkOrphanAttachmentsDeletedAsync`, `UpdateAttachmentBindingsByIdsAsync`); no test: the stand cannot order the link inside the pass | CODE-ONLY |
+| **The file of a removed draft** |  |  |
+| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:50,104` | TEST-CONFIRMED |
+| Abandoned draft of a file outside a project (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:126` | TEST-CONFIRMED |
+| **Conversion of an AI agent into an AI project** (change `migrate-ai-agents-to-projects`; its tests passed on 2026-11-22 against the working tree, `--filter-namespace "*AgentMigrationTests*"`: 48 of 48, the unit classes `AiAgentsMigrationPlanTests`, `AiAgentMigrationTitleTests` and `AiAgentsMigrationConfigurationTests` 21 of 21, `TenantsModuleSpecificsTests` 4 of 4; proven red with mutation patches on the same day: the integration tests except `AgentMigrationRouteTests` `Migrate_PortalWithoutAgents_ReturnsZeros` and `Migrate_RepeatedCall_ReturnsZeros`, which no single removal turns red, and the unit classes except `AiAgentsMigrationConfigurationTests`, which was not tried; the agent tests of the Files suite, 219 of 219, passed with the pass off in the test profile) |  |  |
+| Agent converted; conversion run twice (scenarios); an agent under the 4.0 agents root | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:55,97,79` | TEST-CONFIRMED |
+| Pinned agent (scenario) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:248` | TEST-CONFIRMED |
+| The logo of the agent is copied to the project; the logo files of the room of an agent without knowledge are deleted with the room, the copy made for the project stays | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:298,315` | TEST-CONFIRMED |
+| The colour, the cover and the custom tags of the agent go to the project, the custom tags leave the Knowledge room | `T/AgentMigrationTests/AgentMigrationSettingsTests.cs:131` | TEST-CONFIRMED |
+| The tool preferences, MCP servers and chat preferences scoped to the agent move to the project; the ones without an entity stay. Arranged and read through the internal storage API: the chat service stores them under no entity | `T/AgentMigrationTests/AgentMigrationSettingsTests.cs:56,83,107` | TEST-CONFIRMED |
+| The New and Recent marks of the agent are dropped: none is left on the Knowledge room, none is moved to the project. No route marks a room as recent, so the test writes that mark by SQL | `T/AgentMigrationTests/AgentMigrationSettingsTests.cs:203` | TEST-CONFIRMED |
+| **The room of a converted agent becomes a Knowledge room** |  |  |
+| Knowledge kept; title at the limit; vectorization off (scenarios). The stand has no embedding provider, so a knowledge file is put into the Knowledge folder by SQL (`T/AgentMigrationTests/AgentMigrationTestBase.cs`, `AddKnowledgeFileAsync`) and every case runs with vectorization off | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:117,221,244`; the cut of the title: `CoreTests/AiAgentMigrationTitleTests.cs:42,48,56,64,75,86` | TEST-CONFIRMED |
+| A folder inside the Knowledge folder is deleted with its files, the files lying directly in the Knowledge folder stay in the room. The test moves a folder of Chat outputs into the Knowledge folder by SQL (`T/AgentMigrationTests/AgentMigrationRoomTests.cs`, `MoveFolderToKnowledgeAsync`) | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:345` | TEST-CONFIRMED |
+| A knowledge file is found by its title in the Knowledge room after the conversion: the index gets the change through an event or through its periodic pass, which reads the file by its new `modified_on`, so the test polls for 30 s and does not tell the two apart; the move sets `modified_on` of the current and the first version of a knowledge file to the time of the conversion (the pass finds a file by its first version), so the periodic pass of the index picks the file up when the event is lost; the conversion publishes the deletion of the Knowledge folder from the index (read off the event bus) | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:414,146,200` | TEST-CONFIRMED |
+| **The Knowledge room of a converted agent drops the settings it refuses** |  |  |
+| Restricted agent converted (scenario). `updateRoom` answers 403 when it turns indexing on for an agent (the reordering it starts walks into the Knowledge and Chat outputs folders, which are not rooms), so the test writes that flag by SQL, together with privacy and the two form settings, and reads the form settings by SQL | `T/AgentMigrationTests/AgentMigrationSettingsTests.cs:163` | TEST-CONFIRMED |
+| **An agent without knowledge leaves no room** |  |  |
+| Empty Knowledge folder (scenario) | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:275` | TEST-CONFIRMED |
+| **Threads of an agent become threads of the project** |  |  |
+| Thread follows the agent; thread started elsewhere (scenarios). The thread of the agent is created through the internal storage route with the agent as `entityId`: the public chat route stores an entity only for an AI project (`common/ASC.AI.Chat/app/storage/threadsStorage.ts:111`) | `T/AgentMigrationTests/AgentMigrationThreadsTests.cs:53,86`; thread of a Guest (scenario): `:165` | TEST-CONFIRMED |
+| **The model of an agent becomes the model of the project** |  |  |
+| Agent bound to a profile; agent without an assignment (scenarios) | `T/AgentMigrationTests/AgentMigrationThreadsTests.cs:111,138` | TEST-CONFIRMED |
+| **Members of a converted agent** |  |  |
+| Roles carried over; group invited to the agent; joining the group later (scenarios) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:51,72,98` | TEST-CONFIRMED |
+| Guest of the agent (scenario) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:122` | TEST-CONFIRMED |
+| A Guest among the members of an invited group is left out too: a group takes no Guest through the API, so no test builds the case | `products/ASC.Files/Core/Core/Dao/TeamlabDao/FolderDao.cs:851` (the local function `GetProjectMembersAsync` of `ConvertAiAgentAsync`, the Guest check on a member of a group) | CODE-ONLY |
+| **Access to the Knowledge room of a converted agent** |  |  |
+| Content creator keeps the room (scenario). That such a member can still upload is not asserted: the stand refuses every create in a Knowledge room while vectorization is off. A group that keeps the room is not built either: the API refuses a group as a Content creator of an agent (`products/ASC.Files/Core/Utils/FileSharing.cs:278-299`); the test asserts that a group invited as a Viewer is gone | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:145` | TEST-CONFIRMED |
+| Viewer reads through the project; Guest of the agent; external link of a knowledge file (scenarios) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:178,197,218` | TEST-CONFIRMED |
+| **Chat outputs of a converted agent move to My documents** |  |  |
+| Outputs moved; empty Chat outputs; owner over the quota; owner disabled (scenarios); a second call moves nothing | `T/AgentMigrationTests/AgentMigrationOutputsTests.cs:47,80,100,134,161` | TEST-CONFIRMED |
+| The files of the moved Chat outputs folder, directly in it and in a folder inside it, get `modified_on` of their current and first version set to the time of the conversion, a version between keeps its date, and the folder inside it gets a new `modified_on` too, so the periodic pass of the full-text index stores their new ancestor chain when an index event is lost | `T/AgentMigrationTests/AgentMigrationOutputsTests.cs:188` | TEST-CONFIRMED |
+| The conversion publishes an `UpdateFolders` index event for every file of the moved Chat outputs folder and for the folder inside it (read off the event bus) | `T/AgentMigrationTests/AgentMigrationOutputsTests.cs:263` | TEST-CONFIRMED |
+| The new parent of the moved Chat outputs folder, the tree rows of its subtree and the `modified_on` of its files and subfolders are committed in one transaction, so a run that stops after the move leaves nothing for a later run to find: the stand cannot stop the process between the statements | `products/ASC.Files/Core/Core/Dao/TeamlabDao/FolderDao.cs` (`MoveFolderCoreAsync`, the `inTransaction` call before the commit); `products/ASC.Files/Core/Core/AI/AiAgentMigrator.cs` (`MoveOutputsAsync`, the delegate) | CODE-ONLY |
+| No user's used space changes when the agent is moved under the AI rooms root | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:451` | TEST-CONFIRMED |
+| **The background pass converts agents by itself** |  |  |
+| Restored archive (scenario): the restore writes the time of the restore into `last_modified` of the portal, which puts it into the window of the next pass. No integration test restores an archive: the backup suite never starts a restore (`common/Tests/ASC.Data.Backup.Tests/Tests/Restore/RestoreGuard.cs`) | `common/Tests/ASC.Data.Backup.Core.Tests/TenantsModuleSpecificsTests.cs:49`; `common/ASC.Data.Backup.Core/Tasks/Modules/AiModuleSpecifics.cs` (the `entry_id` relations) | CODE-ONLY, the time by a unit test |
+| Portal being restored; unchanged portal (scenarios): the window and the candidate list are pure functions, the two queries select active portals only; the periodic loop is run by no integration suite, the pass is off in the test profile | `CoreTests/AiAgentsMigrationPlanTests.cs:44,50,56,86`; `common/ASC.Core.Common/EF/Queries/TenantQueries.cs:138,145`; `products/ASC.AI/Worker/BackgroundServices/AiAgentsMigrationService.cs:72,209` | CODE-ONLY, the decisions by unit tests |
+| A pass stopped halfway (a restart, a deploy) resumes after the last portal it saved: the state is saved every 20 portals and once more when the pass ends by an exception or a cancellation (not when the process is killed), with the start of its first part, which opens the next window once it completes (no scenario; the periodic loop is run by no integration suite) | `CoreTests/AiAgentsMigrationPlanTests.cs:154,162,168,176,190`; `products/ASC.AI/Worker/BackgroundServices/AiAgentsMigrationService.cs:127,140,161` | CODE-ONLY, the decisions by unit tests |
+| A portal whose conversion finds the lock of the legacy AI providers migration held elsewhere is skipped by that pass: no failed pass is counted, and the next pass takes it again whether it changed or not (no scenario; the stand cannot hold that lock from a test) | `CoreTests/AiAgentsMigrationPlanTests.cs:126,135,146`; `CoreTests/LegacyAiProvidersMigrationGateTests.cs:40`; `products/ASC.AI/Core/Migration/AiAgentsPortalMigration.cs:54`; `products/ASC.AI/Worker/BackgroundServices/AiAgentsMigrationService.cs:222` | CODE-ONLY, the decisions by unit tests |
+| **A failed conversion is retried and then left** |  |  |
+| One agent of two fails (scenario): each agent is converted in its own try/catch | `products/ASC.Files/Core/Core/AI/AiAgentMigrator.cs:65,75` | CODE-ONLY |
+| Failure repeated; success after a failure (scenarios) | `CoreTests/AiAgentsMigrationPlanTests.cs:62,70,78,94,105,114`; the loop: `products/ASC.AI/Worker/BackgroundServices/AiAgentsMigrationService.cs:112,118` | CODE-ONLY, the decisions by unit tests |
+| **Starting the conversion by request** |  |  |
+| Owner starts the conversion; portal without agents (scenarios); a DocSpace admin is let in | `T/AgentMigrationTests/AgentMigrationRouteTests.cs:73,42,51,62` | TEST-CONFIRMED |
+| Room admin refused; AI switched off (scenarios); no sign-in answers 401 | `T/AgentMigrationTests/AgentMigrationRouteTests.cs:89,112,102` | TEST-CONFIRMED |
+| The route answers 409 while the lock of the legacy AI providers migration is held elsewhere (no scenario; the stand cannot hold that lock from a test) | `products/ASC.AI/Server/Api/AgentsMigrationController.cs` (`MigrateAgentsAsync`); the Busy decision of the lock: `CoreTests/LegacyAiProvidersMigrationGateTests.cs:40` | CODE-ONLY |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 
@@ -510,5 +683,7 @@ A32 and A34 come from new tests of that run.
 | A28 | Attachment cap | More attachments than the composer allows are answered 200 and stored whole on `aiThreadsAppendUserMessage` and the send (11 stored). | `AttachmentComposerRuleTests`, the two `MoreAttachmentsThanTheClientAllows` tests (82894) | OPEN — red test, run 365d87fe60 — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 82894) |
 | A30 | Attachment to the model | A round with a draft by id, an inline record, a device file or an image ends healthy but no streamed request to the stub carries the text. Whether the stand's file reading plays a part was not traced. | `AttachmentSendTests`, four tests (82773) | OPEN — red test, run 365d87fe60 — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 82773; the stand's part was not traced) |
 | A32 | Dropped provider connection | `aiProfilesListModels` on a saved profile whose provider accepts the connection and closes it without an answer is answered 200 with an empty model list instead of 502, so the form shows no models instead of the failure. | `T/ProfileTests/ProfileListModelsFailureTests.cs:67` (Category=Bug); `Chat/controllers/profilesController.ts` (`listModels`) | NEW 2026-11-10, red by run — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
-| A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:107,129` (Category=Bug on 99); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (`AiRoomOutsiderAccessTests.cs:129`, `Category=Bug`) |
+| A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:107,129` (Category=Bug on 128); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (`AiRoomOutsiderAccessTests.cs:129`, `Category=Bug`) |
 | A35 | `aiPromptsDelete` | Deleting another user's prompt answers `success` true although nothing is deleted (bug 82809): the route never reports whether a prompt of the caller was removed. The yaml describes it as intended. | `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` (Trait Bug 82809) | NEW 2026-11-14, red by code reading — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 82809, `PromptIsolationTests.cs:108`) |
+| A36 | Draft cleanup races a link | The pass read the files of unlinked drafts, then deleted them by id with no lock. A link that moved the file into the thread in between lost it: the message kept the attachment without the file. A link that read the file before the deletion and moved it after answered 500. Now the pass marks the unlinked drafts deleted first (`MarkOrphanAttachmentsDeletedAsync`, `MessageId == null && DeletedOn == null`), and both the file read and the row delete take marked drafts only; a link refuses a marked draft. | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:125,128`; `products/ASC.Files/Core/Core/EF/Queries/AiIntegrationQueries.cs` (`ChatDraftFilesAsync`, `a.DeletedOn != null`); `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`MarkOrphanAttachmentsDeletedAsync`, `DeleteAttachmentsAsync`, `UpdateAttachmentBindingsByIdsAsync`) | FIXED `a1f6ce3988`, code read, not run; the interleaving has no test |
+| A37 | Size after the deletion | Both passes return the size of the deleted files to the project after the deletion is committed; a failure of that step or a stop in between leaves the used space too high for good, as in every deletion path of Files (`FileDeleteOperation`). | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:130-135,195-197`; `products/ASC.Files/Core/Services/WCFService/FileOperations/FileDeleteOperation.cs:905-984` | NEW 2026-11-20, red by code reading; left open on purpose |

@@ -69,6 +69,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbMcpServer> McpServers { get; set; }
     public DbSet<DbToolPreference> ToolPrefs { get; set; }
     public DbSet<DbAttachment> Attachments { get; set; }
+    public DbSet<DbPreference> Preferences { get; set; }
     public DbSet<DbFilesMetadataTemplate> MetadataTemplates { get; set; }
     public DbSet<DbFilesMetadataField> MetadataFields { get; set; }
     public DbSet<DbFilesMetadataLink> MetadataLinks { get; set; }
@@ -112,6 +113,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbServers()
             .AddDbToolPrefs()
             .AddDbAttachments()
+            .AddDbPreferences()
             .AddDbFilesMetadataTemplate()
             .AddDbFilesMetadataField()
             .AddDbFilesMetadataLink()

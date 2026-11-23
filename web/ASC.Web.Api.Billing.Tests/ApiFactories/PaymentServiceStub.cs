@@ -35,8 +35,8 @@ namespace ASC.Web.Api.Billing.Tests.ApiFactories;
 
 /// <summary>
 /// The billing, accounting and docscloud services of the <c>integration-test-billing</c> stack: one WireMock on the
-/// fixed address the AppHost points the services at (<see cref="Constants.PaymentStubPort"/>), each service under a
-/// path of its own.
+/// address the AppHost points the services at (the run's port for <see cref="Constants.PaymentStubPort"/>, see
+/// <see cref="HostPorts"/>), each service under a path of its own.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -77,7 +77,9 @@ public sealed class PaymentServiceStub : IDisposable
 
     private PaymentServiceStub()
     {
-        var url = $"http://{Constants.PaymentStubHost}:{Constants.PaymentStubPort}";
+        // The port of this run (HostPorts), the one the AppHost writes into the services' configuration before the
+        // stack starts.
+        var url = $"http://{Constants.PaymentStubHost}:{HostPorts.Of(Constants.PaymentStubPort)}";
 
         try
         {
@@ -85,11 +87,10 @@ public sealed class PaymentServiceStub : IDisposable
         }
         catch (Exception exception)
         {
-            // The port is fixed because the AppHost writes it into the services' configuration before the stack starts.
             // WireMock's own message does not say which port it wanted or where that comes from.
             throw new InvalidOperationException(
-                $"The payment services stub could not listen on {url} (Constants.PaymentStubPort). Another billing test " +
-                "run, or a test process still shutting down, may hold the port.", exception);
+                $"The payment services stub could not listen on {url} (HostPorts.Of(Constants.PaymentStubPort)). The " +
+                "port was free when this run picked it, so another process most likely took it before the stub started.", exception);
         }
 
         _server

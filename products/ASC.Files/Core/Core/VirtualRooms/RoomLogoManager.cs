@@ -205,8 +205,7 @@ public class RoomLogoManager(
 
         try
         {
-            var store = await GetLogoStoreAsync();
-            await store.DeleteFilesAsync(string.Empty, $"{ProcessFolderId(stringId)}*.*", false);
+            await DeleteLogoFilesAsync(stringId);
             room.SettingsHasLogo = false;
 
             await SaveRoomAsync(folderDao, room);
@@ -223,6 +222,17 @@ public class RoomLogoManager(
         }
 
         return room;
+    }
+
+    public async Task DeleteLogoFilesAsync<T>(T id)
+    {
+        var store = await GetLogoStoreAsync();
+        await store.DeleteFilesAsync(string.Empty, GetLogoFilesPattern(id), false);
+    }
+
+    public static string GetLogoFilesPattern<T>(T id)
+    {
+        return $"{ProcessFolderId(id)}{LogosPathSplitter}*.*";
     }
 
     public async ValueTask<LogoDto> GetLogoAsync<T>(Folder<T> room)

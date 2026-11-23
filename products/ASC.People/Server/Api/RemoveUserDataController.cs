@@ -109,7 +109,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
 
     /// <remarks>
     /// Starts a job that deletes the data and the profile of a disabled user.
-    /// The job deletes the personal files of the account. It moves the rooms and third-party storage accounts to the
+    /// The job deletes the personal files of the account. It also deletes the account's chat threads in AI projects,
+    /// with their files. It moves the rooms and third-party storage accounts to the
     /// caller. A private room moves only to the caller or, failing that, the portal owner who holds an encryption key.
     /// Otherwise it stays with the account, and `keptPrivateRoomIds` of the progress names it.
     /// Files and folders that the account shared from the personal section move to a new folder of the caller.

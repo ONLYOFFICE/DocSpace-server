@@ -156,7 +156,9 @@ public class PermissionCheckStarter<T, TTo>(
 
         var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
 
-        if (toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive && !await security.CanCreateAsync(toFolder))
+        var attachToProject = copy && folders.Count == 0 && toFolder.FolderType == FolderType.AiProjectRoom && await security.CanUseAiAsync(toFolder);
+
+        if (!attachToProject && toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive && !await security.CanCreateAsync(toFolder))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_Create;
             if (check)
@@ -314,7 +316,7 @@ public class PermissionCheckStarter<T, TTo>(
             }
         }
 
-        if (copy && !(isRoom && toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiHub) && !await security.CanCopyToAsync(toFolder))
+        if (copy && !attachToProject && !(isRoom && toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiHub) && !await security.CanCopyToAsync(toFolder))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_CopyToFolder;
             if (check)
@@ -621,7 +623,9 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms || toFolder.RootFolderType == FolderType.Archive)
+        var toProject = toFolder.FolderType == FolderType.AiProjectRoom;
+
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms || (toProject && !copy) || toFolder.RootFolderType == FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)
@@ -712,6 +716,14 @@ public class PermissionCheckStarter<T, TTo>(
                 return check ? throw new InvalidOperationException(errorMsg) : errorMsg;
         }
 
+        if (toProject &&
+            FileUtility.GetFileTypeByFileName(file.Title) != FileType.Image &&
+            !vectorizationSettings.IsSupportedContentExtraction(file.Title))
+        {
+            errorMsg = FilesCommonResource.ErrorMessage_NotSupportedFormat;
+            return check ? throw new NotSupportedException(errorMsg) : errorMsg;
+        }
+
         if (!check)
         {
             return null;
@@ -727,7 +739,8 @@ public class PermissionCheckStarter<T, TTo>(
         var conflict = resolveType == FileConflictResolveType.Duplicate ||
                                file.RootFolderType == FolderType.Privacy ||
                                file.Encrypted ||
-                               toKnowledgeBase
+                               toKnowledgeBase ||
+                               toProject
                     ? null
                     : await ttoFileDao.GetFileAsync(toFolder.Id, file.Title);
 

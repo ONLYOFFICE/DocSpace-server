@@ -1,0 +1,171 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
+
+/// <summary>
+/// The roles of an AI project: Project manager is <c>RoomManager</c>, member is <c>ContentCreator</c> - the role that
+/// may use AI in a room - and <c>Read</c> is not a project role at all. A group cannot be a member of a project, with
+/// any role: only users are invited. A room admin demoted to a user keeps the
+/// member role in the projects they managed or owned.
+/// </summary>
+[Trait("Category", "Rooms")]
+[Trait("Feature", "AiHub")]
+public class AiProjectRolesTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
+{
+    [Fact]
+    public async Task Share_UserAtRead_Returns403AndUserIsNotAdded()
+    {
+        // Arrange
+        var projectId = await CreateProjectAsync();
+        var user = await InviteContact(EmployeeType.User);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await ShareRoomAsync(projectId, user.Id, FileShare.Read));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("The role is not available for this user type");
+        (await GetUserAccessAsync(projectId, user.Id)).Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(FileShare.ContentCreator)]
+    [InlineData(FileShare.Read)]
+    public async Task Share_Group_Returns403AndGroupIsNotAdded(FileShare access)
+    {
+        // Arrange
+        var projectId = await CreateProjectAsync();
+        var member = await InviteContact(EmployeeType.User);
+        var groupId = await CreateGroupAsync(member);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await ShareRoomAsync(projectId, groupId, access));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("The role is not available for this user type");
+
+        var shares = (await _roomsApi.GetRoomSecurityInfoAsync(projectId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        shares.Should().NotBeEmpty();
+        shares.Should().NotContain(s => s.SharedToGroup != null && s.SharedToGroup.Id == groupId);
+    }
+
+    [Fact]
+    public async Task Share_UserAtContentCreator_JoinsAsMember()
+    {
+        // Arrange
+        var projectId = await CreateProjectAsync();
+        var user = await InviteContact(EmployeeType.User);
+
+        // Act
+        await ShareRoomAsync(projectId, user.Id, FileShare.ContentCreator);
+
+        // Assert
+        (await GetUserAccessAsync(projectId, user.Id)).Should().Be(FileShare.ContentCreator);
+    }
+
+    [Fact]
+    public async Task DemoteRoomAdminToUser_ProjectManager_BecomesMember()
+    {
+        // Arrange
+        var projectId = await CreateProjectAsync();
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await ShareRoomAsync(projectId, roomAdmin.Id, FileShare.RoomManager);
+
+        // Act
+        var progress = await DemoteToUserAsync(roomAdmin.Id);
+
+        // Assert
+        progress.Error.Should().BeEmpty();
+        progress.IsCompleted.Should().BeTrue();
+        (await GetUserAccessAsync(projectId, roomAdmin.Id)).Should().Be(FileShare.ContentCreator);
+    }
+
+    [Fact]
+    public async Task DemoteRoomAdminToUser_OwnProject_PassesToReassignTargetAndFormerOwnerStaysMember()
+    {
+        // Arrange
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin);
+        var projectId = await CreateProjectAsync();
+
+        // Act
+        var progress = await DemoteToUserAsync(roomAdmin.Id);
+
+        // Assert
+        progress.Error.Should().BeEmpty();
+        progress.IsCompleted.Should().BeTrue();
+        var shares = await GetUserSharesAsync(projectId);
+        shares.Should().ContainSingle(s => s.IsOwner).Which.SharedToUser.Id.Should().Be(Owner.Id);
+        shares.Should().ContainSingle(s => s.SharedToUser.Id == roomAdmin.Id).Which.Access.Should().Be(FileShare.ContentCreator);
+    }
+
+    private async Task<TaskProgressResponseDto> DemoteToUserAsync(Guid userId)
+    {
+        await _peopleClient.Authenticate(Owner);
+        var config = new Configuration { BasePath = _peopleClient.BaseAddress!.ToString().TrimEnd('/') };
+        var userTypeApi = new UserTypeApi(_peopleClient, config);
+
+        await userTypeApi.StartUserTypeUpdateAsync(
+            new StartUpdateUserTypeDto(EmployeeType.User, userId, Owner.Id),
+            TestContext.Current.CancellationToken);
+
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            var progress = (await userTypeApi.GetUserTypeUpdateProgressAsync(userId, TestContext.Current.CancellationToken)).Response;
+
+            if (progress.IsCompleted || DateTime.UtcNow >= deadline)
+            {
+                return progress;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    private async Task<List<FileShareDto>> GetUserSharesAsync(int projectId)
+    {
+        await _filesClient.Authenticate(Owner);
+        var shares = (await _roomsApi.GetRoomSecurityInfoAsync(projectId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        return [.. shares.Where(s => s.SubjectType == SubjectType.User)];
+    }
+
+    private async Task<FileShare?> GetUserAccessAsync(int projectId, Guid userId)
+    {
+        return (await GetUserSharesAsync(projectId)).FirstOrDefault(s => s.SharedToUser?.Id == userId)?.Access;
+    }
+}

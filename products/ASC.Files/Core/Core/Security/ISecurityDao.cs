@@ -40,6 +40,10 @@ public interface ISecurityDao<T>
     Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync(FileEntry<T> entry, HashSet<Guid> subjects = null, bool includeAiProjectAccess = false);
     Task RemoveBySubjectAsync(Guid subject, bool withoutOwner);
     Task RemoveSecuritiesAsync(Guid subject, Guid ownerId, SubjectType subjectType);
+    Task RemoveAiProjectMemberAsync(Guid userId, int projectId);
+    Task RemoveFromAiProjectsAsync(Guid userId);
+    Task MarkAiProjectThreadsDeletedAsync(Guid userId);
+    Task MarkOwnedAiProjectThreadsDeletedAsync(Guid userId);
     IAsyncEnumerable<FileShareRecord<T>> GetPureShareRecordsAsync(IEnumerable<FileEntry<T>> entries);
     IAsyncEnumerable<FileShareRecord<T>> GetPureShareRecordsAsync(FileEntry<T> entry);
     Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord<T>> records);

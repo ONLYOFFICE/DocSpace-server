@@ -94,6 +94,24 @@ public partial class AiIntegrationContext
     {
         return ThreadQueriesContainer.ClearThreadsProfileAsync(this, tenantId, profileId);
     }
+
+    [PreCompileQuery]
+    public Task<int> MarkThreadDeletedAsync(int tenantId, Guid id, DateTime deletedOn)
+    {
+        return ThreadQueriesContainer.MarkThreadDeletedAsync(this, tenantId, id, deletedOn);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<DbThread> GetDeletedThreadsAsync(DateTime deletedOn, Guid id, int count)
+    {
+        return ThreadQueriesContainer.GetDeletedThreadsAsync(this, deletedOn, id, count);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteMarkedThreadAsync(int tenantId, Guid id)
+    {
+        return ThreadQueriesContainer.DeleteMarkedThreadAsync(this, tenantId, id);
+    }
 }
 
 static file class ThreadQueriesContainer
@@ -101,13 +119,13 @@ static file class ThreadQueriesContainer
     public static readonly Func<AiIntegrationContext, int, Guid, Task<DbThread?>> GetThreadAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid id) =>
-                ctx.Threads.FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
+                ctx.Threads.FirstOrDefault(x => x.TenantId == tenantId && x.Id == id && x.DeletedOn == null));
 
     public static readonly Func<AiIntegrationContext, int, Guid, int, IAsyncEnumerable<DbThread>> GetThreadsAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy, int count) =>
                 ctx.Threads
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null)
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null && x.DeletedOn == null)
                     .OrderByDescending(x => x.LastEditDate)
                     .ThenByDescending(x => x.Id)
                     .Take(count));
@@ -116,7 +134,7 @@ static file class ThreadQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy, DateTime lastEditDate, Guid id, int count) =>
                 ctx.Threads
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null && x.DeletedOn == null
                                 && (x.LastEditDate < lastEditDate
                                     || (x.LastEditDate == lastEditDate && x.Id.CompareTo(id) < 0)))
                     .OrderByDescending(x => x.LastEditDate)
@@ -127,7 +145,7 @@ static file class ThreadQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy, int entryId, int count) =>
                 ctx.Threads
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId)
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId && x.DeletedOn == null)
                     .OrderByDescending(x => x.LastEditDate)
                     .ThenByDescending(x => x.Id)
                     .Take(count));
@@ -136,7 +154,7 @@ static file class ThreadQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy, int entryId, DateTime lastEditDate, Guid id, int count) =>
                 ctx.Threads
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId && x.DeletedOn == null
                                 && (x.LastEditDate < lastEditDate
                                     || (x.LastEditDate == lastEditDate && x.Id.CompareTo(id) < 0)))
                     .OrderByDescending(x => x.LastEditDate)
@@ -177,4 +195,29 @@ static file class ThreadQueriesContainer
             ctx.Threads
                 .Where(x => x.TenantId == tenantId && x.ProfileId == profileId)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.ProfileId, (Guid?)null));
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public static readonly Func<AiIntegrationContext, int, Guid, DateTime, Task<int>> MarkThreadDeletedAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid id, DateTime deletedOn) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.Id == id && x.DeletedOn == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
+
+    public static readonly Func<AiIntegrationContext, DateTime, Guid, int, IAsyncEnumerable<DbThread>> GetDeletedThreadsAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, DateTime deletedOn, Guid id, int count) =>
+                ctx.Threads
+                    .Where(x => x.DeletedOn != null
+                                && (x.DeletedOn > deletedOn
+                                    || (x.DeletedOn == deletedOn && x.Id.CompareTo(id) > 0)))
+                    .OrderBy(x => x.DeletedOn)
+                    .ThenBy(x => x.Id)
+                    .Take(count));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteMarkedThreadAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid id) =>
+                ctx.Threads
+                    .Where(x => x.TenantId == tenantId && x.Id == id && x.DeletedOn != null)
+                    .ExecuteDelete());
 }

@@ -705,7 +705,8 @@ public abstract class VirtualRoomsController<T>(
     /// <remarks>
     /// Changes the members of a room in one call, and returns the access of the listed subjects. The call can add,
     /// change, and remove members. Each entry names an account, a group, or the email of a person without an account.
-    /// An `access` of `None` removes the subject from the room. Requires the room manager role in the room. Other
+    /// An `access` of `None` removes the subject from the room. A member removed from an AI project also loses the chat
+    /// threads they created there, with their files. Requires the room manager role in the room. Other
     /// callers get 403. The call changes data, and you can repeat it with the same body. It skips a subject that
     /// already has the listed access, so a repeat sends no email. If `notify` is true, the portal emails the invitation
     /// with `message`. A person who got the same invitation or access email for this room recently gets no new one. A

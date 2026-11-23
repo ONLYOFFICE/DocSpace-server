@@ -233,6 +233,33 @@ public static class DocSpaceHelper
         return room is { SettingsPrivate: true };
     }
 
+    public static async ValueTask<bool> InAiProjectAsync<T>(FileEntry<T> entry, IFolderDao<T> folderDao)
+    {
+        if (entry.RootFolderType != FolderType.AiHub || entry is Folder<T> { IsRoom: true })
+        {
+            return false;
+        }
+
+        if (entry.ParentRoomType.HasValue)
+        {
+            return entry.ParentRoomType == FolderType.AiProjectRoom;
+        }
+
+        var room = await GetParentRoom(entry, folderDao);
+
+        return room is { FolderType: FolderType.AiProjectRoom };
+    }
+
+    public static bool AnnouncesEntriesToMembers(FolderType roomType)
+    {
+        return roomType != FolderType.AiProjectRoom;
+    }
+
+    public static bool ReportsActivityInDigest(FolderType? roomType)
+    {
+        return roomType != FolderType.AiProjectRoom;
+    }
+
     /// <summary>
     /// Whether the file lies in a private room or in a room with a watermark, whose content is not converted into a
     /// file of its own: such a file would leave the room unencrypted or without the watermark.

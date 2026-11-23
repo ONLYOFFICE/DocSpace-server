@@ -53,6 +53,8 @@ public class AttachmentsStorageService(
     TenantManager tenantManager,
     AttachmentsStorage storage,
     MessageStorageService messageStorageService,
+    ThreadsStorage threadsStorage,
+    AiProjectThreadsService projectThreadsService,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
@@ -105,11 +107,54 @@ public class AttachmentsStorageService(
         var internalFiles = await LoadFilesAsync(intDao, internalIds);
         var thirdpartyFiles = await LoadFilesAsync(strDao, thirdpartyIds);
 
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var folderDao = DaoFactory.GetFolderDao<int>();
+        var uploadedIds = new List<int>();
+
+        foreach (var files in internalFiles.GroupBy(f => f.ParentId))
+        {
+            if (await folderDao.GetFolderAsync(files.Key) is { FolderType: FolderType.AiProjectRoom })
+            {
+                uploadedIds.AddRange(files.Select(f => f.Id));
+            }
+        }
+
+        var uploaded = new Dictionary<int, Attachment>();
+
+        foreach (var drafts in (await storage.ReadUnboundByEntryIdsAsync(tenantId, CurrentUserId, uploadedIds)).GroupBy(a => a.EntryId!.Value))
+        {
+            uploaded[drafts.Key] = drafts.FirstOrDefault(a => a.DeletedOn == null)
+                                   ?? throw new ItemNotFoundException();
+        }
+
         var createParams = new List<CreateAttachmentParams>(entryIds.Count);
 
         foreach (var file in internalFiles)
         {
-            createParams.Add(await BuildParamAsync(intDao, file));
+            if (!uploaded.TryGetValue(file.Id, out var attachment))
+            {
+                createParams.Add(await BuildParamAsync(intDao, file));
+                continue;
+            }
+
+            if (attachment.Kind != AttachmentKind.File || attachment.Content != null)
+            {
+                continue;
+            }
+
+            var content = (await BuildParamAsync(intDao, file)).Content!;
+
+            await storage.SetContentAsync(tenantId, CurrentUserId, attachment.Id, content);
+
+            uploaded[file.Id] = new Attachment
+            {
+                Id = attachment.Id,
+                Kind = attachment.Kind,
+                Title = attachment.Title,
+                Content = content,
+                EntryId = attachment.EntryId,
+                CreatedAt = attachment.CreatedAt
+            };
         }
 
         foreach (var file in thirdpartyFiles)
@@ -117,7 +162,7 @@ public class AttachmentsStorageService(
             createParams.Add(await BuildParamAsync(strDao, file));
         }
 
-        var created = await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, createParams);
+        var created = await storage.CreateManyAsync(tenantId, CurrentUserId, createParams);
         var index = 0;
 
         // Only files the client marked analyzeOnly are analysed: for the rest nothing form-analysis runs
@@ -128,7 +173,7 @@ public class AttachmentsStorageService(
 
         foreach (var file in internalFiles)
         {
-            var attachment = created[index++];
+            var attachment = uploaded.TryGetValue(file.Id, out var stored) ? stored : created[index++];
             var analysis = analyses.GetValueOrDefault(file.Id);
 
             // Remember the intent per attachment, so another chat that attaches the same form is isolated.
@@ -173,22 +218,51 @@ public class AttachmentsStorageService(
         await AssertUserHasAccessAsync(_allowedTypes);
 
         var message = await messageStorageService.ReadByIdAsync(messageId);
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        await storage.UpdateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids, message.Id);
+        await storage.UpdateManyAsync(tenantId, CurrentUserId, ids, message.Id, message.ThreadId);
+
+        var thread = await threadsStorage.ReadByIdAsync(tenantId, message.ThreadId);
+        if (thread?.EntryId is not { } projectId ||
+            await DaoFactory.GetFolderDao<int>().GetFolderAsync(projectId) is not { FolderType: FolderType.AiProjectRoom })
+        {
+            return;
+        }
+
+        var attachments = await storage.ReadManyByIdsAsync(tenantId, CurrentUserId, ids);
+        var fileDao = DaoFactory.GetFileDao<int>();
+
+        var uploaded = await fileDao.GetFilesAsync([
+                .. attachments.Where(a => a.MessageId == message.Id && a.EntryId.HasValue).Select(a => a.EntryId!.Value).Distinct()
+            ])
+            .Where(f => f != null && f.ParentId == projectId && f.CreateBy == CurrentUserId)
+            .ToListAsync();
+
+        if (uploaded.Count == 0)
+        {
+            return;
+        }
+
+        var folderId = await projectThreadsService.GetOrCreateAttachmentsFolderAsync(thread);
+
+        foreach (var file in uploaded)
+        {
+            await fileDao.MoveThreadFileAsync(file.Id, folderId, thread.Id);
+        }
     }
 
     public async Task DeleteAsync(Guid id)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id);
+        await storage.MarkForDeletionAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, [id]);
     }
 
     public async Task DeleteManyAsync(HashSet<Guid> ids)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids);
+        await storage.MarkForDeletionAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids);
     }
 
     /// <summary>

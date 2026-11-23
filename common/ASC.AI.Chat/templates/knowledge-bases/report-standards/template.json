@@ -1,0 +1,11 @@
+{
+  "name": "Report standards",
+  "description": "The structure and the writing style reports follow.",
+  "category": "Document",
+  "color": "5CC3F7",
+  "cover": "file_3",
+  "files": [
+    "Report structure.docx",
+    "Style guide.md"
+  ]
+}

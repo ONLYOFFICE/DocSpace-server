@@ -1,0 +1,11 @@
+{
+  "name": "Pitch decks",
+  "description": "Skills for outlining a pitch deck and for writing speaker notes.",
+  "category": "Presentation",
+  "color": "FF6680",
+  "cover": "star",
+  "files": [
+    "deck-outline.md",
+    "speaker-notes.md"
+  ]
+}

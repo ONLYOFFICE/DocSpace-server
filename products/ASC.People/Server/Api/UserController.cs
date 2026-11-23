@@ -731,7 +731,8 @@ public class UserController(
     /// callers get 403. Only the portal owner can delete a DocSpace admin. The call also returns 403 for a system
     /// account or an LDAP account. If no account has the ID, the call returns 404. The call cannot be undone, and a
     /// repeated call returns 404. The account disappears immediately, with its avatar, group memberships, file shares,
-    /// and OAuth apps. A queued job then deletes its data. To track the job, use
+    /// and OAuth apps. A queued job then deletes its data, including its chat threads in AI projects with their files.
+    /// To track the job, use
     /// `GET api/2.0/people/remove/progress/{userId}`. If the account shared files from its own section, the job moves
     /// them to a new folder of the caller. A private room stays with the account if neither the caller nor the portal
     /// owner holds an encryption key. Then `keptPrivateRoomIds` of the progress names it. To move rooms and shared
@@ -1481,7 +1482,8 @@ public class UserController(
     /// the response. It does the same with the IDs of deleted and unknown accounts. The call cannot be undone. A
     /// repeat deletes nothing more and returns only the listed accounts that still exist. The call returns the listed
     /// accounts, including the skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`.
-    /// A queued job deletes the data of each account. To track it, use `GET api/2.0/people/remove/progress/{userId}`.
+    /// A queued job deletes the data of each account, including its chat threads in AI projects. To track it, use
+    /// `GET api/2.0/people/remove/progress/{userId}`.
     /// If an account shared files from its own section, the job moves them to a new folder of the caller. A private
     /// room stays with the account if neither the caller nor the portal owner holds an encryption key. Then
     /// `keptPrivateRoomIds` of the progress names it. To move rooms and shared files to another user first, use
@@ -2591,7 +2593,9 @@ public class UserController(
 
     /// <remarks>
     /// Starts a job that changes an account to `Guest` or `User`. The same job moves the rooms and shared files of the
-    /// account to another admin. For other types, use `PUT api/2.0/people/type/{type}`. Any other type returns 400.
+    /// account to another admin. Changing an account to `Guest` also removes it from every AI project. The job deletes
+    /// its chat threads there, with their files. For other types, use `PUT api/2.0/people/type/{type}`. Any other type
+    /// returns 400.
     /// Requires a room admin or a DocSpace admin. Other callers get 403. The `Guest` type also returns 403 if the
     /// portal does not allow inviting guests. Only the portal owner can change a DocSpace admin. Otherwise the call
     /// returns 400. The call also returns 400 for a system or disabled account, or for the account of the caller. The

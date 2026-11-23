@@ -33,6 +33,8 @@
 
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject, getString, getNumber, getObject, getArray } from "../narrow.js";
+import { DocspaceApiHttpError, resolveAiProjectEntityId } from "./docspaceFilesApi.js";
+import { setRoundThreadId } from "../requestContext.js";
 import { PAGE_SIZE } from "@onlyoffice/ai-chat/core";
 import type { ThreadsStorage, ThreadsCursor } from "@onlyoffice/ai-chat/core";
 import type { Thread } from "@onlyoffice/ai-chat/core";
@@ -42,10 +44,11 @@ import {
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
 
-// Threads are one list per user, whatever folder or AI project the chat is
-// opened in. The `entityId` the library passes on create and list (the
-// project id, or nothing) is accepted for the interface's sake and ignored;
-// the C# storage keeps the list under `entityId: null`.
+// A thread belongs to the AI project it was started in (`entityId`, the
+// project's id) or to none. The C# storage keeps the two apart: a list asked
+// for a project answers that project's threads, and a list asked for nothing
+// answers the threads of no project. The project is what gives a thread its
+// folder of artifacts (see threadFiles.ts).
 const PATH = "/threads";
 
 const MAX_PAGES = 1000;
@@ -99,17 +102,51 @@ export function dtoToThread(raw: unknown): Thread | null {
   return thread;
 }
 
+/**
+ * The AI project a thread belongs to, or `null`: a thread started anywhere
+ * else - a folder, a room, a form's chat in the SDK - belongs to no project
+ * and is listed with the caller's other threads. The C# storage would bind a
+ * thread to any folder it is handed, so only a project's id is passed on.
+ */
+async function toProjectId(entityId: string | undefined): Promise<string | null> {
+  if (entityId === undefined || !/^[1-9]\d*$/.test(entityId)) {
+    return null;
+  }
+  return (await resolveAiProjectEntityId(entityId)) ?? null;
+}
+
+/**
+ * The project whose threads a list is read for. A folder the caller cannot
+ * open is no project of theirs, so it lists the threads of no project, as a
+ * folder that does not exist does: the id of a list is read, never checked.
+ * Any other failure of the read stays a failure, since answering the threads
+ * of no project for a project that could not be read would show the wrong
+ * list as if it were the right one.
+ */
+async function toListedProjectId(entityId: string | undefined): Promise<string | null> {
+  try {
+    return await toProjectId(entityId);
+  } catch (err) {
+    if (err instanceof DocspaceApiHttpError && err.status === 403) {
+      return null;
+    }
+    throw err;
+  }
+}
+
 export class HttpThreadsStorage implements ThreadsStorage {
-  async create(title: string, profileId?: string, _entityId?: string): Promise<Thread> {
+  async create(title: string, profileId?: string, entityId?: string): Promise<Thread> {
     const raw = await aiService.post(PATH, {
       title,
       profileId: profileId ?? null,
-      entityId: null,
+      entityId: await toProjectId(entityId),
     });
     const thread = dtoToThread(raw);
     if (!thread) {
       throw new Error("ai service returned invalid thread");
     }
+    // A round that started without a thread runs in this one from here on.
+    setRoundThreadId(thread.threadId);
     return thread;
   }
 
@@ -133,7 +170,7 @@ export class HttpThreadsStorage implements ThreadsStorage {
   }
 
   async readAll(
-    _entityId?: string,
+    entityId?: string,
     count?: number,
     cursor?: ThreadsCursor,
     query?: string,
@@ -146,15 +183,16 @@ export class HttpThreadsStorage implements ThreadsStorage {
         ? { lastEditDate: cursor.lastEditDate, id: cursor.id || cursor.threadId }
         : undefined;
 
+    const projectId = await toListedProjectId(entityId);
     if (count !== undefined) {
-      const page = await this.readPage(count, wireCursor, query);
+      const page = await this.readPage(projectId, count, wireCursor, query);
       return page.items;
     }
 
     const result: Thread[] = [];
     let next = wireCursor ?? null;
     for (let i = 0; i < MAX_PAGES; i++) {
-      const page = await this.readPage(PAGE_SIZE, next ?? undefined, query);
+      const page = await this.readPage(projectId, PAGE_SIZE, next ?? undefined, query);
       result.push(...page.items);
       next = page.next;
       if (!next) {
@@ -165,11 +203,15 @@ export class HttpThreadsStorage implements ThreadsStorage {
   }
 
   private async readPage(
+    entityId: string | null,
     count: number,
     cursor: WireThreadsCursor | undefined,
     query: string | undefined,
   ): Promise<ThreadsPage> {
     const params: Record<string, QueryValue> = { count };
+    if (entityId !== null) {
+      params["entityId"] = entityId;
+    }
     if (query) {
       params["query"] = query;
     }

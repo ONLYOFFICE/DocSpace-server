@@ -141,6 +141,8 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             await fileStorageService.DeletePersonalDataAsync(UserId);
 
+            await fileStorageService.DeleteAiProjectThreadsAsync(UserId);
+
             Percentage = 45;
             await PublishChanges();
 

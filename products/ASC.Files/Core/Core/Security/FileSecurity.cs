@@ -257,8 +257,7 @@ public class FileSecurity(
                 FolderType.AiProjectRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.Read, FileShare.None] },
-                    { SubjectType.Group, [FileShare.Read, FileShare.None] },
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomManager, FileShare.None] }
                 }.ToFrozenDictionary()
             }
@@ -1160,7 +1159,7 @@ public class FileSecurity(
             FolderType.AiRoom => FileShare.ContentCreator,
             FolderType.InstructionsRoom => FileShare.ContentCreator,
             FolderType.KnowledgeRoom => FileShare.ContentCreator,
-            FolderType.AiProjectRoom => FileShare.Read,
+            FolderType.AiProjectRoom => FileShare.ContentCreator,
             _ => FileShare.None
         };
     }
@@ -1250,6 +1249,19 @@ public class FileSecurity(
         var isRoom = folder is { IsRoom: true };
 
         if ((e.RootFolderType == FolderType.AiHub || folder is { FolderType: FolderType.AiHub }) && !await aiAccessibility.IsAccessEnabledAsync())
+        {
+            return false;
+        }
+
+        if (e.RootFolderType == FolderType.AiHub &&
+            parentFolders.Exists(f => f.FolderType == FolderType.AiProjectRoom) &&
+            (e.CreateBy != userId ||
+             action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy)))
+        {
+            return false;
+        }
+
+        if (action == FilesSecurityActions.HistoryExport && folder is { FolderType: FolderType.AiProjectRoom })
         {
             return false;
         }
@@ -1358,6 +1370,11 @@ public class FileSecurity(
         }
 
         if (action is FilesSecurityActions.UseChat && folder is not { FolderType: FolderType.AiRoom })
+        {
+            return false;
+        }
+
+        if (action is FilesSecurityActions.CanUseAi && isGuest)
         {
             return false;
         }
@@ -3026,6 +3043,11 @@ public class FileSecurity(
             _ => privacyFilter
         };
 
+        if (searchArea == SearchArea.AiHub)
+        {
+            withSubfolders = false;
+        }
+
         var rooms = isAdmin && searchArea is not (SearchArea.Templates or SearchArea.FormTemplates)
             ? await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
                 subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter, withAiFolder, metadataFilter)
@@ -3043,6 +3065,61 @@ public class FileSecurity(
         }
 
         return rooms;
+    }
+
+    public async Task<List<FileEntry>> GetPinnedAiProjectsAsync()
+    {
+        var userId = authContext.CurrentAccount.ID;
+
+        var pinnedIds = await daoFactory.GetTagDao<int>().GetTagsAsync(userId, 0, TagType.Pin)
+            .Where(t => t.EntryType == FileEntryType.Folder && t.EntryId is int)
+            .Select(t => (int)t.EntryId)
+            .Distinct()
+            .ToListAsync();
+
+        if (pinnedIds.Count == 0)
+        {
+            return [];
+        }
+
+        var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId);
+        var aiHubId = await globalFolder.GetFolderAiHubAsync(daoFactory);
+
+        var projects = await daoFactory.GetFolderDao<int>()
+            .GetAiProjectsVisibleToAsync(pinnedIds, aiHubId, userId, isAdmin)
+            .ToDictionaryAsync(p => p.Id);
+
+        var ordered = pinnedIds.Where(projects.ContainsKey).Select(id => projects[id]).ToList();
+
+        foreach (var project in ordered)
+        {
+            if (project.ShareRecord != null)
+            {
+                project.Access = project.ShareRecord.Share;
+            }
+            else
+            {
+                project.Access = FileShare.None;
+
+                if (isAdmin)
+                {
+                    project.ShareRecord = new FileShareRecord<int>
+                    {
+                        EntryId = project.Id,
+                        EntryType = FileEntryType.Folder,
+                        Share = FileShare.None,
+                        SubjectType = SubjectType.User,
+                        Subject = userId
+                    };
+                }
+            }
+
+            project.Pinned = true;
+            project.IsFavorite = false;
+            project.Tags = [];
+        }
+
+        return [.. ordered];
     }
 
     // FillingFormsRoom rooms physically live under VirtualRooms but are surfaced in the separate Forms
@@ -3221,9 +3298,12 @@ public class FileSecurity(
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
+        var excludeAiProjectContent = withSubfolders && searchArea is SearchArea.Any or SearchArea.AiHub;
+
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
-            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, rootFoldersIds, groupId, privacyFilter, withAiFolder, metadataFilter)
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, rootFoldersIds, groupId, privacyFilter, withAiFolder, metadataFilter,
+                    excludeAiProjectContent)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => MatchesFormsSplit(r, searchArea))
                 .Where(r => Filter(r, internalRecords))
@@ -3241,7 +3321,8 @@ public class FileSecurity(
 
         if (withSubfolders && (filterTypes == null || !filterTypes.Contains(FilterType.FoldersOnly)))
         {
-            var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+            var filesParents = excludeAiProjectContent ? rooms.Where(r => r.FolderType != FolderType.AiProjectRoom) : rooms;
+            var files = await fileDao.GetFilesAsync(filesParents.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
             var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(thirdPartyRooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent)
                 .ToListAsync();
 
@@ -3625,6 +3706,26 @@ public class FileSecurity(
     public Task RemoveSecuritiesAsync(Guid subject, Guid owner, SubjectType subjectType)
     {
         return daoFactory.GetSecurityDao<int>().RemoveSecuritiesAsync(subject, owner, subjectType);
+    }
+
+    public Task RemoveAiProjectMemberAsync(Guid userId, int projectId)
+    {
+        return daoFactory.GetSecurityDao<int>().RemoveAiProjectMemberAsync(userId, projectId);
+    }
+
+    public Task RemoveFromAiProjectsAsync(Guid userId)
+    {
+        return daoFactory.GetSecurityDao<int>().RemoveFromAiProjectsAsync(userId);
+    }
+
+    public Task MarkAiProjectThreadsDeletedAsync(Guid userId)
+    {
+        return daoFactory.GetSecurityDao<int>().MarkAiProjectThreadsDeletedAsync(userId);
+    }
+
+    public Task MarkOwnedAiProjectThreadsDeletedAsync(Guid userId)
+    {
+        return daoFactory.GetSecurityDao<int>().MarkOwnedAiProjectThreadsDeletedAsync(userId);
     }
 
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId, bool includeAvailableLinks = false)

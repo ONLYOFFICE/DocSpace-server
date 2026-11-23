@@ -17,6 +17,8 @@ fields, they call the operations through `RawApiClient`.
   on an empty MySQL database.
   - 2026-11-17: `files_share_link_keys`, `files_share_link_secret_wraps`, `ShareLinkKeyQueries.cs`,
     `MigrationContext_Upgrade108`; all migrations applied to an empty MySQL 8.4 database.
+  - 2026-11-23: after `release/v4.1.0` brought its own Upgrade108–111, the migration was generated again on top of
+    them as `MigrationContext_Upgrade112` (same Up and Down); not applied to a database yet.
 - [x] 1.2 Declare both tables skipped in the backup (`.claude/rules/backup-tables.md`) and extend
   `common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs` (`:68`, `:108`, cited by "Keys and file keys are not
   backed up") so it fails if either table is backed up; verify the test passes.

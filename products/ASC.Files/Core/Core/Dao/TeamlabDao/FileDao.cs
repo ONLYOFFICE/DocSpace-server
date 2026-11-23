@@ -479,6 +479,11 @@ internal class FileDao(
         return await SaveFileAsync(file, fileStream, true, true, null, allowQuotaGrace);
     }
 
+    public Task<File<int>> SaveThreadFileAsync(File<int> file, Stream fileStream, Guid threadId)
+    {
+        return SaveFileAsync(file, fileStream, true, true, null, false, threadId);
+    }
+
     /// <summary>
     /// A private room holds nothing but ciphertext, whichever way a file gets there. This sits on the write path
     /// itself so that a new way of creating a file cannot walk around it.
@@ -496,13 +501,25 @@ internal class FileDao(
         return await SaveFileAsync(file, fileStream, true, checkFolder);
     }
 
-    public async Task<File<int>> SaveFileAsync(
+    public Task<File<int>> SaveFileAsync(
         File<int> file,
         Stream fileStream,
         bool checkQuota,
         bool checkFolder,
         ChunkedUploadSession<int> uploadSession = null,
         bool allowQuotaGrace = false)
+    {
+        return SaveFileAsync(file, fileStream, checkQuota, checkFolder, uploadSession, allowQuotaGrace, null);
+    }
+
+    private async Task<File<int>> SaveFileAsync(
+        File<int> file,
+        Stream fileStream,
+        bool checkQuota,
+        bool checkFolder,
+        ChunkedUploadSession<int> uploadSession,
+        bool allowQuotaGrace,
+        Guid? threadId)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -550,7 +567,8 @@ internal class FileDao(
         {
             quotaLockKey = $"room_{roomId}";
             currentRoom = await folderDao.GetFolderAsync(roomId);
-            // the folder type is immutable, so the settings type can be picked outside the lock
+            // a room changes its type only when the agent migration turns an AI agent into a Knowledge room (ClaimAiAgentRoomAsync),
+            // which takes no quota lock; an upload racing with that conversion is checked against the AI agent quota settings
             roomQuotaSettings = currentRoom.FolderType is FolderType.AiRoom
                 ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
                 : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
@@ -631,6 +649,12 @@ internal class FileDao(
                     await strategy.ExecuteAsync(async () =>
                     {
                         await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+
+                        // Locks the thread row until the transaction ends, so a soft delete cannot slip in between.
+                        if (threadId.HasValue && await filesDbContext.TouchLiveThreadAsync(tenantId, threadId.Value, DateTime.UtcNow) == 0)
+                        {
+                            throw new ItemNotFoundException();
+                        }
 
                         if (file.Id == 0)
                         {
@@ -722,6 +746,20 @@ internal class FileDao(
                         else
                         {
                             await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
+                        }
+
+                        if (isNew && currentFolder.FolderType == FolderType.AiProjectRoom)
+                        {
+                            await filesDbContext.Attachments.AddAsync(new DbAttachment
+                            {
+                                Id = Guid.CreateVersion7(),
+                                TenantId = tenantId,
+                                Kind = fileType == FileType.Image ? AttachmentKind.Image : AttachmentKind.File,
+                                Title = file.Title,
+                                EntryId = file.Id,
+                                CreatedBy = file.CreateBy,
+                                CreatedAt = DateTime.UtcNow
+                            });
                         }
 
                         if (file.VectorizationStatus.HasValue)
@@ -1306,6 +1344,23 @@ internal class FileDao(
         return deletedIds;
     }
 
+    public async IAsyncEnumerable<(int FileId, int ProjectId, long Size)> GetChatDraftFilesAsync(IReadOnlyCollection<Guid> attachmentIds)
+    {
+        if (attachmentIds.Count == 0)
+        {
+            yield break;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var file in filesDbContext.ChatDraftFilesAsync(tenantId, attachmentIds))
+        {
+            yield return (file.Id, file.ProjectId, file.Size);
+        }
+    }
+
     public async Task<bool> IsExistAsync(string title, int folderId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -1322,14 +1377,42 @@ internal class FileDao(
 
     public async Task<string> GetAvailableTitleAsync(string requestTitle, int parentFolderId)
     {
-        return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
+        bool? inAiProject = null;
+
+        return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsTitleTakenAsync, FileEntryType.File);
+
+        async Task<bool> IsTitleTakenAsync(string title, int folderId)
+        {
+            if (!await IsExistAsync(title, folderId))
+            {
+                return false;
+            }
+
+            inAiProject ??= await GetFolderTypeAsync(folderId) == FolderType.AiProjectRoom;
+
+            return !inAiProject.Value || await IsExistByCreatorAsync(title, folderId, _authContext.CurrentAccount.ID);
+        }
+    }
+
+    private async Task<FolderType> GetFolderTypeAsync(int folderId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.FolderTypeByIdAsync(tenantId, folderId);
+    }
+
+    private async Task<bool> IsExistByCreatorAsync(string title, int folderId, Guid createBy)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.DbFilesAnyByCreatorAsync(tenantId, title, folderId, createBy);
     }
 
     public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks, string newTitle)
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks, newTitle));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks, newTitle, null));
         }
 
         if (toFolderId is string tsId)
@@ -1342,14 +1425,19 @@ internal class FileDao(
 
     public Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks = false)
     {
-        return MoveFileAsync(fileId, toFolderId, deleteLinks, null);
+        return MoveFileAsync(fileId, toFolderId, deleteLinks, null, null);
+    }
+
+    public Task<int> MoveThreadFileAsync(int fileId, int toFolderId, Guid threadId)
+    {
+        return MoveFileAsync(fileId, toFolderId, false, null, threadId);
     }
 
     /// <summary>
     /// Moves the file; a non-null <paramref name="newTitle"/> is stored on the current version in the same
     /// update, so the file arrives under it instead of being renamed afterwards.
     /// </summary>
-    private async Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks, string newTitle)
+    private async Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks, string newTitle, Guid? threadId)
     {
         var title = newTitle == null ? null : Global.ReplaceInvalidCharsAndTruncate(newTitle);
 
@@ -1474,6 +1562,12 @@ internal class FileDao(
 
             await using (var tx = await context.Database.BeginTransactionAsync())
             {
+                // Locks the thread row until the transaction ends, so a soft delete cannot slip in between.
+                if (threadId.HasValue && await context.TouchLiveThreadAsync(tenantId, threadId.Value, DateTime.UtcNow) == 0)
+                {
+                    throw new ItemNotFoundException();
+                }
+
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
                 if (skill != null && fromRoomId != toRoomId)
@@ -2240,13 +2334,16 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        if (exceptFolderIds == null || !exceptFolderIds.Any())
+        var except = await filesDbContext.AiProjectIdsAsync(tenantId).ToListAsync();
+        except.AddRange(exceptFolderIds ?? []);
+
+        if (except.Count == 0)
         {
             await filesDbContext.ReassignFilesByCreateByAsync(tenantId, oldOwnerId, newOwnerId);
         }
         else
         {
-            await filesDbContext.ReassignFilesPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
+            await filesDbContext.ReassignFilesPartiallyAsync(tenantId, oldOwnerId, newOwnerId, except);
         }
     }
 
@@ -2274,7 +2371,8 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var items = await filesDbContext.GetRoomsFilesReassignInfoAsync(tenantId, fromOwner).ToListAsync();
+        var except = await filesDbContext.AiProjectIdsAsync(tenantId).ToListAsync();
+        var items = await filesDbContext.GetRoomsFilesReassignInfoAsync(tenantId, fromOwner, except).ToListAsync();
 
         foreach (var group in items.GroupBy(x => x.RoomOwnerId))
         {

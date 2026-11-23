@@ -442,6 +442,14 @@ public class FileSharingAceHelper(
                 {
                     await SetPrivateLinkAsync(entry, entryType, w, share, existedShare);
                 }
+                else if (share == FileShare.None &&
+                    !beforeOwnerChange &&
+                    existedShare is { SubjectType: SubjectType.User } &&
+                    room is { FolderType: FolderType.AiProjectRoom, Id: int projectId } &&
+                    room.CreateBy != w.Id)
+                {
+                    await fileSecurity.RemoveAiProjectMemberAsync(w.Id, projectId);
+                }
                 else
                 {
                     await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions, owner: existedShare?.Owner);

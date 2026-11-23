@@ -97,8 +97,11 @@ public class ReassignController(
     /// While a job for the source runs, a repeated call returns that job and starts nothing new. After the job ends, a
     /// repeated call starts a new job. The portal then emails the caller again. If the job deleted the source profile,
     /// a repeated call returns 400. If `deleteProfile` is true, the job also deletes the other personal files of the
-    /// source, then the profile. This cannot be undone. Otherwise, the source keeps the personal files that it did not
-    /// share. The portal emails the caller when the job succeeds or fails. The call returns 400 if the recipient is
+    /// source, then the profile. It also deletes the chat threads the source created in AI projects, with their files.
+    /// This cannot be undone. Otherwise, the source keeps the personal files that it did not share. It also keeps its
+    /// chat threads in AI projects of other owners. The job deletes its threads in the AI projects that move to the
+    /// recipient. Files inside an AI project keep their creator. The portal emails the caller when the job succeeds or
+    /// fails. The call returns 400 if the recipient is
     /// unknown or is not an active room admin or DocSpace admin. It also returns 400 if the source is unknown, a system
     /// account, the portal owner, the caller, or not disabled.
     /// </remarks>

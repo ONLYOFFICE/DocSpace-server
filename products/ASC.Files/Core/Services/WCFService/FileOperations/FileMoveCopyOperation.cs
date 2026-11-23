@@ -697,7 +697,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
 
-        var resolveType = toParentFolders.Exists(f => f.FolderType == FolderType.KnowledgeRoom) ? FileConflictResolveType.Duplicate : _resolveType;
+        var resolveType = toFolder.FolderType == FolderType.AiProjectRoom || toParentFolders.Exists(f => f.FolderType == FolderType.KnowledgeRoom) ? FileConflictResolveType.Duplicate : _resolveType;
 
         // files of one operation usually share a handful of parents
         var parentFoldersCache = new Dictionary<T, Folder<T>>();

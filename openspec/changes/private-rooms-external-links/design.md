@@ -152,7 +152,7 @@ section follows the app".
 ## Migration Plan
 
 - One migration adds the two tables, and both are declared skipped in the backup. No existing data changes: no private
-  item holds a link today. It is generated for MySQL SaaS only (`MigrationContext_Upgrade108`), as the other schema
+  item holds a link today. It is generated for MySQL SaaS only (`MigrationContext_Upgrade112`), as the other schema
   changes of the repository are: the PostgreSQL SaaS and the Standalone model snapshots have not followed the schema
   for months (they hold neither `files_file_keys` nor the `ai_` tables), and a migration on them would carry all of that.
 - The portal setting defaults to on; a portal that never makes such a link sees no difference.

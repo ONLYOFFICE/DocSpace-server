@@ -269,7 +269,7 @@ public class AttachmentSaveFilesManyTests(AspireAppFixture fixture) : Attachment
 
         foreach (var id in ids)
         {
-            await ExpectAbsentAsync(id, "a draft after delete-many");
+            await ExpectCleanedUpAsync(id, "a draft after delete-many");
         }
 
         var after = await GetManyAsync(ids);

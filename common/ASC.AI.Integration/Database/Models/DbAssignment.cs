@@ -104,6 +104,9 @@ public static class DbAssignmentExtension
 
             entity.HasIndex(e => new { e.TenantId, e.ActionType, e.EntryId })
                 .HasDatabaseName("IX_tenant_id_action_type_entry_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("IX_tenant_id_entry_id");
         });
     }
 
@@ -142,6 +145,9 @@ public static class DbAssignmentExtension
 
             entity.HasIndex(e => new { e.TenantId, e.ActionType, e.EntryId })
                 .HasDatabaseName("ix_ai_integration_assignments_tenant_id_action_type_entry_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("ix_ai_integration_assignments_tenant_id_entry_id");
         });
     }
 }
