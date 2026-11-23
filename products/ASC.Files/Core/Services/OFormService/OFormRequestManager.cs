@@ -83,7 +83,8 @@ public class OFormRequestManager(
     /// <exception cref="ItemNotFoundException">The gallery has no such template, or no file of this format for it.</exception>
     /// <exception cref="CustomHttpException">
     /// 502: the gallery did not answer in time, answered with an error status or with a body that is not the template
-    /// list, or returned a PDF without a PDF header or a DOCX, XLSX or PPTX file without a ZIP signature.
+    /// list, named a file at an address that cannot be requested, or returned a PDF without a PDF header or a DOCX, XLSX
+    /// or PPTX file without a ZIP signature.
     /// </exception>
     public async Task<Stream> Get(int id, string ext)
     {
@@ -115,7 +116,15 @@ public class OFormRequestManager(
 
             var file = GetFile(data, ext) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
 
-            using var streamResponse = await httpClient.GetAsync(file.Url, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+            // A gallery that keeps its files itself (the local upload provider of Strapi) names them by a path on its host
+            if (!Uri.TryCreate(new Uri(_configuration.Domain), file.Url, out var fileUri))
+            {
+                logger.WarningOFormGalleryFileAddress(file.Url);
+
+                throw GalleryUnavailable();
+            }
+
+            using var streamResponse = await httpClient.GetAsync(fileUri, HttpCompletionOption.ResponseHeadersRead, cts.Token);
             if (!streamResponse.IsSuccessStatusCode)
             {
                 logger.WarningOFormGalleryStatus(streamResponse.RequestMessage?.RequestUri, (int)streamResponse.StatusCode);
@@ -132,7 +141,7 @@ public class OFormRequestManager(
             if (!await HasFormatSignatureAsync(stream, ext))
             {
                 await stream.DisposeAsync();
-                logger.WarningOFormGalleryNotForm(file.Url);
+                logger.WarningOFormGalleryNotForm(fileUri);
 
                 throw GalleryUnavailable();
             }
@@ -215,7 +224,8 @@ public class OFormRequestManager(
 
     /// <summary>
     /// Asks the gallery for one template of its list. Never throws: a gallery that does not answer in time, answers
-    /// with an error status or with a body that is not the list (the page of a proxy) fails the check.
+    /// with an error status or with a body that is not the list (the page of a proxy) fails the check, and so does an
+    /// exception that is not a failure of the gallery, logged as an error.
     /// </summary>
     private async Task<bool> ProbeAsync(CancellationToken cancellationToken)
     {
@@ -246,6 +256,14 @@ public class OFormRequestManager(
         catch (Exception e) when (IsGalleryFailure(e))
         {
             logger.WarningOFormGalleryProbeFailed(e);
+
+            return false;
+        }
+        catch (Exception e)
+        {
+            // Not a failure of the gallery, yet the check has to answer: with nothing known, a 500 of the endpoint would
+            // replace "unavailable", and a known "available" is kept by the fail-safe either way
+            logger.ErrorOFormGalleryProbeError(e);
 
             return false;
         }

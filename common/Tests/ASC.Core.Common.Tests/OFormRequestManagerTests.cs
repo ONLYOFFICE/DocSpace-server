@@ -104,6 +104,22 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task Get_GalleryNamesTheFileByAPathOnItsHost_ReturnsIt()
+    {
+        // The local upload provider of Strapi keeps the files on the gallery's host and names them by a path from its
+        // root: the stub answers at the root of a server of its own, so that path reaches it
+        var gallery = HttpStub.AtRoot(request => IsFile(request)
+            ? new StubResponse(HttpStatusCode.OK, Pdf)
+            : StubResponse.Json(HttpStatusCode.OK, """{"data":[{"id":1,"file_oform":[{"url":"/uploads/file.pdf","name":"form","ext":".pdf"}]}]}"""));
+        _stubs.Add(gallery);
+
+        await using var stream = await CreateManager(gallery.Url).Get(1, ".pdf");
+
+        using var reader = new StreamReader(stream);
+        (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(Pdf);
+    }
+
+    [Fact]
     public async Task Get_GalleryHasNoSuchForm_Returns404()
     {
         var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, """{"data":[]}"""));
@@ -296,6 +312,16 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task IsAvailableAsync_CheckThrowsForAReasonOtherThanTheGallery_IsFalse()
+    {
+        // An exception that is not a failure of the gallery, with nothing known: the endpoint answers false, not 500
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List));
+        var manager = CreateManager(gallery.Url, primaryHandler: () => new ThrowingHandler(new ObjectDisposedException("handler")));
+
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task IsAvailableAsync_NoGalleryConfigured_IsFalse()
     {
         (await CreateManager(null).IsAvailableAsync()).Should().BeFalse();
@@ -485,16 +511,23 @@ public sealed class OFormRequestManagerTests : IDisposable
 
     /// <param name="domain">The address of the gallery; <c>null</c> configures none.</param>
     /// <param name="clientTimeout">The timeout of the HTTP client, shorter than the manager's own to test it quickly.</param>
-    private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null)
+    /// <param name="primaryHandler">A handler in place of the network, for a fault the stubs cannot produce.</param>
+    private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null,
+        Func<HttpMessageHandler>? primaryHandler = null)
     {
         var services = new ServiceCollection();
-        services.AddHttpClient(Options.DefaultName, client =>
+        var builder = services.AddHttpClient(Options.DefaultName, client =>
         {
             if (clientTimeout is { } timeout)
             {
                 client.Timeout = timeout;
             }
         });
+
+        if (primaryHandler is not null)
+        {
+            builder.ConfigurePrimaryHttpMessageHandler(primaryHandler);
+        }
 
         var provider = services.BuildServiceProvider();
         _services.Add(provider);
@@ -526,6 +559,18 @@ public sealed class OFormRequestManagerTests : IDisposable
 
         exception.StatusCode.Should().Be((int)HttpStatusCode.BadGateway);
     }
+
+    /// <summary>
+    /// A handler that throws the given exception on every request.
+    /// </summary>
+    private sealed class ThrowingHandler(Exception exception) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return Task.FromException<HttpResponseMessage>(exception);
+        }
+    }
+
     /// <summary>
     /// A server that answers 200 with a Content-Length longer than the body it writes, then closes the connection: the
     /// gallery, or a proxy of a closed network, dropping the connection while the body is read. WireMock cannot do

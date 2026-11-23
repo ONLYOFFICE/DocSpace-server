@@ -42,8 +42,11 @@ internal static partial class OFormRequestManagerLogger
     [LoggerMessage(LogLevel.Warning, "The template gallery answered {uri} without its template list")]
     public static partial void WarningOFormGalleryNoList(this ILogger<OFormRequestManager> logger, Uri uri);
 
-    [LoggerMessage(LogLevel.Warning, "The file from the template gallery lacks the expected format signature: {url}")]
-    public static partial void WarningOFormGalleryNotForm(this ILogger<OFormRequestManager> logger, string url);
+    [LoggerMessage(LogLevel.Warning, "The file from the template gallery lacks the expected format signature: {uri}")]
+    public static partial void WarningOFormGalleryNotForm(this ILogger<OFormRequestManager> logger, Uri uri);
+
+    [LoggerMessage(LogLevel.Warning, "The template gallery gave a file address that cannot be read: {url}")]
+    public static partial void WarningOFormGalleryFileAddress(this ILogger<OFormRequestManager> logger, string url);
 
     [LoggerMessage(LogLevel.Warning, "The template gallery could not be reached or gave an unreadable answer")]
     public static partial void WarningOFormGalleryUnreachable(this ILogger<OFormRequestManager> logger, Exception exception);
@@ -56,4 +59,7 @@ internal static partial class OFormRequestManagerLogger
 
     [LoggerMessage(LogLevel.Warning, "The check of the template gallery could not reach it or read its answer")]
     public static partial void WarningOFormGalleryProbeFailed(this ILogger<OFormRequestManager> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "The check of the template gallery failed for a reason other than the gallery")]
+    public static partial void ErrorOFormGalleryProbeError(this ILogger<OFormRequestManager> logger, Exception exception);
 }

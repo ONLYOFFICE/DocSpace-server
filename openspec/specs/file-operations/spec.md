@@ -31,10 +31,8 @@ also where a bug is open, as the full test run of 365d87fe60 showed it.
 `createFile` (`POST api/2.0/files/{folderId}/file`) and `createFileInMyDocuments` (`POST
 api/2.0/files/@my/file`) SHALL create a file from the portal's blank template, normalising the requested title
 to a format the portal can create. A title longer than 170 characters SHALL be rejected (400); a section root
-or a folder id the caller cannot resolve SHALL be refused (403). A nonzero `formId` without `templateId` SHALL copy
-that template from the template gallery: 404 when the gallery is not configured or has no file of the title's
-format for it, 502 when the gallery cannot be read or returns a file that is not of that format (bug 78009). The
-`templateId` source is not covered by tests and is not specified here.
+or a folder id the caller cannot resolve SHALL be refused (403). A nonzero `formId` SHALL copy that template
+from the template gallery (bug 78009); `templateId` is not specified here.
 
 #### Scenario: Title normalisation
 
@@ -66,10 +64,40 @@ format for it, 502 when the gallery cannot be read or returns a file that is not
 
 #### Scenario: Template from the template gallery
 
-- **WHEN** a file is created with a `formId` and the gallery answers its template list with a file of the title's format, a PDF with a PDF header or a DOCX, XLSX or PPTX with a ZIP signature
+- **WHEN** a file is created with a `formId` and no `templateId`, and the gallery answers its template list with a file of the title's format, a PDF with a PDF header or a DOCX, XLSX or PPTX with a ZIP signature, at a full address or at a path on the gallery's host
 - **THEN** the gallery file is the content of the new file
 - **AND** the call answers 404 when no gallery is configured, when the list has no such template, or when the template has no file of that format
-- **AND** the call answers 502 when the gallery cannot be reached, does not answer within 30 seconds, drops the connection while answering, answers the list or the file with an error status, answers the list without its template list (a page of a proxy), or returns a PDF without a PDF header or a DOCX, XLSX or PPTX without a ZIP signature
+- **AND** the call answers 502 when the gallery cannot be reached, does not answer before the download deadline, drops the connection while answering, answers the list or the file with an error status, answers the list without its template list (a page of a proxy), names a file at an address that cannot be requested, or returns a PDF without a PDF header or a DOCX, XLSX or PPTX without a ZIP signature
+
+### Requirement: Template gallery availability
+
+`getTemplateGalleryAvailable` (`GET api/2.0/files/templateGallery/available`) SHALL tell a signed-in caller
+whether the template gallery answers with its template list, and SHALL refuse an anonymous caller (401). The
+answer SHALL be `false` when no gallery is configured or a check fails with no earlier answer known. The answer
+is kept for the whole installation, and a failed check SHALL NOT replace a known `true` for up to a day (bug
+78009).
+
+#### Scenario: Gallery answers
+
+- **WHEN** the gallery answers its template list
+- **THEN** the call returns `true`, and a second call within the cache time does not ask the gallery again
+
+#### Scenario: Check fails with nothing known
+
+- **WHEN** no gallery is configured, or the gallery answers with an error status, with a page that is not the list, not in time, drops the connection, cannot be reached, or the check fails for a reason other than the gallery
+- **THEN** the call returns `false`
+- **AND** that `false` stays with the process that checked: another process of the installation asks the gallery itself
+
+#### Scenario: Check fails with available known
+
+- **WHEN** the call returned `true` and a later check gets an error status or a page that is not the list
+- **THEN** the call still returns `true`
+
+#### Scenario: Caller
+
+- **WHEN** a signed-in user calls it
+- **THEN** the answer is a boolean
+- **AND** an anonymous caller gets 401
 
 #### Scenario: Non-PDF file in a Form filling room
 
