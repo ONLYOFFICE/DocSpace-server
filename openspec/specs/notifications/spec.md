@@ -297,6 +297,17 @@ Telegram.
 - **WHEN** the portal's tariff is not paid
 - **THEN** no hourly digest is sent either, while the letters a room sends at once still go out
 
+### Requirement: AI projects in the digests
+
+The daily feed digest and the hourly room activity digest SHALL list no event of an AI project or of an
+entry inside it, for every recipient, the project's owner and DocSpace admins included (`ai-agents`,
+"Activity digests leave out AI projects").
+
+#### Scenario: Activity in a project
+
+- **WHEN** a member uploads or creates a file in an AI project, or the project is created, renamed or gets a new member
+- **THEN** neither digest of any recipient lists the event
+
 ### Requirement: SMTP settings of the portal
 
 `getSmtpSettings`, `saveSmtpSettings` and `resetSmtpSettings` SHALL require the portal-settings

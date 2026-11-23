@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.EF;
@@ -198,6 +198,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<DbFolderQuery> AiProjectsWithOwnRecordAsync(int tenantId, IEnumerable<int> ids, int parentId, Guid userId, bool isAdmin)
+    {
+        return FolderQueries.AiProjectsWithOwnRecordAsync(this, tenantId, ids, parentId, userId, isAdmin);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<DbFolderQuery> DbFolderQueriesByTextAsync(int tenantId, string text)
     {
         return FolderQueries.DbFolderQueriesByTextAsync(this, tenantId, text);
@@ -330,9 +336,21 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<FolderReassignInfo> GetRoomsFoldersReassignInfoAsync(int tenantId, Guid ownerId)
+    public IAsyncEnumerable<FolderReassignInfo> GetRoomsFoldersReassignInfoAsync(int tenantId, Guid ownerId, IEnumerable<int> exceptFolderIds)
     {
-        return FolderQueries.GetRoomsFoldersReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes);
+        return FolderQueries.GetRoomsFoldersReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes, exceptFolderIds);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> AiProjectIdsAsync(int tenantId)
+    {
+        return FolderQueries.AiProjectIdsAsync(this, tenantId);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> AiProjectChildFolderIdsAsync(int tenantId)
+    {
+        return FolderQueries.AiProjectChildFolderIdsAsync(this, tenantId);
     }
 
     [PreCompileQuery]
@@ -393,6 +411,37 @@ public partial class FilesDbContext
 
 static file class FolderQueries
 {
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, int, Guid, bool, IAsyncEnumerable<DbFolderQuery>> AiProjectsWithOwnRecordAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> ids, int parentId, Guid userId, bool isAdmin) =>
+                ctx.Folders
+                    .Where(f => f.TenantId == tenantId && ids.Contains(f.Id) && f.FolderType == FolderType.AiProjectRoom && f.ParentId == parentId)
+                    .Join(ctx.Folders,
+                        f => new { f.TenantId, Id = f.ParentId },
+                        root => new { root.TenantId, root.Id },
+                        (f, root) => new { Folder = f, Root = root })
+                    .GroupJoin(ctx.RoomSettings,
+                        x => new { x.Folder.TenantId, RoomId = x.Folder.Id },
+                        rs => new { rs.TenantId, rs.RoomId },
+                        (x, settings) => new { x.Folder, x.Root, settings })
+                    .SelectMany(x => x.settings.DefaultIfEmpty(), (x, rs) => new { x.Folder, x.Root, Settings = rs })
+                    .GroupJoin(ctx.Security.Where(s =>
+                            s.EntryType == FileEntryType.Folder &&
+                            s.Subject == userId &&
+                            s.Share != FileShare.Restrict),
+                        x => new { x.Folder.TenantId, x.Folder.Id },
+                        s => new { s.TenantId, Id = s.InternalEntryId },
+                        (x, records) => new { x.Folder, x.Root, x.Settings, records })
+                    .SelectMany(x => x.records.DefaultIfEmpty(), (x, s) => new { x.Folder, x.Root, x.Settings, Record = s })
+                    .Where(x => isAdmin || x.Folder.CreateBy == userId || x.Record != null)
+                    .Select(x => new DbFolderQuery
+                    {
+                        Folder = x.Folder,
+                        Root = x.Root,
+                        Settings = x.Settings,
+                        SharedRecord = x.Record
+                    }));
+
     public static readonly Func<FilesDbContext, int, int, Task<DbFolderQuery>> DbFolderQueryAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId) =>
@@ -840,14 +889,30 @@ static file class FolderQueries
                 .Where(r => r.TenantId == tenantId && roomTypes.Contains(r.FolderType) && r.CreateBy == oldOwnerId)
                 .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
-    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<FolderReassignInfo>> GetRoomsFoldersReassignInfoAsync =
+    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<int>> AiProjectIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid ownerId, IEnumerable<FolderType> roomTypes) =>
+            (FilesDbContext ctx, int tenantId) =>
+                ctx.Folders
+                    .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.AiProjectRoom)
+                    .Select(f => f.Id));
+
+    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<int>> AiProjectChildFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId) =>
+                ctx.Folders
+                    .Where(f => f.TenantId == tenantId &&
+                                ctx.Folders.Any(p => p.TenantId == tenantId && p.Id == f.ParentId && p.FolderType == FolderType.AiProjectRoom))
+                    .Select(f => f.Id));
+
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IEnumerable<int>, IAsyncEnumerable<FolderReassignInfo>> GetRoomsFoldersReassignInfoAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid ownerId, IEnumerable<FolderType> roomTypes, IEnumerable<int> exceptFolderIds) =>
                 ctx.Folders
                     .Where(f =>
                         f.TenantId == tenantId &&
                         f.CreateBy == ownerId &&
-                        (f.FolderType == FolderType.DEFAULT || f.FolderType == FolderType.Ai))
+                        (f.FolderType == FolderType.DEFAULT || f.FolderType == FolderType.Ai) &&
+                        ctx.Tree.FirstOrDefault(t => t.FolderId == f.Id && exceptFolderIds.Contains(t.ParentId)) == null)
                     .Select(f => new FolderReassignInfo
                     {
                         FolderId = f.Id,

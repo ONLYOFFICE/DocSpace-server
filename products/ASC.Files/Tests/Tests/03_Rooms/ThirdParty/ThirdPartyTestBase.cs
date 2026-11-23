@@ -132,30 +132,41 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
     }
 
     /// <summary>
-    /// Builds a connect request for the configured Nextcloud account.
+    /// A Nextcloud account other than the configured one, such as a user a test creates through the
+    /// provisioning API.
+    /// </summary>
+    /// <param name="DavUrl">The WebDAV root of the account, <c>{origin}/remote.php/dav/files/{user}/</c>.</param>
+    /// <param name="Login">The account's login.</param>
+    /// <param name="Password">The account's password.</param>
+    protected sealed record NextcloudAccount(string DavUrl, string Login, string Password);
+
+    /// <summary>
+    /// Builds a connect request for a Nextcloud account, the configured one unless <paramref name="account"/> is given.
     /// </summary>
     /// <param name="customerTitle">The title the connection is saved under.</param>
-    /// <param name="password">The password to authenticate with; defaults to the correct one.</param>
-    protected static ThirdPartyRequestDto NextcloudRequest(string customerTitle, string? password = null)
+    /// <param name="password">The password to authenticate with; defaults to the account's correct one.</param>
+    /// <param name="account">The account to connect; defaults to the configured one.</param>
+    protected static ThirdPartyRequestDto NextcloudRequest(string customerTitle, string? password = null, NextcloudAccount? account = null)
     {
         // The generated model validates its required properties inside the constructor, so
         // customerTitle and providerKey have to be passed as arguments — an object initializer
         // throws ArgumentNullException before it ever assigns them.
         return new ThirdPartyRequestDto(
-            url: NextcloudUrl,
-            login: NextcloudLogin,
-            password: password ?? NextcloudPassword,
+            url: account?.DavUrl ?? NextcloudUrl,
+            login: account?.Login ?? NextcloudLogin,
+            password: password ?? account?.Password ?? NextcloudPassword,
             customerTitle: customerTitle,
             providerKey: "Nextcloud");
     }
 
     /// <summary>
-    /// Connects the configured Nextcloud account and returns the third-party folder it created.
+    /// Connects a Nextcloud account, the configured one unless <paramref name="account"/> is given, and returns the
+    /// third-party folder it created.
     /// </summary>
-    protected async Task<ThirdPartyFolderDto> ConnectNextcloud(string customerTitle)
+    protected async Task<ThirdPartyFolderDto> ConnectNextcloud(string customerTitle, NextcloudAccount? account = null)
     {
         var response = await _thirdPartyApi.SaveThirdPartyAsync(
-            NextcloudRequest(customerTitle), TestContext.Current.CancellationToken);
+            NextcloudRequest(customerTitle, account: account), TestContext.Current.CancellationToken);
 
         return response.Response;
     }
@@ -182,12 +193,20 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
     /// the string overloads of the SDK. With <paramref name="createAsNewFolder"/> the room is a new
     /// subfolder of the account named after <paramref name="title"/>; that keeps the room small, but
     /// the subfolder stays in the storage once the room is gone, so use it only where the room root
-    /// itself is what the test acts on.
+    /// itself is what the test acts on. With <paramref name="account"/> the room is on that account
+    /// instead of the configured one; such a room cannot be a new subfolder, because the subfolder is
+    /// removed after the test through a connection to the configured account.
     /// </remarks>
     protected async Task<(int ProviderId, string FolderId, string RoomId)> CreateNextcloudRoom(
-        string title, RoomType roomType = RoomType.CustomRoom, bool createAsNewFolder = false, bool denyDownload = false)
+        string title, RoomType roomType = RoomType.CustomRoom, bool createAsNewFolder = false, bool denyDownload = false,
+        NextcloudAccount? account = null)
     {
-        var connection = await ConnectNextcloud($"{title} (storage)");
+        if (createAsNewFolder && account is not null)
+        {
+            throw new ArgumentException("A room on another account cannot be a new subfolder: nothing would remove it after the test.", nameof(account));
+        }
+
+        var connection = await ConnectNextcloud($"{title} (storage)", account);
 
         var room = await _roomsApi.CreateRoomThirdPartyAsync(
             connection.Id,

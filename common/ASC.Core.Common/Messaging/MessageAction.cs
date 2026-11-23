@@ -1120,6 +1120,9 @@ public enum MessageAction
     [Description("AI document agent settings updated")]
     AiDocumentAgentSettingsUpdated = 6126,
 
+    [Description("Promo code applied")]
+    CustomerPromoCodeApplied = 6127,
+
     #endregion
 
     #region others

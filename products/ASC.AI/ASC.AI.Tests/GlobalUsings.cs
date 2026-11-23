@@ -61,6 +61,7 @@ global using WireMock.Types;
 global using WireMock.Util;
 
 global using Xunit;
+global using AgentsMigrationDto = ASCAi::ASC.AI.Models.ResponseDto.AgentsMigrationDto;
 // The public AI surface (/api/2.0/ai, the Node chat service). Aliased: several names clash with other SDK areas.
 global using AiAssignmentsApi = DocSpace.API.SDK.Api.AI.AssignmentsApi;
 global using AiChatApi = DocSpace.API.SDK.Api.AI.AIApi;
@@ -83,12 +84,16 @@ global using DocumentAgentReasoning = ASC.AI.Integration.DocumentAgent.DocumentA
 global using DocumentAgentSettingsDto = ASCAi::ASC.AI.Models.ResponseDto.DocumentAgentSettingsDto;
 // The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
 global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
+global using FileIndexAction = ASC.Files.Core.IntegrationEvents.Events.FileIndexAction;
+global using FileIndexIntegrationEvent = ASC.Files.Core.IntegrationEvents.Events.FileIndexIntegrationEvent;
 global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FilesQuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
+global using FolderIndexAction = ASC.Files.Core.IntegrationEvents.Events.FolderIndexAction;
+global using FolderIndexIntegrationEvent = ASC.Files.Core.IntegrationEvents.Events.FolderIndexIntegrationEvent;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
 global using FormSchemaFormatter = ASCAi::ASC.AI.Tools.Core.FormSchemaFormatter;
-global using LegacyProviderMapper = ASCAi::ASC.AI.Migration.LegacyProviderMapper;
+global using LegacyProviderMapper = ASC.AI.Migration.LegacyProviderMapper;
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;
 global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.MessageDto;
 global using MessagesPageDto = ASCAi::ASC.AI.Models.ResponseDto.MessagesPageDto;

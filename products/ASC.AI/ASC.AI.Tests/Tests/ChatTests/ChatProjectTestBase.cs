@@ -42,7 +42,7 @@ namespace ASC.AI.Tests.Tests.ChatTests;
 /// <remarks>
 /// Unlike the agent, a project holds no instructions (the Files API refuses chat settings on it) and has no Chat
 /// outputs folder. Its members are the owner, Project managers (<c>RoomManager</c>, RoomAdmin and above) and members
-/// invited at <c>Read</c>; those three may chat, anyone else is refused.
+/// invited at <c>ContentCreator</c>; those three may chat, anyone else is refused.
 /// </remarks>
 public abstract class ChatProjectTestBase(AspireAppFixture fixture) : ChatPart3TestBase(fixture)
 {
@@ -81,11 +81,11 @@ public abstract class ChatProjectTestBase(AspireAppFixture fixture) : ChatPart3T
         return await AgentsTests.AiProjects.GetModelAsync(ProjectsApi, projectId);
     }
 
-    /// <summary>Invites a member of the given type into a project at <c>Read</c>, the level that may chat there.</summary>
+    /// <summary>Invites a member of the given type into a project at <c>ContentCreator</c>, the member role that may chat there.</summary>
     protected async Task<User> InviteToProjectAsync(int projectId, EmployeeType type)
     {
         var member = await InviteContact(type, TestContext.Current.CancellationToken);
-        await ShareRoomAsync(projectId, member, FileShare.Read);
+        await ShareRoomAsync(projectId, member, FileShare.ContentCreator);
 
         return member;
     }

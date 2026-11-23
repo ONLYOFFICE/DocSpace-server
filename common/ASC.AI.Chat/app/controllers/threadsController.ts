@@ -51,6 +51,7 @@ import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { getSourceMeta } from "../requestContext.js";
 import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
+import { readStoredProfile, resolveStoredProfile } from "./storedProfile.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -115,10 +116,11 @@ const assignmentsEngine = new AssignmentsEngine({ storage });
 //  1. If an `entityId` is supplied it must reference a folder the caller can
 //     access — a missing folder surfaces as 404, a no-access response as 403
 //     (see `assertEntityAccessible`). The client sends one only inside an AI
-//     project (the project id); any other accessible folder is allowed BY
-//     DESIGN (Bug 82719 reopen decision): threads are one list per user,
-//     so `HttpThreadsStorage` ignores the id instead of rejecting it. An
-//     absent entityId is the ordinary case.
+//     project (the project id), and the thread then belongs to that project;
+//     any other accessible folder is allowed BY DESIGN (Bug 82719 reopen
+//     decision): outside a project threads are one list per user, so
+//     `HttpThreadsStorage` binds the thread to no folder instead of rejecting
+//     the id. An absent entityId is the ordinary case.
 //  2. A live profile must be resolvable — an explicit `profileId` that exists,
 //     or the `Chat` assignment for the scope — otherwise there is no model to
 //     run the thread against, so reject with 404.
@@ -145,14 +147,11 @@ export async function assertThreadCreatable(
       expose: true,
     });
   }
-  // A malformed profileId makes the C# lookup fail with a non-404 status;
-  // treat that the same as "no such profile" and fall through to the
-  // scope-assignment resolution instead of relaying an opaque error
-  // (Bug 83045).
-  if (
-    profileId
-    && (await storage.profiles.readById(profileId).catch(() => undefined))
-  ) {
+  // A malformed profileId makes the C# lookup fail with 400; treat that the
+  // same as "no such profile" and fall through to the scope-assignment
+  // resolution instead of relaying an opaque error (Bug 83045). A lookup
+  // that fails any other way is the service failing, and is passed on.
+  if (profileId && (await readStoredProfile(profileId))) {
     return;
   }
   const resolved = await assignmentsEngine.tryResolveForAction(ActionType.Chat, entityId);
@@ -206,8 +205,9 @@ export const threadsController = {
     // object directly, so a missing/non-object profile means there is no model
     // to run the thread against → 404 (this also avoids the engine TypeError
     // that previously collapsed to a 500). A supplied entityId must be
-    // reachable; the thread itself is global whatever it names (see
-    // `assertThreadCreatable` for the Bug 82719 design decision).
+    // reachable; the thread belongs to it only when it is an AI project and
+    // is global otherwise (see `assertThreadCreatable` for the Bug 82719
+    // design decision).
     const body = req.body;
     if (!isObject(body) || !isObject(body.profile)) {
       res.status(404).json({
@@ -224,7 +224,16 @@ export const threadsController = {
     // under the caller's credentials, so a client cannot claim someone else's
     // entry.
     await primeSourceMeta(getString(body, "entityId"));
-    const result = await engine.openOrCreate(body as OpenOrCreateInput);
+    // Only the id of the sent profile is trusted (see storedProfile.ts).
+    const profile = await resolveStoredProfile(body.profile);
+    // Without a threadId this creates a thread, so it is gated as
+    // threads/create is: inside an AI project only those who may chat in it
+    // get one, and only while its model is available. Opening a thread that
+    // exists is left to the storage, which answers the caller's own threads.
+    if (!getString(body, "threadId")) {
+      await assertThreadCreatable(getString(body, "entityId"), profile.id);
+    }
+    const result = await engine.openOrCreate({ ...(body as OpenOrCreateInput), profile });
     res.json(result);
   }),
 
@@ -265,7 +274,12 @@ export const threadsController = {
 
   touch: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "profileId"] as const);
-    await engine.touch(args.threadId as string, args.profileId as string | undefined);
+    // Without a thread id the storage would touch `/threads/undefined`.
+    if (typeof args.threadId !== "string" || args.threadId.length === 0) {
+      res.status(400).json({ error: "threadId is required" });
+      return;
+    }
+    await engine.touch(args.threadId, args.profileId as string | undefined);
     res.json({ success: true });
   }),
 
@@ -342,7 +356,9 @@ export const threadsController = {
       ? getString(args.entityMeta, "entityId")
       : undefined;
     await primeSourceMeta(entityIdHint);
-    const title = await engine.regenerateTitle(args.threadId, args.profile as Profile);
+    // Only the id of the sent profile is trusted (see storedProfile.ts).
+    const profile = await resolveStoredProfile(args.profile);
+    const title = await engine.regenerateTitle(args.threadId, profile);
     res.json({ title });
   }),
 

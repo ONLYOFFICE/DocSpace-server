@@ -69,7 +69,9 @@ public interface IFolderDao<T>
 
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false,
-        MetadataFilter metadataFilter = null);
+        MetadataFilter metadataFilter = null, bool excludeAiProjectContent = false);
+
+    IAsyncEnumerable<Folder<T>> GetAiProjectsVisibleToAsync(IEnumerable<T> projectsIds, int aiHubRootId, Guid userId, bool isAdmin);
 
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags,
         bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null);
@@ -150,6 +152,15 @@ public interface IFolderDao<T>
 
     Task<T> SaveFolderAsync(Folder<T> folder, IEnumerable<Folder<T>> children);
 
+    Task<T> SaveThreadFolderAsync(Folder<T> folder, Guid threadId, ThreadFolderKind kind);
+
+    /// <summary>
+    /// Converts an AI agent into an AI project in one transaction: the room becomes a Knowledge room, linked to the
+    /// project when it holds knowledge files, and a new project takes the agent's threads, model, members and marks. Returns null when the room is not
+    /// an AI agent, which is how a repeated call sees an agent that is already converted.
+    /// </summary>
+    Task<AiAgentConversion> ConvertAiAgentAsync(T roomId);
+
     /// <summary>
     ///     delete folder
     /// </summary>
@@ -169,6 +180,13 @@ public interface IFolderDao<T>
     Task<TTo> MoveFolderAsync<TTo>(T folderId, TTo toFolderId, string newTitle, CancellationToken? cancellationToken);
     Task<string> MoveFolderAsync(T folderId, string toFolderId, CancellationToken? cancellationToken);
     Task<int> MoveFolderAsync(T folderId, int toFolderId, CancellationToken? cancellationToken);
+
+    /// <summary>
+    /// Moves the folder like <see cref="MoveFolderAsync{TTo}"/> and runs <paramref name="inTransaction"/> on the context of the
+    /// move right before its commit, so what it writes is committed together with the new parent and tree rows of the
+    /// folder. The delegate can run more than once when the database retries the move. Third-party storages do not support it.
+    /// </summary>
+    Task<int> MoveFolderAsync(T folderId, int toFolderId, string newTitle, Func<FilesDbContext, Task> inTransaction);
 
     /// <summary>
     ///     copy folder

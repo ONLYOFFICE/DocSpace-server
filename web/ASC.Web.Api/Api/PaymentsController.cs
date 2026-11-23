@@ -79,7 +79,10 @@ public class PaymentController(
     IServiceProvider serviceProvider,
     PaymentHelper paymentHelper,
     QuotaSocketManager quotaSocketManager,
-    DepositDtoMapper depositDtoMapper)
+    DepositDtoMapper depositDtoMapper,
+    BalanceDtoMapper balanceDtoMapper,
+    GoodwillBalanceDtoMapper goodwillBalanceDtoMapper,
+    PromoCodeDtoMapper promoCodeDtoMapper)
     : ControllerBase
 {
     /// <remarks>
@@ -219,8 +222,10 @@ public class PaymentController(
     /// service at the next period. The call returns 400 for `Renew` and `Sub`. If the portal has no billing customer,
     /// the call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the
     /// installation has no billing service. An `Add` call spends money. Do not repeat an `Add` call. Each call buys
-    /// the units again. You can repeat a `Set` call with the same body. With `Add`, the wallet needs a sub-account in
-    /// the accounting currency with enough money. If the wallet has no such sub-account, the call returns 404. If the
+    /// the units again. You can repeat a `Set` call with the same body. With `Add`, the call needs a wallet
+    /// sub-account or a bonus in the accounting currency. A bonus counts only until it ends. Without either, the call
+    /// returns 404. A wallet that was never topped up has no sub-account. If the bonus cannot be read, the call goes
+    /// on. If the wallet balance cannot be read, the call returns 404. The wallet money and the bonus balance together must cover the price. The bonus is spent first. If the
     /// billing service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402
     /// for an add-on to the plan if the plan payment is overdue. A trial plan passes this check. The call returns 400
     /// if the quantity is below the minimum of the service. By default, the minimum is 100 units for disk storage and
@@ -244,7 +249,7 @@ public class PaymentController(
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, or that service is already set")]
     [SwaggerResponse(402, "The payment for the plan of the portal is overdue and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
+    [SwaggerResponse(404, "This portal has no billing customer, or in the `Add` form the wallet balance cannot be read or the portal is known to have neither a wallet sub-account nor a bonus that has not ended in the accounting currency")]
     [HttpPut("updatewallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
@@ -344,7 +349,7 @@ public class PaymentController(
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-        await paymentHelper.GetSubAccountRequiredAsync(tenantId, defaultCurrency, refresh: true);
+        await paymentHelper.DemandWalletOrBonusAsync(tenantId, defaultCurrency, refresh: true);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
@@ -354,9 +359,11 @@ public class PaymentController(
     /// <remarks>
     /// Returns the price of a wallet service purchase without making it. Use it to show the amount before the user
     /// confirms the purchase. The call returns 400 if `productQuantityType` is not `Add` or the quantity is not above
-    /// zero. It also returns 400 if the product is not a wallet service. If the portal has no billing customer or no
-    /// wallet sub-account in the accounting currency, the call returns 404. Requires a DocSpace admin. Other callers
-    /// get 403. The call also returns 403 if the installation has no billing service. The call is read-only and buys
+    /// zero. It also returns 400 if the product is not a wallet service. The call returns 404 without a billing
+    /// customer. The call needs a wallet sub-account or a bonus in the accounting currency. A bonus counts only until it
+    /// ends. Without either, the call returns 404. If the bonus cannot be read, the call goes on. If the wallet
+    /// balance cannot be read, the call returns 404, also for up to 10 minutes after that. Requires a DocSpace
+    /// admin. Other callers get 403. The call also returns 403 if the installation has no billing service. The call is read-only and buys
     /// nothing, so you can repeat it. To make the purchase, use `PUT api/2.0/portal/payment/updatewallet`. The price
     /// is for the moment of the call and is not reserved. So it can change before the purchase. If the billing
     /// service fails, the call returns 200 with an empty body.
@@ -369,7 +376,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for, or an empty body when the billing service failed", typeof(PaymentCalculationDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
+    [SwaggerResponse(404, "This portal has no billing customer, the wallet balance cannot be read, or the portal is known to have neither a wallet sub-account nor a bonus that has not ended in the accounting currency")]
     [HttpPut("calculatewallet")]
     public async Task<PaymentCalculationDto> CalculateWalletPayment(WalletQuantityRequestDto inDto)
     {
@@ -396,7 +403,7 @@ public class PaymentController(
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-        await paymentHelper.GetSubAccountRequiredAsync(tenantId, defaultCurrency);
+        await paymentHelper.DemandWalletOrBonusAsync(tenantId, defaultCurrency);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
@@ -439,23 +446,21 @@ public class PaymentController(
 
     /// <remarks>
     /// Ends the paid subscription of the portal and moves the portal to the wallet. First, the call adds the unused
-    /// balance of the period to the wallet. Then it tops up the wallet from the payment method if that credit does
-    /// not cover the price. Then it buys the requested number of admins as a wallet service. To read the credit
-    /// first, use `GET api/2.0/portal/payment/subscription/balance`. If the portal has no billing customer, the call
-    /// returns 404. If the customer has no payment method, the call returns 403. The payer is the portal user whose
-    /// email is the email of the billing customer. Only the payer can call it. Other callers get 403. The call also
-    /// returns 403 if the installation has no billing service. The call spends money and cannot be undone. Do not
-    /// repeat it. The call ends the subscription before it buys the admins. If the purchase fails, the call returns
-    /// `false` with 200. The portal is then on the wallet, with the credit and any top-up in it. To buy the admins
-    /// after that, use `Add` in `PUT api/2.0/portal/payment/updatewallet`. With a delayed payment method, the call
-    /// does not top up the wallet. Then the wallet must already cover the price. The call returns `true` if the
-    /// admins were bought. The product in `quantity` must be the admins wallet service. The call returns 400 for
-    /// another product or a quantity of zero or less. It also returns 400 for fewer admins than the portal already
-    /// has. If the paid plan is a wallet product, the call returns 400. If the plan is not paid, the call returns
-    /// 402. It also returns 402 if the balance cannot be moved. The next two errors come after the subscription has
-    /// ended. If the wallet still lacks money after the top-up, the call returns 402. If the wallet has no
-    /// sub-account in the accounting currency, the call returns 404. If the paid plan has no subscription, the call
-    /// returns 404. By default, the limit is 10 calls a minute per user. More calls return 429.
+    /// balance of the period to the wallet. If the wallet and the bonus balance fall short, it tops up the wallet from
+    /// the payment method. Then it buys the requested admins as a wallet service and spends the bonus first. To read
+    /// the credit beforehand, use `GET api/2.0/portal/payment/subscription/balance`. The payer is the user with the
+    /// email of the billing customer. Only the payer can call it. Other callers get 403. The call spends money and
+    /// cannot be undone. Do not repeat it. It returns `true` if it bought the admins. If the purchase fails, it returns
+    /// `false` with 200. The portal then stays on the wallet with the moved money. To buy the admins after that, use
+    /// `Add` in `PUT api/2.0/portal/payment/updatewallet`. With a delayed payment method, the wallet and the bonus must
+    /// already cover the price. By default, the limit is 10 calls a minute per user. More calls return 429. The call
+    /// returns 403 if the installation has no billing service or the customer has no payment method. It returns 404 if
+    /// the portal has no billing customer or its paid plan has no subscription. The call returns 400 if `quantity`
+    /// names a product other than the admins wallet service. It also returns 400 for zero admins or fewer than the
+    /// portal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan
+    /// is not paid or the balance cannot be moved. Two errors come after the subscription has ended. If the wallet and
+    /// the bonus still fall short after the top-up, the call returns 402. If the wallet balance cannot be read, the
+    /// call returns 404.
     /// </remarks>
     /// <summary>
     /// Move the subscription to the wallet
@@ -464,9 +469,9 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the balance was moved to the wallet and the administrators were bought; `false` when the subscription has ended and the balance was moved, but the purchase of the administrators failed", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or does not name the administrators wallet product, the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier")]
-    [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet is still short of the price after the top-up")]
+    [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet and the bonus are still short of the price after the top-up")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
-    [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, or after the move its wallet has no balance or no sub-account in the accounting currency")]
+    [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, or after the move the wallet balance cannot be read")]
     [HttpPost("subscription/movetowallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> MoveSubscriptionToWallet(QuantityRequestDto inDto)
@@ -517,8 +522,8 @@ public class PaymentController(
         // Move the unused subscription balance to the wallet.
         await paymentHelper.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
 
-        // Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
-        // A delayed payment method cannot be topped up on the fly, so its wallet has to cover the cost already.
+        // Make sure the wallet and the bonus cover the cost, topping the wallet up for the missing amount if necessary.
+        // A delayed payment method cannot be topped up on the fly, so the wallet and the bonus have to cover it already.
         var siteName = tenant.GetTenantDomain(coreSettings);
         var allowTopUp = !customerInfo.IsDelayedPaymentMethod;
 
@@ -943,11 +948,50 @@ public class PaymentController(
     }
 
     /// <remarks>
+    /// Redeems a promo code for the portal and credits its bonus money to the bonus balance. Requires a DocSpace admin.
+    /// Other callers get 403. The call also returns 403 if the installation has no billing service. The call changes
+    /// data. A repeated call returns 400 if the billing service does not accept the same code twice. If the billing
+    /// service refuses the code, the call returns 400 and credits nothing. The error message is then the billing reason
+    /// code, such as `promo_not_found` or `promo_expired`. The call removes spaces around `promoCode`, then returns 400 if it is empty or too long. The answer
+    /// says whether the bonus is credited already (`status` Completed) or later (Pending). To see the bonus, use `GET
+    /// api/2.0/portal/payment/customer/goodwill`. A pending bonus appears there later. If the billing service cannot be
+    /// reached, fails, or does not know the portal, the call returns 402. After 402 or another server error, the bonus
+    /// may be credited all the same. So read the bonus balance before you try the same code again. By default, the limit
+    /// is 10 calls a minute per user. More calls return 429.
+    /// </remarks>
+    /// <summary>
+    /// Redeem a promo code
+    /// </summary>
+    /// <path>api/2.0/portal/payment/promoCode</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Whether the bonus is credited already or later, with its amount, currency and expiry", typeof(PromoCodeDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `promoCode`, `promoCode` is empty or longer than 100 characters, or the billing service refused the code; the message is its reason code, such as `promo_not_found`")]
+    [SwaggerResponse(402, "The billing service could not be reached, failed, or does not know this portal yet")]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [HttpPost("promoCode")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<PromoCodeDto> ApplyPromoCode(ApplyPromoCodeRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+
+        var result = await paymentHelper.ApplyPromoCodeAsync(tenant.Id, inDto.PromoCode, initiator.Email);
+
+        return promoCodeDtoMapper.Map(result);
+    }
+
+    /// <remarks>
     /// Returns the money in the portal wallet as the accounting service has it. The answer has a sub-account with its
     /// amount for each currency and the last credit movement. Requires a DocSpace admin. Other callers get 403. The
     /// call also returns 403 if the installation has no billing service. If the portal has no billing customer, the
     /// call returns an empty result. The call is read-only. The wallet services spend this balance, and `POST
-    /// api/2.0/portal/payment/deposit` adds to it. To list the movements, use `GET
+    /// api/2.0/portal/payment/deposit` adds to it. The bonus money is not in this balance: to read it, use `GET
+    /// api/2.0/portal/payment/customer/goodwill`. To list the movements, use `GET
     /// api/2.0/portal/payment/customer/operations`. Each call reads the balance from the accounting service, so it is
     /// current right after a top-up too. Only a failed read is cached. A read fails if the service cannot be reached,
     /// answers with an error, or does not know the portal. Then the call returns an empty result for 10 minutes. Use
@@ -975,12 +1019,52 @@ public class PaymentController(
             return null;
         }
 
-        return (await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh))?.Map();
+        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh);
+
+        return balance == null ? null : balanceDtoMapper.Map(balance);
     }
 
     /// <remarks>
-    /// Returns a page of the money movements of the portal wallet. The movements are top-ups, service charges,
-    /// refunds, and corrections. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the
+    /// Returns the bonus balance of the portal, which the accounting service keeps apart from the wallet. Requires a
+    /// DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service. The
+    /// call is read-only. Each call reads the balance from the accounting service, so a new bonus shows up immediately.
+    /// The account part has a sub-account with its amount for each currency. That amount may still include a credit
+    /// that has ended, until the accounting service writes it off. A purchase counts only the rest of the credits in
+    /// `lots` that have not ended, up to that amount. If the portal has no billing customer, the
+    /// call returns an empty result. It also returns an empty result if the accounting service cannot be read. So treat
+    /// an empty result as nothing to show, not as zero. To read the money paid into the wallet, use `GET api/2.0/portal/payment/customer/balance`.
+    /// </remarks>
+    /// <summary>
+    /// Get the bonus balance
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/goodwill</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The bonus balance with its sub-account per currency and the bonus credits not spent in full, or an empty result when the portal has no billing customer or the accounting service could not be read", typeof(GoodwillBalanceDto))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [HttpGet("customer/goodwill")]
+    public async Task<GoodwillBalanceDto> GetCustomerGoodwill()
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var goodwill = await tariffService.GetCustomerGoodwillAsync(tenant.Id);
+
+        return goodwill == null ? null : goodwillBalanceDtoMapper.Map(goodwill);
+    }
+
+    /// <remarks>
+    /// Returns a page of the money movements of the portal wallet and its bonus balance. The movements are top-ups,
+    /// service charges, refunds, corrections, bonus credits, and bonus expirations. A movement keeps its whole amount
+    /// in `credit` or `debit`, and `sources` gives the part on the bonus. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the
     /// installation has no billing service. If the portal has no billing customer, the call returns an empty result.
     /// The call is read-only. All filters are optional. If `serviceName` has a name that the installation does not
     /// sell, the call returns 404. If neither `credit` nor `debit` is set, the list has both directions. AI usage

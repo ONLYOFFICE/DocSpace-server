@@ -42,57 +42,146 @@ public class OrphanAttachmentsCleanerService(
 {
     private const int BatchSize = 100;
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } =
-        ReadTimeSpan(configuration, "period", TimeSpan.FromHours(1));
+    private static readonly TimeSpan _defaultPeriod = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan _minPeriod = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan _maxPeriod = TimeSpan.FromDays(1);
 
+    private static readonly TimeSpan _defaultLifetime = TimeSpan.FromHours(2);
+    private static readonly TimeSpan _minLifetime = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan _maxLifetime = TimeSpan.FromDays(7);
+
+    private static readonly TimeSpan _defaultRetryWindow = TimeSpan.FromDays(7);
+    private static readonly TimeSpan _minRetryWindow = TimeSpan.FromDays(1);
+    private static readonly TimeSpan _maxRetryWindow = TimeSpan.FromDays(30);
+
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+
+    // d.hh:mm:ss, from 5 seconds to 1 day; fifteen minutes is "0.00:15:00"
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } =
+        configuration.ReadInterval("ai:orphanAttachmentsCleaner:period", _defaultPeriod, _minPeriod, _maxPeriod, logger);
+
+    // d.hh:mm:ss, from 30 minutes to 7 days; two hours is "0.02:00:00"
     private readonly TimeSpan _lifetime =
-        ReadTimeSpan(configuration, "lifetime", TimeSpan.FromHours(24));
+        configuration.ReadInterval("ai:orphanAttachmentsCleaner:lifetime", _defaultLifetime, _minLifetime, _maxLifetime, logger);
+
+    // d.hh:mm:ss, from 1 day to 30 days; seven days is "7.00:00:00"
+    private readonly TimeSpan _retryWindow =
+        configuration.ReadInterval("ai:orphanAttachmentsCleaner:retryWindow", _defaultRetryWindow, _minRetryWindow, _maxRetryWindow, logger);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
+        var now = DateTime.UtcNow;
+        var cutoffDate = now - _lifetime;
+        var totals = new Totals();
+
         try
         {
-            var cutoffDate = DateTime.UtcNow - _lifetime;
-            var totalCount = 0;
+            await SweepAsync(
+                (context, position, id) => context.GetDeletedAttachmentsAsync(position, id, BatchSize),
+                x => x.DeletedOn!.Value,
+                now - _retryWindow,
+                now,
+                totals,
+                stoppingToken);
 
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await using var context = await dbContextFactory.CreateDbContextAsync(stoppingToken);
-
-                var rows = await context.GetOrphanAttachmentsAsync(cutoffDate, BatchSize)
-                    .ToListAsync(stoppingToken);
-
-                if (rows.Count == 0)
-                {
-                    break;
-                }
-
-                foreach (var group in rows.GroupBy(x => x.TenantId))
-                {
-                    totalCount += await context.DeleteAttachmentsAsync(group.Key, group.Select(x => x.Id));
-                }
-
-                if (rows.Count < BatchSize)
-                {
-                    break;
-                }
-            }
-
-            if (totalCount > 0)
-            {
-                logger.InformationDeletedOrphanAttachments(totalCount, cutoffDate);
-            }
+            await SweepAsync(
+                (context, position, id) => context.GetOrphanAttachmentsAsync(cutoffDate, position, id, BatchSize),
+                x => x.CreatedAt,
+                cutoffDate - _retryWindow,
+                now,
+                totals,
+                stoppingToken);
         }
-        catch (Exception e)
+        catch (Exception e) when (!stoppingToken.IsCancellationRequested)
         {
             logger.ErrorCleanUpOrphanAttachments(e);
         }
+        finally
+        {
+            if (totals.Drafts > 0 || totals.Files > 0)
+            {
+                logger.InformationDeletedOrphanAttachments(totals.Drafts, totals.Files, cutoffDate);
+            }
+        }
     }
 
-    private static TimeSpan ReadTimeSpan(IConfiguration configuration, string key, TimeSpan fallback)
+    private async Task SweepAsync(
+        Func<AiIntegrationContext, DateTime, Guid, IAsyncEnumerable<OrphanAttachment>> read,
+        Func<OrphanAttachment, DateTime> positionOf,
+        DateTime from,
+        DateTime passStart,
+        Totals totals,
+        CancellationToken stoppingToken)
     {
-        var value = configuration.GetValue<string>($"ai:orphanAttachmentsCleaner:{key}");
+        var position = from;
+        var id = Guid.Empty;
 
-        return string.IsNullOrEmpty(value) ? fallback : TimeSpan.Parse(value, CultureInfo.InvariantCulture);
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            List<OrphanAttachment> rows;
+
+            await using (var context = await dbContextFactory.CreateDbContextAsync(stoppingToken))
+            {
+                rows = await read(context, position, id).ToListAsync(stoppingToken);
+            }
+
+            foreach (var group in rows.GroupBy(x => x.TenantId))
+            {
+                stoppingToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    var (drafts, files) = await DeleteAsync(group.Key, group.Select(x => x.Id).ToList());
+                    totals.Drafts += drafts;
+                    totals.Files += files;
+                }
+                catch (Exception e) when (!stoppingToken.IsCancellationRequested)
+                {
+                    logger.ErrorDeleteOrphanAttachments(group.Key, e);
+
+                    var nextFrom = from + (DateTime.UtcNow - passStart) + ExecuteTaskPeriod;
+
+                    foreach (var row in group.Where(x => positionOf(x) < nextFrom))
+                    {
+                        logger.WarningOrphanAttachmentLeavesRetryWindow(row.Id, group.Key, positionOf(row));
+                    }
+                }
+            }
+
+            if (rows.Count < BatchSize)
+            {
+                break;
+            }
+
+            (position, id) = (positionOf(rows[^1]), rows[^1].Id);
+        }
+    }
+
+    private async Task<(int Drafts, int Files)> DeleteAsync(int tenantId, List<Guid> ids)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+
+        var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+
+        var tenant = await tenantManager.GetTenantAsync(tenantId);
+        if (tenant == null)
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
+            await context.MarkOrphanAttachmentsDeletedAsync(tenantId, ids, DateTime.UtcNow);
+
+            return (await context.DeleteAttachmentsAsync(tenantId, ids), 0);
+        }
+
+        tenantManager.SetCurrentTenant(tenant);
+        await scope.ServiceProvider.GetRequiredService<SecurityContext>().AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
+
+        return await scope.ServiceProvider.GetRequiredService<AiProjectThreadsService>().DeleteChatDraftsAsync(ids);
+    }
+
+    private sealed class Totals
+    {
+        public int Drafts { get; set; }
+        public int Files { get; set; }
     }
 }

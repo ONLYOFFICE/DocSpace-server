@@ -193,7 +193,7 @@ public partial class Global(
         }
     }
 
-    private const int MaxTitle = 170;
+    public const int MaxTitle = 170;
 
     private static readonly Regex _invalidTitleChars = new("[\t*\\+:\"<>?|\\\\/\\p{Cs}]");
 

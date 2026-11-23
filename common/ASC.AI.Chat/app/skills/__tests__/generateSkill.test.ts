@@ -22,6 +22,7 @@ const { getFolderInfo } = await import("../../storage/docspaceFilesApi.js");
 const {
   buildSkillFile,
   cleanDescription,
+  cleanTitle,
   generateSkill,
   NoSkillProfileError,
   parseSkill,
@@ -64,6 +65,7 @@ describe("parseSkill", () => {
     expect(
       parseSkill('---\nname: x\ndescription: "Does things. Use when asked."\n---\n\n# X\n\nBody'),
     ).toEqual({
+      name: "x",
       description: "Does things. Use when asked.",
       body: "# X\n\nBody",
     });
@@ -75,6 +77,7 @@ describe("parseSkill", () => {
         "```markdown\n---\nname: x\ndescription: >\n  Line one\n  line two\n---\n# X\n```",
       ),
     ).toEqual({
+      name: "x",
       description: "Line one line two",
       body: "# X",
     });
@@ -82,6 +85,20 @@ describe("parseSkill", () => {
 
   it("takes an answer without frontmatter as the body", () => {
     expect(parseSkill("# X\n\nBody")).toEqual({ body: "# X\n\nBody" });
+  });
+});
+
+describe("cleanTitle", () => {
+  it("keeps a plain title and drops what a file title cannot hold", () => {
+    expect(cleanTitle("Sales report")).toBe("Sales report");
+    expect(cleanTitle('  "Sales: report?".md ')).toBe("Sales report");
+  });
+
+  it("is empty without a letter or a digit and stays within 64 characters", () => {
+    expect(cleanTitle("--- !!!")).toBe("");
+    const cut = cleanTitle("word ".repeat(30));
+    expect(cut.length).toBeLessThanOrEqual(64);
+    expect(cut.endsWith("word")).toBe(true);
   });
 });
 
@@ -111,10 +128,47 @@ describe("generateSkill", () => {
     });
 
     await expect(generateSkill(input)).resolves.toEqual({
+      title: "Sales Report",
       name: "sales-report",
       content:
         '---\nname: "sales-report"\ndescription: "Writes weekly sales reports."\n---\n\n# Sales report\n\n1. Do it.\n',
     });
+  });
+
+  it("takes the title the model wrote when none was given", async () => {
+    customSync.mockResolvedValue({
+      content:
+        '---\nname: "Weekly Sales Report"\ndescription: Writes weekly sales reports.\n---\n# Report\n\nBody',
+    });
+    const { title: _title, ...untitled } = input;
+
+    await expect(generateSkill(untitled)).resolves.toEqual({
+      title: "Weekly Sales Report",
+      name: "weekly-sales-report",
+      content:
+        '---\nname: "weekly-sales-report"\ndescription: "Writes weekly sales reports."\n---\n\n# Report\n\nBody\n',
+    });
+    const [request] = customSync.mock.calls.at(-1)!;
+    expect(JSON.stringify(request)).not.toContain("Skill name:");
+  });
+
+  it("names an untitled skill after its heading when the model wrote no name", async () => {
+    customSync.mockResolvedValue({ content: "# Invoice check\n\nBody" });
+    const result = await generateSkill({ ...input, title: "  " });
+    expect(result).toMatchObject({ title: "Invoice check", name: "invoice-check" });
+  });
+
+  it("answers 502 when an untitled skill comes back without a name", async () => {
+    customSync.mockResolvedValue({ content: "Just a body" });
+    await expect(generateSkill({ ...input, title: undefined })).rejects.toMatchObject({
+      status: 502,
+    });
+  });
+
+  it("refuses a given title without a letter or a digit", async () => {
+    customSync.mockClear();
+    await expect(generateSkill({ ...input, title: "!!!" })).rejects.toMatchObject({ status: 400 });
+    expect(customSync).not.toHaveBeenCalled();
   });
 
   it("falls back to the user's words when the model wrote no description", async () => {

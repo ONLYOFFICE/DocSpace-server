@@ -1,0 +1,11 @@
+{
+  "name": "Presentation review",
+  "description": "Skills for reviewing a whole deck and for simplifying overloaded slides.",
+  "category": "Presentation",
+  "color": "FF8F40",
+  "cover": "loupe",
+  "files": [
+    "deck-review.md",
+    "slide-simplify.md"
+  ]
+}

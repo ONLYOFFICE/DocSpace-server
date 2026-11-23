@@ -415,6 +415,7 @@ public class SocketManager(
         // an administrator who is not a member of a private room has no access to it, so its title must not reach them either
         if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive &&
             entry is not Folder<T> { IsRoom: true, SettingsPrivate: true } &&
+            !await DocSpaceHelper.InAiProjectAsync(entry, daoFactory.GetCacheFolderDao<T>()) &&
             !await DocSpaceHelper.LocatedInPrivateRoomAsync(entry, daoFactory.GetCacheFolderDao<T>()))
         {
             var admins = await Admins();

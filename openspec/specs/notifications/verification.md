@@ -95,6 +95,9 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | E-mail + Telegram: subscription method seed `email.sender|telegram.sender` for `send_whats_new` | `common/ASC.Core.Common/EF/Model/Core/DbSubscriptionMethod.cs:66`; `Actions.cs:3011-3012` | CODE-ONLY |
 | **Hourly room activity digest** | | |
 | Hourly cron; previous hour; actions list; subject "… for the last hour"; no sender-method row so the engine's default senders (e-mail + Telegram) apply | `StudioNotifyServiceSender.cs:27, 44-47`; `StudioWhatsNewNotify.cs` (`RoomsActivityActions`); `Actions.cs:2974-2981`; `common/ASC.Core.Common/Context/WorkContext.cs:56` (`DefaultClientSenders`) | CODE-ONLY |
+| **AI projects in the digests** | | |
+| Activity in a project (scenario): the decision by room type | `common/Tests/ASC.Core.Common.Tests/DocSpaceHelperAnnouncementTests.cs:59,74` | TEST-CONFIRMED |
+| Activity in a project (scenario): the decision is applied to every digest event of a room | `products/ASC.Files/Core/Configuration/ProductEntryPoint.cs` (`GetAuditEventsAsync`, call of `ReportsActivityInDigest`) | CODE-ONLY |
 | **SMTP settings of the portal** | | |
 | Portal-settings right then hidden-section check (`BillingException` 402) | `web/ASC.Web.Api/Api/Settings/SmtpSettingsController.cs` (`CheckSmtpPermissionsAsync`); yaml 402/403 rows | CODE-ONLY |
 | Owner and DocSpace admin save and read back host, port, sender address, display name, enableAuth, enableSSL (200) | `web/ASC.Web.Api.Tests/Tests/05_Security/Smtp/SmtpSaveSettingsTests.cs:45-82`; `SmtpGetSettingsTests.cs:45-86` | TEST-CONFIRMED [run: PASS] |
@@ -170,7 +173,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Enterprise / Developer / Lifetime: -7 days and on the day, grace -7 and on the day; exactly one flavour claims a portal; admins | `PeriodicLetterScheduleTests.cs:251-397`; `Periodic/PaymentWarnings/Enterprise/*.cs`, `Developer/*.cs`; `Actions.cs:3232-3602` | TEST-CONFIRMED [run: PASS] |
 | Not silenced by the tips subscription | `PeriodicLetterScheduleTests.cs:430-467`; `PeriodicLetterDeliveryTests.cs:181-199` | TEST-CONFIRMED [run: PASS] |
 | **Wallet letters** | | |
-| Low balance: once per threshold crossing (`LowBalanceNotified`), payer + owner, e-mail + Telegram | `web/ASC.Web.Studio/Wallet/TopUpWalletService.cs:214-244`; `StudioNotifyService.cs:983-998`; `common/Tests/ASC.Notify.Tests/Billing/LowWalletBalanceLetterTests.cs:45-69`; release notes v4.0 line 77 | TEST-CONFIRMED [run: NO-LINK] (text), CODE-ONLY (trigger) |
+| Low balance: once per threshold crossing (`LowBalanceNotified`), payer + owner, e-mail + Telegram | `web/ASC.Web.Studio/Wallet/TopUpWalletService.cs:220-273`; `StudioNotifyService.cs:983-998`; `common/Tests/ASC.Notify.Tests/Billing/LowWalletBalanceLetterTests.cs:45-69`; release notes v4.0 line 77 | TEST-CONFIRMED [run: NO-LINK] (text), CODE-ONLY (trigger) |
 | Top-up error, auto top-up unavailable, renew error (e-mail + Telegram, payer + owner); upcoming add-on payment 3 days before (e-mail, owner + payer) | `StudioNotifyService.cs:732-783`; `StudioPeriodicNotify.cs` (`SendUpcomingSubscriptionPaymentAsync`); `Billing/TopUpWalletErrorLetterTests.cs:60`, `RenewSubscriptionErrorLetterTests.cs:67`, `UpcomingSubscriptionPaymentLetterTests.cs:55-67`, `WalletAutoTopUpUnavailableLetterTests.cs:61` | TEST-CONFIRMED [run: NO-LINK] (texts), CODE-ONLY (triggers) |
 | **Letters owned by other capabilities** | | |
 | Suspicious login by e-mail + Telegram | `StudioNotifyService.cs:116-123`; `openspec/specs/history-and-audit/spec.md` | CODE-ONLY |

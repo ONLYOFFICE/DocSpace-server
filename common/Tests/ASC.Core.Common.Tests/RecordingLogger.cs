@@ -34,9 +34,9 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// A logger that keeps the warnings written to it, for a test of what a reader of the configuration warns about.
+/// A logger that keeps the warnings written to it, for tests of what a bad configuration value logs.
 /// </summary>
-internal sealed class RecordingLogger : ILogger
+internal class RecordingLogger : ILogger
 {
     public List<string> Warnings { get; } = [];
 
@@ -52,3 +52,8 @@ internal sealed class RecordingLogger : ILogger
         }
     }
 }
+
+/// <summary>
+/// A <see cref="RecordingLogger"/> for a service that asks for a typed logger.
+/// </summary>
+internal sealed class RecordingLogger<T> : RecordingLogger, ILogger<T>;

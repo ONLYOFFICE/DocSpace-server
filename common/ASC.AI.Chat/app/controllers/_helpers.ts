@@ -44,6 +44,14 @@ import { isObject } from "../narrow.js";
 const MAX_ATTACHMENTS_PER_KIND = 5;
 
 /**
+ * The most attachments one request of the attachments routes may name:
+ * saved, read or bound to a message. Well above what a message carries (the
+ * composer names no more than its free slots), so only a direct API caller
+ * reaches it; what it bounds is the work one request can start.
+ */
+export const MAX_ATTACHMENTS_PER_REQUEST = 100;
+
+/**
  * Validation error when a user message carries more attachment parts than
  * the composer allows, or `null` when the message is within limits (or has
  * no part-array content at all — shape errors are for other validators).

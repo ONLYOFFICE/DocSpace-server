@@ -1,0 +1,11 @@
+{
+  "name": "Contract review",
+  "description": "Skills for reviewing contracts clause by clause and comparing two versions of an agreement.",
+  "category": "Document",
+  "color": "6191F2",
+  "cover": "clipboard",
+  "files": [
+    "clause-risk-check.md",
+    "version-compare.md"
+  ]
+}
