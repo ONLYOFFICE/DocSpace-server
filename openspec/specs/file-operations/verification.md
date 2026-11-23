@@ -41,6 +41,9 @@ test carries the mark or its summary says so, "red by code reading" means the pa
 | 166 chars + `.docx` → 400 (limit 170) | `FileCreateTests.cs:123-140` | TEST-CONFIRMED [run: PASS] |
 | Template from `new/<culture>/` when present, else `new/default/` | `products/ASC.Files/Core/Helpers/Global.cs:331-343, 404-423` (`GetNewDocTemplatePath`, `GetPathDependingOnCulture`); `Helpers/Constants.cs:48-51`; `01_Files/Create/NewFileTemplateCultureTests.cs:56` (de, en-US, ru: the bytes of `new/<culture>/new.docx`) | TEST-CONFIRMED [run: PASS] (culture folder) / CODE-ONLY (fallback to `new/default/`: every portal culture matches a folder by prefix, so the stand cannot reach it) |
 | `en-US` template is Letter, default is A4 | release notes v3.0 ("При создании нового документа для языка en-US ... Letter ... A4") | NOTES-ONLY |
+| `formId`: the gallery file of the title's format is what `createFile` saves | `common/Tests/ASC.Core.Common.Tests/OFormRequestManagerTests.cs:93-104, 168-183` (`Get` returns the PDF, DOCX, XLSX, PPTX as the gallery sent it); `products/ASC.Files/Core/Core/FileStorageService.cs:2010-2012` (the stream saved as the file) | TEST-CONFIRMED (the gallery client, unit test, bug 78009) / CODE-ONLY (`createFile` saving the stream: no integration test reaches a gallery) |
+| `formId` → 404: no gallery configured, no such template / no file of the format | `common/Tests/ASC.Core.Common.Tests/OFormRequestManagerTests.cs:106-112, 240-244` (no template, no gallery); `products/ASC.Files/Core/Services/OFormService/OFormRequestManager.cs:90-93, 116, 298-311` (`GetFile` by extension) | TEST-CONFIRMED (no gallery, no template) / CODE-ONLY (a template without a file of the format) |
+| `formId` → 502: unreachable, slow, connection dropped while answering, error status of the list or the file, no template list, a proxy page instead of the list or the file, an address that cannot be requested | `common/Tests/ASC.Core.Common.Tests/OFormRequestManagerTests.cs:114-238` (`Get_*_Returns502`); `OFormRequestManager.cs:48` (30-second deadline; the tests reach the client's timeout, not this one), `:142-147`, `:254-267` (`IsGalleryFailure`) | TEST-CONFIRMED (the gallery client, unit test) / CODE-ONLY (the 30-second value) |
 | Non-PDF file (docx, text, HTML) in a Form filling room refused with 403 | `01_Files/Create/FormsRoomNonPdfCreateTests.cs:63-95` (bug 84840; asserts 400-499, the 403 is `FileDao.cs:826-828` read with `common/ASC.Api.Core/Middleware/ResponseWrapper.cs:86-88` and the operation's `SwaggerResponse`); `FormsRoomNonPdfCreateTests.cs:69-96` now asserts 403 | TEST-CONFIRMED [run: PASS] |
 | **Creating a text or HTML file from content** | | |
 | `.txt`/`.html` appended, `folderId`, `fileExst` | `01_Files/Create/TextFileCreateTests.cs:46-59, 120-135`; `HtmlFileCreateTests.cs:46-61, 84-97`; `FileCreateTests.cs:142-194` | TEST-CONFIRMED [run: PASS] |
@@ -407,7 +410,8 @@ weaker part next to the stronger one. Spec: 38 requirements, 162 scenarios.
   `TemplatesPermissionsTests.cs`): not read; only the add call is specified.
 - **`deleteAfter` on `deleteFile`** ("postpones the deletion until the editing session has ended",
   OpenAPI): no test exercises an editing session with a delete, so only the field's presence is mentioned.
-- **`templateId` / `formId` sources of `createFile`, synchronous conversion (`sync:true`), the content of a
+- **`templateId` source of `createFile` (the `formId` source is covered by the unit tests of the gallery client
+  only, see the rows of "Creating a blank file by title"), synchronous conversion (`sync:true`), the content of a
   finished conversion, `saveFileAsPdf` positives, the generated thumbnails**: the document server now runs in
   the integration host, but those cases are not ported yet (`CopyFileAsTests.cs:41-50`,
   `SaveFileAsPdfTests.cs:40-46`, `ThumbnailsCreateTests.cs:37-42`).

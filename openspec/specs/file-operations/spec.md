@@ -31,8 +31,10 @@ also where a bug is open, as the full test run of 365d87fe60 showed it.
 `createFile` (`POST api/2.0/files/{folderId}/file`) and `createFileInMyDocuments` (`POST
 api/2.0/files/@my/file`) SHALL create a file from the portal's blank template, normalising the requested title
 to a format the portal can create. A title longer than 170 characters SHALL be rejected (400); a section root
-or a folder id the caller cannot resolve SHALL be refused (403). The `templateId` and `formId` sources are not
-covered by tests and are not specified here.
+or a folder id the caller cannot resolve SHALL be refused (403). A nonzero `formId` without `templateId` SHALL copy
+that template from the template gallery: 404 when the gallery is not configured or has no file of the title's
+format for it, 502 when the gallery cannot be read or returns a file that is not of that format (bug 78009). The
+`templateId` source is not covered by tests and is not specified here.
 
 #### Scenario: Title normalisation
 
@@ -61,6 +63,13 @@ covered by tests and are not specified here.
 - **WHEN** a file is created in the Archive, Trash, Rooms, AI Agents or Forms root, or in a folder id that does not exist
 - **THEN** the system rejects the request (403)
 - **AND** a title of 166 characters plus `.docx` is rejected (400)
+
+#### Scenario: Template from the template gallery
+
+- **WHEN** a file is created with a `formId` and the gallery answers its template list with a file of the title's format, a PDF with a PDF header or a DOCX, XLSX or PPTX with a ZIP signature
+- **THEN** the gallery file is the content of the new file
+- **AND** the call answers 404 when no gallery is configured, when the list has no such template, or when the template has no file of that format
+- **AND** the call answers 502 when the gallery cannot be reached, does not answer within 30 seconds, drops the connection while answering, answers the list or the file with an error status, answers the list without its template list (a page of a proxy), or returns a PDF without a PDF header or a DOCX, XLSX or PPTX without a ZIP signature
 
 #### Scenario: Non-PDF file in a Form filling room
 

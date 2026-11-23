@@ -139,16 +139,17 @@ public class OFormRequestManager(
 
             return stream;
         }
-        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException or UriFormatException or NotSupportedException
-                                       or InvalidOperationException and not ObjectDisposedException)
+        catch (Exception e) when (IsGalleryFailure(e))
         {
-            // No token of a caller reaches here: a cancellation is a timeout, of this download or of the client. An
-            // InvalidOperationException is a charset of the answer the runtime cannot decode, or a gallery address
-            // without a scheme. UriFormatException and NotSupportedException cover malformed addresses and unsupported
-            // schemes, in the configuration or in the file address the gallery gave.
             logger.WarningOFormGalleryUnreachable(e);
 
             throw GalleryUnavailable();
+        }
+        catch (Exception e) when (e is not ItemNotFoundException and not CustomHttpException)
+        {
+            logger.ErrorOFormGalleryDownloadFailed(e);
+
+            throw;
         }
     }
 
@@ -242,13 +243,27 @@ public class OFormRequestManager(
 
             return true;
         }
-        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException or UriFormatException or NotSupportedException
-                                       or InvalidOperationException and not ObjectDisposedException)
+        catch (Exception e) when (IsGalleryFailure(e))
         {
             logger.WarningOFormGalleryProbeFailed(e);
 
             return false;
         }
+    }
+
+    /// <summary>
+    /// Whether the exception is a failure of the gallery or of the way to it rather than of this code. No token of a
+    /// caller reaches the requests: a cancellation is a timeout, of the request or of the client. A connection dropped
+    /// while the body is read comes as an HttpRequestException from HttpContent; IOException covers a read the runtime
+    /// does not wrap (HttpIOException). An InvalidOperationException is a charset of the
+    /// answer the runtime cannot decode, or a gallery address without a scheme. UriFormatException and
+    /// NotSupportedException cover malformed addresses and unsupported schemes, in the configuration or in the file
+    /// address the gallery gave.
+    /// </summary>
+    private static bool IsGalleryFailure(Exception e)
+    {
+        return e is HttpRequestException or IOException or JsonException or OperationCanceledException or UriFormatException or NotSupportedException
+            or InvalidOperationException and not ObjectDisposedException;
     }
 
     private string GetListUrl()

@@ -56,6 +56,7 @@ public sealed class OFormRequestManagerTests : IDisposable
 
     private readonly List<ServiceProvider> _services = [];
     private readonly List<HttpStub> _stubs = [];
+    private readonly List<TruncatingServer> _truncating = [];
     private readonly FusionCache _cache = new(new FusionCacheOptions
     {
         DefaultEntryOptions = new FusionCacheEntryOptions
@@ -74,6 +75,11 @@ public sealed class OFormRequestManagerTests : IDisposable
         foreach (var stub in _stubs)
         {
             stub.Dispose();
+        }
+
+        foreach (var server in _truncating)
+        {
+            server.Dispose();
         }
 
         foreach (var services in _services)
@@ -212,6 +218,26 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task Get_ListConnectionDropsMidBody_Returns502()
+    {
+        await AssertGalleryUnavailableAsync(CreateManager(Truncating().Url));
+    }
+
+    [Theory]
+    [InlineData(".pdf")]
+    [InlineData(".docx")]
+    public async Task Get_FileConnectionDropsMidBody_Returns502(string ext)
+    {
+        var file = Truncating();
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK,
+            $$"""{"data":[{"id":1,"file_oform":[{"url":"{{file.Url}}/file{{ext}}","name":"form","ext":"{{ext}}"}]}]}"""));
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url), ext);
+
+        file.CallCount.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
     public async Task Get_NoGalleryConfigured_Returns404()
     {
         await Assert.ThrowsAsync<ItemNotFoundException>(() => CreateManager(null).Get(1, ".pdf"));
@@ -253,6 +279,12 @@ public sealed class OFormRequestManagerTests : IDisposable
     public async Task IsAvailableAsync_GalleryIsUnreachable_IsFalse()
     {
         (await CreateManager(Unreachable().Url).IsAvailableAsync()).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_ConnectionDropsMidBody_IsFalse()
+    {
+        (await CreateManager(Truncating().Url).IsAvailableAsync()).Should().BeFalse();
     }
 
     [Theory]
@@ -435,6 +467,14 @@ public sealed class OFormRequestManagerTests : IDisposable
         return stub;
     }
 
+    private TruncatingServer Truncating()
+    {
+        var server = new TruncatingServer();
+        _truncating.Add(server);
+
+        return server;
+    }
+
     private HttpStub Unreachable()
     {
         var stub = HttpStub.Unreachable();
@@ -485,5 +525,83 @@ public sealed class OFormRequestManagerTests : IDisposable
         var exception = await Assert.ThrowsAsync<CustomHttpException>(() => manager.Get(1, ext));
 
         exception.StatusCode.Should().Be((int)HttpStatusCode.BadGateway);
+    }
+    /// <summary>
+    /// A server that answers 200 with a Content-Length longer than the body it writes, then closes the connection: the
+    /// gallery, or a proxy of a closed network, dropping the connection while the body is read. WireMock cannot do
+    /// that, its faults either answer in full or fail before the headers.
+    /// </summary>
+    private sealed class TruncatingServer : IDisposable
+    {
+        private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
+        private int _callCount;
+
+        public TruncatingServer()
+        {
+            _listener.Start();
+            _ = Task.Run(AcceptAsync);
+        }
+
+        public string Url => $"http://127.0.0.1:{((IPEndPoint)_listener.LocalEndpoint).Port}";
+
+        public int CallCount => Volatile.Read(ref _callCount);
+
+        public void Dispose()
+        {
+            _listener.Stop();
+        }
+
+        private async Task AcceptAsync()
+        {
+            while (true)
+            {
+                Socket connection;
+
+                try
+                {
+                    connection = await _listener.AcceptSocketAsync();
+                }
+                catch (Exception e) when (e is SocketException or ObjectDisposedException)
+                {
+                    // The listener is stopped at the end of the test
+                    return;
+                }
+
+                _ = Task.Run(() => AnswerAsync(connection));
+            }
+        }
+
+        private async Task AnswerAsync(Socket connection)
+        {
+            using (connection)
+            {
+                try
+                {
+                    var request = new StringBuilder();
+                    var buffer = new byte[4096];
+
+                    while (!request.ToString().Contains("\r\n\r\n", StringComparison.Ordinal))
+                    {
+                        var read = await connection.ReceiveAsync(buffer);
+                        if (read == 0)
+                        {
+                            return;
+                        }
+
+                        request.Append(Encoding.ASCII.GetString(buffer, 0, read));
+                    }
+
+                    Interlocked.Increment(ref _callCount);
+
+                    await connection.SendAsync(Encoding.ASCII.GetBytes(
+                        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 4096\r\n\r\n{\"data\":[{\"id\":1"));
+                    connection.Shutdown(SocketShutdown.Both);
+                }
+                catch (SocketException)
+                {
+                    // The client gave up first; the connection is gone either way
+                }
+            }
+        }
     }
 }

@@ -48,6 +48,9 @@ internal static partial class OFormRequestManagerLogger
     [LoggerMessage(LogLevel.Warning, "The template gallery could not be reached or gave an unreadable answer")]
     public static partial void WarningOFormGalleryUnreachable(this ILogger<OFormRequestManager> logger, Exception exception);
 
+    [LoggerMessage(LogLevel.Error, "The download of a template from the template gallery failed")]
+    public static partial void ErrorOFormGalleryDownloadFailed(this ILogger<OFormRequestManager> logger, Exception exception);
+
     [LoggerMessage(LogLevel.Warning, "The check of the template gallery got {status} from {uri}")]
     public static partial void WarningOFormGalleryProbeStatus(this ILogger<OFormRequestManager> logger, Uri uri, int status);
 
