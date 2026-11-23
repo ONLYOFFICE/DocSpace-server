@@ -18,7 +18,7 @@ or live evidence was found — flagged).
 Conventions that apply to every row: a refusal is asserted as an `ApiException` with the status code, the
 message only where the row says so; "Guest" and "User" are the user types (`EmployeeType` Guest / User),
 "Room admin" is `EmployeeType.RoomAdmin`. The message "The role is not available for this user type" is the
-resource `FilesCommonResource.resx:331` and is thrown by `products/ASC.Files/Core/Utils/FileSharing.cs:180,
+resource `FilesCommonResource.resx:331` and is thrown by `products/ASC.Files/Core/Utils/FileSharing.cs:183,
 181-189, 206, 266-289`; the AI-project guest tests assert the text (`03_Rooms/AiHub/AiProjectGuestInviteTests.cs:57, 78`),
 every other row only the 403. The user-type → room-role table is
 `products/ASC.Files/Core/Core/Security/FileSecurity.cs:266-282` (`AvailableUserAccesses`: User and Guest
@@ -63,7 +63,7 @@ are unchanged (verdicts below).
 | Room admin sees own rooms and the rooms they joined, nothing else | `RoomsFolderVisibilityTests.cs:61-85` | TEST-CONFIRMED [run: PASS] |
 | User / Guest see only rooms they joined | `RoomsFolderVisibilityTests.cs:87-137`; `02_Folders/Subfolders/RootFoldersPermissionsTests.cs:198-215` | TEST-CONFIRMED [run: PASS] |
 | Same rules in the Archive section | `03_Rooms/Archive/ArchiveListingByTypeTests.cs:46-95` (DocSpace admin sees a foreign archived room; Room admin sees own and joined, User / Guest joined only, none of them the foreign one) | TEST-CONFIRMED [run: PASS] |
-| Private room hidden from a non-member Owner / DocSpace admin | `08_Private/PrivateRoomSectionTests.cs:141-153` (the Owner in the `PrivateRooms` area, then the creator); `08_Private/PrivateRoomSectionTests.cs:155-180` (Owner and DocSpace admin outside an active and an archived private room: absent from Active, `PrivateRooms`, `Any` and Archive, while the creator sees the archived one); `products/ASC.Files/Core/Core/Security/FileSecurity.cs:3069-3073`. `PrivateRoomVisibilityTests.cs:53-92` no longer proves it: it calls the default Active area, which leaves private rooms out for everyone | TEST-CONFIRMED [run: PASS] |
+| Private room hidden from a non-member Owner / DocSpace admin | `08_Private/PrivateRoomSectionTests.cs:141-153` (the Owner in the `PrivateRooms` area, then the creator); `08_Private/PrivateRoomSectionTests.cs:155-180` (Owner and DocSpace admin outside an active and an archived private room: absent from Active, `PrivateRooms`, `Any` and Archive, while the creator sees the archived one); `products/ASC.Files/Core/Core/Security/FileSecurity.cs:3081-3085`. `PrivateRoomVisibilityTests.cs:53-92` no longer proves it: it calls the default Active area, which leaves private rooms out for everyone | TEST-CONFIRMED [run: PASS] |
 | **Room creation and management in the Rooms section** | | |
 | Create rooms: Owner, DocSpace admin, Room admin succeed; User, Guest → 403 ("You don't have enough permission to create"); a User → 403 for an AI project too | `03_Rooms/Permissions/RoomCreatePermissionsTests.cs:41-107, 182-236`; `03_Rooms/AiHub/AiProjectRoomTests.cs:62-74` | TEST-CONFIRMED [run: PASS] |
 | Pin: every invited member of every type pins; non-member User / Guest → 403 | `RoomPinPermissionsTests.cs:50-71, 90-109`; `RoomPinInvitedMemberPermissionsTests.cs:41-59` | TEST-CONFIRMED [run: PASS] |
@@ -78,10 +78,10 @@ are unchanged (verdicts below).
 | Archive own room: Owner, DocSpace admin | `RoomArchivePermissionsTests.cs:66-81`; `03_Rooms/Archive/RoomArchiveTests.cs:47-77`; Room admin own room not asserted (`archiveRoom` 30627 demands the room's owner or a portal admin) | TEST-CONFIRMED [run: PASS] |
 | Copy own room: Owner | `RoomDeleteFileOpsTests.cs:46-65`; `yaml` `duplicateBatchItems` (23678) | TEST-CONFIRMED [run: PASS] |
 | Inviting / role changes / removal need the Room manager role, which a User or Guest cannot hold | `RoomSharePermissionsTests.cs:248-270`; `FileSecurity.cs:266-282`; `deviations.md` matrix row "Users and Guests may invite to a room … 403" | TEST-CONFIRMED [run: PASS] |
-| User / Guest who are members cannot invite, member list unchanged | the 403 is asserted for non-members only (`RoomSharePermissionsTests.cs:104-145`); the check is role-based (`FileSharing.cs:102`), a member with any non-manager role fails it; live run `deviations.md` row above | LIVE-CONFIRMED |
+| User / Guest who are members cannot invite, member list unchanged | the 403 is asserted for non-members only (`RoomSharePermissionsTests.cs:104-145`); the check is role-based (`FileSharing.cs:105`), a member with any non-manager role fails it; live run `deviations.md` row above | LIVE-CONFIRMED |
 | Room admin makes another Room admin a Room manager, who then invites | `04_Security/RoomShareTests.cs:1099-1126` | TEST-CONFIRMED [run: PASS] |
-| Room manager role refused for a User / Guest, by the Owner too → 403, member absent | `RoomSharePermissionsTests.cs:248-270`; `RoomShareAccessLevelTests.cs:56-59`; message `FileSharing.cs:293-299` | TEST-CONFIRMED [run: PASS] |
-| Room admin hands out any role but Room manager to a User / Guest; a Guest gets no role in an AI project (403, message) | `03_Rooms/Sharing/RoomShareByRoomAdminTests.cs:58-86` (a Room admin on own room grants Read, Comment, Review, Editing, Content creator to a User and to own Guest; Room manager → 403 "The role is not available for this user type", member absent); AI project: `03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-79`, `FileSharing.cs:285-291` | TEST-CONFIRMED [run: PASS] |
+| Room manager role refused for a User / Guest, by the Owner too → 403, member absent | `RoomSharePermissionsTests.cs:248-270`; `RoomShareAccessLevelTests.cs:56-59`; message `FileSharing.cs:296-302` | TEST-CONFIRMED [run: PASS] |
+| Room admin hands out any role but Room manager to a User / Guest; a Guest gets no role in an AI project (403, message) | `03_Rooms/Sharing/RoomShareByRoomAdminTests.cs:58-86` (a Room admin on own room grants Read, Comment, Review, Editing, Content creator to a User and to own Guest; Room manager → 403 "The role is not available for this user type", member absent); AI project: `03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-79`, `FileSharing.cs:288-294` | TEST-CONFIRMED [run: PASS] |
 | **Actions on rooms owned by someone else** | | |
 | Non-member DocSpace admin: view member list, history, info | `RoomShareReadTests.cs:208-221`; `FolderHistoryPermissionsTests.cs:62-76`; `RoomReadPermissionsTests.cs:43-63` | TEST-CONFIRMED [run: PASS] |
 | Non-member DocSpace admin pins a foreign room | `RoomPinPermissionsTests.cs:73-88` | TEST-CONFIRMED [run: PASS] |
@@ -142,7 +142,7 @@ are unchanged (verdicts below).
 | User sharing with a guest: 200, guest absent | `FileShareTests.cs:1287-1309` | TEST-CONFIRMED [run: PASS] |
 | Skipped guest cannot open the file | `04_Security/Sharing/MyDocumentsSharingByTypeTests.cs:69-100` (User, and Room admin with a foreign guest: guest skipped, `getFileInfo` as the guest 403) | TEST-CONFIRMED [run: PASS] |
 | Quick share for forms (filling link) in My documents by a User | `04_Security/Sharing/MyDocumentsSharingByTypeTests.cs:48-67` (DocSpace admin, Room admin, User create a primary Fill forms link on a PDF form in own My documents); `FileSecurity.cs:97-101` | TEST-CONFIRMED [run: PASS] |
-| Filling link refused on a form in a Custom / Public / Collaboration room → 403 "The role is not available for this user type" | `FileSharing.cs:169-180`; `deviations.md` matrix row "Forms in rooms other than FFR/VDR are shared 'for editing only' / Editing, comment and read links are offered; filling is refused" | LIVE-CONFIRMED |
+| Filling link refused on a form in a Custom / Public / Collaboration room → 403 "The role is not available for this user type" | `FileSharing.cs:172-183`; `deviations.md` matrix row "Forms in rooms other than FFR/VDR are shared 'for editing only' / Editing, comment and read links are offered; filling is refused" | LIVE-CONFIRMED |
 
 Counts: 78 rows — TEST-CONFIRMED 56, CODE-ONLY 17, LIVE-CONFIRMED 3, MATRIX-ONLY 1 (unchanged by revision
 2026-11-04, which widened two rows instead of adding any; the copy of an archived

@@ -192,6 +192,34 @@ public class FolderLinkPrimaryPermissionsTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// The primary read link of a public room skipped the access check, so a user outside the room created one with
+    /// 200 on a folder they could not read. The exception now holds only for a caller who can read the folder.
+    /// </summary>
+    [Fact]
+    public async Task SetPrimaryLink_UserOutsidePublicRoom_Returns403AndNoLinkIsAdded()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreatePublicRoom("Autotest Public Room Outsider Link");
+        var folder = await CreateFolder("Autotest Outsider Link Folder", room.Id);
+        var linksBefore = (await _foldersApi.GetFolderLinksAsync(folder.Id, TestContext.Current.CancellationToken)).Response.Count;
+
+        var outsider = await InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(outsider);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.SetFolderPrimaryExternalLinkAsync(
+                folder.Id, new FolderLinkRequest(access: FileShare.Read, primary: true), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+
+        await _filesClient.Authenticate(Owner);
+        (await _foldersApi.GetFolderLinksAsync(folder.Id, TestContext.Current.CancellationToken)).Response.Count.Should().Be(linksBefore);
+    }
+
     // NOTE: the TypeScript suite also has "User with RoomManager access cannot set primary external
     // link returns 403", inviting a plain User into the room with FileShare.RoomManager. That access
     // level is not one FileSecurity.AvailableRoomAccesses permits for SubjectType.User in a

@@ -305,10 +305,11 @@ public class WebPluginManager(
                     {
                         log.ErrorWithException(webPlugin.Name, e);
 
+                        // the plugin is shown as disabled in this answer only: a read, open to any member including a
+                        // guest, used to save the portal's plugin settings and push a socket event. An admin who
+                        // enables the plugin again stores new settings.
                         webPlugin.Enabled = false;
                         webPlugin.Settings = null;
-
-                        await UpdateWebPluginAsync(webPlugin, false, null);
                     }
                 }
             }

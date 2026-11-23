@@ -727,6 +727,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The metadata could not be applied to every entry. Try again later..
+        /// </summary>
+        public static string ErrorMessage_MetadataCascadeFailed {
+            get {
+                return ResourceManager.GetString("ErrorMessage_MetadataCascadeFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form..
         /// </summary>
         public static string ErrorMessage_MoveToFormRoom {

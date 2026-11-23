@@ -20,6 +20,19 @@ paths around it. Before a fix is handed back:
    the lookup the old behaviour served, rows and backup archives written before the change, the
    other database in the code (the PostgreSQL branch of a model builder or of raw SQL), the success
    path and the opposite failure. If the fix adds a retry, requeue or fallback, show where it ends.
+   - **A changed side effect has readers.** When the fix changes what a shared method leaves behind
+     (a property it sets on the object it was given, a cache entry, a field), run `findReferences` on
+     that state, not only on the method, and read every caller that reads it after the call. Change
+     only the effect the finding is about: an extra "for symmetry" change is new behaviour with no
+     finding behind it. Seen in review: a fix of `FileSecurity` also restored `entry.Access` after a
+     check of another account; `FileEntryWebhookDtoHelper.CanSeeRoomQuotaAsync` reads the
+     subscriber's access from `Access` after that check, and editors lost the room quota of their
+     webhook payloads.
+   - **Run every suite that reaches the changed project.** A change in a shared library
+     (`ASC.Files.Core`, `ASC.Core.Common`, `ASC.Web.Core`) is run in each integration suite whose
+     project references it, the suites of the other products and Web.Api included, not only in the
+     suite of the product the file lives in. In the case above the full Files run was green; the
+     webhook payload tests of `ASC.Web.Api.Tests` would have failed at once.
 3. **Prove it with a test** that fails without the fix — for every behavioural finding — and prove
    that it fails: run `.claude/scripts/prove-red.sh` (`tests.md`, "A test has to be able to fail") and
    put its result line in the commit message. A finding that cannot be tested or proven here

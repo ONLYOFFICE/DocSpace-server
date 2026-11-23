@@ -479,6 +479,11 @@ an existing file (404).
 - **WHEN** an editor of a room document lists a member's address in `sendEditorNotify`
 - **THEN** the system answers 200 and the member receives the mention letter and push
 
+#### Scenario: Mention of an account that cannot read the file
+
+- **WHEN** the caller lists the address of an account that has no access to the file, next to one that can read it
+- **THEN** only the account that can read the file receives the mention letter
+
 #### Scenario: Address without an account
 
 - **WHEN** one listed address belongs to nobody and the caller may share the file

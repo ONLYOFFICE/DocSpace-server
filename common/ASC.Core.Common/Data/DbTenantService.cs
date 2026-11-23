@@ -449,8 +449,8 @@ public class DbTenantService(
             }
 
             var existsTenants = await tenantDbContext.TenantForbiden.Where(r => r.Address.StartsWith(domain)).Select(r => r.Address).ToListAsync();
-            existsTenants.AddRange(await tenantDbContext.Tenants.Where(r => r.Alias.StartsWith(domain) && r.Id != tenantId).Select(r => r.Alias).ToListAsync());
-            existsTenants.AddRange(await tenantDbContext.Tenants.Where(r => r.MappedDomain.StartsWith(domain) && r.Id != tenantId && r.Status != TenantStatus.RemovePending).Select(r => r.MappedDomain).ToListAsync());
+            existsTenants.AddRange(await tenantDbContext.TakenAliasesAsync(tenantId, domain).ToListAsync());
+            existsTenants.AddRange(await tenantDbContext.TakenMappedDomainsAsync(tenantId, domain).ToListAsync());
 
             throw new TenantAlreadyExistsException("Address busy.", existsTenants.Distinct());
         }

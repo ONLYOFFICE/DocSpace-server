@@ -65,6 +65,7 @@ global using ASC.EventBus.Events;
 global using ASC.EventBus.Serializers;
 global using ASC.Files.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.NotifyService;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
@@ -83,6 +84,7 @@ global using ASC.Tests.Common.Data;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.RemovePortal;
 global using ASC.Web.Core.Users;
+global using ASC.Web.Files.Classes;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
 

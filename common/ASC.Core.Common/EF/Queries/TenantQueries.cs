@@ -94,6 +94,22 @@ public partial class TenantDbContext
     {
         return Queries.AnyTenantsAsync(this, tenantId, domain);
     }
+
+    /// <summary>
+    /// The aliases of the other portals that start with <paramref name="prefix"/>, offered as taken names. A removed
+    /// portal keeps its renamed alias (<c>x_deleted</c>) until it is purged; it is no taken name and is left out.
+    /// </summary>
+    [PreCompileQuery]
+    public IAsyncEnumerable<string> TakenAliasesAsync(int tenantId, string prefix)
+    {
+        return Queries.TakenAliasesAsync(this, tenantId, prefix);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<string> TakenMappedDomainsAsync(int tenantId, string prefix)
+    {
+        return Queries.TakenMappedDomainsAsync(this, tenantId, prefix);
+    }
 }
 
 static file class Queries
@@ -172,4 +188,18 @@ static file class Queries
                               r.MappedDomain == domain && !(r.Status == TenantStatus.RemovePending ||
                                                            r.Status == TenantStatus.Restoring))
                                                        && r.Id != tenantId));
+
+    public static readonly Func<TenantDbContext, int, string, IAsyncEnumerable<string>> TakenAliasesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (TenantDbContext ctx, int tenantId, string prefix) =>
+                ctx.Tenants
+                    .Where(r => r.Alias.StartsWith(prefix) && r.Id != tenantId && r.Status != TenantStatus.RemovePending)
+                    .Select(r => r.Alias));
+
+    public static readonly Func<TenantDbContext, int, string, IAsyncEnumerable<string>> TakenMappedDomainsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (TenantDbContext ctx, int tenantId, string prefix) =>
+                ctx.Tenants
+                    .Where(r => r.MappedDomain.StartsWith(prefix) && r.Id != tenantId && r.Status != TenantStatus.RemovePending)
+                    .Select(r => r.MappedDomain));
 }

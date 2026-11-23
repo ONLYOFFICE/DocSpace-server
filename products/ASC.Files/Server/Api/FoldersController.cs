@@ -760,7 +760,8 @@ public abstract class FoldersController<T>(
     /// Creates or changes an external link of a folder or a room, or revokes it. The `linkId` field selects the link. A new
     /// or empty ID creates a link, and an existing ID changes that link. The call applies all fields every time, so a
     /// missing field gets its default value. Requires the right to manage the links of the folder. Other callers
-    /// get 403. The room manager has this right. The call changes data. A repeated call with an existing `linkId`
+    /// get 403. The room manager has this right. In a public room, a caller who can read the folder may also set
+    /// its primary link with `access` Read. The call changes data. A repeated call with an existing `linkId`
     /// changes nothing. A repeated call with an empty `linkId` creates one more link. If `access` grants nothing, the
     /// call revokes the link and returns an empty response. A later read does not recreate a revoked primary link.
     /// In a public room or a form-filling room, revoking the primary link creates a new one with default settings.

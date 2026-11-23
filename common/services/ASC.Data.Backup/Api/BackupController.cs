@@ -623,7 +623,8 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Returns a path to the temporary folder with the stored backup.
+    /// Returns a path to the temporary folder with the stored backup. Requires the right to manage backups, as the
+    /// other backup calls do; it used to answer any signed-in member with the absolute path on the server.
     /// </remarks>
     /// <summary>Get the temporary backup folder</summary>
     /// <path>api/2.0/backup/backuptmp</path>
@@ -631,8 +632,10 @@ public class BackupController(
     [Tags("Backup")]
     [HttpGet("backuptmp")]
     [SwaggerResponse(200, "Path to the temporary folder with the stored backup", typeof(object))]
-    public object GetTempPath()
+    public async Task<object> GetTempPath()
     {
+        await backupService.DemandPermissionsBackupAsync();
+
         return backupService.GetTmpFolder();
     }
 

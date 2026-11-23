@@ -60,7 +60,7 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | **Server address of a new connection** (bug 84672) | `TP/ThirdPartyKDriveConnectBugTests.cs:86` (kDrive only; other WebDAV presets by comment `PAD:500`) | TEST-CONFIRMED [run: PASS] |
 | **Re-authenticating and renaming** | | |
 | Rename (bug 83303) | `TP/ThirdPartyProviderConnectBugTests.cs:80` | TEST-CONFIRMED [run: PASS] |
-| Another member 403 | `FSS:3111-3115`; needs a connected account | CODE-ONLY |
+| Another member 403 | `FSS:3113-3117`; needs a connected account | CODE-ONLY |
 | Unknown id 404 | `TP/ThirdPartyAccessRefusalTests.cs:185` | TEST-CONFIRMED [run: PASS] |
 | Room account keeps its address | `PAD:201`; needs a connected account | CODE-ONLY |
 | Account without address not refused for the address | `TP/ThirdPartyKDriveConnectBugTests.cs:112` | TEST-CONFIRMED [run: PASS] |
@@ -69,15 +69,15 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | Own accounts only, no backup account | `products/ASC.Files/Core/Core/EF/Queries/ProviderAccountQueries.cs:115-125`; needs connected accounts | CODE-ONLY |
 | Empty for a user; anonymous 401 | `TP/ThirdPartyAccessRefusalTests.cs:221,234` | TEST-CONFIRMED [run: PASS] |
 | **Disconnecting** | | |
-| Returned folder id, delete rights check, removal of security, tags and group links | `FC:133-144`, `FSS:3245-3280`, `PAD:436-457`; needs a connected account | CODE-ONLY |
-| Unrelated user 403; anonymous 401 | `TP/ThirdPartyAccessRefusalTests.cs:207` (anonymous 401); the unrelated user's 403 needs a connected account and stays CODE-ONLY (`FSS:3257`) | TEST-CONFIRMED [run: PASS] (partly) |
+| Returned folder id, delete rights check, removal of security, tags and group links | `FC:133-144`, `FSS:3247-3282`, `PAD:436-457`; needs a connected account | CODE-ONLY |
+| Unrelated user 403; anonymous 401 | `TP/ThirdPartyAccessRefusalTests.cs:207` (anonymous 401); the unrelated user's 403 needs a connected account and stays CODE-ONLY (`FSS:3259`) | TEST-CONFIRMED [run: PASS] (partly) |
 | Unknown id 404 | `TP/ThirdPartyAccessRefusalTests.cs:196` | TEST-CONFIRMED [run: PASS] |
 | Room group still listed (bug 83264) | `TP/ThirdPartyProviderDeletionBugTests.cs:88` | TEST-CONFIRMED [run: PASS] |
 | **Account behind a room** (bug 83305) | `TP/ThirdPartyProviderDeletionBugTests.cs:54` | TEST-CONFIRMED [run: PASS] |
 | **Legacy Common section** | `TP/ThirdPartyProvidersTests.cs:188` | TEST-CONFIRMED [run: PASS] |
 | **Backup storage account** | | |
 | Admin-only | `TP/ThirdPartyBackupAccessTests.cs:73,88` (room admin, user, guest 403; anonymous 401) | TEST-CONFIRMED [run: PASS] |
-| Switch off 403, single account, update path checks credentials | `TP/ThirdPartyBackupAccessTests.cs:102` (switch off 403); the single account and the update path need a connected account and stay CODE-ONLY (`FSS:3189-3232`, `PAD:369-434`) | TEST-CONFIRMED [run: PASS] (partly) |
+| Switch off 403, single account, update path checks credentials | `TP/ThirdPartyBackupAccessTests.cs:102` (switch off 403); the single account and the update path need a connected account and stay CODE-ONLY (`FSS:3191-3234`, `PAD:369-434`) | TEST-CONFIRMED [run: PASS] (partly) |
 | **Reading the backup account** | `TP/ThirdPartyBackupAccessTests.cs:60` (none connected: empty answer); reading a connected one stays CODE-ONLY (`FSS` `GetBackupThirdPartyAsync`, `FC:226-236`) | TEST-CONFIRMED [run: PASS] (partly) |
 | **Backup account removes its schedule** | `FC:138-141`; needs a connected backup account | CODE-ONLY |
 | **Content of a connected account** | | |
@@ -195,7 +195,7 @@ No operation of the owned tags is left out: all 31 are named in a requirement.
 | SI4 | Migration operation, if it were started | On failure the task is marked failed but the portal status stays Migrating. | `common/ASC.Data.Storage/StorageUploader.cs:193-204` | red by code reading |
 | SI5 | `getAllProviders` Yandex entry | Key `WebDav` without `requiredConnectionUrl`, while a WebDAV connection without an address is refused. A client following the document cannot connect Yandex that way. The refusal itself was read only as a comment. | `TC:107-164`; `PAD:500` comment | red by code reading |
 | SI7 | `updateStorage`, `updateCdnStorage` | `props` is not required, but is read unconditionally: a configured module with no `props` gives a null dereference, 500 instead of 400. | `SC:403`, `SC:529`; `web/ASC.Web.Api/ApiModels/RequestsDto/StorageRequestsDto.cs:60` | red by code reading |
-| SI8 | `saveThirdPartyBackup` second call | The new title is stored without the invalid-character cleaning a new account gets. | `PAD:412-415` vs `FSS:3208` | red by code reading |
+| SI8 | `saveThirdPartyBackup` second call | The new title is stored without the invalid-character cleaning a new account gets. | `PAD:412-415` vs `FSS:3210` | red by code reading |
 | SI9 | `startStorageEncryption` | A running backup is reported by a bare exception: 500 with no message, though the condition is an expected one. STILL OPEN after 09d4de0768..6fb6dfb17a: `StorageController.cs:212-216` still throws `new Exception()`; the range only removed the documented 500, so it is now undeclared. | `SC:216` | red by code reading |
 | SI10 | `getStorageEncryptionSettings` | Catches every exception, so missing rights, a hosted portal and real failures all look like 200 with an empty body. The yaml documents this. | `SC:296-323`; `ST/EncryptionAccessTests.cs:49` | red test — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | SI11 | `getThirdPartyCode` for Docusign, Wordpress, Github | On an installation without their OAuth application the consent URL is not built: a null dereference (Wordpress, Github) or an unparsable address (Docusign) answers 500, where a provider outside the seven answers 200 without a URL. It may depend on configuration, but the failure is unhandled. | `OA/ThirdPartyOAuthProvidersTests.cs:68`; `TPC:81-102` | red test — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (`OA/ThirdPartyOAuthProvidersTests.cs:68`) |
@@ -203,8 +203,8 @@ No operation of the owned tags is left out: all 31 are named in a requirement.
 ## Not verified
 
 - Apart from the 2026-11-10 run, no test was run for this document; bug-numbered tests were read, not executed.
-- Re-saving an account of another section through `saveThirdParty`, which passes room storage as the folder type (`FSS:3143`, `PAD:281-366` unread).
-- Whether a second DocSpace admin can read the backup folder: if not, `getBackupThirdPartyAccount` answers empty and `saveThirdPartyBackup` would create a second account (`FSS:3207-3223`), and later `SingleOrDefault` calls would fail.
+- Re-saving an account of another section through `saveThirdParty`, which passes room storage as the folder type (`FSS:3145`, `PAD:281-366` unread).
+- Whether a second DocSpace admin can read the backup folder: if not, `getBackupThirdPartyAccount` answers empty and `saveThirdPartyBackup` would create a second account (`FSS:3209-3225`), and later `SingleOrDefault` calls would fail.
 - `DocsCloudClient` itself and its cache times; the 400 without a tenant is now asserted by `BT/DocsCloudTenantTests.cs:104-116`.
 - Rows that need a connected account were left out of the 2026-11-10 run on purpose, although the `integration-test` profile starts a Nextcloud container: another member's 403, the room storage flag, the address kept on re-saving, the list filter, the disconnect details and the backup account's update path.
 - The serialized Dev Pack switches, the `refresh=true` cache times and the audit entry of a configuration update.

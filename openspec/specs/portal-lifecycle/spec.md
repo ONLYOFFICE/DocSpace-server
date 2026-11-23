@@ -88,7 +88,7 @@ breaks one of the naming rules with 400 and the rule's code in `error`. A free n
 - **THEN** `error` is "portalNameEmpty"
 - **AND** a name shorter than 6 or longer than 63 characters gets "tooShortError"
 - **AND** a name that is not lower-case letters, digits and hyphens starting and ending with a letter or digit, or that looks like punycode, gets "portalNameIncorrect"
-- **AND** a name already used by a portal, a mapped domain or a reserved address gets "portalNameExist" with `variants`, the taken names sharing the stem
+- **AND** a name already used by a portal, a mapped domain or a reserved address gets "portalNameExist" with `variants`, the taken names sharing the stem; a deleted portal, renamed to `<name>_deleted` until it is purged, is never among them
 
 #### Scenario: Name already taken
 

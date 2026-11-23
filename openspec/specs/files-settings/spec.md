@@ -255,6 +255,7 @@ requires edit access to the file.
 
 - **WHEN** another member claims a file that is already claimed
 - **THEN** the answer is 403
+- **AND** the refusal leaves the first claim in place, so the same claim repeated right after it is refused too
 
 #### Scenario: Refused callers
 

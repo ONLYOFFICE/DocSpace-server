@@ -67,6 +67,27 @@ public class BackupUnpublishedRoutesTests(
         ((int)response.StatusCode).Should().Be(401);
     }
 
+    /// <summary>
+    /// The route checked no right and gave any signed-in member the absolute path of the worker's temporary folder.
+    /// It now takes the right to manage backups, as the other backup calls do.
+    /// </summary>
+    [Theory]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.RoomAdmin)]
+    public async Task GetBackupTmp_MemberWithoutBackupRight_Returns403(EmployeeType employeeType)
+    {
+        // Arrange
+        await AuthenticateAsMemberAsync(employeeType);
+
+        // Act
+        using var response = await _backup.GetAsync("api/2.0/backup/backuptmp", TestContext.Current.CancellationToken);
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        ((int)response.StatusCode).Should().Be(403, body);
+        body.Should().Contain(AccessDenied);
+    }
+
     [Fact]
     public async Task CancelRestore_IsNotARoute()
     {

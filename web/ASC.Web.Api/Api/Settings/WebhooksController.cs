@@ -167,10 +167,9 @@ public class WebhooksController(
 
         // the triggers are the owner's to receive, so they are checked against the owner's role, not the editor's
         var ownerId = existingWebhook.CreatedBy ?? authContext.CurrentAccount.ID;
-        // left out, ssl keeps the stored value, so a client that omits it does not switch certificate checking on for a
-        // subscription saved with it off. That covers only clients that really omit it: the C# SDK, generated while ssl
-        // was a plain boolean, always sends the field - false unless the caller sets it - so an update through it turns
-        // checking off until the SDK is regenerated from the nullable spec, which follows the merge of this change
+        // left out or null, ssl keeps the stored value, so a client that omits it does not switch certificate checking on
+        // for a subscription saved with it off, nor off for one saved with it on (the C# SDK sends `"ssl": null` when the
+        // caller leaves it unset)
         var ssl = inDto.SSL ?? existingWebhook.SSL;
         var targetId = await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, ssl, inDto.Triggers, inDto.TargetId, ownerId, false);
 

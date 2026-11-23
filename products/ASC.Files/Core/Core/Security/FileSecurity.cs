@@ -2159,7 +2159,10 @@ public class FileSecurity(
                 break;
         }
 
-        var ace = e.ShareRecord;
+        // the record on the entry is the current account's (a listing sets it, and so does a check of that account); a
+        // check of another account used to answer from it, and then left its own record there for the next check
+        var forCurrentAccount = userId == authContext.CurrentAccount.ID;
+        var ace = forCurrentAccount ? e.ShareRecord : null;
 
         if (ace == null)
         {
@@ -2205,7 +2208,11 @@ public class FileSecurity(
                 _ => DefaultCommonShare
             };
 
-        e.ShareRecord = ace;
+        if (forCurrentAccount)
+        {
+            e.ShareRecord = ace;
+        }
+
         e.Access = ace?.Share ?? defaultShare;
         e.Access = e.RootFolderType is FolderType.ThirdpartyBackup ? FileShare.Restrict : e.Access;
 

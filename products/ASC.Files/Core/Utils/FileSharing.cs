@@ -96,7 +96,10 @@ public class FileSharingAceHelper(
                     roomType = entryRoom?.FolderType;
                 }
 
-                return roomType == FolderType.PublicRoom && r.SubjectType == SubjectType.PrimaryExternalLink && r.Access == FileShare.Read;
+                // any reader of a public room may get its primary read link, which is created on the first request; one who
+                // cannot read the entry used to create it on a folder hidden from them
+                return roomType == FolderType.PublicRoom && r.SubjectType == SubjectType.PrimaryExternalLink && r.Access == FileShare.Read
+                       && await fileSecurity.CanReadAsync(entry);
             }) &&
             !beforeOwnerChange &&
             !await fileSharingHelper.CanSetAccessAsync(entry))

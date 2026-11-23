@@ -41,7 +41,7 @@ Line references below were refreshed; the spec text is unchanged.
 | **VDR room management by role** | | |
 | Edit the room: owner changes indexing, deny-download, watermark, lifetime | `03_Rooms/Update/RoomUpdateVdrFieldsTests.cs:46-168` (owner only) | TEST-CONFIRMED [run: PASS] (owner) |
 | Edit the room by role (Room manager yes, others 403) | `03_Rooms/Permissions/VdrRoomManagementRolesTests.cs:59-90` (rename: Room manager 200; Content creator, Editor, Form Filler, Viewer 403, title unchanged) | TEST-CONFIRMED [run: PASS] |
-| Invite / assign / change roles / remove: Room manager yes, lower roles 403 | `03_Rooms/Permissions/VdrRoomManagementRolesTests.cs:94-141` (Room manager invites with a role, changes a role, removes; every lower role 403 for all three, members unchanged); `FileSharing.cs:88-105` | TEST-CONFIRMED [run: PASS] |
+| Invite / assign / change roles / remove: Room manager yes, lower roles 403 | `03_Rooms/Permissions/VdrRoomManagementRolesTests.cs:94-141` (Room manager invites with a role, changes a role, removes; every lower role 403 for all three, members unchanged); `FileSharing.cs:88-108` | TEST-CONFIRMED [run: PASS] |
 | View member list / history / info by every role | `03_Rooms/Permissions/VdrRoomReadArchiveRolesTests.cs:57-74` (room info, `rooms/{id}/share`, `folder/{id}/log` for all five roles) | TEST-CONFIRMED [run: PASS] |
 | Archive / delete: owner only | `03_Rooms/Permissions/VdrRoomReadArchiveRolesTests.cs:78-121` (all five member roles incl. Room manager 403 for archive and delete, room stays active; the owner archives, then deletes) | TEST-CONFIRMED [run: PASS] |
 | **VDR files and folders by role** | | |

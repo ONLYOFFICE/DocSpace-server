@@ -57,6 +57,45 @@ public class PortalImmediateDeletionTests(AspireAppFixture fixture) : PortalLife
         body.GetProperty("message").GetString().Should().Be("portalNameReadyToRegister");
     }
 
+    /// <summary>
+    /// A removed portal keeps its renamed alias (<c>name_deleted</c>) until it is purged. When the name was taken
+    /// again, the variants of the busy name listed that alias too and told anyone that a portal of that name had
+    /// been deleted. They now list only the portals that hold the name.
+    /// </summary>
+    [Fact]
+    public async Task ValidatePortalName_NameTakenAgainAfterDeletion_DoesNotListTheDeletedAlias()
+    {
+        // Arrange
+        var portalName = Clients.PortalName;
+        await _webApiClient.Authenticate(Owner);
+        using (var deleted = await _webApi.DeleteAsync("api/2.0/portal/deleteportalimmediately", TestContext.Current.CancellationToken))
+        {
+            deleted.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        var (registered, registration) = await ApiSystemAsync(HttpMethod.Post, "portal/register", new
+        {
+            portalName,
+            firstName = "Portal",
+            lastName = "Owner",
+            email = Initializer.OwnerEmail,
+            password = Initializer.OwnerPassword,
+            language = "en-US",
+            timeZoneName = "UTC",
+            skipWelcome = true
+        });
+        registered.Should().Be(HttpStatusCode.OK, registration.ToString());
+
+        // Act
+        var (status, body) = await ApiSystemAsync(HttpMethod.Post, "portal/validateportalname", new { portalName });
+
+        // Assert
+        status.Should().Be(HttpStatusCode.BadRequest);
+        var variants = body.GetProperty("variants").EnumerateArray().Select(v => v.GetString()).ToList();
+        variants.Should().Contain(portalName);
+        variants.Should().NotContain(v => v!.Contains("_deleted"));
+    }
+
     [Fact]
     public async Task DeletePortalImmediately_DocSpaceAdmin_ReturnsAccessDenied()
     {

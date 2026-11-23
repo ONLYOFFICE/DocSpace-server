@@ -231,7 +231,7 @@ public class ApiKeysController(
     /// Requires the creator of the key or a DocSpace admin. Other callers get 403.
     /// The call changes data. You can repeat it with the same body.
     /// It changes only the fields in the body.
-    /// Pass only `*` in `permissions` to remove all scope restrictions.
+    /// A `permissions` list that contains `*` removes all scope restrictions.
     /// With `isActive` set to false, the key stops authenticating requests but stays in the list.
     /// The call returns `true` after a change.
     /// For an expired key, it changes nothing and returns `false`.

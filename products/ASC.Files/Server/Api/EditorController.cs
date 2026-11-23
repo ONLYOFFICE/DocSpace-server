@@ -116,7 +116,8 @@ public abstract class EditorController<T>(
     /// saves an autosave and keeps the editing session open. Without it, the call closes the caller's own session
     /// opened with `editingAlone` true. The call returns 403 if the file is locked by another user, is in Trash, or is
     /// encrypted. It also returns 403 for a file in a private room. Without `forcesave`, it also returns 403 while the
-    /// file is open for co-editing or in an editing session of another user. If the file does not exist, the call returns 404. If a string `fileId` points to a storage
+    /// file is open for co-editing. Another user's editing session also returns 403 then. If the file does not exist,
+    /// the call returns 404. If a string `fileId` points to a storage
     /// account that is not connected, the call returns 400. If the content exceeds the storage quota, it returns 402.
     /// For large content, use `POST api/2.0/files/file/{fileId}/edit_session`.
     /// If the file is in a full connected storage other than SharePoint, the call returns 400.
@@ -147,8 +148,8 @@ public abstract class EditorController<T>(
     /// right to edit, review, comment, fill forms, or edit filters. With `editingAlone` true, the caller claims the
     /// file alone. If anybody already edits the file, the call returns 403. Requires editing access to the file. Other
     /// callers get 403. With `editingAlone` true, an anonymous caller without editing access gets 401. The call changes
-    /// data, but not the document. While the session lasts, a repeated call with `editingAlone` true returns 403. That
-    /// call also deletes the portal's record of every editing session of the file. With `editingAlone` false, each call
+    /// data, but not the document. While the session lasts, a repeated call with `editingAlone` true returns 403. A
+    /// refused call keeps the editing sessions of other users. With `editingAlone` false, each call
     /// returns the same key until the file gets a new version. A version from an autosave keeps the key. The call also
     /// returns 403 if the file is locked or in Trash, or if the document service rejects tracking. If the file does not
     /// exist, it returns 404. With `editingAlone` false, a format that the editors cannot open returns 415. To keep the

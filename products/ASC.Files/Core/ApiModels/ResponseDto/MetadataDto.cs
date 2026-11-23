@@ -332,7 +332,8 @@ public class MetadataOperationDto
     public bool IsCompleted { get; set; }
 
     /// <summary>
-    /// The operation error message.
+    /// Why the operation failed: the text of a refusal, such as a missing folder or a lack of rights, or a generic text
+    /// for any other failure. Empty while it runs and after it succeeds.
     /// </summary>
     /// <example>Folder not found.</example>
     public string Error { get; set; }

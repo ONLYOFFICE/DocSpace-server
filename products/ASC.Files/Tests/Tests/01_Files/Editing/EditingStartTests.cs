@@ -135,4 +135,35 @@ public class EditingStartTests(AspireAppFixture fixture) : EditingTestBase(fixtu
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("This document is being edited by you in another tab");
     }
+
+    /// <summary>
+    /// A refused claim used to drop the whole editing tracker of the file, so the owner's exclusive editing mark was
+    /// gone and the same claim repeated right after it went through. The refusal now undoes only the caller's own
+    /// entries, and the second claim is refused as well.
+    /// </summary>
+    [Fact]
+    public async Task StartEditFile_RefusedSecondClaim_KeepsTheOwnersMark()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var (room, file) = await CreateRoomWithFile("Autotest Refused Claim Room", "Autotest Refused Claim File");
+
+        var member = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, member, FileShare.Editing);
+
+        await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken);
+
+        await _filesClient.Authenticate(member);
+        var first = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken));
+
+        // Act
+        var second = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken));
+
+        // Assert
+        first.ErrorCode.Should().Be(403);
+        second.ErrorCode.Should().Be(403);
+        second.ErrorContent!.ToString().Should().Contain("This document is being edited by you in another tab");
+    }
 }

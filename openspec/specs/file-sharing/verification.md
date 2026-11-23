@@ -29,7 +29,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Sharing message too long → 400 | `04_Security/Sharing/SetSecurityInfoTests.cs:127-143` (bug 79156 trait); yaml `setFileSecurityInfo` | TEST-CONFIRMED [run: PASS] |
 | **Who may share and with whom** | | |
 | Account with a Read share cannot re-share → 403 | `04_Security/Sharing/SetSecurityInfoTests.cs:73-87, 147-156` | TEST-CONFIRMED [run: PASS] |
-| Guest cannot re-share → 403, own share kept, nothing added | `04_Security/Sharing/SetSecurityInfoTests.cs:97-123, 165-186` (bug 83263); `products/ASC.Files/Core/Utils/FileSharing.cs:696-709` (`CanSetAccessAsync` returns false for a guest) | TEST-CONFIRMED [run: PASS] |
+| Guest cannot re-share → 403, own share kept, nothing added | `04_Security/Sharing/SetSecurityInfoTests.cs:97-123, 165-186` (bug 83263); `products/ASC.Files/Core/Utils/FileSharing.cs:699-712` (`CanSetAccessAsync` returns false for a guest) | TEST-CONFIRMED [run: PASS] |
 | Guest of another member silently dropped (Room admin, User) | `04_Security/FileShareTests.cs:1227-1258, 1288-1309`; `SetSecurityInfoTests.cs:190-206`; yaml `setFileSecurityInfo` | TEST-CONFIRMED [run: PASS] |
 | Own guest / DocSpace admin / Room admin / User accepted as recipients of a User's or Room admin's file | `04_Security/FileShareTests.cs:1246-1258, 1261-1285` | TEST-CONFIRMED [run: PASS] |
 | **Sharing state of an entry** | | |
@@ -45,18 +45,18 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | File moved to trash: record gone, shared account 403 | `FileSecurityInfoLifecycleTests.cs:112-151` | TEST-CONFIRMED [run: PASS] |
 | Batch skips unknown ids, empty request → empty list, unreadable entry → 403 for User and Guest | `GetSecurityInfoTests.cs:351-357, 391-407`; `GetSecurityInfoPermissionsTests.cs:125-173` (bug 82675); yaml `getSecurityInfo` | TEST-CONFIRMED [run: PASS] |
 | **Access priority when several rights apply** | | |
-| Order user → group (incl. admin group, Everyone) → current link → remembered links; closer level first | `FileSecurity.cs:3870-3922` (`GetUserOrderedSubjectsAsync`, `SubjectOrderType`), `FileSecurity.cs:2779-2825` (`GetCurrentShareAsync`: subject order, then `Level`; since v4.1.0 the virtual AI-project record of an AI-hub room sorts after every stored record, which touches no entry outside the AI rooms) | CODE-ONLY |
+| Order user → group (incl. admin group, Everyone) → current link → remembered links; closer level first | `FileSecurity.cs:3882-3934` (`GetUserOrderedSubjectsAsync`, `SubjectOrderType`), `FileSecurity.cs:2791-2837` (`GetCurrentShareAsync`: subject order, then `Level`; since v4.1.0 the virtual AI-project record of an AI-hub room sorts after every stored record, which touches no entry outside the AI rooms) | CODE-ONLY |
 | Personal Editing beats a Read link | `04_Security/FileShareTests.cs:656-697` | TEST-CONFIRMED [run: PASS] |
 | Group Comment applies; personal Read then beats group Comment and an Editing link | `04_Security/FileShareTests.cs:700-786` | TEST-CONFIRMED [run: PASS] |
 | Anonymous visitor gets the link's rights | `04_Security/FileShareTests.cs:773-786`; `ShareInheritanceTests.cs:193-218` | TEST-CONFIRMED [run: PASS] |
-| Everyone share does not reach an anonymous visitor (Read link → Read) | `04_Security/FileShareTests.cs:1191-1224` (bug 78985); `FileSecurity.cs:3889-3892` (Everyone added only for a real account) | TEST-CONFIRMED [run: PASS] |
+| Everyone share does not reach an anonymous visitor (Read link → Read) | `04_Security/FileShareTests.cs:1191-1224` (bug 78985); `FileSecurity.cs:3901-3904` (Everyone added only for a real account) | TEST-CONFIRMED [run: PASS] |
 | Share on the file beats the share on its folder | `04_Security/FileShareTests.cs:1118-1151` (bug 78782) | TEST-CONFIRMED [run: PASS] |
 | Sub-folder share beats parent share, for the folder and for files inside; rights read by the account show ReadWrite | `FileShareTests.cs:1154-1188` (bug 78968); `FolderShareTests.cs:764-796`; `ShareInheritanceTests.cs:885-909` (bug 78848) | TEST-CONFIRMED [run: PASS] |
 | Folder share beats a link on a file / folder inside | `FileShareTests.cs:1042-1077` (bug 78426), `1080-1115` (bug 78852) | TEST-CONFIRMED [run: PASS] |
 | Share given on a file created inside a shared folder is recorded at the file level | `FileShareTests.cs:1007-1039` (bug 78660) | TEST-CONFIRMED [run: PASS] |
-| In rooms a personal right beats link rights | `04_Security/RoomShareTests.cs:1147-1178` (Viewer of a custom room opening an Editing file link keeps Read); `FileSecurity.cs:3870-3922` | TEST-CONFIRMED [run: PASS] |
+| In rooms a personal right beats link rights | `04_Security/RoomShareTests.cs:1147-1178` (Viewer of a custom room opening an Editing file link keeps Read); `FileSecurity.cs:3882-3934` | TEST-CONFIRMED [run: PASS] |
 | **The last opened link is remembered** | | |
-| Opening via link + recent records a `RecentByLink` tag; earlier link tags for the entry are removed (only the last link counts) | `products/ASC.Files/Core/Utils/EntryManager.cs:2167-2181` (`MarkAsRecent`), `products/ASC.Files/Core/Utils/FileMarker.cs:1333-1351` (`MarkAsRecentByLink`); `FileSecurity.cs:3900-3909` (remembered links join the subject list) | CODE-ONLY |
+| Opening via link + recent records a `RecentByLink` tag; earlier link tags for the entry are removed (only the last link counts) | `products/ASC.Files/Core/Utils/EntryManager.cs:2167-2181` (`MarkAsRecent`), `products/ASC.Files/Core/Utils/FileMarker.cs:1333-1351` (`MarkAsRecentByLink`); `FileSecurity.cs:3912-3921` (remembered links join the subject list) | CODE-ONLY |
 | Three links in turn → access by id equals the last link | `04_Security/FileShareTests.cs:894-948` | TEST-CONFIRMED [run: PASS] |
 | Unused link deleted → file stays in Shared with me | `04_Security/FileShareTests.cs:951-1003` (bug 77819) | TEST-CONFIRMED [run: PASS] |
 | **The Shared with me section** | | |
@@ -76,13 +76,13 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Recipient's call clears the recipient's favorites, recent and new marks; owner record and links untouched; the owner's own call on an entry of their own My documents revokes the shares but keeps the owner's marks | `04_Security/Sharing/RemoveSecurityInfoTests.cs:228-271` (recipient), `273-303` (owner); `FileSharing.cs` `RemoveAceAsync` (early return under the caller's My documents) | TEST-CONFIRMED [run: PASS] |
 | Folder reached by link removed, then reopened → back in the list | `04_Security/FolderShareTests.cs:729-762` | TEST-CONFIRMED [run: PASS] |
 | **Guests cannot re-share** | | |
-| `CanSetAccessAsync` false for every guest regardless of access | `04_Security/Sharing/SetSecurityInfoTests.cs:209-233` (guest holding ReadWrite or Editing re-shares → 403, nothing added); `FileSharing.cs:696-709` | TEST-CONFIRMED [run: PASS] |
+| `CanSetAccessAsync` false for every guest regardless of access | `04_Security/Sharing/SetSecurityInfoTests.cs:209-233` (guest holding ReadWrite or Editing re-shares → 403, nothing added); `FileSharing.cs:699-712` | TEST-CONFIRMED [run: PASS] |
 | Guest sees only the owner in `getSharedUsers` | `04_Security/Sharing/SharedUsersTests.cs:155-172` (bug 81109) | TEST-CONFIRMED [run: PASS] |
 | Member list: no caller, no accounts without access; 403 / 401 / 404 | `SharedUsersTests.cs:47-145, 176-238, 286-291` (bug 83105) | TEST-CONFIRMED [run: PASS] |
 | **Sharing a PDF form from My documents** | | |
 | Link rights on a form in My documents: Editing, FillForms, Comment, Read, None | `04_Security/ShareInheritanceTests.cs:829-842` | TEST-CONFIRMED [run: PASS] |
 | Link rights on a form in a Form filling room: FillForms, None | `04_Security/ShareInheritanceTests.cs:812-826` | TEST-CONFIRMED [run: PASS] |
-| User/group share on a form in My documents accepts FillForms | `04_Security/Sharing/MyDocumentsAccessLevelsTests.cs:100-111`; FillForms on a docx refused: `04_Security/Sharing/MyDocumentsAccessLevelsTests.cs:81-97`; `FileSecurity.cs:3731` | TEST-CONFIRMED [run: PASS] |
+| User/group share on a form in My documents accepts FillForms | `04_Security/Sharing/MyDocumentsAccessLevelsTests.cs:100-111`; FillForms on a docx refused: `04_Security/Sharing/MyDocumentsAccessLevelsTests.cs:81-97`; `FileSecurity.cs:3743` | TEST-CONFIRMED [run: PASS] |
 | Default primary link on a file in My documents: Read, no expiration, no password, download allowed, not internal | `04_Security/FileShareTests.cs:73-92`; `FolderShareTests.cs:79-104` | TEST-CONFIRMED [run: PASS] |
 | **The Recent section** | | |
 | Files only, newest first, personal | `01_Files/Recent/RecentTests.cs:228-255` (two marks 1.5 s apart listed newest first, no folders, the share recipient's Recent empty) | TEST-CONFIRMED [run: PASS] |
@@ -119,7 +119,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Accepted access levels (Sharing a file or folder from My documents) | `04_Security/Sharing/MyDocumentsAccessLevelsTests.cs:46-127` | TEST-CONFIRMED [run: PASS] |
 | Caller without access or missing entry (Reading the sharing rights) | `FileSecurityInfoPermissionsTests.cs:49-57, 161-170`; `FileSecurityInfoLifecycleTests.cs:85-108, 126-135`; `GetSecurityInfoPermissionsTests.cs:47-55, 131-140` | TEST-CONFIRMED [run: PASS] |
 | Batch with unknown identifiers (Reading the sharing rights) | `GetSecurityInfoTests.cs:351-357, 391-407`; yaml `getSecurityInfo` | TEST-CONFIRMED [run: PASS] |
-| Group shares and rooms follow the same order (Access priority) | `FileSecurity.cs:3870-3922` (`GetUserOrderedSubjectsAsync`, Everyone and the admin group added for a real account); release notes v3.6 | CODE-ONLY |
+| Group shares and rooms follow the same order (Access priority) | `FileSecurity.cs:3882-3934` (`GetUserOrderedSubjectsAsync`, Everyone and the admin group added for a real account); release notes v3.6 | CODE-ONLY |
 | Shared by and owned by (The Shared with me section) | `04_Security/Sharing/MyDocumentsAccessLevelsTests.cs:128-154` | TEST-CONFIRMED [run: PASS] |
 | Parent the caller cannot open (The Shared with me section) | `04_Security/Sharing/MyDocumentsAccessLevelsTests.cs:156-172` | TEST-CONFIRMED [run: PASS] |
 | Nothing to remove (Removing a share) | `RemoveSecurityInfoTests.cs:151-158, 205-225` | TEST-CONFIRMED [run: PASS] |
@@ -223,7 +223,7 @@ link bugs and are to be added to the `shared-links` rows of `deviations.md`, not
 | **Members of a group on an entry's access list**: a reader with read access gets no members, total 0, file and folder; the owner gets them | `04_Security/Sharing/AccessListMembersTests.cs:56-73,82-98` (`bf49b2b96a`) | TEST-CONFIRMED [run: PASS] |
 | A group without a record on the file: empty, total 0 (it used to count any portal group) | `04_Security/Sharing/AccessListMembersTests.cs:109-125` | TEST-CONFIRMED [run: PASS] |
 | `filterValue` in upper case: list and count agree | `04_Security/Sharing/GroupAndOwnerSharingTests.cs:96-115` (`2410f9d7fb`; on MySQL proves nothing red, the comparison ignores case anyway) | TEST-CONFIRMED [run: PASS] |
-| Rule: list shown only when `CanSeeSharesAsync` (room → any reader, otherwise manager) | `products/ASC.Files/Core/Utils/FileSharing.cs:1175-1182,906-916` | CODE-ONLY for the room-reader column |
+| Rule: list shown only when `CanSeeSharesAsync` (room → any reader, otherwise manager) | `products/ASC.Files/Core/Utils/FileSharing.cs:1178-1185,909-919` | CODE-ONLY for the room-reader column |
 | **Reading the access list of a room**: order, `filterType` default, links only with the right to see them, 403/404/400 | `products/ASC.Files/Server/Api/VirtualRoomsController.cs:806-827`; yaml `getRoomSecurityInfo` | CODE-ONLY (many room tests call it as a helper, none asserts the order or the refusals here) |
 | A User member reads the room access list without other members' contact details | `04_Security/Sharing/AccessListMembersTests.cs:165-184` | TEST-CONFIRMED [run: PASS] |
 | Documented 500 "An id is a number that is not a 32-bit integer" removed from `getSecurityInfo`, `setSecurityInfo`, `removeSecurityInfo`, `changeFileOwner` | `0ff3031b59` | READ; no requirement cited it |

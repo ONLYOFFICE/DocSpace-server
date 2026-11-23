@@ -318,6 +318,9 @@
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>The maximum number of links may not exceed {0}</value>
   </data>
+  <data name="ErrorMessage_MetadataCascadeFailed" xml:space="preserve">
+    <value>The metadata could not be applied to every entry. Try again later.</value>
+  </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
     <value>The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form.</value>
   </data>

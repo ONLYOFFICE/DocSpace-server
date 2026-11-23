@@ -2253,7 +2253,8 @@ public class FileStorageService //: IFileStorageService
         {
             // Only the caller's own editing session is closed here. Another user's session used to be dropped as
             // well, so the check in EntryManager passed and the content of a file open in someone else's editor
-            // was replaced; now that check refuses such a save.
+            // was replaced; now that check refuses such a save, unless it is a forcesave, which by design saves a file
+            // that stays open for editing.
             if (!forceSave && await fileTracker.IsEditingAloneAsync(fileId) && await IsEditedByCurrentUserAsync(fileId))
             {
                 await fileTracker.RemoveAsync(fileId);
@@ -2404,7 +2405,9 @@ public class FileStorageService //: IFileStorageService
         }
         catch (Exception)
         {
-            await fileTracker.RemoveAsync(fileId);
+            // only the caller's own mark is undone: removing the whole tracker let a refused start, such as a second
+            // claim of a file edited alone or a reader's start, end the editing mark of the person editing the file
+            await fileTracker.RemoveAsync(fileId, userId: authContext.CurrentAccount.ID);
 
             throw;
         }
