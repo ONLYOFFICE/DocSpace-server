@@ -62,10 +62,28 @@ public partial class BasicAuthHandler(
             return AuthenticateResult.Fail("Authorization code not formatted properly.");
         }
 
-        var authBase64 = Encoding.UTF8.GetString(Convert.FromBase64String(authHeaderRegex.Replace(authorizationHeader, "$1")));
+        // A value that is not base64, or decodes without the "user:password" colon, is a credential that does not
+        // authenticate, as a wrong password is; throwing here reached the caller as a 500 on every action.
+        string authBase64;
+
+        try
+        {
+            authBase64 = Encoding.UTF8.GetString(Convert.FromBase64String(authHeaderRegex.Replace(authorizationHeader, "$1")));
+        }
+        catch (FormatException)
+        {
+            return AuthenticateResult.Fail("Authorization code not formatted properly.");
+        }
+
         var authSplit = authBase64.Split(Convert.ToChar(":"), 2);
+
+        if (authSplit.Length < 2)
+        {
+            return AuthenticateResult.Fail("Authorization code not formatted properly.");
+        }
+
         var authUsername = authSplit[0];
-        var authPassword = authSplit.Length > 1 ? authSplit[1] : throw new Exception("Unable to get password");
+        var authPassword = authSplit[1];
 
         try
         {

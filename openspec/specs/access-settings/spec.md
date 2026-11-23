@@ -633,3 +633,8 @@ With a method on, `authenticateMe` SHALL ask for the second factor instead of is
 
 - **WHEN** a caller without a token or cookie calls it
 - **THEN** the answer is 200 with `false`
+
+#### Scenario: Malformed Basic credentials
+
+- **WHEN** the request carries an `Authorization: Basic` value that is not base64, or decodes without the `user:password` colon
+- **THEN** the answer is 200 with `false`, as for an anonymous caller

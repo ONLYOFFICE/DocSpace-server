@@ -307,7 +307,6 @@ candidate for a row with a spec number, or for a fix of the test.
 |---|---|---|
 | webhooks-and-api-keys | `CreateApiKey_NonBmpName_IsStoredUnchanged`, `UpdateApiKey_NonBmpName_IsStoredUnchanged` (84484) | A key name with a character outside the BMP answers 500 "An error occurred while saving the entity changes". |
 | invitations | `CheckConfirm_EmpInviteWithoutEmployeeType_DoesNotSurfaceInternalException` (84502) | The answer carries the internal message "Nullable object must have a value". |
-| access-settings | `GetIsAuthentificated_MalformedBasicHeader_ReturnsFalse` (84500) | A malformed Basic header answers an error instead of 200 with `false`. |
 | file-operations | `GetFolder_ByMemberWithoutOpeningTheFile_KeepsTheFilesNewMark` (84797) | The "new" mark of the file is gone after the member only opened the folder. |
 | ai-agents | `Ask_ASavedAllowAlways_Wins` (84298) | A saved "allow always" does not win over "ask". |
 | ai-agents | `Send_OtherProfileInProject_CannotOverrideTheFixedModel` (82914), `Create_ThreadInProjectOnAnotherModel_DoesNotStoreIt` (82915) | A round or a thread of a project runs on a model other than the project's; may be part of A16. |
@@ -339,6 +338,7 @@ green, run 2026-11-18" were confirmed by that run; the others were read, not run
 |---|------|---------------------|----------|--------|
 | AC-1 to AC-4 | access-settings | `saveSsoSettingsV2` answered 500 for no IdP entity ID (bug 84685), a missing or invalid SSO URL (84686), an incomplete field mapping (84687) and a malformed SLO URL (84688); each now answers 400. | commit read, not run; tests green, run 2026-11-18 | FIXED `f3a52c35dd` |
 | AC-5 | access-settings | `sendSmsCode` with valid credentials and SMS off for the account answered 500, the thrown exception type having no mapping (bug 84503). | commit read, not run; tests green, run 2026-11-18 | FIXED `f5f2735e30` |
+| - | access-settings | `getIsAuthentificated` answered 500 for an `Authorization: Basic` value that is not base64 or decodes without a colon (bug 84500); `BasicAuthHandler` now reports it as a failed authentication, so the answer is 200 with `false`. | test (`AuthCheckInvalidCredentialsTests.cs:57`); tests green, run 2026-11-20 | FIXED (uncommitted) |
 | F22 | file-operations | `updateFile` on a file locked by somebody else was refused through a 500 instead of a client error; it now answers 403 (bug 84842). | tests (`LockedFileStateTests.cs:147`, `FileRenameLockedTests.cs:110`); tests green, run 2026-11-18 | FIXED `77db3a6128` |
 | R10 | shared-links | After a file's primary link was revoked, `createFilePrimaryExternalLink` answered 404 from then on, while `setFileExternalLink` could still make one (bug 84872). | commit read, not run; tests green, run 2026-11-18 | FIXED `62419af921` |
 | FX3 | files-settings | Same bug as R10, on `createFilePrimaryExternalLink` and the folder one: create shared the read path, so after a revocation the POST answered 404 (bug 84872). | commit read, not run; tests green, run 2026-11-18 | FIXED `62419af921` |

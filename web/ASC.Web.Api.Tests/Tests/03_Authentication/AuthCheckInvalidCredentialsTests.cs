@@ -45,9 +45,10 @@ public class AuthCheckInvalidCredentialsTests(
 {
     /// <summary>
     /// Bug 84500: <c>BasicAuthHandler</c> threw an unhandled FormatException / "Unable to get
-    /// password" for a Basic value that is not valid base64 (or decodes without a colon) and the
-    /// endpoint answered 500 with the stack trace. Raw HTTP: the SDK cannot send an arbitrary
-    /// Authorization header value.
+    /// password" for a Basic value that was not valid base64 (or decoded without a colon), and the
+    /// endpoint answered 500 with the stack trace. Fixed: the handler now reports such a value as a
+    /// failed authentication, so the call is anonymous and the answer is 200 with <c>false</c>.
+    /// Raw HTTP: the SDK cannot send an arbitrary Authorization header value.
     /// </summary>
     [Trait("Bug", "84500")]
     [Theory]
