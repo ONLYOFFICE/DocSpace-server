@@ -98,10 +98,16 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected virtual bool NeedsDocumentServer => false;
 
     /// <summary>
-    /// True for a class whose tests use a service of <see cref="AspireAppFixture"/>'s <c>LazyResources</c> (Nextcloud):
+    /// True for a class whose tests use a service of <see cref="AspireAppFixture"/>'s <c>LazyResources</c> (Nextcloud, Web.Studio):
     /// its setup then waits until those are healthy, which the rest of the suite does not.
     /// </summary>
     protected virtual bool NeedsLazyResources => false;
+
+    // the wait is shared by every class that needs them, so it is not cancelled itself: this test just stops waiting
+    protected Task WaitForLazyResourcesAsync()
+    {
+        return fixture.WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken);
+    }
 
     public async ValueTask InitializeAsync()
     {
@@ -109,8 +115,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
         if (NeedsLazyResources)
         {
-            // the wait is shared by every class that needs them, so it is not cancelled itself: this test just stops waiting
-            await fixture.WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken);
+            await WaitForLazyResourcesAsync();
         }
 
         // Register a brand-new portal for this test and bind a fresh set of clients to it.
@@ -186,6 +191,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
     }
 
+    protected Task<EventBusProbe> ListenToEventBusAsync(string eventName)
+    {
+        return fixture.ListenToEventBusAsync(eventName, TestContext.Current.CancellationToken);
+    }
+
     /// <summary>
     /// The status and error body an SDK call ended with: 200 and an empty body when it succeeded, the <see cref="ApiException"/>
     /// code and content otherwise.
@@ -218,12 +228,16 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi ThirdPartyIntegrationApi => _clients.ThirdPartyIntegrationApi;
     protected DocSpace.API.SDK.Api.Rooms.AIApi RoomsAiApi => _clients.RoomsAiApi;
 
+    protected HttpClient StudioHttpClient => _clients.StudioHttpClient;
+
     // The People service: member profiles (culture, type). Starts unsigned: authenticate it before the first call.
     protected HttpClient PeopleHttpClient => _clients.PeopleHttpClient;
     protected ProfilesApi ProfilesApi => _clients.ProfilesApi;
     protected UserStatusApi UserStatusApi => _clients.UserStatusApi;
     protected UserTypeApi UserTypeApi => _clients.UserTypeApi;
     protected UserDataApi UserDataApi => _clients.UserDataApi;
+    protected DocSpace.API.SDK.Api.People.QuotaApi PeopleQuotaApi => _clients.PeopleQuotaApi;
+    protected DocSpace.API.SDK.Api.Group.GroupApi GroupApi => _clients.GroupApi;
 
     // Web.Api, for portal settings and quotas. Starts unsigned: authenticate it before the first call.
     protected HttpClient WebApiHttpClient => _clients.WebApiHttpClient;

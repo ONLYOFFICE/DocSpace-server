@@ -155,6 +155,10 @@ public class ProjectConfigurator(
                 .WithEnvironment("ai:deletedThreadsCleaner:period", "00:00:05")
                 .WithEnvironment("ai:orphanAttachmentsCleaner:period", "0.00:00:05")
 
+                // The tests build an agent in several calls and convert it through the internal route:
+                // a background pass in the middle would convert a half-built one.
+                .WithEnvironment("ai:agentsMigration:enabled", "false")
+
                 // Small ceilings for unpacking migration backups, see Constants.MigrationTestMaxExtractedSize and MigrationTestMaxExtractedEntries.
                 .WithEnvironment("migration:maxExtractedSize", Constants.MigrationTestMaxExtractedSize.ToString(CultureInfo.InvariantCulture))
                 .WithEnvironment("migration:maxExtractedEntries", Constants.MigrationTestMaxExtractedEntries.ToString(CultureInfo.InvariantCulture))
