@@ -30,9 +30,11 @@ so one page must never see two plugins with the same `name` or `pluginName`.
 
 ### Storage: a folder in the existing module
 
-Personal files go to `webplugins/.personal/<userId>/<name>/`. A manifest name cannot start with a dot, so no
-plugin folder can be `.personal`. The portal scan keeps only `<name>/config.json` entries, one level deep, and
-so never reads the personal folders, on disc and on S3 alike (S3 lists recursively).
+Personal files go to `webplugins/.personal/<userId>/<name>/`, saved with a private ACL so a public-read S3
+module does not expose them past the storage handler. A manifest name cannot start with a dot, so no plugin
+folder can be `.personal`; a name like `personal` could be, and deleting such a portal plugin would delete
+every member's folder with it. The portal scan keeps only `<name>/config.json` entries, one level deep, so it
+never reads a personal manifest; the listing itself still walks the personal folders (S3 lists recursively).
 
 Alternatives: a new storage module (needs `storage.json` changes on every installation and a backup
 declaration); the user's documents (mixes code with documents); browser storage (bound to one device).
@@ -55,16 +57,27 @@ Alternatives:
 - Delete the personal copies on a portal upload: settings are lost, and the copy may be another plugin with
   the same name.
 
-### Personal CSP through a cookie
+### Personal CSP through a cached header and a key in a cookie
 
-The portal CSP header is cached per host and shared by everyone, so the personal domains cannot go there.
-`getWebPlugins` sets the HttpOnly cookie `asc_personal_csp` while the caller has enabled personal plugins with
-domains, and clears it otherwise; the personal POST, PUT and DELETE do the same. For a request with the cookie,
-the proxy asks `getCspSettings` instead of its shared cache, and `getCspSettings` adds the caller's domains to
-`header` and skips 304. Every other request keeps the cached path.
+The portal CSP header is cached per host (`csp:{host}`) and read by the proxy for everyone, so the personal
+domains cannot go there. The member's own header (portal domains plus their personal ones) is cached next to
+it, under `csp:{host}:{token}`, written through the same cache so the proxy reads it the same way. The token is
+an HMAC of the tenant and user id with the installation key: the server can rebuild it for any member without
+storing a mapping, and no one can derive another member's token from an id.
 
-Alternatives: an administrator approval or allow-list of personal domains (left out of the MVP);
-refusing `cspDomains` on personal plugins (plugins that call external services could not work).
+- `getWebPlugins` without `personal`, and the personal POST, PUT and DELETE, write the entry and set the HttpOnly
+  cookie `asc_personal_csp` to the token while the member has enabled personal plugins with domains; otherwise
+  they remove the entry and clear the cookie. The entries live a day and are rewritten on every plugin list.
+- The proxy reads `csp:{host}:{token}` for a request whose cookie is a well-formed token. On a miss it asks
+  `getCspSettings`, which adds the caller's domains to `header` and skips 304. Every other request keeps the
+  portal path.
+- Saving the portal CSP removes the personal entries of the tenant (their tokens are kept in a list next to
+  them), since each of them repeats the portal domains.
+
+Alternatives: the domains themselves in the cookie (the proxy would have to rebuild every directive, and a
+cookie written by a sibling site could widen anyone's policy); an administrator approval or allow-list of
+personal domains (left out of the MVP); refusing `cspDomains` on personal plugins (plugins that call external
+services could not work).
 
 ### Files served to their owner only
 
@@ -79,8 +92,10 @@ owner's other pages see the change after a reload.
 
 ### Configuration
 
-Two installation keys, read through the configuration helpers: personal plugins on (default true) and the
-per-member limit (default 10, 1 to 100).
+Two installation keys: personal plugins on (default true) and the per-member limit (default 10). The whole
+`plugins` section is read with `TryParse` and a default, never with a binder that throws: `getSettings` reads it
+on every page, so a typo must not take the portal down. A count or size of 0 or less falls back to its default.
+This deliberately does not follow the repository's helper with bounds and warnings, by the team's decision.
 
 ## Risks / Trade-offs
 
@@ -91,8 +106,13 @@ per-member limit (default 10, 1 to 100).
 - [Parallel uploads of one member can pass the count limit] → stated in the requirement; follow-up.
 - [The personal `cspDomains` are not validated like `POST api/2.0/security/csp` and the header size is not
   capped on the personal path] → only the owner's pages are affected; follow-up.
-- [`asc_personal_csp` is `SameSite=Lax`: the first page after sign-in and SDK frames on another site run
-  without the personal CSP] → the next page load has it; follow-up for frames.
+- [`asc_personal_csp` is `SameSite=Lax` and the session cookie `Strict`: the first page after sign-in, a page
+  opened from a link on another site, and SDK frames on another site run without the personal CSP] → the next
+  page load has it; follow-up for frames.
+- [A personal cache entry outlives a lost token in the tenant's token list (two writes at once)] → the next plugin
+  list rewrites it, and it expires after a day.
+- [The portal scan lists every member's personal files, more of them as members add plugins] → follow-up: list
+  the top-level folders only.
 - [A member installs a malicious plugin from someone else] → it runs with that member's rights only; an
   installation can switch personal plugins off.
 

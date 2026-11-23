@@ -964,7 +964,7 @@
     <value>Changes to system plugins are prohibited</value>
   </data>
   <data name="ErrorWebPluginInstalledForPortal" xml:space="preserve">
-    <value>A plugin with the same name is already installed for the whole portal</value>
+    <value>A plugin with the same name or pluginName is already installed for the whole portal</value>
   </data>
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>The number of plugins exceeds the limit</value>

@@ -1,7 +1,8 @@
 # Tasks
 
 The code of groups 1-5 is on `feature/personal-plugins` (`410d6a20f6`, `36c35c030c`, `2dfeea03fc`, `7a0fb27433`,
-`e9a85ab1ea`). A task is ticked once its test has run green on the `integration-test` stand.
+`e9a85ab1ea`, `44f42b0eaa`, `1c7a500501`, `84c4fb90c4` and the commit that caches the personal CSP header). A task is
+ticked once its test has run green on the `integration-test` stand.
 
 ## 1. Personal level: switch, storage and state
 
@@ -25,9 +26,10 @@ The code of groups 1-5 is on `feature/personal-plugins` (`410d6a20f6`, `36c35c03
 ## 4. Files, CSP and events
 
 - [ ] 4.1 Serve a personal plugin's `url` to its owner only (403 to another User, the portal owner and an anonymous caller; 200 to the owner); add a test that requests the `url` of a personal plugin as each of them
-- [ ] 4.2 Keep personal `cspDomains` out of the portal CSP and give them to their owner through `getCspSettings` with the `asc_personal_csp` cookie, without 304; add tests: the portal's CSP settings after a personal upload with `cspDomains`, the owner's `header` with the cookie and `If-Modified-Since`, another User's `header` with the cookie
-- [ ] 4.3 Set and clear `asc_personal_csp` in `getWebPlugins` and the personal upload, update and deletion; add a test that reads `Set-Cookie` after a personal upload with `cspDomains` and after switching that plugin off
+- [ ] 4.2 Keep personal `cspDomains` out of the portal CSP and give them to their owner through `getCspSettings` with the `asc_personal_csp` cookie, without 304; written as `PersonalWebPluginTests.UploadPersonalWebPlugin_WithCspDomains_OnlyOwnerGetsThemInCspHeader` (owner with the cookie, owner without it, another User with the owner's cookie), not run yet; add the 304 case for a cookie without personal domains
+- [ ] 4.3 Set and clear `asc_personal_csp` in `getWebPlugins` and the personal upload, update and deletion, with a 64-character token as its value; the test of 4.2 reads it from `Set-Cookie`; add the clearing after the plugin is switched off
 - [ ] 4.4 Send no plugin event for a personal change; CODE-ONLY until a suite runs the socket service (the Web.Api stand has none)
+- [ ] 4.5 Cache the member's header for the proxy under `csp:{host}:{token}` and remove the entries of the tenant when the portal CSP is saved; CODE-ONLY until a test reads the cache (the proxy itself is checked by `nginx -t` and a Lua compile only)
 
 ## 5. Changed requirements and deviations
 

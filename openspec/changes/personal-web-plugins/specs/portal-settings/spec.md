@@ -6,9 +6,9 @@
 
 `getCspSettings` SHALL answer 200 with `domains` and a non-empty `header` to every caller, an anonymous one
 included, and SHALL answer 304 with an empty body when the settings did not change since `If-Modified-Since`.
-A portal with no stored domains SHALL answer an empty `domains`. A signed-in member whose request carries the
-`asc_personal_csp` cookie SHALL get the domains of their own enabled personal plugins in `header`, not in
-`domains`, and never 304.
+A portal with no stored domains SHALL answer an empty `domains`. A signed-in member with enabled personal plugins
+that declare domains, none shadowed, whose request carries the `asc_personal_csp` cookie SHALL get those domains
+in `header`, not in `domains`, and never 304.
 
 #### Scenario: Every role reads what was configured
 
@@ -27,5 +27,10 @@ A portal with no stored domains SHALL answer an empty `domains`. A signed-in mem
 
 #### Scenario: Another member with the cookie
 
-- **WHEN** another User, who has no personal plugin, reads the policy with the `asc_personal_csp` cookie
+- **WHEN** another User, who has no personal plugin, reads the policy with the `asc_personal_csp` cookie of the first User
 - **THEN** `header` does not contain `https://a.example`
+
+#### Scenario: Cookie without personal domains
+
+- **WHEN** a User without enabled personal plugins reads the policy with the `asc_personal_csp` cookie and an `If-Modified-Since` the policy has not changed since
+- **THEN** the system answers 304 with an empty body

@@ -3148,7 +3148,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A plugin with the same name is already installed for the whole portal.
+        ///   Looks up a localized string similar to A plugin with the same name or pluginName is already installed for the whole portal.
         /// </summary>
         public static string ErrorWebPluginInstalledForPortal {
             get {

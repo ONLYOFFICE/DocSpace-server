@@ -23,8 +23,11 @@ alone, while the administrator keeps control of what runs for the portal.
   shadowed. Each entry carries `personal`.
 - The domains a personal plugin declares in `cspDomains` never reach the portal Content Security Policy. A
   signed-in member whose request carries the `asc_personal_csp` cookie gets them in the `header` that
-  `getCspSettings` returns. The cookie is set and cleared by `getWebPlugins` and by the personal uploads,
-  updates and deletions.
+  `getCspSettings` returns. The cookie is set and cleared by `getWebPlugins` without `personal` and by the
+  personal uploads, updates and deletions. It carries the key under which the member's header is cached for the
+  proxy, next to the portal's.
+- The cached plugin manifests of a portal now expire after an hour, so plugin files replaced in storage show up
+  within an hour even without `refreshWebPlugin`.
 - The files of a personal plugin are served to their owner only.
 - A personal change sends no real-time event to the portal's clients.
 - `refreshWebPlugin` gets a request model of its own and does not take `personal`.
@@ -46,6 +49,7 @@ None.
   - "Switching a plugin on or off and storing its settings" (personal state);
   - "Content Security Policy domains of a plugin" (personal domains stay out of the portal policy);
   - "Deleting a plugin" (personal deletion);
+  - "Portal plugin count limit" (the caller's personal plugins come on top of the 100);
   - "Clients are told when a plugin changes" (no event for personal changes).
 
   Requirements added: personal plugins and their access, the name rule between the levels, the personal count
@@ -69,12 +73,17 @@ None.
   of the list answers 404 unless `personal=true` is sent.
 - **Reading the Content Security Policy** (`getCspSettings`). A request with the `asc_personal_csp` cookie
   from a signed-in member with enabled personal plugins that declare domains gets a longer `header` and never
-  304. Every other caller sees no change. The proxy (buildtools `feature/personal-plugins`) asks the API
-  instead of its shared cache for such a request.
+  304. Every other caller sees no change. The proxy (buildtools `feature/personal-plugins`) reads such a
+  member's header from the cache under the key the cookie carries, and asks the API only when it is missing.
+- **Uploading a plugin package**, **Switching a plugin on or off and storing its settings**, **Content Security
+  Policy domains of a plugin**, **Deleting a plugin**: none for calls without `personal=true`. A call with it
+  was refused before and now acts on the caller's personal plugins.
+- **Portal plugin count limit**: the 100 still caps the portal and installation-wide plugins; the list may hold
+  more because the caller's personal plugins come on top.
 - **Installation-wide plugin switches** (`getSettings`): a new `plugins.personal` field, true unless the
   installation switched personal plugins off. No existing field changes.
-- **Portal plugin count limit**: an upload of a new name at the limit now answers 400 "Wrong plugin archive.
-  The number of plugins exceeds the limit", as the requirement says (see P9 below).
+- **Portal plugin count limit, the message**: an upload of a new name at the limit now answers 400 "Wrong plugin
+  archive. The number of plugins exceeds the limit", as the requirement says (see P9 below).
 - Socket events: a personal change sends none, so the owner's other open pages pick it up on their next load.
 - Backup and restore: personal plugin files are in the portal's `webplugins` storage and their state in the
   member's settings row, so both are part of a portal backup. The files sit under a folder named by the

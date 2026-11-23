@@ -127,8 +127,7 @@ public class WebPluginFromFileRequestDto
     public bool System { get; set; }
 
     /// <summary>
-    /// Whether the plugin is installed for the calling user alone rather than for the portal. It cannot be combined
-    /// with `system`.
+    /// Whether the plugin is installed for the calling user alone rather than for the portal.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "personal")]
@@ -143,7 +142,7 @@ public class RefreshWebPluginRequestDto
     /// <summary>
     /// The plugin to check, by the manifest name `GET api/2.0/settings/webplugins` publishes as `name`, matched
     /// without regard to case. It is neither the localized display name nor the JavaScript object name in
-    /// `pluginName`; a name that is not installed answers 404.
+    /// `pluginName`.
     /// </summary>
     /// <example>example-plugin</example>
     [FromRoute(Name = "name")]

@@ -41,10 +41,11 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class WebPluginDto
 {
     /// <summary>
-    /// The plugin's manifest name, which is what every other operation of this group addresses it by and what
-    /// makes it unique within the portal - an installation-wide plugin wins the name over a portal one.
+    /// The plugin's manifest name, which is what every other operation of this group addresses it by. A name is
+    /// unique within its level: an installation-wide plugin wins the name over a portal one, and a portal plugin over
+    /// the caller's personal one.
     /// </summary>
-    /// <example>Example Plugin</example>
+    /// <example>example-plugin</example>
     public required string Name { get; set; }
 
     /// <summary>
@@ -122,15 +123,16 @@ public class WebPluginDto
     public required DateTime CreateOn { get; set; }
 
     /// <summary>
-    /// Whether the plugin is loaded. It is the state this portal stored, so an installation-wide plugin can be on
+    /// Whether the plugin is switched on. It is the state this portal stored, so an installation-wide plugin can be on
     /// for one portal and off for another; for a personal plugin it is the state its owner stored.
     /// </summary>
     /// <example>true</example>
     public required bool Enabled { get; set; }
 
     /// <summary>
-    /// Whether the plugin ships with the installation rather than having been uploaded here. A system plugin
-    /// cannot be deleted through `DELETE api/2.0/settings/webplugins/{name}`, only switched off.
+    /// Whether the plugin ships with the installation rather than having been uploaded here. Only a standalone
+    /// installation can delete it through `DELETE api/2.0/settings/webplugins/{name}`; elsewhere it can only be
+    /// switched off.
     /// </summary>
     /// <example>false</example>
     public required bool System { get; set; }

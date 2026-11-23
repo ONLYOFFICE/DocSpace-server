@@ -56,8 +56,8 @@ SHALL answer 400 "Changes to system plugins are prohibited".
 
 ### Requirement: A plugin name belongs to the higher level
 
-A personal upload SHALL answer 400 "Wrong plugin archive. A plugin with the same name is already installed for
-the whole portal" when a portal or installation-wide plugin has its `name` (any case) or `pluginName`, and 400
+A personal upload SHALL answer 400 "Wrong plugin archive. A plugin with the same name or pluginName is already
+installed for the whole portal" when a portal or installation-wide plugin has its `name` (any case) or `pluginName`, and 400
 "Wrong plugin archive. Plugin already exist" when another personal plugin of the same member has its
 `pluginName`. A portal upload SHALL NOT be refused for a personal plugin; that plugin SHALL be left out of its
 owner's list until the portal plugin is deleted.
@@ -65,7 +65,7 @@ owner's list until the portal plugin is deleted.
 #### Scenario: Name of a portal plugin
 
 - **WHEN** the owner installed a portal plugin and a User uploads a package with the same `name` and `personal=true`
-- **THEN** the system answers 400 "Wrong plugin archive. A plugin with the same name is already installed for the whole portal"
+- **THEN** the system answers 400 "Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal"
 
 #### Scenario: Portal plugin shadows a personal one
 
@@ -304,6 +304,23 @@ remove the plugin's CSP domains, write the audit event and answer 200.
 
 - **WHEN** a User deletes with `personal=true` their personal plugin that a portal plugin of the same name shadows
 - **THEN** the system answers 200 and the portal plugin stays installed with its state
+
+### Requirement: Portal plugin count limit
+
+A portal SHALL hold at most 100 plugins, the installation-wide ones counted in: an upload that would add
+a new name beyond that SHALL answer 400 "Wrong plugin archive. The number of plugins exceeds the limit",
+while a re-upload of an installed name is accepted. The portal and installation-wide part of the list SHALL
+never return more than that number; the caller's personal plugins come on top.
+
+#### Scenario: Limit reached
+
+- **WHEN** 100 plugins are available to the portal and the owner uploads a package with a new name
+- **THEN** the system answers 400 "Wrong plugin archive. The number of plugins exceeds the limit"
+
+#### Scenario: Personal plugins on top of a full portal
+
+- **WHEN** 100 plugins are available to the portal and a User with a personal plugin calls `getWebPlugins`
+- **THEN** the list holds the 100 portal and installation-wide plugins and the User's personal plugin
 
 ### Requirement: Clients are told when a plugin changes
 
