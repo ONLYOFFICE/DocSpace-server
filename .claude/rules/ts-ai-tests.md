@@ -8,9 +8,9 @@ paths:
 
 Unit tests of the Node service live next to the code, in `app/**/__tests__/*.test.ts`
 (`vitest.config.ts` includes nothing else). `yarn test` runs them all, `yarn vitest run <file>` one
-file, `-t "<name>"` one test, `yarn test:coverage` writes the coverage report to `coverage/`. They are not part of `dotnet test ASC.Tests.slnx`. The service came
-without tests until October 2026: none of the 35 fixes before vitest arrived brought one, 30 of the
-39 after it did. Style rules (`ts-ai-style.md`) apply to tests too; ESLint leaves them `any`, `!`
+file, `-t "<name>"` one test, `yarn test:coverage` writes the coverage report to `coverage/`. They
+are not part of `dotnet test ASC.Tests.slnx`. The service came without tests until October 2026:
+none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it did. Style rules (`ts-ai-style.md`) apply to tests too; ESLint leaves them `any`, `!`
 and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
 
 ## 1. Which suite proves what
