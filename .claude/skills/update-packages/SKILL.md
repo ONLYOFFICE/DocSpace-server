@@ -270,7 +270,7 @@ meets the old config. Confirm in `obj/project.assets.json` that the old versions
 
 - `DocSpace.API.SDK` is our own SDK (built into `.nuget/packages` by the generate-sdk skill and also
   published on nuget.org). Never bump it here, even when `outdated.py` lists it.
-- A test run binds free ports (`HostPorts`), so it runs next to the dev stand. To stop the dev AppHost, use
+- A test run binds free ports (`HostPorts`; not with `Docker=true`), so it runs next to the dev stand. To stop the dev AppHost, use
   `aspire stop --non-interactive`; never kill the `dotnet run` task — that orphans every session container
   (openresty keeps 443/8092) and the user has to `docker rm -f` them. Check `docker ps` before a test run.
 - Generated files rewritten by a documentation or SDK build (`json/*.json`, `openapi-schemas.json`) must be

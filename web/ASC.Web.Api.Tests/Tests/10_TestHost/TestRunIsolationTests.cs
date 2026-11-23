@@ -185,11 +185,45 @@ public sealed class TestRunIsolationTests : IDisposable
             whileHeld = ASC.AppHost.Configuration.HostPorts.TryReserve(port);
         }
 
+        // The port stays reserved for this process until it ends, outside Assigned: a later pick of it fails its own
+        // reservation (held by this process) and moves on to the next port.
         var afterRelease = ASC.AppHost.Configuration.HostPorts.TryReserve(port);
 
         // Assert: skipped while the other run lives, reserved once it is gone
         whileHeld.Should().BeFalse();
         afterRelease.Should().BeTrue();
+    }
+
+    [Fact]
+    public void HostPorts_ALockFileThatCannotBeWritten_FailsTheReservationInsteadOfCountingAsHeld()
+    {
+        // Windows only: on Unix a read-only file does not stop root, and the open fails there with an exception the code
+        // reads the same way before and after the change.
+        Assert.SkipUnless(OperatingSystem.IsWindows(), "Guards the Windows classification of a failed open.");
+
+        // Arrange: a read-only lock file of a port no run holds - an open that fails for a reason other than a holder,
+        // which a run that read it as "held by another run" could not tell from a folder that refuses every port
+        var (port, held) = HoldReservationOfAnUnreservedPort();
+        var path = ASC.AppHost.Configuration.HostPorts.GetReservationPath(port);
+
+        held.Dispose();
+
+        File.WriteAllText(path, string.Empty);
+        File.SetAttributes(path, FileAttributes.ReadOnly);
+
+        try
+        {
+            // Act
+            var reserve = () => ASC.AppHost.Configuration.HostPorts.TryReserve(port);
+
+            // Assert
+            reserve.Should().Throw<InvalidOperationException>().WithMessage($"*{path}*");
+        }
+        finally
+        {
+            File.SetAttributes(path, FileAttributes.Normal);
+            File.Delete(path);
+        }
     }
 
     private static (int Port, FileStream Held) HoldReservationOfAnUnreservedPort()
@@ -209,7 +243,10 @@ public sealed class TestRunIsolationTests : IDisposable
 
             try
             {
-                return (port, new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, System.IO.FileShare.None, 1, FileOptions.DeleteOnClose));
+                // As HostPorts holds it: deleted on close on Windows only. On Unix deleting a locked file would let another
+                // run lock the old file while a third one creates and locks a new one under the same name.
+                return (port, new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, System.IO.FileShare.None, 1,
+                    OperatingSystem.IsWindows() ? FileOptions.DeleteOnClose : FileOptions.None));
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {

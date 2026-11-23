@@ -401,7 +401,7 @@ dotnet --list-sdks
 <details>
 <summary><b>Webhook tests fail on macOS: the webhook receiver does not start</b></summary>
 
-The webhook tests of `ASC.Web.Api.Tests` run their receiver (WireMock.Net, in the test process) on the loopback alias `127.0.0.2` (`WebhookReceiverHost` in `common/ASC.AppHost/Configuration/Constants.cs`), at a free port the run picks (`HostPorts`), because the webhook blacklist of the `integration-test` profile blocks `127.0.0.1`. Windows and Linux route the whole `127.0.0.0/8` to loopback; macOS only has `127.0.0.1` until the alias is added, so the server cannot bind the port and every webhook test that creates a subscription fails starting it; the rest of the suite is not affected. Add the alias (it does not survive a reboot):
+The webhook tests of `ASC.Web.Api.Tests` run their receiver (WireMock.Net, in the test process) on the loopback alias `127.0.0.2` (`WebhookReceiverHost` in `common/ASC.AppHost/Configuration/Constants.cs`), at a free port the run picks (`HostPorts`; the fixed `WebhookReceiverPort` in a run with `Docker=true`), because the webhook blacklist of the `integration-test` profile blocks `127.0.0.1`. Windows and Linux route the whole `127.0.0.0/8` to loopback; macOS only has `127.0.0.1` until the alias is added, so the server cannot bind the port and every webhook test that creates a subscription fails starting it; the rest of the suite is not affected. Add the alias (it does not survive a reboot):
 ```bash
 sudo ifconfig lo0 alias 127.0.0.2
 ```

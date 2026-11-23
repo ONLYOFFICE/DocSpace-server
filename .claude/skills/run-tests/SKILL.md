@@ -27,11 +27,17 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filt
   boots its own AppHost instance, and a separately running app would compete for resources.
 - A test run binds free ports (`HostPorts` in `common/ASC.AppHost/Configuration/`), not the
   fixed ones of a development stack: the services are not on 50xx and the router is not on
-  8092. Each port it picks is reserved for the run (a lock file under the temp folder,
-  `docspace-test-ports/`), so other test runs skip it. So runs from two checkouts on different
+  8092. Each port it picks is reserved for the run (a lock file `<port>.lock` in
+  `docspace-test-ports/` under the temp folder on Windows, under `~/.local/share` on Unix, or the
+  shared temp folder as `docspace-test-ports-<user>/` for a user without a home folder), so other
+  test runs of the same user skip it. So runs from two checkouts on different
   branches, or a run next to a development stack, can go at the same time. The test log shows
   the ports picked when the stack is built ("Host ports of this run (fixed -> used)"); the
   webhook receiver picks its port later, on first use, and is not in that line.
+- Storage and logs below are under the base folder: the nearest folder up from the AppHost that holds
+  `buildtools/` (`AppPaths.GetBasePath`) — the parent of `server/` for the main checkout, and for a
+  worktree under `.claude/worktrees` the same one, unless a `buildtools` link in `.claude/worktrees`
+  makes that folder the base.
 - Storage is per checkout and suite: `../Data/test/_main/<test assembly>/` for the main
   checkout, `../Data/test/<worktree>/<test assembly>/` for a git worktree (the assembly name in
   lower case), deleted at the end of its run. Logs are per checkout: `../Logs/test/` for the
@@ -40,8 +46,11 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filt
 - Within one checkout, run suites one after another: two runs of the *same* suite share its
   storage, and the first to finish deletes it; two different suites share the log files, so
   `SocketContractTests` of one also counts the socket refusals of the other.
-- This holds for the default, non-docker runs (`Docker=false` in the test profiles). With
-  `Docker=true` the services and the socket service publish their fixed ports.
+- This holds for the default, non-docker runs. A run with the environment variable `Docker=true`
+  (the fixture hands it to the AppHost, whose launch profile it overrides) takes no free ports: its
+  listeners use the fixed ones the containers of the docker mode publish (only MySQL and the forms
+  PostgreSQL get ports from the testing builder), so it cannot run next to a development stack or
+  another test run. A `Docker` variable set on the machine for another tool switches it on too.
 - Every test registers its own portal (via the `Origin` header); the DB is NOT cleaned between
   tests — test classes run in parallel and must not depend on each other's data.
 
@@ -67,6 +76,8 @@ writes there, NOT to the regular `../Logs/`; a run from a git worktree writes to
 ## Regression or flake
 
 Compare against a baseline using `git stash push --include-untracked` in the same working
-tree, then `git stash pop`. **`git worktree` does not work for this** — the Aspire fixture
-fails to start there at all. If the list of failures matches the baseline name-by-name,
+tree, then `git stash pop`. A git worktree at the base commit works too, and can run at the same
+time (its own ports, storage and logs), when it has what a worktree run needs: `buildtools` found
+from it, the `common/resources/DocStore` submodule initialised, and the Files templates built from it
+(`products/ASC.Files/Server/DocStore`) — without them file creation fails and gives false reds. If the list of failures matches the baseline name-by-name,
 it is a flake, not a regression.

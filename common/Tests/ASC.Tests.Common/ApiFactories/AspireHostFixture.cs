@@ -136,6 +136,15 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// </summary>
     protected virtual bool Standalone => true;
 
+    /// <summary>
+    /// Whether the services run as containers (the AppHost's docker mode): the <c>Docker</c> environment variable of
+    /// the test process set to <c>true</c>. The AppHost gets this value as an argument, which wins over the launch
+    /// profile's, so the fixture and the AppHost agree on it - and so on whether the run takes free ports
+    /// (<see cref="HostPorts.UseFreePorts"/>) or the fixed ones, which the containers of the docker mode publish.
+    /// </summary>
+    protected static bool Docker =>
+        string.Equals(Environment.GetEnvironmentVariable("Docker"), "true", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>Builds the suite's own client bundle for a freshly registered portal.</summary>
     protected abstract TClients CreateClients(PortalContext context);
 
@@ -189,8 +198,12 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // Before anything reads a port, the stubs of OnStartingAsync included: the listeners with a port of their own -
         // services, router, socket, published container ports, stubs - take a free one (HostPorts), the proxied
         // endpoints get one from DCP, so a run of another checkout or a development stack can run at the same time.
-        // The AppHost runs in this process and reads the same table.
-        HostPorts.UseFreePorts();
+        // The AppHost runs in this process and reads the same table. Not in the docker mode, whose containers publish
+        // their fixed ports: the AppHost is handed this decision (Docker below), so both sides read the same ports.
+        if (!Docker)
+        {
+            HostPorts.UseFreePorts();
+        }
 
         await OnStartingAsync();
 
@@ -199,7 +212,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // Origin header first (see TenantManager.SetCurrentTenantAsync), which is how every test
         // is scoped to its own freshly registered portal; see Standalone for the SaaS stack.
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            [$"DOTNET_LAUNCH_PROFILE={LaunchProfile}", "SKIP_CLIENT=true", $"APP_HOSTING_STANDALONE={(Standalone ? "true" : "false")}"]);
+            [$"DOTNET_LAUNCH_PROFILE={LaunchProfile}", "SKIP_CLIENT=true", $"APP_HOSTING_STANDALONE={(Standalone ? "true" : "false")}",
+             $"Docker={(Docker ? "true" : "false")}"]);
 
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";

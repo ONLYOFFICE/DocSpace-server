@@ -39,7 +39,7 @@ namespace ASC.AppHost.Configuration;
 /// <see cref="Of"/> gives the port this run uses for it.
 /// </summary>
 /// <remarks>
-/// A development run keeps the fixed ports. A test run takes free ones instead (<see cref="UseFreePorts"/>), so two
+/// A development run keeps the fixed ports, and so does a test run in the docker mode. Any other test run takes free ones instead (<see cref="UseFreePorts"/>), so two
 /// runs - from two checkouts on different branches, or a test run next to a development stack - do not compete for
 /// the same ports. The test fixture boots the AppHost inside the test process, so the AppHost and the fixture read
 /// the same table: the router address the fixture polls, the port a stub of the test listens on and the address the
@@ -70,10 +70,22 @@ public static class HostPorts
     // there would let a run lock the old file while another creates and locks a new one under the same name.
     private static readonly List<FileStream> _reservations = [];
 
-    // Per user on Unix, where the temp folder is shared and a folder another user created cannot be written; the temp
-    // folder of a Windows user is that user's already.
-    private static readonly string _reservationDirectory = Path.Combine(Path.GetTempPath(),
-        OperatingSystem.IsWindows() ? "docspace-test-ports" : $"docspace-test-ports-{Environment.UserName}");
+    // In a folder of the user's own: the temp folder of a Windows user is that user's already. On Unix the temp folder
+    // is shared, and a folder there with a name known in advance could be created first by another user, who would
+    // then decide which ports this one may take; ~/.local/share is the user's alone. Not XDG_RUNTIME_DIR: it is set in
+    // a login session and missing under cron, sudo -u or docker exec, so two runs of one user could reserve in two
+    // folders and not see each other.
+    private static readonly string _reservationDirectory = GetReservationDirectory();
+
+    // How many free ports in a row may fail their reservation before the run stops looking. A port another run holds
+    // is a port it listens on, or soon will: such ports mostly fail the probe bind and never get here, so a long run of
+    // failed reservations means the folder itself refuses them, which every next port would repeat. A single lock file
+    // that cannot be opened (left read-only) counts as one failure and costs the run only that port.
+    private const int MaxReservationFailuresInARow = 64;
+
+    // The Win32 errors of an open the holder of the file refuses: ERROR_SHARING_VIOLATION, ERROR_LOCK_VIOLATION.
+    private const int ErrorSharingViolation = 32;
+    private const int ErrorLockViolation = 33;
 
     // null until the first decision: UseFreePorts, or a read of a port, which settles on the fixed ones.
     private static bool? _freePorts;
@@ -92,7 +104,8 @@ public static class HostPorts
 
     /// <summary>
     /// Makes this process take free ports. Called before the first port is read: by the test fixture before it
-    /// starts anything, and by the AppHost for its test profiles. A second call changes nothing.
+    /// starts anything, and by the AppHost for its test profiles - neither in the docker mode (Docker=true), which keeps
+    /// the fixed ports. A second call changes nothing.
     /// </summary>
     /// <exception cref="InvalidOperationException">A port was read before, so part of the run already uses the fixed ones.</exception>
     public static void UseFreePorts()
@@ -152,33 +165,40 @@ public static class HostPorts
     /// port is held - by another process, or by a reservation of this one. A port reserved here stays reserved until
     /// the process ends.
     /// </summary>
-    /// <exception cref="InvalidOperationException">The reservation folder cannot be written, which no port would change.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The folder cannot be created, or the lock file cannot be opened for a reason the open tells apart from a holder:
+    /// on Windows a read-only file or a full disk, on Unix a file the user may not open. A folder that refuses new files
+    /// on Windows and the other failures on Unix read as held: the caller that picks the ports stops on them by count.
+    /// </exception>
     public static bool TryReserve(int port)
     {
         lock (_lock)
         {
+            CreateReservationDirectory();
+
+            var path = GetReservationPath(port);
+
             try
             {
-                Directory.CreateDirectory(_reservationDirectory);
-
-                _reservations.Add(new FileStream(GetReservationPath(port), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None,
+                _reservations.Add(new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None,
                     bufferSize: 1, OperatingSystem.IsWindows() ? FileOptions.DeleteOnClose : FileOptions.None));
 
                 return true;
             }
-            catch (IOException exception) when (exception is not (DirectoryNotFoundException or PathTooLongException or DriveNotFoundException))
+            catch (IOException exception) when (IsHeld(exception))
             {
-                // Locked by its holder: a sharing violation on Windows, a failed lock on Unix.
+                // Locked by its holder.
                 return false;
             }
-            catch (UnauthorizedAccessException) when (OperatingSystem.IsWindows())
+            catch (UnauthorizedAccessException) when (OperatingSystem.IsWindows() && !File.Exists(path))
             {
-                // Deleted by its holder on close a moment ago: Windows refuses the open while the delete is pending.
+                // Deleted by its holder on close a moment ago: Windows refuses the open while the delete is pending, and
+                // the file no longer shows. A file that does show and refuses the open (read-only) is not held.
                 return false;
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
-                throw new InvalidOperationException($"The port reservations cannot be written to {_reservationDirectory}.", exception);
+                throw new InvalidOperationException($"The port reservation {path} cannot be written.", exception);
             }
         }
     }
@@ -193,20 +213,88 @@ public static class HostPorts
     {
         const int count = LastFreePort - FirstFreePort + 1;
         var start = Random.Shared.Next(count);
+        var failuresInARow = 0;
 
-        // Ends by count: every port of the range is tried once.
+        Exception? lastFailure = null;
+
+        CreateReservationDirectory();
+
+        // Ends by count: every port of the range is tried once; or earlier, when the folder refuses the reservations.
         for (var i = 0; i < count; i++)
         {
             var port = FirstFreePort + (start + i) % count;
 
-            if (!_taken.Contains(port) && IsFree(port) && TryReserve(port))
+            if (_taken.Contains(port) || !IsFree(port))
             {
-                return port;
+                continue;
+            }
+
+            try
+            {
+                if (TryReserve(port))
+                {
+                    return port;
+                }
+            }
+            catch (InvalidOperationException exception)
+            {
+                // This port's lock file only: the next port has a file of its own.
+                lastFailure = exception;
+            }
+
+            if (++failuresInARow >= MaxReservationFailuresInARow)
+            {
+                throw new InvalidOperationException(
+                    $"{MaxReservationFailuresInARow} free ports in a row could not be reserved in {_reservationDirectory}: the folder refuses the lock files.",
+                    lastFailure);
             }
         }
 
         throw new InvalidOperationException(
             $"No free port between {FirstFreePort} and {LastFreePort}: each one was in use, or its reservation in {_reservationDirectory} could not be taken.");
+    }
+
+    /// <summary>
+    /// Whether the open failed because another handle holds the file: a sharing or lock violation on Windows. On Unix
+    /// the failed lock (EWOULDBLOCK) has no portable code that tells it from the other failures of the open, so every
+    /// <see cref="IOException"/> but a missing folder counts as held, and <see cref="MaxReservationFailuresInARow"/>
+    /// ends the search when the folder refuses them all.
+    /// </summary>
+    private static bool IsHeld(IOException exception)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return (exception.HResult & 0xFFFF) is ErrorSharingViolation or ErrorLockViolation;
+        }
+
+        return exception is not (DirectoryNotFoundException or PathTooLongException or DriveNotFoundException);
+    }
+
+    private static void CreateReservationDirectory()
+    {
+        try
+        {
+            Directory.CreateDirectory(_reservationDirectory);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            throw new InvalidOperationException($"The port reservation folder {_reservationDirectory} cannot be created.", exception);
+        }
+    }
+
+    private static string GetReservationDirectory()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return Path.Combine(Path.GetTempPath(), "docspace-test-ports");
+        }
+
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        // No home folder (a service account): the shared temp folder, by user name, as the last resort.
+        return string.IsNullOrEmpty(home)
+            ? Path.Combine(Path.GetTempPath(), $"docspace-test-ports-{Environment.UserName}")
+            : Path.Combine(home, ".local", "share", "docspace-test-ports");
     }
 
     /// <summary>
