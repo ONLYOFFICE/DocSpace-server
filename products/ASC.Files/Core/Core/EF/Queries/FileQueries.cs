@@ -246,6 +246,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<bool> DbFilesAnyByCreatorAsync(int tenantId, string title, int folderId, Guid createBy)
+    {
+        return FileQueries.DbFilesAnyByCreatorAsync(this, tenantId, title, folderId, createBy);
+    }
+
+    [PreCompileQuery]
     public Task<DbFile> DbFileAsync(int tenantId, int fileId)
     {
         return FileQueries.DbFileAsync(this, tenantId, fileId);
@@ -300,9 +306,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<FileReassignInfo> GetRoomsFilesReassignInfoAsync(int tenantId, Guid ownerId)
+    public IAsyncEnumerable<FileReassignInfo> GetRoomsFilesReassignInfoAsync(int tenantId, Guid ownerId, IEnumerable<int> exceptFolderIds)
     {
-        return FileQueries.GetRoomsFilesReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes);
+        return FileQueries.GetRoomsFilesReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes, exceptFolderIds);
     }
 
     [PreCompileQuery]
@@ -911,6 +917,16 @@ static file class FileQueries
                               r.CurrentVersion &&
                               r.TenantId == tenantId));
 
+    public static readonly Func<FilesDbContext, int, string, int, Guid, Task<bool>> DbFilesAnyByCreatorAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string title, int folderId, Guid createBy) =>
+                ctx.Files
+                    .Any(r => r.Title == title &&
+                              r.ParentId == folderId &&
+                              r.CreateBy == createBy &&
+                              r.CurrentVersion &&
+                              r.TenantId == tenantId));
+
     public static readonly Func<FilesDbContext, int, int, Task<DbFile>> DbFileAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int fileId) =>
@@ -980,13 +996,14 @@ static file class FileQueries
                 .Where(r => r.TenantId == tenantId && filesIds.Contains(r.Id))
                 .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
-    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<FileReassignInfo>> GetRoomsFilesReassignInfoAsync =
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IEnumerable<int>, IAsyncEnumerable<FileReassignInfo>> GetRoomsFilesReassignInfoAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid ownerId, IEnumerable<FolderType> roomTypes) =>
+            (FilesDbContext ctx, int tenantId, Guid ownerId, IEnumerable<FolderType> roomTypes, IEnumerable<int> exceptFolderIds) =>
                 ctx.Files.Where(f =>
                         f.TenantId == tenantId &&
                         f.CurrentVersion &&
-                        f.CreateBy == ownerId)
+                        f.CreateBy == ownerId &&
+                        ctx.Tree.FirstOrDefault(t => t.FolderId == f.ParentId && exceptFolderIds.Contains(t.ParentId)) == null)
                     .Select(f => new FileReassignInfo
                     {
                         FileId = f.Id,

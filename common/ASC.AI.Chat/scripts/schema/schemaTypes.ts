@@ -173,9 +173,17 @@ export type AiActionArgs = {
    */
   knowledgeRoom?: KnowledgeRoomRef;
   /**
-   * The folder connected to the chat as the round's context. It becomes
-   * the location the model is told the user works in, and the entry the
-   * round is attributed to.
+   * The folders and rooms connected to the chat as the round's data sources.
+   * Each is read again under the caller's credentials, so only its `id` is
+   * trusted; one that is gone or that the caller cannot read is left out.
+   * The first 20 distinct ids are used and any further entry is ignored.
+   */
+  folderContexts?: FolderContextRef[];
+  /**
+   * A single data source, as an older client sends it. Read as a list of one
+   * when `folderContexts` is absent; send `folderContexts` instead.
+   *
+   * @deprecated
    */
   folderContext?: FolderContextRef;
   /**
@@ -765,12 +773,18 @@ export type Res_aiMetaGenerate = {
 export type Req_aiSkillsGenerate = {
   /** The integer id of the Instructions room the skill is written for. */
   destId: string | number;
-  /** The skill's title, at most 64 characters; its kebab-case form is the skill's name. */
-  title: string;
+  /**
+   * The skill's title, at most 64 characters; its kebab-case form is the
+   * skill's name. Optional: the model titles the skill when it is absent
+   * or empty.
+   */
+  title?: string;
   /** What the skill should do, at most 2000 characters; a specification for the model. */
   description: string;
 };
 export type Res_aiSkillsGenerate = {
+  /** The skill's title: the one given, or the one the model chose. */
+  title: string;
   /** The skill's name as written in the frontmatter; the file is saved as `<name>.md`. */
   name: string;
   /** The whole Markdown file, frontmatter included. Nothing is saved. */
@@ -788,6 +802,70 @@ export type Res_aiSkillsCreate = {
   id: string;
   /** The title the file was saved under, extension included. */
   title: string;
+};
+
+/** A skill set or a knowledge base of the catalog. */
+type TemplateSource = {
+  /** The template's id: its path in the catalog. */
+  id: string;
+  kind: "skillSet" | "knowledgeBase";
+  name: string;
+  description: string;
+  /** The category the template is listed under. */
+  category: string;
+  /** The colour the room is drawn in, six hexadecimal digits without `#`, as `POST api/2.0/files/rooms` takes it. */
+  color?: string;
+  /** The id of the built-in room cover drawn on the room, one of `GET api/2.0/files/rooms/covers`. */
+  cover?: string;
+  /** The names of the files the template holds, in the order they are uploaded. */
+  files: string[];
+};
+/** An agent of the catalog. */
+type TemplateAgent = {
+  /** The template's id: its path in the catalog. */
+  id: string;
+  kind: "agent";
+  name: string;
+  description: string;
+  /** The category the template is listed under. */
+  category: string;
+  /** The colour the room is drawn in, six hexadecimal digits without `#`, as `POST api/2.0/files/rooms` takes it. */
+  color?: string;
+  /** The id of the built-in room cover drawn on the room, one of `GET api/2.0/files/rooms/covers`. */
+  cover?: string;
+  /** The agent's instructions to the chat. */
+  instructions: string;
+  /** The ids of the skill set templates the agent is linked to. */
+  skills: string[];
+  /** The ids of the knowledge base templates the agent is linked to. */
+  knowledges: string[];
+};
+/** A room an installation made. */
+type TemplateRoom = {
+  /** The id of the template the room was made from. */
+  templateId: string;
+  /** The ID of the new room. */
+  id: string;
+  /** The title the room was created with. */
+  title: string;
+};
+export type Res_aiTemplatesList = {
+  agents: TemplateAgent[];
+  skillSets: TemplateSource[];
+  knowledgeBases: TemplateSource[];
+};
+export type Req_aiTemplatesInstall = {
+  /** The id of the template to install, as the catalog lists it. */
+  id: string;
+};
+export type Res_aiTemplatesInstall = TemplateRoom & {
+  kind: "agent" | "skillSet" | "knowledgeBase";
+  /** The Instructions rooms made for an agent's skill sets; empty for the other kinds. */
+  skillSets: TemplateRoom[];
+  /** The Knowledge rooms made for an agent's knowledge bases; empty for the other kinds. */
+  knowledgeBases: TemplateRoom[];
+  /** What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` for every agent, as its instructions are not installed yet. */
+  warnings: string[];
 };
 
 export type Req_aiMetaFill = {

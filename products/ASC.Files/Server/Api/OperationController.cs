@@ -94,7 +94,10 @@ public class OperationController(
     /// Starts a background job that copies files and folders into `destFolderId`. With `content` true, the call copies
     /// the content of each listed folder, not the folder. Requires the right to create content in the destination and
     /// to copy every listed item. Other callers get 403. In a room, room managers and content creators can create
-    /// content. A room that forbids downloads denies copying to the Read role. The call queues work. Repeat `GET
+    /// content. A room that forbids downloads denies copying to the Read role. Into an AI project, the right to chat
+    /// there is enough, and only files can be copied. Each copy is stored there as a new file, whatever
+    /// `conflictResolveType` says. A listed folder returns 403 there. A file that is neither a picture nor a document
+    /// with readable text returns 415. The call queues work. Repeat `GET
     /// api/2.0/files/fileops` until `finished` is true. Its `files` and `folders` then name the copies. What a repeated
     /// call does depends on `conflictResolveType`. With `Skip`, it skips clashing files, except encrypted files, rooms,
     /// and copies into knowledge folders. With `Overwrite`, it adds a new version to each earlier copy of a file. With
@@ -118,9 +121,9 @@ public class OperationController(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "The request body cannot be read, or a number in `folderIds` or `fileIds` is not a 32-bit integer")]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot copy one of the listed items, the destination is a listed folder or lies inside one, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, or a file to overwrite is locked, open for editing or cannot be edited by the caller")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder or, for an AI project, cannot chat in it, cannot copy one of the listed items, the destination is a listed folder or lies inside one, a folder is listed for an AI project, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, or a file to overwrite is locked, open for editing or cannot be edited by the caller")]
     [SwaggerResponse(404, "The destination folder, a listed file or a listed folder does not exist")]
-    [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
+    [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, one a knowledge folder cannot index, or, for an AI project, is neither a picture nor a document with readable text")]
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
@@ -344,7 +347,8 @@ public class OperationController(
     /// `conflictResolveType`. With `Skip`, it changes nothing. With `Overwrite`, it adds to each listed file a new
     /// version of itself. With `Duplicate`, it gives each listed folder a new name and a new id. The call returns the
     /// move operations of the caller, including the new one. An empty selection queues nothing and returns the
-    /// existing operations. A room can move only between the Rooms section and the archive. To archive a room, use
+    /// existing operations. A room can move only between the Rooms section and the archive. Moving into an AI project
+    /// returns 403. To archive a room, use
     /// `PUT api/2.0/files/rooms/{id}/archive`. To find name clashes first, use `GET api/2.0/files/fileops/move`. To
     /// check that the destination accepts the files, use `GET api/2.0/files/fileops/checkdestfolder`. To keep the
     /// originals, use `PUT api/2.0/files/fileops/copy`. The call also returns 403 if the destination is inside a
@@ -370,7 +374,7 @@ public class OperationController(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "The request body cannot be read, or a number in `folderIds` or `fileIds` is not a 32-bit integer")]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, a listed file is locked or open for editing, a file inside a listed folder is open for editing, or a file to overwrite is locked, open for editing or cannot be edited by the caller")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is an AI project, a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, a listed file is locked or open for editing, a file inside a listed folder is open for editing, or a file to overwrite is locked, open for editing or cannot be edited by the caller")]
     [SwaggerResponse(404, "The destination folder, a listed file or a listed folder does not exist")]
     [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
     [HttpPut("move")]

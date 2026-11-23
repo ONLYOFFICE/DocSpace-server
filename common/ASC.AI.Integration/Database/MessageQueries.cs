@@ -102,7 +102,7 @@ static file class MessageQueriesContainer
             (AiIntegrationContext ctx, int tenantId, Guid id) =>
                 ctx.Messages
                     .Include(x => x.Thread)
-                    .FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
+                    .FirstOrDefault(x => x.TenantId == tenantId && x.Id == id && x.Thread.DeletedOn == null));
 
     public static readonly Func<AiIntegrationContext, int, Guid, int, IAsyncEnumerable<DbMessage>> GetMessagesByThreadAsync =
         EF.CompileAsyncQuery(

@@ -342,6 +342,12 @@ tied to the source installation or transient (short links, account links, tariff
 - **WHEN** an Instructions or Knowledge room linked to an AI project, or a skill file of an Instructions room, is restored
 - **THEN** the link points at the new ids of the project and the room, and the skill row at the new id of its file, its name and description copied as they were
 
+#### Scenario: A project thread follows its project and its file sets
+
+- **WHEN** a thread of an AI project that has artifacts and attachments is restored
+- **THEN** the thread points at the new ids of the project and of both file sets, under the new tenant and the new id of its creator
+- **AND** a thread without file sets is restored with none, and an archive made before threads had file sets is restored as it is
+
 #### Scenario: Document agent settings follow their log folder
 
 - **WHEN** a portal whose document agent settings name a task log folder is restored

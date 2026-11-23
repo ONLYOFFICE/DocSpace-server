@@ -113,7 +113,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags,
         bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false,
-        MetadataFilter metadataFilter = null)
+        MetadataFilter metadataFilter = null, bool excludeAiProjectContent = false)
     {
         var result = AsyncEnumerable.Empty<Folder<string>>();
 
@@ -139,6 +139,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         result = FilterByProvider(result, provider);
 
         return result.Distinct();
+    }
+
+    public IAsyncEnumerable<Folder<string>> GetAiProjectsVisibleToAsync(IEnumerable<string> projectsIds, int aiHubRootId, Guid userId, bool isAdmin)
+    {
+        return AsyncEnumerable.Empty<Folder<string>>();
     }
 
     public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId,
@@ -328,6 +333,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     }
 
     public Task<string> SaveFolderAsync(Folder<string> folder, IEnumerable<Folder<string>> children)
+    {
+        throw new NotSupportedException();
+    }
+
+    public Task<string> SaveThreadFolderAsync(Folder<string> folder, Guid threadId, ThreadFolderKind kind)
     {
         throw new NotSupportedException();
     }

@@ -1,0 +1,11 @@
+{
+  "name": "Summary deck guide",
+  "description": "The template of a summary deck and a guide to choosing a visual for each slide.",
+  "category": "Presentation",
+  "color": "FF7FD4",
+  "cover": "label",
+  "files": [
+    "Summary deck template.docx",
+    "Visual selection guide.md"
+  ]
+}

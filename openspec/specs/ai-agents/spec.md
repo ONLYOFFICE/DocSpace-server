@@ -445,20 +445,35 @@ take no folder in the section root (403) and are deleted outright.
 ### Requirement: Members of the AI rooms
 
 An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
-the same without Editor, an AI project only Project manager (Room manager) and Member (Read). A Guest SHALL
-NOT hold any role in a project (403, nobody added) while a User joins through a link as Member. Every member
-reads the project; only a manager edits it; a non-member of any role, a DocSpace admin included, SHALL NOT
-read its model, sources or skills (403).
+the same without Editor, an AI project only Room manager and Content creator. Every member reads the project;
+only a Room manager edits it; a non-member other than a DocSpace admin SHALL NOT read its model, sources or
+skills (403).
+
+#### Scenario: Content creator reads, Room manager writes
+
+- **WHEN** a Content creator of the project reads the project model and then sets it
+- **THEN** the read answers 200 and the write 403
+
+#### Scenario: DocSpace admin outside the project
+
+- **WHEN** a DocSpace admin who is not a member of a project calls `getProjectModel`, `getProjectSources` and `getRoomSkills` for it
+- **THEN** each call answers 200
+
+### Requirement: Users only in an AI project
+
+The members of an AI project SHALL be users only: a group SHALL NOT be invited to a project with any role
+(403, "The role is not available for this user type"). A Guest SHALL NOT hold any role in a project (403,
+nobody added), while a User joins through an invitation link as Content creator.
 
 #### Scenario: Guest invited to a project
 
-- **WHEN** the owner invites a Guest to a project as Member by id, by email or through an invitation link
+- **WHEN** the owner invites a Guest to a project as Content creator by id, by email or through an invitation link
 - **THEN** the system answers 403 and the Guest is not a member
 
-#### Scenario: Member reads, manager writes
+#### Scenario: Group invited to a project
 
-- **WHEN** a Member reads the project model and then sets it
-- **THEN** the read answers 200 and the write 403
+- **WHEN** the owner invites a group to a project with any role
+- **THEN** the system answers 403 and the group is not a member
 
 ### Requirement: The model of an AI project
 
@@ -470,17 +485,17 @@ Instructions room or an unknown id answers 404 on either route.
 
 #### Scenario: Image profile refused
 
-- **WHEN** a manager sets an image-only profile on a project that runs on a chat profile
+- **WHEN** a Room manager of the project sets an image-only profile on a project that runs on a chat profile
 - **THEN** the system answers 400 and the project keeps its model
 
-#### Scenario: Member reads the fixed model
+#### Scenario: Content creator reads the fixed model
 
-- **WHEN** a Member reads the model of a project bound to profile A while the portal's Chat binding is B
+- **WHEN** a Content creator of the project reads the model of a project bound to profile A while the portal's Chat binding is B
 - **THEN** A is returned
 
 #### Scenario: Model moved
 
-- **WHEN** a manager sets another chat profile on a project with an open thread
+- **WHEN** a Room manager of the project sets another chat profile on a project with an open thread
 - **THEN** new rounds run on the new profile and the existing thread keeps its model
 
 #### Scenario: Selection cannot be cleared
@@ -494,7 +509,7 @@ Instructions room or an unknown id answers 404 on either route.
 `linkProjectSources` SHALL link active rooms of those two types that the caller manages and refuse the whole
 call (400, linking nothing) for any other room id, an empty list, over 40 ids or more than 20 rooms of one
 kind; `unlinkProjectSources` SHALL remove the listed links without checking rights on the rooms. Both writes
-need a project manager (403) and are audited.
+need a Room manager of the project (403) and are audited.
 
 #### Scenario: Over the limit
 
@@ -519,14 +534,14 @@ need a project manager (403) and are audited.
 ### Requirement: Access through a project
 
 A member of a project SHALL read every room linked to it and the files inside, through a membership of the
-project or of a group in it, without the room being listed in the project's member section; a non-member
-SHALL NOT (403). Unlinking the room or removing the member from the project SHALL end that access, while a
+project, without the room being listed in the project's member section; a non-member SHALL NOT (403).
+Unlinking the room or removing the member from the project SHALL end that access, while a
 member's own role in the room is never lowered by the project. `getRoomSkills` for a project SHALL answer
 the skills of its linked Instructions rooms to any member.
 
 #### Scenario: Access ends with the link
 
-- **WHEN** a Member reads a file of a linked Knowledge room and the manager then unlinks the room
+- **WHEN** a Content creator of the project reads a file of a linked Knowledge room and a Room manager of the project then unlinks the room
 - **THEN** the read answers 200 before and 403 after
 
 ### Requirement: Skills of an Instructions room
@@ -680,7 +695,7 @@ message is appended.
 
 ### Requirement: Where a thread may be started
 
-`entityId` of `aiThreadsCreate` SHALL be checked, never used as a partition: omitted, null, empty or 0 is
+`entityId` of `aiThreadsCreate` SHALL be checked and, an AI project excepted, never used as a partition: omitted, null, empty or 0 is
 the ordinary case; a value naming no folder, a malformed one included, 404; a folder the caller cannot open
 403; any accessible folder is accepted, Read in a room sufficing. An AI project SHALL refuse a Room admin or
 a User who is not its member (403).
@@ -706,7 +721,8 @@ A thread SHALL be visible to its creator only: `aiThreadsGetById`, `aiThreadsRea
 `aiThreadsRename`, `aiThreadsDelete`, `aiThreadsClearMessages`, `aiThreadsTouch`,
 `aiThreadsOpenOrCreate`, every message route, a tool-call decision and a send or regeneration into it
 SHALL answer 403 to any other member, a DocSpace admin or a member of the same room included. A member
-removed from a room SHALL still manage the thread they wrote there but is refused a send into it (403).
+removed from a non-project room SHALL still manage the thread they wrote there but is refused a send into it
+(403).
 
 #### Scenario: Two members of one room
 
@@ -715,8 +731,13 @@ removed from a room SHALL still manage the thread they wrote there but is refuse
 
 #### Scenario: Removed member keeps their thread
 
-- **WHEN** a member who wrote in a room is removed from it
+- **WHEN** a member who wrote in a room that is not an AI project is removed from it
 - **THEN** creating for that room and sending into the thread answer 403, while the thread is still read and renamed by its creator
+
+#### Scenario: Member removed from an AI project
+
+- **WHEN** a member who wrote a thread in an AI project is removed from the project
+- **THEN** reading that thread answers 404
 
 #### Scenario: Regeneration by a fellow member
 
@@ -725,9 +746,9 @@ removed from a room SHALL still manage the thread they wrote there but is refuse
 
 ### Requirement: One thread list per user
 
-`aiThreadsList` SHALL show the caller's threads as one list whatever `entityId` it carries: a thread started
-in room A is listed for room B, a folder, a third-party room, a project, a string that is no id and no
-entity at all; the id is not checked, so a room the caller cannot open lists
+`aiThreadsList` SHALL show the caller's threads as one list whatever `entityId` it carries, an AI project
+excepted: a thread started in room A is listed for room B, a folder, a third-party room, a string that is no
+id and no entity at all; the id is not checked, so a room the caller cannot open lists
 the same threads and never another user's. A thread SHALL survive the archiving or deletion of the room it
 was started in and stays readable and answerable.
 
@@ -931,7 +952,7 @@ thread.
 
 #### Scenario: Project answers on its model
 
-- **WHEN** a project manager sends into a project thread naming another profile
+- **WHEN** a Room manager of the project sends into a project thread naming another profile
 - **THEN** the reply runs on the project's model and the thread still reports that model
 - **AND** when a read member sends the same, the request does not reach the project's model (bug 82914)
 
@@ -1499,8 +1520,8 @@ body limit. Guests 403; anonymous 401; AI off 403.
 `aiAttachmentsGet`, `aiAttachmentsGetMany`, `aiAttachmentsDelete` and `aiAttachmentsDeleteMany` SHALL see
 the caller's drafts only: another user's draft reads as null in place and is not deleted; an unknown id
 reads as null and deletes with success without stopping a batch; a malformed id, an empty list or a missing
-body 400. A draft is readable right after it is saved and gone right after it is deleted; deleting it SHALL
-leave the DocSpace file it was made from.
+body 400. A draft is readable right after it is saved. A deleted draft SHALL stay readable until the next
+background pass and be gone after it; a linked attachment SHALL stay.
 
 #### Scenario: Another user's draft
 
@@ -1509,8 +1530,18 @@ leave the DocSpace file it was made from.
 
 #### Scenario: Mixed delete
 
-- **WHEN** a User deletes their own draft and the owner's in one `aiAttachmentsDeleteMany`
+- **WHEN** a User deletes their own draft and the owner's in one `aiAttachmentsDeleteMany`, and the background pass has run
 - **THEN** only the User's draft is gone
+
+#### Scenario: Deleted draft
+
+- **WHEN** the owner deletes a draft made from a file of their My documents, and the background pass has run
+- **THEN** the draft reads as null and `getFileInfo` still answers for the file
+
+#### Scenario: Linked attachment
+
+- **WHEN** the owner links a draft to a message, deletes it, and the background pass has run
+- **THEN** the attachment still reads back
 
 #### Scenario: Draft reaches the model
 
@@ -1534,6 +1565,27 @@ be accepted; another user's draft cannot be linked.
 
 - **WHEN** the owner links a draft to a message and deletes the message
 - **THEN** the draft reads back as null while an unlinked draft stays
+
+### Requirement: Which drafts a link binds
+
+`aiAttachmentsLinkToMessage` SHALL leave unlinked a draft deleted before the call, which the background pass
+then removes, and SHALL leave a draft linked to a message of another thread with that message; linking a draft
+to another message of the same thread SHALL move it there.
+
+#### Scenario: Deleted draft is not linked
+
+- **WHEN** the owner deletes a draft and then links it to a message
+- **THEN** the link is accepted and the draft is still removed by the background pass
+
+#### Scenario: Draft of another thread
+
+- **WHEN** the owner links a draft to a message of one thread, links it to a message of a second thread and deletes that second message
+- **THEN** the draft still reads back, while a draft linked only to the second message is gone
+
+#### Scenario: Another message of the same thread
+
+- **WHEN** the owner links a draft to one message of a thread, then to a second message of it, and deletes the second message
+- **THEN** the draft reads back as not found
 
 ### Requirement: Suggested questions for a form attachment
 
@@ -1842,3 +1894,855 @@ file's vectorization status change, or a form's starter questions are ready.
 
 - **WHEN** a member reads any AI setting
 - **THEN** the audit trail records nothing
+
+### Requirement: Files of a project thread
+
+A thread whose entry is an AI project SHALL keep two sets of files inside that project: its artifacts, saved
+by the chat tools, and its attachments, the files sent with its messages. Each thread SHALL have sets of its
+own, never shared with another thread of the project, and the thread itself SHALL NOT report where they are
+stored. A thread of any other entry has neither set.
+
+#### Scenario: Two threads of one project
+
+- **WHEN** the creator saves an artifact into each of two threads of one project
+- **THEN** `getThreadArtifacts` of each thread lists its own file only, and the two files report different `folderId` values
+
+#### Scenario: Artifacts saved at the same moment
+
+- **WHEN** three artifacts are saved at once into a thread that has none yet
+- **THEN** the three files report one `folderId` and the thread lists three artifacts
+
+#### Scenario: The thread does not name its folders
+
+- **WHEN** the creator reads a thread that has an artifact
+- **THEN** the answer carries no `folderId`
+
+### Requirement: Saving an artifact of a thread
+
+The storage route `POST internal/ai/threads/{id}/artifacts` SHALL save the sent file among the artifacts of
+the caller's project thread and answer with the stored file. It SHALL answer 400 for a thread that is not in
+an AI project, for an empty file and for a file over 100 MB, 404 for an unknown thread and 403 for a thread
+of another user, storing nothing. A title that an artifact of the thread already has SHALL NOT replace that
+artifact: the new file is stored under another title.
+
+#### Scenario: Saved artifact is listed
+
+- **WHEN** the creator saves `report.txt` into a thread of a project
+- **THEN** the answer is the file titled `report.txt`, and `getThreadArtifacts` lists it with total 1
+
+#### Scenario: Same title twice
+
+- **WHEN** the creator saves `report.txt` into one thread twice
+- **THEN** the thread lists two artifacts with different ids and different titles
+
+#### Scenario: Thread outside a project
+
+- **WHEN** the creator saves a file into a thread that has no entry
+- **THEN** the system answers 400
+
+#### Scenario: Empty file
+
+- **WHEN** the creator saves a file of 0 bytes into a thread of a project
+- **THEN** the system answers 400 and the thread lists no artifacts
+
+#### Scenario: File over the limit
+
+- **WHEN** the creator saves a file of 100 MB and one byte into a thread of a project
+- **THEN** the system answers 400 and the thread lists no artifacts
+
+#### Scenario: Unknown thread
+
+- **WHEN** a file is saved into a thread id that does not exist
+- **THEN** the system answers 404
+
+#### Scenario: Thread of another member
+
+- **WHEN** a member of the project saves a file into a thread the project's owner created
+- **THEN** the system answers 403 and the thread still lists no artifacts
+
+### Requirement: Listing the files of a thread
+
+`getThreadArtifacts` and `getThreadAttachments` SHALL answer to the creator of a thread of the given AI project
+one page of its files with the total, an empty page when it has none. They SHALL answer 404 for a thread of
+another user, the project's owner included, for a thread of another project and for a deleted thread, and
+403 to a caller outside the project. `count` SHALL be 1 to 100, 100 when omitted, and `startIndex` 0 or more;
+any other value answers 400.
+
+#### Scenario: Thread without files
+
+- **WHEN** the creator lists the artifacts of a thread nothing was saved into
+- **THEN** the page is empty and the total is 0
+
+#### Scenario: One page
+
+- **WHEN** the creator lists two artifacts with `count` 1 and `startIndex` 1
+- **THEN** the page holds one file and the total is 2
+
+#### Scenario: Project owner asks for a member's thread
+
+- **WHEN** a member has an artifact and a sent attachment in a thread, and the project's owner calls `getThreadArtifacts` and `getThreadAttachments` for it
+- **THEN** the member's own calls list the files and both calls of the owner answer 404
+
+#### Scenario: Thread of another project
+
+- **WHEN** the creator names the thread together with the id of another project they own
+- **THEN** the system answers 404
+
+#### Scenario: Caller outside the project
+
+- **WHEN** a User who is not a member of the project calls `getThreadArtifacts`
+- **THEN** the system answers 403
+
+#### Scenario: Attachment that was not sent
+
+- **WHEN** the creator uploads a file into the project and attaches it without sending a message
+- **THEN** `getThreadAttachments` answers an empty page with total 0
+
+#### Scenario: Count of zero
+
+- **WHEN** the creator calls either list with `count` 0
+- **THEN** the system answers 400
+
+#### Scenario: Count above the maximum
+
+- **WHEN** the creator calls either list with `count` 101
+- **THEN** the system answers 400
+
+#### Scenario: Negative start index
+
+- **WHEN** the creator calls either list with `startIndex` -1
+- **THEN** the system answers 400
+
+#### Scenario: Largest count
+
+- **WHEN** the creator calls either list with `count` 100 and `startIndex` 0
+- **THEN** the system answers 200
+
+### Requirement: Uploading an attachment into a project
+
+A caller who may chat in an AI project SHALL upload a file into the project itself through a chunked session
+opened by `createUploadSessionInFolder` with the project's id. The session SHALL be refused with 403 for a
+caller outside the project and for a `relativePath`, and with 400 for a file that is neither a picture nor a
+document text can be read from. `uploadFile` into a project SHALL answer 403.
+
+#### Scenario: Member uploads
+
+- **WHEN** a Content creator of the project uploads `notes.txt` through a chunked session opened in the project
+- **THEN** the stored file reports the project's id as `folderId`
+
+#### Scenario: Caller outside the project
+
+- **WHEN** a User who is not a member opens a session in the project
+- **THEN** the system answers 403
+
+#### Scenario: Relative path
+
+- **WHEN** the owner opens a session in the project with `relativePath` `nested`
+- **THEN** the system answers 403
+
+#### Scenario: Unsupported format
+
+- **WHEN** the owner opens a session in the project for `data.bin`
+- **THEN** the system answers 400
+
+#### Scenario: Upload in one request
+
+- **WHEN** the owner sends `notes.txt` to the project with `uploadFile`
+- **THEN** the system answers 403
+
+### Requirement: Copying a portal file into a project
+
+`copyBatchItems` with an AI project as the destination SHALL copy files for a caller who may chat in the
+project, storing each copy in the project as a new file whatever `conflictResolveType` is sent. It SHALL answer
+403 to a caller outside the project and when the items include a folder, and 415 for a file that is neither a
+picture nor a document text can be read from. `moveBatchItems` into a project SHALL answer 403.
+
+#### Scenario: Member copies
+
+- **WHEN** a Content creator of the project copies a file of their My documents into the project
+- **THEN** the copy reports the project's id as `folderId` and an id of its own
+
+#### Scenario: Same file twice
+
+- **WHEN** the owner copies one file into the project twice, both times with the overwrite conflict type
+- **THEN** the project holds two copies with different ids and different titles
+
+#### Scenario: Caller outside the project
+
+- **WHEN** a User who is not a member copies a file of their My documents into the project
+- **THEN** the system answers 403
+
+#### Scenario: Folder among the items
+
+- **WHEN** the owner copies a folder of their My documents into the project
+- **THEN** the system answers 403
+
+#### Scenario: Unsupported format
+
+- **WHEN** the owner copies `data.bin` into the project
+- **THEN** the system answers 415
+
+#### Scenario: Move
+
+- **WHEN** the owner moves a file of their My documents into the project
+- **THEN** the system answers 403
+
+### Requirement: Attachment of a file stored in a project
+
+`aiAttachmentsSaveFilesMany` for a file the caller stored in an AI project SHALL answer one attachment per
+file: a repeated call for the same file SHALL return the same attachment, with the extracted text for a
+document and as an image attachment for a picture. Once the caller deleted that attachment, a call for the
+file SHALL answer 404 and store nothing of the batch, before the background pass and after it.
+
+#### Scenario: Document attached twice
+
+- **WHEN** the owner uploads `notes.txt` into the project and attaches it twice
+- **THEN** both answers carry one attachment id, the kind `file`, the file's id as `entryId` and the text of the file
+
+#### Scenario: Picture attached twice
+
+- **WHEN** the owner uploads a PNG picture into the project and attaches it twice
+- **THEN** both answers carry one attachment id and the kind `image`
+
+#### Scenario: Deleted attachment attached again
+
+- **WHEN** a Content creator of a project uploads a file into the project, attaches it, deletes the attachment and attaches the file again in a batch with a file of their My documents
+- **THEN** the system answers 404, no attachment of the My documents file is stored, and after the next background pass the project file answers 404 and the deleted attachment reads as null
+
+### Requirement: A sent attachment is kept with its thread
+
+`aiAttachmentsLinkToMessage` for a message of a project thread SHALL move each linked file that the caller
+stored in the project into the attachments of that thread, where `getThreadAttachments` lists it. A copy
+linked this way SHALL stay after the file it was copied from is deleted. Linking in a thread outside a
+project SHALL leave the file where it is, and so SHALL linking a draft deleted before the call or a draft
+that a message of another thread already holds.
+
+#### Scenario: Linked file is listed
+
+- **WHEN** the creator uploads a file into the project, attaches it and links the attachment to a message of a project thread
+- **THEN** the link answers 204, `getThreadAttachments` lists that file with total 1, and its `folderId` is no longer the project's id
+
+#### Scenario: Copy outlives the original
+
+- **WHEN** the creator copies a file of their My documents into the project, links the copy to a message and deletes the original
+- **THEN** `getThreadAttachments` still lists the copy
+
+#### Scenario: Two messages of one thread
+
+- **WHEN** the creator sends one file with each of two messages of a thread
+- **THEN** the thread lists both attachments and they report one `folderId`
+
+#### Scenario: Threads of one project
+
+- **WHEN** the creator sends a file in each of two threads of one project
+- **THEN** each thread lists its own attachment only, under different `folderId` values
+
+#### Scenario: Thread outside a project
+
+- **WHEN** the owner links an attachment of a file in their My documents to a message of a thread that has no entry
+- **THEN** the link answers 204 and the file still reports My documents as `folderId`
+
+#### Scenario: Deleted draft in a project
+
+- **WHEN** the creator uploads a file into the project, attaches it, deletes the attachment and links it to a message of a project thread
+- **THEN** the link answers 204 and `getThreadAttachments` lists nothing with total 0
+
+### Requirement: Privacy of the contents of a project
+
+A file or folder inside an AI project (an artifact, an attachment, a file not sent yet) SHALL be readable by
+its creator only: `getFileInfo`, `getPresignedFileUri`, `copyBatchItems`, `bulkDownload` and `getFolderInfo`
+SHALL answer 403 to another member, to the project's owner and to a DocSpace admin. The creator SHALL read,
+download and copy it and nothing else: `updateFile`, `deleteFile`, `moveBatchItems`, an external link and
+`insertFile` SHALL answer 403.
+
+#### Scenario: Artifact of another member
+
+- **WHEN** another member of the project, the project's owner and a DocSpace admin each read a member's artifact, ask for its download link, copy it into their My documents and request it as an archive
+- **THEN** every call answers 403
+
+#### Scenario: Folder of another member's thread
+
+- **WHEN** another member, the project's owner and a DocSpace admin each call `getFolderInfo` with the `folderId` of a member's artifact
+- **THEN** the system answers 403
+
+#### Scenario: File that was not sent
+
+- **WHEN** a member uploads a file into the project, and another member, the project's owner and a DocSpace admin each read it
+- **THEN** the system answers 403
+
+#### Scenario: Creator reads, downloads and copies
+
+- **WHEN** the creator reads an own artifact, asks for its download link and copies it into their My documents
+- **THEN** every call succeeds and the copy reports My documents as `folderId`
+
+#### Scenario: Creator cannot change the file
+
+- **WHEN** the creator renames an own artifact, deletes it, moves it into their My documents, creates an external link to it or inserts a file into its folder
+- **THEN** every call answers 403
+
+#### Scenario: Creator opens the editor
+
+- **WHEN** the creator calls `openEditFile` for an own artifact
+- **THEN** the document opens with the edit permission false
+
+### Requirement: Used space of a project
+
+The project's `usedSpace` SHALL be null for a caller who may not edit the project, a DocSpace admin outside it
+included, and sorting the AI rooms root by `UsedSpace` SHALL order projects by title.
+
+#### Scenario: Used space of a project
+
+- **WHEN** a member uploads a file into a project, and another member, the project's owner and a DocSpace admin each call `getRoomInfo`
+- **THEN** `usedSpace` is positive for the owner and null for the member and the admin
+
+#### Scenario: Used space in a room webhook
+
+- **WHEN** the owner and a Content creator of a project each subscribe to `room.updated`, and the owner renames the project
+- **THEN** the owner's payload carries `usedSpace` and the Content creator's does not
+
+#### Scenario: Sorting by used space
+
+- **WHEN** a member of two projects lists the AI rooms root with `sortBy` `UsedSpace` descending, and only the later title holds a file
+- **THEN** the project with the earlier title comes first
+
+### Requirement: The contents of a project are not listed
+
+`getFolderByFolderId` of an AI project SHALL answer no files, no folders and total 0, `getFolders` an empty
+list, and a search inside the project nothing, to the creator of the files, the project's owner and a DocSpace
+admin alike. `getRoomInfo` of a project SHALL report `filesCount` and `foldersCount` 0. `getProjectSources`
+and `getRoomSkills` of the project SHALL answer as they do for a project without files.
+
+#### Scenario: Listing a project that holds thread files
+
+- **WHEN** the creator of the files, the project's owner and a DocSpace admin each call `getFolderByFolderId` and `getFolders` for a project with an artifact and a file not sent yet
+- **THEN** every answer holds no files and no folders, with total 0
+
+#### Scenario: Search inside the project
+
+- **WHEN** the creator of an artifact `report.txt` calls `getFolderByFolderId` of the project with `filterValue` `report` and `withSubFolders` true
+- **THEN** the answer holds no files and total 0
+
+#### Scenario: Counters of the project
+
+- **WHEN** the owner reads `getRoomInfo` of a project that holds thread files
+- **THEN** `filesCount` and `foldersCount` are 0
+
+#### Scenario: Sources and skills
+
+- **WHEN** the owner links an Instructions room to a project that holds thread files
+- **THEN** `getProjectSources` lists that room and `getRoomSkills` of the project answers
+
+### Requirement: The rooms roots list nothing inside a project
+
+`getFolderByFolderId` and `searchFolder` of the AI rooms root, and `getFolderByFolderId` of the rooms root with
+`searchArea` AiHub, SHALL list rooms only, whatever `withSubFolders` says. `getFolderByFolderId` of the rooms
+root with `searchArea` Any SHALL list no entry inside a project, with `withSubFolders` true as well. No entry
+inside a project SHALL count in `total` of these listings.
+
+#### Scenario: Listing the AI rooms root
+
+- **WHEN** another member of the project, the project's owner and a DocSpace admin each call `getFolderByFolderId` and `searchFolder` of the AI rooms root, and `getFolderByFolderId` of the rooms root with `searchArea` AiHub, for a project with an artifact and a file not sent yet
+- **THEN** every answer lists the project and other rooms only, no file and no folder of a thread, with a total equal to the number of rooms listed
+
+#### Scenario: Filtering the AI rooms root by the title of a thread folder
+
+- **WHEN** the same callers call `getFolderByFolderId` of the AI rooms root with `filterValue` `artifacts`
+- **THEN** the answer holds no folder of a thread and no file
+
+#### Scenario: Listing the rooms root across all sections
+
+- **WHEN** another member of the project, the project's owner and a DocSpace admin each call `getFolderByFolderId` of the rooms root with `searchArea` Any, without a filter and with `filterValue` `artifacts`, for a project with an artifact and a file not sent yet
+- **THEN** no answer holds the folder of the thread, the artifact or the file not sent yet, and each total equals the number of entries listed; the unfiltered answer to the member lists the project
+
+### Requirement: Recipients of an upload into a project
+
+The socket event that announces a file uploaded into an AI project SHALL reach the uploader only: the
+project's owner, a DocSpace admin and another member subscribed to the project SHALL NOT receive it. The
+upload SHALL NOT mark the file as new for the project's owner, and the members of the project SHALL NOT be
+sent the notification about a file uploaded to a room. `getSharedUsers` of a file inside a project SHALL
+answer an empty list.
+
+#### Scenario: Uploader is told
+
+- **WHEN** a member subscribed to the project uploads a file into it
+- **THEN** the member receives the event that the file was created
+
+#### Scenario: Others are not told
+
+- **WHEN** a member uploads a file into the project while the project's owner, a DocSpace admin or another member is subscribed to it
+- **THEN** the uploader receives the event and the other subscriber receives none within 2 seconds
+
+#### Scenario: Owner's new items
+
+- **WHEN** a member uploads one file into a project and one into an ordinary room of the same owner
+- **THEN** `getNewRoomItems` of the room lists the room's file for the owner, and `getNewRoomItems` of the project lists nothing
+
+#### Scenario: Upload notification
+
+- **WHEN** a member uploads a file into a project
+- **THEN** no notification about a file uploaded to the room is prepared for the other members and the owner
+
+#### Scenario: Shared users of a file
+
+- **WHEN** a member uploads a file into a project on a portal that has a DocSpace admin, and calls `getSharedUsers` for it
+- **THEN** the list is empty
+
+### Requirement: Activity digests leave out AI projects
+
+The hourly room activity digest and the daily feed digest SHALL leave out every event of an AI project and of
+the entries inside it, for every recipient, the project's owner and DocSpace admins included.
+
+#### Scenario: Activity digests
+
+- **WHEN** a member uploads or creates a file in a project, or the project is created, renamed or gets a new member
+- **THEN** neither the hourly room activity digest nor the daily feed digest of any recipient lists the event
+
+### Requirement: Deleting a thread of a project
+
+`aiThreadsDelete` of a thread in an AI project SHALL answer at once and close the thread everywhere: it
+leaves the list and the search, and reading or renaming it, reading or adding a message, saving an artifact
+and both file lists answer 404. Its files SHALL be removed afterwards by a background pass, every 5 minutes
+by default, which then returns their size to the project's used space unless that step fails (A37). Other
+threads of the project SHALL keep their files.
+
+#### Scenario: Gone at once
+
+- **WHEN** the creator deletes a project thread that has a message and an artifact
+- **THEN** the delete answers 204, the thread is absent from the list of the project and from a search by its title, and reading it, renaming it, reading its message, adding a message, saving an artifact, `getThreadArtifacts` and `getThreadAttachments` answer 404
+
+#### Scenario: Files removed by the background pass
+
+- **WHEN** the creator deletes a project thread with an artifact and a sent attachment, and the background pass has run
+- **THEN** reading either file answers 404 and the project's used space equals what it was before the thread
+
+#### Scenario: Other thread of the project
+
+- **WHEN** the creator deletes one of two threads of a project, each with an artifact, and the background pass has run
+- **THEN** the other thread is still read and still lists its artifact, and the used space equals what it was with that thread alone
+
+#### Scenario: Project deleted afterwards
+
+- **WHEN** the owner deletes a project one of whose threads was deleted before
+- **THEN** the deletion of the project finishes without an error
+
+### Requirement: Losing access to a project deletes the member's threads
+
+When a member's own access to an AI project is removed (by `setRoomSecurity` with no access, sent by a manager
+or by the member, or by `removeSecurityInfo` sent by the project's owner), the threads that member created in
+the project SHALL be deleted as by `aiThreadsDelete`, with their files. Threads of other members SHALL stay, a
+later invitation SHALL NOT bring the threads back, and a change of the project's owner SHALL delete nothing.
+
+#### Scenario: Member removed by the owner
+
+- **WHEN** the owner removes a member who has a thread with an artifact and a sent attachment, and the background pass has run
+- **THEN** the member's read of the thread, 200 before, answers 404, both files answer 404 and the project's used space equals what it was before the member's thread
+
+#### Scenario: Member leaves
+
+- **WHEN** a member removes their own access to the project
+- **THEN** the thread answers 404 and its files are removed as above
+
+#### Scenario: Deactivated member removed
+
+- **WHEN** the owner removes a member whose account was disabled
+- **THEN** the files of the member's thread are removed and the used space returns
+
+#### Scenario: Other members
+
+- **WHEN** one of two members with a thread each is removed
+- **THEN** the other member still reads their thread and lists its artifact
+
+#### Scenario: Invited again
+
+- **WHEN** a removed member is invited to the project again as Content creator
+- **THEN** the old thread and its artifact list answer 404
+
+#### Scenario: Owner removes the project from the list
+
+- **WHEN** the project's owner calls `removeSecurityInfo` for a project where two members have a thread each
+- **THEN** both threads answer 404 and their files are removed
+
+#### Scenario: Member removes the project from the list
+
+- **WHEN** a member calls `removeSecurityInfo` for the project
+- **THEN** the member is still in the project, still reads the thread and still lists its artifact
+
+#### Scenario: Owner changed
+
+- **WHEN** the project passes to a new owner who had a thread in it, the former owner having one too
+- **THEN** both still read their threads and the new owner still lists their artifact
+
+### Requirement: Converting a member to Guest removes them from the projects
+
+When `startUserTypeUpdate` converts a user to Guest, the job SHALL remove the user's role in every AI project,
+one the user owned and passed on included, and SHALL delete the threads the user created in AI projects as by
+`aiThreadsDelete`, with their files. Threads of other members SHALL stay. In an AI agent the user SHALL stay a
+Viewer.
+
+#### Scenario: Member converted
+
+- **WHEN** a User who is a Content creator of a project and has a thread there with an artifact and a sent attachment is converted to Guest, the job completes and the background pass has run
+- **THEN** `getRoomSecurityInfo` of the project no longer lists the user, both files answer 404 and the project's used space equals what it was before the user's thread
+
+#### Scenario: Thread closed when the job completes
+
+- **WHEN** a User who reads their thread in a project is converted to Guest, the job completes and the user is converted back to User
+- **THEN** the thread answers 404 to the user
+
+#### Scenario: Other members
+
+- **WHEN** one of two members with a thread each is converted to Guest
+- **THEN** the other member still reads their thread and lists its artifact
+
+#### Scenario: Owner of a project converted
+
+- **WHEN** a Room admin who owns a project and has a thread there with an artifact is converted to Guest with the project passed to another account, and the background pass has run
+- **THEN** the other account owns the project (its `createdBy`), `getRoomSecurityInfo` does not list the converted user, and the artifact answers 404
+
+#### Scenario: Member of an agent converted
+
+- **WHEN** a User who is a Content creator of an AI agent is converted to Guest
+- **THEN** `getRoomSecurityInfo` of the agent lists the user as Viewer
+
+### Requirement: Thread list of an AI project
+
+`aiThreadsList` with the id of an AI project as `entityId` SHALL list the threads the caller started in that
+project and no other thread. A thread started in a project SHALL NOT be listed for another project, for any
+other `entityId` or without one.
+
+#### Scenario: Thread started in a project
+
+- **WHEN** the owner of two projects starts a thread in one of them and lists threads for that project, for the other project, for a room and without an entity
+- **THEN** the list of that project holds exactly this thread and the other three lists do not hold it
+
+#### Scenario: Thread started in a room
+
+- **WHEN** the owner starts one thread in a room and one in a project, and lists threads for the project and without an entity
+- **THEN** the list of the project holds the project's thread only, and the list without an entity holds the room's thread
+
+### Requirement: Deleting a profile deletes its project threads
+
+When a profile is deleted (`startRemove`, `deleteMember`, `removeUsers`, or `startReassign` with
+`deleteProfile` true), the threads the user created in any AI project, one the user owned included, SHALL be
+deleted as by `aiThreadsDelete` by the data job, with their files. Threads of other members SHALL stay. No
+file or folder inside a project SHALL pass to another creator, so the new owner of the project or the
+recipient of the data SHALL NOT read them.
+
+#### Scenario: Data of a member removed
+
+- **WHEN** the data of a disabled member who has a thread with an artifact and a sent attachment in a project is removed with `startRemove`, the job completes and the background pass has run
+- **THEN** both files answer 404 and the project's used space equals what it was before the member's thread
+
+#### Scenario: Owner of the project before the background pass
+
+- **WHEN** the data of a disabled member with a thread in a project is removed with `startRemove` and the job completes
+- **THEN** the project's owner reading the member's artifact gets 403 or 404, never 200, and 404 after the background pass
+
+#### Scenario: Member deleted at once
+
+- **WHEN** a disabled member who has a thread with an artifact in a project is deleted with `deleteMember`, and the background pass has run
+- **THEN** the artifact answers 404 and the project's used space equals what it was before the member's thread
+
+#### Scenario: Owner of the project deleted
+
+- **WHEN** the data of a disabled room admin who owns a project and has a thread in it is removed with `startRemove`, while a member of the project has a thread too, and the background pass has run
+- **THEN** the project passes to the caller, the files of the former owner's thread answer 404, and the member still reads their thread and lists its artifact
+
+#### Scenario: Data transferred with the profile deleted
+
+- **WHEN** a disabled member's data is transferred with `startReassign` and `deleteProfile` true to the project's owner, who then reads the member's artifact
+- **THEN** the read answers 403 or 404, never 200, and 404 after the background pass
+
+### Requirement: Transferring data keeps the contents of a project with their creator
+
+`startReassign` with `deleteProfile` false SHALL NOT change the creator of a file or folder inside an AI
+project, and SHALL NOT delete the threads the user created in a project the user does not own. Once enabled
+again, such a member SHALL still read their thread and its artifact, and the recipient SHALL be refused the
+artifact with 403, the project's owner included.
+
+#### Scenario: Member's data transferred to the project's owner
+
+- **WHEN** a disabled member who has a thread with an artifact in a project has their data transferred with `startReassign` and `deleteProfile` false to the project's owner, and the member is enabled again
+- **THEN** the member reads the thread and the artifact, and the project's owner reading the artifact gets 403
+
+### Requirement: Transferring a project deletes its former owner's threads
+
+When `startReassign` with `deleteProfile` false hands a project the user owns to the recipient, the threads the
+user created in that project SHALL be deleted as by `aiThreadsDelete` by the data job, with their files. The
+user gets no access to the project. Threads of other members of the project SHALL stay.
+
+#### Scenario: Owner's data transferred
+
+- **WHEN** the data of a disabled room admin who owns a project and has a thread there with an artifact and a sent attachment is transferred with `startReassign` and `deleteProfile` false, and the background pass has run
+- **THEN** the recipient owns the project (its `createdBy`), both files answer 404 and the project's used space equals what it was before the former owner's thread
+
+#### Scenario: Members of the transferred project
+
+- **WHEN** a project whose member has a thread with an artifact is handed over this way
+- **THEN** the member still reads their thread and lists its artifact
+
+#### Scenario: Former owner's thread in another project
+
+- **WHEN** the former owner also has a thread with an artifact in a project owned by someone else, where the former owner is a member, and is enabled again after the transfer
+- **THEN** the former owner still reads that thread and its artifact
+
+### Requirement: Pinned projects in the root folders
+
+`getRootFolders` SHALL return in `folders` of the AI rooms section only the AI projects the caller pinned and may
+see, sorted as the listing of the section sorts pinned rooms. `total` and `count` of that section SHALL equal their
+number and `startIndex` SHALL be 0, whatever paging and filters the request carries. The other sections SHALL keep
+their behaviour.
+
+#### Scenario: Only pinned projects are listed
+
+- **WHEN** the owner creates three AI projects and an Instructions room, pins two of the projects and then the Instructions room, and calls `getRootFolders` with `filterType=2` and `count=1`
+- **THEN** `folders` of the AI rooms section holds the two pinned projects with `total` and `count` 2 and `startIndex` 0
+- **AND** neither the Instructions room nor the unpinned project is in it
+
+#### Scenario: Nothing pinned
+
+- **WHEN** the caller has pinned no AI project, or only an Instructions room
+- **THEN** `folders` of the AI rooms section is empty and its `total` is 0, and the section itself is still listed
+
+#### Scenario: Paging and filters do not cut the list
+
+- **WHEN** ten AI projects are pinned, the most the pin limit of the AI rooms section allows, and `getRootFolders` is called with `count=1`, `startIndex=5`, a `filterValue` no project title contains and `sortBy=AZ`
+- **THEN** `folders` of the AI rooms section holds all ten projects in the order of their titles, with `total` and `count` 10 and `startIndex` 0
+
+#### Scenario: Unpinned project leaves the list
+
+- **WHEN** a pinned project is unpinned with `unpinRoom` and `getRootFolders` is called again
+- **THEN** the project is no longer in `folders` of the AI rooms section and `getRoomsFolder` with `searchArea=AiHub` still lists it
+
+#### Scenario: Other sections are not changed
+
+- **WHEN** the owner has two Custom rooms and a pinned AI project and calls `getRootFolders` with `count=1`
+- **THEN** the Rooms section holds one room with `total` 2, as before the change
+
+### Requirement: Who finds a pinned project in the root folders
+
+A pinned AI project SHALL be listed in the root folders when the caller is a DocSpace admin, created the project
+or holds a share of their own on it; a share held through a group SHALL NOT count. A pin SHALL be personal: the
+pins of other accounts SHALL NOT be listed. A pin on a project the caller may no longer see SHALL be skipped and
+kept, so the project is listed again once the caller regains access.
+
+#### Scenario: Member pins a project
+
+- **WHEN** the owner invites a User to a project as Content creator and the User pins it
+- **THEN** the project is in `folders` of the AI rooms section of the User's `getRootFolders`
+- **AND** it is not in the owner's list, since the owner did not pin it
+
+#### Scenario: Member loses access and regains it
+
+- **WHEN** a member who pinned a project is removed from it and calls `getRootFolders`, and is then invited again
+- **THEN** the project is not listed while the member is out of it, and is listed again after the new invitation without a new pin
+
+#### Scenario: DocSpace admin outside the project
+
+- **WHEN** a DocSpace admin who was never invited to a project pins it
+- **THEN** the project is in `folders` of the AI rooms section of the admin's `getRootFolders`, as it is in the admin's listing of the section
+
+#### Scenario: Creator of the project
+
+- **WHEN** a Room admin creates a project, pins it and calls `getRootFolders`
+- **THEN** the project is listed, although the creator holds no share record on it
+
+### Requirement: Drafts that are not sent are removed
+
+A background pass, every 15 minutes by default, SHALL remove each draft its creator deleted and each draft
+not linked to a message 2 hours, by default, after it was created, in a project from the upload or copy.
+Any linked attachment SHALL stay. A draft the pass has taken SHALL be left unlinked by a link that comes after.
+
+#### Scenario: Sent attachment older than the lifetime
+
+- **WHEN** a Content creator uploads a file into a project, attaches it and links it to a message of a project thread, and 2 hours pass after the upload
+- **THEN** after the next background pass `getThreadAttachments` still lists the file
+
+### Requirement: The file of a removed draft
+
+With a draft it removes, the background pass SHALL remove the file the draft was made from when that file still
+lies in an AI project unsent, then return its size to the project's space unless that step fails (A37). Any
+other file SHALL stay.
+
+#### Scenario: Deleted draft of a file in a project
+
+- **WHEN** a Content creator of a project uploads a file into the project, attaches it, deletes the draft, and the background pass has run
+- **THEN** the draft reads as null, the file answers 404 and the project's used space equals what it was before the upload
+
+#### Scenario: Abandoned draft of a file in a project
+
+- **WHEN** a Content creator uploads a file into a project and attaches it, and the draft is not linked for 2 hours
+- **THEN** after the next background pass the draft reads as null, the file answers 404 and the project's used space equals what it was before the upload
+
+#### Scenario: Abandoned draft of a file outside a project
+
+- **WHEN** the owner attaches a file of their My documents and the draft is not linked for 2 hours
+- **THEN** after the next background pass the draft reads as null and `getFileInfo` still answers for the file
+
+### Requirement: Number of projects that use a room
+
+A Knowledge or an Instructions room SHALL carry `linkedProjectsCount` in the answers of `getRoomsFolder`,
+`getRoomInfo`, `createRoom` and `updateRoom`: the number of AI projects the room is linked to, 0 when there is
+none. The number SHALL count every such project, whether the caller may read it or not. A room of another type,
+an AI project included, SHALL NOT carry the field.
+
+#### Scenario: Room linked to two projects
+
+- **WHEN** the owner links a Knowledge room to two projects, lists the section with `getRoomsFolder` and `searchArea=AiHub` and reads the room with `getRoomInfo`
+- **THEN** the room carries `linkedProjectsCount` 2 in both answers
+
+#### Scenario: Room linked to no project
+
+- **WHEN** the owner creates an Instructions room and reads it with `getRoomInfo`
+- **THEN** the answer of `createRoom` and the answer of `getRoomInfo` carry `linkedProjectsCount` 0
+
+#### Scenario: Room changed
+
+- **WHEN** the owner renames a Knowledge room linked to one project with `updateRoom`
+- **THEN** the answer carries `linkedProjectsCount` 1
+
+#### Scenario: Rooms of other types
+
+- **WHEN** the owner reads an AI project and a Custom room with `getRoomInfo` and lists the section with `getRoomsFolder` and `searchArea=AiHub`
+- **THEN** neither the project nor the Custom room carries `linkedProjectsCount`
+
+#### Scenario: Reader of the room outside the projects
+
+- **WHEN** a User who is a Viewer of a Knowledge room linked to two projects, and a member of neither, reads the room with `getRoomInfo`
+- **THEN** the room carries `linkedProjectsCount` 2
+
+#### Scenario: Number follows the links
+
+- **WHEN** a room is linked to two projects, a Room manager of the first unlinks it with `unlinkProjectSources`, and the second project is then deleted with `deleteRoom`
+- **THEN** `getRoomInfo` of the room carries `linkedProjectsCount` 1 after the unlink and 0 after the deletion has completed
+
+### Requirement: Listing the projects that use a room
+
+`getRoomProjects` SHALL answer one page of the AI projects a Knowledge or an Instructions room is linked to, each
+with `id`, `title` and `logo`, sorted by title and then by id, with the number of listed projects as the total;
+an empty page when it lists none. It SHALL need read access to the room (403) and answer 404 for any other id:
+an unknown one, an AI project, a room of another type. `count` SHALL be 1 to 100, 100 when omitted, and
+`startIndex` 0 or more; any other value answers 400.
+
+#### Scenario: Projects sorted by title
+
+- **WHEN** the owner links a Knowledge room to the projects "Gamma", "Alpha" and "Beta", in that order, and calls `getRoomProjects` for the room
+- **THEN** the page holds "Alpha", "Beta" and "Gamma" in that order, each with its `id`, `title` and `logo`, and the total is 3
+
+#### Scenario: Projects with one title
+
+- **WHEN** the owner links an Instructions room to two projects that both have the title "Twin"
+- **THEN** the page lists the project with the lower id first
+
+#### Scenario: Room linked to no project
+
+- **WHEN** the owner calls `getRoomProjects` for a Knowledge room no project links
+- **THEN** the page is empty and the total is 0
+
+#### Scenario: Id that is no Knowledge or Instructions room
+
+- **WHEN** the owner calls `getRoomProjects` with the id of an AI project, of a Custom room, and with an id no room has
+- **THEN** each call answers 404
+
+#### Scenario: Caller who cannot read the room
+
+- **WHEN** a User who has no role in an Instructions room and is a member of no project that links it calls `getRoomProjects` for it
+- **THEN** the system answers 403
+
+#### Scenario: One page
+
+- **WHEN** the owner lists the three projects of a room with `count` 1 and `startIndex` 1
+- **THEN** the page holds the second project by title and the total is 3
+
+#### Scenario: Start index past the end
+
+- **WHEN** the owner lists the three projects of a room with `startIndex` 3
+- **THEN** the page is empty and the total is 3
+
+#### Scenario: Count of zero
+
+- **WHEN** the owner calls `getRoomProjects` with `count` 0
+- **THEN** the system answers 400
+
+#### Scenario: Negative count
+
+- **WHEN** the owner calls `getRoomProjects` with `count` -1
+- **THEN** the system answers 400
+
+#### Scenario: Count above the maximum
+
+- **WHEN** the owner calls `getRoomProjects` with `count` 101
+- **THEN** the system answers 400
+
+#### Scenario: Empty count
+
+- **WHEN** the owner calls `getRoomProjects` with `count` sent without a value
+- **THEN** the system answers 400
+
+#### Scenario: Negative start index
+
+- **WHEN** the owner calls `getRoomProjects` with `startIndex` -1
+- **THEN** the system answers 400
+
+#### Scenario: Largest count
+
+- **WHEN** the owner calls `getRoomProjects` with `count` 100 and `startIndex` 0 for a room linked to three projects
+- **THEN** the system answers 200 with the three projects
+
+### Requirement: Who is listed among the projects of a room
+
+`getRoomProjects` SHALL list a project only to a caller who may read it: a DocSpace admin, the creator of the
+project, or a member who holds a role of their own in it. A project the caller may not read SHALL be left out
+of the page and of the total, while `linkedProjectsCount` of the room still counts it.
+
+#### Scenario: Member of one of two projects
+
+- **WHEN** a User who is a Viewer of a Knowledge room and a Content creator of one of the two projects that link it calls `getRoomProjects` for the room
+- **THEN** the page holds that project only and the total is 1, while `getRoomInfo` of the room carries `linkedProjectsCount` 2
+
+#### Scenario: Reader of the room outside the projects
+
+- **WHEN** a User who is a Viewer of a Knowledge room linked to two projects, and a member of neither, calls `getRoomProjects` for the room
+- **THEN** the page is empty and the total is 0
+
+#### Scenario: Member who reads the room through a project
+
+- **WHEN** a User who is a Content creator of one of the two projects that link an Instructions room, and holds no role in the room, calls `getRoomProjects` for the room
+- **THEN** the system answers 200 and the page holds that project only
+
+#### Scenario: DocSpace admin outside the projects
+
+- **WHEN** a DocSpace admin who is a member of neither of the two projects that link a room calls `getRoomProjects` for the room
+- **THEN** the page holds both projects and the total is 2
+
+#### Scenario: Creator of a project
+
+- **WHEN** a Room admin creates a project and a Knowledge room, links the room to the project and calls `getRoomProjects` for the room
+- **THEN** the page holds the project, although its creator holds no share record on it
+
+### Requirement: Clients are told when the number of projects of a room changes
+
+When `linkProjectSources` links a room, `unlinkProjectSources` unlinks one or `deleteRoom` deletes a project, the
+clients of the accounts that may read each room whose `linkedProjectsCount` changed SHALL receive the event that
+reports an updated folder for that room, after the change is stored. A call that changes the number of no room
+SHALL send no such event for a room.
+
+#### Scenario: Room linked
+
+- **WHEN** a Room manager of a project links a Knowledge room while the owner of the portal listens to the AI rooms section
+- **THEN** the owner's client receives the updated-folder event for the room
+
+#### Scenario: Room unlinked
+
+- **WHEN** a Room manager of a project unlinks a linked Instructions room while the owner of the portal listens to the AI rooms section
+- **THEN** the owner's client receives the updated-folder event for the room
+
+#### Scenario: Project deleted
+
+- **WHEN** a project that links two rooms is deleted with `deleteRoom` while the owner of the portal listens to the AI rooms section, and the deletion has completed
+- **THEN** the owner's client receives the updated-folder event for each of the two rooms
+
+#### Scenario: Nothing linked anew
+
+- **WHEN** a Room manager links a room the project already links, after a first link whose event the owner's client received
+- **THEN** the owner's client receives no second updated-folder event for the room

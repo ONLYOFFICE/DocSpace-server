@@ -45,17 +45,18 @@ public class FolderDto<T> : FileEntryDto<T>
     public T ParentId { get; set; }
 
     /// <summary>
-    /// How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room
-    /// templates, default templates and AI agents sections always report 0, because the number is not collected for
-    /// them.
+    /// How many files lie directly in the folder, without counting the subfolders. Always 0 for an AI project, whose
+    /// files no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI
+    /// rooms sections, for which the number is not collected.
     /// </summary>
     /// <example>5</example>
     public int FilesCount { get; set; }
 
     /// <summary>
     /// How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are
-    /// subtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI
-    /// agents sections report 0.
+    /// subtracted, so the number matches what a listing of it shows. Always 0 for an AI project, whose thread folders
+    /// no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI rooms
+    /// sections.
     /// </summary>
     /// <example>7</example>
     public int FoldersCount { get; set; }
@@ -185,7 +186,8 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is
     /// refreshed when a file operation finishes, so a read right after an upload or a deletion can still report the
-    /// previous figure. Null for a folder that is not a room.
+    /// previous figure. Null for a folder that is not a room, and for an AI project the caller may not edit: the files
+    /// of a project belong to the members who added them, so only who manages the project sees their total.
     /// </summary>
     /// <example>524288000</example>
     public long? UsedSpace { get; set; }
@@ -247,6 +249,16 @@ public class FolderDto<T> : FileEntryDto<T>
     /// </summary>
     /// <example>42</example>
     public int? OriginalFormId { get; set; }
+
+    /// <summary>
+    /// How many AI projects use the room as a source. Every project the room is linked to is counted, the ones the
+    /// caller may not read included, so the number can be higher than the list of `GET
+    /// api/2.0/files/rooms/{id}/projects` is long. 0 means that no project uses the room. Filled in for a Knowledge
+    /// and an Instructions room only: null for every other room type, an AI project included, and for a folder that
+    /// is not a room.
+    /// </summary>
+    /// <example>2</example>
+    public int? LinkedProjectsCount { get; set; }
 }
 
 [Scope]
@@ -277,17 +289,30 @@ public class FolderDtoHelper(
     BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IFusionCache fusionCache,
     MetadataTemplatesCache metadataTemplatesCache,
+    AiProjectRoomDao aiProjectRoomDao,
     ILogger<FileEntryDtoHelper> logger)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, builtinFormsDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
     private readonly TenantManager _tenantManager = tenantManager;
 
+    public async Task<Dictionary<int, int>> GetLinkedProjectsCountsAsync(IEnumerable<FileEntry> entries)
+    {
+        var roomIds = entries.OfType<Folder<int>>().Where(CarriesLinkedProjectsCount).Select(f => f.Id).ToList();
+        if (roomIds.Count == 0)
+        {
+            return null;
+        }
+
+        return await aiProjectRoomDao.GetProjectsCountsAsync(_tenantManager.GetCurrentTenantId(), roomIds);
+    }
+
     public async Task<FolderDto<T>> GetAsync<T>(
         Folder<T> folder,
         List<FileShareRecord<string>> currentUserRecords = null,
         string order = null,
-        IFolder contextFolder = null)
+        IFolder contextFolder = null,
+        IReadOnlyDictionary<int, int> linkedProjectsCounts = null)
     {
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
@@ -306,6 +331,12 @@ public class FolderDtoHelper(
 
             result.Logo = await roomLogoManager.GetLogoAsync(folder);
             result.RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType);
+
+            if (folder is Folder<int> internalRoom && CarriesLinkedProjectsCount(internalRoom))
+            {
+                linkedProjectsCounts ??= await aiProjectRoomDao.GetProjectsCountsAsync(_tenantManager.GetCurrentTenantId(), [internalRoom.Id]);
+                result.LinkedProjectsCount = linkedProjectsCounts.GetValueOrDefault(internalRoom.Id);
+            }
 
             if (folder.ProviderEntry)
             {
@@ -337,7 +368,10 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
-            result.UsedSpace = folder.Counter;
+            result.UsedSpace = folder.FolderType != FolderType.AiProjectRoom ||
+                               (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEditProject) && canEditProject)
+                ? folder.Counter
+                : null;
 
             if ((await _tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEdit) && canEdit) ||
@@ -561,6 +595,11 @@ public class FolderDtoHelper(
         return result;
     }
 
+    private static bool CarriesLinkedProjectsCount(Folder<int> folder)
+    {
+        return folder is { FolderType: FolderType.KnowledgeRoom or FolderType.InstructionsRoom, RootFolderType: FolderType.AiHub };
+    }
+
     private async Task<FolderDto<T>> GetFolderWrapperAsync<T>(Folder<T> folder)
     {
         var newBadges = folder.NewForMe;
@@ -576,7 +615,7 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        if (folder.FolderType is not (FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates or FolderType.AiAgents or FolderType.AiHub))
+        if (folder.FolderType is not (FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates or FolderType.AiAgents or FolderType.AiHub or FolderType.AiProjectRoom))
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;

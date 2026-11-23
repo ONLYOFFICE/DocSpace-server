@@ -33,7 +33,7 @@
 
 import { AttachmentsEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { asyncHandler, unpackPositional } from "./_helpers.js";
+import { asyncHandler, MAX_ATTACHMENTS_PER_REQUEST, unpackPositional } from "./_helpers.js";
 import { isObject, parseInt10 } from "../narrow.js";
 import { setAnalyzeEntryIds } from "../requestContext.js";
 import { getSuggestedQuestions } from "../forms/suggestedQuestions.js";
@@ -128,9 +128,11 @@ function parseFileInput(raw: unknown): ParseResult<FileInput> {
 
 // `entityId` on the save routes is the folder the client is in, as
 // @onlyoffice/ai-chat sends it. A saved file is an existing DocSpace entry
-// (`input.path` is its id), so the folder is only recorded on the attachment
-// and nothing depends on it: a save without one is the ordinary case for a
-// chat opened outside the file tree, not an error.
+// (`input.path` is its id), so a save without a folder is the ordinary case
+// for a chat opened outside the file tree, not an error. The folder decides
+// one thing: when it is an AI project, a file of the portal is attached as
+// its copy in the project room (see storage/projectAttachments.ts). A folder
+// that cannot be read attaches the file itself and fails nothing.
 export const attachmentsController = {
   saveFile: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["input", "entityId"] as const);
@@ -159,6 +161,15 @@ export const attachmentsController = {
     const list = args.inputs;
     if (!Array.isArray(list)) {
       res.status(400).json({ error: "inputs must be an array" });
+      return;
+    }
+    // Every file named is resolved by the backend, and in a chat of an AI
+    // project copied into its room through this process's memory, so the
+    // batch is bounded.
+    if (list.length > MAX_ATTACHMENTS_PER_REQUEST) {
+      res.status(400).json({
+        error: `inputs may name at most ${MAX_ATTACHMENTS_PER_REQUEST} files (got ${list.length})`,
+      });
       return;
     }
     const inputs: FileInput[] = [];
@@ -213,6 +224,13 @@ export const attachmentsController = {
       });
       return;
     }
+    // Every id is read, and an image among them downloaded and inlined.
+    if (args.ids.length > MAX_ATTACHMENTS_PER_REQUEST) {
+      res.status(400).json({
+        error: `ids may name at most ${MAX_ATTACHMENTS_PER_REQUEST} attachments (got ${args.ids.length})`,
+      });
+      return;
+    }
     const result = await engine.getMany(args.ids as string[]);
     res.json(result);
   }),
@@ -231,7 +249,13 @@ export const attachmentsController = {
 
   delete: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["id"] as const);
-    await engine.delete(args.id as string);
+    // Without an id the storage would ask the backend to delete
+    // `/attachments/undefined`.
+    if (typeof args.id !== "string" || args.id.length === 0) {
+      res.status(400).json({ error: "id is required" });
+      return;
+    }
+    await engine.delete(args.id);
     res.json({ success: true });
   }),
 
@@ -265,7 +289,14 @@ export const attachmentsController = {
     // thread) still answered `success: true`. The thread's own existence
     // follows from the ownership check — a nonexistent threadId can never
     // match the message's actual thread.
-    const ids = args.ids as string[];
+    if (args.ids.length > MAX_ATTACHMENTS_PER_REQUEST) {
+      res.status(400).json({
+        error: `ids may name at most ${MAX_ATTACHMENTS_PER_REQUEST} attachments (got ${args.ids.length})`,
+      });
+      return;
+    }
+    // An attachment named twice is bound once.
+    const ids = [...new Set(args.ids as string[])];
     const messageThreadId = await storage.messages.readThreadId(args.messageId);
     if (messageThreadId === null) {
       res.status(404).json({ error: "message not found" });
@@ -277,8 +308,9 @@ export const attachmentsController = {
       });
       return;
     }
-    const attachments = await engine.getMany(ids);
-    const missing = ids.filter((_, i) => !attachments[i]);
+    // The records only: reading them through the engine would download and
+    // inline every image among them to learn that it exists.
+    const missing = await storage.attachments.findMissingIds(ids);
     if (missing.length > 0) {
       res.status(404).json({
         error: `attachment(s) not found: ${missing.join(", ")}`,

@@ -118,11 +118,11 @@ public class FolderContentDtoHelper(
     FolderContentDtoHelperSettings settings)
 {
 
-    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
+    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, List<FolderType> folderType = null, MetadataFilter metadataFilter = null, bool pinnedAiProjects = false)
     {
         var types = filterType.HasValue ? new[] { filterType.Value } : null;
 
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit, folderType, metadataFilter);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit, folderType, metadataFilter, pinnedAiProjects);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -149,7 +149,8 @@ public class FolderContentDtoHelper(
         }
 
         List<FileShareRecord<string>> currentUsersRecords = null;
-        if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates })
+        if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates } ||
+            folderItems.FolderInfo is { FolderType: FolderType.AiHub } && folderItems.Entries.Count > 0)
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
@@ -160,6 +161,8 @@ public class FolderContentDtoHelper(
         }
 
         var aiStatus = await accessibility.GetStatusAsync();
+
+        var linkedProjectsCounts = await folderWrapperHelper.GetLinkedProjectsCountsAsync(folderItems.Entries.Append(folderItems.FolderInfo));
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
@@ -285,7 +288,7 @@ public class FolderContentDtoHelper(
         {
             return folderEntry switch
             {
-                Folder<int> fol1 => await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder),
+                Folder<int> fol1 => await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, linkedProjectsCounts),
                 Folder<string> fol2 => await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder),
                 _ => null,
             };
@@ -332,7 +335,8 @@ public class FolderContentDtoHelper(
         int startIndex,
         int count,
         List<FolderType> folderType = null,
-        MetadataFilter metadataFilter = null)
+        MetadataFilter metadataFilter = null,
+        bool pinnedAiProjects = false)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(sortByFilter, true, out var sortBy))
@@ -360,9 +364,12 @@ public class FolderContentDtoHelper(
             formsItemDto: formsItemDto,
             location: location,
             folderType: folderType,
-            metadataFilter: metadataFilter);
+            metadataFilter: metadataFilter,
+            pinnedAiProjects: pinnedAiProjects);
 
-        return await GetAsync(folderId, items, startIndex, text, metadataFilter?.IncludeHiddenTemplates ?? false);
+        var pinnedOnly = pinnedAiProjects && items.FolderInfo is { FolderType: FolderType.AiHub };
+
+        return await GetAsync(folderId, items, pinnedOnly ? 0 : startIndex, text, metadataFilter?.IncludeHiddenTemplates ?? false);
     }
 
 }

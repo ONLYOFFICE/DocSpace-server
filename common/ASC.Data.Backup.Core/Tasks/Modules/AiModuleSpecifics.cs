@@ -113,7 +113,7 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
         new("ai_integration_threads", "tenant_id", "id", IdType.GuidV7)
         {
             UserIDColumns = ["created_by"],
-            DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "last_edit_date", false } }
+            DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "last_edit_date", false }, { "deleted_on", false } }
         },
         new("ai_integration_messages", "tenant_id", "id", IdType.GuidV7)
         {
@@ -122,7 +122,7 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
         new("ai_integration_attachments", "tenant_id")
         {
             UserIDColumns = ["created_by"],
-            DateColumns = new Dictionary<string, bool> { { "created_at", false } }
+            DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "deleted_on", false } }
         },
         new("ai_integration_prompt_folders", "tenant_id", "id", IdType.GuidV7)
         {
@@ -165,6 +165,8 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
         new("core_user", "id", "ai_integration_preferences", "created_by"),
         new("core_user", "id", "ai_integration_tool_preferences", "created_by"),
         new("files_folder", "id", "ai_integration_threads", "entry_id"),
+        new("files_folder", "id", "ai_integration_threads", "artifacts_folder_id"),
+        new("files_folder", "id", "ai_integration_threads", "attachments_folder_id"),
         new("files_folder", "id", "ai_integration_preferences", "entry_id"),
         new("files_folder", "id", "ai_integration_tool_preferences", "entry_id"),
         new("files_folder", "id", "ai_integration_mcp_servers", "entry_id"),

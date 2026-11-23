@@ -120,6 +120,15 @@ export function allowPrivateBaseUrl(): boolean {
     return value === "true" || value === "1";
 }
 
+// The largest image an attachment is inlined from, in bytes: `ai:maxImageSize`
+// of appsettings, the size the Files service lets a chat take an image up to.
+const DEFAULT_MAX_IMAGE_SIZE = 20 * 1024 * 1024;
+
+export function getMaxImageSize(): number {
+    const value = Number(nconf.get("ai:maxImageSize"));
+    return Number.isFinite(value) && value > 0 ? value : DEFAULT_MAX_IMAGE_SIZE;
+}
+
 // The portal's own MCP server (docspace-mcp, the `ai.mcp` entry named
 // below). It is always enabled everywhere — global chat, agents, the
 // editor plugin — and its tools cannot be disabled: the agent whitelist

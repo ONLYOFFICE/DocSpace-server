@@ -1882,7 +1882,7 @@
           "Files / Files"
         ],
         "summary": "Get file history",
-        "description": "Returns the activity log of one file from the portal audit trail. The log shows who renamed, moved, shared,\r\nconverted, locked, or edited the file, and when. Requires read access to the file. Other callers get 403. The\r\ncall is read-only. Entries come newest first. The call merges the events of one action into one entry, and its\r\n`related` list holds the others. The response headers carry the total number of entries, not the body. If no\r\nfile has this id, the call returns 404. The call returns 400 if `fromDate` or `toDate` has no `Z` or UTC\r\noffset. To read the log of a folder or a room, use `GET api/2.0/files/folder/{folderId}/log`.",
+        "description": "Returns the activity log of one file from the portal audit trail. The log shows who renamed, moved, shared,\r\nconverted, locked, or edited the file, and when. Requires read access to the file. Other callers get 403. A\r\nfile inside an AI project has no log, so the call returns 403 for it to everyone. The call is read-only.\r\nEntries come newest first. The call merges the events of one action into one entry, and its\r\n`related` list holds the others. The response headers carry the total number of entries, not the body. If no\r\nfile has this id, the call returns 404. The call returns 400 if `fromDate` or `toDate` has no `Z` or UTC\r\noffset. To read the log of a folder or a room, use `GET api/2.0/files/folder/{folderId}/log`.",
         "operationId": "getFileHistory",
         "parameters": [
           {
@@ -1971,7 +1971,7 @@
             "description": "A parameter has the wrong type, the `count` is outside its allowed range, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset"
           },
           "403": {
-            "description": "The caller has no read access to the file"
+            "description": "The caller has no read access to the file, or the file lies inside an AI project"
           },
           "404": {
             "description": "No file with this identifier exists"
@@ -8563,7 +8563,7 @@
           "Files / Folders"
         ],
         "summary": "Get folder history",
-        "description": "Returns the history of a folder and of the entries inside it. Each record names the action, its time, and the\r\nuser who did it. The records of one action form one entry, and its other records are in `related`. The list\r\nstarts with the most recent entry. Paging with `startIndex` and `count` counts records, so a page can hold\r\nfewer entries. The response headers carry the total number of records, and the body does not. Requires read\r\naccess to the folder. Other callers get 403. A caller who only fills forms in a form-filling folder sees only\r\nthe entries available to them. The call is read-only. If the folder does not exist,\r\nthe call returns 404. The call returns 400 if `count` is out of range or a date has a wrong format. To get\r\nthe history as a file, use `POST api/2.0/files/folder/{folderId}/log/report`.",
+        "description": "Returns the history of a folder and of the entries inside it. Each record names the action, its time, and the\r\nuser who did it. The records of one action form one entry, and its other records are in `related`. The list\r\nstarts with the most recent entry. Paging with `startIndex` and `count` counts records, so a page can hold\r\nfewer entries. The response headers carry the total number of records, and the body does not. Requires read\r\naccess to the folder. Other callers get 403. An AI project and the folders inside it have no history. For them\r\nthe call returns 403 to everyone. A caller who only fills forms in a form-filling folder sees only\r\nthe entries available to them. The call is read-only. If the folder does not exist,\r\nthe call returns 404. The call returns 400 if `count` is out of range or a date has a wrong format. To get\r\nthe history as a file, use `POST api/2.0/files/folder/{folderId}/log/report`.",
         "operationId": "getFolderHistory",
         "parameters": [
           {
@@ -8652,7 +8652,7 @@
             "description": "A parameter has the wrong type, the `count` is outside its allowed range, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset"
           },
           "403": {
-            "description": "The caller may not read this folder"
+            "description": "The caller may not read this folder, or the folder is an AI project or lies inside one"
           },
           "404": {
             "description": "The folder does not exist"
@@ -8730,7 +8730,7 @@
           "Files / Folders"
         ],
         "summary": "Start the folder history report generation",
-        "description": "Starts a job that saves the history of a folder as a report file in the caller's \"My documents\". The file is\r\nan XLSX spreadsheet, or a CSV file if `format` is `Csv`. If both `from` and `to` are left out, the report\r\ncovers the whole history. Any user with read access to the folder can call it, except a guest. Other callers\r\nget 403. The call queues work and returns the task, not the report. Repeat\r\n`GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true. Then take the file from\r\n`resultFileId` and `resultFileUrl`. For a CSV file too large for the editor, the URL downloads the file. You can\r\nrepeat the call. While a report of the same folder and caller runs, the call returns that task. It starts no\r\nsecond report. After the report ends, a repeat starts a new report and saves one more file. An XLSX report keeps\r\nat most the 200,000 most recent events by default, and fewer for long events. Its header says how many events it\r\nleft out. A CSV report has every event of the period. Only a DocSpace admin gets the IP address, browser, and\r\nplatform columns. To stop a running report, use `DELETE api/2.0/files/folder/{folderId}/log/report`. If the\r\nfolder does not exist, the call returns 404. It returns 402 only if the login history and audit trail section is\r\nturned off for the portal.",
+        "description": "Starts a job that saves the history of a folder as a report file in the caller's \"My documents\". The file is\r\nan XLSX spreadsheet, or a CSV file if `format` is `Csv`. If both `from` and `to` are left out, the report\r\ncovers the whole history. Any user with read access to the folder can call it, except a guest. Other callers\r\nget 403. An AI project and the folders inside it have no history, so the call returns 403 for them. The call\r\nqueues work and returns the task, not the report. Repeat\r\n`GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true. Then take the file from\r\n`resultFileId` and `resultFileUrl`. For a CSV file too large for the editor, the URL downloads the file. You can\r\nrepeat the call. While a report of the same folder and caller runs, the call returns that task. It starts no\r\nsecond report. After the report ends, a repeat starts a new report and saves one more file. An XLSX report keeps\r\nat most the 200,000 most recent events by default, and fewer for long events. Its header says how many events it\r\nleft out. A CSV report has every event of the period. Only a DocSpace admin gets the IP address, browser, and\r\nplatform columns. To stop a running report, use `DELETE api/2.0/files/folder/{folderId}/log/report`. If the\r\nfolder does not exist, the call returns 404. It returns 402 only if the login history and audit trail section is\r\nturned off for the portal.",
         "operationId": "createReportFolderHistory",
         "parameters": [
           {
@@ -8806,7 +8806,7 @@
             "description": "The login history and audit trail section is turned off for this portal"
           },
           "403": {
-            "description": "The caller may not export the history of this folder"
+            "description": "The caller may not export the history of this folder, or the folder is an AI project or lies inside one"
           },
           "404": {
             "description": "The folder does not exist"
@@ -8892,7 +8892,7 @@
           "Files / Folders"
         ],
         "summary": "Get the folder history report generation status",
-        "description": "Returns the state of the history report that the caller started for a folder. Each caller sees only their own\r\nreport. Any user with read access to the folder can call it, except a guest. Other callers get 403. The call\r\nis read-only. This is the call to poll after `POST api/2.0/files/folder/{folderId}/log/report`. Repeat it\r\nuntil `isCompleted` is true. It becomes true however the job ends. If the job fails, `error` gives the reason.\r\nAfter a success, `resultFileId`, `resultFileName`, and `resultFileUrl` name the file in \"My\r\ndocuments\". If the caller has no report for this folder, the response is empty. If the folder does not exist,\r\nthe call returns 404. It returns 402 if the login history and audit trail section is turned off for the\r\nportal.",
+        "description": "Returns the state of the history report that the caller started for a folder. Each caller sees only their own\r\nreport. Any user with read access to the folder can call it, except a guest. Other callers get 403. For an AI\r\nproject and the folders inside it, the call returns 403. The call is read-only. This is the call to poll\r\nafter `POST api/2.0/files/folder/{folderId}/log/report`. Repeat it\r\nuntil `isCompleted` is true. It becomes true however the job ends. If the job fails, `error` gives the reason.\r\nAfter a success, `resultFileId`, `resultFileName`, and `resultFileUrl` name the file in \"My\r\ndocuments\". If the caller has no report for this folder, the response is empty. If the folder does not exist,\r\nthe call returns 404. It returns 402 if the login history and audit trail section is turned off for the\r\nportal.",
         "operationId": "getReportFolderHistory",
         "parameters": [
           {
@@ -8932,7 +8932,7 @@
             "description": "The login history and audit trail section is turned off for this portal"
           },
           "403": {
-            "description": "The caller may not export the history of this folder"
+            "description": "The caller may not export the history of this folder, or the folder is an AI project or lies inside one"
           },
           "404": {
             "description": "The folder does not exist"
@@ -9018,7 +9018,7 @@
           "Files / Folders"
         ],
         "summary": "Terminate the folder history report generation",
-        "description": "Stops the history report that the caller started for a folder with\r\n`POST api/2.0/files/folder/{folderId}/log/report`. Each caller can stop only their own report. Any user with\r\nread access to the folder can call it, except a guest. Other callers get 403. The call only queues a request\r\nto stop the job and returns no body. To see the task end as cancelled, use\r\n`GET api/2.0/files/folder/{folderId}/log/report`. If no report runs, the call changes nothing, so you can\r\nrepeat it. A finished report stays, and its file remains in \"My documents\". If the folder does not exist, the\r\ncall returns 404. It returns 402 if the login history and audit trail section is turned off for the portal.",
+        "description": "Stops the history report that the caller started for a folder with\r\n`POST api/2.0/files/folder/{folderId}/log/report`. Each caller can stop only their own report. Any user with\r\nread access to the folder can call it, except a guest. Other callers get 403. For an AI project and the\r\nfolders inside it, the call returns 403. The call only queues a request to stop the job and returns no body. To see the task end as cancelled, use\r\n`GET api/2.0/files/folder/{folderId}/log/report`. If no report runs, the call changes nothing, so you can\r\nrepeat it. A finished report stays, and its file remains in \"My documents\". If the folder does not exist, the\r\ncall returns 404. It returns 402 if the login history and audit trail section is turned off for the portal.",
         "operationId": "terminateReportFolderHistory",
         "parameters": [
           {
@@ -9051,7 +9051,7 @@
             "description": "The login history and audit trail section is turned off for this portal"
           },
           "403": {
-            "description": "The caller may not export the history of this folder"
+            "description": "The caller may not export the history of this folder, or the folder is an AI project or lies inside one"
           },
           "404": {
             "description": "The folder does not exist"
@@ -10249,7 +10249,7 @@
           "Files / Folders"
         ],
         "summary": "Get a folder by ID",
-        "description": "Returns one page of the contents of a folder. The response has the subfolders in `folders`, the files in\r\n`files`, and the folder itself in `current`. The chain of parent folders is in `pathParts`. Requires read\r\naccess to the folder. Other callers get 403. Without signing in, a caller needs an external link to the\r\nfolder. The call changes data of the caller only. It clears the new-item marks of the folder. It also saves a\r\nvalid `sortBy` and `sortOrder` as the default order of the account. You can repeat it. With a filter, the\r\ncall searches the whole subtree by default. The text filter also searches indexed document content. Indexing\r\nruns in the background, so a new file can be missing from the results at first. Use `count` and `startIndex`\r\nto page through the result. The `total` field counts all matching entries. To filter by metadata with a typed\r\nbody, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`\r\nout of range, or a negative `startIndex`. An invalid metadata filter also returns 400. It also returns 400 if `roomId` is not a\r\nnumber but the folder ID is. It also returns 403 for a folder in the trash. If the folder does not exist, the\r\ncall returns 404. For an anonymous caller, it returns 403 instead.",
+        "description": "Returns one page of the contents of a folder. The response has the subfolders in `folders`, the files in\r\n`files`, and the folder itself in `current`. The chain of parent folders is in `pathParts`. Requires read\r\naccess to the folder. Other callers get 403. Without signing in, a caller needs an external link to the\r\nfolder. The call changes data of the caller only. It clears the new-item marks of the folder. It also saves a\r\nvalid `sortBy` and `sortOrder` as the default order of the account. You can repeat it. With a filter, the\r\ncall searches the whole subtree by default. The AI rooms root, and the rooms root with `searchArea` AiHub,\r\nlist rooms only. An AI project lists no files or folders, with a `total` of 0. The text filter also searches\r\nindexed document content. Indexing\r\nruns in the background, so a new file can be missing from the results at first. Use `count` and `startIndex`\r\nto page through the result. The `total` field counts all matching entries. To filter by metadata with a typed\r\nbody, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`\r\nout of range, or a negative `startIndex`. An invalid metadata filter also returns 400. It also returns 400 if `roomId` is not a\r\nnumber but the folder ID is. It also returns 403 for a folder in the trash. If the folder does not exist, the\r\ncall returns 404. For an anonymous caller, it returns 403 instead.",
         "operationId": "getFolderByFolderId",
         "parameters": [
           {
@@ -10774,7 +10774,7 @@
           "Files / Folders"
         ],
         "summary": "Search a folder by metadata",
-        "description": "Returns one page of the contents of a folder, filtered by metadata. The response has the same shape as for\r\n`GET api/2.0/files/{folderId}`. Requires read access to the folder. Other callers get 403. The call changes\r\ndata of the caller only. It clears the new-item marks of the folder. It also saves a valid `sortBy` as the\r\ndefault order of the account. The call ignores an unknown `sortBy`. You can repeat it. All conditions of\r\n`metadataFilters` must match. Without a template, conditions, and `filterValue`, the call lists the folder\r\nunfiltered. By default, the search covers the whole subtree. Use `count` and `startIndex` to page through the\r\nresult. The `total` field counts all matches. Take the template and field IDs from\r\n`GET api/2.0/files/metadata/templates`. A folder of a connected storage has no metadata, so a filter there\r\nreturns an empty page. The call returns 400 for an unknown template or field, or a field outside the named\r\ntemplate. It also returns 400 for more than 20 conditions or a filter in the Templates or Private section. If\r\nthe folder does not exist, the call returns 404. To combine metadata with the user, extension, or form filters,\r\nuse `GET api/2.0/files/{folderId}`.",
+        "description": "Returns one page of the contents of a folder, filtered by metadata. The response has the same shape as for\r\n`GET api/2.0/files/{folderId}`. Requires read access to the folder. Other callers get 403. The call changes\r\ndata of the caller only. It clears the new-item marks of the folder. It also saves a valid `sortBy` as the\r\ndefault order of the account. The call ignores an unknown `sortBy`. You can repeat it. All conditions of\r\n`metadataFilters` must match. Without a template, conditions, and `filterValue`, the call lists the folder\r\nunfiltered. By default, the search covers the whole subtree. The AI rooms root lists rooms only. Use `count`\r\nand `startIndex` to page through the result. The `total` field counts all matches. Take the template and\r\nfield IDs from\r\n`GET api/2.0/files/metadata/templates`. A folder of a connected storage has no metadata, so a filter there\r\nreturns an empty page. The call returns 400 for an unknown template or field, or a field outside the named\r\ntemplate. It also returns 400 for more than 20 conditions or a filter in the Templates or Private section. If\r\nthe folder does not exist, the call returns 404. To combine metadata with the user, extension, or form filters,\r\nuse `GET api/2.0/files/{folderId}`.",
         "operationId": "searchFolder",
         "parameters": [
           {
@@ -12513,7 +12513,7 @@
           "Files / Folders"
         ],
         "summary": "Get filtered sections",
-        "description": "Returns every top-level section that the caller can see, each with its first page of content. Sections come\r\nin this order: \"Favorites\", \"Recent\", \"Shared with me\", \"My documents\", \"Trash\", \"Rooms\", \"Forms\", and\r\n\"Archive\". While the private rooms app is on, \"Private rooms\" comes before \"Archive\". While AI access is on for\r\nthe portal, the AI agents and AI hub sections follow. The list has\r\n\"Recent\" only after `PUT api/2.0/files/displayrecent` turns it on. It skips \"My documents\" if the account has\r\nnone, which is usual for a guest. To skip \"Trash\", set `withoutTrash` to `true`. Any signed-in user can call\r\nit. The call is read-only, but a valid `sortBy` becomes the account's default order. It does not clear\r\nnew-item marks. The filters, `count`, and `startIndex` apply to each section. So `count=1` returns one entry\r\nper section, and each section has its own `total`. This is the most expensive listing of the module. When you\r\nneed one section, read it directly, for example with `GET api/2.0/files/@my`. The call returns 400 if `count`\r\nis outside its allowed range.",
+        "description": "Returns every top-level section that the caller can see, each with its first page of content. Sections come\r\nin this order: \"Favorites\", \"Recent\", \"Shared with me\", \"My documents\", \"Trash\", \"Rooms\", \"Forms\", and\r\n\"Archive\". While the private rooms app is on, \"Private rooms\" comes before \"Archive\". While AI access is on for\r\nthe portal, the AI agents and AI hub sections follow. AI hub lists only the AI projects the caller pinned and\r\ncan access. They are sorted like pinned rooms in the section listing. The list has\r\n\"Recent\" only after `PUT api/2.0/files/displayrecent` turns it on. It skips \"My documents\" if the account has\r\nnone, which is usual for a guest. To skip \"Trash\", set `withoutTrash` to `true`. Any signed-in user can call\r\nit. The call is read-only, but a valid `sortBy` becomes the account's default order. It does not clear\r\nnew-item marks. The filters, `count`, and `startIndex` apply to each section except AI hub. So `count=1`\r\nreturns one entry per other section, each with its own `total`. AI hub always lists every pinned\r\nproject. This is the most expensive listing of the module. When you\r\nneed one section, read it directly, for example with `GET api/2.0/files/@my`. The call returns 400 if `count`\r\nis outside its allowed range.",
         "operationId": "getRootFolders",
         "parameters": [
           {
@@ -17602,7 +17602,7 @@
           "Files / Operations"
         ],
         "summary": "Copy files and folders",
-        "description": "Starts a background job that copies files and folders into `destFolderId`. With `content` true, the call copies\r\nthe content of each listed folder, not the folder. Requires the right to create content in the destination and\r\nto copy every listed item. Other callers get 403. In a room, room managers and content creators can create\r\ncontent. A room that forbids downloads denies copying to the Read role. The call queues work. Repeat `GET\r\napi/2.0/files/fileops` until `finished` is true. Its `files` and `folders` then name the copies. What a repeated\r\ncall does depends on `conflictResolveType`. With `Skip`, it skips clashing files, except encrypted files, rooms,\r\nand copies into knowledge folders. With `Overwrite`, it adds a new version to each earlier copy of a file. With\r\n`Duplicate`, it makes new copies under new names. The call returns the copy operations of the caller, including\r\nthe new one. An empty selection queues nothing and returns the existing operations. To find name clashes first,\r\nuse `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use `GET\r\napi/2.0/files/fileops/checkdestfolder`. To move the items instead, use `PUT api/2.0/files/fileops/move`. The\r\ncall also returns 403 if the destination is inside a listed folder. A listed folder that would exceed a room or\r\nuser quota also returns 403. It also returns 403 if a file to overwrite is locked, open for editing, or not\r\neditable by the caller. A file that is not a PDF form sent to a form-filling room also returns 403. A listed\r\nfile too large for a knowledge folder also returns 403. If the destination or a listed file or folder does not\r\nexist, the call returns 404. The call returns 415 for a file format the portal does not accept for upload. It\r\nalso returns 415 for a format a knowledge folder cannot index.\n\nRaises the `folder.copied` webhook for every copied folder, and for its subfolders only within one storage. Raises the `room.copied` webhook for every listed room copied into its own section, an AI agent included. Raises the `file.copied` webhook for every copied file, and for files inside copied folders only within one storage.",
+        "description": "Starts a background job that copies files and folders into `destFolderId`. With `content` true, the call copies\r\nthe content of each listed folder, not the folder. Requires the right to create content in the destination and\r\nto copy every listed item. Other callers get 403. In a room, room managers and content creators can create\r\ncontent. A room that forbids downloads denies copying to the Read role. Into an AI project, the right to chat\r\nthere is enough, and only files can be copied. Each copy is stored there as a new file, whatever\r\n`conflictResolveType` says. A listed folder returns 403 there. A file that is neither a picture nor a document\r\nwith readable text returns 415. The call queues work. Repeat `GET\r\napi/2.0/files/fileops` until `finished` is true. Its `files` and `folders` then name the copies. What a repeated\r\ncall does depends on `conflictResolveType`. With `Skip`, it skips clashing files, except encrypted files, rooms,\r\nand copies into knowledge folders. With `Overwrite`, it adds a new version to each earlier copy of a file. With\r\n`Duplicate`, it makes new copies under new names. The call returns the copy operations of the caller, including\r\nthe new one. An empty selection queues nothing and returns the existing operations. To find name clashes first,\r\nuse `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use `GET\r\napi/2.0/files/fileops/checkdestfolder`. To move the items instead, use `PUT api/2.0/files/fileops/move`. The\r\ncall also returns 403 if the destination is inside a listed folder. A listed folder that would exceed a room or\r\nuser quota also returns 403. It also returns 403 if a file to overwrite is locked, open for editing, or not\r\neditable by the caller. A file that is not a PDF form sent to a form-filling room also returns 403. A listed\r\nfile too large for a knowledge folder also returns 403. If the destination or a listed file or folder does not\r\nexist, the call returns 404. The call returns 415 for a file format the portal does not accept for upload. It\r\nalso returns 415 for a format a knowledge folder cannot index.\n\nRaises the `folder.copied` webhook for every copied folder, and for its subfolders only within one storage. Raises the `room.copied` webhook for every listed room copied into its own section, an AI agent included. Raises the `file.copied` webhook for every copied file, and for files inside copied folders only within one storage.",
         "operationId": "copyBatchItems",
         "requestBody": {
           "content": {
@@ -17637,13 +17637,13 @@
             }
           },
           "403": {
-            "description": "The caller cannot create items in the destination folder or cannot copy one of the listed items, the destination is a listed folder or lies inside one, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, or a file to overwrite is locked, open for editing or cannot be edited by the caller"
+            "description": "The caller cannot create items in the destination folder or, for an AI project, cannot chat in it, cannot copy one of the listed items, the destination is a listed folder or lies inside one, a folder is listed for an AI project, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, or a file to overwrite is locked, open for editing or cannot be edited by the caller"
           },
           "404": {
             "description": "The destination folder, a listed file or a listed folder does not exist"
           },
           "415": {
-            "description": "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index"
+            "description": "A listed file has a format the portal does not accept for upload, one a knowledge folder cannot index, or, for an AI project, is neither a picture nor a document with readable text"
           },
           "401": {
             "description": "Unauthorized",
@@ -18627,7 +18627,7 @@
           "Files / Operations"
         ],
         "summary": "Move files and folders",
-        "description": "Starts a background job that moves files and folders into `destFolderId`. With `content` true, the call moves\r\nthe content of each listed folder, not the folder. Requires the right to create content in the destination and\r\nto remove the items from their source. Other callers get 403. In a room, room managers and content creators\r\nhave the right to create content. In a room, a content creator can move only the items they created. The call\r\nqueues work. Repeat `GET api/2.0/files/fileops` until `finished` is true. What a repeated call does depends on\r\n`conflictResolveType`. With `Skip`, it changes nothing. With `Overwrite`, it adds to each listed file a new\r\nversion of itself. With `Duplicate`, it gives each listed folder a new name and a new id. The call returns the\r\nmove operations of the caller, including the new one. An empty selection queues nothing and returns the\r\nexisting operations. A room can move only between the Rooms section and the archive. To archive a room, use\r\n`PUT api/2.0/files/rooms/{id}/archive`. To find name clashes first, use `GET api/2.0/files/fileops/move`. To\r\ncheck that the destination accepts the files, use `GET api/2.0/files/fileops/checkdestfolder`. To keep the\r\noriginals, use `PUT api/2.0/files/fileops/copy`. The call also returns 403 if the destination is inside a\r\nlisted folder. A listed folder that would exceed a room or user quota also returns 403. It also returns 403 if\r\na listed file is locked or open for editing. A file open for editing inside a listed folder also returns 403.\r\nA file to overwrite that is locked, open for editing, or not editable by the caller also returns 403. A file\r\nthat is not a PDF form sent to a form-filling room also returns 403. A folder or several files moved into a\r\nform-filling room from outside also return 403. A listed file too large for a knowledge folder also returns\r\n403. If the destination or a listed file or folder does not exist, the call returns 404. The call returns 415\r\nfor a file format the portal does not accept for upload. It also returns 415 for a format a knowledge folder\r\ncannot index.\n\nRaises the `folder.moved` webhook for each listed folder, and for subfolders of a merged folder. Raises the `folder.copied` webhook instead for a listed folder merged into an existing one. Raises the `folder.restored` webhook instead for a folder moved out of the trash. Raises the `room.archived` webhook for every listed room moved to the archive. Raises the `room.restored` webhook for every listed room moved out of the archive. Raises the `file.moved` webhook for each listed file, and for files of merged folders. Raises the `file.restored` webhook instead for a file moved out of the trash.",
+        "description": "Starts a background job that moves files and folders into `destFolderId`. With `content` true, the call moves\r\nthe content of each listed folder, not the folder. Requires the right to create content in the destination and\r\nto remove the items from their source. Other callers get 403. In a room, room managers and content creators\r\nhave the right to create content. In a room, a content creator can move only the items they created. The call\r\nqueues work. Repeat `GET api/2.0/files/fileops` until `finished` is true. What a repeated call does depends on\r\n`conflictResolveType`. With `Skip`, it changes nothing. With `Overwrite`, it adds to each listed file a new\r\nversion of itself. With `Duplicate`, it gives each listed folder a new name and a new id. The call returns the\r\nmove operations of the caller, including the new one. An empty selection queues nothing and returns the\r\nexisting operations. A room can move only between the Rooms section and the archive. Moving into an AI project\r\nreturns 403. To archive a room, use\r\n`PUT api/2.0/files/rooms/{id}/archive`. To find name clashes first, use `GET api/2.0/files/fileops/move`. To\r\ncheck that the destination accepts the files, use `GET api/2.0/files/fileops/checkdestfolder`. To keep the\r\noriginals, use `PUT api/2.0/files/fileops/copy`. The call also returns 403 if the destination is inside a\r\nlisted folder. A listed folder that would exceed a room or user quota also returns 403. It also returns 403 if\r\na listed file is locked or open for editing. A file open for editing inside a listed folder also returns 403.\r\nA file to overwrite that is locked, open for editing, or not editable by the caller also returns 403. A file\r\nthat is not a PDF form sent to a form-filling room also returns 403. A folder or several files moved into a\r\nform-filling room from outside also return 403. A listed file too large for a knowledge folder also returns\r\n403. If the destination or a listed file or folder does not exist, the call returns 404. The call returns 415\r\nfor a file format the portal does not accept for upload. It also returns 415 for a format a knowledge folder\r\ncannot index.\n\nRaises the `folder.moved` webhook for each listed folder, and for subfolders of a merged folder. Raises the `folder.copied` webhook instead for a listed folder merged into an existing one. Raises the `folder.restored` webhook instead for a folder moved out of the trash. Raises the `room.archived` webhook for every listed room moved to the archive. Raises the `room.restored` webhook for every listed room moved out of the archive. Raises the `file.moved` webhook for each listed file, and for files of merged folders. Raises the `file.restored` webhook instead for a file moved out of the trash.",
         "operationId": "moveBatchItems",
         "requestBody": {
           "content": {
@@ -18662,7 +18662,7 @@
             }
           },
           "403": {
-            "description": "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, a listed file is locked or open for editing, a file inside a listed folder is open for editing, or a file to overwrite is locked, open for editing or cannot be edited by the caller"
+            "description": "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is an AI project, a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, a listed file is locked or open for editing, a file inside a listed folder is open for editing, or a file to overwrite is locked, open for editing or cannot be edited by the caller"
           },
           "404": {
             "description": "The destination folder, a listed file or a listed folder does not exist"
@@ -19699,7 +19699,7 @@
           "Files / Operations"
         ],
         "summary": "Chunked upload",
-        "description": "Opens a chunked upload session for a file in the folder and returns it in a success envelope. This call is\r\ndeprecated. Use `POST api/2.0/files/{folderId}/session`, which returns the same session without the envelope.\r\nNo content is stored yet. Send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Each\r\npart is at most `chunkUploadSize` from `GET api/2.0/files/settings`. Then store the file with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the\r\nfolder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has\r\nit there only as a content creator. In My documents, the owner and anyone with read and write access to the\r\nfolder have it. A section root, an archived room, and an AI agent or AI project root also return 403. The call\r\nchanges data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist\r\nyet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With\r\nfalse, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this\r\nway. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call\r\nreturns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase\r\nUUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or\r\nfor a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder\r\ngets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an\r\ninstructions room. If the installation does not allow uploads with this extension, the call returns 415.\r\nIf the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a\r\n`fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is\r\nstored. The user has to free up space there first.",
+        "description": "Opens a chunked upload session for a file in the folder and returns it in a success envelope. This call is\r\ndeprecated. Use `POST api/2.0/files/{folderId}/session`, which returns the same session without the envelope.\r\nNo content is stored yet. Send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Each\r\npart is at most `chunkUploadSize` from `GET api/2.0/files/settings`. Then store the file with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the\r\nfolder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has\r\nit there only as a content creator. In My documents, the owner and anyone with read and write access to the\r\nfolder have it. A section root, an archived room, and an AI agent root also return 403. In an AI project,\r\nthe right to chat in the project is required instead. The file is stored in the project itself, visible to its\r\nuploader only. There, `relativePath` returns 403. A file that is neither a picture nor a document with\r\nreadable text returns 400. The call changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist\r\nyet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With\r\nfalse, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this\r\nway. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call\r\nreturns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase\r\nUUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or\r\nfor a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder\r\ngets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an\r\ninstructions room. If the installation does not allow uploads with this extension, the call returns 415.\r\nIf the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a\r\n`fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is\r\nstored. The user has to free up space there first.",
         "operationId": "createUploadSession",
         "parameters": [
           {
@@ -19751,13 +19751,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, a file going into an AI project is neither a picture nor a document with readable text, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`"
+            "description": "The caller cannot add content to the target folder or, for an AI project, cannot chat in it, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder, an instructions room or an AI project, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -19878,7 +19878,7 @@
           "Files / Operations"
         ],
         "summary": "Create an upload session",
-        "description": "Opens a chunked upload session for a file in the folder and returns it. If `fileSize` is below\r\n`chunkUploadSize` from `GET api/2.0/files/settings`, send the whole file in one\r\n`POST api/2.0/files/{folderId}/session/{sessionId}`. That call stores the file and returns 201. For a larger\r\nfile, send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Then store the file with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the\r\nfolder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has\r\nit there only as a content creator. In My documents, the owner and anyone with read and write access to the\r\nfolder have it. A section root, an archived room, and an AI agent or AI project root also return 403. The call\r\nchanges data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist\r\nyet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With\r\nfalse, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this\r\nway. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call\r\nreturns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase\r\nUUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or\r\nfor a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder\r\ngets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an\r\ninstructions room. If the installation does not allow uploads with this extension, the call returns 415.\r\nIf the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a\r\n`fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is\r\nstored. The user has to free up space there first.",
+        "description": "Opens a chunked upload session for a file in the folder and returns it. If `fileSize` is below\r\n`chunkUploadSize` from `GET api/2.0/files/settings`, send the whole file in one\r\n`POST api/2.0/files/{folderId}/session/{sessionId}`. That call stores the file and returns 201. For a larger\r\nfile, send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Then store the file with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the\r\nfolder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has\r\nit there only as a content creator. In My documents, the owner and anyone with read and write access to the\r\nfolder have it. A section root, an archived room, and an AI agent root also return 403. In an AI project,\r\nthe right to chat in the project is required instead. The file is stored in the project itself, visible to its\r\nuploader only. There, `relativePath` returns 403. A file that is neither a picture nor a document with\r\nreadable text returns 400. The call changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist\r\nyet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With\r\nfalse, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this\r\nway. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call\r\nreturns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase\r\nUUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or\r\nfor a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder\r\ngets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an\r\ninstructions room. If the installation does not allow uploads with this extension, the call returns 415.\r\nIf the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a\r\n`fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is\r\nstored. The user has to free up space there first.",
         "operationId": "createUploadSessionInFolder",
         "parameters": [
           {
@@ -19930,13 +19930,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, a file going into an AI project is neither a picture nor a document with readable text, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`"
+            "description": "The caller cannot add content to the target folder or, for an AI project, cannot chat in it, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder, an instructions room or an AI project, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -26437,7 +26437,7 @@
           "Files / Sharing"
         ],
         "summary": "Remove sharing rights in batch",
-        "description": "Deletes all sharing rights on the listed files and folders, or removes them from the caller's own list. The\r\nowner's record and external links stay. To delete external links, use the link operations of the entry.\r\nRequires read access to each entry. Other callers get 403. Only a caller who may manage access, or a DocSpace\r\nadmin outside a private room, deletes the rights. Any other caller only removes the entry from their own list.\r\nFor a room member, this means leaving the room. The call changes data, and you can repeat it. It stops at the\r\nfirst entry it may not change, and earlier entries stay changed. In both modes, it clears the caller's\r\nfavorite, recent, and new marks on the entry. In a private room, every account\r\nthat loses access also loses its file keys. The call always returns `true` and skips IDs that match nothing.\r\nTo check the result, use `POST api/2.0/files/share`. To delete the rights of one account, use\r\n`PUT api/2.0/files/share` with the access `None`.",
+        "description": "Deletes all sharing rights on the listed files and folders, or removes them from the caller's own list. The\r\nowner's record and external links stay. To delete external links, use the link operations of the entry.\r\nRequires read access to each entry. Other callers get 403. Only a caller who may manage access, or a DocSpace\r\nadmin outside a private room, deletes the rights. Any other caller only removes the entry from their own list.\r\nFor a room member, this means leaving the room. On an AI project, every member the call removes also loses the\r\nchat threads they created there. The call changes data, and you can repeat it. It stops at the\r\nfirst entry it may not change, and earlier entries stay changed. In both modes, it clears the caller's\r\nfavorite, recent, and new marks on the entry. In a private room, every account\r\nthat loses access also loses its file keys. The call always returns `true` and skips IDs that match nothing.\r\nTo check the result, use `POST api/2.0/files/share`. To delete the rights of one account, use\r\n`PUT api/2.0/files/share` with the access `None`.",
         "operationId": "removeSecurityInfo",
         "requestBody": {
           "content": {
@@ -29976,7 +29976,7 @@
           "Rooms"
         ],
         "summary": "Set the room access rights",
-        "description": "Changes the members of a room in one call, and returns the access of the listed subjects. The call can add,\r\nchange, and remove members. Each entry names an account, a group, or the email of a person without an account.\r\nAn `access` of `None` removes the subject from the room. Requires the room manager role in the room. Other\r\ncallers get 403. The call changes data, and you can repeat it with the same body. It skips a subject that\r\nalready has the listed access, so a repeat sends no email. If `notify` is true, the portal emails the invitation\r\nwith `message`. A person who got the same invitation or access email for this room recently gets no new one. A\r\nnew `message` does not change this. The call ignores an entry without an access level. If a subject is listed\r\ntwice, the last level wins. An empty list changes nothing. The call skips subjects that the caller cannot see,\r\nexcept current members that the room owner changes. So compare the answer with the request. Without `force`, the\r\ncall does not remove a member who has a form role. It reports this in `error` instead. The answer can also carry\r\na `warning`. The call returns 400 for an invalid or too long `email`, too many email invitations, or an invalid\r\n`culture`. It returns 403 if an entry has an email and the portal forbids guest invitations. It also returns 403\r\nif a subject cannot get the access, such as a user or guest as room manager. In a private room, a subject\r\nwithout encryption keys also returns 403. If the room does not exist, the call returns 404.",
+        "description": "Changes the members of a room in one call, and returns the access of the listed subjects. The call can add,\r\nchange, and remove members. Each entry names an account, a group, or the email of a person without an account.\r\nAn `access` of `None` removes the subject from the room. A member removed from an AI project also loses the chat\r\nthreads they created there, with their files. Requires the room manager role in the room. Other\r\ncallers get 403. The call changes data, and you can repeat it with the same body. It skips a subject that\r\nalready has the listed access, so a repeat sends no email. If `notify` is true, the portal emails the invitation\r\nwith `message`. A person who got the same invitation or access email for this room recently gets no new one. A\r\nnew `message` does not change this. The call ignores an entry without an access level. If a subject is listed\r\ntwice, the last level wins. An empty list changes nothing. The call skips subjects that the caller cannot see,\r\nexcept current members that the room owner changes. So compare the answer with the request. Without `force`, the\r\ncall does not remove a member who has a form role. It reports this in `error` instead. The answer can also carry\r\na `warning`. The call returns 400 for an invalid or too long `email`, too many email invitations, or an invalid\r\n`culture`. It returns 403 if an entry has an email and the portal forbids guest invitations. It also returns 403\r\nif a subject cannot get the access, such as a user or guest as room manager. In a private room, a subject\r\nwithout encryption keys also returns 403. If the room does not exist, the call returns 404.",
         "operationId": "setRoomSecurity",
         "parameters": [
           {
@@ -34510,6 +34510,155 @@
         ]
       }
     },
+    "/api/2.0/files/rooms/{id}/projects": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the AI projects of a room",
+        "description": "Returns the AI projects that use a Knowledge or an Instructions room as a source, one page at a time.\r\nRequires read access to the room. Other callers get 403.\r\nThe call is read-only.\r\nIt lists only the projects the caller may read.\r\nA DocSpace admin reads every project.\r\nOther callers read the projects they created or are members of.\r\nSo the list can be shorter than `linkedProjectsCount` of the room, which counts every project.\r\nThe call sorts the projects by title.\r\nThe total in the answer counts the listed projects of all pages.\r\nA room that no listed project uses gives an empty list.\r\nAn unknown ID or another kind of room, such as an AI project, returns 404.\r\nThe call returns 400 if `count` or `startIndex` is out of range.\r\nIt also returns 403 if AI features are turned off on the portal.\r\nTo see the rooms that a project uses, use `GET api/2.0/files/rooms/{id}/sources`.",
+        "operationId": "getRoomProjects",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the Knowledge or Instructions room. Take it from `GET api/2.0/files/rooms` with `searchArea=AiHub`.",
+            "required": true,
+            "schema": {
+              "examples": [
+                17001
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The size of the page: the maximum number of projects to return.",
+            "schema": {
+              "examples": [
+                25
+              ],
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The number of projects to skip from the start of the list sorted by title.",
+            "schema": {
+              "examples": [
+                0
+              ],
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of the AI projects that use the room and that the caller may read",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiRoomProjectArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`count` is outside its allowed range or `startIndex` is negative"
+          },
+          "403": {
+            "description": "The caller may not read the room, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No Knowledge or Instructions room has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/files/rooms/{id}/model": {
       "get": {
         "tags": [
@@ -34701,6 +34850,392 @@
           },
           "404": {
             "description": "No AI project has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/rooms/{id}/threads/{threadId}/artifacts": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the AI thread artifacts",
+        "description": "Returns the artifacts of a thread in an AI project, one page at a time.\r\nThey are the files that the chat tools created in the thread.\r\nRequires read access to the project. Other callers get 403.\r\nOnly the author of the thread sees these files.\r\nThe call is read-only.\r\nThe total in the answer counts the files of all pages.\r\nA thread with no artifacts yet gives an empty list.\r\nA valid `sortBy` also becomes the saved default order of the account.\r\nThe call returns 404 for an unknown AI project or thread.\r\nA thread of another user also returns 404, even to the project owner or a DocSpace admin.\r\nThe call returns 400 if `count` or `startIndex` is out of range.\r\nIt also returns 403 if AI features are turned off on the portal.\r\nTo get the files the user sent with the messages of the thread, use `GET api/2.0/files/rooms/{id}/threads/{threadId}/attachments`.",
+        "operationId": "getThreadArtifacts",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the AI project the thread was started in. Take it from `GET api/2.0/files/rooms` with `searchArea`\r\nset to `AiHub`, which lists the AI projects together with the other AI rooms.",
+            "required": true,
+            "schema": {
+              "examples": [
+                18432
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "threadId",
+            "in": "path",
+            "description": "ID of a thread the caller started in the project. Take it from `GET api/2.0/ai/threads/list` with `entityId`\r\nset to the project ID.",
+            "required": true,
+            "schema": {
+              "examples": [
+                "0198c3f4-6a2e-7c41-9b8d-2f5e7a1c3d90"
+              ],
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The maximum number of files to return.",
+            "schema": {
+              "examples": [
+                25
+              ],
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The number of files to skip.",
+            "schema": {
+              "examples": [
+                0
+              ],
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The name of the field the files are ordered by, matched case-insensitively against the file sort fields:\r\n`DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,\r\n`CustomOrder`, `LastOpened` and `UsedSpace`. Without a recognized value the saved default order of the account applies.",
+            "schema": {
+              "examples": [
+                "DateAndTime"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The sort order.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            },
+            "example": 1
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The text to search for in the file titles.",
+            "schema": {
+              "examples": [
+                "report"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The artifacts of the thread",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`count` is outside its allowed range or `startIndex` is negative"
+          },
+          "403": {
+            "description": "The caller may not read the project, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No AI project has this id, or it has no such thread of the caller"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/rooms/{id}/threads/{threadId}/attachments": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the AI thread attachments",
+        "description": "Returns the attachments of a thread in an AI project, one page at a time.\r\nThey are the files that the user sent with the messages of the thread.\r\nRequires read access to the project. Other callers get 403.\r\nOnly the author of the thread sees these files.\r\nThe call is read-only.\r\nThe total in the answer counts the files of all pages.\r\nA thread with no attachments yet gives an empty list.\r\nA valid `sortBy` also becomes the saved default order of the account.\r\nThe call returns 404 for an unknown AI project or thread.\r\nA thread of another user also returns 404, even to the project owner or a DocSpace admin.\r\nThe call returns 400 if `count` or `startIndex` is out of range.\r\nIt also returns 403 if AI features are turned off on the portal.\r\nTo get the files the chat tools created in the thread, use `GET api/2.0/files/rooms/{id}/threads/{threadId}/artifacts`.",
+        "operationId": "getThreadAttachments",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the AI project the thread was started in. Take it from `GET api/2.0/files/rooms` with `searchArea`\r\nset to `AiHub`, which lists the AI projects together with the other AI rooms.",
+            "required": true,
+            "schema": {
+              "examples": [
+                18432
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "threadId",
+            "in": "path",
+            "description": "ID of a thread the caller started in the project. Take it from `GET api/2.0/ai/threads/list` with `entityId`\r\nset to the project ID.",
+            "required": true,
+            "schema": {
+              "examples": [
+                "0198c3f4-6a2e-7c41-9b8d-2f5e7a1c3d90"
+              ],
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The maximum number of files to return.",
+            "schema": {
+              "examples": [
+                25
+              ],
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The number of files to skip.",
+            "schema": {
+              "examples": [
+                0
+              ],
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The name of the field the files are ordered by, matched case-insensitively against the file sort fields:\r\n`DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,\r\n`CustomOrder`, `LastOpened` and `UsedSpace`. Without a recognized value the saved default order of the account applies.",
+            "schema": {
+              "examples": [
+                "DateAndTime"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The sort order.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            },
+            "example": 1
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The text to search for in the file titles.",
+            "schema": {
+              "examples": [
+                "report"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The attachments of the thread",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`count` is outside its allowed range or `startIndex` is negative"
+          },
+          "403": {
+            "description": "The caller may not read the project, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No AI project has this id, or it has no such thread of the caller"
           },
           "401": {
             "description": "Unauthorized",
@@ -36703,6 +37238,88 @@
           }
         },
         "description": "The successful API response containing the AiProjectSourcesDto object."
+      },
+      "AiRoomProjectArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiRoomProjectDto"
+            },
+            "description": "The list of AiRoomProjectDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of AiRoomProjectDto objects."
+      },
+      "AiRoomProjectDto": {
+        "required": [
+          "id",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              17040
+            ],
+            "type": "integer",
+            "description": "ID of the project, the `id` that the AI project calls take, such as `GET api/2.0/files/rooms/{id}/sources`.",
+            "format": "int32"
+          },
+          "title": {
+            "examples": [
+              "Website relaunch"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Project title."
+          },
+          "logo": {
+            "description": "The addresses of the project logo in four sizes, together with the colour and the built-in cover that are\r\ndrawn when no logo was uploaded. A project without a logo answers with four empty addresses rather than with\r\nnull.",
+            "$ref": "#/components/schemas/LogoDto"
+          }
+        },
+        "description": "An AI project that uses a Knowledge or an Instructions room as a source."
       },
       "AiSkillDto": {
         "required": [
@@ -47095,7 +47712,7 @@
                   5
                 ],
                 "type": "integer",
-                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates, default templates and AI agents sections always report 0, because the number is not collected for\r\nthem.",
+                "description": "How many files lie directly in the folder, without counting the subfolders. Always 0 for an AI project, whose\r\nfiles no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI\r\nrooms sections, for which the number is not collected.",
                 "format": "int32"
               },
               "foldersCount": {
@@ -47103,7 +47720,7 @@
                   7
                 ],
                 "type": "integer",
-                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI\r\nagents sections report 0.",
+                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows. Always 0 for an AI project, whose thread folders\r\nno listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI rooms\r\nsections.",
                 "format": "int32"
               },
               "isShareable": {
@@ -47234,7 +47851,7 @@
                   "null",
                   "integer"
                 ],
-                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room.",
+                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room, and for an AI project the caller may not edit: the files\r\nof a project belong to the members who added them, so only who manages the project sees their total.",
                 "format": "int64"
               },
               "passwordProtected": {
@@ -47295,6 +47912,17 @@
                   "integer"
                 ],
                 "description": "The form the completed copies in this folder were filled from, taken from the copy submitted last. Null while\r\nthe folder holds no completed copy, and for every folder that does not collect them.",
+                "format": "int32"
+              },
+              "linkedProjectsCount": {
+                "examples": [
+                  2
+                ],
+                "type": [
+                  "null",
+                  "integer"
+                ],
+                "description": "How many AI projects use the room as a source. Every project the room is linked to is counted, the ones the\r\ncaller may not read included, so the number can be higher than the list of `GET\r\napi/2.0/files/rooms/{id}/projects` is long. 0 means that no project uses the room. Filled in for a Knowledge\r\nand an Instructions room only: null for every other room type, an AI project included, and for a folder that\r\nis not a room.",
                 "format": "int32"
               }
             }
@@ -56623,7 +57251,7 @@
                   5
                 ],
                 "type": "integer",
-                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates, default templates and AI agents sections always report 0, because the number is not collected for\r\nthem.",
+                "description": "How many files lie directly in the folder, without counting the subfolders. Always 0 for an AI project, whose\r\nfiles no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI\r\nrooms sections, for which the number is not collected.",
                 "format": "int32"
               },
               "foldersCount": {
@@ -56631,7 +57259,7 @@
                   7
                 ],
                 "type": "integer",
-                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI\r\nagents sections report 0.",
+                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows. Always 0 for an AI project, whose thread folders\r\nno listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI rooms\r\nsections.",
                 "format": "int32"
               },
               "isShareable": {
@@ -56762,7 +57390,7 @@
                   "null",
                   "integer"
                 ],
-                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room.",
+                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room, and for an AI project the caller may not edit: the files\r\nof a project belong to the members who added them, so only who manages the project sees their total.",
                 "format": "int64"
               },
               "passwordProtected": {
@@ -56823,6 +57451,17 @@
                   "integer"
                 ],
                 "description": "The form the completed copies in this folder were filled from, taken from the copy submitted last. Null while\r\nthe folder holds no completed copy, and for every folder that does not collect them.",
+                "format": "int32"
+              },
+              "linkedProjectsCount": {
+                "examples": [
+                  2
+                ],
+                "type": [
+                  "null",
+                  "integer"
+                ],
+                "description": "How many AI projects use the room as a source. Every project the room is linked to is counted, the ones the\r\ncaller may not read included, so the number can be higher than the list of `GET\r\napi/2.0/files/rooms/{id}/projects` is long. 0 means that no project uses the room. Filled in for a Knowledge\r\nand an Instructions room only: null for every other room type, an AI project included, and for a folder that\r\nis not a room.",
                 "format": "int32"
               }
             }

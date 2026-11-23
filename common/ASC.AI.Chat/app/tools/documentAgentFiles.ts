@@ -71,6 +71,7 @@ import { getForwardedHeaders } from "../requestContext.js";
 import { DocspaceApiHttpError, getFileInfo } from "../storage/docspaceFilesApi.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { mediaTypeOf, uploadFile } from "../storage/docspaceFileTransfer.js";
+import { uploadThreadArtifact } from "../storage/threadFiles.js";
 import { fileEditorUrl } from "./httpToolsAdapter.js";
 import { FileTooLargeError, readFileBytes } from "../storage/roomSkills.js";
 import { authorizationValue } from "./systemTools.js";
@@ -83,6 +84,8 @@ export const DOCUMENT_AGENT_FILES_PATH = "/document-agent/files/mcp";
 /** Where the agent delivers result files; `?folder=<id>` names where they go. */
 export const DOCUMENT_AGENT_OUTPUTS_PATH = "/document-agent/files/outputs";
 export const DOCUMENT_AGENT_OUTPUTS_FOLDER_PARAM = "folder";
+/** `?thread=<id>`: the conversation the files are results of, which keeps them among its artifacts when it can. */
+export const DOCUMENT_AGENT_OUTPUTS_THREAD_PARAM = "thread";
 /** The header the agent presents the shared token in; `Authorization` is left to the user's session. */
 export const DOCUMENT_AGENT_TOKEN_HEADER = "x-docagent-token";
 
@@ -193,6 +196,34 @@ async function serve(req: Request, res: Response): Promise<void> {
   }
 }
 
+const THREAD_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function asThreadId(value: unknown): string | undefined {
+  return typeof value === "string" && THREAD_ID.test(value) ? value : undefined;
+}
+
+/**
+ * Saves a result file. A conversation of an AI project keeps its results in
+ * its folder of artifacts; any other conversation has none, and the file
+ * goes into the folder the run named, as it did before.
+ */
+export async function saveResult(
+  threadId: string | undefined,
+  folderId: string,
+  name: string,
+  bytes: Uint8Array,
+  mediaType: string,
+): Promise<{ id: string; title: string; where: string }> {
+  if (threadId !== undefined) {
+    const artifact = await uploadThreadArtifact(threadId, name, bytes, mediaType);
+    if (artifact !== undefined) {
+      return { ...artifact, where: `among the artifacts of thread ${threadId}` };
+    }
+  }
+  const file = await uploadFile(folderId, name, bytes, mediaType);
+  return { ...file, where: `into folder ${folderId}` };
+}
+
 // A delivered file: the bytes in the body, the name in Content-Disposition,
 // the folder in the query. Inserted as the user; a same-named file gets a
 // numbered title rather than being overwritten. The answer the agent reads:
@@ -241,9 +272,15 @@ async function receive(req: Request, res: Response): Promise<void> {
   const mediaType =
     declaredType && declaredType !== "application/octet-stream" ? declaredType : mediaTypeOf(name);
   try {
-    const file = await uploadFile(folderId, name, bytes, mediaType);
+    const file = await saveResult(
+      asThreadId(req.query[DOCUMENT_AGENT_OUTPUTS_THREAD_PARAM]),
+      folderId,
+      name,
+      bytes,
+      mediaType,
+    );
     logger.info(
-      `documentAgentFiles: ${name} (${bytes.byteLength} bytes) saved into folder ${folderId} as file ${file.id}` +
+      `documentAgentFiles: ${name} (${bytes.byteLength} bytes) saved ${file.where} as file ${file.id}` +
         (file.title === name ? "" : ` (${file.title})`),
     );
     res.status(201).setHeader("Location", fileEditorUrl(file.id));

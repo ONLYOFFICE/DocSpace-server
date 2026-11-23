@@ -38,8 +38,14 @@ namespace ASC.AI.Worker.Log;
 
 internal static partial class OrphanAttachmentsCleanerServiceLogger
 {
-    [LoggerMessage(LogLevel.Information, "Deleted {Count} orphan attachments older than {CutoffDate}")]
-    public static partial void InformationDeletedOrphanAttachments(this ILogger logger, int count, DateTime cutoffDate);
+    [LoggerMessage(LogLevel.Information, "Deleted {Count} orphan attachments and {FilesCount} of their files in AI projects, cutoff {CutoffDate}")]
+    public static partial void InformationDeletedOrphanAttachments(this ILogger logger, int count, int filesCount, DateTime cutoffDate);
+
+    [LoggerMessage(LogLevel.Error, "Failed to delete orphan attachments of tenant {TenantId}")]
+    public static partial void ErrorDeleteOrphanAttachments(this ILogger logger, int tenantId, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Orphan attachment {AttachmentId} of tenant {TenantId} from {Since} leaves the retry window and will not be deleted")]
+    public static partial void WarningOrphanAttachmentLeavesRetryWindow(this ILogger logger, Guid attachmentId, int tenantId, DateTime since);
 
     [LoggerMessage(LogLevel.Error, "Failed to clean up orphan attachments")]
     public static partial void ErrorCleanUpOrphanAttachments(this ILogger logger, Exception exception);

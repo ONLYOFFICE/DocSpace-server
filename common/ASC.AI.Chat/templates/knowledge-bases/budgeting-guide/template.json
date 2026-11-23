@@ -1,0 +1,11 @@
+{
+  "name": "Budgeting guide",
+  "description": "The budgeting method and the standard list of budget categories.",
+  "category": "Tables",
+  "color": "61C059",
+  "cover": "suitcase",
+  "files": [
+    "Budgeting method.docx",
+    "Budget categories.md"
+  ]
+}
