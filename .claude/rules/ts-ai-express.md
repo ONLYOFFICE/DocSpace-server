@@ -36,7 +36,8 @@ meet it yet. Cite this file as `[ts-ai-express.md §N]`.
   The process manager restarts the service; the code's job is to leave no promise unhandled
   (`no-floating-promises`).
 - Guard: a request with a broken JSON body and one over the limit answer 400 and 413 as JSON, with
-  no stack.
+  no stack (`app/__tests__/app.pipeline.test.ts`); `errorHandler` itself in
+  `controllers/__tests__/errorHandler.test.ts`. An unknown path answers 404 `{ error }` as well.
 
 ## 2. The order of middleware is part of the contract
 
@@ -120,11 +121,9 @@ Read from `app.ts`, `app/createApp.ts`, `app/routes.ts`, `controllers/_helpers.t
 
 | Guidance | Now |
 |---|---|
-| §1 error handler registered last | none: a body-parser error gets Express's default HTML page |
 | §1 `next(err)` after the headers are sent | `asyncHandler` calls `res.end()` |
-| §2 one way of matching paths | the parser is chosen by an exact, case-sensitive `req.path` |
 | §2 no parser without a reader | `bodyParser.urlencoded` is mounted for every route |
 | §3 backpressure | the stream helpers do not look at the result of `res.write` |
-| §4 `trust proxy`, `x-powered-by`, `helmet` | not set |
+| §4 `trust proxy`, `helmet` | not set |
 | §5 graceful shutdown | `SIGTERM` flushes telemetry and exits; with telemetry off there is no handler |
 | §7 maintained releases | `express` 4.17.1 and `body-parser` 1.19.0 are pinned |

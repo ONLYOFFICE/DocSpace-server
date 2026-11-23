@@ -42,6 +42,7 @@ import { coreCors } from "../config/index.js";
 import { corsOptions } from "./cors.js";
 import registerRoutes, { API_PREFIX } from "./routes.js";
 import { requestContextMiddleware } from "./requestContext.js";
+import { errorHandler } from "./controllers/_helpers.js";
 import { DOCUMENT_AGENT_OUTPUTS_PATH } from "./tools/documentAgentFiles.js";
 
 /**
@@ -51,6 +52,7 @@ import { DOCUMENT_AGENT_OUTPUTS_PATH } from "./tools/documentAgentFiles.js";
  */
 export function createApp(): Express {
   const app = express();
+  app.disable("x-powered-by");
 
   // Server-Timing header so DevTools can tell server time from network time;
   // set at header flush, so for streamed replies it is time-to-first-byte.
@@ -96,14 +98,16 @@ export function createApp(): Express {
     .use(accessLog())
     .use(cookieParser())
     .use((req, res, next) => {
-      if (
-        req.path.startsWith(OPENAI_PASSTHROUGH_PREFIX) ||
-        req.path === DOCUMENT_AGENT_OUTPUTS_PATH
-      ) {
+      // The path as the router compares it: without regard to case, and with or without one
+      // trailing slash. Otherwise another spelling of a route gets another parser.
+      const path = req.path.toLowerCase();
+      const names = (route: string): boolean =>
+        path === route.toLowerCase() || path === `${route.toLowerCase()}/`;
+      if (path.startsWith(OPENAI_PASSTHROUGH_PREFIX) || names(DOCUMENT_AGENT_OUTPUTS_PATH)) {
         next();
         return;
       }
-      if (req.path === TEXT_TO_DOCX_PATH) {
+      if (names(TEXT_TO_DOCX_PATH)) {
         docxJsonParser(req, res, next);
         return;
       }
@@ -123,6 +127,9 @@ export function createApp(): Express {
   app.use(requestContextMiddleware);
 
   registerRoutes(app);
+
+  // Last: what was raised before a handler ran (a body that does not parse, one over the limit).
+  app.use(errorHandler);
 
   return app;
 }

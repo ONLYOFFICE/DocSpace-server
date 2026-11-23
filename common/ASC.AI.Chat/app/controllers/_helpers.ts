@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { Request, Response, NextFunction, RequestHandler } from "express";
+import type { ErrorRequestHandler, Request, Response, NextFunction, RequestHandler } from "express";
 import logger from "../log.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
@@ -257,6 +257,27 @@ function errorDetails(err: unknown): string {
     return String(err);
   }
 }
+
+/**
+ * The application's error handler, registered after the routes: it answers what was raised
+ * before a handler ran (by a body parser) in the `{ error }` JSON of every other refusal.
+ */
+export const errorHandler: ErrorRequestHandler = (err: unknown, req, res, next) => {
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
+  // The parser's own message quotes the text it could not parse.
+  if (readProp(err, "type") === "entity.parse.failed") {
+    res.status(400).json({ error: "The request body is not valid JSON" });
+    return;
+  }
+  const { status, message } = clientError(err);
+  if (status >= 500) {
+    logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
+  }
+  res.status(status).json({ error: message });
+};
 
 export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknown>>(
   handler: AsyncHandler<ReqBody, ReqQuery>,

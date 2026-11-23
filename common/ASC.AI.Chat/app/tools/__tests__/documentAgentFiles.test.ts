@@ -237,7 +237,7 @@ describe("the gate of the document agent's routes", () => {
         .set(AGENT);
 
       expect(reply.status).toBe(404);
-      expect(reply.text).toBe("Not Found");
+      expect(reply.body).toEqual({ error: "Not Found" });
     },
   );
 });
@@ -579,16 +579,16 @@ describe("the document agent's MCP server", () => {
     expect(reply.text).toBe("");
   });
 
-  // DEFECT docagent-2: a body that is not JSON is answered by Express's default HTML error page with the parser's stack — expected the JSON-RPC parse error the transport answers for every other bad body (ts-ai-express.md §1)
-  it("answers a body that is not JSON with Express's HTML 400", async () => {
+  // DEFECT docagent-2: a body that is not JSON is answered by the application's `{ error }`, not in the envelope of the protocol — expected the JSON-RPC parse error the transport answers for every other bad body (ts-ai-express.md §1)
+  it("answers a body that is not JSON with the application's 400", async () => {
     const reply = await request(app)
       .post(DOCUMENT_AGENT_FILES_PATH)
       .set({ ...MCP_ACCEPT, ...AGENT, "Content-Type": "application/json" })
       .send("{bad");
 
     expect(reply.status).toBe(400);
-    expect(reply.headers["content-type"]).toBe("text/html; charset=utf-8");
-    expect(reply.text).toContain("SyntaxError");
+    expect(reply.body).toEqual({ error: "The request body is not valid JSON" });
+    expect(reply.text).not.toContain("SyntaxError");
   });
 
   it("answers 406 to a client that does not take an event stream", async () => {

@@ -249,12 +249,12 @@ describe("Cache-Control", () => {
 });
 
 describe("an unknown path", () => {
-  it("answers 404 Not Found as plain text and logs it", async () => {
+  it("answers 404 Not Found as JSON and logs it", async () => {
     const reply = await request(app).delete("/nothing/here?x=1").set(AUTH);
 
     expect(reply.status).toBe(404);
-    expect(reply.headers["content-type"]).toBe("text/plain; charset=utf-8");
-    expect(reply.text).toBe("Not Found");
+    expect(reply.headers["content-type"]).toBe("application/json; charset=utf-8");
+    expect(reply.body).toEqual({ error: "Not Found" });
     expect(logger.warn).toHaveBeenCalledWith("Route not found: DELETE /nothing/here?x=1");
   });
 
@@ -264,14 +264,11 @@ describe("an unknown path", () => {
     expect(reply.status).toBe(404);
   });
 
-  // DEFECT app-1: the 404 of an unknown API path is the plain-text `Not Found` of
-  // `res.sendStatus` — expected the `{ error }` JSON every other answer of the API uses
-  // (ts-ai-style.md, "Errors and the error boundary"; ts-ai-express.md §1).
-  it("answers an unknown API path with plain text, not JSON", async () => {
+  it("answers an unknown API path with the { error } JSON of every other refusal", async () => {
     const reply = await request(app).get(`${API_PREFIX}/nothing`).set(AUTH);
 
     expect(reply.status).toBe(404);
-    expect(reply.text).toBe("Not Found");
+    expect(reply.body).toEqual({ error: "Not Found" });
   });
 
   // The engine's save-image routes are deliberately not served (Bug 83289).
@@ -290,27 +287,25 @@ describe("an unknown path", () => {
 describe("the body parsers", () => {
   const big = (bytes: number): string => JSON.stringify({ text: "x".repeat(bytes) });
 
-  // DEFECT app-2: a body that does not parse gets Express's default HTML error page (with the
-  // stack outside production), a status the operation does not publish — expected 400 `{ error }`
-  // JSON from an error handler registered last, documented (ts-ai-express.md §1, §8).
-  it("answers a broken JSON body with 400 and Express's HTML page, before the gate", async () => {
+  // DEFECT app-2: the 400 of a body that does not parse is a status the operation does not
+  // publish — expected it documented for every operation that takes a body (ts-ai-express.md §1).
+  it("answers a broken JSON body with 400 as JSON, without the parser's text, before the gate", async () => {
     const reply = await request(app)
       .post(`${API_PREFIX}/threads/create`)
       .set(JSON_TYPE)
       .send("{bad");
 
     expect(reply.status).toBe(400);
-    expect(reply.headers["content-type"]).toBe("text/html; charset=utf-8");
-    expect(reply.text).toContain("<pre>SyntaxError: ");
+    expect(reply.headers["content-type"]).toBe("application/json; charset=utf-8");
+    expect(reply.body).toEqual({ error: "The request body is not valid JSON" });
+    expect(reply.text).not.toContain("SyntaxError");
     expect(responseViolations("aiThreadsCreate", 400, reply.body)).toEqual([
       "aiThreadsCreate publishes no JSON schema for status 400",
     ]);
     expect(calledOut()).toEqual([]);
   });
 
-  // DEFECT app-3: a body over the limit gets Express's default HTML page, not the published
-  // `AiErrorResponse` of the 413 — expected 413 `{ error }` JSON (ts-ai-express.md §1, §8).
-  it("answers a JSON body over 100 kB with 413 and Express's HTML page", async () => {
+  it("answers a JSON body over 100 kB with the published 413", async () => {
     const reply = await request(app)
       .post(`${API_PREFIX}/threads/create`)
       .set(AUTH)
@@ -318,11 +313,9 @@ describe("the body parsers", () => {
       .send(big(100 * 1024));
 
     expect(reply.status).toBe(413);
-    expect(reply.headers["content-type"]).toBe("text/html; charset=utf-8");
-    expect(reply.text).toContain("<pre>PayloadTooLargeError: request entity too large");
-    expect(responseViolations("aiThreadsCreate", 413, reply.body)).toEqual([
-      "/ must have required property 'error'",
-    ]);
+    expect(reply.body).toEqual({ error: "request entity too large" });
+    expect(reply.text).not.toContain("PayloadTooLargeError");
+    expect(responseViolations("aiThreadsCreate", 413, reply.body)).toEqual([]);
   });
 
   it("takes a JSON body just under 100 kB", async () => {
@@ -370,32 +363,27 @@ describe("the body parsers", () => {
       .send(big(15 * 1024 * 1024));
 
     expect(reply.status).toBe(413);
-    expect(reply.text).toContain("PayloadTooLargeError");
-    expect(responseViolations("aiExportTextToDocx", 413, reply.body)).toEqual([
-      "/ must have required property 'error'",
-    ]);
+    expect(reply.body).toEqual({ error: "request entity too large" });
+    expect(responseViolations("aiExportTextToDocx", 413, reply.body)).toEqual([]);
   });
 
   it("parses a text-to-docx body: a broken one answers 400 before the gate", async () => {
     const reply = await request(app).post(`${API_PREFIX}/text-to-docx`).set(JSON_TYPE).send("{bad");
 
     expect(reply.status).toBe(400);
-    expect(reply.text).toContain("<pre>SyntaxError: ");
+    expect(reply.body).toEqual({ error: "The request body is not valid JSON" });
   });
 
-  // DEFECT app-4: the parser is picked by an exact, case-sensitive `req.path`, while the router
-  // matches `/AI/TEXT-TO-DOCX` and `/text-to-docx/` too: those spellings reach the same handler
-  // with the 100 kB limit — expected the same parser for every spelling the router accepts
-  // (ts-ai-express.md §2, §8).
+  // The router takes these spellings for the same route, so the parser does too.
   it.each([`${API_PREFIX}/TEXT-TO-DOCX`, `${API_PREFIX}/text-to-docx/`])(
-    "gives %s the default 100 kB limit",
+    "gives %s the 15 MB limit of text-to-docx",
     async (path) => {
       const reply = await request(app)
         .post(path)
         .set(JSON_TYPE)
         .send(big(200 * 1024));
 
-      expect(reply.status).toBe(413);
+      expect(reply.status).toBe(401);
     },
   );
 
@@ -418,16 +406,14 @@ describe("the body parsers", () => {
     expect(reply.status).toBe(401);
   });
 
-  // DEFECT app-5: the passthrough is recognised by a case-sensitive prefix: `/OPENAI/...` is
-  // routed to the same handler but its body is parsed (and a broken one refused with 400) —
-  // expected the raw body for every spelling the router accepts (ts-ai-express.md §2, §8).
-  it("parses the body of the passthrough spelled in upper case", async () => {
+  it("leaves the body of the passthrough spelled in upper case unparsed too", async () => {
     const reply = await request(app)
       .post(`${API_PREFIX}/OPENAI/p1/v1/chat/completions`)
       .set(JSON_TYPE)
       .send("{bad");
 
-    expect(reply.status).toBe(400);
+    expect(reply.status).toBe(401);
+    expect(reply.body).toEqual({ error: "Unauthorized" });
   });
 
   it("leaves the document-agent outputs path unparsed: a broken JSON body reaches it", async () => {
@@ -440,13 +426,14 @@ describe("the body parsers", () => {
     expect(reply.body).toEqual({ error: "not found" });
   });
 
-  it("parses the document-agent outputs path with a trailing slash", async () => {
+  it("leaves the document-agent outputs path with a trailing slash unparsed too", async () => {
     const reply = await request(app)
       .post("/document-agent/files/outputs/")
       .set(JSON_TYPE)
       .send("{bad");
 
-    expect(reply.status).toBe(400);
+    expect(reply.status).toBe(404);
+    expect(reply.body).toEqual({ error: "not found" });
   });
 
   // DEFECT app-6: `bodyParser.urlencoded` is mounted for every route though no handler reads a
@@ -473,11 +460,9 @@ describe("the body parsers", () => {
 });
 
 describe("hardening headers", () => {
-  // DEFECT app-7: every answer carries `X-Powered-By: Express` — expected it removed with
-  // `app.disable("x-powered-by")` in createApp (ts-ai-express.md §4, §8).
-  it("announces Express in X-Powered-By", async () => {
+  it("does not announce Express in X-Powered-By", async () => {
     const reply = await request(app).get("/isLife");
 
-    expect(reply.headers["x-powered-by"]).toBe("Express");
+    expect(reply.headers["x-powered-by"]).toBeUndefined();
   });
 });
