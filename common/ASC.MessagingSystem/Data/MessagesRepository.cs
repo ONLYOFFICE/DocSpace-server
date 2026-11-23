@@ -173,7 +173,7 @@ public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDa
 
             if (await _channelWriter.WaitToWriteAsync())
             {
-                await _channelWriter.WriteAsync(new EventData(@event.RequestMessage, tariff.State));
+                await _channelWriter.WriteAsync(new EventData(@event.RequestMessage, tariff.LaneState));
             }
         }
     }

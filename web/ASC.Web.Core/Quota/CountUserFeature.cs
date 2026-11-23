@@ -49,7 +49,7 @@ public class CountUserChecker(
     }
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
-        if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
+        if ((await tariffService.GetTariffAsync(tenantId)).IsRestricted)
         {
             throw new BillingNotFoundException(Resource.ErrorNotAllowedOption);
         }

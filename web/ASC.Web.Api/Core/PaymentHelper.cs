@@ -157,7 +157,7 @@ public class PaymentHelper(
     {
         var tariff = await tariffService.GetTariffAsync(tenantId);
 
-        if (tariff.State != TariffState.Paid)
+        if (tariff.State == TariffState.Trial || tariff.IsRestricted)
         {
             throw new BillingException("Tariff is not paid");
         }

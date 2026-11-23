@@ -66,7 +66,7 @@ public class SocketServiceClient(
         {
             var tenant = tenantId ?? _tenantManager.GetCurrentTenantId();
 
-            return (await tariffService.GetTariffAsync(tenant)).State;
+            return (await tariffService.GetTariffAsync(tenant)).LaneState;
         });
     }
 

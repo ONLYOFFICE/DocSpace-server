@@ -107,7 +107,7 @@ public class DocsCloudController(
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
 
-        if (tariff.State > TariffState.Paid)
+        if (tariff.IsRestricted)
         {
             throw new BillingException("Tariff is not paid");
         }
@@ -594,7 +594,7 @@ public class DocsCloudController(
         var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync(refresh: true);
 
         var tariff = await tariffService.GetTariffAsync(tenantId);
-        if (tariff.State > TariffState.Paid)
+        if (tariff.IsRestricted)
         {
             throw new BillingException("Tariff is not paid");
         }

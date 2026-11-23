@@ -77,7 +77,7 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
             var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
 
             var data = @event.FileIds.Select(fileId => new FileData<int>(@event.TenantId, @event.CreateBy,
-                Convert.ToInt32(fileId), @event.BaseUrl, tariff.State));
+                Convert.ToInt32(fileId), @event.BaseUrl, tariff.LaneState));
 
             if (await _channelWriter.WaitToWriteAsync())
             {

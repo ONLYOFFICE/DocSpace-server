@@ -99,7 +99,7 @@ public sealed class BackupSchedulerService(
 
                 var tariff = await tariffService.GetTariffAsync(schedule.TenantId);
 
-                if (tariff.State < TariffState.Delay)
+                if (!tariff.IsRestricted)
                 {
                     lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetFreeBackupsCountCheckKey(schedule.TenantId), cancellationToken: stoppingToken);
 

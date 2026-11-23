@@ -44,7 +44,7 @@ internal static partial class BackupSchedulerServiceLogger
     [LoggerMessage(LogLevel.Debug, "Start scheduled backup: {tenantId}, {storageType}, {storageBasePath}")]
     public static partial void DebugStartScheduledBackup(this ILogger<BackupSchedulerService> logger, int tenantId, BackupStorageType storageType, string storageBasePath);
 
-    [LoggerMessage(LogLevel.Debug, "Skip portal {tenantId} not paid")]
+    [LoggerMessage(LogLevel.Debug, "Skip portal {tenantId}: its tariff is not paid, or in a grace period that restricts it")]
     public static partial void DebugNotPaid(this ILogger<BackupSchedulerService> logger, int tenantId);
 
     [LoggerMessage(LogLevel.Debug, "Skip portal {tenantId} haven't access cause {reason}")]

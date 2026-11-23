@@ -394,7 +394,7 @@ public class RenewSubscriptionService(
             var currentTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);
             var walletQuota = _walletQuotas[data.Quota];
 
-            if (currentTariff.State > TariffState.Paid && walletQuota.Additional)
+            if (currentTariff.IsRestricted && walletQuota.Additional)
             {
                 if (!resumed)
                 {

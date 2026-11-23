@@ -1424,7 +1424,7 @@ public class TariffService(
             // The state only picks the queue of the socket service. It is calculated on a copy, which leaves the
             // caller's tariff as it is. A deleted tariff has no state until the next read creates one, so the state of
             // the default tariff is used
-            state = tariff == null ? TariffState.Paid : (await CalculateTariffAsync(tenant, CopyForState(tariff))).State;
+            state = tariff == null ? TariffState.Paid : (await CalculateTariffAsync(tenant, CopyForState(tariff))).LaneState;
 
             portals = tenant != Tenant.DefaultTenant
                 ? [tenant]
