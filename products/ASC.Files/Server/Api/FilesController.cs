@@ -322,17 +322,17 @@ public abstract class FilesController<T>(
     /// without an extension. It keeps an unknown extension and the few formats that the portal stores as they are. With
     /// `enableExternalExt=true`, the call keeps the extension of `title` in lower case and does not change the format.
     /// If `templateId` is set, the call copies that file, which the caller must be able to read. Otherwise, `formId`
-    /// copies a form from the form gallery. Without both, the call uses the blank template of the format in the
+    /// copies a template from the template gallery. Without both, the call uses the blank template of the format in the
     /// caller's language. Requires the right to create files in the folder. Other callers get 403. The call changes
     /// data. Do not repeat it. Each call creates another file. The call returns 403 in the Rooms root, the archive, and
-    /// the template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable template. The
-    /// call returns 404 for an unknown `formId` or a gallery form without a file of this format. With a `formId`, it
-    /// also returns 404 when no form gallery is configured. A string `templateId` that matches no third-party file also
-    /// returns 404. The call returns 502 if the form gallery is unreachable or takes over 30 seconds. It also returns
-    /// 502 if the gallery answers with an error or without its form list. A PDF without a PDF header also returns 502.
-    /// It also returns 502 for a DOCX, XLSX, or PPTX without a ZIP signature. If the new file exceeds the storage
-    /// quota, the call returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file
-    /// in your own section, use `POST api/2.0/files/@my/file`.
+    /// the template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable `templateId`
+    /// file. The call returns 404 for an unknown `formId` or a gallery template without a file of this format. With a
+    /// `formId`, it also returns 404 when no template gallery is configured. A string `templateId` that matches no
+    /// third-party file also returns 404. The call returns 502 if the template gallery is unreachable or takes over 30
+    /// seconds. It also returns 502 if the gallery answers with an error or without its template list. A PDF without a
+    /// PDF header also returns 502. It also returns 502 for a DOCX, XLSX, or PPTX without a ZIP signature. If the new
+    /// file exceeds the storage quota, the call returns 402. The call returns 400 if `title` is missing, empty, or too
+    /// long. To create the file in your own section, use `POST api/2.0/files/@my/file`.
     /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
     /// The user has to free up space there first.
     /// </remarks>
@@ -345,9 +345,9 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
-    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it, or a `formId` is given and no form gallery is configured")]
-    [SwaggerResponse(502, "The form gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its form list, returned a PDF without a PDF header, or returned a DOCX, XLSX, or PPTX without a ZIP signature")]
+    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the `templateId` file does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
+    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the template gallery has no template with this `formId` or no file of the title's format for it, or a `formId` is given and no template gallery is configured")]
+    [SwaggerResponse(502, "The template gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its template list, returned a PDF without a PDF header, or returned a DOCX, XLSX, or PPTX without a ZIP signature")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -1315,19 +1315,19 @@ public class FilesControllerCommon(
     /// format. The portal changes a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. A title
     /// without an extension gets DOCX. The portal keeps an unknown extension and a few other formats. If
     /// `enableExternalExt` is true, the portal keeps the extension of the title in lower case. If `templateId` is set,
-    /// the portal copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that form
-    /// from the form gallery. If neither is set, the portal uses its blank template for the format and the language of
-    /// the caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any signed-in user
-    /// can call it, except a guest. A guest who has My documents gets 403. The call changes data. Do not repeat it.
-    /// Each call creates another file. The returned title shows the extension that the portal stored. To create a file
-    /// in a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title` is
-    /// missing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403 if the
-    /// template does not exist or the caller cannot read it. It returns 404 for an unknown `formId` or a gallery form
-    /// without a file of the title's format. A `formId` without a configured gallery also returns 404. If a string
-    /// `templateId` is not a file of a connected third-party storage, the call also returns 404. The call returns 502
-    /// if the form gallery is unreachable or takes over 30 seconds. It also returns 502 if the gallery answers with an
-    /// error or without its form list. A PDF without a PDF header also returns 502. It also returns 502 for a DOCX,
-    /// XLSX, or PPTX without a ZIP signature.
+    /// the portal copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that
+    /// template from the template gallery. If neither is set, the portal uses its blank template for the format and the
+    /// language of the caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any
+    /// signed-in user can call it, except a guest. A guest who has My documents gets 403. The call changes data. Do not
+    /// repeat it. Each call creates another file. The returned title shows the extension that the portal stored. To
+    /// create a file in a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if
+    /// `title` is missing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns
+    /// 403 if the `templateId` file does not exist or the caller cannot read it. It returns 404 for an unknown `formId`
+    /// or a gallery template without a file of the title's format. A `formId` without a configured gallery also returns
+    /// 404. If a string `templateId` is not a file of a connected third-party storage, the call also returns 404. The
+    /// call returns 502 if the template gallery is unreachable or takes over 30 seconds. It also returns 502 if the
+    /// gallery answers with an error or without its template list. A PDF without a PDF header also returns 502. It also
+    /// returns 502 for a DOCX, XLSX, or PPTX without a ZIP signature.
     /// </remarks>
     /// <summary>
     /// Create a file in My documents
@@ -1338,9 +1338,9 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller is a guest whose My documents still exists, or the template does not exist or cannot be read")]
-    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it, or a `formId` is given and no form gallery is configured")]
-    [SwaggerResponse(502, "The form gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its form list, returned a PDF without a PDF header, or returned a DOCX, XLSX, or PPTX without a ZIP signature")]
+    [SwaggerResponse(403, "The caller is a guest whose My documents still exists, or the `templateId` file does not exist or cannot be read")]
+    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the template gallery has no template with this `formId` or no file of the title's format for it, or a `formId` is given and no template gallery is configured")]
+    [SwaggerResponse(502, "The template gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its template list, returned a PDF without a PDF header, or returned a DOCX, XLSX, or PPTX without a ZIP signature")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {

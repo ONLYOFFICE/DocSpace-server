@@ -41,8 +41,9 @@ public class OFormRequestManager(
     IFusionCache cache)
 {
     /// <summary>
-    /// How long a form is downloaded, both requests together: the editor page waits for the request that creates the
-    /// file, so a gallery that does not answer must fail it rather than hold it for the 100 seconds of the client.
+    /// How long a gallery template is downloaded, both requests together: the editor page waits for the request that
+    /// creates the file, so a gallery that does not answer must fail it rather than hold it for the 100 seconds of the
+    /// client.
     /// </summary>
     private static readonly TimeSpan _downloadTimeout = TimeSpan.FromSeconds(30);
 
@@ -77,12 +78,12 @@ public class OFormRequestManager(
     private bool IsConfigured => !string.IsNullOrEmpty(_configuration?.Domain) && !string.IsNullOrEmpty(_configuration.Path);
 
     /// <summary>
-    /// Downloads the file of a gallery form in the format <paramref name="ext"/>.
+    /// Downloads the file of a gallery template in the format <paramref name="ext"/>.
     /// </summary>
-    /// <exception cref="ItemNotFoundException">The gallery has no such form, or no file of this format for it.</exception>
+    /// <exception cref="ItemNotFoundException">The gallery has no such template, or no file of this format for it.</exception>
     /// <exception cref="CustomHttpException">
-    /// 502: the gallery did not answer in time, answered with an error status or with a body that is not the form list,
-    /// or returned a PDF without a PDF header or a DOCX, XLSX or PPTX file without a ZIP signature.
+    /// 502: the gallery did not answer in time, answered with an error status or with a body that is not the template
+    /// list, or returned a PDF without a PDF header or a DOCX, XLSX or PPTX file without a ZIP signature.
     /// </exception>
     public async Task<Stream> Get(int id, string ext)
     {
@@ -126,8 +127,8 @@ public class OFormRequestManager(
             await streamResponse.Content.CopyToAsync(stream, cts.Token);
             stream.Position = 0;
 
-            // A proxy of a closed network answers 200 with a page of its own: such a page saved as the form opens as a
-            // blank editor
+            // A proxy of a closed network answers 200 with a page of its own: such a page saved as the template opens as
+            // a blank editor
             if (!await HasFormatSignatureAsync(stream, ext))
             {
                 await stream.DisposeAsync();
@@ -152,7 +153,7 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// Whether the gallery is configured and answers with its form list. "Available" is cached per list URL,
+    /// Whether the gallery is configured and answers with its template list. "Available" is cached per list URL,
     /// kept in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" for up to a
     /// day, so a short failure of the gallery or the network never hides a gallery that answered before. With nothing
     /// known, a failed check means "unavailable" for 1 minute, kept by this process only, so one process that cannot
@@ -179,7 +180,7 @@ public class OFormRequestManager(
                 // A failed check is no answer: the fail-safe keeps a known "available" and asks again after a minute
                 if (context.HasStaleValue && context.StaleValue.Value)
                 {
-                    throw new InvalidOperationException("The form gallery did not answer its check");
+                    throw new InvalidOperationException("The template gallery did not answer its check");
                 }
 
                 // "Unavailable" stays in this process: it never replaces the answer other processes got
@@ -212,8 +213,8 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// Asks the gallery for one form of its list. Never throws: a gallery that does not answer in time, answers with an
-    /// error status or with a body that is not the list (the page of a proxy) fails the check.
+    /// Asks the gallery for one template of its list. Never throws: a gallery that does not answer in time, answers
+    /// with an error status or with a body that is not the list (the page of a proxy) fails the check.
     /// </summary>
     private async Task<bool> ProbeAsync(CancellationToken cancellationToken)
     {
@@ -257,7 +258,7 @@ public class OFormRequestManager(
 
     private static CustomHttpException GalleryUnavailable()
     {
-        return new CustomHttpException(HttpStatusCode.BadGateway, FilesCommonResource.ErrorMessage_FormGalleryUnavailable);
+        return new CustomHttpException(HttpStatusCode.BadGateway, FilesCommonResource.ErrorMessage_TemplateGalleryUnavailable);
     }
 
     /// <summary>

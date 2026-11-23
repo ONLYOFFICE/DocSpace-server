@@ -35,8 +35,8 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// How a form is downloaded from the form gallery when a file is created from it, and how the portal checks whether
-/// the gallery answers (bug 78009: in a closed network the editor page waited for the gallery and opened blank).
+/// How a template is downloaded from the template gallery when a file is created from it, and how the portal checks
+/// whether the gallery answers (bug 78009: in a closed network the editor page waited for the gallery and opened blank).
 /// </summary>
 /// <remarks>
 /// The gallery is a WireMock stub that answers its list and its files under the stub's own path, so the request manager
@@ -145,28 +145,35 @@ public sealed class OFormRequestManagerTests : IDisposable
         await AssertGalleryUnavailableAsync(CreateManager(gallery.Url));
     }
 
-    [Fact]
-    public async Task Get_DocxIsAPageOfAProxy_Returns502()
+    // The gallery holds document, spreadsheet and presentation templates besides the PDF forms
+    [Theory]
+    [InlineData(".docx")]
+    [InlineData(".xlsx")]
+    [InlineData(".pptx")]
+    public async Task Get_OfficeFileIsAPageOfAProxy_Returns502(string ext)
     {
-        var gallery = Gallery(request => request.Path.EndsWith("/file.docx", StringComparison.Ordinal)
+        var gallery = Gallery(request => request.Path.EndsWith("/file" + ext, StringComparison.Ordinal)
             ? new StubResponse(HttpStatusCode.OK, "<html>Access denied</html>")
-            : StubResponse.Json(HttpStatusCode.OK, ListWithFile(".docx")));
+            : StubResponse.Json(HttpStatusCode.OK, ListWithFile(ext)));
 
-        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url), ".docx");
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url), ext);
     }
 
-    [Fact]
-    public async Task Get_GalleryAnswersWithTheDocx_ReturnsIt()
+    [Theory]
+    [InlineData(".docx", "word/document.xml")]
+    [InlineData(".xlsx", "xl/workbook.xml")]
+    [InlineData(".pptx", "ppt/presentation.xml")]
+    public async Task Get_GalleryAnswersWithTheOfficeFile_ReturnsIt(string ext, string part)
     {
-        const string docx = "PK\u0003\u0004word/document.xml";
-        var gallery = Gallery(request => request.Path.EndsWith("/file.docx", StringComparison.Ordinal)
-            ? new StubResponse(HttpStatusCode.OK, docx)
-            : StubResponse.Json(HttpStatusCode.OK, ListWithFile(".docx")));
+        var file = "PK\u0003\u0004" + part;
+        var gallery = Gallery(request => request.Path.EndsWith("/file" + ext, StringComparison.Ordinal)
+            ? new StubResponse(HttpStatusCode.OK, file)
+            : StubResponse.Json(HttpStatusCode.OK, ListWithFile(ext)));
 
-        await using var stream = await CreateManager(gallery.Url).Get(1, ".docx");
+        await using var stream = await CreateManager(gallery.Url).Get(1, ext);
 
         using var reader = new StreamReader(stream);
-        (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(docx);
+        (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(file);
     }
 
     [Fact]

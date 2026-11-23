@@ -547,11 +547,11 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The form gallery is temporarily unavailable. Try again later or create the form from another template..
+        ///   Looks up a localized string similar to The template gallery is temporarily unavailable. Try again later..
         /// </summary>
-        public static string ErrorMessage_FormGalleryUnavailable {
+        public static string ErrorMessage_TemplateGalleryUnavailable {
             get {
-                return ResourceManager.GetString("ErrorMessage_FormGalleryUnavailable", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage_TemplateGalleryUnavailable", resourceCulture);
             }
         }
 

@@ -35,30 +35,31 @@
 namespace ASC.Files.Api;
 
 /// <summary>
-/// The form gallery of the installation, as the portal itself sees it.
+/// The template gallery of the installation (document, spreadsheet, presentation and PDF form templates), as the
+/// portal itself sees it.
 /// </summary>
 [Scope]
 [ApiEndpoint("files")]
-public class FormGalleryController(OFormRequestManager oFormRequestManager) : ControllerBase
+public class TemplateGalleryController(OFormRequestManager oFormRequestManager) : ControllerBase
 {
     /// <remarks>
-    /// Returns whether the portal can create files from the forms of its form gallery. Call it when the gallery opens.
-    /// If it returns `false`, show the gallery as unavailable and do not offer its forms. Any signed-in user can call
-    /// it. Other callers get 401. The call is read-only. The portal asks the gallery for its form list and keeps the
-    /// answer for 10 minutes. A failed check keeps a known `true` for up to a day. With nothing known, a failed check
-    /// returns `false` for 1 minute. After 200 ms of waiting for a refresh, the call can return an expired answer.
-    /// The request to the gallery times out after 4 seconds. Cache access and waiting for a lock can add time.
-    /// Without a configured gallery, the call returns `false`.
+    /// Returns whether the portal can create files from the templates of its template gallery. Call it when the
+    /// gallery opens. If it returns `false`, show the gallery as unavailable and do not offer its templates. Any
+    /// signed-in user can call it. Other callers get 401. The call is read-only. The portal asks the gallery for its
+    /// template list and keeps the answer for 10 minutes. A failed check keeps a known `true` for up to a day. With
+    /// nothing known, a failed check returns `false` for 1 minute. After 200 ms of waiting for a refresh, the call can
+    /// return an expired answer. The request to the gallery times out after 4 seconds. Cache access and waiting for a
+    /// lock can add time. Without a configured gallery, the call returns `false`.
     /// </remarks>
     /// <summary>
-    /// Check the form gallery
+    /// Check the template gallery
     /// </summary>
-    /// <path>api/2.0/files/formGallery/available</path>
+    /// <path>api/2.0/files/templateGallery/available</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "`true` when the gallery answered with its form list, `false` when no gallery is configured or the portal has failed to get the list and knows no earlier answer", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the gallery answered with its template list, `false` when no gallery is configured or the portal has failed to get the list and knows no earlier answer", typeof(bool))]
     [SwaggerResponse(401, "The caller is not signed in")]
-    [HttpGet("formGallery/available")]
-    public async Task<bool> GetFormGalleryAvailable()
+    [HttpGet("templateGallery/available")]
+    public async Task<bool> GetTemplateGalleryAvailable()
     {
         return await oFormRequestManager.IsAvailableAsync();
     }

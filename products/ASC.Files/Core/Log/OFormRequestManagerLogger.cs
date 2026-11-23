@@ -36,21 +36,21 @@ namespace ASC.Files.Core.Log;
 
 internal static partial class OFormRequestManagerLogger
 {
-    [LoggerMessage(LogLevel.Warning, "The form gallery answered {status} to {uri}")]
+    [LoggerMessage(LogLevel.Warning, "The template gallery answered {status} to {uri}")]
     public static partial void WarningOFormGalleryStatus(this ILogger<OFormRequestManager> logger, Uri uri, int status);
 
-    [LoggerMessage(LogLevel.Warning, "The form gallery answered {uri} without its form list")]
+    [LoggerMessage(LogLevel.Warning, "The template gallery answered {uri} without its template list")]
     public static partial void WarningOFormGalleryNoList(this ILogger<OFormRequestManager> logger, Uri uri);
 
-    [LoggerMessage(LogLevel.Warning, "The file from the form gallery lacks the expected format signature: {url}")]
+    [LoggerMessage(LogLevel.Warning, "The file from the template gallery lacks the expected format signature: {url}")]
     public static partial void WarningOFormGalleryNotForm(this ILogger<OFormRequestManager> logger, string url);
 
-    [LoggerMessage(LogLevel.Warning, "The form gallery could not be reached or gave an unreadable answer")]
+    [LoggerMessage(LogLevel.Warning, "The template gallery could not be reached or gave an unreadable answer")]
     public static partial void WarningOFormGalleryUnreachable(this ILogger<OFormRequestManager> logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Warning, "The check of the form gallery got {status} from {uri}")]
+    [LoggerMessage(LogLevel.Warning, "The check of the template gallery got {status} from {uri}")]
     public static partial void WarningOFormGalleryProbeStatus(this ILogger<OFormRequestManager> logger, Uri uri, int status);
 
-    [LoggerMessage(LogLevel.Warning, "The check of the form gallery could not reach it or read its answer")]
+    [LoggerMessage(LogLevel.Warning, "The check of the template gallery could not reach it or read its answer")]
     public static partial void WarningOFormGalleryProbeFailed(this ILogger<OFormRequestManager> logger, Exception exception);
 }

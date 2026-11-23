@@ -32,10 +32,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 
-namespace ASC.Files.Tests.Tests._01_Files.FormGallery;
+namespace ASC.Files.Tests.Tests._01_Files.TemplateGallery;
 
 /// <summary>
-/// GET /files/formGallery/available - whether the portal can create files from gallery forms (bug 78009).
+/// GET /files/templateGallery/available - whether the portal can create files from gallery templates (bug 78009).
 /// </summary>
 /// <remarks>
 /// The operation is not in the SDK until the SDKs are regenerated, so it is called through RawApiClient. Whether the
@@ -45,12 +45,12 @@ namespace ASC.Files.Tests.Tests._01_Files.FormGallery;
 /// </remarks>
 [Trait("Bug", "78009")]
 [Trait("Feature", "Files")]
-public class FormGalleryAvailableTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class TemplateGalleryAvailableTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    private const string Route = "api/2.0/files/formGallery/available";
+    private const string Route = "api/2.0/files/templateGallery/available";
 
     [Fact]
-    public async Task GetFormGalleryAvailable_SignedInUser_ReturnsABoolean()
+    public async Task GetTemplateGalleryAvailable_SignedInUser_ReturnsABoolean()
     {
         var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
@@ -65,7 +65,7 @@ public class FormGalleryAvailableTests(AspireAppFixture fixture) : BaseTest(fixt
     }
 
     [Fact]
-    public async Task GetFormGalleryAvailable_Anonymous_Returns401()
+    public async Task GetTemplateGalleryAvailable_Anonymous_Returns401()
     {
         await _filesClient.Authenticate(null);
 
