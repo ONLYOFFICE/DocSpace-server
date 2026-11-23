@@ -45,6 +45,17 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   show one of each.
 - The logger is stubbed once for every file by `app/__tests__/setup.ts`. A test that asserts on a
   line imports the logger and reads the spy; do not declare the same `vi.mock` again.
+- `invoke` hands the body over as given, `null` and `""` included. It answers when the handler
+  returns: a stream the client closes half-way needs a response double of the test's own
+  (`controllers/__tests__/aiController.harness.ts`).
+- `useUpstream({ localApp: true })` in a file that drives `createApp()` with supertest: its own
+  requests to 127.0.0.1 pass and stay out of `seen`. msw does not end an answer's body when the
+  request is aborted and reads an answer to its end: a stalled or over-long body is a
+  `ReadableStream` the handler drives from `request.signal`. A client that does not use the global
+  `fetch` (the A2A SDK over undici) is not intercepted; mock its class.
+- A file that mocks an engine class with `vi.mock` imports `helpers/schema.js` dynamically, after
+  the controller: a static import loads `@onlyoffice/ai-chat/core` before the mock's variable
+  exists.
 - `useUpstream()` runs the real `httpClient.js` and fails the test on a request no handler answers.
   Prefer it to `vi.mock("../httpClient.js")` and to `vi.stubGlobal("fetch")`: most older tests mock
   `requestContext.js` and `storage/httpClient.js`, so they show nothing about which headers are
@@ -82,8 +93,8 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
 - Anything that waits (a timeout, a poll, a retry, the stream heartbeat) runs on fake timers:
   `useFastTimers()` when only the outcome matters, `vi.useFakeTimers()` with
   `vi.advanceTimersByTimeAsync()` when the test asserts the moment. One file waiting on real
-  timers took 20 of the suite's 20.5 seconds until it moved to `useFastTimers()`; the whole suite
-  now runs in about 2 seconds, keep it there.
+  timers took 20 of the suite's 20.5 seconds until it moved to `useFastTimers()`. The whole suite,
+  6040 tests, runs in about 7 seconds: a single test stays under about 50 ms.
 - `restoreMocks: true` resets spies between tests. Module state (a cache, a memoized promise) is
   not reset: re-import the module (`vi.resetModules()`), or the tests depend on their order.
 
@@ -103,3 +114,28 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   level": the status TEST-CONFIRMED is defined there as a .NET test, and the run marks are written
   from the .NET run only, so a vitest citation reads `[run: NO-LINK]`.
 - A commit that moves the cited lines updates the rows (`claims.md` §4).
+
+## 8. The suite pins what the code does today
+
+- The tests are characterization tests: they assert the exact status, body, upstream requests and
+  log level of the code as it is, so that a refactoring which changes any of it turns a test red.
+  A change of behaviour therefore changes a test in the same commit, and the commit message says
+  which behaviour moved. A test that goes red without such an intent is the deviation the suite
+  exists to catch: fix the code, not the assertion.
+- Every answer of a route handler is checked against the schema the service publishes for that
+  operation and status (`responseViolations`), every request body by a table over each field
+  (missing, `null`, wrong type, empty, over a limit), every upstream DTO by a fixture whose shape
+  is taken from the C# class named above it, then each field missing, `null` and of the wrong type.
+- **Behaviour that is pinned although it is wrong** carries a comment directly above the test:
+  `// DEFECT <area>-<n>: <what it does> — expected <what it should do> (<rule §N or source>)`.
+  `grep -rn "// DEFECT" common/ASC.AI.Chat/app` lists them (138 when the suite was written). The
+  fix of one changes its test to the expected behaviour and removes the comment; a new one found
+  while writing a test gets the next number of its area.
+- A defect that touches security (a secret or a credential in an answer or a log, a credential
+  sent to another host, a missing access check, a request to an address the caller chose) is not
+  pinned and not described in the repository: it goes to the private register
+  (`fix-bug` §6), and its test comes with the fix.
+- **Coverage** is part of `yarn check`: `vitest.config.ts` fails the run under 99.5% of lines,
+  100% of functions and 98.5% of branches. What is left is code no input reaches (a `??` after a
+  value that is always set, a branch for a non-`Error` nothing throws). New code comes with its
+  tests; do not lower a threshold, and do not add `/* v8 ignore */` to reach it.

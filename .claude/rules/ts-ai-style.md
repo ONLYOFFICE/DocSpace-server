@@ -15,7 +15,8 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
 
 ## Checks
 
-- `yarn check` in `common/ASC.AI.Chat` runs `typecheck`, `lint`, `format:check` and `test`; a change
+- `yarn check` in `common/ASC.AI.Chat` runs `typecheck`, `lint`, `format:check` and the tests with
+  their coverage thresholds (`ts-ai-tests.md` §8); a change
   is handed over with it green. `.github/workflows/ai-chat.yml` runs the same and fails when
   `yarn openapi` changes `app/generated`.
 - **ESLint** (`eslint.config.js`) holds one rule per class of defect, no style rule. Code that
