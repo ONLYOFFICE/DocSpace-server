@@ -207,17 +207,20 @@ describe.each([
     },
   );
 
-  // DEFECT ctl-2: a config that is a non-empty string reaches `"headers" in provided`, which throws a TypeError, so the route answers 500 — expected 400 naming the config ([ts-ai-failure-paths.md §4])
-  it("answers 500 when the config is a string", async () => {
+  // The engine refuses a config that is not an object as a value (`{ success: false, error }`,
+  // answered 200: the "Soft refusals" of openspec/specs/ai-agents/spec.md), so it is handed over.
+  it("hands a config that is a string to the engine, which refuses it", async () => {
+    const refusal = { success: false as const, error: { field: "url" as const, message: "no" } };
+    engineCall().mockResolvedValue(refusal as never);
+
     const reply = await send(handler, { name: "crm", config: "https://mcp.example.com" });
 
-    expect(reply.status).toBe(500);
-    expect(reply.body).toEqual({ error: "Internal server error" });
-    expect(engineCall()).not.toHaveBeenCalled();
-    expect(responseViolations(operationId, 500, reply.body)).toEqual([]);
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual(refusal);
+    expect(engineCall()).toHaveBeenCalledWith("crm", "https://mcp.example.com", undefined);
   });
 
-  // DEFECT ctl-3: a config that is an array is handed to the engine as the config to store — expected 400 ([ts-ai-failure-paths.md §4])
+  // The engine's to refuse, as above (ASC.AI.Tests, McpServerConfigValidationTests).
   it("hands a config that is an array to the engine", async () => {
     engineCall().mockResolvedValue({ success: true });
 
@@ -302,25 +305,22 @@ describe.each([
 
     expect(reply.status).toBe(200);
     expect(upstream.seen).toEqual([]);
-    expect(engineCall()).toHaveBeenCalledWith("crm", { url: URL_A }, entityId);
+    // `null` is how the widget sends an argument it omits: the engine gets none.
+    expect(engineCall()).toHaveBeenCalledWith("crm", { url: URL_A }, entityId ?? undefined);
   });
 
-  // DEFECT ctl-4: an entityId that is not a string skips the entity check (assertEntityAccessible returns for a non-string) and reaches the engine as it came — expected 400 naming entityId ([ts-ai-failure-paths.md §4])
   it.each([
     ["a number", 42],
     ["an object", { id: 42 }],
-  ])(
-    "hands an entityId that is %s to the engine without the entity check",
-    async (_w, entityId) => {
-      engineCall().mockResolvedValue({ success: true });
+  ])("answers 400 for an entityId that is %s, before the entity check", async (_w, entityId) => {
+    const reply = await send(handler, { name: "crm", config: { url: URL_A }, entityId });
 
-      const reply = await send(handler, { name: "crm", config: { url: URL_A }, entityId });
-
-      expect(reply.status).toBe(200);
-      expect(upstream.seen).toEqual([]);
-      expect(engineCall()).toHaveBeenCalledWith("crm", { url: URL_A }, entityId);
-    },
-  );
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "entityId must be a string" });
+    expect(upstream.seen).toEqual([]);
+    expect(engineCall()).not.toHaveBeenCalled();
+    expect(responseViolations(operationId, 400, reply.body)).toEqual([]);
+  });
 
   it.each([
     [403, 'Entity "42" is not accessible'],
@@ -849,17 +849,21 @@ describe("toolsController.replaceAllCustomServers", () => {
     expect(engine.replaceAllCustomServers).not.toHaveBeenCalled();
   });
 
-  // DEFECT ctl-6: an entry whose config is a non-empty string throws a TypeError in keepStoredHeaders and answers 500 — expected 400 naming the entry ([ts-ai-failure-paths.md §4])
-  it("answers 500 for an entry whose config is a string", async () => {
+  // The engine's to refuse, entry by entry (`errors`), as for the single-server routes.
+  it("hands an entry whose config is a string to the engine", async () => {
+    engine.replaceAllCustomServers.mockResolvedValue({ success: true });
+
     const reply = await send(handler, { map: { crm: "https://mcp.example.com" } });
 
-    expect(reply.status).toBe(500);
-    expect(reply.body).toEqual({ error: "Internal server error" });
-    expect(engine.replaceAllCustomServers).not.toHaveBeenCalled();
-    expect(responseViolations(operationId, 500, reply.body)).toEqual([]);
+    expect(reply.status).toBe(200);
+    expect(engine.replaceAllCustomServers).toHaveBeenCalledWith(
+      { crm: "https://mcp.example.com" },
+      undefined,
+    );
   });
 
-  // DEFECT ctl-7: the map has no limit on its number of entries; 1000 entries go to the engine in one call — expected a named limit and 400 above it ([ts-ai-failure-paths.md §4])
+  // No cap on the servers of one registry: ASC.AI.Tests pins it (McpServerReplaceAllTests,
+  // ReplaceAll_ALargeMap_IsStoredWhole).
   it("hands a map of 1000 entries to the engine", async () => {
     engine.replaceAllCustomServers.mockResolvedValue({ success: true });
     const map = Object.fromEntries(
@@ -872,14 +876,13 @@ describe("toolsController.replaceAllCustomServers", () => {
     expect(Object.keys(engine.replaceAllCustomServers.mock.calls[0]?.[0] ?? {})).toHaveLength(1000);
   });
 
-  // DEFECT ctl-4 (as above): a numeric entityId skips the entity check and reaches the engine.
-  it("hands an entityId that is a number to the engine without the entity check", async () => {
-    engine.replaceAllCustomServers.mockResolvedValue({ success: true });
+  it("answers 400 for an entityId that is a number, before the entity check and the registry", async () => {
+    const reply = await send(handler, { map: {}, entityId: 42 });
 
-    await send(handler, { map: {}, entityId: 42 });
-
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "entityId must be a string" });
     expect(upstream.seen).toEqual([]);
-    expect(engine.replaceAllCustomServers).toHaveBeenCalledWith({}, 42);
+    expect(engine.replaceAllCustomServers).not.toHaveBeenCalled();
   });
 
   it("answers 404 for an entity that does not exist, before reading the registry", async () => {

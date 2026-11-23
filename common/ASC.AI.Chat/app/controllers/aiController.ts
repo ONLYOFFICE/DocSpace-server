@@ -942,6 +942,12 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // No body at all: the reads below would throw on it. Any other body goes on to the gated
+    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    if (req.body === null || req.body === undefined) {
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
     // One aggregate read for the whole round — every storage read below
     // (profiles, assignments, prefs, MCP servers, thread, history, folder
     // metadata) is served from it. See storage/chatContext.ts.
@@ -985,6 +991,12 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // No body at all: the reads below would throw on it. Any other body goes on to the gated
+    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    if (req.body === null || req.body === undefined) {
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
     await primeChatContext({
       threadId: req.body.threadId,
       entityId: req.body.entityId,
@@ -1019,6 +1031,12 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // No body at all: the reads below would throw on it. Any other body goes on to the gated
+    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    if (req.body === null || req.body === undefined) {
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
     await primeChatContext({
       threadId: req.body.threadId,
       entityId: req.body.entityId,
@@ -1056,6 +1074,12 @@ export const aiController = {
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // No body at all: the reads below would throw on it. Any other body goes on to the gated
+    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    if (req.body === null || req.body === undefined) {
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
     await primeChatContext({
       threadId: req.body.threadId,
       entityId: req.body.entityId,
@@ -1084,6 +1108,12 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // No body at all: the reads below would throw on it. Any other body goes on to the gated
+    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    if (req.body === null || req.body === undefined) {
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
     await primeChatContext({
       threadId: req.body.threadId,
       entityId: req.body.entityId,

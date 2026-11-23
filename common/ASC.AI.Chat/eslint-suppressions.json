@@ -25,11 +25,6 @@
       "count": 2
     }
   },
-  "app/controllers/attachmentsController.ts": {
-    "@typescript-eslint/consistent-type-assertions": {
-      "count": 5
-    }
-  },
   "app/controllers/editorToolsController.ts": {
     "@typescript-eslint/consistent-type-assertions": {
       "count": 1
@@ -55,7 +50,7 @@
   },
   "app/controllers/toolsController.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 18
+      "count": 8
     }
   },
   "app/controllers/webSearchController.ts": {

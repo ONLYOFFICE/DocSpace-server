@@ -372,13 +372,12 @@ describe.each([
 ] as const)("%s", (name, operationId) => {
   const route = (body: unknown) => h.call(aiController[name], body);
 
-  // DEFECT ai-2: a null body throws reading `threadId` and answers 500 — expected 400 "the request body must be an object" (ts-ai-failure-paths.md §4)
-  it("answers 500 for a null body", async () => {
+  it("answers 400 for a null body, before anything is read", async () => {
     const reply = await route(null);
 
-    expect(reply.status).toBe(500);
-    expect(reply.body).toEqual({ error: "Internal server error" });
-    expect(responseViolations(operationId, 500, reply.body)).toEqual([]);
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "the request body must be an object" });
+    expect(responseViolations(operationId, 400, reply.body)).toEqual([]);
     expect(h.primeChatContext).not.toHaveBeenCalled();
   });
 
@@ -470,13 +469,14 @@ describe.each([
 ] as const)("%s", (name, operationId) => {
   const route = (body: unknown) => h.call(aiController[name], body);
 
-  // DEFECT ai-2: a null body throws reading `threadId` and answers 500 — expected 400 "the request body must be an object" (ts-ai-failure-paths.md §4)
-  it("answers 500 for a null body", async () => {
+  it("answers 400 for a null body, before anything is read", async () => {
     const reply = await route(null);
 
-    expect(reply.status).toBe(500);
-    expect(reply.body).toEqual({ error: "Internal server error" });
-    expect(responseViolations(operationId, 500, reply.body)).toEqual([]);
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "the request body must be an object" });
+    expect(responseViolations(operationId, 400, reply.body)).toEqual([]);
+    expect(h.primeChatContext).not.toHaveBeenCalled();
+    expect(h.engine[name]).not.toHaveBeenCalled();
   });
 
   // DEFECT ai-3: the route checks nothing of the body (threadId, messageId, toolCallId) and runs the engine on it — expected 400 naming the field (ts-ai-failure-paths.md §4)

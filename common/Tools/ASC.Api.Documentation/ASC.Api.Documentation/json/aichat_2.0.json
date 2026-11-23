@@ -732,6 +732,16 @@
               }
             }
           },
+          "400": {
+            "description": "The request has no body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
             "content": {
@@ -871,6 +881,16 @@
               }
             }
           },
+          "400": {
+            "description": "The request has no body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
             "content": {
@@ -996,6 +1016,16 @@
                       "$ref": "#/components/schemas/AiStreamErrorEvent"
                     }
                   ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request has no body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -2548,6 +2578,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The body is not a list of attachment IDs, or names more than 100 attachments.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }

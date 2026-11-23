@@ -655,15 +655,18 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiRegenerateStream: {
+    "400": "The request has no body.",
     "404": "The thread does not exist or is not the caller's.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiApproveToolCall: {
+    "400": "The request has no body.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiDenyToolCall: {
+    "400": "The request has no body.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
@@ -715,6 +718,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "The list of attachment IDs is malformed or names more than 100 attachments.",
   },
   aiAttachmentsDelete: { "400": "The attachment ID is missing." },
+  aiAttachmentsDeleteMany: {
+    "400": "The body is not a list of attachment IDs, or names more than 100 attachments.",
+  },
   aiAttachmentsLinkToMessage: {
     "400":
       "The attachment or message reference is malformed, or `ids` names more than 100 attachments.",

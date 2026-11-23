@@ -138,7 +138,9 @@ describe.each([
   });
 });
 
-// DEFECT data-16: the string "0" is taken as a room id while the number 0 is refused, although the message says a room id is a positive integer — expected 400 for "0" (preferencesController.ts scopeOf; its own error message)
+// "0" is handed on as it came. Behind this service it resolves to the user's own scope, which
+// ASC.AI.Tests pins (PreferenceEntityIdTests, EveryRoute_WithAnEmptyOrZeroEntityId_IsTheUsersOwnScope),
+// so refusing it here would change that outcome.
 it("takes the string 0 as a scope", async () => {
   engine.getDeepMode.mockResolvedValue(false);
 

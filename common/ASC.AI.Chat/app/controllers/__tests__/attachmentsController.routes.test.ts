@@ -261,18 +261,25 @@ describe("attachmentsController.saveFile", () => {
     expect(responseViolations("aiAttachmentsSaveFile", 400, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-27: entityId is cast (`args.entityId as string | undefined`), so a number or an object reaches
-  // the engine as it is — expected 400 naming entityId for a non-string (ts-ai-failure-paths.md §4)
   it.each([
     ["a number", 42],
     ["an object", { id: "42" }],
-  ])("hands an entityId that is %s to the engine unchecked", async (_what, entityId) => {
-    engine.saveFile.mockResolvedValue(attachment);
-
+  ])("answers 400 for an entityId that is %s, before the engine", async (_what, entityId) => {
     const reply = await invoke(handler, { body: [input, entityId] });
 
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "entityId must be a string" });
+    expect(responseViolations("aiAttachmentsSaveFile", 400, reply.body)).toEqual([]);
+    expect(engine.saveFile).not.toHaveBeenCalled();
+  });
+
+  it("takes a null entityId, as the widget sends an omitted argument, for none", async () => {
+    engine.saveFile.mockResolvedValue(attachment);
+
+    const reply = await invoke(handler, { body: [input, null] });
+
     expect(reply.status).toBe(200);
-    expect(engine.saveFile).toHaveBeenCalledWith(input, entityId);
+    expect(engine.saveFile).toHaveBeenCalledWith(input, undefined);
   });
 
   // DEFECT ctl-28: the engine's attachment is sent as it came (`res.json(result)`), so a field the storage
@@ -401,13 +408,12 @@ describe("attachmentsController.saveFilesMany", () => {
     expect(marked).toEqual([]);
   });
 
-  // DEFECT ctl-27 (same cast as save-file): a non-string entityId reaches the engine unchecked.
-  it("hands an entityId that is a number to the engine unchecked", async () => {
-    engine.saveFilesMany.mockResolvedValue([]);
+  it("answers 400 for an entityId that is a number, before the engine", async () => {
+    const reply = await invoke(handler, { body: [[input], 42] });
 
-    await invoke(handler, { body: [[input], 42] });
-
-    expect(engine.saveFilesMany).toHaveBeenCalledWith([input], 42);
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "entityId must be a string" });
+    expect(engine.saveFilesMany).not.toHaveBeenCalled();
   });
 
   it("answers 500 when the engine fails", async () => {
@@ -547,15 +553,17 @@ describe("attachmentsController.getMany", () => {
     expect(engine.getMany).not.toHaveBeenCalled();
   });
 
-  // DEFECT ctl-29: the elements of `ids` are cast (`args.ids as string[]`), so numbers, null and objects reach
-  // the engine — expected 400 naming ids for a non-string element (ts-ai-failure-paths.md §4)
-  it("hands ids that are not strings to the engine unchecked", async () => {
-    engine.getMany.mockResolvedValue([]);
+  it.each([
+    ["a number", ["a1", 5]],
+    ["null", ["a1", null]],
+    ["an object", [{ id: "a1" }]],
+    ["an empty string", ["a1", ""]],
+  ])("answers 400 for ids holding %s, before the engine", async (_what, ids) => {
+    const reply = await invoke(handler, { body: { ids } });
 
-    const reply = await invoke(handler, { body: { ids: [5, null, { id: "a1" }] } });
-
-    expect(reply.status).toBe(200);
-    expect(engine.getMany).toHaveBeenCalledWith([5, null, { id: "a1" }]);
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "ids must hold non-empty strings only" });
+    expect(engine.getMany).not.toHaveBeenCalled();
   });
 
   it("answers 500 when the engine fails", async () => {
@@ -647,32 +655,32 @@ describe("attachmentsController.deleteMany", () => {
     expect(responseViolations("aiAttachmentsDeleteMany", 200, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-30: `(args.ids as string[]) ?? []` checks nothing: a string, a number, `{}` (wrapped as the
-  // value) and non-string elements reach the engine, and the list has no limit — expected 400 naming ids,
-  // and the MAX_ATTACHMENTS_PER_REQUEST bound of the other attachment routes (ts-ai-failure-paths.md §4,
-  // which names this very line)
   it.each([
-    ["a bare string", "a1", "a1"],
-    ["a number", 5, 5],
-    ["{}", {}, {}],
-    ["non-string elements", [5, null], [5, null]],
-  ])("hands a body that is %s to the engine unchecked", async (_what, body, passed) => {
-    engine.deleteMany.mockResolvedValue(undefined);
-
+    ["a bare string", "a1", "ids must be an array"],
+    ["a number", 5, "ids must be an array"],
+    ["{}", {}, "ids must be an array"],
+    ["non-string elements", [5, null], "ids must hold non-empty strings only"],
+    ["an empty string among the ids", ["a1", ""], "ids must hold non-empty strings only"],
+  ])("answers 400 for a body that is %s, before the engine", async (_what, body, error) => {
     const reply = await invoke(handler, { body });
 
-    expect(reply.status).toBe(200);
-    expect(engine.deleteMany).toHaveBeenCalledWith(passed);
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error });
+    expect(responseViolations("aiAttachmentsDeleteMany", 400, reply.body)).toEqual([]);
+    expect(engine.deleteMany).not.toHaveBeenCalled();
   });
 
-  it("deletes 1000 ids in one call, with no limit", async () => {
+  it("deletes 100 ids in one call and answers 400 for 101", async () => {
     engine.deleteMany.mockResolvedValue(undefined);
-    const ids = Array.from({ length: 1000 }, (_, i) => `a${i}`);
+    const ids = Array.from({ length: 101 }, (_, i) => `a${i}`);
 
-    const reply = await invoke(handler, { body: ids });
+    const most = await invoke(handler, { body: ids.slice(0, 100) });
+    const over = await invoke(handler, { body: ids });
 
-    expect(reply.status).toBe(200);
-    expect(engine.deleteMany).toHaveBeenCalledWith(ids);
+    expect(most.status).toBe(200);
+    expect(over.status).toBe(400);
+    expect(over.body).toEqual({ error: "ids may name at most 100 attachments (got 101)" });
+    expect(engine.deleteMany).toHaveBeenCalledTimes(1);
   });
 
   it("answers 500 when the engine fails", async () => {
@@ -843,13 +851,12 @@ describe("attachmentsController.linkToMessage", () => {
     expect(reply.body).toEqual({ error: "Internal server error" });
   });
 
-  // DEFECT ctl-31: the elements of `ids` are cast (`args.ids as string[]`), so a number or null reaches the
-  // record check and the binding — expected 400 naming ids for a non-string element (ts-ai-failure-paths.md §4)
-  it("hands ids that are not strings to the record check and the engine unchecked", async () => {
+  it("answers 400 for ids that are not strings, before any read", async () => {
     const reply = await invoke(handler, { body: [[5, null, 5], "m1", "t1"] });
 
-    expect(reply.status).toBe(200);
-    expect(store.findMissingIds).toHaveBeenCalledWith([5, null]);
-    expect(engine.linkToMessage).toHaveBeenCalledWith([5, null], "m1", "t1");
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "ids must hold non-empty strings only" });
+    expect(store.findMissingIds).not.toHaveBeenCalled();
+    expect(engine.linkToMessage).not.toHaveBeenCalled();
   });
 });

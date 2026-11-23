@@ -48,6 +48,7 @@ import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 import { clientFault } from "../httpErrors.js";
+import { optionalString } from "./requestFields.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
 
@@ -114,6 +115,10 @@ function keepStoredHeaders(
   provided: McpServerConfig,
   stored: McpServerConfig | null,
 ): McpServerConfig {
+  // A config that is not an object is the engine's to refuse; it has no headers to keep.
+  if (!isObject(provided)) {
+    return provided;
+  }
   if ("headers" in provided || !stored || !isObject(stored["headers"])) {
     return provided;
   }
@@ -190,11 +195,12 @@ export const toolsController = {
     // registry is one map per portal (Bug 82863: the widget sends the
     // current location here) — mirroring the threads/create decision
     // (Bug 82719).
-    await assertEntityAccessible(args.entityId as string | undefined);
+    const entityId = optionalString(args.entityId, "entityId");
+    await assertEntityAccessible(entityId);
     const result = await engine.addCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
-      args.entityId as string | undefined,
+      entityId,
     );
     res.json(result);
   }),
@@ -203,11 +209,12 @@ export const toolsController = {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
     // Same accessibility gate as addCustomServer (Bug 82975).
-    await assertEntityAccessible(args.entityId as string | undefined);
+    const entityId = optionalString(args.entityId, "entityId");
+    await assertEntityAccessible(entityId);
     const result = await engine.updateCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
-      args.entityId as string | undefined,
+      entityId,
     );
     res.json(result);
   }),
@@ -309,7 +316,8 @@ export const toolsController = {
     }
     // Critical here: an unreachable entityId used to fold to the portal-wide
     // scope and WIPE its whole server map (Bug 82975).
-    await assertEntityAccessible(args.entityId as string | undefined);
+    const entityId = optionalString(args.entityId, "entityId");
+    await assertEntityAccessible(entityId);
     const map = args.map as Record<string, McpServerConfig>;
     const stored = await storage.mcpServers.readAll(undefined);
     const normalized: Record<string, McpServerConfig> = {};
@@ -317,10 +325,7 @@ export const toolsController = {
       assertRoutableServerName(name);
       normalized[name] = await resolveConfig(name, config, stored);
     }
-    const result = await engine.replaceAllCustomServers(
-      normalized,
-      args.entityId as string | undefined,
-    );
+    const result = await engine.replaceAllCustomServers(normalized, entityId);
     res.json(result);
   }),
 
@@ -333,7 +338,8 @@ export const toolsController = {
     ] as const);
     // Same accessibility gate as the server writes above (Bug 82975): a
     // bogus entityId must not silently write prefs into the global scope.
-    await assertEntityAccessible(args.entityId as string | undefined);
+    const entityId = optionalString(args.entityId, "entityId");
+    await assertEntityAccessible(entityId);
     const scope = parseToolPrefsScope(args.scope);
     if (scope === INVALID_SCOPE) {
       res.status(400).json({ error: invalidScopeMessage(args.scope) });
@@ -353,7 +359,6 @@ export const toolsController = {
     // groups, web-search / image-generation, and the scope's registered
     // custom MCP servers.
     const serverType = args.serverType as string;
-    const entityId = args.entityId as string | undefined;
     const validTypes = new Set<string>([
       ...systemToolsSource.getServerTypes(),
       DOCSPACE_INTEGRATION_SERVER_TYPE,
@@ -406,7 +411,8 @@ export const toolsController = {
       "entityId",
     ] as const);
     // Same accessibility gate as the server writes above (Bug 82975).
-    await assertEntityAccessible(args.entityId as string | undefined);
+    const entityId = optionalString(args.entityId, "entityId");
+    await assertEntityAccessible(entityId);
     if (!isNonEmptyString(args.serverType)) {
       res.status(400).json({ error: "serverType is required and must be a non-empty string" });
       return;
@@ -419,12 +425,7 @@ export const toolsController = {
       res.status(400).json({ error: "value is required and must be a boolean" });
       return;
     }
-    await engine.setAllowAlways(
-      args.serverType,
-      args.toolName,
-      args.value,
-      args.entityId as string | undefined,
-    );
+    await engine.setAllowAlways(args.serverType, args.toolName, args.value, entityId);
     res.json({ success: true });
   }),
 

@@ -37,6 +37,7 @@ import { asyncHandler, MAX_ATTACHMENTS_PER_REQUEST, unpackPositional } from "./_
 import { isObject, parseInt10 } from "../narrow.js";
 import { setAnalyzeEntryIds } from "../requestContext.js";
 import { getSuggestedQuestions } from "../forms/suggestedQuestions.js";
+import { nonEmptyStrings, optionalString } from "./requestFields.js";
 
 const engine = new AttachmentsEngine({ storage });
 
@@ -143,7 +144,8 @@ export const attachmentsController = {
       res.status(400).json({ error: parsed.error });
       return;
     }
-    const result = await engine.saveFile(parsed.value, args.entityId as string | undefined);
+    const entityId = optionalString(args.entityId, "entityId");
+    const result = await engine.saveFile(parsed.value, entityId);
     res.json(result);
   }),
 
@@ -154,6 +156,7 @@ export const attachmentsController = {
     // `inputs` itself is required: a missing/null value is a malformed
     // request, not an empty batch — only an explicit `[]` means "no files"
     // (Bug 82754 reopen).
+    const entityId = optionalString(args.entityId, "entityId");
     const list = args.inputs;
     if (!Array.isArray(list)) {
       res.status(400).json({ error: "inputs must be an array" });
@@ -186,7 +189,7 @@ export const attachmentsController = {
       }
     }
     setAnalyzeEntryIds(analyzeEntryIds);
-    const result = await engine.saveFilesMany(inputs, args.entityId as string | undefined);
+    const result = await engine.saveFilesMany(inputs, entityId);
     res.json(result);
   }),
 
@@ -224,7 +227,7 @@ export const attachmentsController = {
       });
       return;
     }
-    const result = await engine.getMany(args.ids as string[]);
+    const result = await engine.getMany(nonEmptyStrings(args.ids, "ids"));
     res.json(result);
   }),
 
@@ -254,7 +257,19 @@ export const attachmentsController = {
 
   deleteMany: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["ids"] as const);
-    await engine.deleteMany((args.ids as string[]) ?? []);
+    // No body and an empty list delete nothing and succeed; anything else is a list of ids.
+    const list: unknown = args.ids ?? [];
+    if (!Array.isArray(list)) {
+      res.status(400).json({ error: "ids must be an array" });
+      return;
+    }
+    if (list.length > MAX_ATTACHMENTS_PER_REQUEST) {
+      res.status(400).json({
+        error: `ids may name at most ${MAX_ATTACHMENTS_PER_REQUEST} attachments (got ${list.length})`,
+      });
+      return;
+    }
+    await engine.deleteMany(nonEmptyStrings(list, "ids"));
     res.json({ success: true });
   }),
 
@@ -288,7 +303,7 @@ export const attachmentsController = {
       return;
     }
     // An attachment named twice is bound once.
-    const ids = [...new Set(args.ids as string[])];
+    const ids = [...new Set(nonEmptyStrings(args.ids, "ids"))];
     const messageThreadId = await storage.messages.readThreadId(args.messageId);
     if (messageThreadId === null) {
       res.status(404).json({ error: "message not found" });
