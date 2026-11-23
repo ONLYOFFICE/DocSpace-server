@@ -164,6 +164,21 @@ public class PersonalWebPluginTests(
     }
 
     [Fact]
+    public async Task UploadPersonalWebPlugin_CookieWithPortalOrigin_Installed()
+    {
+        // Arrange
+        var user = await InviteMember(EmployeeType.User);
+        await _webApiClient.Authenticate(user);
+
+        // Act
+        using var response = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, "portal-origin-autotest", true, TestContext.Current.CancellationToken, AuthCookie(user));
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
     public async Task UploadPersonalWebPlugin_BearerFromAnotherSite_Installed()
     {
         // Arrange
