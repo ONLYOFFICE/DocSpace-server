@@ -85,7 +85,7 @@ public partial class FileUploader(
         return file;
     }
 
-    private async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, bool updateIfExists, string relativePath = null)
+    private async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, bool updateIfExists, string relativePath = null, bool chunked = false)
     {
         fileName = Global.ReplaceInvalidCharsAndTruncate(fileName);
 
@@ -94,7 +94,7 @@ public partial class FileUploader(
             throw new NotSupportedException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
 
-        folderId = await GetFolderIdAsync(folderId, string.IsNullOrEmpty(relativePath) ? null : relativePath.Split('/').ToList());
+        folderId = await GetFolderIdAsync(folderId, string.IsNullOrEmpty(relativePath) ? null : relativePath.Split('/').ToList(), chunked);
 
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(folderId, fileName);
@@ -150,7 +150,7 @@ public partial class FileUploader(
                && !file.Encrypted;
     }
 
-    private async Task<T> GetFolderIdAsync<T>(T folderId, IList<string> relativePath)
+    private async Task<T> GetFolderIdAsync<T>(T folderId, IList<string> relativePath, bool chunked = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
@@ -160,7 +160,10 @@ public partial class FileUploader(
             throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (DocSpaceHelper.IsRoomsSectionRoot(folder.FolderType) || !await fileSecurity.CanCreateAsync(folder))
+        var attachToProject = chunked && folder.FolderType == FolderType.AiProjectRoom;
+
+        if (DocSpaceHelper.IsRoomsSectionRoot(folder.FolderType) ||
+            !(attachToProject ? await fileSecurity.CanUseAiAsync(folder) : await fileSecurity.CanCreateAsync(folder)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -171,7 +174,7 @@ public partial class FileUploader(
 
             if (!string.IsNullOrEmpty(subFolderTitle))
             {
-                if (folder.FolderType is FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
+                if (folder.FolderType is FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom or FolderType.AiProjectRoom)
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
@@ -214,7 +217,7 @@ public partial class FileUploader(
             throw FileSizeComment.GetFileSizeException(maxUploadSize);
         }
 
-        var file = await VerifyFileUploadAsync(folderId, fileName, updateIfExists, relativePath);
+        var file = await VerifyFileUploadAsync(folderId, fileName, updateIfExists, relativePath, true);
         file.ContentLength = fileSize;
 
         return file;
@@ -222,7 +225,7 @@ public partial class FileUploader(
 
     public async Task VerifyFolderForUploadAsync<T>(T folderId)
     {
-        await GetFolderIdAsync(folderId, null);
+        await GetFolderIdAsync(folderId, null, true);
     }
 
     public async Task<File<T>> VerifyChunkedUploadForEditing<T>(T fileId, long fileSize)
@@ -308,6 +311,13 @@ public partial class FileUploader(
             {
                 throw FileSizeComment.GetFileSizeException(vectorizationGlobalSettings.MaxContentLength);
             }
+        }
+
+        if (folder is { FolderType: FolderType.AiProjectRoom } &&
+            FileUtility.GetFileTypeByFileName(fileName) != FileType.Image &&
+            !vectorizationGlobalSettings.IsSupportedContentExtraction(fileName))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_NotSupportedFormat, nameof(fileName));
         }
 
         var uploadSession = await dao.CreateUploadSessionAsync(file, contentLength);
@@ -494,7 +504,7 @@ public partial class FileUploader(
         {
             properties.FormFilling.StartFilling = false;
             properties.FormFilling.IsVersionChanged = true;
-            await dao.SaveProperties(fileId, properties);
+            await serviceProvider.GetRequiredService<FormFillingReportCreator>().SaveFormPropertiesAsync(fileId, properties);
         }
     }
 

@@ -1,0 +1,500 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Web.Api.Billing.Tests.Tests.Renewal;
+
+/// <summary>
+/// What Web.Studio (<c>RenewSubscriptionService</c>) does with a renewal whose outcome it does not know: one a stopped
+/// process left in its journal, and one whose payment change got an answer that cannot be read.
+/// </summary>
+/// <remarks>
+/// A test cannot stop a process half-way, so all but the last two plant the entry such a process leaves
+/// (<see cref="RenewalJournal"/>); the service finds it on its next run, a few seconds later, and asks billing what
+/// became of the subscription. Their subscription ends days from now, so the service never renews it by itself:
+/// whatever billing is asked or told about it comes from the planted entry, which is marked as started longer ago
+/// than the service leaves a started renewal alone. The last two tests go the whole way through the service: the last
+/// one shows that the service itself writes the pending renewal the planted one stands for, the one before it that the
+/// service records the request of a payment change before it sends it.
+/// </remarks>
+public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixture)
+{
+    private const string ChangeSubscription = "/billing/ChangeSubscription";
+    private const string Deposit = "/billing/Deposit";
+    private const string ActiveResources = "/billing/GetActiveResources";
+
+    // far beyond the window the service renews in
+    private static readonly TimeSpan _dueIn = TimeSpan.FromDays(3);
+
+    // a few renewal periods from now, for the test the service renews by itself
+    private static readonly TimeSpan _dueSoon = Constants.PaymentStubRenewPeriod * 4;
+
+    // a started renewal is left alone for 10 minutes, a "not extended" answer of a re-check is final after 10 minutes
+    private static readonly TimeSpan _startedAgo = TimeSpan.FromMinutes(12);
+    private static readonly TimeSpan _timedOutAgo = TimeSpan.FromMinutes(11);
+
+    // the run that takes the entry up and what it does with it, and room for a busy machine
+    private static readonly TimeSpan _settleDeadline = Constants.PaymentStubRenewPeriod * 12;
+
+    // how long billing holds the payment change unanswered at most, well inside the client timeout of a minute
+    private static readonly TimeSpan _holdAnswer = TimeSpan.FromSeconds(30);
+
+    private readonly AspireAppFixture _fixture = fixture;
+
+    [Fact]
+    public async Task ResumedRenewal_BillingSaysExtended_IsNotPaidAgain()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        // the stopped process got its payment change through: billing has the next period, the stack has not read it
+        Payments.Paid(Plans.AdminWalletProductId, quantity: 1, row.DueDate.AddDays(30), Owner.Email);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var askedBefore = AskedAboutSubscription();
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(StartedEntry(row), pending: null, TestContext.Current.CancellationToken);
+
+            var left = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            // Assert
+            left.Should().BeTrue("billing has answered, so the renewal is settled and leaves the journal");
+            AskedAboutSubscription().Should().BeGreaterThan(askedBefore, "billing is asked what became of the interrupted renewal");
+            PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription, "the subscription is extended already");
+            PaymentCalls.Should().NotContain(call => call.Route == Deposit, "nothing is to be paid");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    [Fact]
+    public async Task ResumedRenewal_BillingGivesNoAnswer_WaitsInTheJournalAsItWas()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        Payments.On(PaymentService.Billing, "POST", ActiveResources, "\"billing is down\"", HttpStatusCode.InternalServerError);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var planted = StartedEntry(row);
+        var askedBefore = AskedAboutSubscription();
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(planted, pending: null, TestContext.Current.CancellationToken);
+
+            // Billing has been asked about it twice, and the entry is back in the journal: while a run has it, the
+            // entry is there as claimed, with a new time and one more attempt.
+            var waits = await WaitAsync(async () =>
+                AskedAboutSubscription() >= askedBefore + 2 &&
+                await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == planted,
+                _settleDeadline);
+
+            // Assert
+            waits.Should().BeTrue("no answer is not a refusal: the renewal is asked about again and goes back as it was read, " +
+                                  "with the time and the attempts its limits are counted from");
+
+            PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription, "the payment change may have been applied already");
+            PaymentCalls.Should().NotContain(call => call.Route == Deposit, "nothing is paid before billing has answered");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    // The stopped process had requested the payment change, and billing has had about as long to apply it as a
+    // re-check gives: "not extended" is final, and the change is not sent a second time.
+    [Fact]
+    public async Task ResumedRenewal_PaymentWasRequestedAndIsNotExtended_IsNotPaidAgain()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var askedBefore = AskedAboutSubscription();
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(StartedEntry(row) with { PaymentRequestedAt = DateTime.UtcNow - _timedOutAgo }, pending: null, TestContext.Current.CancellationToken);
+
+            var left = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            // Assert
+            left.Should().BeTrue("billing has answered, so the renewal is settled and leaves the journal");
+            AskedAboutSubscription().Should().BeGreaterThan(askedBefore, "billing is asked what became of the payment change");
+            PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription, "a payment change that was requested is never sent again");
+            PaymentCalls.Should().NotContain(call => call.Route == Deposit, "nothing more is paid for it");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    // The payment change was requested a moment ago: billing may still be applying it, so the entry is not taken up yet,
+    // however long ago it was claimed. A second entry of the portal, which a run does take up and close, shows that
+    // a run has been over the journal.
+    [Fact]
+    public async Task ResumedRenewal_PaymentWasRequestedLately_IsLeftAlone()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var requestedLately = StartedEntry(row) with { PaymentRequestedAt = DateTime.UtcNow - TimeSpan.FromMinutes(1) };
+        var takenUp = StartedEntry(row) with { Quota = Plans.DocsCloudQuotaId };
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(requestedLately, pending: null, TestContext.Current.CancellationToken);
+            await journal.PlantAsync(takenUp, pending: null, TestContext.Current.CancellationToken);
+
+            var runPassed = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, takenUp.Quota, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            // Assert
+            runPassed.Should().BeTrue("a run takes up the entry that is due for it");
+
+            (await journal.FindEntryAsync(TenantId, row.Quota, TestContext.Current.CancellationToken))
+                .Should().Be(requestedLately, "an entry whose payment change was requested a moment ago is left as it is");
+
+            PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription, "billing may still be applying the change that was requested");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    // Billing says "not extended" and nothing else stands in the way, so the renewal is made - once, and as the tariff
+    // row says now: the customer has gone down to one administrator since the entry was written with three.
+    [Fact]
+    public async Task ResumedRenewal_NotExtended_IsPaidOnceAsTheRowSaysNow()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(StartedEntry(row) with { Quantity = row.Quantity + 2 }, pending: null, TestContext.Current.CancellationToken);
+
+            var left = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            // Assert
+            left.Should().BeTrue("billing accepted the payment change, so the renewal leaves the journal");
+
+            var changes = PaymentCalls.Where(call => call.Route == ChangeSubscription).ToList();
+            changes.Should().ContainSingle("the renewal billing does not report as extended is made once");
+            BillingValue(changes[0], "ProductId").Should().Be(Plans.AdminWalletProductId.ToString(CultureInfo.InvariantCulture));
+            BillingValue(changes[0], "ProductQty").Should().Be(row.Quantity.ToString(CultureInfo.InvariantCulture), "the quantity is read from the row again");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    // The entry renews from a due date the row no longer has - the subscription was renewed and the row moved on -
+    // while billing does not report the subscription as running past it. A renewal of the row as it is now is another
+    // one, which a later window brings: this one is closed without a payment.
+    [Fact]
+    public async Task ResumedRenewal_RowDueDateMoved_IsNotPaid()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var askedBefore = AskedAboutSubscription();
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(StartedEntry(row) with { DueDate = row.DueDate.AddDays(1) }, pending: null, TestContext.Current.CancellationToken);
+
+            var left = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            // Assert
+            left.Should().BeTrue("the renewal is settled and leaves the journal");
+            AskedAboutSubscription().Should().BeGreaterThan(askedBefore, "a started renewal is asked about before it is closed");
+            PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription, "the row the entry was written for is not there any more");
+            PaymentCalls.Should().NotContain(call => call.Route == Deposit, "nothing is paid for it");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    [Fact]
+    public async Task InterruptedRenewal_PendingListSettlesIt_IsNotRenewedAgain()
+    {
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await AssertPendingListSettlesAloneAsync(row, row.Quota);
+    }
+
+    // A pending renewal written before the quota was recorded - by the release before this one - names
+    // the renewal by the tenant, the due date and what it bought: the product and the service of the wallet plan.
+    [Fact]
+    public async Task InterruptedRenewal_PendingWithoutQuotaSettlesIt_IsNotRenewedAgain()
+    {
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await AssertPendingListSettlesAloneAsync(row, pendingQuota: 0);
+    }
+
+    // Two renewals of the portal have the same due date, and the pending renewal without a quota is one of them: it
+    // takes out the entry of the plan it bought and leaves the other, which is then closed on its own - the portal
+    // has no such row.
+    [Fact]
+    public async Task InterruptedRenewal_PendingWithoutQuotaAmongTwoOfTheDate_SettlesTheOneItBought()
+    {
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var other = StartedEntry(row) with { Quota = Plans.DocsCloudQuotaId };
+
+        await journal.PlantAsync(other, pending: null, TestContext.Current.CancellationToken);
+
+        await AssertPendingListSettlesAloneAsync(row, pendingQuota: 0);
+    }
+
+    private async Task AssertPendingListSettlesAloneAsync(TariffRow row, int pendingQuota)
+    {
+        // Arrange
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        // The process stopped between the two: the payment change had got no readable answer and was handed to the
+        // re-checks, the claim in the journal was not released yet. Billing still says "not extended", long enough
+        // for the re-check to take that as final.
+        var pending = new PendingRenewal(
+            TenantId,
+            pendingQuota,
+            Plans.AdminWalletProductId.ToString(CultureInfo.InvariantCulture),
+            $"adminwallet {row.Quantity}",
+            "admin",
+            row.Quantity,
+            row.DueDate,
+            Owner.Id,
+            null,
+            DateTime.UtcNow - _timedOutAgo);
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(StartedEntry(row), pending, TestContext.Current.CancellationToken);
+
+            var left = await WaitAsync(async () =>
+                !await journal.HoldsPendingAsync(TenantId, TestContext.Current.CancellationToken) &&
+                await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null,
+                _settleDeadline);
+
+            // Assert
+            left.Should().BeTrue("the re-check settles the renewal, and its entry leaves the journal with it");
+
+            PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription,
+                "the re-check has settled the renewal as failed: it is not made after that as an interrupted one");
+            PaymentCalls.Should().NotContain(call => call.Route == Deposit, "nothing is paid for a renewal that is settled");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    // The service records the request of the payment change in the journal before it sends it: while billing holds
+    // the change unanswered, the claimed entry already carries the mark.
+    [Fact]
+    public async Task Renewal_PaymentChangeOnItsWay_IsRecordedInTheJournal()
+    {
+        // Arrange
+        var due = DateTime.UtcNow + _dueSoon;
+
+        using var held = new ManualResetEventSlim();
+
+        Payments.Customer(Owner.Email)
+            .Balance(100m)
+            .Paid(Plans.AdminWalletProductId, quantity: 1, due, Owner.Email)
+            // billing takes its time to answer the payment change, well inside the client timeout
+            .On(PaymentService.Billing, "POST", ChangeSubscription, _ =>
+            {
+                held.Wait(_holdAnswer);
+
+                return PaymentServiceAnswer.Json("true");
+            });
+
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        try
+        {
+            // Act
+            var changeArrived = await WaitAsync(() => Task.FromResult(PaymentCalls.Any(call => call.Route == ChangeSubscription)), _dueSoon + _settleDeadline);
+
+            var entry = await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken);
+
+            held.Set();
+
+            // Assert
+            changeArrived.Should().BeTrue("the renewal comes due and sends its payment change");
+            entry.Should().NotBeNull("the claimed renewal is in the journal while its payment change is unanswered");
+            entry!.PaymentRequestedAt.Should().NotBeNull("the request is recorded before the payment change is sent");
+
+            var settled = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            settled.Should().BeTrue("billing accepted the change, so the renewal leaves the journal");
+            PaymentCalls.Count(call => call.Route == ChangeSubscription).Should().Be(1, "the payment change is sent once");
+        }
+        finally
+        {
+            held.Set();
+
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    [Fact]
+    public async Task Renewal_PaymentChangeAnswerUnreadable_IsRecheckedAndNotRepeated()
+    {
+        // Arrange
+        var due = DateTime.UtcNow + _dueSoon;
+
+        Payments.Customer(Owner.Email)
+            .Balance(100m)
+            .Paid(Plans.AdminWalletProductId, quantity: 1, due, Owner.Email)
+            // a proxy's page in place of billing's answer: nothing can be told about the payment change from it
+            .On(PaymentService.Billing, "POST", ChangeSubscription, "<html><body>502 Bad Gateway</body></html>");
+
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        try
+        {
+            // Act
+            var handedOver = await WaitAsync(() => journal.HoldsPendingAsync(TenantId, TestContext.Current.CancellationToken), _dueSoon + _settleDeadline);
+
+            // Assert
+            handedOver.Should().BeTrue("an answer that cannot be read is not a refusal: the renewal is handed to the re-checks");
+
+            // billing had applied the change after all
+            Payments.Paid(Plans.AdminWalletProductId, quantity: 1, due.AddDays(30), Owner.Email);
+
+            var settled = await WaitAsync(async () =>
+                !await journal.HoldsPendingAsync(TenantId, TestContext.Current.CancellationToken) &&
+                await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null,
+                _settleDeadline);
+
+            settled.Should().BeTrue("the re-check finds the subscription extended and settles the renewal");
+
+            PaymentCalls.Count(call => call.Route == ChangeSubscription).Should().Be(1, "the payment change is never sent a second time");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    // The portal pays one administrator from the wallet until the given date, and the stack has stored the row the
+    // service renews.
+    private async Task<TariffRow> SubscribeAsync(DateTime due)
+    {
+        Payments.Customer(Owner.Email)
+            .Balance(100m)
+            .Paid(Plans.AdminWalletProductId, quantity: 1, due, Owner.Email)
+            .On(PaymentService.Billing, "POST", ChangeSubscription, "true");
+
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // The journal entry names the row by its quota and its due date as the database holds it, to the second;
+        // no endpoint returns the quota id of the wallet plan.
+        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT quota, quantity, due_date FROM tenants_tariffrow WHERE tenant = @tenant AND due_date IS NOT NULL ORDER BY tariff_id DESC LIMIT 1";
+        command.Parameters.AddWithValue("@tenant", TenantId);
+
+        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
+
+        (await reader.ReadAsync(TestContext.Current.CancellationToken)).Should().BeTrue("the tariff read has stored the paid row");
+
+        return new TariffRow(reader.GetInt32(0), reader.GetInt32(1), reader.GetDateTime(2));
+    }
+
+    // the entry a process leaves when it stops after it has claimed the renewal
+    private RenewalJournalEntry StartedEntry(TariffRow row)
+    {
+        return new RenewalJournalEntry(TenantId, row.Quota, row.Quantity, null, null, row.DueDate, RenewalJournalEntry.Started, DateTime.UtcNow - _startedAgo, 1);
+    }
+
+    private int AskedAboutSubscription()
+    {
+        return PaymentCalls.Count(call => call.Route == ActiveResources);
+    }
+
+    private static async Task<bool> WaitAsync(Func<Task<bool>> until, TimeSpan within)
+    {
+        var deadline = DateTime.UtcNow + within;
+
+        while (true)
+        {
+            var reached = await until();
+
+            if (reached || DateTime.UtcNow >= deadline)
+            {
+                return reached;
+            }
+
+            await Task.Delay(1000, TestContext.Current.CancellationToken);
+        }
+    }
+
+    private sealed record TariffRow(int Quota, int Quantity, DateTime DueDate);
+}

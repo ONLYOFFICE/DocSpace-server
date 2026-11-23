@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "10.0.13")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.AI.Core.Database.Legacy.DbMcpServer", b =>
@@ -181,6 +181,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
+
                     b.HasIndex("TenantId", "ActionType", "EntryId")
                         .HasDatabaseName("IX_tenant_id_action_type_entry_id");
 
@@ -217,6 +220,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("deleted_on");
+
                     b.Property<int?>("EntryId")
                         .HasColumnType("int")
                         .HasColumnName("entry_id");
@@ -248,6 +255,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("DeletedOn", "Id")
+                        .HasDatabaseName("IX_deleted_on_id");
 
                     b.HasIndex("MessageId", "CreatedAt")
                         .HasDatabaseName("IX_message_id_created_at");
@@ -348,6 +358,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
+
                     b.HasIndex("TenantId", "Name", "EntryId")
                         .HasDatabaseName("IX_tenant_id_name_entry_id");
 
@@ -423,6 +436,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
 
                     b.HasIndex("TenantId", "CreatedBy", "EntryId")
                         .HasDatabaseName("IX_tenant_id_created_by_entry_id");
@@ -637,6 +653,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<int?>("ArtifactsFolderId")
+                        .HasColumnType("int")
+                        .HasColumnName("artifacts_folder_id");
+
+                    b.Property<int?>("AttachmentsFolderId")
+                        .HasColumnType("int")
+                        .HasColumnName("attachments_folder_id");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
@@ -646,6 +670,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("created_by")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("deleted_on");
 
                     b.Property<int?>("EntryId")
                         .HasColumnType("int")
@@ -671,6 +699,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("DeletedOn", "Id")
+                        .HasDatabaseName("IX_deleted_on_id");
+
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
 
                     b.HasIndex("TenantId", "LastEditDate")
                         .HasDatabaseName("IX_tenant_id_last_edit_date");
@@ -731,6 +765,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_tenant_id_entry_id");
 
                     b.HasIndex("TenantId", "CreatedBy", "ServerType", "EntryId")
                         .HasDatabaseName("IX_tenant_id_created_by_server_type_entry_id");
@@ -3938,6 +3975,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("LastModified")
                         .HasDatabaseName("last_modified");
+
+                    b.HasIndex("TenantId", "UserGroupId", "Removed")
+                        .HasDatabaseName("tenant_groupid");
 
                     b.ToTable("core_usergroup", (string)null);
 

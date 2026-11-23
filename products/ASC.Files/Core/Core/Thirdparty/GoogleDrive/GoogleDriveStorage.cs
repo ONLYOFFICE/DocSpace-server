@@ -344,6 +344,8 @@ internal class GoogleDriveStorage(
 #pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
 
+        await ThrowIfOutOfSpaceAsync(response);
+
         if (!response.IsSuccessStatusCode)
         {
             throw new InvalidOperationException(response.ReasonPhrase);
@@ -413,6 +415,8 @@ internal class GoogleDriveStorage(
 
         using (response)
         {
+            await ThrowIfOutOfSpaceAsync(response);
+
             if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
             {
                 googleDriveSession.BytesTransferred += chunkLength;
@@ -454,6 +458,12 @@ internal class GoogleDriveStorage(
         }
         catch (GoogleApiException ex)
         {
+            // an account out of space answers 403 as well, and must not read as "Access denied"
+            if (ThirdPartyStorageQuota.IsGoogleDrive(ex))
+            {
+                throw ThirdPartyStorageQuota.CreateException(ex);
+            }
+
             if (ex.HttpStatusCode == HttpStatusCode.Forbidden)
             {
                 throw new SecurityException(ex.Error.Message);
@@ -527,7 +537,7 @@ internal class GoogleDriveStorage(
             var requestFolder = _driveService.Files.Create(body);
             requestFolder.Fields = GoogleLoginProvider.FilesFields;
 
-            return await requestFolder.ExecuteAsync();
+            return await WriteAsync(() => requestFolder.ExecuteAsync());
         }
 
         var request = _driveService.Files.Create(body, fileStream, mimeType);
@@ -538,7 +548,7 @@ internal class GoogleDriveStorage(
         {
             if (request.ResponseBody == null)
             {
-                throw result.Exception;
+                throw TranslateUploadError(result.Exception);
             }
 
             _logger.ErrorWhileTryingToInsertEntity(result.Exception);
@@ -573,7 +583,7 @@ internal class GoogleDriveStorage(
         request.AddParents = toFolderId;
         request.Fields = GoogleLoginProvider.FilesFields;
 
-        return request.ExecuteAsync();
+        return WriteAsync(() => request.ExecuteAsync());
     }
 
     private Task<DriveFile> RenameEntryAsync(string fileId, string newTitle)
@@ -581,7 +591,7 @@ internal class GoogleDriveStorage(
         var request = _driveService.Files.Update(FileConstructor(newTitle), fileId);
         request.Fields = GoogleLoginProvider.FilesFields;
 
-        return request.ExecuteAsync();
+        return WriteAsync(() => request.ExecuteAsync());
     }
 
     private async Task<DriveFile> SaveStreamAsync(string fileId, Stream fileStream, string fileTitle)
@@ -600,12 +610,47 @@ internal class GoogleDriveStorage(
 
         if (request.ResponseBody == null)
         {
-            throw result.Exception;
+            throw TranslateUploadError(result.Exception);
         }
 
         _logger.ErrorWhileTryingToInsertEntity(result.Exception);
 
         return request.ResponseBody;
+    }
+
+    // Google Drive refuses a write the account has no space for with 403 / storageQuotaExceeded, which would
+    // otherwise reach the user as the library's raw error text; it is replaced with a readable one.
+    private static async Task<T> WriteAsync<T>(Func<Task<T>> write)
+    {
+        try
+        {
+            return await write();
+        }
+        catch (Exception ex) when (ThirdPartyStorageQuota.IsGoogleDrive(ex))
+        {
+            throw ThirdPartyStorageQuota.CreateException(ex);
+        }
+    }
+
+    private static Exception TranslateUploadError(Exception uploadError)
+    {
+        return ThirdPartyStorageQuota.IsGoogleDrive(uploadError) ? ThirdPartyStorageQuota.CreateException(uploadError) : uploadError;
+    }
+
+    // The resumable upload goes over plain HTTP, so an account out of space comes back as a 403 whose
+    // JSON body carries the reason; any other failure is left to the caller as before.
+    private static async Task ThrowIfOutOfSpaceAsync(HttpResponseMessage response)
+    {
+        if ((int)response.StatusCode < 400)
+        {
+            return;
+        }
+
+        var body = await response.Content.ReadAsStringAsync();
+        if (ThirdPartyStorageQuota.IsGoogleDriveResponse(body))
+        {
+            throw ThirdPartyStorageQuota.CreateException(new HttpRequestException(body, null, response.StatusCode));
+        }
     }
 
     private sealed class CachedHttpClientFactory : Google.Apis.Http.HttpClientFactory

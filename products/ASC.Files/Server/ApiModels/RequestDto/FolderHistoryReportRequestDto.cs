@@ -46,8 +46,7 @@ public class FolderHistoryReportRequestDto
     public required int FolderId { get; set; }
 
     /// <summary>
-    /// The shape the report is written in: `Xlsx` produces a spreadsheet and `Csv` a comma-separated text file, and
-    /// either is saved as a file in "My documents".
+    /// The file format of the report: `Xlsx` for a spreadsheet, or `Csv` for a comma-separated text file.
     /// </summary>
     /// <example>Xlsx</example>
     [FromQuery(Name = "format")]

@@ -1,0 +1,206 @@
+# quotas — verification
+
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
+Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
+root (`server/`); Files test paths omit the `products/ASC.Files/Tests/Tests/` prefix, People test paths the
+`products/ASC.People/Tests/Tests/` prefix and Web.Api test paths the `web/ASC.Web.Api.Tests/Tests/` prefix; `BT/` is
+`web/ASC.Web.Api.Billing.Tests/Tests/` (a SaaS stack whose billing, accounting and DocsCloud are stubs in the test process).
+`yaml` is `sdk/docspace-api-spec/docspace-backend.yaml` (submodule `5ea4dc6`, 2026-11-04; line numbers of `ce37da4`). Status:
+**TEST-CONFIRMED** (an integration test asserts it), **CODE-ONLY** (read from the product code or the OpenAPI
+document, no test), **NOTES-ONLY** (only the release notes say it — nothing of that kind was written into
+the spec; such items are listed at the end as left out).
+
+Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row. The `yaml` line numbers were moved to the submodule commit release/v4.1.0 pins (`ce37da4`); where the header names an older submodule commit, that stays the version the yaml texts were read from.
+
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a): no quota code changed; the yaml no longer documents the 500 of `saveRoomQuotaSettings` and `saveAiAgentQuotaSettings` (`c096f23fa9`), so Q1 and the contract row were reworded, Q1 stays open.
+
+Revision 2026-11-09 (bb406b409b..6fb013e745): the SaaS quota cases moved to the billing suite (`cbf6e874d9`), so the
+`getPortalQuota` shape and `getRightQuota` rows cite it and the Startup plan and recommendation of a hosted portal
+are new scenarios; the `PaymentQuotaInformationTests.cs` line references were refreshed. Changed rows carry no run mark; one row was added and two CODE-ONLY rows are now partly TEST-CONFIRMED (the counts below are those of 2026-10-24).
+
+Revision 2026-11-10 (tests for the CODE-ONLY rows, no product change): new classes `07_Settings/Quota/QuotaEnforcementTests.cs`
+(Files, 8 cases), `02_Settings/Quota/QuotaSettingsValidationTests.cs` (Web.Api, 12), `07_Quota/UserQuotaValuesTests.cs`
+(People, 3) and `BT/Quota/QuotaSettingsTariffTests.cs` (billing suite, 12; its `BaseTest`/`PortalClients` gained the
+People and Settings quota clients). Q1 to Q4 are reproduced by red tests marked `Category=Bug`; the spec was corrected
+where the server behaves differently by design: a member added directly above the paid limit is created as a User,
+and the non-admin branch of `setTenantQuotaSettings` is unreachable (403 first).
+
+Revision 2026-10-24: re-checked against the hotfix range `34df477e4e..HEAD` (bug 81534 — `ca104886f0`,
+`5db334ab5e`, `8074ce5b54`; `feature/service-limit`). Line references were refreshed for every file that
+changed in the range (`PortalController.cs`, `QuotaHelper.cs`, `QuotaSocketManager.cs`,
+`TenantQuotaFeature.cs`, `FileDao.cs`, `CopyPermissionsCheck.cs`, `PaymentQuotaInformationTests.cs`, the
+yaml submodule); `SettingsController.cs`, `TenantQuotaController.cs`, `FileStorageService.cs` (before line
+2689), `EntryManager.cs`, `DocumentServiceHelper.cs`, `Resource.resx` and the Files/People quota tests are
+unchanged at the lines cited.
+
+Revision 2026-11-04: re-checked against the merge of `release/v4.1.0` (`d58816bece..3533ad8a89`). No quota code
+changed in the range; `FileStorageService.cs` (AI rooms refused while AI is off), `UserController.cs`,
+`PaymentsController.cs` and `SettingsController.cs` only shifted, and their line references were refreshed. The
+range added `02_Settings/Statistics/SpaceUsageStatisticsTests.cs` (`c957208af5`), from which the requirement "Space
+usage of a module" was written, and moved `PortalTariffPermissionsTests` and `QuotaTestBase` to typed SDK calls
+(`632c2fc262`). The yaml was regenerated (`5ea4dc6`): the `getQuotaPaymentInformation` text now states the
+trimming by user type; the `getPortalQuota` and `saveRoomQuotaSettings` texts behind Q6 and the 403 row are unchanged.
+
+## Requirement rows
+
+| Claim | Source | Status |
+|---|---|---|
+| **Portal storage allowance and what is charged against it** | | |
+| `maxTotalSize` of the tariff is the allowance; `total_size` feature | `web/ASC.Web.Api/Api/PortalController.cs:675-688`; `common/ASC.Core.Common/Quota/Features/MaxTotalSizeFeature.cs:36-38`; yaml `getPortalQuota` (53465), `getQuotaPaymentInformation` (49665) | CODE-ONLY |
+| Per-owner quota rows (`tenants_quotarow`), total = sum of rows with a product tag | `common/ASC.Data.Storage/TenantQuotaController.cs:101-108, 256-267`; `web/ASC.Web.Core/Quota/MaxTotalSizeFeature.cs:47-57`; `PortalController.cs:535-543` | CODE-ONLY |
+| Creating a file grows the portal total by `pureContentLength`; ten concurrent files by the sum | `02_Folders/UsedSpace/QuotaUsedSpaceTests.cs:64-130` | TEST-CONFIRMED [run: PASS] |
+| Trash keeps the total; delete from Trash / empty Trash / batch delete releases it | `QuotaUsedSpaceTests.cs:132-456` | TEST-CONFIRMED [run: PASS] |
+| Reads and renames do not move the counters (bug 81648) | `02_Folders/UsedSpace/FilesUsedSpaceTests.cs:234-251, 284-299` | TEST-CONFIRMED [run: PASS] |
+| Thumbnails (`thumb*`) excluded when a stored file's size is summed; rows without a tag left out of the total | `products/ASC.Files/Core/Core/Dao/TeamlabDao/FileDao.cs:1126, 1255, 2452`; `common/ASC.Data.Storage/DiscStorage/DiscDataStore.cs:500-507`; `PortalController.cs:541-542`; release note v1.1 | CODE-ONLY |
+| **Portal storage allowance enforced on uploads** | | |
+| Remaining allowance = `maxTotalSize` − used, capped by `maxFileSize`; file above it → `TenantQuotaException` "The maximum file size is exceeded (<remaining>)" | `web/ASC.Web.Core/SetupInfo.cs:156-166`; `FileDao.cs:442-455`; `web/ASC.Web.Core/FileSizeComment.cs:38-41, 60-63`; `web/ASC.Web.Core/PublicResources/Resource.resx:958`; no test | CODE-ONLY (unreachable: the Standalone stand has no `maxTotalSize`, and the billing suite, whose Startup plan has 2 GiB, runs no Files service; a file above the remaining 2 GiB is also impractical) |
+| `TenantQuotaException` / `BillingException` → 402 | `common/ASC.Api.Core/Middleware/UnhandledExceptionMiddleware.cs:100-103`; `07_Settings/Quota/QuotaEnforcementTests.cs:45-77` (`TenantQuotaException` of the user and the portal quota); `BT/Quota/QuotaSettingsTariffTests.cs:48-59` (`BillingException` without `statistic`) | TEST-CONFIRMED [run: PASS] |
+| Chunked upload refused during chunk upload answers 402 with "quota" in the message | `07_Settings/Quota/QuotaTests.cs:520-578` (room quota case; same exception path) | TEST-CONFIRMED [run: PASS] |
+| Strict for every non-editor write; grace only on the editor save path | `common/ASC.Data.Storage/IQuotaController.cs:38-42`; `TenantQuotaController.cs:232-249`; `FileDao.cs:450-455`; no test | CODE-ONLY (the tariff grace needs a `maxTotalSize`, which the Standalone stand lacks, and an editor save session; the Standalone portal quota, which has a soft overrun of its own, is in the enforcement row below) |
+| **Editor save may overrun once; editor opens read-only** | | |
+| Grace = `web:available-file-size`, default 100 MiB; only when used ≤ limit and file ≤ `maxFileSize`; serialized by `tenant_quota_{tenantId}` lock; audit "saved but tenant quota exceeded"; opt-in from `EntryManager.SaveEditingAsync` | `FileDao.cs:397-475`; `common/ASC.Data.Storage/TenantQuotaController.cs:34-44, 237-249`; `common/ASC.Data.Storage/Constants.cs:45`; `products/ASC.Files/Core/Utils/EntryManager.cs:1688-1697`; release notes v3.7, v4.0 | CODE-ONLY |
+| `quota_exceeded` scope `tenant` raised by the quota-row update | `TenantQuotaController.cs:109-146`; `common/ASC.Core.Common/Quota/QuotaSocketManager.cs:206-229` | CODE-ONLY |
+| Editor opens without edit right with `quotaExceededScope` Tenant / Room / User | `products/ASC.Files/Core/Services/DocumentService/DocumentServiceHelper.cs:115-174`; `products/ASC.Files/Server/Api/EditorController.cs:293-302`; `products/ASC.Files/Server/ApiModels/ResponseDto/ConfigurationDto.cs:145-149`; release note v3.7; `07_Settings/Quota/QuotaEnforcementTests.cs:165-214` (`openEdit` after a soft overrun: `quotaExceededScope` User / Room / Tenant and `document.permissions.edit` false) | TEST-CONFIRMED [run: FAIL-BUG] (Tenant through the Standalone portal quota; the tariff `maxTotalSize` branch stays CODE-ONLY) |
+| **Default user quota of the portal** | | |
+| Owner / DocSpace admin read `getUserQuotaSettings` (200, `lastModified` set) | `02_Settings/Quota/UserQuotaSettingsTests.cs:45-74` | TEST-CONFIRMED [run: PASS] |
+| Room admin / User / Guest 403, anonymous 401 | `UserQuotaSettingsTests.cs:76-106` | TEST-CONFIRMED [run: PASS] |
+| `POST settings/userquotasettings` hidden from the document (`IgnoreApi`), raw-HTTP write succeeds and `resetUsersQuota` falls back to it | `web/ASC.Web.Api/Api/Settings/SettingsController.cs:307-314`; `07_Quota/QuotaTestBase.cs:53-63`; `07_Quota/ResetUserQuotaTests.cs:42-58` | TEST-CONFIRMED [run: PASS] |
+| Setting is `TenantUserQuotaSettings`; validation: not a whole number / > `maxTotalSize` / > Standalone quota → 400 (`ArgumentException`); SaaS without `statistic` → 402; ≤ 0 stored as 0; `If-Modified-Since` 304; audit record | `SettingsController.cs:316-367, 386-393, 1522-1531`; yaml `getUserQuotaSettings`; `02_Settings/Quota/QuotaSettingsValidationTests.cs:98-142, 214-235` (not a whole number 400, above the Standalone quota 400 with the message, -5 stored as 0, `If-Modified-Since` with the `Last-Modified` string 304); `BT/Quota/QuotaSettingsTariffTests.cs:48-59, 96-106` (402 without `statistic`, above the tariff `maxTotalSize` 400) | TEST-CONFIRMED [run: FAIL-BUG] (the audit record stays CODE-ONLY) |
+| **Custom quota of an account** | | |
+| Owner sets 100 MB on self and on admin / Room admin / User; reset gives 500 MB default, order kept; answer rows carry `quotaLimit` / `usedSpace` / `isCustomQuota` | `07_Quota/UpdateUserQuotaTests.cs:41-77`; `07_Quota/ResetUserQuotaTests.cs:42-86` | TEST-CONFIRMED [run: PASS] |
+| DocSpace admin changes and resets the owner's quota | `UpdateUserQuotaTests.cs:79-103`; `ResetUserQuotaTests.cs:88-116` | TEST-CONFIRMED [run: PASS] |
+| Room admin / User / Guest 403 "Access denied" on self and others; anonymous 401 (update and reset) | `07_Quota/QuotaPermissionsTests.cs:43-245` | TEST-CONFIRMED [run: PASS] |
+| Quota above the total storage → 400 with the exact message (bug 80301), reproduced via `setTenantQuotaSettings` cap | `QuotaPermissionsTests.cs:255-273`; `QuotaTestBase.cs:78-88` | TEST-CONFIRMED [run: PASS] |
+| Negative value removes the personal limit; system accounts dropped; `resetUsersQuota` 402 without `statistic` on SaaS; a limit below the usage frees nothing | `products/ASC.People/Server/Api/UserController.cs:2730-2786, 2806-2832`; yaml `updateUserQuota`, `resetUsersQuota`; `07_Quota/UserQuotaValuesTests.cs:45-96` (-1 → `quotaLimit` -1; the system guest id dropped from `updateUserQuota` and `resetUsersQuota`); `BT/Quota/QuotaSettingsTariffTests.cs:48-59` (`resetUsersQuota` 402 without `statistic`) | TEST-CONFIRMED [run: PASS] (a limit below the usage freeing nothing stays CODE-ONLY) |
+| **Behaviour when the user quota is exceeded** | | |
+| Limit = custom or portal default, `-1` no limit; used = own quota rows; soft overrun once below 2× with socket + audit, else 402 "User space quota exceeded (<limit>)" | `FileDao.cs:558-613`; `FileSizeComment.cs:54-58, 70-73`; `Resource.resx:1348`; `common/ASC.Core.Common/Users/UserQuotaSettings.cs:36-49`; `07_Settings/Quota/QuotaEnforcementTests.cs:45-60` (4 KB default: one document passes as the soft overrun, the next answers 402 "User space quota exceeded (4 KB)") | TEST-CONFIRMED [run: PASS] (the socket event, the audit record and the `-1` branch stay CODE-ONLY) |
+| Move / copy / restore into My documents or a room refused outright when the file does not fit; `checkdestfolder` reports the message | `FileDao.cs:1392-1430`; `products/ASC.Files/Core/Utils/EntryManager.cs:1906-1948`; `products/ASC.Files/Core/Services/WCFService/FileOperations/CopyPermissionsCheck.cs:520-539`; `07_Settings/Quota/QuotaEnforcementTests.cs:79-102` (4 KB room default: the move ends with "Room space quota exceeded" and the file stays, where a create in the room takes the overrun) | TEST-CONFIRMED [run: PASS] for the move into a room (copy, restore, the move into My documents and `checkdestfolder` stay CODE-ONLY) |
+| Move between two accounts' My documents raises the receiver's custom quota and announces it instead of refusing | `FileDao.cs:1432-1451`; `07_Settings/Quota/QuotaEnforcementTests.cs:104-141` (a DocSpace admin moves his document into a folder the owner shared from My documents, user default 1 byte) | TEST-CONFIRMED [run: FAIL-BUG] (Q2: the test asserts the refusal; the run shows the owner's `isCustomQuota` true) |
+| **Default room quota and default AI agent quota** | | |
+| Owner / DocSpace admin enable with 1 GB and disable `saveRoomQuotaSettings`; answer shape | `02_Settings/Quota/RoomQuotaSettingsTests.cs:48-114` | TEST-CONFIRMED [run: PASS] |
+| Same for `saveAiAgentQuotaSettings` | `02_Settings/Quota/AiAgentQuotaSettingsTests.cs:48-114` | TEST-CONFIRMED [run: PASS] |
+| Room admin / User / Guest 403, anonymous 401 (both settings) | `RoomQuotaSettingsTests.cs:116-150`; `AiAgentQuotaSettingsTests.cs:116-150` | TEST-CONFIRMED [run: PASS] |
+| Settings are `TenantRoomQuotaSettings` / `TenantAiAgentQuotaSettings`; validation: > `maxTotalSize` / > Standalone quota → plain `Exception` (500); 402 without `statistic`; ≤ 0 stored as 0; `enableQuota:false` keeps the size; applied to rooms created afterwards; audit | `SettingsController.cs:415-460, 482-525, 1522-1531`; `FileDao.cs:571-577`; yaml `saveRoomQuotaSettings`, `saveAiAgentQuotaSettings`; `02_Settings/Quota/QuotaSettingsValidationTests.cs:48-96, 144-174` (above the Standalone quota 500 for both settings, `1.5` 500, -1 stored as 0, disabled keeps 1 GB); `BT/Quota/QuotaSettingsTariffTests.cs:48-59, 80-93, 109-121` (402 without `statistic`, above the tariff `maxTotalSize` 500 for both, 200 on the paid plan); rooms created after the setting follow it: `07_Settings/Quota/QuotaEnforcementTests.cs:79-102, 181-197` | TEST-CONFIRMED [run: FAIL-BUG] (Q1: the over-limit and non-integer cases answer 500, the tests assert 400; 402, ≤ 0 → 0, `enableQuota:false` and the rest; the audit record stays CODE-ONLY) |
+| Custom quota on a room/agent refused while the feature is off (`InvalidOperationException` → 403) | `products/ASC.Files/Core/Core/FileStorageService.cs:939-951, 1371-1427`; `07_Settings/Quota/RoomQuotaPermissionsTests.cs`, `RoomQuotaResetTests.cs` (asserted in `room-types`) | TEST-CONFIRMED [run: PASS] |
+| `aiAgentsUpdateQuota` / `aiAgentsResetQuota` relay to the AI service | yaml `aiAgentsUpdateQuota`, `aiAgentsResetQuota` | CODE-ONLY |
+| **Portal-wide quota of a Standalone installation** | | |
+| Owner caps the test portal at 1 MB → 200, then 100 MB per-user quota → 400 | `07_Quota/QuotaTestBase.cs:78-88` (the tenant id now read through `getPortalInformation`, `632c2fc262`); `QuotaPermissionsTests.cs:255-273` | TEST-CONFIRMED [run: PASS] |
+| Negative removes; non-admin or SaaS → `NotSupportedException` (415); 402 without `statistic`; `change-user-quota-used-value` to admins; audit; caps the defaults set afterwards | `SettingsController.cs:605-644`, `322-340`, `421-439`, `488-505`; yaml `setTenantQuotaSettings`; `02_Settings/Quota/QuotaSettingsValidationTests.cs:176-212` (-1 → `enableQuota` false, `quota` -1, a default above the old cap accepted again; Room admin / User 403); `02_Settings/Quota/QuotaSettingsValidationTests.cs:48-112` (caps the defaults); `BT/Quota/QuotaSettingsTariffTests.cs:48-59, 62-77` (402 on the free plan, 415 on a paid hosted portal) | TEST-CONFIRMED [run: FAIL-BUG] (Q3: SaaS answers 415, the test asserts 403; the rest; the non-admin branch is unreachable, the portal-settings demand answers 403 first; the socket event and the audit record stay CODE-ONLY) |
+| Enforcement: 402 "The used storage size should not exceed <quota>" when already above or above 2×; soft overrun below 2× | `TenantQuotaController.cs:211-230`; `Resource.resx:1279`; `07_Settings/Quota/QuotaEnforcementTests.cs:62-77` (4 KB portal quota: one document passes, the next answers 402 with the message) | TEST-CONFIRMED [run: PASS] |
+| **Used space by section** | | |
+| Four mandatory sections with titles "Files", "Trash", "Rooms", "Archive", whole values ≥ 0 | `02_Folders/UsedSpace/FilesUsedSpaceTests.cs:61-95, 167-181, 301-318` | TEST-CONFIRMED [run: PASS] |
+| Forms, AI agents, room templates, default templates sections when the root exists | `products/ASC.Files/Core/Core/Dao/TeamlabDao/FolderDao.cs:432-487`; `FilesUsedSpaceTests.cs:188-203` (AI agents shape when present) | CODE-ONLY |
+| Create in My documents / in a room / trash / archive move the right counter; soft delete conserves | `FilesUsedSpaceTests.cs:97-165, 324-346`; `QuotaUsedSpaceTests.cs:64-108, 132-187` | TEST-CONFIRMED [run: PASS] |
+| Hard delete decreases My documents (bug 81648); pre-existing files counted on first call | `FilesUsedSpaceTests.cs:210-227, 353-368` | TEST-CONFIRMED [run: PASS] |
+| Deep trees, batch delete and four concurrent deletes return the counters exactly | `QuotaUsedSpaceTests.cs:189-223, 283-456` | TEST-CONFIRMED [run: PASS] |
+| Form filling room content charged to Forms, not Rooms; archive/unarchive/delete move it | `03_Rooms/FormFilling/FormFillingRoomUsedSpaceTests.cs:51-161` | TEST-CONFIRMED [run: PASS] |
+| Owner / DocSpace admin 200; Room admin / User / Guest 403; anonymous 401 | `02_Folders/UsedSpace/FilesUsedSpacePermissionsTests.cs:47-121`; `FilesUsedSpaceTests.cs:48-59` | TEST-CONFIRMED [run: PASS] |
+| Counters incremental, can lag the operation | `02_Folders/UsedSpace/UsedSpaceTestBase.cs:115-140` (polling rationale; the base now deletes with `ReturnSingleOperation`, l. 167-172); yaml `getFilesUsedSpace` | CODE-ONLY |
+| **Portal quota and usage statistics** | | |
+| `getPortalUsedSpace` ≥ 0 for owner and DocSpace admin; GB rounded to 2 decimals | `04_Portal/Quota/PortalUsedSpaceTests.cs:46-73`; `PortalController.cs:535-543` | TEST-CONFIRMED [run: PASS] |
+| `getPortalUsersCount` = 5 with one of every role; active state only | `04_Portal/Users/PortalUsersCountTests.cs:52-81`; `PortalController.cs:565-569` | TEST-CONFIRMED [run: PASS] |
+| 403 "Access denied" for Room admin / User / Guest, 401 anonymous on quota, quota/right, usedspace, userscount | `04_Portal/Quota/PortalQuotaPermissionsTests.cs:45-77` (bug 81340); `PortalRightQuotaPermissionsTests.cs:45-76`; `PortalUsedSpacePermissionsTests.cs:45-76`; `PortalUsersCountTests.cs:83-114` | TEST-CONFIRMED [run: PASS] |
+| `getPortalQuota` shape: `maxTotalSize`, `maxFileSize`, `countRoom`, `countUser`, `countPaidUser`, `countRoomAdmin`, feature flags | `PortalController.cs:714-727`; yaml `getPortalQuota` (53465) and `TenantQuotaDto` (106247); `BT/Quota/PortalQuotaTests.cs:43-121` (`maxTotalSize`, `countRoom`, `countRoomAdmin` and every feature flag of the Startup plan, owner and DocSpace admin) | TEST-CONFIRMED [run: PASS] (`maxTotalSize`, `countRoom`, `countRoomAdmin`, flags), CODE-ONLY (`maxFileSize`, `countUser`, `countPaidUser`) |
+| Hosted portal: Startup plan 2 GiB, 3 administrators, 12 rooms, free; after ten administrator units `free` false, `countRoomAdmin` 10, audit / SSO / content search on | `BT/Quota/PortalQuotaTests.cs:43-83`; `BT/Plans.cs` | TEST-CONFIRMED [run: PASS] |
+| `getRightQuota`: cheapest monthly quota above user count and used space, empty body when none | `PortalController.cs:749-761`; yaml `getRightQuota`; `BT/Quota/PortalRightQuotaTests.cs:45-111` (free portal: a visible monthly paid plan; paid portal, owner and DocSpace admin: no dearer, no more storage and no more administrators than the paid plan) | TEST-CONFIRMED [run: PASS] (a monthly plan the portal fits), CODE-ONLY (the cheapest, the empty body) |
+| `getPortalTariff` graded by role: owner / DocSpace admin full (`state` Paid, `id` ≥ 0, `quotas` non-empty); Room admin / User / Guest `id` 0; anonymous 401 | `04_Portal/Quota/PortalTariffTests.cs:53-93`; `PortalTariffPermissionsTests.cs:47-77` (typed SDK call since `632c2fc262`); `PortalController.cs:592-623` | TEST-CONFIRMED [run: PASS] |
+| **Space usage of a module** | | |
+| Portal-settings right; module found by id among the registered items with a space-usage manager; missing or non-reporting module → empty list; `{id:guid}` route constraint → 404 for a non-GUID; sizes formatted; not paged | `web/ASC.Web.Api/Api/Settings/SettingsController.cs:1132-1172`; yaml `getSpaceUsageStatistics` (65840) | CODE-ONLY |
+| Owner and DocSpace admin → 200 with a list for the Documents module id; unknown id → empty list; `not-a-guid` → 404; User 403; anonymous 401 | `02_Settings/Statistics/SpaceUsageStatisticsTests.cs:25-33, 36-44, 48-56, 59-70, 73-83, 86-97` (the real id is only asserted to succeed: whether the host registers the module is not grounded in the repo) | TEST-CONFIRMED [run: PASS] |
+| **Payment quota information trimmed by user type** | | |
+| `getQuotaPaymentInformation`: Guest 403, anonymous 401; only the Guest check is in the action | `04_Portal/Payments/PaymentQuotaInformationTests.cs:50-63, 158-170`; `web/ASC.Web.Api/Api/PaymentsController.cs:744-756` | TEST-CONFIRMED [run: PASS] |
+| Room admin: features exactly `manager`, `total_size`, `room`, `statistic`; `price` value / currency / ISO currency null; `dueDate` null; `usersQuota` / `roomsQuota` / `aiAgentsQuota` / `tenantCustomQuota` equal to the owner's (bug 81534: `ca104886f0`, test `5db334ab5e`, `8074ce5b54`) | `PaymentQuotaInformationTests.cs:96-113, 135-156`; `web/ASC.Web.Api/Core/QuotaHelper.cs:124-148, 169-192`; `common/ASC.Core.Common/Tenants/TenantQuota.cs:540-562` (`manager` / `room` / `statistic` = RoomAdmin, `total_size` = User); `common/ASC.Core.Common/Quota/TenantQuotaFeature.cs:45-47` (default DocSpaceAdmin); `common/ASC.Core.Common/Core/EmployeeType.cs:60-79` (`EmployeeTypeComparer`: DocSpaceAdmin 4, RoomAdmin 3, User 2, Guest 1, All 0) | TEST-CONFIRMED [run: PASS] |
+| User: a single feature `total_size` with `used`; no billing data; same quota settings as the owner | `PaymentQuotaInformationTests.cs:115-133`; `QuotaHelper.cs:257-267, 289-300` (`used` written for every feature with a statistic provider) | TEST-CONFIRMED [run: PASS] |
+| DocSpace admin: the Room admin's four features and more; `price.value` never null (0 on the free plan) | `PaymentQuotaInformationTests.cs:74-94`; `QuotaHelper.cs:127-148` | TEST-CONFIRMED [run: PASS] |
+| `usersQuota` / `roomsQuota` / `aiAgentsQuota` / `tenantCustomQuota` on every quota DTO (Standalone or `statistic`), regardless of the caller type | `QuotaHelper.cs:151-164` | CODE-ONLY |
+| **Count limits of the tariff** | | |
+| Feature ids `room`, `manager`, `users`, `aiagent`; `-1` unlimited; checkers throw `TenantQuotaException` with "should not exceed" messages | `common/ASC.Core.Common/Quota/ITenantQuotaFeatureChecker.cs:43-90`; `products/ASC.Files/Core/Core/CountRoomFeature.cs:36-123`; `web/ASC.Web.Core/Quota/CountRoomAdminFeature.cs:38-72`; `web/ASC.Web.Core/Quota/CountUserFeature.cs:38-69`; `Resource.resx:1210-1264` | CODE-ONLY |
+| Invitation link of a paid role when `manager` is reached → 402 (bug 81564); skipped on an unlimited plan | `04_Portal/Users/InvitationLinkGetTests.cs:115-184`; `PortalController.cs:343-346` | TEST-CONFIRMED [run: PASS] (skips itself on the integration host: `manager` is `-1` there) |
+| Rooms: create, from template, third-party, copy, restore from archive under the rooms-count lock | `FileStorageService.cs:664-698, 770-779, 1052-1059`; `FileMoveCopyOperation.cs:294-314, 518-535` | CODE-ONLY |
+| AI agents: `CreateAiAgentAsync` under the agents-count lock | `FileStorageService.cs:703-720` | CODE-ONLY |
+| Paid users: user creation, type change, re-enable, SSO, invitation link; bulk invite refused as a whole with "<asked>/<free>" | `common/ASC.Core.Common/Context/Impl/UserManager.cs:376-389`; `UserController.cs:482-494`; LSP references of `CheckAppend` (`UserManagerWrapper.cs:293-331`, `SsoHandler.cs:301`, `UserController.cs:2275-2395`, `PortalController.cs:279, 345`); `Resource.resx:1315`; `BT/Quota/QuotaSettingsTariffTests.cs:125-170` (Startup plan: four Room admins in one `people/invite` → 402 "The number of admins exceeds the limit: 4/…"; four `POST people` with Room admin are not refused, the ones past the count are created as User — spec corrected) | TEST-CONFIRMED [run: PASS] for the bulk invitation and for `POST people` (type change, re-enable, SSO and the invitation link stay CODE-ONLY) |
+| Free users (`users`) checked when a User or Guest is created | `UserManager.cs:378-383`; `CountUserFeature.cs:62-69` | CODE-ONLY |
+| Grace / not-paid tariff → `BillingNotFoundException` "Your pricing plan does not support this option" (402) | `CountRoomFeature.cs:47-55, 93-101`; `CountRoomAdminFeature.cs:51-59`; `common/ASC.Core.Common/Billing/BillingClient.cs:637-648`; `Resource.resx:862` | CODE-ONLY |
+| User or Guest FOLLOWING a room invitation link that grants a paid role gets the highest free role (link path only; a direct invite with Room manager is 403 by the type rule — live run 2026-10-04 and `invitations` spec) | `products/ASC.Files/Core/Core/VirtualRooms/InvitationService.cs:330-348`; release note v2.0 | CODE-ONLY |
+| A 402 on an AI request may be a wallet spending limit on the AI services (money and/or count threshold per day / week / month / lifetime), not a tariff count | `billing` spec, "Spending limits on the AI services", and its `verification.md` (`feature/service-limit`, merged `e8091c8068`) | — (cross-reference) |
+| **Quota recalculation** | | |
+| Hidden endpoints, portal-settings right, one job per portal, reuse / restart, what is recomputed and stamped | `web/ASC.Web.Api/Api/Settings/SettingsController.cs:745-778`; `products/ASC.People/Server/Api/UserController.cs:2681-2708`; `products/ASC.Files/Core/Core/UsersQuotaSyncOperation.cs:36-164`; `products/ASC.Files/Core/Configuration/FilesSpaceUsageStatManager.cs:100-175` | CODE-ONLY |
+| **Quota changes are announced on the socket** | | |
+| `change-quota-used-value` on every counter change; `change-user-quota-used-value` per account and to admins on settings; `quota_exceeded` with scope | `common/ASC.Data.Storage/BaseStorage.cs:383-413`; `QuotaSocketManager.cs:45-64, 196-229`; `SettingsController.cs:355, 632`; `UserController.cs:2770`; `FileMoveCopyOperation.cs:533-534`; `FileDao.cs:1448` | CODE-ONLY |
+
+Counts (recounted 2026-11-10): 67 rows — TEST-CONFIRMED 46, CODE-ONLY 20, cross-reference 1, NOTES-ONLY 0; 11 CODE-ONLY rows were closed by tests that day, several only in part as the row says (nothing was written into
+the spec on the strength of the release notes alone; the v1.1, v2.0, v3.6, v3.7 and v4.0 items are each
+backed by code). Spec: 15 requirements, 55 scenarios. Previous revision (2026-10-24): 64 rows (31 / 32 / 1),
+14 requirements, 52 scenarios; the growth is the requirement "Space usage of a module" with its two rows and
+three scenarios.
+
+## Where the server differs from the release notes or the OpenAPI document (spec follows the server)
+
+| Release note / document | Server |
+|---|---|
+| v2.5: a custom quota can be set "in the info panel, the table column, the menu and the room dialog" | Client surfaces; the server offers `updateUserQuota` / `resetUsersQuota` for accounts and `updateRoomsQuota` / `resetRoomQuota` / `createRoom.quota` for rooms (the latter in `room-types`). |
+| v2.6.1: toasts and banners "almost reached" / "exceeded", a toast before an upload into a full room | Client behaviour. The server only exposes the figures (`getQuotaPaymentInformation`, `getRoomInfo.usedSpace`), the `quota_exceeded` socket event and the refusals; no "almost reached" threshold exists server-side. |
+| v3.7: "the document is saved once over the quota, further saving is impossible, a banner appears" | Holds for the user and room quota (below 2× the limit) and, since v4.0, for the portal allowance (within `web:available-file-size`); the banner is the client's reaction to `quota_exceeded`. |
+| v4.0: "allow a small overrun of the portal storage quota when saving from the editor" | The overrun is bounded by `web:available-file-size` (100 MiB by default), granted once per portal while the portal is still under the limit, and never for an upload, conversion or copy. |
+| yaml `saveRoomQuotaSettings` / `saveAiAgentQuotaSettings` list 403 for "`defaultQuota` is not a JSON number" and listed 500 for a value above the total storage until `c096f23fa9` removed it (no code change) | The code throws a plain `Exception` in both cases, which the middleware maps to 500; the 403 wording comes from the JSON reader, not from the action. The spec states 500 for the over-limit case and leaves the body-shape errors out. |
+| yaml `updateUserQuota` says 400 for a value "larger than the portal-wide quota on a standalone installation" | Matches the code (`ArgumentException`); the test (bug 80301) reproduces it through the Standalone cap because the integration host has no tariff ceiling. |
+| yaml `getPortalQuota` (and the controller remarks, `PortalController.cs:698-699`): "`maxTotalSize` comes back as 0 when the calling account's own role is user" | Dead branch: a User is refused by `DemandPermissionsAsync(EditPortalSettings)` two lines earlier (`PortalController.cs:716-724`), so no caller ever sees the 0. Left out of the spec. |
+| yaml `getQuotaPaymentInformation` 200 before `5ea4dc6`: "The quota the portal is on, with its price, features, limits and current usage" | Resolved: the regenerated description (49440-49458) states the trimming by user type that `QuotaHelper.cs:124-148, 169-192` does since `8074ce5b54` — a Room admin gets four features, a User one, both an empty `price` and no `dueDate`, a Guest 403. |
+| Previous revision of this spec (and the test comment it followed, `PaymentQuotaInformationTests.cs` before `5db334ab5e`): "features marked for DocSpace admins are dropped for other roles, and the `used` figures are withheld from a User except `total_size`" | Replaced in the range: each feature carries the lowest user type that is shown it (`TenantQuotaFeature.EmployeeType`, default DocSpaceAdmin), so a Room admin gets `manager`, `total_size`, `room`, `statistic` and a User gets `total_size` only — the `used` figure is no longer withheld separately, the feature itself is. |
+| `PortalQuotaTests`, `PortalRightQuotaTests`, `PaymentQuotaInformationTests` (startup-plan assertions) | The integration host runs the single "default" quota without a tariff catalogue, so those values cannot be asserted there; since `cbf6e874d9` they run in the billing suite `BT/` on a SaaS stack, and the spec states the Startup plan and the recommendation of a hosted portal. |
+| Test name `GetQuotaPaymentInformation_User_ReturnsTotalSizeOnly` | The assertion is `ContainSingle` on `total_size` with `Used != null`, plus empty price, no due date and the owner's quota settings — the name understates it. |
+| Test name `GetQuotaPaymentInformation_DocSpaceAdmin_ReturnsAdminOnlyFeaturesAndPrice` | The assertion pins only what holds on any plan: the four Room admin features plus at least one more, and a non-null `price.value`; the full admin set and the due date depend on the plan and edition of the host. |
+| Test name `UpdateRoomsQuota_ZeroQuota_ShouldResetQuota` | The assertion is `quotaLimit == 0`, i.e. 0 is stored as a limit, not a reset (already recorded in `room-types`). |
+
+## Left out of the spec, and why
+
+- **Per-room quota set/reset, `isCustomQuota`, the 2× soft overrun of a room, archived rooms and the
+  feature switch** (`07_Settings/Quota/RoomQuota*Tests.cs`, `QuotaTests.cs`): specified in `room-types`;
+  this spec refers to them.
+- **Billing, wallet, prices, top-up, `getPaymentQuotas`, the spending limits on the AI services and their
+  `change-service-limits` socket event** (`04_Portal/Payments/*`, `QuotaSocketManager.cs:174-189`): out of
+  scope, specified in `billing`; only the user-type trimming of `getQuotaPaymentInformation`, the
+  tariff-limit refusals and a one-line cross-reference to the spending limits are used.
+- **Free backup count (`free_backup`), `docscloud` count and the DocsCloud tenant quota and quota report**
+  (`02_Settings/DocsCloud/DocsCloud*Quota*Tests.cs`, `CountFreeBackupChecker`): tariff features of other
+  subsystems; the DocsCloud quota report is a user-storage report for the Docs Cloud offering, not the
+  portal quota.
+- **Invitation limit per day** (`00_Regressions/InvitationLimitTest.cs`, `web:invitation-limit`): a rate
+  limit on invitations, not a tariff count; it is `int.MaxValue` on the integration host.
+- **`usersInRoom` feature** (`UsersInRoomChecker`, checked when a member joins a room): a per-room member
+  cap of the tariff; no test and no release note; belongs with room membership rather than storage quotas.
+- **Quota values of the Startup plan** (`maxTotalSize` 2 GiB, 12 rooms, 3 paid users): asserted only in the
+  commented-out tests; they are SaaS seed data, not server behaviour.
+- **Upload, UploadCheck, EmptyTrash, Move and Copy suites** (`02_Folders/Upload`, `02_Folders/UploadCheck`,
+  `06_Operations/EmptyTrash|Move|Copy`): read for quota assertions; none exist there (the new
+  `06_Operations/Copy/CopyPermissionsTests.cs`, `Move/MoveBatchBugTests.cs` and `Move/FolderMoveConflictTests.cs`
+  of the range included). The Trash and move cases of this spec come from `02_Folders/UsedSpace`.
+- **`QuotaFilter` (All / Default / Custom)** of the people and rooms listings: a listing filter, specified
+  with the listings.
+- **LDAP user quota mapping** (v2.6.1 note): LDAP import settings, out of scope.
+- **Standalone-only features `update` and `lifetime`** of the quota: shown only on a Standalone installation
+  (`QuotaHelper.cs:176-179`, rewritten without a change of behaviour in `8074ce5b54`); licence features,
+  specified in `branding-and-licensing`.
+
+## Suspected defects
+
+Re-checked 2026-10-24 against `34df477e4e..HEAD` and 2026-11-04 against `d58816bece..3533ad8a89`: none of the six
+was touched by either range (the 4.1.0 range only shifted the cited lines); all STILL OPEN.
+
+| # | Where | What the server does | Evidence | 2026-10-24 | 2026-11-04 |
+|---|-------|----------------------|----------|------------|------------|
+| Q1 | Default room / AI agent quota | `saveRoomQuotaSettings` and `saveAiAgentQuotaSettings` refuse a `defaultQuota` above the total storage (and a non-integer JSON number) with a plain `Exception`, which the middleware reports as 500 "Internal Server Error"; the sibling `SaveUserQuotaSettings` and `updateUserQuota` throw `ArgumentException` (400) for the same condition. | `SettingsController.cs:421, 430, 439, 488, 497, 505` vs `322, 331, 340`; `UnhandledExceptionMiddleware.cs:79-103`; the yaml documented the 500 until `c096f23fa9` removed it, the code is unchanged in 09d4de0768..6fb6dfb17a | STILL OPEN | STILL OPEN — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| Q2 | Move between owners | Moving a file from one account's My documents to another's silently raises the receiver's custom quota by the file size instead of refusing or asking; a Room admin moving a large file into a shared folder of another account can grow that account's limit without the portal-settings right. | `FileDao.cs:1432-1451` | STILL OPEN | STILL OPEN — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| Q3 | Standalone portal quota | `setTenantQuotaSettings` reports a caller who is not a DocSpace admin, and a hosted portal, with `NotSupportedException`, which the middleware maps to 415 Unsupported Media Type; a permission refusal is expected to be 403. | `SettingsController.cs:609-612`; yaml `setTenantQuotaSettings` 415 | STILL OPEN | STILL OPEN — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| Q4 | Per-room quota change | `FolderQuotaChangeAsync` refuses a quota above `maxTotalSize` or the Standalone portal quota with `InvalidOperationException` (403) and the "greater than the total storage" message, the status of an access refusal; the user-quota sibling answers 400 (`ArgumentException`). (Earlier revisions also cited a second, unreachable "folder not found" refusal; that code is gone.) | `FileStorageService.cs:1406-1409, 1416-1419` | STILL OPEN | STILL OPEN — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| Q5 | Portal allowance refusal message | A file that does not fit the remaining portal allowance is refused with "The maximum file size is exceeded (<remaining>)", quoting the remaining space as if it were a per-file limit; the room and user cases say "space quota exceeded". A client cannot distinguish the portal allowance from `maxFileSize` by the message. | `FileDao.cs:442-455`; `SetupInfo.cs:156-166`; `Resource.resx:958` | STILL OPEN | STILL OPEN |
+| Q6 | `getPortalQuota` | The `maxTotalSize = 0` branch for a User is unreachable behind the portal-settings demand, while the OpenAPI document — and the action's own `<remarks>` — describe it as behaviour. | `PortalController.cs:698-699, 716-724`; yaml `getPortalQuota` (53255-53263, unchanged in `5ea4dc6`) | STILL OPEN | STILL OPEN |
+
+2026-11-10: Q1 reproduced (`QuotaSettingsValidationTests.cs:48-96`, Standalone cap, and `BT/Quota/QuotaSettingsTariffTests.cs:80-93`,
+tariff `maxTotalSize`: 500 for room and AI agent, 400 for the user default); Q2 reproduced (`QuotaEnforcementTests.cs:104-141`: the
+owner's `isCustomQuota` turns true after a DocSpace admin's move); Q3 reproduced for the hosted portal
+(`BT/Quota/QuotaSettingsTariffTests.cs:62-77`, 415), its non-admin half is unreachable (403 first, `QuotaSettingsValidationTests.cs:196-212`);
+Q4 reproduced in its current form (`QuotaEnforcementTests.cs:143-162`: above the Standalone cap answers 403 with the "greater than the
+total storage" message; the second, "folder not found" refusal is gone — a missing folder now returns null). Q5 is unreachable on the
+stands (no `maxTotalSize` on Standalone, no Files service in the billing suite). Q6 is a documentation finding. All STILL OPEN.

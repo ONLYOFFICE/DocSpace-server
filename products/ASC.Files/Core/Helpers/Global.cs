@@ -188,12 +188,12 @@ public partial class Global(
                 return field;
             }
 
-            field = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
+            field = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic", ".heif"];
             return field;
         }
     }
 
-    private const int MaxTitle = 170;
+    public const int MaxTitle = 170;
 
     private static readonly Regex _invalidTitleChars = new("[\t*\\+:\"<>?|\\\\/\\p{Cs}]");
 

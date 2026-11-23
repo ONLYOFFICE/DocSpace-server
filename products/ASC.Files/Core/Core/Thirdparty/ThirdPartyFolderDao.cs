@@ -105,7 +105,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
     public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider,
         Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false,
-        MetadataFilter metadataFilter = null)
+        MetadataFilter metadataFilter = null, bool excludeAiProjectContent = false)
     {
         if (dao.CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != _providerInfo.ProviderFilter))
         {
@@ -130,6 +130,12 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             yield return room;
         }
     }
+
+    public IAsyncEnumerable<Folder<string>> GetAiProjectsVisibleToAsync(IEnumerable<string> projectsIds, int aiHubRootId, Guid userId, bool isAdmin)
+    {
+        return AsyncEnumerable.Empty<Folder<string>>();
+    }
+
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
     {
         return GetFoldersAsync(parentId);
@@ -233,6 +239,21 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public Task<string> SaveFolderAsync(Folder<string> folder, IEnumerable<Folder<string>> children)
+    {
+        throw new NotSupportedException();
+    }
+
+    public Task<string> SaveThreadFolderAsync(Folder<string> folder, Guid threadId, ThreadFolderKind kind)
+    {
+        throw new NotSupportedException();
+    }
+
+    public Task<AiAgentConversion> ConvertAiAgentAsync(string roomId)
+    {
+        throw new NotSupportedException();
+    }
+
+    public Task<int> MoveFolderAsync(string folderId, int toFolderId, string newTitle, Func<FilesDbContext, Task> inTransaction)
     {
         throw new NotSupportedException();
     }

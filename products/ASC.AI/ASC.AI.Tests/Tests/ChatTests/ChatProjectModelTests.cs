@@ -120,9 +120,10 @@ public class ChatProjectModelTests(AspireAppFixture fixture) : ChatProjectTestBa
     }
 
     /// <summary>
-    /// Product hole: the chat context drops a project the caller cannot "use AI" in (<c>FileSecurity.CanUseAi</c> needs
-    /// RoomManager or ContentCreator, while a project member holds Read), so a Read member's round is not bound to the
-    /// project and runs on whatever the composer sent or the portal binding names.
+    /// Was a product hole: the chat context dropped a project the caller could not "use AI" in (<c>FileSecurity.CanUseAi</c>
+    /// needs RoomManager or ContentCreator, while a project member held Read), so a member's round was not bound to the
+    /// project and ran on whatever the composer sent or the portal binding named. Fixed by making ContentCreator the
+    /// member role of a project in place of Read.
     /// </summary>
     [Fact]
     [Trait("Category", "Bug")]

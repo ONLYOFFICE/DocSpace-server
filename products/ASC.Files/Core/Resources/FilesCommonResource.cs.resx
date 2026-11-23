@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Chyba při spuštění editujícího souboru</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>V připojeném úložišti třetí strany není dostatek volného místa. Uvolněte v něm místo a zkuste to znovu.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>Archivované místnosti nelze upravovat</value>
   </data>

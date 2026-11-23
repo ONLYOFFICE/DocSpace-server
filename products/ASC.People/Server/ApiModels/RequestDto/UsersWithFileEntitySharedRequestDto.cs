@@ -63,7 +63,7 @@ public class UsersWithFileEntitySharedRequestDto<T>
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// Keeps only the accounts that do not have access to the entry yet, which is the set to offer when granting
+    /// Keeps only the accounts that have no access record on the entry yet, which is the set to offer when granting
     /// access. It takes precedence over `includeShared`, and every returned entry has `shared` set to false.
     /// </summary>
     /// <example>false</example>
@@ -71,7 +71,7 @@ public class UsersWithFileEntitySharedRequestDto<T>
     public bool? ExcludeShared { get; set; }
 
     /// <summary>
-    /// Keeps only the accounts that already have access to the entry, which is the set to offer when changing or
+    /// Keeps only the accounts that already have an access record on the entry, a denying one included, which is the set to offer when changing or
     /// revoking access. Every returned entry has `shared` set to true, and the flag is ignored when `excludeShared`
     /// is also set.
     /// </summary>

@@ -1,30 +1,14 @@
 builder.CreateFile("xlsx");
 
-var defaultFontSize = 11;
-var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
 var inputData = ${inputData};
-var oWorksheet = Api.GetActiveSheet();
-var currentRowIndex = 1;
-var currentColIndex = 1;
-var MAX_COLUMN_WIDTH = 100;
+var DATA_FONT_SIZE = 12;
+var HEADER_FONT_SIZE = 11;
+var BASE_ROW_HEIGHT = 19.5;
+var LINE_HEIGHT = 15;
 var MAX_ROW_HEIGHT = 125;
-
-function getMaxLineLength(text) {
-    if (!text || typeof text !== 'string') return 0;
-    var lines = text.split('\n');
-    var maxLength = 0;
-    for (var i = 0; i < lines.length; i++) {
-        if (lines[i].length > maxLength) {
-            maxLength = lines[i].length;
-        }
-    }
-    return maxLength;
-}
-
-function countLineBreaks(text) {
-    if (!text || typeof text !== 'string') return 0;
-    return (text.match(/\n/g) || []).length;
-}
+var MAX_COLUMN_WIDTH = 100;
+// The longest address a HYPERLINK formula takes; a longer one is set as a cell hyperlink.
+var MAX_FORMULA_URL = 255;
 
 function toColumnName(num) {
     for (var res = '', a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) {
@@ -33,108 +17,114 @@ function toColumnName(num) {
     return res;
 }
 
-function customizeWorksheet() {
-    oWorksheet.SetName(inputData.resources.sheetName);
+function lineStats(text) {
+    if (!text || typeof text !== 'string') return { length: 0, breaks: 0 };
+    var lines = text.split('\n');
+    var length = 0;
+    for (var i = 0; i < lines.length; i++) {
+        if (lines[i].length > length) length = lines[i].length;
+    }
+    return { length: length, breaks: lines.length - 1 };
 }
 
-function prepareData(startColIndex, startRowIndex) {
-    var colors = {
-        mainBgColor: Api.CreateColorFromRGB(inputData.themeColors.mainBgColor[0], inputData.themeColors.mainBgColor[1], inputData.themeColors.mainBgColor[2]),
-        lightBgColor: Api.CreateColorFromRGB(inputData.themeColors.lightBgColor[0], inputData.themeColors.lightBgColor[1], inputData.themeColors.lightBgColor[2]),
-        mainFontColor: Api.CreateColorFromRGB(inputData.themeColors.mainFontColor[0], inputData.themeColors.mainFontColor[1], inputData.themeColors.mainFontColor[2])
-    };
-
-    var kA = [];
-    for (var i = 0; i < inputData.data.keys.length; i++) {
-        kA.push({ "value": inputData.data.keys[i], "bold": true, "fontColor": defaultFontColorBlack, valign: "center" });
-    }
-    var dataTable = [{
-        height: 19.5,
-        dataArray: kA
-    }];
-
-    for (var i = 0; i < inputData.data.values.length; i++) {
-        var rowValues = [];
-        for (var j = 0; j < inputData.data.values[i].length; j++) {
-            rowValues.push({
-                "value": inputData.data.values[i][j].value,
-                "url": inputData.data.values[i][j].url,
-                "fontSize": (defaultFontSize + 1),
-                valign: "center",
-                "format": inputData.data.values[i][j].format
-            });
-        }
-        dataTable.push({
-            height: 19.5,
-            dataArray: rowValues
-        });
-    }
-    return dataTable;
+// A formula string literal: quotes are doubled.
+function quote(text) {
+    return '"' + String(text).replace(/"/g, '""') + '"';
 }
 
-function writeCell(position, data) {
-    if (data == null) return;
-    var sRange = oWorksheet.GetRange(position);
-    if (data.format) sRange.SetNumberFormat(data.format);
-    if (data.url) {
-        oWorksheet.SetHyperlink(position, data.url, "", data.value, data.value);
-    } else if (data.value != null) {
-        sRange.SetValue(data.value);
-        sRange.SetWrap(true);
+// The whole sheet is written with one call and formatted by ranges: cell-by-cell calls dominate the build time.
+function writeSheet(worksheet, sheet) {
+    var columnCount = sheet.keys.length;
+    var rowCount = sheet.values.length + 1;
+    if (columnCount === 0) return;
+
+    var lastColumn = toColumnName(columnCount);
+    var linkColumn = toColumnName(columnCount);
+    var data = [sheet.keys.slice()];
+    var widths = [];
+    var tallRows = [];
+    var longLinks = [];
+
+    for (var c = 0; c < columnCount; c++) {
+        widths.push(lineStats(sheet.keys[c]).length);
     }
-    sRange.SetFontSize(data.fontSize || defaultFontSize);
-    sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
-    sRange.SetBold(data.bold || false);
-    sRange.SetAlignHorizontal(data.halign || "left");
-    sRange.SetAlignVertical(data.valign || "bottom");
-    if (data.bgColor) sRange.SetFillColor(data.bgColor);
+
+    for (var r = 0; r < sheet.values.length; r++) {
+        var row = sheet.values[r].slice();
+        var breaks = 0;
+        for (var c = 0; c < row.length; c++) {
+            var stats = lineStats(row[c]);
+            if (stats.length > widths[c]) widths[c] = stats.length;
+            if (stats.breaks > breaks) breaks = stats.breaks;
+            if (row[c] == null) row[c] = "";
+            // Only text columns keep a leading "=" as text; elsewhere the quote prefix does.
+            else if (sheet.formats[c] !== "@" && /^[=+\-@]/.test(row[c])) row[c] = "'" + row[c];
+        }
+        var link = sheet.links[r];
+        if (link && link.length > MAX_FORMULA_URL) {
+            longLinks.push({ row: r + 2, url: link });
+            link = null;
+        }
+        row.push(link ? "=HYPERLINK(" + quote(link) + "," + quote(inputData.linkText) + ")" : "");
+        if (sheet.links[r] && inputData.linkText.length > widths[columnCount - 1]) widths[columnCount - 1] = inputData.linkText.length;
+        if (breaks > 0) tallRows.push({ row: r + 2, breaks: breaks });
+        data.push(row);
+    }
+
+    // Text format is set before the values, so an answer starting with "=" stays text.
+    for (var c = 0; c < sheet.formats.length; c++) {
+        var column = toColumnName(c + 1);
+        worksheet.GetRange(column + "1:" + column + rowCount).SetNumberFormat(sheet.formats[c]);
+    }
+    worksheet.GetRange("A1:" + toColumnName(sheet.formats.length) + "1").SetNumberFormat("@");
+
+    var all = worksheet.GetRange("A1:" + lastColumn + rowCount);
+    all.SetValue(data);
+    all.SetFontColor(Api.CreateColorFromRGB(0, 0, 0));
+    all.SetAlignHorizontal("left");
+    all.SetAlignVertical("center");
+    all.SetRowHeight(BASE_ROW_HEIGHT);
+
+    var header = worksheet.GetRange("A1:" + lastColumn + "1");
+    header.SetFontSize(HEADER_FONT_SIZE);
+    header.SetBold(true);
+
+    if (rowCount > 1) {
+        var body = worksheet.GetRange("A2:" + lastColumn + rowCount);
+        body.SetFontSize(DATA_FONT_SIZE);
+        body.SetWrap(true);
+
+        var links = worksheet.GetRange(linkColumn + "2:" + linkColumn + rowCount);
+        links.SetFontColor(Api.CreateColorFromRGB(5, 99, 193));
+        links.SetUnderline("single");
+        links.SetWrap(false);
+    }
+
+    for (var i = 0; i < longLinks.length; i++) {
+        worksheet.SetHyperlink(linkColumn + longLinks[i].row, longLinks[i].url, "", inputData.linkText, inputData.linkText);
+    }
+
+    for (var i = 0; i < tallRows.length; i++) {
+        worksheet.GetRange("A" + tallRows[i].row).SetRowHeight(Math.min(BASE_ROW_HEIGHT + tallRows[i].breaks * LINE_HEIGHT, MAX_ROW_HEIGHT));
+    }
+
+    for (var c = 0; c < columnCount; c++) {
+        worksheet.GetRange(toColumnName(c + 1) + "1").SetColumnWidth(Math.min(widths[c] * 1.2, MAX_COLUMN_WIDTH));
+    }
+
+    worksheet.GetRange("A1").Select();
 }
 
-function writeTable(table) {
-    var columnMaxLengths = {};
-    var rowMaxBreaks = {};
-    var baseRowHeight = 19.5;
-    var lineHeight = 15;
-
-    for (var i = 0; i < table.length; i++) {
-        rowMaxBreaks[i] = 0;
-        for (var j = 0; j < table[i].dataArray.length; j++) {
-            var currentLength = getMaxLineLength(table[i].dataArray[j].value);
-            if (!columnMaxLengths[j] || currentLength > columnMaxLengths[j]) {
-                columnMaxLengths[j] = currentLength;
-            }
-            var breaksCount = countLineBreaks(table[i].dataArray[j].value);
-            if (breaksCount > rowMaxBreaks[i]) {
-                rowMaxBreaks[i] = breaksCount;
-            }
-        }
+// One sheet per group of form versions, the current one first.
+for (var s = 0; s < inputData.sheets.length; s++) {
+    if (s > 0) {
+        Api.AddSheet(inputData.sheets[s].name);
     }
-
-    for (var i = 0; i < table.length; i++) {
-        var rowNum = currentRowIndex + i;
-        var calculatedHeight = baseRowHeight + (rowMaxBreaks[i] * lineHeight);
-        oWorksheet.GetRange("A" + rowNum).SetRowHeight(Math.min(calculatedHeight, MAX_ROW_HEIGHT));
-        for (var j = 0; j < table[i].dataArray.length; j++) {
-            var position = toColumnName(currentColIndex) + rowNum;
-            writeCell(position, table[i].dataArray[j]);
-            currentColIndex++;
-        }
-        currentColIndex = 1;
-    }
-
-    currentRowIndex += table.length;
-
-    for (var col in columnMaxLengths) {
-        if (columnMaxLengths.hasOwnProperty(col)) {
-            var columnLetter = toColumnName(parseInt(col) + 1);
-            oWorksheet.GetRange(columnLetter + "1").SetColumnWidth(Math.min(columnMaxLengths[col] * 1.2, MAX_COLUMN_WIDTH));
-        }
-    }
+    var worksheet = Api.GetActiveSheet();
+    worksheet.SetName(inputData.sheets[s].name);
+    writeSheet(worksheet, inputData.sheets[s]);
 }
+Api.GetSheets()[0].SetActive();
 
-customizeWorksheet();
-var dataTable = prepareData(currentColIndex, currentRowIndex);
-writeTable(dataTable);
-oWorksheet.GetRange(toColumnName(1) + 1).Select();
 builder.SaveFile("xlsx", "${tempFileName}");
 builder.CloseFile();

@@ -58,6 +58,12 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, Au
         return settings.DisabledRooms.Select(r => r.ToString());
     }
 
+    public async Task<IEnumerable<string>> GetDisabledRoomsAsync(Guid userId)
+    {
+        var settings = await settingsManager.LoadAsync<RoomsNotificationSettings>(userId);
+        return settings.DisabledRooms.Select(r => r.ToString());
+    }
+
     public async Task<RoomsNotificationSettings> GetSettingsForCurrentUserAsync()
     {
         return await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();

@@ -211,6 +211,7 @@ global using ASC.Webhooks.Core;
 global using Box.V2;
 global using Box.V2.Auth;
 global using Box.V2.Config;
+global using Box.V2.Exceptions;
 global using Box.V2.Models;
 
 global using DocuSign.eSign.Api;
@@ -246,6 +247,7 @@ global using Microsoft.Extensions.AI;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Http.Resilience;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Primitives;
 global using Microsoft.Graph;
@@ -255,6 +257,10 @@ global using Microsoft.SharePoint.Client;
 global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json.Linq;
+
+global using Npgsql;
+
+global using NpgsqlTypes;
 
 global using OpenAI;
 
@@ -281,10 +287,14 @@ global using static ASC.Web.Files.Services.DocumentService.DocumentServiceTracke
 global using static ASC.Web.Files.Utils.FileTracker;
 
 global using ActionType = ASC.AI.Integration.Assignments.ActionType;
+global using AiThread = ASC.AI.Integration.Threads.Thread;
+global using AttachmentKind = ASC.AI.Integration.Attachments.AttachmentKind;
+global using AttachmentsStorage = ASC.AI.Integration.Attachments.AttachmentsStorage;
 global using AuditReportFormat = ASC.Files.Core.Services.DocumentBuilderService.AuditReportFormat;
 global using AuditReportKind = ASC.Files.Core.Services.DocumentBuilderService.AuditReportKind;
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;
 global using Constants = ASC.Core.Users.Constants;
+global using DeletedThread = ASC.AI.Integration.Threads.DeletedThread;
 global using DocumentBuilderFailedException = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderFailedException;
 global using DocumentBuilderScriptRunner = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderScriptRunner;
 global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttribute;
@@ -302,12 +312,15 @@ global using JsonTokenType = System.Text.Json.JsonTokenType;
 global using License = ASC.Core.Billing.License;
 global using Location = ASC.Files.Core.Core.Entries.Location;
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+global using NewtonsoftJsonException = Newtonsoft.Json.JsonException;
 global using Profile = ASC.AI.Integration.Profiles.Profile;
 global using ReportType = ASC.Files.Core.Services.DocumentBuilderService.ReportType;
 global using SecurityContext = ASC.Core.SecurityContext;
 global using SocketManager = ASC.Web.Files.Utils.SocketManager;
 global using SortOrder = ASC.Api.Core.Core.SortOrder;
 global using Tag = ASC.Files.Core.Tag;
+global using ThreadFolderKind = ASC.AI.Integration.Threads.ThreadFolderKind;
+global using ThreadsStorage = ASC.AI.Integration.Threads.ThreadsStorage;
 global using Thumbnail = ASC.Files.Core.Thumbnail;
 global using Token = ASC.Web.Files.ThirdPartyApp.Token;
 global using UserInfo = ASC.Core.Users.UserInfo;

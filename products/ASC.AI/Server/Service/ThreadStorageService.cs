@@ -42,6 +42,7 @@ public class ThreadStorageService(
     TenantManager tenantManager,
     ThreadsStorage storage,
     ProfileStorageService profileStorageService,
+    AiProjectThreadsService projectThreadsService,
     IDistributedLockProvider distributedLockProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
@@ -160,7 +161,7 @@ public class ThreadStorageService(
 
         AssertOwner(thread);
 
-        await storage.DeleteAsync(tenantId, id);
+        await projectThreadsService.DeleteAsync(thread);
     }
 
     internal async Task<Thread?> ReadByIdVerifiedAsync(Guid id)

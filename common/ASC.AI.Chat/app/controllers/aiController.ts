@@ -50,9 +50,19 @@ import {
   setKnowledgeRoomIds,
   setRoundAttachmentIds,
   setRoundProfileId,
+  setRoundThreadId,
 } from "../requestContext.js";
 import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
 import { applyAiProjectChatContext } from "../storage/aiProjectChatContext.js";
+import {
+  buildContextFoldersLines,
+  buildLocationLines,
+  contextFolderIdsOf,
+  resolveContextFolders,
+  resolveLocation,
+  type ChatLocation,
+  type ContextFolder,
+} from "../storage/contextFolders.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { aiService } from "../storage/httpClient.js";
@@ -60,6 +70,7 @@ import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } fro
 import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
+import { readStoredProfile } from "./storedProfile.js";
 import { asActionType, getString, isObject, parseInt10 } from "../narrow.js";
 import {
   HttpToolsAdapter,
@@ -183,22 +194,11 @@ function stringField(body: unknown, key: string): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
-// `actionArgs.folderContext.id`: the folder the user connected as context
-// in the composer, or `undefined` when none is connected.
-function folderContextIdOf(body: unknown): string | undefined {
-  if (!isObject(body)) {
-    return undefined;
-  }
-  const actionArgs = body["actionArgs"];
-  if (!isObject(actionArgs)) {
-    return undefined;
-  }
-  const folderContext = actionArgs["folderContext"];
-  if (!isObject(folderContext)) {
-    return undefined;
-  }
-  const id = folderContext["id"];
-  return typeof id === "string" && id.length > 0 ? id : undefined;
+// The folders and rooms the user selected as the chat's context in the
+// composer (`actionArgs.folderContexts`, up to `CONTEXT_FOLDERS_LIMIT`), by
+// id; empty when none is selected.
+function contextFolderIdsOfBody(body: unknown): string[] {
+  return isObject(body) ? contextFolderIdsOf(body["actionArgs"]) : [];
 }
 
 // The id the engine hands the tools adapters for the round — mirrors its
@@ -208,11 +208,10 @@ function toolsScopeOf(body: unknown): string | undefined {
   return stringField(body, "contextEntityId") ?? stringField(body, "entityId");
 }
 
-// The folder the user works in for this round: the folder context they
-// picked in the composer, else the folder or room they are in. The location
-// line of the prompt.
+// The folder the round is attributed to: the first of the context folders
+// the user selected, else the folder or room they are in.
 function locationOf(body: unknown): string | undefined {
-  return folderContextIdOf(body) ?? stringField(body, "contextEntityId");
+  return contextFolderIdsOfBody(body)[0] ?? stringField(body, "contextEntityId");
 }
 
 // The entry the round is attributed to for usage accounting: the location
@@ -314,21 +313,25 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
 
 // Build the context fragment that tells the model where it is operating and
 // how to scope tool calls. The location lines are emitted only when the
-// round has a location (see `locationOf`).
-function buildContextFragment(entityId: string | undefined): string {
+// user is somewhere (`location`) that is not already one of the context
+// folders; the context folders - the folders and rooms the user selected for
+// the chat, several of them at once - follow as a list the model can reach
+// by id through the tools.
+function buildContextFragment(
+  location: ChatLocation | undefined,
+  contextFolders: readonly ContextFolder[] = [],
+): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
     "Context:",
     "- You are an AI agent operating inside an ONLYOFFICE Apps workspace, not a generic standalone assistant.",
   ];
-  if (entityId) {
-    lines.push(
-      `- You are currently in the folder or room with id ${entityId} — this is the user's current location. Any tool you call reads or modifies data on the user's behalf and with their permissions — never assume access beyond that.`,
-      `- When a tool needs a folder, room, or scope identifier and the user did not specify one, use this folder/room id (${entityId}) — e.g. scope searches and listings to it.`,
-      `- To see what is in the current location (its files and subfolders), call the get_folder_content tool with this id (${entityId}); use get_folder_info for the location's own properties. Do this when the user refers to "this folder/room", "these files", or asks what is here.`,
-    );
+  if (location) {
+    lines.push(...buildLocationLines(location));
   }
+  lines.push(...buildContextFoldersLines(contextFolders));
   lines.push(
+    "- Ids of folders, rooms and files are for tool calls only and mean nothing to the user: in your replies, refer to them by their names.",
     `- Today's date is ${today}.`,
     "- Prefer answering from the conversation when you can; use tools only when the request clearly needs data or actions in the workspace.",
     "- When you link to a workspace file, use only a link a tool returned for it (its `url` or `webUrl`), copied verbatim. Never compose a link yourself from a file id or title; if no tool returned a link, name the file without one.",
@@ -336,16 +339,24 @@ function buildContextFragment(entityId: string | undefined): string {
   return lines.join("\n");
 }
 
-function withContextPrompt<T>(body: T): T {
+async function withContextPrompt<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
   }
-  // The location line must tell the model where the USER is: the folder
-  // they connected as context in the composer (`actionArgs.folderContext`)
-  // when they picked one to work in, else the folder or room they are in
-  // (`contextEntityId`). The project id (`entityId`) is never a location —
-  // inside a project `applyAiProjectChatContext` supplies the folder context.
-  return appendActionPrompt(body, buildContextFragment(locationOf(body)));
+  // The model is told two things. Where the USER is: the folder or room
+  // they are in (`contextEntityId`). And what they selected as the chat's
+  // context: the folders and rooms of `actionArgs.folderContexts`, read here
+  // under the caller's credentials so the names and rights are the server's.
+  // The project id (`entityId`) is never a location - inside a project
+  // `applyAiProjectChatContext` supplies `contextEntityId`.
+  // The location is read as the context folders are, for its name.
+  const contextFolders = await resolveContextFolders(contextFolderIdsOfBody(body));
+  const entityId = stringField(body, "contextEntityId");
+  const location =
+    entityId && !contextFolders.some((folder) => folder.id === entityId)
+      ? await resolveLocation(entityId)
+      : undefined;
+  return appendActionPrompt(body, buildContextFragment(location, contextFolders));
 }
 
 // Attribute the round to the DocSpace entry it runs for — the folder the
@@ -432,7 +443,8 @@ const engine = new AIEngine({
   // formAnalysisSubAgent adds the `analyze_form` delegating tool; its serverType is silent
   // (absent from systemServerTypes), so it runs without UI approval.
   // documentAgentTools adds the `document_agent` delegating tool when an agent is configured;
-  // its serverType is approval-required, a delegated task may run for minutes.
+  // its serverType is approval-required, a delegated task may run for minutes. The tool itself
+  // asks for no approval (it only creates files), so only the "ask" permission mode stops it.
   toolsAdapter: composeToolsAdapters(
     systemToolsSource,
     customToolsSource,
@@ -695,21 +707,80 @@ function hasPromptContent(userMessage: unknown): boolean {
 // Validation error when the effective profileId does not reference an
 // existing profile, or null when it does (or when no profileId is supplied —
 // the engine then resolves the scope's assignment itself). A malformed id
-// makes the C# lookup fail with a non-404 status; that is just as much "no
-// such profile" to the caller, so both collapse to the same message.
+// makes the C# lookup fail with 400; that is just as much "no such profile"
+// to the caller, so both collapse to the same message. A lookup that fails
+// any other way is the service failing, and is passed on with its status.
 async function unknownProfileIdError(
   profileId: string | undefined,
 ): Promise<string | null> {
   if (!profileId) {
     return null;
   }
-  const profile = await storage.profiles
-    .readById(profileId)
-    .catch(() => undefined);
+  const profile = await readStoredProfile(profileId);
   if (!profile) {
     return `unknown profileId: ${profileId}`;
   }
   return aiToolsUnpaidError(profile.providerType);
+}
+
+// What a round that stores its user message checks before the stream opens,
+// for `send-with-stream` and its OpenAI-framed twin alike. Answers `false`
+// when it has already responded with the refusal. Runs after the AI-project
+// binding, so the profile checked is the one the round will use.
+async function preflightStreamRound(body: SendStreamInput, res: Response): Promise<boolean> {
+  // Reject an empty prompt before opening the stream: a user message with
+  // neither non-whitespace text nor an attachment otherwise reaches the
+  // provider and streams back nothing (Bug 82720). A file-only message
+  // passes — the composer sends one when a file is dropped with no text.
+  if (!hasPromptContent(body.userMessage)) {
+    res.status(400).json({
+      error: "userMessage must contain non-empty text content or an attachment",
+    });
+    return false;
+  }
+  // The same per-kind attachment cap as threads/append-user-message —
+  // these endpoints persist the user message through the same engine, so
+  // they are the other way around the composer's limit (Bug 82894).
+  const limitError = attachmentLimitError(body.userMessage);
+  if (limitError) {
+    res.status(400).json({ error: limitError });
+    return false;
+  }
+  // A new thread (no threadId) is created implicitly here, so gate it like
+  // threads/create (review #6): `assertThreadCreatable` throws the refusal
+  // for an entity the caller cannot use or a round no profile resolves for.
+  if (!body.threadId) {
+    await assertThreadCreatable(body.entityId, body.profileId);
+  }
+  // Without a profileId the round runs on the model the thread was created
+  // with (Bug 82860). Pre-fill it from the thread's stored value so the
+  // checks below and the document agent tool see the profile the round
+  // really uses; a session-level profileId is honored for the request
+  // without mutating persisted state.
+  if (!body.profileId && body.threadId) {
+    const thread = await storage.threads.readById(body.threadId);
+    if (thread?.profileId) {
+      body.profileId = thread.profileId;
+    }
+  }
+  // The effective profile, for the document agent tool: it runs the agent
+  // on the chat's own model, and `callTool` carries no profile.
+  setRoundProfileId(body.profileId);
+  setRoundThreadId(body.threadId);
+  // The effective profileId must reference an existing profile BEFORE the
+  // stream opens: a malformed or unknown id otherwise surfaces only as an
+  // opaque {"type":"error"} frame inside a 200 stream (Bug 83045), or the
+  // engine silently falls back to another model (Bug 83160).
+  const profileError = await unknownProfileIdError(body.profileId);
+  if (profileError === AI_TOOLS_UNPAID_ERROR) {
+    res.status(402).json({ error: await aiToolsUnpaidMessage() });
+    return false;
+  }
+  if (profileError) {
+    res.status(400).json({ error: profileError });
+    return false;
+  }
+  return true;
 }
 
 // Sentinel so the callers can tell the billing failure (402) apart from the
@@ -812,7 +883,7 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
-    const result = await engine.send(await withSourceMetadata(req.body));
+    const result = await engine.send(await withSourceMetadata(withRequestSignal(res, req.body)));
     res.json(result);
   }),
 
@@ -852,6 +923,21 @@ export const aiController = {
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
     await primeChatContext({ entityId: customScopeOf(req.body) });
+    // A profileId that names no profile would otherwise fall back to another
+    // model without a word, and an unpaid AI Tools wallet would answer inside
+    // the stream (Bugs 83160, 83344): refuse both up front, as the stored
+    // rounds do.
+    {
+      const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError === AI_TOOLS_UNPAID_ERROR) {
+        res.status(402).json({ error: await aiToolsUnpaidMessage() });
+        return;
+      }
+      if (profileError) {
+        res.status(400).json({ error: profileError });
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -903,66 +989,10 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
-    // Reject an empty prompt before opening the stream: a user message with
-    // neither non-whitespace text nor an attachment otherwise reaches the
-    // provider and streams back nothing (Bug 82720). A file-only message
-    // passes — the composer sends one when a file is dropped with no text.
-    if (!hasPromptContent(req.body.userMessage)) {
-      res.status(400).json({
-        error: "userMessage must contain non-empty text content or an attachment",
-      });
+    if (!(await preflightStreamRound(req.body, res))) {
       return;
     }
-    // The same per-kind attachment cap as threads/append-user-message —
-    // this endpoint persists the user message through the same engine, so
-    // it is the other way around the composer's limit (Bug 82894).
-    {
-      const limitError = attachmentLimitError(req.body.userMessage);
-      if (limitError) {
-        res.status(400).json({ error: limitError });
-        return;
-      }
-    }
-    // A new thread (no threadId) is created implicitly here, so gate it like
-    // threads/create: a supplied entityId must be accessible and a profile
-    // must resolve, otherwise 404 (review #6).
-    if (!req.body.threadId) {
-      await assertThreadCreatable(req.body.entityId, req.body.profileId);
-    }
-    // When the request omits profileId, the engine resolves the Chat
-    // assignment (or the Default slot) and persists it onto the thread,
-    // silently overwriting the model the thread was created with (Bug 82860).
-    // Pre-fill profileId from the thread's stored value: a session-level
-    // profileId is honored for the request without mutating persisted state,
-    // so the thread keeps its own model. The proper fix lives in the engine's
-    // profile resolution; this is a proxy-side guard.
-    if (!req.body.profileId && req.body.threadId) {
-      const thread = await storage.threads.readById(req.body.threadId);
-      if (thread?.profileId) {
-        req.body.profileId = thread.profileId;
-      }
-    }
-    // The effective profile, for the document agent tool: it runs the agent
-    // on the chat's own model, and `callTool` carries no profile.
-    setRoundProfileId(req.body.profileId);
-    // The effective profileId must reference an existing profile BEFORE the
-    // stream opens: a malformed or unknown id otherwise surfaces only as an
-    // opaque {"type":"error"} frame inside a 200 stream (Bug 83045), or the
-    // engine silently falls back to another model (Bug 83160). Runs after
-    // the thread prefill and the AI-project binding, so only the value that
-    // will actually be used is checked.
-    {
-      const profileError = await unknownProfileIdError(req.body.profileId);
-      if (profileError === AI_TOOLS_UNPAID_ERROR) {
-        res.status(402).json({ error: await aiToolsUnpaidMessage() });
-        return;
-      }
-      if (profileError) {
-        res.status(400).json({ error: profileError });
-        return;
-      }
-    }
-    const body = withContextPrompt(
+    const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
     // The round's ids as the client sent them (see `toolsScopeOf`). An
@@ -1002,20 +1032,12 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
-    setRoundProfileId(req.body.profileId);
-    // Same pre-flight as sendWithStream (Bugs 83045 / 83160).
-    {
-      const profileError = await unknownProfileIdError(req.body.profileId);
-      if (profileError === AI_TOOLS_UNPAID_ERROR) {
-        res.status(402).json({ error: await aiToolsUnpaidMessage() });
-        return;
-      }
-      if (profileError) {
-        res.status(400).json({ error: profileError });
-        return;
-      }
+    // The same pre-flight as sendWithStream: this route stores the user
+    // message and creates the thread through the same engine path.
+    if (!(await preflightStreamRound(req.body, res))) {
+      return;
     }
-    const body = withContextPrompt(
+    const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
     await streamOpenAiSse(
@@ -1044,9 +1066,18 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
+    // The effective profile and thread, for the document agent tool (see
+    // sendWithStream): the sent profile, else the thread's own model.
+    {
+      const thread = req.body.profileId
+        ? undefined
+        : await storage.threads.readById(req.body.threadId);
+      setRoundProfileId(req.body.profileId ?? thread?.profileId ?? undefined);
+      setRoundThreadId(req.body.threadId);
+    }
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
-    const body = withContextPrompt(
+    const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
     await streamNdjson(

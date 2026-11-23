@@ -53,7 +53,7 @@ internal static partial class DocumentServiceConnectorLogger
     public static partial void InfoDocServiceCommandResponse(this ILogger<DocumentServiceConnector> logger, ErrorTypes error, string errorString);
 
     [LoggerMessage(LogLevel.Error, "DocService command error")]
-    public static partial void ErrorDocServiceCommandError(this ILogger<DocumentServiceConnector> logger, Exception exception);
+    public static partial void ErrorDocServiceCommandError(this ILogger logger, Exception exception);
 
     [LoggerMessage(LogLevel.Error, "Healthcheck DocService check error")]
     public static partial void ErrorDocServiceHealthcheck(this ILogger<DocumentServiceConnector> logger, Exception exception);

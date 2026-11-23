@@ -114,7 +114,7 @@ public class UploadCheckTests(
         var room = await CreateCustomRoom("Autotest Room For Upload Check Null");
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _foldersApi.CheckUploadAsync(room.Id, new CheckUploadRequest(filesTitle: null), TestContext.Current.CancellationToken));
+            async () => await _foldersApi.CheckUploadAsync(room.Id, new CheckUploadRequest(filesTitle: null!), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
     }

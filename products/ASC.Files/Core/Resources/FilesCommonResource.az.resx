@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Faylın redaktəsinə başlarkən xəta baş verdi</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>Qoşulmuş üçüncü tərəf yaddaşında kifayət qədər boş yer yoxdur. Orada yer boşaldın və yenidən cəhd edin.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>Arxivlənmiş otaqları redaktə edə bilməzsiniz</value>
   </data>

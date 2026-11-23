@@ -336,8 +336,9 @@ public class CustomerServiceUsageRequestDto
 
     /// <summary>
     /// The usage annotations a wallet service records alongside its consumption, as the key and value pairs that
-    /// must all match for a record to be counted. The keys are chosen by the service that writes them, so read them
-    /// off the `metadata` of the records already returned rather than guessing; an omitted map counts every record.
+    /// must all match for a record to be counted, passed as `metadata[key]=value`. The keys are chosen by the service
+    /// that writes them, so read them off the `metadata` of the records already returned rather than guessing; an
+    /// omitted map counts every record.
     /// </summary>
     /// <example>{"key1": "value1", "key2": "value2"}</example>
     public Dictionary<string, string> Metadata { get; set; }
@@ -382,14 +383,16 @@ public class CustomerServiceUsageRequestDto
 }
 
 /// <summary>
-/// The query parameters for reading a page of the portal's wallet top-ups: the period, the outcome and the paging
-/// window.
+/// The query parameters for reading a page of the portal's wallet top-ups: the period, the outcome, who started
+/// them, their metadata and the paging window.
 /// </summary>
 /// <example>
 /// {
 ///   "startDate": "2025-01-01T00:00:00Z",
 ///   "endDate": "2025-12-31T23:59:59Z",
 ///   "status": "Completed",
+///   "initiator": "Automatic",
+///   "metadata": {"details": "Automatic top up"},
 ///   "offset": 0,
 ///   "limit": 25
 /// }
@@ -419,6 +422,23 @@ public class GetCustomerDepositsRequestDto
     /// <example>Completed</example>
     [FromQuery(Name = "status")]
     public OperationStatus? Status { get; init; }
+
+    /// <summary>
+    /// Who started the top-ups to keep: a portal user, or the portal itself, by the automatic top-up or to renew a
+    /// subscription. Top-ups of both kinds are reported when this is omitted.
+    /// </summary>
+    /// <example>Automatic</example>
+    [FromQuery(Name = "initiator")]
+    public DepositInitiator? Initiator { get; init; }
+
+    /// <summary>
+    /// The metadata pairs a top-up must all carry to be reported, passed as `metadata[key]=value`. A top-up the portal
+    /// made on its own carries the key `details`. Its value is a display text that can change, so a filter by it may
+    /// stop matching. To find the portal's own top-ups, use `initiator`. An omitted map keeps every top-up.
+    /// </summary>
+    /// <example>{"details": "Automatic top up"}</example>
+    [FromQuery(Name = "metadata")]
+    public Dictionary<string, string> Metadata { get; init; }
 
     /// <summary>
     /// The number of top-ups to skip before the first one returned, for walking through a long history page by page.

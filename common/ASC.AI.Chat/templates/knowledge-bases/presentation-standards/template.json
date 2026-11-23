@@ -1,0 +1,11 @@
+{
+  "name": "Presentation standards",
+  "description": "The criteria a deck is reviewed against and the slide design checklist.",
+  "category": "Presentation",
+  "color": "FF8F40",
+  "cover": "flag",
+  "files": [
+    "Review criteria.docx",
+    "Slide design checklist.md"
+  ]
+}

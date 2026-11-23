@@ -32,12 +32,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 module.exports = (files) => {
-  const router = require("express").Router(),
-    bodyParser = require("body-parser"),
+  const express = require("express"),
+    router = express.Router(),
     check = require("../middleware/authService.js")();
 
-  router.use(bodyParser.json());
-  router.use(bodyParser.urlencoded({ extended: false }));
+  router.use(express.json());
+  router.use(express.urlencoded({ extended: false }));
   router.use(require("cookie-parser")());
   router.use((req, res, next) => {
     const token = req?.headers?.authorization;

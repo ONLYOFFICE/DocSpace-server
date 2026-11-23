@@ -256,7 +256,7 @@
                 <configuration>
                     <apiDocsUrl>http://localhost:8080/docs</apiDocsUrl>
                     <outputFileName>identity-registration-openapi.json</outputFileName>
-                    <outputDir>${build.directory}</outputDir>
+                    <outputDir>${project.build.directory}</outputDir>
                     <skip>false</skip>
                 </configuration>
             </plugin>

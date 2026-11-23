@@ -152,6 +152,33 @@ public class PrivateRoomSectionTests(AspireAppFixture fixture) : PrivacyRoomTest
         (await RoomTitles(SearchArea.PrivateRooms)).Should().Contain(room.Title);
     }
 
+    /// <summary>
+    /// The administrator's view drops a private room the caller is not a member of in every area: Rooms,
+    /// the private section, <c>Any</c> and the Archive, for the Owner and a DocSpace admin alike.
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task AdminOutsideTheRoom_DoesNotSeeActiveOrArchivedPrivateRoomInAnyArea(bool asOwner)
+    {
+        var admin = asOwner ? Owner : await InviteContact(EmployeeType.DocSpaceAdmin);
+
+        var creator = await InviteWithKeys(EmployeeType.RoomAdmin);
+        var activeRoom = await CreatePrivateRoom($"Private Active {Guid.NewGuid():N}", RoomType.CustomRoom);
+        var archivedRoom = await CreatePrivateRoom($"Private Archived {Guid.NewGuid():N}", RoomType.CustomRoom);
+        await ArchiveRoom(archivedRoom.Id);
+
+        var creatorArchive = await PollUntil(() => RoomTitles(SearchArea.Archive), titles => titles.Contains(archivedRoom.Title));
+        creatorArchive.Should().Contain(archivedRoom.Title, "the creator sees the archived private room, so its absence below is the filter");
+
+        await _filesClient.Authenticate(admin);
+
+        foreach (var area in new[] { SearchArea.Active, SearchArea.PrivateRooms, SearchArea.Any, SearchArea.Archive })
+        {
+            (await RoomTitles(area)).Should().NotContain([activeRoom.Title, archivedRoom.Title], "area {0}", area);
+        }
+    }
+
     [Fact]
     public async Task Member_SeesTheRoomInTheSectionAndNotInRooms()
     {

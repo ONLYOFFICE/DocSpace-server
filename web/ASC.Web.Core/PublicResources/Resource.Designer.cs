@@ -61,6 +61,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Credit (bonuses).
+        /// </summary>
+        public static string AccountingCustomerOperationBonusCredit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationBonusCredit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Debit (bonuses).
+        /// </summary>
+        public static string AccountingCustomerOperationBonusDebit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationBonusDebit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cached.
         /// </summary>
         public static string AccountingCustomerOperationCachedTokens {
@@ -255,6 +273,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceDesc_backup {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bonus credit.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_bonus {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_bonus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bonus expiration.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_bonus_expiration {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_bonus-expiration", resourceCulture);
             }
         }
         

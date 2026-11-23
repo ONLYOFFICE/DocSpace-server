@@ -41,14 +41,13 @@ public class MetadataController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Lists the metadata templates of the portal with their fields, the dictionary a file, a folder or a room is described
-    /// with. Any member of the portal can read it, the list is the same for everyone. The call is read-only. The templates
-    /// come back ordered by their creation, each with its fields in their display order and the choice options of the choice
-    /// fields; the `visible` parameter narrows the list to the templates shown in the pickers or to the hidden ones, without
-    /// it both are returned. The author and the last editor of a template come as user objects with the display name and
-    /// the avatar, so a list needs no lookup of its own per author. An empty list means the portal has no templates yet.
-    /// The custom text fields set on the entries are not templates and are not listed here: read them on the entry with
-    /// `GET api/2.0/files/metadata/file/{fileId}`.
+    /// Returns the metadata templates of the portal with their fields. A template is a set of fields that describes a file,
+    /// a folder, or a room. Any signed-in user can call it. The call is read-only. Every caller gets the same list. The
+    /// templates come in the order of their creation. Their fields come in display order, with the options of choice
+    /// fields. Without `visible`, the call returns both shown and hidden templates. The author and the last editor of a
+    /// template come as user objects. An empty list means the portal has no templates. The custom text fields of entries
+    /// are not templates, and the call does not return them. To read them, use `GET api/2.0/files/metadata/file/{fileId}`
+    /// or `GET api/2.0/files/metadata/folder/{folderId}`.
     /// </remarks>
     /// <summary>Get metadata templates</summary>
     /// <path>api/2.0/files/metadata/templates</path>
@@ -64,17 +63,15 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Creates a metadata template for the whole portal together with its fields in one call. Only a DocSpace admin can
-    /// create templates. The template name must be unique on the portal regardless of case, at most 255 characters, and the
-    /// name `System` is reserved. The template needs at least one field: a request without fields is refused, more fields
-    /// are added later with `POST api/2.0/files/metadata/templates/{templateId}/fields`. Every field needs a name unique
-    /// within the template and a type from the published set; a
-    /// choice field requires at least one option and the options must be unique, a field of another type takes no options.
-    /// A field without `order` is placed after the fields that have one, in the order of the request. The template and
-    /// its fields are stored together: an invalid field rejects the whole request and nothing is created.
-    /// The answer is the created template with its fields and the generated option identifiers, which the values written
-    /// with `PUT api/2.0/files/metadata/file/{fileId}/values` refer to. A name already in use or an invalid field is
-    /// answered with 400; the request of a member who is not a DocSpace admin with 403.
+    /// Creates a metadata template of the portal together with its fields. Requires a DocSpace admin. Other callers
+    /// get 403. The call changes data. A repeated call returns 400, since the name is then taken. A field without `order` goes
+    /// after the fields with one, in the order of the request. The response is the created template with the generated
+    /// option IDs. The values of `PUT api/2.0/files/metadata/file/{fileId}/values` refer to these IDs. To add fields
+    /// later, use `POST api/2.0/files/metadata/templates/{templateId}/fields`. The call compares names regardless of case.
+    /// It returns 400 if `fields` is empty, or the name is empty, `System`, or taken. It also returns 400 for a name
+    /// over 255 characters, repeated field names, an unknown field type, or wrong options. A choice field needs at least
+    /// one option, and its options must be unique. Other field types take no options. If any field is invalid, the call
+    /// creates nothing.
     /// </remarks>
     /// <summary>Create a metadata template</summary>
     /// <path>api/2.0/files/metadata/templates</path>
@@ -93,10 +90,9 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Returns one metadata template with its fields, in their display order, and the options of its choice fields. Any
-    /// member of the portal can read a template, the call is read-only. Use it to resolve the template identifiers a file or
-    /// a folder reports in `assignedMetadataTemplates` into names and fields. A template that does not exist is answered
-    /// with 404.
+    /// Returns one metadata template with its fields and the options of its choice fields. The fields come in display
+    /// order. Any signed-in user can call it. The call is read-only. Use it to get the names and fields of the IDs
+    /// in `assignedMetadataTemplates` of a file or a folder. If no template has this ID, the call returns 404.
     /// </remarks>
     /// <summary>Get a metadata template</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}</path>
@@ -112,15 +108,15 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Renames a metadata template or changes whether it is shown in the pickers. Only a DocSpace admin can change
-    /// templates. The request is partial: a property left out keeps its value, the fields are not touched here and are
-    /// changed with `PUT api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}`. The new name follows the rules
-    /// of the creation: unique on the portal regardless of case and at most 255 characters. Hiding a template keeps it
-    /// assigned and keeps its values, but takes its fields out of the pickers, the search and the filling: every entry
-    /// it is assigned to reports `hasMetadataFields` false unless another visible template or a custom field is on it,
-    /// and the clients showing those entries are told to re-read them. Showing it again reverses that. The answer is the
-    /// whole template with its fields. A template that does not exist is answered with 404, a name already in use or too
-    /// long with 400.
+    /// Renames a metadata template or changes whether it is shown in the pickers. Requires a DocSpace admin. Other
+    /// callers get 403. The call changes data, and you can repeat it with the same body. A property left out keeps its
+    /// value. This call does not change the fields. To change a field, use
+    /// `PUT api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}`. With `visible` false, the template keeps its
+    /// assignments and values. Its fields leave the pickers, the filling, and the default text search. An entry with the
+    /// template then has `hasMetadataFields` false if no other visible template or custom field gives it fields. With
+    /// `visible` true, the call reverses this. The response is the whole template with its fields. If no template has
+    /// this ID, the call returns 404. The call returns 400 if another template has the new name in any case. It also
+    /// returns 400 for a name over 255 characters.
     /// </remarks>
     /// <summary>Update a metadata template</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}</path>
@@ -138,12 +134,12 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Deletes a metadata template together with its fields, its assignments and every value written for its fields on any
-    /// file, folder or room of the portal. Only a DocSpace admin can delete templates. The deletion is irreversible and there
-    /// is no confirmation: the affected entries lose the template at once, their search documents are rebuilt and the clients
-    /// viewing them are told to refresh. A template that does not exist, or was already deleted, is answered with 404.
-    /// To take the template off a single entry and keep it for the others use
-    /// `DELETE api/2.0/files/metadata/file/{fileId}/templates/{templateId}` instead.
+    /// Deletes a metadata template with its fields, assignments, and the values of its fields on all files, folders,
+    /// and rooms. Requires a DocSpace admin. Other callers get 403. The deletion cannot be undone, and the call asks for
+    /// no confirmation. All entries lose the template immediately. The call returns 404 for an unknown ID, so a repeated
+    /// call also returns 404. To remove the template from one entry only, use
+    /// `DELETE api/2.0/files/metadata/file/{fileId}/templates/{templateId}` or
+    /// `DELETE api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`.
     /// </remarks>
     /// <summary>Delete a metadata template</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}</path>
@@ -158,13 +154,12 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Adds a field to an existing metadata template. Only a DocSpace admin can change templates. The field name must be
-    /// unique within the template regardless of case and at most 255 characters, the type must be one of the published ones,
-    /// a choice field needs at least one option and unique option values, a field of another type takes no options. A
-    /// field without `order` is placed after the last field of the template. The entries the template is already
-    /// assigned to get the field without a value: nothing is written on them and no cascade runs. The answer is the
-    /// created field with its generated option identifiers. A template that does not exist is answered with 404, an
-    /// invalid field with 400.
+    /// Adds a field to a metadata template. Requires a DocSpace admin. Other callers get 403. The call changes data. A
+    /// repeated call returns 400, since the field name is then taken. A field without `order` goes after the last field
+    /// of the template. Entries with the template get the field without a value. The response is the created field with
+    /// the generated option IDs. If no template has this ID, the call returns 404. The call returns 400 if the name is
+    /// empty, over 255 characters, or taken in any case. It also returns 400 for an unknown type or wrong options. A
+    /// choice field needs at least one option, and its options must be unique. Other field types take no options.
     /// </remarks>
     /// <summary>Add a metadata field</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}/fields</path>
@@ -182,13 +177,15 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Changes the name, the type, the options or the display order of a metadata field. Only a DocSpace admin can change
-    /// templates. The request is partial: a property left out keeps its value. The type can be changed only while no entry
-    /// holds a value for the field, and an option can be removed only while no entry has selected it; a new option is sent
-    /// without an identifier and gets one in the answer. A new name must be unique within the template regardless of case.
-    /// The values already written are left as they are. The field is addressed through its own template: a field reached
-    /// through another template's route is answered with 404, the same as a field that does not exist. A conflicting name,
-    /// a type change on a field with values or the removal of an option in use is answered with 400.
+    /// Changes the name, the type, the options, or the display order of a metadata field. Requires a DocSpace admin.
+    /// Other callers get 403. The call changes data. A property left out keeps its value. The `options` list replaces
+    /// all options of the field. Send a new option without an ID. The response gives it a new ID. So a repeat replaces
+    /// the options of the first call with new options and new IDs. If an entry has selected one of them by then, the
+    /// repeat returns 400. To repeat safely, send the options with the IDs from the response. The values already written
+    /// stay as they are. The call returns 400 if another field of the template has the new name in any case. It also
+    /// returns 400 if you change the type of a field with values. It also returns 400 if you remove an option that an
+    /// entry has selected, or if the field is invalid. If the template has no field with this ID, the call returns 404.
+    /// A field of another template also returns 404.
     /// </remarks>
     /// <summary>Update a metadata field</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}</path>
@@ -206,13 +203,11 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Deletes a metadata field from its template together with every value written for it on any file, folder or room of
-    /// the portal. Only a DocSpace admin can change templates. The deletion is irreversible: the affected entries lose the
-    /// value at once, their search documents are rebuilt and the clients viewing them are told to refresh. The template and
-    /// its other fields stay as they are. The last field of a template cannot be deleted, a template always keeps at least
-    /// one: to get rid of it, delete the template with `DELETE api/2.0/files/metadata/templates/{templateId}`; such a
-    /// request is answered with 400 and the field stays. A field that does not exist, or that belongs to another template
-    /// than the one in the route, is answered with 404.
+    /// Deletes a metadata field with its values on all files, folders, and rooms. Requires a DocSpace admin. Other callers
+    /// get 403. The deletion cannot be undone. The template and its other fields stay. A template always keeps at least
+    /// one field. If this is the last field, the call returns 400 and deletes nothing. To delete the whole template, use
+    /// `DELETE api/2.0/files/metadata/templates/{templateId}`. If the template has no field with this ID, the call
+    /// returns 404. So a repeated call also returns 404.
     /// </remarks>
     /// <summary>Delete a metadata field</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}</path>
@@ -228,19 +223,16 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Returns the metadata of a file: the templates assigned to it, directly or inherited from a cascading folder above
-    /// it, each with its fields, and the custom text fields set on the file. The caller needs read access to the file: a
-    /// member of the portal, or an anonymous caller through an external link that grants access to the file or to a
-    /// folder above it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is
-    /// read-only. A field carries its value inside it; a field the file holds no value for comes without a `value`.
-    /// A file never cascades, so every template reports `cascade` false and no `conflictResolveType`; whether it was
-    /// inherited from a folder above is not told apart from a direct assignment. The custom fields are name and value
-    /// pairs and are not part of any template. A file without metadata is answered with empty lists, not with an error.
-    /// `hasMetadataFields` sums the answer up for a client that decides whether to offer the filling: true when a visible
-    /// template has a field or a custom field exists, false otherwise; the fields of a hidden template do not count.
-    /// The same shape is returned by `PUT api/2.0/files/metadata/file/{fileId}/values` after a write. A request with
-    /// neither a session nor a link key is answered with 401; a file the caller cannot read with 403, a file that does
-    /// not exist with 404.
+    /// Returns the metadata templates of a file with their fields and values, and the custom text fields of the file. A
+    /// template can be assigned directly or inherited from a cascading folder above. The response does not tell these
+    /// apart. Requires read access to the file. Other callers get 403. An anonymous caller can use an external link to
+    /// the file or to a folder above it. Pass the link key in the `Request-Token` header or the `share` query parameter.
+    /// Without a session or a link key, the call returns 401. The call is read-only. A field without a value on the file
+    /// has no `value`. For a file, `cascade` is always false, and `conflictResolveType` is absent. The custom fields are
+    /// name and value pairs outside any template. A file without metadata returns empty lists. The `hasMetadataFields`
+    /// flag is true if a visible template has a field or the file has a custom field. After a write,
+    /// `PUT api/2.0/files/metadata/file/{fileId}/values` returns the same object. If no file has this ID, the call
+    /// returns 404.
     /// </remarks>
     /// <summary>Get file metadata</summary>
     /// <path>api/2.0/files/metadata/file/{fileId}</path>
@@ -260,19 +252,17 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Returns the metadata of a folder or a room: the templates assigned to it, directly or inherited from a cascading
-    /// folder above it, each with its fields, and the custom text fields set on it. The caller needs read access to the
-    /// folder: a member of the portal, or an anonymous caller through an external link to the folder or to a folder
-    /// above it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is
-    /// read-only. A field carries its value inside it; a field without a value on the folder comes without `value`. Each
-    /// template reports whether this folder cascades it to its content in `cascade`, with the rule of that cascade in
-    /// `conflictResolveType`, absent while it does not; an inherited template reports false unless this folder cascades it
-    /// on its own. The custom fields are name and value pairs outside any template. A folder without metadata is answered
-    /// with empty lists. `hasMetadataFields` sums the answer up for a client that decides whether to offer the filling:
-    /// true when a visible template has a field or a custom field exists, false otherwise; the fields of a hidden template
-    /// do not count. The cascade is changed with `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`.
-    /// A request with neither a session nor a link key is answered with 401; a folder the caller cannot read with 403, a
-    /// folder that does not exist with 404.
+    /// Returns the metadata templates of a folder or a room with their fields and values, and its custom text fields. A
+    /// template can be assigned directly or inherited from a cascading folder above. Requires read access to the folder.
+    /// Other callers get 403. An anonymous caller can use an external link to the folder or to a folder above it. Pass
+    /// the link key in the `Request-Token` header or the `share` query parameter. Without a session or a link key, the
+    /// call returns 401. The call is read-only. A field without a value on the folder has no `value`. A template has
+    /// `cascade` true if this folder passes it down to its content. Then `conflictResolveType` gives the rule for
+    /// existing values. Otherwise, `conflictResolveType` is absent. The custom fields are name and value pairs outside any
+    /// template. A folder without metadata returns empty lists. The `hasMetadataFields` flag is true if a visible
+    /// template has a field or the folder has a custom field. To turn a cascade on or off, use
+    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`. If no folder or room has this ID, the call
+    /// returns 404.
     /// </remarks>
     /// <summary>Get folder metadata</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}</path>
@@ -292,12 +282,11 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Assigns one or more metadata templates to a file, so its fields can be filled with
-    /// `PUT api/2.0/files/metadata/file/{fileId}/values`. The caller needs the right to edit the file. The assignment writes
-    /// no values and is idempotent: a template the file already carries is skipped, the others are added, an empty list
-    /// changes nothing. The call finishes in the request, nothing runs in the background. A template a cascading folder above
-    /// the file already provides stays inherited. A file the caller cannot edit is answered with 403; a file, or a template,
-    /// that does not exist with 404. To take a template off the file use
+    /// Assigns metadata templates to a file. After this call, fill their fields with
+    /// `PUT api/2.0/files/metadata/file/{fileId}/values`. Requires editing access to the file. Other callers get 403. The
+    /// call changes data but writes no values. You can repeat it with the same body. The call skips templates that the
+    /// file already has, and an empty list changes nothing. If the file or any template does not exist, the call returns
+    /// 404 and assigns nothing. The call returns 400 if the body has no `templateIds`. To remove a template, use
     /// `DELETE api/2.0/files/metadata/file/{fileId}/templates/{templateId}`.
     /// </remarks>
     /// <summary>Assign templates to a file</summary>
@@ -314,18 +303,21 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Assigns one or more metadata templates to a folder or a room and, with `cascade` set, propagates them to every
-    /// folder and file below it. The caller needs the right to create in the folder (a room manager or a content
-    /// creator); for a room that is its manager. The assignment itself finishes in the request and writes no values. The
-    /// cascade is asynchronous: a pass is queued that assigns the templates to the whole subtree and copies the values the
-    /// folder holds, and the answer is that pass with the `templateIds` it propagates. Poll
-    /// `GET api/2.0/files/metadata/folder/{folderId}/templates/progress` until `isCompleted` is true; a failed pass
-    /// reports its `error` there. The `conflictResolveType` decides what happens to a value an entry already holds: `Skip`
-    /// keeps it, `Overwrite` replaces it with the folder's value. A folder inside the subtree that cascades the same
-    /// template keeps its own values for its content. Without a cascade the answer is a completed operation without an identifier;
-    /// a template that already cascades keeps cascading, it is turned off with
-    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`. A caller without the right to create in the
-    /// folder is answered with 403; a folder, or a template, that does not exist with 404.
+    /// Assigns metadata templates to a folder or a room. With `cascade` true, it also passes them down to the content.
+    /// Requires the right to create content in the folder, or a room manager for a room itself. Other callers
+    /// get 403. The root folders of sections also return 403. The call changes data but writes no values.
+    /// With `cascade` false, the assignment ends in the request. The response is then a completed operation without an
+    /// ID. With `cascade` true, the call also queues a pass over all folders and files below. The pass assigns the
+    /// templates and copies the values of the folder. The response is that pass with the `templateIds` it passes down.
+    /// Repeat `GET api/2.0/files/metadata/folder/{folderId}/templates/progress` until `isCompleted` is true. A failed
+    /// pass reports its `error` there. The `conflictResolveType` value `Skip` keeps an existing value below, and
+    /// `Overwrite` replaces it with the folder value. A folder below that cascades the same template keeps its own values for its
+    /// content. A template that already cascades keeps cascading. To turn a cascade off, use
+    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`. You can repeat the call. With `cascade`
+    /// true, each call queues a new pass. It runs after the earlier passes in the same room or section. If a pass with
+    /// the same templates and `conflictResolveType` has not started yet, the call returns it instead. An empty list
+    /// changes nothing. If the folder or any template does not exist, the call returns 404. The call returns 400 if the
+    /// body has no `templateIds`.
     /// </remarks>
     /// <summary>Assign templates to a folder</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates</path>
@@ -344,19 +336,20 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Reports the cascade pass of a folder started by `PUT api/2.0/files/metadata/folder/{folderId}/templates` or by
-    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`: the running one, otherwise the most recent
-    /// one. The caller needs read access to the folder, the call is read-only. `templateIds` names the templates the pass
-    /// propagates, so a client can show the progress next to the right template; `progress` is the share of the subtree
-    /// processed, `isCompleted` tells the pass is over and `error` carries the reason of a failed one; a completed pass
-    /// without an error has written every template and value it was asked for. A folder that never cascaded, or whose
-    /// passes were already dropped, is answered with a completed operation without an identifier and with empty
-    /// `templateIds` rather than with an error. A folder that does not exist is answered with 404.
+    /// Returns the running cascade pass of a folder, or the most recent one if none is running. A pass starts with
+    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates` or
+    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`. Requires read access to the folder. Other
+    /// callers get 403. The call is read-only. This is the call to poll. Repeat it until `isCompleted` is true. The
+    /// `templateIds` field names the templates of the pass. The `progress` field is the share of the subtree done. A
+    /// failed pass has an `error`. A completed pass without an error has written all its templates and values. If the
+    /// folder has no pass to report, the response is a completed operation with empty `templateIds`. If no folder or room
+    /// has this ID, the call returns 404.
     /// </remarks>
     /// <summary>Get cascade progress</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/progress</path>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "Cascade operation status; a completed operation without an ID when the folder has no cascade to report", typeof(MetadataOperationDto))]
+    [SwaggerResponse(403, "The caller cannot read the folder")]
     [SwaggerResponse(404, "No folder or room with this identifier exists")]
     [HttpGet("metadata/folder/{folderId:int}/templates/progress")]
     public async Task<MetadataOperationDto> GetCascadeProgress(FolderIdRequestDto<int> inDto)
@@ -365,11 +358,11 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Removes a metadata template from a file together with the values of its fields. The caller needs the right to edit
-    /// the file. The removal is irreversible for the values, the template itself stays on the portal and on the other
-    /// entries. It applies to a directly assigned template and to one inherited from a cascading folder alike; a later
-    /// cascade from that folder assigns it again. A file the caller cannot edit is answered with 403; a file, or a template,
-    /// that does not exist with 404.
+    /// Removes a metadata template from a file, together with the values of its fields. Requires editing access to the
+    /// file. Other callers get 403. The deletion of the values cannot be undone. The template stays on the portal and on other
+    /// entries. The call also removes a template inherited from a cascading folder. A later cascade from that folder
+    /// assigns it again. A repeated call changes nothing. If the file or the template does not exist, the call
+    /// returns 404.
     /// </remarks>
     /// <summary>Unassign a template from a file</summary>
     /// <path>api/2.0/files/metadata/file/{fileId}/templates/{templateId}</path>
@@ -384,15 +377,15 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Removes a metadata template from a folder or a room together with the values of its fields. The caller needs the
-    /// right to create content in the folder, that is a room manager or a content creator; for a room that is its
-    /// manager. When the template was cascaded from this folder, the
-    /// cascade stops here: the folders and files below keep the template and their values as a direct assignment of their
-    /// own, and there is no bulk rollback. To take the template off them as well, remove it entry by entry with
-    /// `DELETE api/2.0/files/metadata/file/{fileId}/templates/{templateId}`. A pass of the cascade still running is stopped
-    /// for this template. To stop the cascade and keep the template and its values on the folder use
-    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}` with `cascade` false instead. A caller
-    /// without the right to create in the folder is answered with 403; a folder, or a template, that does not exist with 404.
+    /// Removes a metadata template from a folder or a room, together with the values of its fields. Requires the right to
+    /// create content in the folder, or a room manager for a room itself. Other callers get 403. The root folders
+    /// of sections also return 403. The deletion of the values cannot be undone. If this folder cascaded the
+    /// template, the cascade stops here. A running pass also stops for this template. The folders and files below keep
+    /// the template and their values as direct assignments. To remove it from them, call this operation or
+    /// `DELETE api/2.0/files/metadata/file/{fileId}/templates/{templateId}` on each entry. To stop the cascade but keep
+    /// the template and values on the folder, use `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`.
+    /// Set `cascade` to false there. A repeated call changes nothing. If the folder or the template does not exist, the
+    /// call returns 404.
     /// </remarks>
     /// <summary>Unassign a template from a folder</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/{templateId}</path>
@@ -407,18 +400,20 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Turns the cascade of a metadata template the folder or the room already carries on or off, without taking the
-    /// template off the folder. The template must be assigned first, with `PUT api/2.0/files/metadata/folder/{folderId}/templates`
-    /// or inherited from a folder above. The caller needs the right to create in the folder (a room manager
-    /// or a content creator); for a room that is its manager. With `cascade` true the template is marked as cascading with
-    /// the given `conflictResolveType`, an inherited assignment becomes the folder's own, and the pass the assignment runs
-    /// is queued, also when the cascade was already on: the answer is that pass, poll
-    /// `GET api/2.0/files/metadata/folder/{folderId}/templates/progress` until `isCompleted` is true. With `cascade` false
-    /// the folder keeps the template and its values, the entries below keep them as their own, entries created later no
-    /// longer inherit the template from this folder, a running pass stops at its next batch, and the answer is a completed
-    /// operation without an identifier; `conflictResolveType` is ignored and a cascade already off stays so. A caller
-    /// without the right to create in the folder is answered with 403; a folder or a template that does not exist, or a
-    /// template the folder does not carry, with 404.
+    /// Turns the cascade of a metadata template on a folder or a room on or off. The template stays on the folder. First,
+    /// assign the template with `PUT api/2.0/files/metadata/folder/{folderId}/templates`, or inherit it from a folder
+    /// above. Requires the right to create content in the folder, or a room manager for a room itself. Other
+    /// callers get 403. The root folders of sections also return 403. The call changes data. With `cascade` true, the
+    /// template cascades with the given `conflictResolveType`. An inherited assignment becomes the folder's own. The call
+    /// queues a pass, even if the cascade was already on. The response is that pass. Repeat
+    /// `GET api/2.0/files/metadata/folder/{folderId}/templates/progress` until `isCompleted` is true. With `cascade`
+    /// false or left out, the call turns the cascade off. The folder then keeps the template and its values. The entries
+    /// below keep them as their own assignments. New entries no longer inherit the template from this folder. A running
+    /// pass stops at its next batch. The response is then a completed operation without an ID, and the call ignores
+    /// `conflictResolveType`. You can repeat the call. With `cascade` true, each call queues a new pass. It runs after
+    /// the earlier passes in the same room or section. If a pass of this template with the same `conflictResolveType`
+    /// has not started yet, the call returns it instead. The call returns 404 if the folder or template does not exist,
+    /// or the template is not on the folder. If the body cannot be read, the call returns 400.
     /// </remarks>
     /// <summary>Update a template assignment on a folder</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/{templateId}</path>
@@ -437,21 +432,18 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Writes the values of metadata fields on a file. The caller needs the right to edit the file: a member with editing
-    /// access, or an anonymous caller through an external link that grants editing, with the link key in the
-    /// `Request-Token` header or in the `share` query parameter; a link that grants viewing, commenting, reviewing or
-    /// form filling only is refused. Every field must belong to a template the file carries, assigned with
-    /// `PUT api/2.0/files/metadata/file/{fileId}/templates` or inherited from a cascading folder, and a field may be
-    /// listed once. A value carries exactly the member of its type: `stringValue` for a text field of at most 8000
-    /// characters, `numberValue` for a whole number of at most 2^53-1 in magnitude (the largest integer a JSON client
-    /// reads exactly), `dateValue` for a date, `optionIds` for a choice field, a single option for a single choice; an
-    /// empty value clears the field. A date without a time zone offset is read as UTC. The write
-    /// finishes in the request, the file is re-indexed for the metadata filters at once. The custom text fields are not
-    /// written here: use `PUT api/2.0/files/metadata/file/{fileId}/customFields`. The answer is the whole metadata of the
-    /// file after the write, the same shape `GET api/2.0/files/metadata/file/{fileId}` returns. A value of the wrong type or beyond the number limit,
-    /// a field of a template the file does not carry, a field listed twice or a custom field is answered with 400; a
-    /// request with neither a session nor a link key with 401; a file the caller cannot edit with 403; a file or a field
-    /// that does not exist with 404.
+    /// Writes the values of metadata fields on a file. Requires editing access to the file. Other callers get 403. An
+    /// anonymous caller can use an external link that grants editing. Pass the link key in the `Request-Token` header or
+    /// the `share` query parameter. A link for viewing, commenting, reviewing, or form filling gets 403. Without a session
+    /// or a link key, the call returns 401. The call changes data, and you can repeat it with the same body. Each field
+    /// must belong to a template of the file, assigned with `PUT api/2.0/files/metadata/file/{fileId}/templates` or
+    /// inherited. Fill only the member for the field type: `stringValue`, `numberValue`, `dateValue`, or `optionIds`. A
+    /// text value has at most 8000 characters. A single-choice field takes one option. An empty value clears the field.
+    /// The metadata filters of listings find the new values immediately. To set the custom text fields, use
+    /// `PUT api/2.0/files/metadata/file/{fileId}/customFields`. The response is the whole metadata of the file, as
+    /// `GET api/2.0/files/metadata/file/{fileId}` returns it. The call returns 400 if a value does not fit the field type
+    /// or limits. It also returns 400 for a field listed twice, a custom field, or a field of another template. If any
+    /// value is invalid, the call writes nothing. If the file or a field does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Set file metadata values</summary>
     /// <path>api/2.0/files/metadata/file/{fileId}/values</path>
@@ -472,18 +464,17 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Writes the values of metadata fields on a folder or a room. The caller needs the right to create in the folder (a
-    /// room manager or a content creator); for a room that is its manager. Every field must belong to a template the
-    /// folder carries, assigned with `PUT api/2.0/files/metadata/folder/{folderId}/templates` or inherited from a
-    /// cascading folder, and a field may be listed once. A value carries exactly the member of its type: `stringValue` for
-    /// a text field of at most 8000 characters, `numberValue` for a whole number of at most 2^53-1 in magnitude (the
-    /// largest integer a JSON client reads exactly), `dateValue` for a date, `optionIds` for a choice field; an empty
-    /// value clears the field. The write finishes in the request and touches the folder only: to
-    /// push the new values down a cascading folder run the cascade again with `Overwrite`. The custom text fields are written with
-    /// `PUT api/2.0/files/metadata/folder/{folderId}/customFields`. The answer is the whole metadata of the folder after
-    /// the write. A value of the wrong type or beyond the number limit, a field listed twice, a custom field or a field of a template the folder
-    /// does not carry is answered with 400; a caller without the right to create in the folder with 403; a folder or a
-    /// field that does not exist with 404.
+    /// Writes the values of metadata fields on a folder or a room. Requires the right to create content in the folder,
+    /// or a room manager for a room itself. Other callers get 403. The root folders of sections also
+    /// return 403. The call changes data, and you can repeat it with the same body. Each field must belong to a template
+    /// of the folder, assigned with `PUT api/2.0/files/metadata/folder/{folderId}/templates` or inherited. Fill only the
+    /// member for the field type: `stringValue`, `numberValue`, `dateValue`, or `optionIds`. A text value has at most
+    /// 8000 characters. A single-choice field takes one option. An empty value clears the field. The call writes on the
+    /// folder only. To pass the new values down, run the cascade again with `Overwrite`. To set the custom text fields,
+    /// use `PUT api/2.0/files/metadata/folder/{folderId}/customFields`. The response is the whole metadata of the folder.
+    /// The call returns 400 if a value does not fit the field type or limits. It also returns 400 for a field listed
+    /// twice, a custom field, or a field of another template. If any value is invalid, the call writes nothing. If the
+    /// folder or a field does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Set folder metadata values</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/values</path>
@@ -501,15 +492,14 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Sets the custom text fields of a file: free-form name and value pairs that need no template. The caller needs the
-    /// right to edit the file. A field is addressed by its name regardless of case: a listed name gets the value, a null or
-    /// empty value removes the field from the file, the names not listed are left alone, so a partial request is safe. A name
-    /// the portal has not seen yet creates the field for the whole portal, and a name no entry holds a value for any more is
-    /// dropped, so the set of names follows the values. A name is at most 255 characters, a value at most 8000, a name may
-    /// be listed once and a file holds at most 50 custom fields. The write finishes in the request; the values take part in
-    /// the free text search and in the `metadataFilters` of the listings. The answer is the custom fields of the file
-    /// after the write. An empty list, a blank, repeated or over-long name, an over-long value or more than 50 fields is
-    /// answered with 400; a file the caller cannot edit with 403; a file that does not exist with 404.
+    /// Sets the custom text fields of a file. These are name and value pairs that need no template. Requires editing
+    /// access to the file. Other callers get 403. The call changes data, and you can repeat it with the same body. The
+    /// call matches names regardless of case. A listed name gets the value, and a null or empty value removes the field.
+    /// The call leaves the names that are not listed unchanged. A new name creates the field for the whole portal. When no
+    /// entry has a value for a name, the portal deletes that field. The text search and the `metadataFilters` of listings
+    /// find the values. The response is the custom fields of the file after the write. The call returns 400 for an empty
+    /// list, or a blank or repeated name. It also returns 400 for a name over 255 characters or a value over 8000. It
+    /// also returns 400 if the file would have more than 50 custom fields. If no file has this ID, the call returns 404.
     /// </remarks>
     /// <summary>Set file custom fields</summary>
     /// <path>api/2.0/files/metadata/file/{fileId}/customFields</path>
@@ -527,15 +517,16 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Sets the custom text fields of a folder or a room: free-form name and value pairs that need no template. The
-    /// caller needs the right to create in the folder (a room manager or a content creator); for a room that is its
-    /// manager. A field is addressed by its name regardless of case: a listed name gets the value, a null or empty value
-    /// removes the field, the names not listed are left alone. A new name creates the field for the whole portal, and a
-    /// name no entry holds a value for any more is dropped. A name is at most 255 characters, a value at most 8000, a name
-    /// may be listed once and a folder holds at most 50 custom fields. The custom fields never cascade to the content of
-    /// the folder. The write finishes in the request. The answer is the custom fields of the folder after the write. An empty list, a
-    /// blank, repeated or over-long name, an over-long value or more than 50 fields is answered with 400; a caller
-    /// without the right to create in the folder with 403; a folder that does not exist with 404.
+    /// Sets the custom text fields of a folder or a room. These are name and value pairs that need no template. Requires
+    /// the right to create content in the folder, or a room manager for a room itself. Other callers
+    /// get 403. The root folders of sections also return 403. The call changes data, and you can repeat it with the same
+    /// body. The call matches names regardless of case. A listed name gets the value, and a null or empty value removes
+    /// the field. The call leaves the names that are not listed unchanged. A new name creates the field for the whole
+    /// portal. When no entry has a value for a name, the portal deletes that field. The custom fields never cascade to the
+    /// content of the folder. The response is the custom fields of the folder after the write. The call returns 400 for
+    /// an empty list, or a blank or repeated name. It also returns 400 for a name over 255 characters or a value
+    /// over 8000. It also returns 400 if the folder would have more than 50 custom fields. If no folder or room has this ID,
+    /// the call returns 404.
     /// </remarks>
     /// <summary>Set folder custom fields</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/customFields</path>

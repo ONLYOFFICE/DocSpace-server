@@ -34,6 +34,15 @@
 namespace ASC.Files.Core.Log;
 internal static partial class EntryManagerLogger
 {
+    [LoggerMessage(LogLevel.Error, "The submission of form {formId} was not sent on to the forms database and the report")]
+    public static partial void ErrorSubmissionNotPublished(this ILogger<EntryManager> logger, Exception exception, string formId);
+
+    [LoggerMessage(LogLevel.Error, "The form version state of {fileId} was not updated after version {version} was saved or restored")]
+    public static partial void ErrorFormVersionStateNotUpdated(this ILogger<EntryManager> logger, Exception exception, string fileId, int version);
+
+    [LoggerMessage(LogLevel.Warning, "The check of version {version} of form {fileId} was not requested; its first submission decides its table")]
+    public static partial void WarnFormVersionCheckNotRequested(this ILogger<EntryManager> logger, Exception exception, string fileId, int version);
+
     [LoggerMessage(LogLevel.Error, "Error on update {fileId} to version {version}")]
     public static partial void ErrorUpdateFile(this ILogger<EntryManager> logger, string fileId, int version, Exception exception);
 

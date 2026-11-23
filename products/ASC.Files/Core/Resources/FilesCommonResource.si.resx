@@ -120,6 +120,9 @@
   <data name="Date" xml:space="preserve">
     <value>දිනය</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>සම්බන්ධිත තෙවන පාර්ශ්ව ආචයනයේ ප්‍රමාණවත් නිදහස් ඉඩක් නොමැත. එහි ඉඩ නිදහස් කර නැවත උත්සාහ කරන්න.</value>
+  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>පරිශ්‍රීලකයා</value>
   </data>

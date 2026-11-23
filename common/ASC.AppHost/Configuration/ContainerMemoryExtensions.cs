@@ -66,6 +66,9 @@ public static class ContainerMemoryExtensions
     /// </summary>
     public const string MySqlLimit = "1g";
 
+    /// <summary>The built-in forms database, 58 MiB measured idle; up to 300 connections, each a process of its own.</summary>
+    public const string PostgresLimit = "1g";
+
     /// <summary>
     /// Document Server: ~720 MiB anonymous memory idle once the broker and database live in the AppHost
     /// containers, the rest of its 1.5 GiB being page cache the cap lets the kernel reclaim. Conversions are
@@ -77,9 +80,11 @@ public static class ContainerMemoryExtensions
     /// <summary>
     /// Measured on identity-authorization: 706 -> 492 MiB idle, health UP. Serial GC and a small
     /// thread stack fit a dev instance that serves one developer; the default ergonomics would give
-    /// each JVM a 2 GB max heap on an 8 GB Docker VM.
+    /// each JVM a 2 GB max heap on an 8 GB Docker VM. Metaspace grows with the classes the OAuth paths load, not
+    /// with the traffic: identity-registration ran out of a 160m metaspace about 30 s into the Web.Api
+    /// integration suite (2026-11-19), answered 500 and then stopped, so the cap is 256m.
     /// </summary>
-    public const string IdentityJavaOptions = "-Xmx384m -XX:MaxMetaspaceSize=160m -XX:+UseSerialGC -Xss512k";
+    public const string IdentityJavaOptions = "-Xmx384m -XX:MaxMetaspaceSize=256m -XX:+UseSerialGC -Xss512k";
 
     /// <summary>
     /// Measured: 1722 -> 1011 MiB idle against the image default of 1g. Safe only together with the

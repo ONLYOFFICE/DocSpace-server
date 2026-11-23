@@ -63,6 +63,19 @@ public class QuotaSocketManager(
         await MakeRequest("change-quota-feature-value", new { room, featureId, value });
     }
 
+    /// <summary>
+    /// Sends a quota value of a portal whose tariff was just written. The tariff and the current tenant are not read
+    /// here: the caller writes the tariff, possibly under the lock of the tariff read, or from a background job.
+    /// </summary>
+    /// <param name="tenantId">The portal whose clients are told.</param>
+    /// <param name="featureId">The name of the quota feature.</param>
+    /// <param name="value">Its new value.</param>
+    /// <param name="tariffState">The state of the tariff just written.</param>
+    public async Task ChangeQuotaFeatureValueAsync<T>(int tenantId, string featureId, T value, TariffState tariffState)
+    {
+        await MakeRequest("change-quota-feature-value", new { room = $"{tenantId}-quota", featureId, value }, tariffState);
+    }
+
     public async Task ChangeInvitationLimitValue(int value)
     {
         var room = GetQuotaRoom();
@@ -77,7 +90,22 @@ public class QuotaSocketManager(
         await MakeRequest("change-web-plugin", new { room, webPluginName, enabled });
     }
 
-    public async Task TopUpWallet(bool auto)
+    /// <summary>
+    /// Tells the clients of a portal that its tariff changed (its end, its quotas), so they read it again. The event
+    /// carries no data. The tenant is passed explicitly, because a background job that writes the tariff has none.
+    /// </summary>
+    /// <param name="tenantId">The portal whose clients are told.</param>
+    /// <param name="tariffState">
+    /// The state of the tariff just written. The tariff is not read here: the caller writes it, possibly under the lock
+    /// of the tariff read.
+    /// </param>
+    public async Task ChangeTariffAsync(int tenantId, TariffState tariffState)
+    {
+        await MakeRequest("change-tariff", new { room = $"{tenantId}-quota" }, tariffState);
+    }
+
+    // virtual so that a unit test of the wallet top-up can record the event
+    public virtual async Task TopUpWallet(bool auto)
     {
         var room = GetQuotaRoom();
 

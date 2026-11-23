@@ -642,6 +642,21 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                         Result = sb.ToString();
                     }
+                    catch (TenantQuotaException ex)
+                    {
+                        // a portal quota or limit (storage, room count) is reached, as in the file chain below: not a server fault
+                        Err = ex.Message;
+
+                        Logger.InformationUnableFolderMoveCopyOperation(folderId.ToString(), ex.Message);
+                    }
+                    catch (ThirdPartyStorageQuotaException ex)
+                    {
+                        // the connected storage is full: the user has to free space there, it is not a server fault
+                        Err = ex.Message;
+                        StorageFullErr ??= ex.Message;
+
+                        Logger.InformationUnableFolderMoveCopyOperation(folderId.ToString(), ex.InnerException?.Message ?? ex.Message);
+                    }
                     catch (Exception ex)
                     {
                         Err = ex.Message;
@@ -682,7 +697,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
 
-        var resolveType = toParentFolders.Exists(f => f.FolderType == FolderType.KnowledgeRoom) ? FileConflictResolveType.Duplicate : _resolveType;
+        var resolveType = toFolder.FolderType == FolderType.AiProjectRoom || toParentFolders.Exists(f => f.FolderType == FolderType.KnowledgeRoom) ? FileConflictResolveType.Duplicate : _resolveType;
 
         // files of one operation usually share a handful of parents
         var parentFoldersCache = new Dictionary<T, Folder<T>>();
@@ -1037,6 +1052,14 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                     Err = ex.Message;
 
                     Logger.InformationUnableFileMoveCopyOperation(fileId.ToString(), ex.Message);
+                }
+                catch (ThirdPartyStorageQuotaException ex)
+                {
+                    // the connected storage is full: the user has to free space there, it is not a server fault
+                    Err = ex.Message;
+                    StorageFullErr ??= ex.Message;
+
+                    Logger.InformationUnableFileMoveCopyOperation(fileId.ToString(), ex.InnerException?.Message ?? ex.Message);
                 }
                 catch (Exception ex)
                 {

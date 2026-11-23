@@ -83,7 +83,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     ExternalShare externalShare,
     EntryManager entryManager,
     IPSecurity.IPSecurity ipSecurity,
-    FileDtoHelper fileDtoHelper)
+    FileDtoHelper fileDtoHelper,
+    FormFillingReportCreator formFillingReportCreator)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -1282,7 +1283,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var fileDao = daoFactory.GetFileDao<T>();
             var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
             properties.CopyToFillOut = true;
-            await fileDao.SaveProperties(file.Id, properties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(file.Id, properties);
 
             if (responseMessage)
             {

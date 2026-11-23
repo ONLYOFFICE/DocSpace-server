@@ -150,7 +150,8 @@ internal static class PaymentStubs
         ICache? cache = null,
         IServiceProvider? serviceProvider = null,
         IDistributedLockProvider? distributedLockProvider = null,
-        DocsCloudClient? docsCloudClient = null)
+        DocsCloudClient? docsCloudClient = null,
+        ResiliencePipelineProvider<string>? resiliencePipelineProvider = null)
     {
         return new TariffService(
             quotaService: null!,
@@ -167,7 +168,7 @@ internal static class PaymentStubs
             accountingClient: accountingClient!,
             docsCloudClient: docsCloudClient!,
             serviceProvider: serviceProvider!,
-            resiliencePipelineProvider: null!,
+            resiliencePipelineProvider: resiliencePipelineProvider!,
             tenantExtraConfig: null!);
     }
 

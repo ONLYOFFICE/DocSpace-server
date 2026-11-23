@@ -365,7 +365,7 @@ public static class DocumentService
 
         var commandTimeout = Timeout;
 
-        if (method == CommandMethod.Version)
+        if (method is CommandMethod.Version or CommandMethod.License)
         {
             commandTimeout = 5000;
         }
@@ -425,18 +425,44 @@ public static class DocumentService
             };
         }
 
+        return ReadCommandResponse(dataResponse);
+    }
+
+    /// <summary>
+    /// Reads the editing service's answer to a command; an answer that cannot be read comes back as
+    /// <see cref="CommandResponse.ErrorTypes.ParseError"/> carrying the content.
+    /// </summary>
+    public static CommandResponse ReadCommandResponse(string dataResponse)
+    {
         try
         {
-            var commandResponse = JsonSerializer.Deserialize<CommandResponse>(dataResponse, _commonSettings);
-            return commandResponse;
+            return JsonSerializer.Deserialize<CommandResponse>(dataResponse, _commonSettings);
         }
         catch (Exception ex)
         {
             return new CommandResponse
             {
                 Error = ErrorTypes.ParseError,
-                ErrorString = $"{ex.Message} Content: {dataResponse}"
+                ErrorString = $"{ex.Message} Content: {dataResponse}",
+                Server = TryReadServerInfo(dataResponse)
             };
+        }
+    }
+
+    // The editors without a license answer the license command with an end date of null, which the license cannot take;
+    // their server characteristics are still read.
+    private static CommandResponse.ServerInfo TryReadServerInfo(string dataResponse)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(dataResponse);
+            return document.RootElement.TryGetProperty("server", out var server) && server.ValueKind == JsonValueKind.Object
+                ? server.Deserialize<CommandResponse.ServerInfo>(_commonSettings)
+                : null;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 
@@ -1347,33 +1373,39 @@ public static class DocumentService
 
 public static class DocumentServiceHttpClientExtension
 {
+    /// <summary>
+    /// Registers the named clients of the document service, with their resilience pipeline, and the pipeline that
+    /// validates the document server's license. Every host whose code sends a request to the document server calls
+    /// it, through <see cref="DocumentServiceConnector"/> or <see cref="DocumentServiceLicense"/>: Files.Server,
+    /// Files.Worker, Web.Api, People, AI.Worker and ApiSystem. A host that does not call it gets the default handler
+    /// for these names, without the pipeline and without the switch that turns certificate validation off. Web.Studio
+    /// is one: its portal migration reaches the editor drop check only for files imported moments earlier, which
+    /// nobody has open, so it sends no request in practice.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A second call on the same service collection does nothing, whatever configuration it passes. The Monolith runs
+    /// the services of every host in one process, so several of its service extensions call this. Each call used to
+    /// add another resilience handler to the same named clients, and the handlers nest: the outer one retries the
+    /// inner one, so a request that fails fast was tried many more times than configured, within the client's
+    /// 100-second timeout.
+    /// </para>
+    /// <para>
+    /// Nothing is read from the configuration here. <see cref="DocumentServiceHttpClientSettings"/> reads the timeout
+    /// and the retry count when the first client is built, with a logger, so a bad value is logged and replaced
+    /// instead of stopping the host.
+    /// </para>
+    /// </remarks>
     public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
-        var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
-        var policyTimeout = TimeSpan.FromSeconds(httpClientTimeout / 1000);
-        var retryCount = Convert.ToInt32(configuration["files:docservice:try"] ?? "6");
-        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount).ToArray();
-
-        var retryOptions = new RetryStrategyOptions<HttpResponseMessage>
+        if (services.Any(descriptor => descriptor.ServiceType == typeof(DocumentServiceHttpClientSettings)))
         {
-            MaxRetryAttempts = retryCount,
-
-            ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                            .Handle<HttpRequestException>()
-                            .Handle<TaskCanceledException>()
-                            .Handle<TimeoutRejectedException>()
-                            .HandleResult(response => !response.IsSuccessStatusCode),
-
-            DelayGenerator = args => ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber])
-        };
+            return;
+        }
 
         services.AddHttpClient(GetHttpClientName(sslVerification: true))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .AddResilienceHandler(ResiliencePipelineName, builder =>
-                {
-                    builder.AddTimeout(policyTimeout);
-                    builder.AddRetry(retryOptions);
-                });
+                .AddResilienceHandler(ResiliencePipelineName, ConfigurePipeline);
 
         services.AddHttpClient(GetHttpClientName(sslVerification: false))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
@@ -1383,11 +1415,7 @@ public static class DocumentServiceHttpClientExtension
                     handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
                     return handler;
                 })
-                .AddResilienceHandler(ResiliencePipelineName, builder =>
-                {
-                    builder.AddTimeout(policyTimeout);
-                    builder.AddRetry(retryOptions);
-                });
+                .AddResilienceHandler(ResiliencePipelineName, ConfigurePipeline);
 
         services.AddHttpClient(CustomSslVerificationClient)
                 .ConfigurePrimaryHttpMessageHandler(_ =>
@@ -1407,5 +1435,20 @@ public static class DocumentServiceHttpClientExtension
                 ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
             });
         });
+
+        // the settings double as the mark that the clients are registered, so they go last
+        services.AddSingleton(provider => new DocumentServiceHttpClientSettings(configuration, provider.GetRequiredService<ILogger<DocumentServiceHttpClientSettings>>()));
+    }
+
+    private static void ConfigurePipeline(ResiliencePipelineBuilder<HttpResponseMessage> builder, ResilienceHandlerContext context)
+    {
+        var settings = context.ServiceProvider.GetRequiredService<DocumentServiceHttpClientSettings>();
+
+        // the first strategy added is the outer one: the retry wraps the timeout, so the timeout cancels one attempt
+        // and the retry starts the next, instead of ending the request with all of its attempts. That holds while the
+        // configured timeout is shorter than the client's 100-second HttpClient.Timeout and the caller's own token;
+        // with the default of 100 seconds, HttpClient.Timeout ends a hanging request first and nothing is retried
+        builder.AddRetry(settings.RetryOptions);
+        builder.AddTimeout(settings.AttemptTimeout);
     }
 }

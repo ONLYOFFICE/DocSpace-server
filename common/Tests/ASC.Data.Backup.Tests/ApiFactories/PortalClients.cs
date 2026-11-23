@@ -54,10 +54,14 @@ public sealed class PortalClients : PortalClientsBase
     public RoomsApi RoomsApi { get; }
     public FoldersApi FoldersApi { get; }
     public ThirdPartyIntegrationApi ThirdPartyIntegrationApi { get; }
+    public FilesApi FilesApi { get; }
+    public OperationsApi OperationsApi { get; }
 
-    // Web.Api service - the wallet the paid backups are charged to, and the consumer keys of S3
+    // Web.Api service - the wallet the paid backups are charged to, the consumer keys of S3 and the
+    // storages a backup can be written to
     public PaymentApi PaymentApi { get; }
     public SettingsAuthorizationApi SettingsAuthorizationApi { get; }
+    public SettingsStorageApi SettingsStorageApi { get; }
 
     public PortalClients(PortalContext context) : base(context)
     {
@@ -73,9 +77,12 @@ public sealed class PortalClients : PortalClientsBase
         RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
         ThirdPartyIntegrationApi = new ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
+        FilesApi = new FilesApi(FilesHttpClient, filesConfig);
+        OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         PaymentApi = new PaymentApi(WebApiHttpClient, webApiConfig);
         SettingsAuthorizationApi = new SettingsAuthorizationApi(WebApiHttpClient, webApiConfig);
+        SettingsStorageApi = new SettingsStorageApi(WebApiHttpClient, webApiConfig);
     }
 }

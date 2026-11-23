@@ -75,6 +75,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
     private async Task Invoke<T>(HttpContext context)
     {
+        string uploadId = null;
+
         try
         {
             if (context.Request.Method == "OPTIONS")
@@ -85,6 +87,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
             }
 
             var request = new ChunkedRequestHelper<T>(context.Request);
+            uploadId = request.UploadId;
 
             if (!await TryAuthorizeAsync(request))
             {
@@ -156,7 +159,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             {
                                 var folderDao = daoFactory.GetFolderDao<T>();
                                 var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => f.IsRoom);
-                                if (room != null)
+                                if (room != null && DocSpaceHelper.AnnouncesEntriesToMembers(room.FolderType))
                                 {
                                     var data = room.Id is int rId && resumedSession.File.Id is int fId
                                         ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
@@ -226,7 +229,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         var folderDao = daoFactory.GetFolderDao<T>();
                         var parents = await folderDao.GetParentFoldersAsync(session.FolderId).ToListAsync();
                         var room = parents.FirstOrDefault(f => f.IsRoom);
-                        if (room != null)
+                        if (room != null && DocSpaceHelper.AnnouncesEntriesToMembers(room.FolderType))
                         {
                             var data = room.Id is int rId && session.File.Id is int fId
                                 ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
@@ -269,6 +272,15 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         catch (InvalidCastException e) when (e.Message.Contains($"'{typeof(ChunkedUploadSession<string>)}'") && e.Message.Contains($"'{typeof(ChunkedUploadSession<int>)}'"))
         {
             throw;
+        }
+        catch (ThirdPartyStorageQuotaException error)
+        {
+            // Its own message is the one meant for the user; the provider's error it wraps is for the log
+            // only, so it must not be unwrapped like the others below. The user has to free space in that
+            // storage, so it is not a server fault: it is logged at Information with the session and the
+            // provider's own text, which ties the entry to an upload without a stack trace.
+            logger.InformationThirdPartyStorageFull(uploadId, error.InnerException?.Message ?? error.Message);
+            await WriteError(context, error.Message);
         }
         catch (Exception error)
         {
