@@ -256,7 +256,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Unknown profile (scenario), malformed | `T/ChatTests/ChatThreadModelRulesTests.cs:168`; `ChatHiddenFailureTests.cs:46` | TEST-CONFIRMED [run: PASS] |
 | Non-member of project; oversized (scenario) | `T/ChatTests/ChatProjectAccessTests.cs:84`; `ChatHiddenFailureTests.cs:77` | TEST-CONFIRMED [run: PASS] |
 | Unpaid 402 | `TS/chat/chat.ai-disabled.spec.ts:352` | TS-ONLY (TS block skipped) |
-| Project without a usable model 409 (scenario) | `Chat/storage/aiProjectChatContext.ts:216-250`; `Chat/storage/__tests__/aiProjectChatContext.test.ts`; yaml 743 ff. | TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] at unit level - `Chat/storage/__tests__/aiProjectChatContext.test.ts:238,257,273`; no .NET test drives it |
+| Project without a usable model 409 (scenario) | `Chat/storage/aiProjectChatContext.ts:216-250`; `Chat/storage/__tests__/aiProjectChatContext.test.ts`; yaml 743 ff. | TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] at unit level - `Chat/storage/__tests__/aiProjectChatContext.test.ts:268,287,303`; no .NET test drives it |
 | **The model of a chat** | | |
 | Project answers on its model, for a manager (scenario); blank, unknown | `T/ChatTests/ChatProjectModelTests.cs:47,74,186,212`; `Send_OtherProfileInProject_CannotOverrideTheFixedModel(asMember: False)` | TEST-CONFIRMED [run: PASS] |
 | The same send by a read member misses the project's model | failure text of `Send_OtherProfileInProject_CannotOverrideTheFixedModel(asMember: True)` in run 365d87fe60 (bug 82914, A16); run 2026-11-10: red again | TEST-CONFIRMED [run: FAIL-BUG] - `T/ChatTests/ChatProjectModelTests.cs:278` (A16) |
