@@ -11,7 +11,7 @@
   },
   "app/controllers/_helpers.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 6
+      "count": 2
     },
     "@typescript-eslint/no-misused-promises": {
       "count": 1
@@ -19,7 +19,7 @@
   },
   "app/controllers/aiController.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 3
+      "count": 1
     },
     "no-restricted-syntax": {
       "count": 3
@@ -32,33 +32,20 @@
   },
   "app/controllers/editorToolsController.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 2
+      "count": 1
     }
   },
   "app/controllers/openaiPassthroughController.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 5
+      "count": 1
     },
     "no-restricted-globals": {
       "count": 1
-    },
-    "no-restricted-syntax": {
-      "count": 2
-    }
-  },
-  "app/controllers/profilesController.ts": {
-    "@typescript-eslint/consistent-type-assertions": {
-      "count": 4
     }
   },
   "app/controllers/promptsController.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 4
-    }
-  },
-  "app/controllers/textToDocxController.ts": {
-    "@typescript-eslint/consistent-type-assertions": {
-      "count": 1
+      "count": 2
     }
   },
   "app/controllers/threadsController.ts": {
@@ -73,22 +60,11 @@
   },
   "app/controllers/webSearchController.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 4
+      "count": 2
     }
   },
   "app/controllers/webSearchPassthroughController.ts": {
-    "@typescript-eslint/consistent-type-assertions": {
-      "count": 1
-    },
     "no-restricted-globals": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "app/meta/common.ts": {
-    "@typescript-eslint/no-non-null-assertion": {
       "count": 1
     }
   },
@@ -121,14 +97,8 @@
     }
   },
   "app/storage/attachmentsStorage.ts": {
-    "@typescript-eslint/no-non-null-assertion": {
-      "count": 1
-    },
     "no-restricted-globals": {
       "count": 2
-    },
-    "no-restricted-syntax": {
-      "count": 1
     }
   },
   "app/storage/chatContext.ts": {
@@ -136,69 +106,38 @@
       "count": 1
     }
   },
-  "app/storage/contextFolders.ts": {
-    "@typescript-eslint/no-non-null-assertion": {
-      "count": 1
-    }
-  },
   "app/storage/docspaceFileTransfer.ts": {
     "no-restricted-globals": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
       "count": 1
     }
   },
   "app/storage/docspaceFilesApi.ts": {
-    "no-restricted-globals": {
-      "count": 5
-    },
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "app/storage/docspacePeopleApi.ts": {
-    "no-restricted-globals": {
       "count": 1
     }
   },
   "app/storage/httpClient.ts": {
     "no-restricted-syntax": {
-      "count": 4
+      "count": 3
     }
   },
   "app/storage/profilesStorage.ts": {
     "no-restricted-globals": {
       "count": 1
-    },
-    "no-restricted-syntax": {
-      "count": 1
     }
   },
   "app/storage/projectAttachments.ts": {
-    "@typescript-eslint/no-non-null-assertion": {
-      "count": 2
-    },
     "no-restricted-globals": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
       "count": 1
     }
   },
   "app/storage/roomSkills.ts": {
     "no-restricted-globals": {
       "count": 4
-    },
-    "no-restricted-syntax": {
-      "count": 2
     }
   },
   "app/storage/threadFiles.ts": {
     "no-restricted-globals": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
       "count": 1
     }
   },

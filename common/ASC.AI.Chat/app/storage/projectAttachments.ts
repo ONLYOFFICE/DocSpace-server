@@ -50,6 +50,7 @@ import { FileTooLargeError, readFileBytes } from "./roomSkills.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { getEntityId, getNumber, getObject, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { errorBodyText } from "./errorBody.js";
 
 /** The largest file copied: its bytes are held in memory on the way. */
 export const MAX_COPY_BYTES = 50 * 1024 * 1024;
@@ -103,11 +104,11 @@ async function postFiles(
         init.json === undefined
           ? getForwardedHeaders()
           : { ...getForwardedHeaders(), "Content-Type": "application/json" },
-      body: init.json === undefined ? init.form! : JSON.stringify(init.json),
+      body: init.json === undefined ? init.form : JSON.stringify(init.json),
       signal,
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
+      const text = await errorBodyText(res);
       throw new AiServiceHttpError(res.status, res.statusText, text, url);
     }
     const raw: unknown = await res.json();
@@ -227,10 +228,13 @@ export async function copyManyIntoProject(
   entryIds: readonly string[],
 ): Promise<string[]> {
   const copies = new Map<string, Promise<string>>();
-  for (const id of entryIds) {
-    if (!copies.has(id)) {
-      copies.set(id, copyIntoProject(projectId, id));
+  const copyOnce = (id: string): Promise<string> => {
+    let copy = copies.get(id);
+    if (copy === undefined) {
+      copy = copyIntoProject(projectId, id);
+      copies.set(id, copy);
     }
-  }
-  return Promise.all(entryIds.map((id) => copies.get(id)!));
+    return copy;
+  };
+  return Promise.all(entryIds.map(copyOnce));
 }

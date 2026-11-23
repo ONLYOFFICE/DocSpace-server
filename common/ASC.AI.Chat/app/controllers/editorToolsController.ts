@@ -113,7 +113,7 @@ export const editorToolsController = {
     markForwardHeadersToProvider();
     const body = isObject(req.body) ? req.body : {};
     const name = typeof body["name"] === "string" ? body["name"].trim() : "";
-    const args = isObject(body["arguments"]) ? (body["arguments"] as Record<string, unknown>) : {};
+    const args = isObject(body["arguments"]) ? body["arguments"] : {};
     const entityId = typeof body["entityId"] === "string" ? body["entityId"] : undefined;
 
     if (!name || EXCLUDED_TOOLS.has(name)) {

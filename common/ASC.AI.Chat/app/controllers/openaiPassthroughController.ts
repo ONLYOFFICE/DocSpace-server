@@ -43,6 +43,7 @@ import { sourceMetadataFields } from "@onlyoffice/ai-chat/core";
 import { asyncHandler, startStreamHeartbeat } from "./_helpers.js";
 import { hasCacheBreakpoints, markCacheBreakpoints } from "./cacheBreakpoints.js";
 import { isObject } from "../narrow.js";
+import { errorBodyText } from "../storage/errorBody.js";
 
 // OpenAI-compatible passthrough for the document editor's AI plugin.
 //
@@ -371,11 +372,14 @@ class BodyTooLargeError extends Error {}
 // Read the raw request body into a single buffer, rejecting anything over
 // `limit` as it arrives (the declared-length check upstream only catches
 // honest clients).
+type UpstreamOutcome = { response: globalThis.Response } | { error: unknown };
+
 async function readRequestBody(req: Readable, limit: number): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let total = 0;
   for await (const chunk of req) {
-    const buf: Buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
+    const piece: Buffer | string = chunk;
+    const buf = Buffer.isBuffer(piece) ? piece : Buffer.from(piece);
     total += buf.length;
     if (total > limit) {
       throw new BodyTooLargeError();
@@ -436,7 +440,7 @@ function imageRequestError(body: Record<string, unknown>): string | undefined {
     return "prompt is required and must be a non-empty string";
   }
   const n = body["n"];
-  if (n !== undefined && n !== null && (!Number.isInteger(n) || (n as number) < 1)) {
+  if (n !== undefined && n !== null && (typeof n !== "number" || !Number.isInteger(n) || n < 1)) {
     return "n must be a positive integer";
   }
   for (const field of ["model", "size", "quality", "style", "response_format"]) {
@@ -456,7 +460,7 @@ function imageRequestError(body: Record<string, unknown>): string | undefined {
 // through — the plugin's SDK raises them as APIErrors with the provider's
 // own message.
 async function logUpstreamFailure(route: string, upstream: globalThis.Response): Promise<void> {
-  const detail = await upstream.text().catch(() => "");
+  const detail = await errorBodyText(upstream);
   logger.error(`${route}: upstream answered ${upstream.status}: ${detail.slice(0, 1000)}`);
 }
 
@@ -563,8 +567,8 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
       body,
       signal: upstreamAbortSignal(res),
     }).then(
-      (response) => ({ response }) as { response: globalThis.Response },
-      (error: unknown) => ({ error }) as { error: unknown },
+      (response): UpstreamOutcome => ({ response }),
+      (error: unknown): UpstreamOutcome => ({ error }),
     );
 
     // Keep-alive started before the provider answered. Once it exists the
@@ -678,7 +682,7 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
       // non-stream answer can be relayed as-is: both are re-framed as a
       // single SSE event the plugin's SDK can raise.
       earlyHeartbeat?.stop();
-      const detail = await upstream.text().catch(() => "");
+      const detail = await errorBodyText(upstream);
       logger.warn(
         `openai passthrough ${subPath}: provider answered ${upstream.status} ${
           contentType ?? "no content-type"

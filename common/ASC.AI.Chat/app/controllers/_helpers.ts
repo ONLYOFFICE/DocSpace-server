@@ -35,7 +35,7 @@ import type { Request, Response, NextFunction, RequestHandler } from "express";
 import logger from "../log.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
-import { isObject } from "../narrow.js";
+import { isObject, readProp } from "../narrow.js";
 
 // Mirror of the widget composer's per-kind attachment cap (ATTACHMENT_LIMIT
 // in the chat library's attachments store): at most 5 file parts and 5
@@ -175,8 +175,8 @@ function clientError(err: unknown): { status: number; message: string } {
   if (err instanceof DocspaceApiHttpError) {
     return { status: err.status, message: err.statusText || "Upstream error" };
   }
-  const status = (err as { status?: unknown })?.status;
-  const expose = (err as { expose?: unknown })?.expose === true;
+  const status = readProp(err, "status");
+  const expose = readProp(err, "expose") === true;
   if (expose && typeof status === "number" && status >= 400 && status < 500) {
     return { status, message: err instanceof Error ? err.message : "Bad request" };
   }
@@ -194,16 +194,16 @@ export function unpackPositional<T extends string>(
   body: unknown,
   names: readonly T[],
 ): Partial<Record<T, unknown>> {
-  if (names.length === 0) {
+  const [first, ...rest] = names;
+  if (first === undefined) {
     return {};
   }
   // Single-arg routes: ApiProvider sends the value directly as the body
   // (no wrapping), so `body` IS the arg — be it a string, array, or
   // object. Wrap it under the single name. Legacy callers that send
   // `{name: value}` are detected via the `name in body` check.
-  if (names.length === 1) {
-    const first = names[0] as T;
-    if (typeof body === "object" && body !== null && !Array.isArray(body) && first in body) {
+  if (rest.length === 0) {
+    if (isObject(body) && first in body) {
       return body as Partial<Record<T, unknown>>;
     }
     if (body === undefined || body === null) {
@@ -222,7 +222,7 @@ export function unpackPositional<T extends string>(
     });
     return out;
   }
-  if (typeof body === "object" && body !== null) {
+  if (isObject(body)) {
     return body as Partial<Record<T, unknown>>;
   }
   return {};
@@ -234,7 +234,7 @@ function errorDetails(err: unknown): string {
     if (err.stack) {
       parts.push(err.stack);
     }
-    const cause = (err as { cause?: unknown }).cause;
+    const cause = err.cause;
     if (cause !== undefined) {
       parts.push(`cause: ${errorDetails(cause)}`);
     }

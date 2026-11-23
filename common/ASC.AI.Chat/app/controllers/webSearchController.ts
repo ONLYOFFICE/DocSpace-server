@@ -35,7 +35,7 @@ import { WebSearchEngine } from "@onlyoffice/ai-chat/core";
 import type { WebSearchConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { isObject } from "../narrow.js";
+import { isObject, readProp } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
@@ -75,7 +75,7 @@ function isSet(value: unknown): boolean {
 function unpackConfig(body: unknown): { body: unknown; entityId: unknown } {
   const args = unpackPositional(body, ["body", "entityId"] as const);
   return {
-    body: args.body ?? (args as { config?: unknown }).config,
+    body: args.body ?? readProp(args, "config"),
     entityId: args.entityId,
   };
 }
@@ -102,7 +102,7 @@ function asConfig(value: unknown): WebSearchConfig {
   if (!isObject(value)) {
     badRequest("config is required and must be an object");
   }
-  const { provider, key, baseUrl, isCloudProvider, headers } = value as Record<string, unknown>;
+  const { provider, key, baseUrl, isCloudProvider, headers } = value;
   if (typeof provider !== "string" || !provider.trim()) {
     badRequest("config.provider is required and must be a non-empty string");
   }

@@ -71,8 +71,11 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
 
 - The AI service is called through `aiService.*` (`storage/httpClient.ts`), the Files API through
   `filesApiGet` / `filesApiSend` (`storage/docspaceFilesApi.ts`). ESLint refuses a bare `fetch`
-  outside `httpClient.ts`; the 23 that predate the rule are in the baseline, and a new upstream call
-  does not add one.
+  outside the three clients (`httpClient.ts`, `docspaceFilesApi.ts`, `docspacePeopleApi.ts`); the
+  17 that predate the rule are in the baseline, and a new upstream call does not add one.
+- The body of a refused answer is read with `errorBodyText` (`storage/errorBody.ts`), not with
+  `res.text().catch(() => "")`. A field of a value of unknown type (the `status` of a caught
+  error) is read with `readProp` (`app/narrow.ts`), not through a cast.
 - Every call is bounded: `withTimeout(signal)` with `cancel()` in a `finally`, and the result is
   awaited inside that `try` (`ts-ai-failure-paths.md` §7).
 - An error of the Files API is a `DocspaceApiHttpError`, an error of the AI service an

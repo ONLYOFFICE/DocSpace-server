@@ -129,9 +129,8 @@ function withRequestSignal<T>(res: Response, body: T): T {
 // each a DocSpace room id, once, in the order sent. An older widget sends a
 // single `actionArgs.knowledgeRoom`; it is read the same way.
 function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
-  const list = Array.isArray(actionArgs["knowledgeRooms"])
-    ? (actionArgs["knowledgeRooms"] as unknown[])
-    : [actionArgs["knowledgeRoom"]];
+  const rooms = actionArgs["knowledgeRooms"];
+  const list: unknown[] = Array.isArray(rooms) ? rooms : [actionArgs["knowledgeRoom"]];
   const ids: number[] = [];
   for (const room of list) {
     if (!isObject(room)) {
@@ -164,7 +163,7 @@ function appendActionPrompt<T>(body: T, fragment: string): T {
   const existing = actionArgs["prompt"];
   const prompt =
     isObject(existing) && typeof existing["text"] === "string"
-      ? { ...existing, text: `${existing["text"] as string}\n\n${fragment}` }
+      ? { ...existing, text: `${existing["text"]}\n\n${fragment}` }
       : { mode: "append", text: fragment };
   return {
     ...body,

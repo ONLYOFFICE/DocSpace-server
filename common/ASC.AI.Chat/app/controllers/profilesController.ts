@@ -38,7 +38,7 @@ import { listOnlyofficeGatewayModels } from "../storage/profilesStorage.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { assertAiAccess } from "./aiAccess.js";
-import { asString, isObject } from "../narrow.js";
+import { asString, isObject, readProp } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import logger from "../log.js";
 import type { Response } from "express";
@@ -107,10 +107,8 @@ function describeProviderError(err: unknown): { status: number; message: string 
     return { status: 400, message: HEADER_UNSAFE_KEY_MESSAGE };
   }
   // OpenAI-SDK HTTP errors expose a numeric `status`.
-  const httpStatus =
-    typeof (err as { status?: unknown })?.status === "number"
-      ? (err as { status: number }).status
-      : undefined;
+  const rawStatus = readProp(err, "status");
+  const httpStatus = typeof rawStatus === "number" ? rawStatus : undefined;
   if (httpStatus === 401 || httpStatus === 403) {
     return { status: 400, message: "Invalid API key for the AI provider" };
   }
@@ -139,7 +137,7 @@ function describeProviderError(err: unknown): { status: number; message: string 
   ]);
   let cur: unknown = err;
   for (let i = 0; i < 5 && cur; i++) {
-    const code = (cur as { code?: unknown }).code;
+    const code = readProp(cur, "code");
     if (typeof code === "string" && codes.has(code)) {
       return {
         status: 502,
@@ -147,7 +145,7 @@ function describeProviderError(err: unknown): { status: number; message: string 
           "The AI provider is unreachable — check the base URL and that the service is running",
       };
     }
-    cur = (cur as { cause?: unknown }).cause;
+    cur = readProp(cur, "cause");
   }
 
   const msg = err instanceof Error ? err.message : String(err);

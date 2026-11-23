@@ -44,7 +44,7 @@ import type {
 import type { Response } from "express";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString, isObject } from "../narrow.js";
+import { asString, isObject, readProp } from "../narrow.js";
 
 const engine = new PromptsEngine({ storage });
 
@@ -56,7 +56,7 @@ const engine = new PromptsEngine({ storage });
 type RefusalError = ImportError["error"];
 
 function refusalStatus(error: RefusalError): number {
-  const code = (error as { code?: string }).code;
+  const code = readProp(error, "code");
   if (code === "not_found") return 404;
   if (code === "conflict") return 409;
   if (code !== undefined) return 400;
@@ -204,6 +204,9 @@ function bundleShapeErrors(bundle: unknown): ImportError[] {
 }
 
 const IMPORT_MODES: ReadonlySet<string> = new Set(["merge", "replace"]);
+
+const isImportMode = (value: unknown): value is ImportMode =>
+  typeof value === "string" && IMPORT_MODES.has(value);
 
 interface UpdateBody {
   id: string;
@@ -388,7 +391,7 @@ export const promptsController = {
     let mode: ImportMode | undefined;
     if (options !== undefined && options !== null) {
       const rawMode = isObject(options) ? options["mode"] : options;
-      if (rawMode !== undefined && (typeof rawMode !== "string" || !IMPORT_MODES.has(rawMode))) {
+      if (rawMode !== undefined && !isImportMode(rawMode)) {
         res.status(400).json({
           success: false,
           errors: [
@@ -405,7 +408,7 @@ export const promptsController = {
         });
         return;
       }
-      mode = rawMode as ImportMode | undefined;
+      mode = rawMode;
     }
     const twinErrors = bundleTwinErrors(bundle);
     if (twinErrors.length > 0) {

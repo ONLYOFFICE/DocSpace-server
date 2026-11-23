@@ -299,12 +299,10 @@ export async function readDocuments(
 ): Promise<Document[]> {
   const results: (Document | undefined)[] = new Array(files.length);
   const reader = new PortalTextReader(signal);
-  let next = 0;
+  // One iterator for every worker: each takes the next file nobody has taken yet.
+  const queue = files.entries();
   const worker = async (): Promise<void> => {
-    while (next < files.length) {
-      const index = next;
-      next += 1;
-      const file = files[index]!;
+    for (const [index, file] of queue) {
       try {
         const raw = await reader.readFileAsText(file);
         const text = raw.trim();

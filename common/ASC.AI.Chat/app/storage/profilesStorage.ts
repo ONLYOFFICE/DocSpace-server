@@ -53,6 +53,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { errorBodyText } from "./errorBody.js";
 
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
@@ -519,7 +520,7 @@ export async function listOnlyofficeGatewayModels(signal?: AbortSignal): Promise
       signal: reqSignal,
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
+      const text = await errorBodyText(res);
       throw new AiServiceHttpError(res.status, res.statusText, text, url);
     }
     const json: unknown = await res.json();

@@ -51,6 +51,7 @@ import logger from "../log.js";
 import { uploadThreadArtifact } from "./threadFiles.js";
 import { copyManyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
+import { errorBodyText } from "./errorBody.js";
 
 const PATH = "/attachments";
 
@@ -194,7 +195,7 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
       signal,
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
+      const text = await errorBodyText(res);
       logger.error(
         `insertGeneratedImage: POST ${url} -> ${res.status} ${res.statusText}; ` +
           `body=${text.slice(0, 1000)}`,
@@ -445,11 +446,11 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       );
     });
 
-    const docspaceIndices: number[] = [];
+    const docspace: Array<{ index: number; input: (typeof inputs)[number] }> = [];
     const sourceIds: string[] = [];
     inputs.forEach((input, i) => {
       if (result[i]) return;
-      docspaceIndices.push(i);
+      docspace.push({ index: i, input });
       sourceIds.push(input.path ?? "");
     });
 
@@ -513,8 +514,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
           `(missing id/title/kind/entryId); skipped=${JSON.stringify(skipped)}`,
       );
     }
-    docspaceIndices.forEach((i, docspaceIdx) => {
-      const input = inputs[i]!;
+    docspace.forEach(({ index, input }, docspaceIdx) => {
       const entryId = entryIds[docspaceIdx] ?? "";
       const matched = byEntryId.get(entryId);
       if (!matched) {
@@ -540,7 +540,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       if (input.type !== undefined) {
         matched.type = input.type;
       }
-      result[i] = matched;
+      result[index] = matched;
     });
 
     const finalResult = result.map((rec, i) => {

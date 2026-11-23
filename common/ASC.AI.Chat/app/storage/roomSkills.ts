@@ -357,7 +357,7 @@ export async function readBodyCapped(res: Response, limit: number): Promise<Uint
       chunks.push(value);
     }
   } finally {
-    await reader.cancel().catch(() => undefined);
+    await cancelReader(reader);
   }
   return Buffer.concat(chunks, received);
 }
@@ -431,7 +431,7 @@ async function readTextCapped(res: Response, limit: number): Promise<string> {
     }
   } finally {
     // Past the limit, or on an error: drop the rest of the download.
-    await reader.cancel().catch(() => undefined);
+    await cancelReader(reader);
   }
   return text + decoder.decode();
 }
@@ -467,4 +467,15 @@ export async function getRoomSkill(roomId: string, skillId: string): Promise<str
     });
   }
   return readFileText(skillId);
+}
+
+// The read is over either way: a stream that refuses to be cancelled changes nothing for the
+// caller, which already has its answer or its error.
+async function cancelReader(reader: { cancel(): Promise<void> }): Promise<void> {
+  const pending = reader.cancel();
+  try {
+    await pending;
+  } catch {
+    // nothing to do: see above
+  }
 }

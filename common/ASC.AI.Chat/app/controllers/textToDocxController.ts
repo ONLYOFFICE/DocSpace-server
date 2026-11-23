@@ -44,7 +44,7 @@ const OUTPUT_FORMATS = ["Docx", "Pdf", "Md"] as const;
 type OutputFormat = (typeof OUTPUT_FORMATS)[number];
 
 const isOutputFormat = (value: unknown): value is OutputFormat =>
-  OUTPUT_FORMATS.includes(value as OutputFormat);
+  OUTPUT_FORMATS.some((format) => format === value);
 
 // Proxy for the .NET md export pipeline
 // (`POST internal/ai/text-to-docx/start`,

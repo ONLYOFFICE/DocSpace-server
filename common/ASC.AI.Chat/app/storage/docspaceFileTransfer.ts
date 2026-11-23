@@ -41,6 +41,7 @@ import { proxyBaseUrl, withTimeout, AiServiceHttpError } from "./httpClient.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { errorBodyText } from "./errorBody.js";
 
 export interface UploadedFile {
   /** The new DocSpace entry id (internal int or thirdparty string, as a string). */
@@ -91,7 +92,7 @@ export async function uploadFile(
   try {
     const res = await fetch(url, { method: "POST", headers, body: form, signal });
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
+      const text = await errorBodyText(res);
       throw new AiServiceHttpError(res.status, res.statusText, text, url);
     }
     const json: unknown = await res.json();

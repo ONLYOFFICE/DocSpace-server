@@ -77,6 +77,14 @@ export function getObjectArray(obj: JsonObject, key: string): JsonObject[] | und
   return getArray(obj, key)?.filter(isObject);
 }
 
+/**
+ * `value[key]` of anything, as `unknown`: what `value?.[key]` reads on an untyped value, without
+ * a cast that would also claim the type of the property.
+ */
+export function readProp(value: unknown, key: string): unknown {
+  return value === undefined || value === null ? undefined : Reflect.get(Object(value), key);
+}
+
 export function asString(v: unknown): string | undefined {
   return typeof v === "string" ? v : undefined;
 }

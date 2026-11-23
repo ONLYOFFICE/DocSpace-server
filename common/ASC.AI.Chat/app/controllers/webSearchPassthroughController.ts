@@ -40,6 +40,7 @@ import { safeResolveSource } from "../storage/docspaceFilesApi.js";
 import type { SourceKind, SourceMeta } from "../storage/docspaceFilesApi.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler } from "./_helpers.js";
+import { errorBodyText } from "../storage/errorBody.js";
 
 // Web-search passthrough for the document editor's AI plugin.
 //
@@ -168,7 +169,7 @@ function bodyError(
     if (
       numResults !== undefined &&
       numResults !== null &&
-      (!Number.isInteger(numResults) || (numResults as number) < 1)
+      (typeof numResults !== "number" || !Number.isInteger(numResults) || numResults < 1)
     ) {
       return { error: "numResults must be a positive integer", field: "numResults" };
     }
@@ -248,7 +249,7 @@ function passthrough(subPath: "search" | "contents") {
     // detail goes to the log and the client gets a fixed 502; 4xx answers
     // still pass through for the plugin's `formatResponse`.
     if (response.status >= 500) {
-      const detail = await response.text().catch(() => "");
+      const detail = await errorBodyText(response);
       logger.error(
         `web-search passthrough ${subPath}: upstream answered ${response.status}: ${detail.slice(0, 1000)}`,
       );

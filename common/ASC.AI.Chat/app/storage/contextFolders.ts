@@ -203,7 +203,8 @@ export function buildContextFoldersLines(folders: readonly ContextFolder[]): str
   if (folders.length === 0) {
     return [];
   }
-  const one = folders.length === 1;
+  const only = folders.length === 1 ? folders[0] : undefined;
+  const one = only !== undefined;
   const writable = folders.find((folder) => folder.canCreate !== false);
   const lines = [
     one
@@ -219,7 +220,7 @@ export function buildContextFoldersLines(folders: readonly ContextFolder[]): str
     );
   } else {
     lines.push(
-      `- When a tool needs a folder, room or scope identifier and the user did not specify one, use this id (${folders[0]!.id}).`,
+      `- When a tool needs a folder, room or scope identifier and the user did not specify one, use this id (${only.id}).`,
     );
   }
   lines.push(

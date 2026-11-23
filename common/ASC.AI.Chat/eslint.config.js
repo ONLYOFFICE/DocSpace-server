@@ -97,8 +97,13 @@ export default tseslint.config(
     rules: { "no-console": "off", "no-restricted-syntax": ["error", ...swallowingCatch] },
   },
   {
-    // The AI service client is the place a bare fetch belongs.
-    files: ["app/storage/httpClient.ts"],
+    // The clients of the AI service, the Files API and the People API are the places a bare
+    // fetch belongs: each owns the timeout, the envelope and the error class of its upstream.
+    files: [
+      "app/storage/httpClient.ts",
+      "app/storage/docspaceFilesApi.ts",
+      "app/storage/docspacePeopleApi.ts",
+    ],
     rules: { "no-restricted-globals": "off" },
   },
   {

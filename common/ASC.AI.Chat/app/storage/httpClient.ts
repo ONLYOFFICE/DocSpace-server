@@ -35,6 +35,7 @@ import nconf from "../../config/index.js";
 import { countUpstreamCall, countUpstreamRead, getForwardedHeaders } from "../requestContext.js";
 import { isObject, parseInt10 } from "../narrow.js";
 import type { AppConfig } from "../types.js";
+import { errorBodyText } from "./errorBody.js";
 
 // Hard ceiling for a single upstream round-trip so a hung AI service / MCP
 // server can't pin a Node socket (and the caller's request) indefinitely.
@@ -178,7 +179,7 @@ async function jsonRequest(
   try {
     const res = await fetch(url, init);
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
+      const text = await errorBodyText(res);
       throw new AiServiceHttpError(res.status, res.statusText, text, url);
     }
     if (res.status === 204) {
