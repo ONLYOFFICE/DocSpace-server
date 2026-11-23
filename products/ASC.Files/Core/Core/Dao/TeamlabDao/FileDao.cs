@@ -567,7 +567,8 @@ internal class FileDao(
         {
             quotaLockKey = $"room_{roomId}";
             currentRoom = await folderDao.GetFolderAsync(roomId);
-            // the folder type is immutable, so the settings type can be picked outside the lock
+            // a room changes its type only when the agent migration turns an AI agent into a Knowledge room (ClaimAiAgentRoomAsync),
+            // which takes no quota lock; an upload racing with that conversion is checked against the AI agent quota settings
             roomQuotaSettings = currentRoom.FolderType is FolderType.AiRoom
                 ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
                 : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();

@@ -111,6 +111,9 @@ public static class DbMcpServerExtension
 
             entity.HasIndex(e => new { e.TenantId, e.Name, e.EntryId })
                 .HasDatabaseName("IX_tenant_id_name_entry_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("IX_tenant_id_entry_id");
         });
     }
 
@@ -150,6 +153,9 @@ public static class DbMcpServerExtension
 
             entity.HasIndex(e => new { e.TenantId, e.Name, e.EntryId })
                 .HasDatabaseName("ix_ai_integration_mcp_servers_tenant_id_name_entry_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("ix_ai_integration_mcp_servers_tenant_id_entry_id");
         });
     }
 }
