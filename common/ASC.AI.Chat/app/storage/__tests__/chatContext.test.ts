@@ -66,7 +66,6 @@ const full: ChatContextRequest = { threadId: THREAD_ID, entityId: "42", contextE
 const parsedFull = () => ({
   requested: { threadId: THREAD_ID, entityId: "42", contextEntityId: "43" },
   aiReady: true,
-  aiNotReadyMessage: undefined,
   toolPermissionMode: "auto",
   profiles: [dtoToProfile((chatContextDto()["profiles"] as unknown[])[0])],
   global: {
@@ -170,7 +169,6 @@ describe("parseChatContext", () => {
         const parsed = parseChatContext(withField(["config"], value), full);
         expect(parsed).toMatchObject({ toolPermissionMode: null });
         expect(parsed?.aiReady).toBeUndefined();
-        expect(parsed?.aiNotReadyMessage).toBeUndefined();
       },
     );
 
@@ -186,18 +184,12 @@ describe("parseChatContext", () => {
       );
     });
 
-    // DEFECT stor2-1: chatContext.ts reads `config.aiNotReadyMessage`, a field AiSettingsDto (products/ASC.AI/Server/Models/ResponseDto/AiSettingsDto.cs) does not have, so the snapshot's "portal's localized reason" is always undefined against the real service — expected the field to exist in the C# DTO or the read and its doc comment in chatContextSnapshot.ts to go (ts-ai-failure-paths.md §9)
-    it.each([
-      [MISSING, undefined],
-      [null, undefined],
-      [5, undefined],
-      ["", ""],
-      ["AI is not configured", "AI is not configured"],
-    ])("reads config.aiNotReadyMessage %s as %s", (value, expected) => {
-      expect(
-        parseChatContext(withField(["config", "aiNotReadyMessage"], value), full)
-          ?.aiNotReadyMessage,
-      ).toBe(expected);
+    it("keeps no portal message for a portal that is not ready: AiSettingsDto declares none", () => {
+      const parsed = parseChatContext(
+        withField(["config", "aiNotReadyMessage"], "AI is not configured"),
+        full,
+      );
+      expect(parsed).not.toHaveProperty("aiNotReadyMessage");
     });
 
     it.each([

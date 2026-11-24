@@ -61,7 +61,6 @@ export function snapshotWithFolders(
   return {
     requested: { threadId: undefined, entityId: entity?.id, contextEntityId: contextEntity?.id },
     aiReady: true,
-    aiNotReadyMessage: undefined,
     toolPermissionMode: null,
     profiles: [],
     global: {

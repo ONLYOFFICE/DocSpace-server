@@ -37,6 +37,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
 import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
+import { AiServiceHttpError } from "../../storage/httpClient.js";
 import * as h from "./aiController.harness.js";
 
 // The boundary of the controller: the engine class, the storage, the chat-context aggregate,
@@ -236,18 +237,29 @@ describe("send", () => {
     expect(h.engine.send).toHaveBeenCalledTimes(1);
   });
 
-  // DEFECT ai-1: an id of a wrong type is passed on as it came instead of answering 400 naming the field — expected 400 (ts-ai-failure-paths.md §4)
   it.each([
     ["entityId", 5],
+    ["entityId", true],
     ["contextEntityId", { id: 1 }],
-  ])("hands %s of a wrong type to the chat context unchecked", async (field, value) => {
+    ["contextEntityId", ["8"]],
+  ])("answers 400 naming %s when it is %j, before anything is read", async (field, value) => {
     const reply = await send({ ...valid, [field]: value });
 
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: `${field} must be a string` });
+    expect(responseViolations("aiSend", 400, reply.body)).toEqual([]);
+    expect(h.primeChatContext).not.toHaveBeenCalled();
+    expect(h.engine.send).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["null", null],
+    ["a string", "12"],
+  ])("runs a message whose entityId is %s", async (_what, entityId) => {
+    const reply = await send({ ...valid, entityId });
+
     expect(reply.status).toBe(200);
-    expect(h.primeChatContext).toHaveBeenCalledWith({
-      entityId: field === "entityId" ? value : undefined,
-      contextEntityId: field === "contextEntityId" ? value : undefined,
-    });
+    expect(h.primeChatContext).toHaveBeenCalledWith({ entityId, contextEntityId: undefined });
   });
 });
 
@@ -353,15 +365,17 @@ describe("sendCustom", () => {
     expect(h.storage.profiles.readById).not.toHaveBeenCalled();
   });
 
-  // DEFECT ai-1: a numeric profileId reaches the profile read instead of answering 400 naming the field — expected 400 (ts-ai-failure-paths.md §4)
-  it("reads a profileId of a wrong type from the storage as it came", async () => {
-    h.storage.profiles.readById.mockResolvedValue(undefined);
+  it.each([
+    ["a number", 7],
+    ["an object", { id: "p1" }],
+  ])("answers 400 when profileId is %s, before the profile read", async (_what, profileId) => {
+    const reply = await sendCustom({ ...valid, profileId });
 
-    const reply = await sendCustom({ ...valid, profileId: 7 });
-
-    expect(h.storage.profiles.readById).toHaveBeenCalledWith(7);
     expect(reply.status).toBe(400);
-    expect(reply.body).toEqual({ error: "unknown profileId: 7" });
+    expect(reply.body).toEqual({ error: "profileId must be a string" });
+    expect(responseViolations("aiSendCustom", 400, reply.body)).toEqual([]);
+    expect(h.primeChatContext).not.toHaveBeenCalled();
+    expect(h.storage.profiles.readById).not.toHaveBeenCalled();
   });
 });
 
@@ -436,17 +450,35 @@ describe.each([
     expect(h.storage.threads.readById).not.toHaveBeenCalled();
   });
 
-  // DEFECT ai-1: a numeric threadId goes to the chat context and the thread read instead of answering 400 naming the field — expected 400 (ts-ai-failure-paths.md §4)
-  it("reads a threadId of a wrong type as it came", async () => {
-    const reply = await route({ threadId: 9, userMessage: text("hi") });
+  it.each([
+    ["threadId", 9],
+    ["entityId", 12],
+    ["contextEntityId", false],
+    ["profileId", { id: "p1" }],
+  ])("answers 400 naming %s when it is %j, after the aggregate read", async (field, value) => {
+    const reply = await route({ threadId: "t1", userMessage: text("hi"), [field]: value });
 
-    expect(reply.status).toBe(200);
-    expect(h.storage.threads.readById).toHaveBeenCalledWith(9);
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: `${field} must be a string` });
+    expect(responseViolations(operationId, 400, reply.body)).toEqual([]);
+    // The aggregate read is the route's access gate; the id of a wrong type is not sent with it.
     expect(h.primeChatContext).toHaveBeenCalledWith({
-      threadId: 9,
+      threadId: field === "threadId" ? undefined : "t1",
       entityId: undefined,
       contextEntityId: undefined,
     });
+    expect(h.storage.threads.readById).not.toHaveBeenCalled();
+    expect(h.storage.profiles.readById).not.toHaveBeenCalled();
+    expect(h.engine[name]).not.toHaveBeenCalled();
+  });
+
+  it("answers the 403 of the aggregate read before a word about an id of a wrong type", async () => {
+    h.primeChatContext.mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "", "u"));
+
+    const reply = await route({ threadId: 9, userMessage: text("hi") });
+
+    expect(reply.status).toBe(403);
+    expect(h.engine[name]).not.toHaveBeenCalled();
   });
 
   it("answers 400 for a profileId the store does not hold", async () => {

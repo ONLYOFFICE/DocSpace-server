@@ -199,10 +199,6 @@ const CONTRACTS: Contract[] = [
       [AI + "ResponseDto/AiSettingsDto.cs", "AiSettingsDto"],
     ],
     node: ["app/storage/chatContext.ts", "parseChatContext"],
-    notSent: {
-      aiNotReadyMessage:
-        "AiSettingsDto has no such property: the localized 402 text is never there",
-    },
     unread: {
       embeddingModel: "not read: parseChatContext takes aiReady and toolPermissionMode from config",
       recommendedModelForForms:

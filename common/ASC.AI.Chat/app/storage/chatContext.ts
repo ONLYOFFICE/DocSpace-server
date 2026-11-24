@@ -52,7 +52,7 @@ import {
   getUpstreamReadCount,
   setChatContextSnapshot,
 } from "../requestContext.js";
-import nconf from "../../config/index.js";
+import nconf, { chatContextDisabled } from "../../config/index.js";
 import type { AppConfig } from "../types.js";
 import {
   isObject,
@@ -68,7 +68,7 @@ import logger from "../log.js";
 
 const PATH = "/chat-context";
 
-const CHAT_CONTEXT_DISABLED = process.env["AI_CHAT_CONTEXT"] === "off";
+const CHAT_CONTEXT_DISABLED = chatContextDisabled();
 const OPT_OUT_HEADER = "x-ai-chat-context";
 const app: AppConfig | undefined = nconf.get("app");
 const IS_PRODUCTION = (app?.environment ?? "").toLowerCase() === "production";
@@ -217,7 +217,6 @@ export function parseChatContext(
       contextEntityId: request.contextEntityId,
     },
     aiReady: config ? getBoolean(config, "aiReady") : undefined,
-    aiNotReadyMessage: config ? getString(config, "aiNotReadyMessage") : undefined,
     toolPermissionMode: config ? csharpToToolPermissionMode(config["toolPermissionMode"]) : null,
     profiles: parseProfiles(getArray(raw, "profiles")),
     global,

@@ -95,8 +95,6 @@ export interface ChatContextSnapshot {
    * aggregate predates the setting.
    */
   toolPermissionMode: ToolPermissionMode | null;
-  /** The portal's localized reason for `aiReady === false`; undefined when ready or absent. */
-  aiNotReadyMessage: string | undefined;
   profiles: DocspaceProfile[];
   global: ChatContextScope;
   /** `null` when `entityId` was given but the folder is inaccessible or unknown. */

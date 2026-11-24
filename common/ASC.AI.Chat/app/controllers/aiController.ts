@@ -65,13 +65,13 @@ import {
 } from "../storage/contextFolders.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
-import { aiService } from "../storage/httpClient.js";
+import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
 import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { readStoredProfile } from "./storedProfile.js";
-import { asActionType, getString, isObject } from "../narrow.js";
+import { asActionType, isObject } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
@@ -168,7 +168,7 @@ function appendActionPrompt<T>(body: T, fragment: string): T {
   return {
     ...body,
     actionArgs: { ...actionArgs, prompt },
-  } as T;
+  };
 }
 
 // The two ids a chat request may carry, as the client sends them:
@@ -192,6 +192,60 @@ function stringField(body: unknown, key: string): string | undefined {
   }
   const value = body[key];
   return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+// The ids a chat body carries (`threadId`, `entityId`, `contextEntityId`,
+// `profileId`) are strings on the wire: the engine's input types say so, and
+// the web client and the .NET suite send them as strings. `null` stays what it
+// was, an absent id. Any other type is the caller's mistake and answers 400
+// naming the field, so that a number never reaches the aggregate read, the
+// thread read or the profile read (ts-ai-failure-paths.md §4).
+type ChatIdField = "threadId" | "entityId" | "contextEntityId" | "profileId";
+const STREAM_ID_FIELDS: readonly ChatIdField[] = [
+  "threadId",
+  "entityId",
+  "contextEntityId",
+  "profileId",
+];
+
+function idTypeError(body: unknown, fields: readonly ChatIdField[]): string | null {
+  if (!isObject(body)) {
+    return null;
+  }
+  for (const field of fields) {
+    const value = body[field];
+    if (value !== undefined && value !== null && typeof value !== "string") {
+      return `${field} must be a string`;
+    }
+  }
+  return null;
+}
+
+// An id of the body as the aggregate read takes it: a string as sent, else
+// absent. A round whose ids are of a wrong type is refused right after that
+// read (see idTypeError), which stays first as the access gate of the route.
+function idOf(body: unknown, field: ChatIdField): string | undefined {
+  if (!isObject(body)) {
+    return undefined;
+  }
+  const value = body[field];
+  return typeof value === "string" ? value : undefined;
+}
+
+// The aggregate read of a round that takes its ids from the body, then the
+// refusal of an id of a wrong type. Answers `false` when it has responded.
+async function primeRound(body: unknown, res: Response): Promise<boolean> {
+  await primeChatContext({
+    threadId: idOf(body, "threadId"),
+    entityId: idOf(body, "entityId"),
+    contextEntityId: idOf(body, "contextEntityId"),
+  });
+  const error = idTypeError(body, STREAM_ID_FIELDS);
+  if (error) {
+    res.status(400).json({ error });
+    return false;
+  }
+  return true;
 }
 
 // The folders and rooms the user selected as the chat's context in the
@@ -220,12 +274,21 @@ function sourceScopeOf(body: unknown): string | undefined {
   return locationOf(body) ?? stringField(body, "entityId");
 }
 
+// A thread read that answers "this thread is not there": 404, or the 400 the
+// AI service gives a malformed id. Every other failure (a 5xx, a timeout, a
+// dropped connection) says nothing about the thread and is passed on, so the
+// caller gets a 5xx and can retry (ts-ai-failure-paths.md §1).
+function isThreadAbsent(err: unknown): err is AiServiceHttpError {
+  return err instanceof AiServiceHttpError && (err.status === 404 || err.status === 400);
+}
+
 // The round's profile and attachments for a request that resumes a round
 // (tool-call approval): the profile the round runs on, ranked as
 // sendWithStream ranks it (the caller's explicit choice, then the thread's
 // own), and the attachments of the thread's last user message, the one the
-// resumed round answers. Best-effort: a failed read leaves the document
-// agent tool to its own fallbacks.
+// resumed round answers. A thread that is not there leaves the document agent
+// tool to its own fallbacks; a read that failed otherwise fails the request
+// before the approved tool runs.
 async function primeRoundFromThread(threadId: unknown, requestedProfileId: unknown): Promise<void> {
   if (typeof threadId !== "string" || threadId.length === 0) {
     return;
@@ -247,17 +310,17 @@ async function primeRoundFromThread(threadId: unknown, requestedProfileId: unkno
     }
     setRoundAttachmentIds(lastUser ? extractAttachmentRefIds(lastUser) : []);
   } catch (err) {
-    logger.warn(
-      `primeRoundFromThread: thread ${threadId} not resolved: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
-    );
+    if (!isThreadAbsent(err)) {
+      throw err;
+    }
+    logger.warn(`primeRoundFromThread: thread ${threadId} not found: AI service ${err.status}`);
   }
 }
 
 // Attachment refs from the thread's persisted history, newest message first
-// so the most recently attached form wins. Best-effort — a failed read carries
-// no prior context rather than erroring the round.
+// so the most recently attached form wins. A thread that is not there carries
+// no prior context; a read that failed otherwise fails the round before its
+// stream opens.
 async function historyAttachmentRefIds(threadId: unknown): Promise<string[]> {
   if (typeof threadId !== "string" || threadId.length === 0) {
     return [];
@@ -266,10 +329,11 @@ async function historyAttachmentRefIds(threadId: unknown): Promise<string[]> {
   try {
     history = await storage.messages.readByThread(threadId);
   } catch (err) {
+    if (!isThreadAbsent(err)) {
+      throw err;
+    }
     logger.warn(
-      `withToolsPrompt: thread ${threadId} history read failed, form context not carried over: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
+      `withToolsPrompt: thread ${threadId} history not found, form context not carried over: AI service ${err.status}`,
     );
     return [];
   }
@@ -752,7 +816,7 @@ async function preflightStreamRound(body: SendStreamInput, res: Response): Promi
   // engine silently falls back to another model (Bug 83160).
   const profileError = await unknownProfileIdError(body.profileId);
   if (profileError === AI_TOOLS_UNPAID_ERROR) {
-    res.status(402).json({ error: await aiToolsUnpaidMessage() });
+    res.status(402).json({ error: AI_TOOLS_UNPAID_ERROR });
     return false;
   }
   if (profileError) {
@@ -762,27 +826,12 @@ async function preflightStreamRound(body: SendStreamInput, res: Response): Promi
   return true;
 }
 
-// Sentinel so the callers can tell the billing failure (402) apart from the
-// unknown-profile validation error (400) in unknownProfileIdError's single
-// string channel. Never sent as-is: the 402 body carries the portal's
-// localized wording, see aiToolsUnpaidMessage.
+// The 402 body for the unpaid gateway, and the sentinel by which the callers
+// tell it apart from the unknown-profile validation error (400) in
+// unknownProfileIdError's single string channel. It is English: the AI
+// service serves no localized wording for this state (AiSettingsDto has no
+// such field), and this service has no resources of its own.
 const AI_TOOLS_UNPAID_ERROR = "The AI Tools service is not paid for the current portal";
-
-// The 402 body for the unpaid gateway. The C# settings (`aiNotReadyMessage`)
-// carry the reason in the user's culture; this service has no resources of
-// its own, so answering with the English sentinel put a `ru` user back on an
-// untranslated refusal after the refusal moved out of the stream (Bug 84023,
-// same class as Bug 83048). Falls back to the sentinel when the portal
-// predates the field.
-async function aiToolsUnpaidMessage(): Promise<string> {
-  const primed = getChatContextSnapshot()?.aiNotReadyMessage;
-  if (primed) {
-    return primed;
-  }
-  const config = await aiService.get("/config").catch(() => undefined);
-  const message = isObject(config) ? getString(config, "aiNotReadyMessage") : undefined;
-  return message || AI_TOOLS_UNPAID_ERROR;
-}
 
 // 402 message when the effective profile rides the portal gateway while the
 // tenant's AI Tools wallet service is not paid, null otherwise. Without
@@ -800,7 +849,25 @@ async function aiToolsUnpaidError(providerType: string | undefined): Promise<str
   if (primed !== undefined) {
     return primed ? null : AI_TOOLS_UNPAID_ERROR;
   }
-  const config = await aiService.get("/config").catch(() => undefined);
+  let config: unknown;
+  try {
+    config = await aiService.get("/config");
+  } catch (err) {
+    // A refusal of the caller's own (401, 403) is passed on. Any other failure
+    // leaves the wallet unknown, and unknown is safe to read as paid here: the
+    // check only moves the gateway's refusal out of the stream, and the
+    // gateway refuses an unpaid portal itself (AiGatewayProxyController.cs), so nothing is
+    // billed and the caller gets an error frame instead of the 402.
+    if (err instanceof AiServiceHttpError && err.status < 500) {
+      throw err;
+    }
+    logger.warn(
+      `ai-tools wallet check: /config not read, the gateway decides: ${
+        err instanceof AiServiceHttpError ? `AI service ${err.status}` : String(err)
+      }`,
+    );
+    return null;
+  }
   if (isObject(config) && config["aiReady"] === false) {
     return AI_TOOLS_UNPAID_ERROR;
   }
@@ -831,6 +898,13 @@ export const aiController = {
       const limitError = attachmentLimitError(req.body.userMessage);
       if (limitError) {
         res.status(400).json({ error: limitError });
+        return;
+      }
+    }
+    {
+      const idError = idTypeError(req.body, ["entityId", "contextEntityId"]);
+      if (idError) {
+        res.status(400).json({ error: idError });
         return;
       }
     }
@@ -893,6 +967,13 @@ export const aiController = {
       res.status(400).json({ error: "isStream must be a boolean" });
       return;
     }
+    {
+      const idError = idTypeError(req.body, ["profileId"]);
+      if (idError) {
+        res.status(400).json({ error: idError });
+        return;
+      }
+    }
     // As with `send`, the forwarded headers must be marked before the
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
@@ -904,7 +985,7 @@ export const aiController = {
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
       if (profileError === AI_TOOLS_UNPAID_ERROR) {
-        res.status(402).json({ error: await aiToolsUnpaidMessage() });
+        res.status(402).json({ error: AI_TOOLS_UNPAID_ERROR });
         return;
       }
       if (profileError) {
@@ -951,11 +1032,9 @@ export const aiController = {
     // One aggregate read for the whole round — every storage read below
     // (profiles, assignments, prefs, MCP servers, thread, history, folder
     // metadata) is served from it. See storage/chatContext.ts.
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -997,11 +1076,9 @@ export const aiController = {
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {

@@ -53,7 +53,6 @@ export function snapshotOf(overrides: Partial<ChatContextSnapshot> = {}): ChatCo
   return {
     requested: { threadId: undefined, entityId: undefined, contextEntityId: undefined },
     aiReady: true,
-    aiNotReadyMessage: undefined,
     toolPermissionMode: null,
     profiles: [],
     global: scopeOf(),

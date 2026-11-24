@@ -636,13 +636,13 @@ describe.each([
     h.storage.profiles.readById.mockResolvedValue({ id: "p1", providerType: "onlyoffice" });
   });
 
-  it("answers 402 with the portal's own words from the round's aggregate", async () => {
-    h.chat.snapshot = { aiReady: false, aiNotReadyMessage: "ИИ-инструменты не оплачены" };
+  it("answers 402 from the round's aggregate without reading /config", async () => {
+    h.chat.snapshot = { aiReady: false };
 
     const reply = await h.call(aiController[name], body);
 
     expect(reply.status).toBe(402);
-    expect(reply.body).toEqual({ error: "ИИ-инструменты не оплачены" });
+    expect(reply.body).toEqual({ error: UNPAID });
     expect(upstream.seen).toEqual([]);
     expect(h.engine[name]).not.toHaveBeenCalled();
   });
@@ -656,47 +656,22 @@ describe.each([
     expect(upstream.seen).toEqual([]);
   });
 
-  // DEFECT ai-7: the localized refusal is read from `aiNotReadyMessage`, which AiSettingsDto (products/ASC.AI/Server/Models/ResponseDto/AiSettingsDto.cs) does not carry, so outside a primed round the 402 is always English — expected the field on the C# DTO or the message read from where it is served (aiController.ts:776-781 comment, Bug 84023)
-  it("reads /config twice and answers the English sentinel when the aggregate has no words", async () => {
+  // AiSettingsDto carries no localized reason, so the 402 is the service's own sentence and
+  // /config is read once, for aiReady only (Bug 84023).
+  it("answers 402 after one /config read when the round has no aggregate", async () => {
     config(() => HttpResponse.json(settings));
 
     const reply = await h.call(aiController[name], body);
 
     expect(reply.status).toBe(402);
     expect(reply.body).toEqual({ error: UNPAID });
-    expect(upstream.seen.map((r) => `${r.method} ${r.path}`)).toEqual([
-      "GET /internal/ai/config",
-      "GET /internal/ai/config",
-    ]);
-  });
-
-  it("answers the words /config gives when the aggregate says not ready and has none", async () => {
-    h.chat.snapshot = { aiReady: false };
-    config(() => HttpResponse.json({ ...settings, aiNotReadyMessage: "AI Tools unpaid (de)" }));
-
-    const reply = await h.call(aiController[name], body);
-
-    expect(reply.body).toEqual({ error: "AI Tools unpaid (de)" });
-  });
-
-  it.each([
-    ["an empty message", () => HttpResponse.json({ ...settings, aiNotReadyMessage: "" })],
-    ["a message of a wrong type", () => HttpResponse.json({ aiNotReadyMessage: 5 })],
-    ["a body that is not an object", () => HttpResponse.json(["x"])],
-    ["a 500", () => HttpResponse.json({ error: "boom" }, { status: 500 })],
-  ])("falls back to the sentinel on %s", async (_what, answer) => {
-    h.chat.snapshot = { aiReady: false };
-    config(answer);
-
-    const reply = await h.call(aiController[name], body);
-
-    expect(reply.status).toBe(402);
-    expect(reply.body).toEqual({ error: UNPAID });
+    expect(upstream.seen.map((r) => `${r.method} ${r.path}`)).toEqual(["GET /internal/ai/config"]);
   });
 
   it.each([
     ["aiReady true", () => HttpResponse.json({ ...settings, aiReady: true })],
     ["no aiReady", () => HttpResponse.json({ embeddingModel: "m" })],
+    ["a body that is not an object", () => HttpResponse.json(["x"])],
   ])("runs when /config answers %s", async (_what, answer) => {
     config(answer);
 
@@ -705,14 +680,31 @@ describe.each([
     expect(reply.status).toBe(200);
   });
 
-  // HANDLED DOWNSTREAM ai-8: a failed /config read counts as "paid" and the round opens its stream. In production the gateway refuses an unpaid portal itself (AiGateway.cs, 403), so nothing is billed: the caller gets an error frame instead of the 402; it shows only with the engine or the service stubbed.
-  it("runs when /config cannot be read", async () => {
-    config(() => HttpResponse.json({ error: "down" }, { status: 503 }));
+  // HANDLED DOWNSTREAM ai-8: a /config read that fails without a refusal of the caller's own counts as "paid" and the round opens its stream. In production the gateway refuses an unpaid portal itself (AiGatewayProxyController.cs, 403), so nothing is billed: the caller gets an error frame instead of the 402; it shows only with the engine or the service stubbed.
+  it.each([
+    ["answers 503", () => HttpResponse.json({ error: "down" }, { status: 503 }), "AI service 503"],
+    ["drops the connection", () => HttpResponse.error(), "TypeError: Failed to fetch"],
+  ])("runs when /config %s, with a warning", async (_what, answer, logged) => {
+    config(answer);
 
     const reply = await h.call(aiController[name], body);
 
     expect(reply.status).toBe(200);
     expect(h.engine[name]).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `ai-tools wallet check: /config not read, the gateway decides: ${logged}`,
+      ),
+    );
+  });
+
+  it("passes on a /config read the AI service refuses with 403", async () => {
+    config(() => HttpResponse.json({ error: "no" }, { status: 403 }));
+
+    const reply = await h.call(aiController[name], body);
+
+    expect(reply.status).toBe(403);
+    expect(h.engine[name]).not.toHaveBeenCalled();
   });
 
   it("asks nothing for a profile of another provider", async () => {
@@ -943,30 +935,36 @@ describe("the prompt of a streaming round", () => {
     expect(roundAttachments).toEqual([]);
   });
 
-  // DEFECT ai-9: any failure of the history read, a 5xx or a timeout included, is read as "no attachments" without a test of its status — expected a catch that tests the status, or the comment of ts-ai-failure-paths.md §1 saying why unknown is safe (ts-ai-failure-paths.md §1)
   it.each([
-    ["answers 500", new AiServiceHttpError(500, "Internal Server Error", "", "u")],
-    ["times out", new Error("upstream timeout after 300000ms")],
-  ])("carries no history attachments when the history read %s", async (_what, error) => {
-    h.storage.messages.readByThread.mockRejectedValue(error);
+    ["404", 404],
+    ["400", 400],
+  ])("carries no history attachments when the history read answers %s", async (_w, status) => {
+    h.storage.messages.readByThread.mockRejectedValue(
+      new AiServiceHttpError(status, "Not Found", "", "u"),
+    );
 
     const reply = await stream({});
 
     expect(reply.status).toBe(200);
     expect(h.safeGetToolsPrompt.mock.calls[0]?.[2]).toEqual([]);
     expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
-      `withToolsPrompt: thread t1 history read failed, form context not carried over: ${error.message}`,
+      `withToolsPrompt: thread t1 history not found, form context not carried over: AI service ${status}`,
     );
   });
 
-  it("logs a history read that failed with something that is not an Error", async () => {
-    h.storage.messages.readByThread.mockRejectedValue("socket hang up");
+  it.each([
+    ["answers 500", new AiServiceHttpError(500, "Internal Server Error", "", "u")],
+    ["times out", new Error("upstream timeout after 300000ms")],
+    ["fails with something that is not an Error", "socket hang up"],
+  ])("fails the round before its stream when the history read %s", async (_w, error) => {
+    h.storage.messages.readByThread.mockRejectedValue(error);
 
-    await stream({});
+    const reply = await stream({});
 
-    expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
-      "withToolsPrompt: thread t1 history read failed, form context not carried over: socket hang up",
-    );
+    expect(reply.status).toBe(500);
+    expect(JSON.stringify(reply.body)).not.toContain("upstream timeout");
+    expect(h.safeGetToolsPrompt).not.toHaveBeenCalled();
+    expect(h.engine.sendWithStream).not.toHaveBeenCalled();
   });
 
   it("reads no history for a new thread", async () => {
@@ -1258,25 +1256,35 @@ describe("approveToolCall", () => {
     expect(h.engine.approveToolCall).toHaveBeenCalledTimes(1);
   });
 
-  // DEFECT ai-9: a failed thread read (a 5xx or a timeout included) leaves the round without its profile and attachments, without a test of the status — expected a catch that tests the status, or a comment saying why unknown is safe (ts-ai-failure-paths.md §1)
+  it.each([404, 400])(
+    "still runs the approved tool when the thread read answers %s",
+    async (status) => {
+      h.storage.messages.readByThread.mockRejectedValue(
+        new AiServiceHttpError(status, "Not Found", "", "u"),
+      );
+      const box = capture();
+
+      const reply = await h.call(aiController.approveToolCall, VALID.approveToolCall);
+
+      expect(reply.status).toBe(200);
+      expect(box.seen).toEqual([undefined, []]);
+      expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
+        `primeRoundFromThread: thread t1 not found: AI service ${status}`,
+      );
+    },
+  );
+
   it.each([
-    [
-      "answers 500",
-      new AiServiceHttpError(500, "Internal Server Error", "", "u"),
-      "AI service 500 Internal Server Error for u: ",
-    ],
-    ["throws something that is not an Error", "dropped", "dropped"],
-  ])("still runs the approved tool when the thread read %s", async (_w, error, logged) => {
+    ["answers 500", new AiServiceHttpError(500, "Internal Server Error", "", "u")],
+    ["times out", new Error("upstream timeout after 300000ms")],
+    ["throws something that is not an Error", "dropped"],
+  ])("runs no approved tool when the thread read %s", async (_w, error) => {
     h.storage.messages.readByThread.mockRejectedValue(error);
-    const box = capture();
 
     const reply = await h.call(aiController.approveToolCall, VALID.approveToolCall);
 
-    expect(reply.status).toBe(200);
-    expect(box.seen).toEqual([undefined, []]);
-    expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
-      `primeRoundFromThread: thread t1 not resolved: ${logged}`,
-    );
+    expect(reply.status).toBe(500);
+    expect(h.engine.approveToolCall).not.toHaveBeenCalled();
   });
 });
 
