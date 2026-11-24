@@ -22,6 +22,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Npgsql:PostgresExtension:citext", ",,")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
@@ -39,12 +40,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Description")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("description");
 
                     b.Property<string>("Endpoint")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("endpoint");
 
                     b.Property<bool>("HasIcon")
@@ -52,19 +53,19 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("has_icon");
 
                     b.Property<string>("Headers")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("headers");
 
                     b.Property<DateTime>("ModifiedOn")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<int>("TenantId")
@@ -138,7 +139,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("action_type");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("created_at");
 
                     b.Property<int?>("EntryId")
@@ -176,11 +177,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("Content")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("content");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("CreatedBy")
@@ -188,7 +189,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("DeletedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("deleted_on");
 
                     b.Property<int?>("EntryId")
@@ -205,13 +206,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("ThirdpartyEntryId")
                         .HasMaxLength(32)
-                        .HasColumnType("char(32)")
+                        .HasColumnType("citext")
                         .HasColumnName("thirdparty_entry_id");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("title");
 
                     b.HasKey("TenantId", "Id")
@@ -247,17 +248,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("key");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<string>("Provider")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("provider");
 
                     b.Property<int>("Type")
@@ -279,11 +280,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Config")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("config");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("created_at");
 
                     b.Property<int?>("EntryId")
@@ -293,7 +294,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<int>("TenantId")
@@ -388,7 +389,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("BaseUrl")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("base_url");
 
                     b.Property<bool?>("CanUseTool")
@@ -400,29 +401,29 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("capabilities");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Key")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("key");
 
                     b.Property<string>("ModelId")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("model_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<string>("ProviderType")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("provider_type");
 
                     b.Property<ReasoningConfig>("Reasoning")
@@ -454,7 +455,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("CreatedBy")
@@ -468,7 +469,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<int>("TenantId")
@@ -477,11 +478,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("text");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
@@ -506,7 +507,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("CreatedBy")
@@ -516,7 +517,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<int>("TenantId")
@@ -524,7 +525,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
@@ -555,7 +556,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("attachments_folder_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("CreatedBy")
@@ -563,7 +564,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("DeletedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("deleted_on");
 
                     b.Property<int?>("EntryId")
@@ -571,7 +572,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("entry_id");
 
                     b.Property<DateTime>("LastEditDate")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("last_edit_date");
 
                     b.Property<Guid?>("ProfileId")
@@ -581,7 +582,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("title");
 
                     b.HasKey("TenantId", "Id")
@@ -617,7 +618,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("allow_always");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp(0) without time zone")
                         .HasColumnName("created_at");
 
                     b.Property<Guid>("CreatedBy")
@@ -635,7 +636,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("ServerType")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("server_type");
 
                     b.Property<int>("TenantId")
@@ -670,7 +671,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Object")
                         .HasMaxLength(255)
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("object");
 
                     b.Property<int>("AceType")
@@ -1248,13 +1249,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("categoryid");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<Guid?>("ParentId")
@@ -1269,7 +1270,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Sid")
                         .HasMaxLength(512)
-                        .HasColumnType("varchar(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("sid");
 
                     b.Property<int>("TenantId")
@@ -1301,16 +1302,16 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("citext")
                         .HasColumnName("description");
 
                     b.Property<string>("Features")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("features");
 
                     b.Property<string>("Name")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<decimal>("Price")
@@ -1321,17 +1322,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("ProductId")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("citext")
                         .HasColumnName("product_id");
 
                     b.Property<string>("ServiceGroup")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("citext")
                         .HasColumnName("service_group");
 
                     b.Property<string>("ServiceName")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("citext")
                         .HasColumnName("service_name");
 
                     b.Property<bool>("Visible")
@@ -1567,7 +1568,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Path")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("path");
 
                     b.Property<long>("Counter")
@@ -1577,12 +1578,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("0");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("Tag")
                         .HasMaxLength(1024)
-                        .HasColumnType("varchar(1024)")
+                        .HasColumnType("citext")
                         .HasColumnName("tag");
 
                     b.HasKey("TenantId", "UserId", "Path");
@@ -1601,23 +1602,23 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Source")
                         .HasMaxLength(38)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("source");
 
                     b.Property<string>("Action")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("action");
 
                     b.Property<string>("Recipient")
                         .HasMaxLength(38)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("recipient");
 
                     b.Property<string>("Sender")
                         .IsRequired()
                         .HasMaxLength(1024)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("sender");
 
                     b.HasKey("TenantId", "Source", "Action", "Recipient");
@@ -1893,21 +1894,21 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Comment")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("comment");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<string>("CustomerId")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("customer_id");
 
                     b.Property<DateTime>("Stamp")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("stamp");
 
                     b.Property<int>("TenantId")
@@ -1937,7 +1938,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("quota");
 
                     b.Property<DateTime?>("DueDate")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("due_date");
 
                     b.Property<int?>("NextQuantity")
@@ -1988,12 +1989,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Application")
                         .HasMaxLength(20)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("application");
 
                     b.Property<string>("FirebaseDeviceToken")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("firebase_device_token");
 
                     b.Property<bool?>("IsSubscribed")
@@ -2021,26 +2022,26 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("id");
 
                     b.Property<string>("UId")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("uid");
 
                     b.Property<DateTime>("Linked")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("linked");
 
                     b.Property<string>("Profile")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("profile");
 
                     b.Property<string>("Provider")
                         .HasMaxLength(60)
-                        .HasColumnType("varchar(60)")
+                        .HasColumnType("citext")
                         .HasColumnName("provider");
 
                     b.HasKey("Id", "UId")
@@ -2064,12 +2065,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("ModelId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("model_id");
 
                     b.Property<string>("Alias")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("alias");
 
                     b.Property<AiModelCapabilities>("Capabilities")
@@ -2102,7 +2103,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("created_on");
 
                     b.Property<bool>("HasModelSettings")
@@ -2113,11 +2114,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("key");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<int>("TenantId")
@@ -2127,7 +2128,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("title");
 
                     b.Property<int>("Type")
@@ -2136,7 +2137,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("url");
 
                     b.HasKey("Id")
@@ -2156,15 +2157,15 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("created_on");
 
                     b.Property<DateTime?>("DeletedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("deleted_on");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<int>("RoomId")
@@ -2177,7 +2178,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Title")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("title");
 
                     b.Property<Guid>("UserId")
@@ -2216,7 +2217,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("content");
 
                     b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("created_on");
 
                     b.Property<int>("Role")
@@ -2240,7 +2241,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("DefaultModel")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("default_model");
 
                     b.Property<int>("ProviderId")
@@ -2264,17 +2265,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("expires_at");
 
                     b.Property<string>("HashedKey")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("hashed_key");
 
                     b.Property<bool>("IsActive")
@@ -2283,21 +2284,21 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("KeyPostfix")
                         .IsRequired()
                         .HasMaxLength(4)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("key_postfix");
 
                     b.Property<DateTime?>("LastUsed")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_used");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<string>("Permissions")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("permissions");
 
                     b.Property<int>("TenantId")
@@ -2324,7 +2325,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Id")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("id");
 
                     b.Property<bool>("Enabled")
@@ -2334,7 +2335,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("enabled");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("Settings")
@@ -2355,11 +2356,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Id")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_modified");
 
                     b.Property<byte[]>("Value")
@@ -2425,7 +2426,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbIPLookup", b =>
                 {
                     b.Property<string>("AddrType")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("addr_type");
 
                     b.Property<byte[]>("IPStart")
@@ -2435,25 +2436,25 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("City")
                         .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("varchar(80)")
+                        .HasColumnType("citext")
                         .HasColumnName("city");
 
                     b.Property<string>("Continent")
                         .IsRequired()
                         .HasMaxLength(2)
-                        .HasColumnType("char(2)")
+                        .HasColumnType("citext")
                         .HasColumnName("continent");
 
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasMaxLength(2)
-                        .HasColumnType("char(2)")
+                        .HasColumnType("citext")
                         .HasColumnName("country");
 
                     b.Property<string>("District")
                         .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("varchar(80)")
+                        .HasColumnType("citext")
                         .HasColumnName("district");
 
                     b.Property<int?>("GeonameId")
@@ -2476,18 +2477,18 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("StateProv")
                         .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("varchar(80)")
+                        .HasColumnType("citext")
                         .HasColumnName("stateprov");
 
                     b.Property<string>("StateProvCode")
                         .HasMaxLength(15)
-                        .HasColumnType("varchar(15)")
+                        .HasColumnType("citext")
                         .HasColumnName("stateprov_code");
 
                     b.Property<string>("TimezoneName")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("varchar(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("timezone_name");
 
                     b.Property<float>("TimezoneOffset")
@@ -2497,12 +2498,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("WeatherCode")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
+                        .HasColumnType("citext")
                         .HasColumnName("weather_code");
 
                     b.Property<string>("ZipCode")
                         .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
+                        .HasColumnType("citext")
                         .HasColumnName("zipcode");
 
                     b.HasKey("AddrType", "IPStart");
@@ -2521,7 +2522,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Alias")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("alias");
 
                     b.Property<bool>("Calls")
@@ -2531,7 +2532,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("true");
 
                     b.Property<DateTime>("CreationDateTime")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("creationdatetime");
 
                     b.Property<int>("Industry")
@@ -2544,23 +2545,23 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
+                        .HasColumnType("citext")
                         .HasColumnName("language")
                         .HasDefaultValueSql("'en-US'");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("MappedDomain")
                         .HasMaxLength(100)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("mappeddomain");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<Guid?>("OwnerId")
@@ -2569,7 +2570,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("PaymentId")
                         .HasMaxLength(38)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("payment_id");
 
                     b.Property<int>("Status")
@@ -2579,12 +2580,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("0");
 
                     b.Property<DateTime?>("StatusChanged")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("statuschanged");
 
                     b.Property<string>("TimeZone")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("timezone");
 
                     b.Property<int>("TrustedDomainsEnabled")
@@ -2595,7 +2596,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("TrustedDomainsRaw")
                         .HasMaxLength(1024)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("trusteddomains");
 
                     b.Property<int>("Version")
@@ -2605,7 +2606,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("2");
 
                     b.Property<DateTime?>("Version_Changed")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("version_changed");
 
                     b.HasKey("Id");
@@ -2660,7 +2661,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("Address")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("address");
 
                     b.HasKey("Address")
@@ -2711,17 +2712,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("AffiliateId")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("affiliate_id");
 
                     b.Property<string>("Campaign")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("campaign");
 
                     b.Property<string>("PartnerId")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("partner_id");
 
                     b.HasKey("TenantId")
@@ -2745,13 +2746,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("url");
 
                     b.Property<string>("Version")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("version");
 
                     b.Property<bool>("Visible")
@@ -2769,11 +2770,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("IndexName")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("citext")
                         .HasColumnName("index_name");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_modified");
 
                     b.HasKey("IndexName")
@@ -2802,7 +2803,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("data");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_modified");
 
                     b.HasKey("TenantId", "Id", "UserId")
@@ -2840,7 +2841,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("employee_type");
 
                     b.Property<DateTime>("Expiration")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("expiration");
 
                     b.Property<int?>("MaxUseCount")
@@ -2864,7 +2865,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("UserEmail")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("user_email");
 
                     b.Property<int>("AppType")
@@ -2872,11 +2873,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("app_type");
 
                     b.Property<DateTime?>("LastSign")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_sign");
 
                     b.Property<DateTime>("RegisteredOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("registered_on");
 
                     b.HasKey("UserEmail", "AppType")
@@ -2900,7 +2901,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("attempts");
 
                     b.Property<DateTime>("ModifyDate")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modify_date");
 
                     b.Property<int>("Priority")
@@ -2933,50 +2934,50 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Attachments")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("attachments");
 
                     b.Property<string>("AutoSubmitted")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("auto_submitted");
 
                     b.Property<string>("Content")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("content");
 
                     b.Property<string>("ContentType")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("content_type");
 
                     b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("creation_date");
 
                     b.Property<string>("Reciever")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("reciever");
 
                     b.Property<string>("ReplyTo")
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)")
+                        .HasColumnType("citext")
                         .HasColumnName("reply_to");
 
                     b.Property<string>("Sender")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("sender");
 
                     b.Property<string>("SenderType")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("sender_type");
 
                     b.Property<string>("Subject")
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)")
+                        .HasColumnType("citext")
                         .HasColumnName("subject");
 
                     b.Property<int>("TenantId")
@@ -2997,13 +2998,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
             modelBuilder.Entity("ASC.Core.Common.EF.Model.Regions", b =>
                 {
                     b.Property<string>("Region")
-                        .HasColumnType("text");
+                        .HasColumnType("citext");
 
                     b.Property<string>("ConnectionString")
-                        .HasColumnType("text");
+                        .HasColumnType("citext");
 
                     b.Property<string>("Provider")
-                        .HasColumnType("text");
+                        .HasColumnType("citext");
 
                     b.HasKey("Region");
 
@@ -3024,7 +3025,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Short")
                         .HasMaxLength(15)
-                        .HasColumnType("varchar(15)")
+                        .HasColumnType("citext")
                         .HasColumnName("short");
 
                     b.Property<int>("TenantId")
@@ -3060,7 +3061,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("telegram_user_id");
 
                     b.Property<string>("TelegramUsername")
-                        .HasColumnType("varchar(35)")
+                        .HasColumnType("citext")
                         .HasColumnName("telegram_username");
 
                     b.HasKey("TenantId", "PortalUserId")
@@ -3090,7 +3091,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Ip")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("citext")
                         .HasColumnName("ip");
 
                     b.Property<int>("TenantId")
@@ -3113,22 +3114,22 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Source")
                         .HasMaxLength(38)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("source");
 
                     b.Property<string>("Action")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("action");
 
                     b.Property<string>("Recipient")
                         .HasMaxLength(38)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("recipient");
 
                     b.Property<string>("Object")
                         .HasMaxLength(128)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("object");
 
                     b.Property<bool>("Unsubscribed")
@@ -3347,16 +3348,16 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("0");
 
                     b.Property<DateTime?>("BirthDate")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("bithdate");
 
                     b.Property<string>("Contacts")
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)")
+                        .HasColumnType("citext")
                         .HasColumnName("contacts");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<Guid?>("CreatedBy")
@@ -3365,38 +3366,38 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("CultureName")
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("citext")
                         .HasColumnName("culture");
 
                     b.Property<string>("Email")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("email");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("firstname");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("lastname");
 
                     b.Property<string>("Location")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("location");
 
                     b.Property<string>("MobilePhone")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("phone");
 
                     b.Property<int>("MobilePhoneActivation")
@@ -3407,7 +3408,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Notes")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("notes");
 
                     b.Property<bool>("Removed")
@@ -3422,7 +3423,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Sid")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("sid");
 
                     b.Property<bool?>("Spam")
@@ -3431,12 +3432,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("SsoNameId")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("sso_name_id");
 
                     b.Property<string>("SsoSessionId")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("sso_session_id");
 
                     b.Property<int>("Status")
@@ -3450,22 +3451,22 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("tenant");
 
                     b.Property<DateTime?>("TerminatedDate")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("terminateddate");
 
                     b.Property<string>("Title")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("title");
 
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("username");
 
                     b.Property<DateTime?>("WorkFromDate")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("workfromdate");
 
                     b.HasKey("Id")
@@ -3545,7 +3546,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("ref_type");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_modified");
 
                     b.Property<bool>("Removed")
@@ -3610,12 +3611,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("userid");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("lastmodified");
 
                     b.Property<string>("PwdHash")
                         .HasMaxLength(512)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("pwdhash");
 
                     b.Property<int>("TenantId")
@@ -3647,7 +3648,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("InstanceRegistrationId")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("instance_registration_id");
 
                     b.Property<bool>("IsActive")
@@ -3655,13 +3656,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("is_active");
 
                     b.Property<DateTime?>("LastUpdated")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_updated");
 
                     b.Property<string>("WorkerTypeName")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("worker_type_name");
 
                     b.HasKey("InstanceRegistrationId")
@@ -3681,19 +3682,19 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("created_on");
 
                     b.Property<DateTime>("ExpiresOn")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("expires_on")
                         .HasDefaultValueSql("'0001-01-01 00:00:00'");
 
                     b.Property<string>("Hash")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("hash");
 
                     b.Property<bool>("IsScheduled")
@@ -3703,7 +3704,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<bool>("Paid")
@@ -3717,20 +3718,20 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("StorageBasePath")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("storage_base_path")
                         .HasDefaultValueSql("NULL");
 
                     b.Property<string>("StorageParams")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("storage_params")
                         .HasDefaultValueSql("NULL");
 
                     b.Property<string>("StoragePath")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("storage_path");
 
                     b.Property<int>("StorageType")
@@ -3769,7 +3770,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Cron")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("cron");
 
                     b.Property<bool>("Dump")
@@ -3777,16 +3778,16 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("dump");
 
                     b.Property<DateTime>("LastBackupTime")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_backup_time");
 
                     b.Property<string>("StorageBasePath")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("storage_base_path");
 
                     b.Property<string>("StorageParams")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("storage_params");
 
                     b.Property<int>("StorageType")
@@ -3808,7 +3809,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("content");
 
                     b.Property<Guid>("CreateBy")
@@ -3816,13 +3817,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<string>("EventTypeName")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("event_type_name");
 
                     b.Property<int>("State")
@@ -3838,7 +3839,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("times_sent");
 
                     b.Property<string>("TransactionId")
-                        .HasColumnType("text");
+                        .HasColumnType("citext");
 
                     b.HasKey("EventId")
                         .HasName("pk_event_bus_integration_event_log");
@@ -3870,12 +3871,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("0");
 
                     b.Property<string>("Changes")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("changes");
 
                     b.Property<string>("Comment")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("comment");
 
                     b.Property<long>("ContentLength")
@@ -3886,7 +3887,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("ConvertedType")
                         .HasMaxLength(10)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("converted_type");
 
                     b.Property<Guid>("CreateBy")
@@ -3894,7 +3895,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<bool>("CurrentVersion")
@@ -3926,7 +3927,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<int>("ParentId")
@@ -3944,7 +3945,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(400)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("title");
 
                     b.Property<int>("VersionGroup")
@@ -3992,12 +3993,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("user_id");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<string>("PrivateKeyEnc")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("private_key_enc");
 
                     b.Property<Guid>("PublicKeyId")
@@ -4056,7 +4057,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("file_id");
 
                     b.Property<DateTime?>("DeletedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("deleted_on");
 
                     b.Property<int>("Status")
@@ -4064,7 +4065,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("status");
 
                     b.Property<DateTime>("UpdatedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("updated_on");
 
                     b.HasKey("TenantId", "FileId")
@@ -4110,13 +4111,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("RightNode")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("right_node");
 
                     b.Property<string>("LeftNode")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("left_node");
 
                     b.HasKey("TenantId", "RightNode")
@@ -4140,7 +4141,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("RoleName")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("role_name");
 
                     b.Property<Guid>("UserId")
@@ -4149,12 +4150,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("user_id");
 
                     b.Property<DateTime>("OpenedAt")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("opened_at");
 
                     b.Property<string>("RoleColor")
                         .HasMaxLength(6)
-                        .HasColumnType("varchar(6)")
+                        .HasColumnType("citext")
                         .HasColumnName("role_color");
 
                     b.Property<int>("RoomId")
@@ -4166,7 +4167,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("sequence");
 
                     b.Property<DateTime>("SubmissionDate")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("submission_date");
 
                     b.Property<bool>("Submitted")
@@ -4201,13 +4202,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Icon")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("citext")
                         .HasColumnName("icon");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<int>("TenantId")
@@ -4233,12 +4234,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("SourceId")
                         .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
+                        .HasColumnType("citext")
                         .HasColumnName("source_id");
 
                     b.Property<string>("LinkedId")
                         .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
+                        .HasColumnType("citext")
                         .HasColumnName("linked_id");
 
                     b.Property<Guid>("LinkedFor")
@@ -4267,7 +4268,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<Guid>("ModifiedBy")
@@ -4275,13 +4276,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<string>("Options")
@@ -4351,7 +4352,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<int?>("SourceFolderId")
@@ -4383,7 +4384,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<bool>("IsSystem")
@@ -4397,13 +4398,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<int>("TenantId")
@@ -4446,7 +4447,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("OptionId")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("option_id")
                         .HasDefaultValueSql("''");
 
@@ -4455,7 +4456,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<Guid>("ModifiedBy")
@@ -4463,11 +4464,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<DateTime?>("ValueDate")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("value_date");
 
                     b.Property<long?>("ValueNumber")
@@ -4475,7 +4476,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("value_number");
 
                     b.Property<string>("ValueString")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("value_string");
 
                     b.HasKey("TenantId", "EntryId", "EntryType", "FieldId", "OptionId")
@@ -4501,11 +4502,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("EntryId")
                         .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
+                        .HasColumnType("citext")
                         .HasColumnName("entry_id");
 
                     b.Property<string>("Data")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("data");
 
                     b.Property<bool?>("StartFilling")
@@ -4544,7 +4545,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.Property<string>("ThirdpartyRoomId")
-                        .HasColumnType("varchar(200)")
+                        .HasColumnType("citext")
                         .HasColumnName("thirdparty_room_id");
 
                     b.HasKey("Id");
@@ -4577,7 +4578,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("EntryId")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("citext")
                         .HasColumnName("entry_id");
 
                     b.Property<int>("EntryType")
@@ -4609,7 +4610,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("subject_type");
 
                     b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("timestamp");
 
                     b.HasKey("TenantId", "EntryId", "EntryType", "Subject")
@@ -4643,13 +4644,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)")
+                        .HasColumnType("citext")
                         .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.HasKey("TenantId", "FileId")
@@ -4669,7 +4670,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<Guid>("Owner")
@@ -4706,7 +4707,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("EntryId")
                         .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
+                        .HasColumnType("citext")
                         .HasColumnName("entry_id");
 
                     b.Property<int>("EntryType")
@@ -4724,7 +4725,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime?>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.HasKey("TenantId", "TagId", "EntryId", "EntryType")
@@ -4749,20 +4750,20 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Color")
                         .HasMaxLength(6)
-                        .HasColumnType("varchar(6)")
+                        .HasColumnType("citext")
                         .HasColumnName("color");
 
                     b.Property<string>("Cover")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("citext")
                         .HasColumnName("cover");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<string>("FolderId")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("folder_id");
 
                     b.Property<int>("FolderType")
@@ -4775,14 +4776,14 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<DateTime>("ModifiedOn")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("password");
 
                     b.Property<bool>("Private")
@@ -4792,7 +4793,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Provider")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("citext")
                         .HasColumnName("provider");
 
                     b.Property<int>("RoomType")
@@ -4806,15 +4807,15 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(400)
-                        .HasColumnType("character varying(400)")
+                        .HasColumnType("citext")
                         .HasColumnName("customer_title");
 
                     b.Property<string>("Token")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("token");
 
                     b.Property<string>("Url")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("url");
 
                     b.Property<Guid>("UserId")
@@ -4824,7 +4825,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("citext")
                         .HasColumnName("user_name");
 
                     b.HasKey("Id");
@@ -4843,11 +4844,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("App")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying (50)")
+                        .HasColumnType("citext")
                         .HasColumnName("app");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<int>("TenantId")
@@ -4855,7 +4856,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.Property<string>("Token")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("token");
 
                     b.HasKey("UserId", "App")
@@ -4870,12 +4871,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("HashId")
                         .HasMaxLength(32)
-                        .HasColumnType("char(32)")
+                        .HasColumnType("citext")
                         .HasColumnName("hash_id");
 
                     b.Property<string>("Id")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("id");
 
                     b.Property<int>("TenantId")
@@ -4910,7 +4911,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("create_on");
 
                     b.Property<int>("FilesCount")
@@ -4936,7 +4937,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<int>("ParentId")
@@ -4952,7 +4953,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(400)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("title");
 
                     b.HasKey("Id")
@@ -5037,12 +5038,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Color")
                         .HasMaxLength(6)
-                        .HasColumnType("varchar(6)")
+                        .HasColumnType("citext")
                         .HasColumnName("color");
 
                     b.Property<string>("Cover")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("citext")
                         .HasColumnName("cover");
 
                     b.Property<bool>("DenyDownload")
@@ -5123,7 +5124,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("message_id");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.HasKey("TenantId", "ChatId", "FileId")
@@ -5157,7 +5158,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("server_id");
 
                     b.Property<string>("OauthCredentials")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("oauth_credentials");
 
                     b.Property<ToolsConfiguration>("ToolsConfiguration")
@@ -5222,39 +5223,39 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Browser")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("browser");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("date");
 
                     b.Property<string>("DescriptionRaw")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("description");
 
                     b.Property<string>("Initiator")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("initiator");
 
                     b.Property<string>("Ip")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("ip");
 
                     b.Property<string>("Page")
                         .HasMaxLength(4096)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("page");
 
                     b.Property<string>("Platform")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("platform");
 
                     b.Property<string>("Target")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("target");
 
                     b.Property<int>("TenantId")
@@ -5291,36 +5292,36 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Browser")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("browser");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("date");
 
                     b.Property<string>("DescriptionRaw")
                         .HasMaxLength(500)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("description");
 
                     b.Property<string>("Ip")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("ip");
 
                     b.Property<string>("Login")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("login");
 
                     b.Property<string>("Page")
                         .HasMaxLength(4096)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("page");
 
                     b.Property<string>("Platform")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar")
+                        .HasColumnType("citext")
                         .HasColumnName("platform");
 
                     b.Property<int>("TenantId")
@@ -5346,17 +5347,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("PrincipalId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("principal_id");
 
                     b.Property<string>("RegisteredClientId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("registered_client_id");
 
                     b.Property<string>("AuthorizationGrantType")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("authorization_grant_type");
 
                     b.Property<DateTime?>("AccessTokenExpiresAt")
@@ -5364,7 +5365,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("access_token_expires_at");
 
                     b.Property<string>("AccessTokenHash")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("access_token_hash");
 
                     b.Property<DateTime?>("AccessTokenIssuedAt")
@@ -5372,24 +5373,24 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("access_token_issued_at");
 
                     b.Property<string>("AccessTokenMetadata")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("access_token_metadata");
 
                     b.Property<string>("AccessTokenScopes")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("access_token_scopes");
 
                     b.Property<string>("AccessTokenType")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("access_token_type");
 
                     b.Property<string>("AccessTokenValue")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("access_token_value");
 
                     b.Property<string>("Attributes")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("attributes");
 
                     b.Property<DateTime?>("AuthorizationCodeExpiresAt")
@@ -5402,24 +5403,24 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("AuthorizationCodeMetadata")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("authorization_code_metadata");
 
                     b.Property<string>("AuthorizationCodeValue")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("authorization_code_value");
 
                     b.Property<string>("AuthorizedScopes")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("authorized_scopes");
 
                     b.Property<string>("Id")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("id");
 
                     b.Property<string>("IdTokenClaims")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("id_token_claims");
 
                     b.Property<DateTime?>("IdTokenExpiresAt")
@@ -5431,11 +5432,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("id_token_issued_at");
 
                     b.Property<string>("IdTokenMetadata")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("id_token_metadata");
 
                     b.Property<string>("IdTokenValue")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("id_token_value");
 
                     b.Property<bool?>("IsInvalidated")
@@ -5454,7 +5455,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("OwnerUserId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("owner_user_id");
 
                     b.Property<DateTime?>("RefreshTokenExpiresAt")
@@ -5462,7 +5463,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("refresh_token_expires_at");
 
                     b.Property<string>("RefreshTokenHash")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("refresh_token_hash");
 
                     b.Property<DateTime?>("RefreshTokenIssuedAt")
@@ -5470,16 +5471,16 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("refresh_token_issued_at");
 
                     b.Property<string>("RefreshTokenMetadata")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("refresh_token_metadata");
 
                     b.Property<string>("RefreshTokenValue")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("refresh_token_value");
 
                     b.Property<string>("State")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("citext")
                         .HasColumnName("state");
 
                     b.Property<int>("TenantId")
@@ -5515,7 +5516,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("id");
 
                     b.Property<DateTime?>("CreatedAt")
@@ -5528,12 +5529,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("PrivateKey")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("private_key");
 
                     b.Property<string>("PublicKey")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("public_key");
 
                     b.HasKey("Id")
@@ -5546,17 +5547,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("ClientId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("client_id");
 
                     b.Property<string>("ClientSecret")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("client_secret");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -5565,7 +5566,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
+                        .HasColumnType("citext")
                         .HasColumnName("description");
 
                     b.Property<bool?>("IsEnabled")
@@ -5582,17 +5583,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Logo")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("logo");
 
                     b.Property<string>("LogoutRedirectUri")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("logout_redirect_uri");
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime?>("ModifiedOn")
@@ -5601,12 +5602,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<string>("PolicyUrl")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("policy_url");
 
                     b.Property<int>("TenantId")
@@ -5615,7 +5616,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("TermsUrl")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("terms_url");
 
                     b.Property<int>("Version")
@@ -5624,7 +5625,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("WebsiteUrl")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
+                        .HasColumnType("citext")
                         .HasColumnName("website_url");
 
                     b.HasKey("ClientId");
@@ -5643,13 +5644,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("AllowedOrigin")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("allowed_origin");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("client_id");
 
                     b.HasIndex(new[] { "ClientId" }, "idx_identity_client_allowed_origins_client_id");
@@ -5661,13 +5662,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("AuthenticationMethod")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("authentication_method");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("client_id");
 
                     b.HasIndex(new[] { "ClientId" }, "idx_client_authentication_methods_client_id");
@@ -5680,12 +5681,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("client_id");
 
                     b.Property<string>("RedirectUri")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("redirect_uri");
 
                     b.HasIndex(new[] { "ClientId" }, "idx_identity_client_redirect_uris_client_id");
@@ -5698,12 +5699,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("client_id");
 
                     b.Property<string>("ScopeName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("scope_name");
 
                     b.HasIndex("ClientId")
@@ -5719,12 +5720,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("PrincipalId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("principal_id");
 
                     b.Property<string>("RegisteredClientId")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("registered_client_id");
 
                     b.Property<bool?>("IsInvalidated")
@@ -5743,7 +5744,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<string>("OwnerUserId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("owner_user_id");
 
                     b.HasKey("PrincipalId", "RegisteredClientId")
@@ -5762,16 +5763,16 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("PrincipalId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("principal_id");
 
                     b.Property<string>("RegisteredClientId")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("citext")
                         .HasColumnName("registered_client_id");
 
                     b.Property<string>("Scopes")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("scopes");
 
                     b.HasKey("PrincipalId", "RegisteredClientId", "Scopes")
@@ -5816,18 +5817,18 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("ExchangeName")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("exchange_name");
 
                     b.Property<string>("Headers")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("headers");
 
                     b.Property<string>("RoutingKey")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("routing_key");
 
                     b.HasKey("Id")
@@ -5842,7 +5843,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("Name")
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<DateTime>("Position")
@@ -5858,19 +5859,19 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityScope", b =>
                 {
                     b.Property<string>("Name")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<string>("Group")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("group");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("type");
 
                     b.HasKey("Name")
@@ -5939,7 +5940,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<string>("Name")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<DateTime>("LockUntil")
@@ -5953,7 +5954,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("LockedBy")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("citext")
                         .HasColumnName("locked_by");
 
                     b.HasKey("Name")
@@ -5973,14 +5974,14 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Method")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
+                        .HasColumnType("citext")
                         .HasDefaultValue("")
                         .HasColumnName("method");
 
                     b.Property<string>("Route")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("citext")
                         .HasDefaultValue("")
                         .HasColumnName("route");
 
@@ -6003,7 +6004,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("created_on");
 
                     b.Property<bool>("Enabled")
@@ -6012,15 +6013,15 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("true");
 
                     b.Property<string>("LastFailureContent")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("last_failure_content");
 
                     b.Property<DateTime?>("LastFailureOn")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_failure_on");
 
                     b.Property<DateTime?>("LastSuccessOn")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("last_success_on");
 
                     b.Property<Guid?>("ModifiedBy")
@@ -6028,13 +6029,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime?>("ModifiedOn")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("modified_on");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<bool>("SSL")
@@ -6045,13 +6046,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("SecretKey")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("secret_key")
                         .HasDefaultValueSql("''");
 
                     b.Property<string>("TargetId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("target_id");
 
                     b.Property<int>("TenantId")
@@ -6063,7 +6064,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("triggers");
 
                     b.Property<string>("Uri")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("uri");
 
                     b.HasKey("Id")
@@ -6094,11 +6095,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("config_id");
 
                     b.Property<DateTime>("CreationTime")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("creation_time");
 
                     b.Property<DateTime?>("Delivery")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("delivery");
 
                     b.Property<Guid?>("LeaseId")
@@ -6106,7 +6107,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("lease_id");
 
                     b.Property<DateTime?>("NextAttemptOn")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp(0) with time zone")
                         .HasColumnName("next_attempt_on");
 
                     b.Property<string>("RequestHeaders")
@@ -6114,7 +6115,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("request_headers");
 
                     b.Property<string>("RequestPayload")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("request_payload");
 
                     b.Property<string>("ResponseHeaders")
@@ -6122,7 +6123,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("response_headers");
 
                     b.Property<string>("ResponsePayload")
-                        .HasColumnType("text")
+                        .HasColumnType("citext")
                         .HasColumnName("response_payload");
 
                     b.Property<Guid?>("RetriedBy")

@@ -61,7 +61,7 @@ public class TopUpWalletService(
             await using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 await using var webstudioDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContextAsync(stoppingToken);
-                activeTenants = await Queries.GetTenantWalletSettingsAsync(webstudioDbContext, TenantWalletSettings.ID).ToListAsync(stoppingToken);
+                activeTenants = await (webstudioDbContext.Database.IsNpgsql() ? Queries.GetTenantWalletSettingsPostgreSqlAsync : Queries.GetTenantWalletSettingsAsync)(webstudioDbContext, TenantWalletSettings.ID).ToListAsync(stoppingToken);
             }
 
             if (activeTenants.Count == 0)
@@ -335,6 +335,17 @@ static file class Queries
                    // tenants that can't act on it
                    .Where(x => x.tenants.Status == TenantStatus.Active && x.settings.Id == id &&
                        (x.settings.Data.Contains("\"Enabled\":") || x.settings.Data.Contains("\"LowBalanceThreshold\":")))
+                   .Select(r => new TenantWalletSettingsData(r.tenants.Id, r.settings.Data)));
+
+    // The same rows on PostgreSQL, where Data is jsonb: LIKE does not apply to it, and jsonb keeps no text of its own
+    // ("Enabled": true, with a space), so the keys are looked up by the ?| operator instead.
+    public static readonly Func<WebstudioDbContext, Guid, IAsyncEnumerable<TenantWalletSettingsData>>
+        GetTenantWalletSettingsPostgreSqlAsync = EF.CompileAsyncQuery(
+            (WebstudioDbContext ctx, Guid id) =>
+                ctx.WebstudioSettings
+                   .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (settings, tenants) => new { settings, tenants })
+                   .Where(x => x.tenants.Status == TenantStatus.Active && x.settings.Id == id &&
+                       EF.Functions.JsonExistAny(x.settings.Data, "Enabled", "LowBalanceThreshold"))
                    .Select(r => new TenantWalletSettingsData(r.tenants.Id, r.settings.Data)));
 }
 

@@ -45,6 +45,20 @@ cd common/Tools/ASC.Migration.Runner && dotnet run
   (the PostgreSQL SaaS baseline does). The baseline holds a second hand-written statement: the seeded
   `webstudio_settings` row gets the `last_modified` MySQL gives it (2025-03-12, from `MigrationContext_Upgrade49`)
   instead of `DateTime.MinValue`. A regenerated baseline needs both added again, at the end of `Up`, and the AGPL header at the top. `PostgreSqlProviderOptionsTests` in `ASC.Core.Common.Tests` fails when the Standalone snapshot is no longer a copy.
+- A DateTime column on PostgreSQL is `timestamp(0)`/`timestamptz(0)`, set by `PostgreSqlModelCustomizer` for every
+  column whose MySQL type has no fraction of a second, so PostgreSQL rounds a value to the second as MySQL does. A new
+  `datetime(6)` column on MySQL goes into the customizer's `KeepsFraction` list (the ASC.Identity tables are in it as a
+  whole); `PostgreSqlDateTimeMappingTests` fails when the list and the MySQL model disagree. Never fix the precision
+  in the seed data instead: the seeds are shared by both providers, and a snapshot never carries the converters.
+- A text column on PostgreSQL is `citext` (extension `citext`), set by `PostgreSqlModelCustomizer`, so it ignores the
+  letter case in lookups, LIKE, sorting and unique indexes as a MySQL `_ci` column does; json and jsonb columns keep
+  their type. A new MySQL column with a `_bin` collation goes into the customizer's `CaseSensitive` list
+  (`short_links.link` is there); `PostgreSqlCaseInsensitiveTextTests` fails when the list and the MySQL model disagree.
+  PostgreSQL refuses to change the type of a text column that a foreign key from another text column or a stored
+  computed column depends on: the generated migration then drops those objects before the change and creates them
+  again after it, by hand, as `MigrationContext_Upgrade2` does for the ASC.Identity keys and
+  `files_properties.start_filling`. Apply the migration to an empty database with the runner
+  (`--provider=PostgreSql`) before handing it over.
 
 ## Foreign keys to the tenant: Cascade, never Restrict
 

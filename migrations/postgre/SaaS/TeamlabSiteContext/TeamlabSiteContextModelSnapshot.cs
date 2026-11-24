@@ -16,15 +16,16 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Npgsql:PostgresExtension:citext", ",,")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Teamlabsite.Model.DbCache", b =>
                 {
                     b.Property<string>("TenantAlias")
                         .HasMaxLength(100)
-                        .HasColumnType("character varying")
+                        .HasColumnType("citext")
                         .HasColumnName("tenant_alias");
 
                     b.HasKey("TenantAlias")

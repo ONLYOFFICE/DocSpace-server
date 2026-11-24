@@ -38,15 +38,16 @@ namespace ASC.Core.Common.Tests;
 /// string, over the whole model the migrations are made from: Npgsql writes to timestamptz only a DateTime of Kind Utc
 /// and to timestamp (without time zone) only one that is not Utc, and the code passes values of every Kind (a portal
 /// registration writes the owner's WorkFromDate in the tenant's time zone, Kind Local; the AI storage writes
-/// DateTime.UtcNow into timestamp columns). The model is built without opening a connection.
+/// DateTime.UtcNow into timestamp columns). A column whose MySQL type has no fraction of a second has none here
+/// either, so the database rounds the value as MySQL does. The model is built without opening a connection.
 /// </summary>
 public class PostgreSqlDateTimeMappingTests
 {
     private static readonly DateTime[] _values =
     [
-        new(2026, 11, 22, 15, 30, 0, DateTimeKind.Local),
-        new(2026, 11, 22, 15, 30, 0, DateTimeKind.Unspecified),
-        new(2026, 11, 22, 15, 30, 0, DateTimeKind.Utc)
+        new DateTime(2026, 11, 22, 15, 30, 0, DateTimeKind.Local).AddTicks(4_999_999),
+        new DateTime(2026, 11, 22, 15, 30, 0, DateTimeKind.Unspecified).AddTicks(5_000_000),
+        new DateTime(2026, 11, 22, 15, 30, 0, DateTimeKind.Utc).AddTicks(1_234_567)
     ];
 
     private static ASC.Migrations.Core.MigrationContext CreateContext(string providerName)
@@ -76,7 +77,7 @@ public class PostgreSqlDateTimeMappingTests
     }
 
     [Fact]
-    public void PostgreSql_EveryDateTimeProperty_StoresTheValueAsItIsInTheKindItsColumnTakes()
+    public void PostgreSql_EveryDateTimeProperty_StoresTheValueInTheKindItsColumnTakes_InAWholeSecondColumnAsOnMySql()
     {
         using var context = CreateContext("Npgsql");
 
@@ -93,6 +94,19 @@ public class PostgreSqlDateTimeMappingTests
         {
             var name = $"{property.DeclaringType.DisplayName()}.{property.Name} ({property.GetColumnType() ?? "no type"})";
             var withoutTimeZone = ASC.Core.Common.EF.PostgreSqlModelCustomizer.IsWithoutTimeZone(property.GetColumnType());
+            var keepsFraction = ASC.Core.Common.EF.PostgreSqlModelCustomizer.KeepsFraction(property.DeclaringType.GetTableName()!, property.GetColumnName());
+
+            // The database rounds to the second where the MySQL column has no fraction, as MySQL does.
+            if (!keepsFraction && ASC.Core.Common.EF.PostgreSqlModelCustomizer.IsTimestamp(property.GetColumnType()))
+            {
+                property.GetColumnType().Should().Be(withoutTimeZone
+                    ? ASC.Core.Common.EF.PostgreSqlModelCustomizer.WholeSecondTimestamp
+                    : ASC.Core.Common.EF.PostgreSqlModelCustomizer.WholeSecondTimestampTz, name);
+            }
+            else if (keepsFraction)
+            {
+                property.GetColumnType().Should().NotContain("(0)", name);
+            }
             var converter = property.GetValueConverter();
 
             converter.Should().NotBeNull(name);
@@ -110,6 +124,32 @@ public class PostgreSqlDateTimeMappingTests
         }
     }
 
+    /// <summary>
+    /// The columns that keep a fraction of a second on PostgreSQL are exactly those whose MySQL type has one: a new
+    /// datetime(6) column on MySQL that is not added to the list would be rounded on PostgreSQL only.
+    /// </summary>
+    [Fact]
+    public void KeepsFraction_IsExactlyTheColumnsWithAFractionOnMySql()
+    {
+        using var context = CreateContext("MySql.Data.MySqlClient");
+
+        var withFraction = context.Model.GetEntityTypes()
+            .Where(entityType => entityType.GetTableName() is not null)
+            .SelectMany(entityType => entityType.GetProperties())
+            .Where(property => property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+            .Select(property => (Table: property.DeclaringType.GetTableName()!, Column: property.GetColumnName(), Type: property.GetRelationalTypeMapping().StoreType))
+            .ToList();
+
+        withFraction.Should().Contain(column => column.Type.Contains('('), "the model has columns with a fraction");
+
+        var mismatches = withFraction
+            .Where(c => ASC.Core.Common.EF.PostgreSqlModelCustomizer.KeepsFraction(c.Table, c.Column) != (c.Type.Contains('(') && !c.Type.EndsWith("(0)", StringComparison.Ordinal)))
+            .Select(c => $"{c.Table}.{c.Column} is {c.Type} on MySQL")
+            .ToList();
+
+        mismatches.Should().BeEmpty(string.Join("; ", mismatches));
+    }
+
     [Theory]
     [InlineData(null, false)]
     [InlineData("timestamptz", false)]
@@ -117,6 +157,8 @@ public class PostgreSqlDateTimeMappingTests
     [InlineData("timestamp", true)]
     [InlineData("timestamp without time zone", true)]
     [InlineData("timestamp(6)", true)]
+    [InlineData("timestamp(0) without time zone", true)]
+    [InlineData("timestamp(0) with time zone", false)]
     [InlineData("date", false)]
     public void IsWithoutTimeZone_ColumnType(string? columnType, bool expected)
     {
