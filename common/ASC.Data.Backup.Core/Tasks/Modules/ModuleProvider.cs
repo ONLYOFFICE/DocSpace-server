@@ -52,12 +52,15 @@ public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, Cor
 
     private IModuleSpecifics RoomLogosModule { get; } = new RoomLogosModuleSpecifics(helpers);
 
+    private IModuleSpecifics WebPluginsModule { get; } = new WebPluginsModuleSpecifics(helpers);
+
     public IModuleSpecifics GetByStorageModule(string storageModuleName, string storageDomainName = null)
     {
         return storageModuleName switch
         {
             "files" => AllModules.FirstOrDefault(m => m.ModuleName == ModuleName.Files),
             "room_logos" => RoomLogosModule,
+            "webplugins" => WebPluginsModule,
             _ => null
         };
     }
