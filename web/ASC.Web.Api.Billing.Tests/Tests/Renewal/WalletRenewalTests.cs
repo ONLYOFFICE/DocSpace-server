@@ -96,6 +96,30 @@ public class WalletRenewalTests(AspireAppFixture fixture) : BaseTest(fixture)
         calls.IndexOf(deposits[0]).Should().BeLessThan(changeAt, "the wallet is topped up before the period is paid from it");
     }
 
+    [Fact]
+    public async Task Renewal_YearlyPlanWithAWalletShortOfTheCost_TopsUpToTheYearlyPriceThenPays()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .Balance(5m)
+            .Paid(Plans.AdminWalletYearProductId, quantity: 2, DateTime.UtcNow + _dueIn, Owner.Email)
+            .On(PaymentService.Billing, "POST", "/billing/ChangeSubscription", "true");
+
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // Act
+        var calls = await WaitForRenewalAsync();
+
+        // Assert
+        var change = calls.Find(call => call.Route == "/billing/ChangeSubscription");
+        change.Should().NotBeNull("the subscription is renewed before its due date");
+        BillingValue(change!, "ProductId").Should().Be(Plans.AdminWalletYearProductId.ToString(CultureInfo.InvariantCulture));
+        BillingValue(change!, "ProductQty").Should().Be("2");
+
+        var deposit = calls.Should().ContainSingle(call => call.Route == "/billing/Deposit", "the shortfall is topped up once").Subject;
+        decimal.Parse(BillingValue(deposit, "Amount")!, CultureInfo.InvariantCulture).Should().Be(Plans.AdminWalletYearPrice * 2 - 5m);
+    }
+
     private async Task<List<PaymentServiceCall>> WaitForRenewalAsync()
     {
         var deadline = DateTime.UtcNow + _renewalDeadline;

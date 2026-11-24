@@ -132,6 +132,57 @@ public class SubscriptionMoveToWalletTests(AspireAppFixture fixture) : BaseTest(
         PaymentCalls.Should().ContainSingle(c => c.Route == "/billing/ChangeSubscription");
     }
 
+    [Fact]
+    public async Task MoveSubscriptionToWallet_YearlyPlan_BuysTheYearlyProductAtItsPrice()
+    {
+        // Arrange: an empty wallet, nothing left of the period to move and no bonus
+        Payments.Paid(Plans.AdminProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1), Owner.Email)
+            .Customer(Owner.Email)
+            .Balance(0m)
+            .On(PaymentService.Billing, "POST", "/billing/SubscriptionBalanceToWallet", """{"amount":0,"currency":"usd"}""")
+            .On(PaymentService.Billing, "POST", "/billing/ChangeSubscription", "true")
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/goodwill", GoodwillJson(0m));
+
+        // the plan is read anew, so the move sees the paid subscription instead of the cached free plan
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // Act
+        var bought = (await _paymentApi.MoveSubscriptionToWalletAsync(
+            new QuantityRequestDto(new Dictionary<string, int> { [Plans.AdminWalletYearPlanName] = Admins }), TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        bought.Should().BeTrue();
+
+        var deposit = PaymentCalls.Should().ContainSingle(c => c.Route == "/billing/Deposit").Subject;
+        decimal.Parse(BillingValue(deposit, "Amount")!, CultureInfo.InvariantCulture).Should().Be(Plans.AdminWalletYearPrice * Admins);
+
+        var purchase = PaymentCalls.Should().ContainSingle(c => c.Route == "/billing/ChangeSubscription").Subject;
+        BillingValue(purchase, "ProductId").Should().Be(Plans.AdminWalletYearProductId.ToString(CultureInfo.InvariantCulture));
+        BillingValue(purchase, "ProductQty").Should().Be(Admins.ToString(CultureInfo.InvariantCulture));
+    }
+
+    [Fact]
+    public async Task MoveSubscriptionToWallet_WalletProductThatIsNotAnAdministratorsPlan_ThrowsBadRequest()
+    {
+        // Arrange
+        Payments.Paid(Plans.AdminProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1), Owner.Email)
+            .Customer(Owner.Email)
+            .Balance(0m)
+            .On(PaymentService.Billing, "POST", "/billing/SubscriptionBalanceToWallet", """{"amount":0,"currency":"usd"}""")
+            .On(PaymentService.Billing, "POST", "/billing/ChangeSubscription", "true");
+
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _paymentApi.MoveSubscriptionToWalletAsync(
+            new QuantityRequestDto(new Dictionary<string, int> { ["storage"] = 100 }), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("Invalid product");
+        PaymentCalls.Should().NotContain(c => c.Route == "/billing/SubscriptionBalanceToWallet", "nothing is moved");
+    }
+
     private string GoodwillJson(decimal amount, string currency = "USD")
     {
         return new JsonObject

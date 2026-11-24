@@ -13,7 +13,7 @@ hold one of the two: buying one while the tariff holds the other answers 400 "Qu
 
 - **WHEN** the owner calls `updateWalletPayment` with `Add` and `adminwalletyear` in a count not below the portal's administrators, and the tariff holds no wallet administrators plan
 - **THEN** the system answers 200 `true`
-- **AND** the tariff holds the yearly plan with the due date the billing service gave
+- **AND** the billing service is asked for the yearly product in that count
 
 #### Scenario: Fewer administrators than the portal has
 

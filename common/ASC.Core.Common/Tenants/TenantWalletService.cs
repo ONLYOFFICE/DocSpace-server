@@ -63,3 +63,18 @@ public enum TenantWalletService
     [Description("AdminYear")]
     AdminYear = -19
 }
+
+/// <summary>
+/// The wallet quotas that are the plan of the portal itself, not an add-on to it: the administrators plan paid
+/// from the wallet, with a monthly and a yearly period. A portal holds one of them.
+/// </summary>
+public static class TenantWalletPlans
+{
+    /// <summary>
+    /// Whether the quota is an administrators plan paid from the wallet.
+    /// </summary>
+    public static bool IsAdminPlan(int quotaId)
+    {
+        return quotaId is (int)TenantWalletService.Admin or (int)TenantWalletService.AdminYear;
+    }
+}

@@ -49,10 +49,11 @@ See proposal.md for the motivation. What shapes the approach:
    `movetowallet` (accepted products). *Alternative:* decide by the quota's flags (`wallet` and not
    additional) — rejected for now: the flags describe the catalogue, and a third primary wallet plan would
    silently get the administrators rules.
-4. **One plan at a time**, checked before the wallet is read or topped up, in `updatewallet` (`Add`) and in
-   `movetowallet`: if the tariff holds the other administrators plan, 400 "Quota is already set", the text
-   the DocsCloud / Dev Pack pair already uses. The tariff row counts whatever its state, so an overdue
-   monthly plan also blocks the yearly one; the way out is to cancel it (`Set` 0) and let it end.
+4. **One plan at a time**, checked before the wallet is read or topped up, in `updatewallet` (`Add`): if the
+   tariff holds the other administrators plan, 400 "Quota is already set", the text the DocsCloud / Dev Pack
+   pair already uses. The tariff row counts whatever its state, so an overdue monthly plan also blocks the
+   yearly one; the way out is to cancel it (`Set` 0) and let it end. `movetowallet` needs no check of its
+   own: it already answers 400 "Invalid product" when the plan of the portal is a wallet product.
 5. **Migrations.** One MySQL SaaS migration inserts the row (down: deletes it). One MySQL Standalone
    migration deletes it, because the runner applies the SaaS migrations to a standalone database first.
 6. **Guard test on the seed**: non-empty product ids are unique over all rows, and service names are unique

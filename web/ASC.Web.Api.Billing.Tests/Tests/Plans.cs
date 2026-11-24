@@ -53,6 +53,14 @@ internal static class Plans
     public const int AdminWalletProductId = 1013;
     public const decimal AdminWalletPrice = 20m;
 
+    // The yearly plan paid from the wallet, "adminwalletyear" (quota -19), at 220 USD per administrator. The payment
+    // services do not price it, so the price is the one the catalogue stores.
+    public const int AdminWalletYearQuotaId = -19;
+    public const int AdminWalletYearProductId = 1020;
+    public const decimal AdminWalletYearPrice = 220m;
+    public const string AdminWalletPlanName = "adminwallet";
+    public const string AdminWalletYearPlanName = "adminwalletyear";
+
     // The DocsCloud wallet services: DocsCloud (quota -15) and its developer pack (quota -16).
     public const int DocsCloudQuotaId = -15;
     public const int DocsCloudProductId = 1014;
