@@ -65,15 +65,36 @@ function parseMessagesCursor(raw: unknown): MessagesCursor | undefined {
   if (typeof raw !== "string" || raw.length === 0) {
     return undefined;
   }
+  let parsed: unknown;
   try {
-    const parsed: unknown = JSON.parse(raw);
-    if (isObject(parsed) && getString(parsed, "id") !== undefined) {
-      return parsed as unknown as MessagesCursor;
-    }
+    parsed = JSON.parse(raw);
   } catch {
-    // fall through — not JSON
+    // not JSON
+    return undefined;
   }
-  return undefined;
+  if (!isObject(parsed)) {
+    return undefined;
+  }
+  const id = getString(parsed, "id");
+  if (id === undefined) {
+    return undefined;
+  }
+  return { id, createdAt: cursorCreatedAt(parsed["createdAt"]) };
+}
+
+// The storage sends `createdAt` as an ISO string, and also takes the epoch
+// milliseconds a message stored before this service sent ISO strings still
+// carries (`toWireCursor` in messagesStorage.ts). Anything else is no
+// position, which the storage reads as an unpaginated read.
+function cursorCreatedAt(value: unknown): string | null {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value !== "number") {
+    return null;
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 // Only an explicit `desc` turns the read around; anything else — absent,
@@ -161,6 +182,13 @@ export async function assertThreadCreatable(
 
 type ThreadMessageInput = Omit<ThreadMessageLike, "id" | "createdAt">;
 
+// A message the storage keeps verbatim: an object with a known role and
+// something to store (`invalidMessageError`). Its parts are the widget's
+// and are stored as they came.
+function isMessageInput(message: unknown): message is ThreadMessageInput {
+  return invalidMessageError(message) === null;
+}
+
 interface AppendUserMessageBody {
   threadId: string;
   message: ThreadMessageInput;
@@ -242,12 +270,11 @@ export const threadsController = {
     // role used to be stored and served back as a user message (Bugs 84409,
     // 84410). The route stores user messages only: the engine appends the
     // other roles in-process, nothing sends them here.
-    const shapeError = invalidMessageError(args.message);
-    if (shapeError) {
-      res.status(400).json({ error: shapeError });
+    const message = args.message;
+    if (!isMessageInput(message)) {
+      res.status(400).json({ error: invalidMessageError(message) });
       return;
     }
-    const message = args.message as ThreadMessageInput;
     if (message.role !== "user") {
       res.status(400).json({ error: "append-user-message stores user messages only" });
       return;
@@ -437,12 +464,11 @@ export const threadsController = {
     // message (Bug 84412). The role is pinned to the stored one rather than
     // to `user`: the widget rewrites assistant messages through this route
     // when it cancels a client-side tool call (Bug 84413).
-    const shapeError = invalidMessageError(args.message);
-    if (shapeError) {
-      res.status(400).json({ error: shapeError });
+    const message = args.message;
+    if (!isMessageInput(message)) {
+      res.status(400).json({ error: invalidMessageError(message) });
       return;
     }
-    const message = args.message as ThreadMessageInput;
     const stored = await storage.messages.readById(args.messageId);
     if (stored === null) {
       res.status(404).json({ error: "message not found" });

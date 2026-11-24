@@ -60,6 +60,7 @@ const readAiProjectChatContext = vi.fn();
 vi.mock("../../storage/aiProjectChatContext.js", () => ({ readAiProjectChatContext }));
 
 const { threadsController } = await import("../threadsController.js");
+const { handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
@@ -67,7 +68,8 @@ const run = async (name: keyof typeof threadsController, body: unknown) => {
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (threadsController[name] as unknown as Handler)({ body, query: {} }, res, next);
+  (threadsController[name] as unknown as Handler)({ body, query: {} }, res, next);
+  await handlerSettled(res);
   return {
     status: res.status.mock.calls[0]?.[0] as number | undefined,
     body: res.json.mock.calls[0]?.[0],

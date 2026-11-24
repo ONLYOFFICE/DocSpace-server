@@ -178,6 +178,8 @@ describe.each([
     ["an empty object", {}],
     ["a number", 5],
     ["a boolean", true],
+    ["an empty string", ""],
+    ["an empty array", []],
   ])("re-saves the stored entry when the config is %s", async (_what, config) => {
     mcpServers.readByName.mockResolvedValue({ url: URL_A, headers: SECRET });
     engineCall().mockResolvedValue({ success: true });

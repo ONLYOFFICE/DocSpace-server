@@ -54,9 +54,14 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   AssignmentsEngine: engineClass(() => engine),
 }));
 const profiles = vi.hoisted(() => ({ readByIdRaw: vi.fn(), readAllForClient: vi.fn() }));
-vi.mock("../../storage/index.js", () => ({ storage: { profiles } }));
+// The adapter class stays real: the resolve operations build their own storage from it.
+vi.mock("../../storage/index.js", async (original) => ({
+  ...(await original<typeof import("../../storage/index.js")>()),
+  storage: { profiles },
+}));
 
-const { assignmentsController } = await import("../assignmentsController.js");
+const { assignmentsController, AssignedProfileGoneError } =
+  await import("../assignmentsController.js");
 const { AiServiceHttpError } = await import("../../storage/httpClient.js");
 
 const upstream = useUpstream();
@@ -106,16 +111,11 @@ beforeEach(() => {
 });
 
 const resolveRoutes = [
-  ["resolveForAction", "aiAssignmentsResolveForAction", []],
-  // The published answer is `AiResolvedAssignment | null`, so ajv also reports the null branch.
-  [
-    "tryResolveForAction",
-    "aiAssignmentsTryResolveForAction",
-    ["/ must be null", "/ must match a schema in anyOf"],
-  ],
+  ["resolveForAction", "aiAssignmentsResolveForAction"],
+  ["tryResolveForAction", "aiAssignmentsTryResolveForAction"],
 ] as const;
 
-describe.each(resolveRoutes)("assignmentsController.%s", (route, operationId, nullBranch) => {
+describe.each(resolveRoutes)("assignmentsController.%s", (route, operationId) => {
   const handler = assignmentsController[route];
 
   it("answers the stored profile without key and headers, and asks the engine with the action and entity", async () => {
@@ -288,26 +288,16 @@ describe.each(resolveRoutes)("assignmentsController.%s", (route, operationId, nu
     expect(reply.body).toEqual({ error: "Internal server error" });
   });
 
-  // DEFECT ctl-20: the profile is spread from the storage object, so whatever the storage adds (here the
-  // C# ProfileDto's byokProvider of a BYOK profile) leaves in the answer and breaks AiProfile's
-  // additionalProperties:false — expected the answer built from the listed profile fields
-  // (ts-ai-failure-paths.md §5; AiResolvedAssignment in the published schema)
-  it("answers whatever extra field the stored profile carries, byokProvider included", async () => {
+  it("answers the listed profile fields only, whatever else the stored profile carries", async () => {
     engine.tryResolveForAction.mockResolvedValue(engineResolved as never);
     profiles.readByIdRaw.mockResolvedValue({ ...storedProfile, byokProvider: "openai", extra: 1 });
 
     const reply = await invoke(handler, { method: "GET", query: { actionType: "Chat" } });
 
     expect(reply.status).toBe(200);
-    expect(reply.body).toEqual({
-      profileId: storedProfile.id,
-      profile: { ...shownProfile, byokProvider: "openai", extra: 1 },
-    });
-    expect(responseViolations(operationId, 200, reply.body)).toEqual([
-      "/profile must NOT have additional properties",
-      "/profile must NOT have additional properties",
-      ...nullBranch,
-    ]);
+    expect(reply.body).toEqual({ profileId: storedProfile.id, profile: shownProfile });
+    expect(JSON.stringify(reply.body)).not.toContain("MARKER");
+    expect(responseViolations(operationId, 200, reply.body)).toEqual([]);
   });
 });
 
@@ -325,17 +315,23 @@ describe("assignmentsController.resolveForAction absent answers", () => {
     expect(responseViolations("aiAssignmentsResolveForAction", 404, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-21: an assigned profile that is gone is recognised by the text of the engine's Error message
-  // ("Assigned profile not found") — expected a test of the error's class or status
-  // (ts-ai-failure-paths.md §1 "Never recognize an error by the text of its message")
-  it("answers 404 when the engine says the assigned profile is not found", async () => {
-    engine.tryResolveForAction.mockRejectedValue(new Error("Assigned profile not found: p9"));
+  it("answers 404 when the engine's profile read finds the assigned profile gone", async () => {
+    engine.tryResolveForAction.mockRejectedValue(new AssignedProfileGoneError("p9"));
 
     const reply = await invoke(handler, { method: "GET", query: { actionType: "Chat" } });
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "no AI profile is available for ActionType.Chat" });
     expect(profiles.readByIdRaw).not.toHaveBeenCalled();
+  });
+
+  it("answers 500 for a plain Error worded as the engine's gone profile", async () => {
+    engine.tryResolveForAction.mockRejectedValue(new Error("Assigned profile not found: p9"));
+
+    const reply = await invoke(handler, { method: "GET", query: { actionType: "Chat" } });
+
+    expect(reply.status).toBe(500);
+    expect(reply.body).toEqual({ error: "Internal server error" });
   });
 
   it("answers 404 when the resolved profile cannot be read back", async () => {
@@ -355,9 +351,8 @@ describe("assignmentsController.tryResolveForAction absent answers", () => {
   it.each([
     ["nothing is configured", () => engine.tryResolveForAction.mockResolvedValue(null)],
     [
-      "the engine says the assigned profile is not found",
-      () =>
-        engine.tryResolveForAction.mockRejectedValue(new Error("Assigned profile not found: p9")),
+      "the engine's profile read finds the assigned profile gone",
+      () => engine.tryResolveForAction.mockRejectedValue(new AssignedProfileGoneError("p9")),
     ],
     [
       "the resolved profile cannot be read back",
@@ -732,31 +727,21 @@ describe("assignmentsController.getAllAssignments", () => {
     expect(responseViolations("aiAssignmentsGetAllAssignments", 200, reply.body)).toEqual([]);
   });
 
-  // DEFECT ctl-25: with expand=profile the stored profiles are echoed as the storage gives them, so a BYOK
-  // profile's byokProvider (C# ProfileDto.ByokProvider) leaves in the answer and breaks AiProfile's
-  // additionalProperties:false — expected the profiles built from the listed fields (ts-ai-failure-paths.md §5)
-  it("echoes the extra fields of a stored profile with expand=profile", async () => {
+  it("answers the listed profile fields only with expand=profile", async () => {
     engine.getAllAssignments.mockResolvedValue({ Chat: "p1" });
     profiles.readAllForClient.mockResolvedValue([
-      { ...forClient("p1", 1), byokProvider: "openai" },
+      { ...forClient("p1", 1), byokProvider: "openai", key: "sk-MARKER", headers: { X: "MARKER" } },
     ]);
 
     const reply = await invoke(handler, { method: "GET", query: { expand: "profile" } });
 
     expect(reply.body).toEqual({
-      assignments: { Chat: { ...forClient("p1", 1), byokProvider: "openai" } },
+      assignments: { Chat: forClient("p1", 1) },
       profilesTotal: 1,
       chatProfilesTotal: 1,
     });
-    expect(responseViolations("aiAssignmentsGetAllAssignments", 200, reply.body)).toEqual([
-      // the AiAssignmentsMap branch of the oneOf
-      "/assignments must be string",
-      "/profilesTotal must be string",
-      "/chatProfilesTotal must be string",
-      // the AiAssignmentsExpanded branch
-      "/assignments/Chat must NOT have additional properties",
-      "/ must match exactly one schema in oneOf",
-    ]);
+    expect(JSON.stringify(reply.body)).not.toContain("MARKER");
+    expect(responseViolations("aiAssignmentsGetAllAssignments", 200, reply.body)).toEqual([]);
   });
 
   it.each([

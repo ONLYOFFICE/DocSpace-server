@@ -153,11 +153,20 @@ function isFolderRef(v: unknown): v is string | null | undefined {
 // which dereferences `bundle.version` / `.folders` / `.prompts` unguarded
 // and answered 500 (Bug 84423). Returns the refusals, empty when the
 // bundle is well-formed.
+//
+// The check covers the fields the engine reads (the version, the ids, names,
+// texts and folder references); the engine reads no timestamp of an entry,
+// so one that is missing is not refused.
+function isPromptBundle(bundle: unknown, errors: ImportError[]): bundle is PromptBundle {
+  errors.push(...bundleShapeErrors(bundle));
+  return errors.length === 0;
+}
+
 function bundleShapeErrors(bundle: unknown): ImportError[] {
   const refuse = (kind: ImportError["kind"], ref: string, message: string): ImportError => ({
     kind,
     ref,
-    error: { field: "name", message, code: "invalid" } as ImportError["error"],
+    error: { field: "name", message, code: "invalid" },
   });
   if (!isObject(bundle)) {
     return [refuse("folder", "<bundle>", "bundle is required and must be an object")];
@@ -385,12 +394,12 @@ export const promptsController = {
 
   importBundle: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["bundle", "options"] as const);
-    const shapeErrors = bundleShapeErrors(args.bundle);
-    if (shapeErrors.length > 0) {
+    const bundle = args.bundle;
+    const shapeErrors: ImportError[] = [];
+    if (!isPromptBundle(bundle, shapeErrors)) {
       res.status(400).json({ success: false, errors: shapeErrors });
       return;
     }
-    const bundle = args.bundle as PromptBundle;
     const options: unknown = args.options;
     let mode: ImportMode | undefined;
     if (options !== undefined && options !== null) {

@@ -271,18 +271,23 @@ describe.each([
     expect(engineCall()).toHaveBeenCalledTimes(1);
   });
 
-  // DEFECT data-5: the engine's refusal `{ success: false, error }` is sent with 200 by `res.json(result)` — expected 400 (or 404/409 by error.code) as sendMutation does for prompts (ts-ai-failure-paths.md §2)
-  it("answers a refusal of the engine with 200", async () => {
+  // The widget's ApiProvider hands a non-2xx body back as a value when it says `success: false`,
+  // so the profile form reads the refusal as before.
+  it.each([
+    [
+      "a key the provider refuses",
+      { field: "key" as const, message: "Provider validation failed" },
+    ],
+    ["a taken name", { field: "name" as const, message: "Duplicate name" }],
+    ["an unknown provider type", { field: "name" as const, message: "Unknown provider type: x" }],
+  ])("answers 400 for a refusal of the engine: %s", async (_what, error) => {
     portalConfig(false);
-    const refusal = {
-      success: false as const,
-      error: { field: "key" as const, message: "Invalid API key", code: "invalid" as const },
-    };
+    const refusal = { success: false as const, error };
     engineCall().mockResolvedValue(refusal);
 
     const reply = await invoke(profilesController[method], { body });
 
-    expect(reply.status).toBe(200);
+    expect(reply.status).toBe(400);
     expect(reply.body).toEqual(refusal);
     expect(published(operationId, reply)).toEqual([]);
   });
@@ -780,6 +785,19 @@ describe("profilesController.getById", () => {
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(stored);
     expect(JSON.stringify(reply.body)).not.toContain("MARKER");
+    expect(published("aiProfilesGetById", reply)).toEqual([]);
+  });
+
+  it("answers the listed profile fields only, whatever else the stored profile carries", async () => {
+    readByIdRaw.mockResolvedValue({ ...stored, byokProvider: "openai", extra: 1 });
+
+    const reply = await invoke(profilesController.getById, {
+      method: "GET",
+      query: { id: stored.id },
+    });
+
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual(stored);
     expect(published("aiProfilesGetById", reply)).toEqual([]);
   });
 

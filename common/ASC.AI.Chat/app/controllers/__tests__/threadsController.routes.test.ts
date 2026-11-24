@@ -902,6 +902,11 @@ describe("threadsController.readMessages", () => {
     ['{"createdAt":"x"}', undefined],
     ['["m0"]', undefined],
     [["a", "b"], undefined],
+    ['{"id":"m0"}', { id: "m0", createdAt: null }],
+    ['{"id":"m0","createdAt":true}', { id: "m0", createdAt: null }],
+    // An epoch-ms position of a message stored before ISO strings, which the storage takes too.
+    ['{"id":"m0","createdAt":1767225600000}', { id: "m0", createdAt: "2026-01-01T00:00:00.000Z" }],
+    ['{"id":"m0","createdAt":1e300}', { id: "m0", createdAt: null }],
   ])("reads the cursor %j as %j", async (cursor, parsed) => {
     engine.readMessages.mockResolvedValue([]);
 

@@ -16,13 +16,15 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
 });
 const readAllForClient = vi.fn();
 const readByIdRaw = vi.fn();
-vi.mock("../../storage/index.js", () => ({
+vi.mock("../../storage/index.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../storage/index.js")>()),
   storage: { profiles: { readAllForClient, readByIdRaw } },
 }));
 const assertEntityAccessible = vi.fn(async () => {});
 vi.mock("../../storage/docspaceFilesApi.js", () => ({ assertEntityAccessible }));
 
 const { assignmentsController } = await import("../assignmentsController.js");
+const { handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
@@ -30,7 +32,8 @@ const call = async (query: Record<string, string>) => {
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (assignmentsController.getAllAssignments as unknown as Handler)({ query }, res, next);
+  (assignmentsController.getAllAssignments as unknown as Handler)({ query }, res, next);
+  await handlerSettled(res);
   const failure = next.mock.calls[0];
   if (failure) throw failure[0];
   return res.json.mock.calls[0]?.[0];
@@ -77,7 +80,8 @@ const run = async (name: keyof typeof assignmentsController, req: Record<string,
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (assignmentsController[name] as unknown as Handler)({ query: {}, ...req }, res, next);
+  (assignmentsController[name] as unknown as Handler)({ query: {}, ...req }, res, next);
+  await handlerSettled(res);
   const failure = next.mock.calls[0];
   if (failure) throw failure[0];
   return {

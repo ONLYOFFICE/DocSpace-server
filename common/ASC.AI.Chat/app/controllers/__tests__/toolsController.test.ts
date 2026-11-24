@@ -66,6 +66,7 @@ vi.mock("../../storage/docspaceFilesApi.js", () => ({
 }));
 
 const { toolsController } = await import("../toolsController.js");
+const { handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
@@ -73,7 +74,8 @@ const call = async (handler: unknown, req: { query?: unknown; body?: unknown }) 
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (handler as Handler)({ query: {}, body: {}, ...req }, res, next);
+  (handler as Handler)({ query: {}, body: {}, ...req }, res, next);
+  await handlerSettled(res);
   const failure = next.mock.calls[0];
   if (failure) throw failure[0];
   return res.json.mock.calls[0]?.[0];

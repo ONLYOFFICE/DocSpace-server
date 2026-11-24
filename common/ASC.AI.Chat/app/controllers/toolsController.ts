@@ -85,7 +85,7 @@ function assertRoutableServerName(rawName: unknown): string {
 // caller that resolves many entries (the whole-map save).
 async function resolveConfig(
   name: string,
-  provided: McpServerConfig | undefined,
+  provided: unknown,
   stored?: Record<string, McpServerConfig>,
 ): Promise<McpServerConfig> {
   const system = getSystemServerConfig(name);
@@ -95,13 +95,26 @@ async function resolveConfig(
   const portal = stored
     ? (stored[name] ?? null)
     : await storage.mcpServers.readByName(name, undefined);
-  if (provided && Object.keys(provided).length > 0) {
+  if (isObject(provided) && Object.keys(provided).length > 0) {
     return keepStoredHeaders(provided, portal);
+  }
+  if ((typeof provided === "string" || Array.isArray(provided)) && provided.length > 0) {
+    return forTheEngineToRefuse(provided);
   }
   if (portal) {
     return portal;
   }
   throw clientFault(400, `No config provided and no portal-level server named "${name}"`);
+}
+
+// A config that is a string or a list goes to the engine as sent: the engine
+// refuses it as a value on the `url` field, and the whole-map save reports it
+// among the entries it refuses (spec ai-agents, "Server configurations and
+// replace-all"; ASC.AI.Tests, McpServerReplaceAllTests). The library types the
+// parameter as an object, which this value is not: the one place the
+// controller hands the engine a value its type does not describe.
+function forTheEngineToRefuse(config: unknown): McpServerConfig {
+  return config as McpServerConfig;
 }
 
 // No read answers a server's headers (see withoutHeaders below), so a config
@@ -115,10 +128,6 @@ function keepStoredHeaders(
   provided: McpServerConfig,
   stored: McpServerConfig | null,
 ): McpServerConfig {
-  // A config that is not an object is the engine's to refuse; it has no headers to keep.
-  if (!isObject(provided)) {
-    return provided;
-  }
   if ("headers" in provided || !stored || !isObject(stored["headers"])) {
     return provided;
   }
@@ -175,14 +184,16 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
-function toolNamesError(value: unknown): string | undefined {
+// The names, or the message of the 400 that refuses them.
+function readToolNames(value: unknown): string[] | string {
   if (!Array.isArray(value)) {
     return "toolNames is required and must be an array of tool names";
   }
-  if (!value.every(isNonEmptyString)) {
+  const names = value.filter(isNonEmptyString);
+  if (names.length !== value.length) {
     return "toolNames must contain non-empty strings only";
   }
-  return undefined;
+  return names;
 }
 
 export const toolsController = {
@@ -199,7 +210,7 @@ export const toolsController = {
     await assertEntityAccessible(entityId);
     const result = await engine.addCustomServer(
       name,
-      await resolveConfig(name, args.config as McpServerConfig | undefined),
+      await resolveConfig(name, args.config),
       entityId,
     );
     res.json(result);
@@ -213,7 +224,7 @@ export const toolsController = {
     await assertEntityAccessible(entityId);
     const result = await engine.updateCustomServer(
       name,
-      await resolveConfig(name, args.config as McpServerConfig | undefined),
+      await resolveConfig(name, args.config),
       entityId,
     );
     res.json(result);
@@ -280,18 +291,20 @@ export const toolsController = {
     ]);
     // This engine's source exposes plain getTools only, so the system half
     // always comes back as the legacy grouped map.
-    const systemGroups = (
-      isObject(tools) && "groups" in (tools as Record<string, unknown>)
-        ? (tools as { groups: Record<string, unknown> }).groups
-        : tools
-    ) as Record<string, unknown>;
+    const listed: unknown = isObject(tools) && "groups" in tools ? tools["groups"] : tools;
     // Hide the portal MCP server from every management surface (the MCP
     // settings page's permission cards):
     // it is always enabled with all tools and cannot be configured. The
     // chat engine's tool context does not go through this listing, so the
     // tools themselves stay available everywhere.
-    if (isObject(systemGroups)) {
-      delete systemGroups[PORTAL_MCP_SERVER_NAME];
+    // A listing that is not a map is a source that failed, not "no system
+    // tools": the boundary answers it 500.
+    if (!isObject(listed)) {
+      throw new Error("the system tool listing is not an object");
+    }
+    const systemGroups: Record<string, unknown> = {};
+    for (const [serverType, group] of Object.entries(listed)) {
+      if (serverType !== PORTAL_MCP_SERVER_NAME) systemGroups[serverType] = group;
     }
     res.json({
       groups: { ...systemGroups, ...custom.groups },
@@ -318,7 +331,7 @@ export const toolsController = {
     // scope and WIPE its whole server map (Bug 82975).
     const entityId = optionalString(args.entityId, "entityId");
     await assertEntityAccessible(entityId);
-    const map = args.map as Record<string, McpServerConfig>;
+    const map = args.map;
     const stored = await storage.mcpServers.readAll(undefined);
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
@@ -347,9 +360,9 @@ export const toolsController = {
     }
     // An explicit empty list stays legal: it is the documented "switch
     // everything back on" and what the settings page sends for it.
-    const toolNamesProblem = toolNamesError(args.toolNames);
-    if (toolNamesProblem !== undefined) {
-      res.status(400).json({ error: toolNamesProblem });
+    const toolNames = readToolNames(args.toolNames);
+    if (typeof toolNames === "string") {
+      res.status(400).json({ error: toolNames });
       return;
     }
     // The serverType must be a group key the round's tool filter actually
@@ -358,7 +371,7 @@ export const toolsController = {
     // the host-configured system servers, the two DocSpace-integration
     // groups, web-search / image-generation, and the scope's registered
     // custom MCP servers.
-    const serverType = args.serverType as string;
+    const serverType: unknown = args.serverType;
     const validTypes = new Set<string>([
       ...systemToolsSource.getServerTypes(),
       DOCSPACE_INTEGRATION_SERVER_TYPE,
@@ -376,7 +389,7 @@ export const toolsController = {
       });
       return;
     }
-    await engine.setDisabled(serverType, args.toolNames as string[], entityId, scope);
+    await engine.setDisabled(serverType, toolNames, entityId, scope);
     res.json({ success: true });
   }),
 

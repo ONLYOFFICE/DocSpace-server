@@ -32,7 +32,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { ProfilesEngine } from "@onlyoffice/ai-chat/core";
-import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-chat/core";
+import type {
+  Profile,
+  CreateProfileInput,
+  ProfileMutationResult,
+  ProviderType,
+} from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { listOnlyofficeGatewayModels } from "../storage/profilesStorage.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
@@ -189,6 +194,48 @@ function sendKeyRefusal(res: Response, message: string): void {
   res.status(400).json({ success: false, error: { field: "key", message, code: "invalid" } });
 }
 
+// A refusal of the engine (a taken name, an unknown provider type, a key the
+// provider refuses, an unknown id on update) is a 400 in the same
+// `{ success: false, error }` shape: the widget's ApiProvider hands a non-2xx
+// body of that shape back as a value, so its profile form reads it as before
+// (ts-ai-failure-paths.md §2). The profiles engine sets no `error.code`, and
+// the published document lists 400 alone for these writes, so every refusal
+// is one status.
+function sendProfileMutation(res: Response, result: ProfileMutationResult): void {
+  res.status(result.success ? 200 : 400).json(result);
+}
+
+// The profile as an answer carries it: the fields of `AiProfile` in the
+// published document, by name. Spread from the storage, it carried whatever
+// the AI service adds to its ProfileDto (the BYOK provider of a profile that
+// runs on the portal's own key is one), and `key` and `headers` never leave
+// through these answers (ts-ai-failure-paths.md §5). An absent field is left
+// undefined, which the JSON answer omits.
+export type ProfileAnswer = Omit<Profile, "key" | "headers"> & { useResponsesApi?: boolean };
+
+export function profileForResponse(profile: Profile): ProfileAnswer {
+  // Not a field of the library's `Profile`: the AI service's ProfileDto
+  // carries it and `dtoToProfile` reads it.
+  const useResponsesApi = readProp(profile, "useResponsesApi");
+  return {
+    id: profile.id,
+    name: profile.name,
+    providerType: profile.providerType,
+    basedOn: profile.basedOn,
+    baseUrl: profile.baseUrl,
+    modelId: profile.modelId,
+    reasoning: profile.reasoning,
+    reasoningSupport: profile.reasoningSupport,
+    contextWindow: profile.contextWindow,
+    capabilities: profile.capabilities,
+    canUseTool: profile.canUseTool,
+    useResponsesApi: typeof useResponsesApi === "boolean" ? useResponsesApi : undefined,
+    isCloudProvider: profile.isCloudProvider,
+    useProxy: profile.useProxy,
+    createdAt: profile.createdAt,
+  };
+}
+
 // 404 for a profile the caller cannot see, before the engine is involved:
 // the library's lookup throws a plain Error for a missing profile, which
 // collapsed into 502 "Failed to list provider models" on list-models and
@@ -217,8 +264,7 @@ export const profilesController = {
       sendKeyRefusal(res, keyError);
       return;
     }
-    const result = await engine.create(req.body);
-    res.json(result);
+    sendProfileMutation(res, await engine.create(req.body));
   }),
 
   update: asyncHandler<Profile>(async (req, res) => {
@@ -239,8 +285,7 @@ export const profilesController = {
       sendKeyRefusal(res, keyError);
       return;
     }
-    const result = await engine.update(req.body);
-    res.json(result);
+    sendProfileMutation(res, await engine.update(req.body));
   }),
 
   delete: asyncHandler(async (req, res) => {
@@ -376,7 +421,7 @@ export const profilesController = {
     // for an HTTP response (Bug 82821). The former justification for the
     // full profile — the doceditor Next passthrough — was removed; the
     // editor now goes through /openai/{profileId}/v1, which resolves the
-    // profile server-side. `key` and `headers` are dropped on top: no
+    // profile server-side. `key` and `headers` are left out on top: no
     // consumer reads them (on SaaS `key` is the "onlyoffice" placeholder;
     // on self-hosted it is the tenant's real provider secret).
     const profile = await storage.profiles.readByIdRaw(id);
@@ -384,8 +429,7 @@ export const profilesController = {
       res.status(404).json({ error: "Profile not found" });
       return;
     }
-    const { key: _key, headers: _headers, ...publicProfile } = profile;
-    res.json(publicProfile);
+    res.json(profileForResponse(profile));
   }),
 
   // `readAllForClient`, not `engine.list()`: the engine reads the full

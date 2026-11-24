@@ -31,29 +31,61 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { ActionType } from "@onlyoffice/ai-chat/core";
+import type { ActionType, Profile } from "@onlyoffice/ai-chat/core";
 import { AssignmentsEngine, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
-import { storage } from "../storage/index.js";
+import { HttpStorageAdapter, storage } from "../storage/index.js";
+import { HttpProfilesStorage } from "../storage/profilesStorage.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asActionType, asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
+import { profileForResponse } from "./profilesController.js";
+import type { ProfileAnswer } from "./profilesController.js";
 
 const engine = new AssignmentsEngine({ storage });
 
-// The engine's lenient lookup still throws a plain Error when the slot
-// names a profile that can no longer be loaded - deleted without the
-// assignment cascade, or one the caller cannot see. For the caller that is
-// the same as an empty slot, not a server failure, so both resolve
-// operations answer it as one (404 and an empty result respectively)
-// instead of a 500.
+// The engine resolves a slot by reading its profile, and throws a plain
+// Error, told apart from any other only by its wording, when that read finds
+// nothing: a profile deleted without the assignment cascade, or one the
+// caller cannot see. For the caller that is the same as an empty slot, not a
+// server failure. The resolve operations therefore run on an engine whose
+// profile read throws this error itself for a profile that is absent, so it is
+// recognised by its class (ts-ai-failure-paths.md §1); a read that fails stays
+// the failure it is.
+export class AssignedProfileGoneError extends Error {
+  readonly status = 404;
+
+  constructor(profileId: string) {
+    super(`the assigned profile ${profileId} does not exist`);
+    this.name = "AssignedProfileGoneError";
+  }
+}
+
+class GoneAwareProfiles extends HttpProfilesStorage {
+  override async readById(id: string): Promise<Profile | undefined> {
+    const profile = await super.readById(id);
+    if (profile === undefined) {
+      throw new AssignedProfileGoneError(id);
+    }
+    return profile;
+  }
+}
+
+class ResolveStorage extends HttpStorageAdapter {
+  override profiles = new GoneAwareProfiles();
+}
+
+const resolveEngine = new AssignmentsEngine({ storage: new ResolveStorage() });
+
+// Both resolve operations answer the gone profile as an empty slot (404 and
+// an empty result respectively) instead of a 500.
 async function resolveOrNull(
   actionType: ActionType,
   entityId: string | undefined,
 ): Promise<Awaited<ReturnType<AssignmentsEngine["tryResolveForAction"]>>> {
   try {
-    return await engine.tryResolveForAction(actionType, entityId);
+    return await resolveEngine.tryResolveForAction(actionType, entityId);
   } catch (err) {
-    if (err instanceof Error && err.message.startsWith("Assigned profile not found")) {
+    if (err instanceof AssignedProfileGoneError) {
       return null;
     }
     throw err;
@@ -64,12 +96,12 @@ async function resolveOrNull(
 // the read in-process provider calls use: the provider key and, for an
 // `onlyoffice` profile, the internal gateway address and the caller's
 // forwarded auth headers (Bug 82821). The profile is read again as
-// `profiles/get-by-id` answers it, without the override, and `key` and
-// `headers` are dropped: the callers of these routes read the profile's
-// name and model, and a round names its profile by id.
+// `profiles/get-by-id` answers it, without the override, and answered by its
+// named fields, without `key` and `headers`: the callers of these routes read
+// the profile's name and model, and a round names its profile by id.
 async function resolvedForResponse(
   resolved: Awaited<ReturnType<typeof resolveOrNull>>,
-): Promise<{ profileId: string; profile: object } | null> {
+): Promise<{ profileId: string; profile: ProfileAnswer } | null> {
   if (resolved === null) {
     return null;
   }
@@ -77,8 +109,7 @@ async function resolvedForResponse(
   if (!stored) {
     return null;
   }
-  const { key: _key, headers: _headers, ...profile } = stored;
-  return { profileId: resolved.profileId, profile };
+  return { profileId: resolved.profileId, profile: profileForResponse(stored) };
 }
 
 interface AssignBody {
@@ -221,10 +252,14 @@ export const assignmentsController = {
     if (asString(req.query["expand"]) === "profile") {
       const profiles = await storage.profiles.readAllForClient();
       const byId = new Map(profiles.map((profile) => [profile.id, profile]));
-      const assignments: Record<string, (typeof profiles)[number]> = {};
+      // Each profile by its named fields, as profiles/get-by-id answers it: the
+      // list is read for a client, which still hands an administrator the key
+      // and headers the settings cards edit, and none of that is this
+      // answer's to carry (ts-ai-failure-paths.md §5).
+      const assignments: Record<string, ProfileAnswer> = {};
       for (const [actionType, profileId] of Object.entries(result)) {
         const profile = profileId ? byId.get(profileId) : undefined;
-        if (profile) assignments[actionType] = profile;
+        if (profile) assignments[actionType] = profileForResponse(profile);
       }
       // A profile without known capabilities may chat, as the widget's
       // model picker assumes (`CapabilitiesUI.Chat`).
