@@ -366,12 +366,19 @@ describe("getEntryMetadata against the Files API", () => {
   it.each([
     ["a response that is a list", envelope([METADATA_DTO])],
     ["a response that is null", envelope(null)],
-    ["a body without a response", HttpResponse.json({ status: 0 })],
-    ["a body that is a list", HttpResponse.json([METADATA_DTO])],
   ])("reads %s as an entry without metadata", async (_what, answer) => {
     upstream.use(http.get("*/api/2.0/files/metadata/:kind/:id", () => answer));
 
     expect(await getEntryMetadata("file", "10")).toEqual({ templates: [], customFields: [] });
+  });
+
+  it.each([
+    ["a body without a response", () => HttpResponse.json({ status: 0 })],
+    ["a body that is a list", () => HttpResponse.json([METADATA_DTO])],
+  ])("rejects %s instead of reading it as no metadata", async (_what, answer) => {
+    upstream.use(http.get("*/api/2.0/files/metadata/:kind/:id", answer));
+
+    await expect(getEntryMetadata("file", "10")).rejects.toThrow(/unparseable response/);
   });
 
   it.each([

@@ -36,9 +36,7 @@
  * client's info panel makes. Shapes mirror `MetadataController` DTOs.
  */
 
-import { withTimeout, proxyBaseUrl } from "../storage/httpClient.js";
-import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
-import { getForwardedHeaders } from "../requestContext.js";
+import { filesApiGet, filesApiSend } from "../storage/docspaceFilesApi.js";
 import { getNumber, getObject, getObjectArray, getString, isObject } from "../narrow.js";
 
 export type EntryKind = "file" | "folder";
@@ -106,30 +104,9 @@ export function hasValue(value: FieldValue | undefined): boolean {
   );
 }
 
-function metadataUrl(kind: EntryKind, id: string, suffix = ""): string {
-  return `${proxyBaseUrl}/api/2.0/files/metadata/${kind}/${encodeURIComponent(id)}${suffix}`;
-}
-
-async function call(url: string, init?: RequestInit): Promise<unknown> {
-  const { signal, cancel } = withTimeout(undefined);
-  try {
-    const res = await fetch(url, {
-      ...init,
-      headers: {
-        ...getForwardedHeaders(),
-        ...(init?.body ? { "content-type": "application/json" } : {}),
-        ...(init?.headers ?? {}),
-      },
-      signal,
-    });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
-    }
-    const raw: unknown = await res.json();
-    return isObject(raw) ? raw["response"] : undefined;
-  } finally {
-    cancel();
-  }
+// Relative to `api/2.0/files/`, as the Files API clients take it.
+function metadataPath(kind: EntryKind, id: string, suffix = ""): string {
+  return `metadata/${kind}/${encodeURIComponent(id)}${suffix}`;
 }
 
 function toValue(raw: Record<string, unknown> | undefined): FieldValue | undefined {
@@ -235,7 +212,7 @@ export function parseEntryMetadata(raw: unknown): EntryMetadata {
 
 /** `GET metadata/{kind}/{id}`: the entry's templates with values and its custom fields. */
 export async function getEntryMetadata(kind: EntryKind, id: string): Promise<EntryMetadata> {
-  return parseEntryMetadata(await call(metadataUrl(kind, id)));
+  return parseEntryMetadata(await filesApiGet(metadataPath(kind, id)));
 }
 
 /** `PUT metadata/{kind}/{id}/values`; answers the whole metadata after the write. */
@@ -245,10 +222,7 @@ export async function setValues(
   values: ValueRequest[],
 ): Promise<EntryMetadata> {
   return parseEntryMetadata(
-    await call(metadataUrl(kind, id, "/values"), {
-      method: "PUT",
-      body: JSON.stringify({ values }),
-    }),
+    await filesApiSend("PUT", metadataPath(kind, id, "/values"), { values }),
   );
 }
 
@@ -258,8 +232,5 @@ export async function setCustomFields(
   id: string,
   fields: { name: string; value: string | null }[],
 ): Promise<void> {
-  await call(metadataUrl(kind, id, "/customFields"), {
-    method: "PUT",
-    body: JSON.stringify({ fields }),
-  });
+  await filesApiSend("PUT", metadataPath(kind, id, "/customFields"), { fields });
 }

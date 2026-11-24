@@ -32,6 +32,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import logger from "../../log.js";
+import { DocspaceApiHttpError } from "../docspaceFilesApi.js";
 
 const { getFolderInfoCached } = vi.hoisted(() => ({ getFolderInfoCached: vi.fn() }));
 
@@ -107,7 +108,7 @@ describe("resolveContextFolders", () => {
   it("leaves out a folder that is gone or that the caller cannot read", async () => {
     getFolderInfoCached.mockImplementation(async (id: string) => {
       if (id === "1") return undefined;
-      if (id === "2") throw new Error("403 Forbidden");
+      if (id === "2") throw new DocspaceApiHttpError(403, "Forbidden", "files/folder/2");
       return { title: "Kept" };
     });
     expect(await resolveContextFolders(["1", "2", "3"])).toEqual([
@@ -191,12 +192,10 @@ describe("a read that rejects with something other than an Error", () => {
     getFolderInfoCached.mockReset();
   });
 
-  it("leaves the context folder out and logs what was thrown", async () => {
+  it("rejects with what was thrown for a context folder, without a warning", async () => {
     getFolderInfoCached.mockRejectedValue("down");
-    expect(await resolveContextFolders(["1"])).toEqual([]);
-    expect(vi.mocked(logger.warn).mock.calls).toEqual([
-      ["context folders: folder 1 not readable by the caller, left out: down"],
-    ]);
+    await expect(resolveContextFolders(["1"])).rejects.toBe("down");
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it("keeps the location by its id and logs what was thrown", async () => {

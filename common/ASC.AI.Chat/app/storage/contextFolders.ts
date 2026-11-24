@@ -34,6 +34,7 @@
 import { isObject } from "../narrow.js";
 import logger from "../log.js";
 import {
+  DocspaceApiHttpError,
   folderSourceType,
   getFolderInfoCached,
   type DocspaceFolderInfo,
@@ -112,8 +113,11 @@ function toContextFolder(id: string, info: DocspaceFolderInfo): ContextFolder {
  * The context folders as the caller can see them: each id is read through
  * the Files API under the caller's credentials, so the names and rights the
  * model is told are the server's, never what the client claimed. A folder
- * that is gone or that the caller cannot read is left out - the model must
- * not be pointed at an id its tools will be refused on. Order is kept.
+ * that is gone (404) or that the caller cannot read (403) is left out - the
+ * model must not be pointed at an id its tools will be refused on. Any other
+ * failure (a 5xx, a timeout, a body of the wrong shape) is unknown and
+ * rejects, so the round fails and can be retried instead of telling the
+ * model the user selected fewer folders. Order is kept.
  */
 export async function resolveContextFolders(ids: readonly string[]): Promise<ContextFolder[]> {
   const resolved = await Promise.all(
@@ -122,10 +126,11 @@ export async function resolveContextFolders(ids: readonly string[]): Promise<Con
         const info = await getFolderInfoCached(id);
         return info ? toContextFolder(id, info) : undefined;
       } catch (err) {
+        if (!(err instanceof DocspaceApiHttpError && err.status === 403)) {
+          throw err;
+        }
         logger.warn(
-          `context folders: folder ${id} not readable by the caller, left out: ${
-            err instanceof Error ? err.message : String(err)
-          }`,
+          `context folders: folder ${id} not readable by the caller, left out: ${err.message}`,
         );
         return undefined;
       }

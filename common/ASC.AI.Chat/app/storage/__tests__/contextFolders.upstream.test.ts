@@ -105,12 +105,27 @@ describe("resolveContextFolders over the Files API", () => {
     ]);
   });
 
-  // DEFECT stor2-11: a context folder whose read fails with a 5xx (or times out) is left out like one the caller cannot read, and the model is told the user selected fewer folders — expected the unknown answer not to be read as "not readable" (ts-ai-failure-paths.md §1; the doc comment of resolveContextFolders names only "gone" and "cannot read")
-  it("leaves out a folder whose read fails with a 500", async () => {
+  it("rejects when a folder's read fails with a 500, instead of leaving it out", async () => {
     folders({ "3": status(500), "1": ok(folderDto(1)) });
-    await expect(resolveContextFolders(["3", "1"])).resolves.toEqual([
-      { id: "1", title: "Folder 1", kind: "folder", canCreate: true },
-    ]);
+    await expect(resolveContextFolders(["3", "1"])).rejects.toMatchObject({ status: 500 });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it("rejects when a folder's read times out, instead of leaving it out", async () => {
+    vi.useFakeTimers();
+    try {
+      upstream.use(
+        // The Files service never answers: only the client's own timeout ends the read.
+        http.get("*/api/2.0/files/folder/:id", () => new Promise<Response>(() => undefined)),
+      );
+      const read = resolveContextFolders(["3"]);
+      const outcome = expect(read).rejects.toThrow(/upstream timeout/);
+      await vi.advanceTimersByTimeAsync(60 * 60 * 1000);
+      await outcome;
+      expect(logger.warn).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("reads at most the limit of folders", async () => {

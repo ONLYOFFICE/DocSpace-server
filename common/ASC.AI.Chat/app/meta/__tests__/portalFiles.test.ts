@@ -34,7 +34,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useFastTimers } from "../../__tests__/helpers/time.js";
 import {
-  FakeDocspaceApiHttpError,
   fakeFetch,
   headers,
   logger,
@@ -44,11 +43,17 @@ import {
   withTimeout,
 } from "./mocks.js";
 
+// The Files API clients are the real ones, over the `fetch` each test stubs: only the proxy
+// address, the timeout and the caller's headers are the test's.
 vi.mock("../../log.js", () => ({ default: logger }));
-vi.mock("../../storage/httpClient.js", () => ({ withTimeout, proxyBaseUrl: PROXY }));
-vi.mock("../../requestContext.js", () => ({ getForwardedHeaders: () => headers }));
-vi.mock("../../storage/docspaceFilesApi.js", () => ({
-  DocspaceApiHttpError: FakeDocspaceApiHttpError,
+vi.mock("../../storage/httpClient.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../storage/httpClient.js")>()),
+  withTimeout,
+  proxyBaseUrl: PROXY,
+}));
+vi.mock("../../requestContext.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../requestContext.js")>()),
+  getForwardedHeaders: () => headers,
 }));
 
 const { getPortalFile, listFolderFiles, PortalTextReader, textTargetFor, UnsupportedFileError } =
@@ -294,6 +299,36 @@ describe("PortalTextReader", () => {
     ).rejects.toMatchObject({ status: 403 });
     expect(calls.filter((c) => c.url.endsWith("/fileops/bulkdownload"))).toHaveLength(4);
   }, 15_000);
+
+  it("starts the next queued conversion after one the portal refused", async () => {
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url, init) =>
+          url.endsWith("/fileops/bulkdownload") && String(init?.body).includes('"key":1'),
+        answer: () => new Response("", { status: 500, statusText: "Server Error" }),
+      },
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () =>
+          portalJson([
+            operation("op-2", { finished: true, url: "https://x/filehandler.ashx?b=2" }),
+          ]),
+      },
+      {
+        match: (url) => url.includes("filehandler.ashx"),
+        answer: () => textResponse("text of b"),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    const [a, b] = await Promise.allSettled([
+      reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" }),
+      reader.readFileAsText({ id: "2", title: "b.docx", ext: ".docx" }),
+    ]);
+    expect(a).toMatchObject({ status: "rejected", reason: { status: 500 } });
+    expect(b).toEqual({ status: "fulfilled", value: "text of b" });
+  });
 
   it("survives a failed poll and reads the result on the next one", async () => {
     let polls = 0;

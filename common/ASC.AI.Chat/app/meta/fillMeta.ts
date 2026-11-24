@@ -152,7 +152,7 @@ function typeLabel(type: FieldType): string {
       return "single_choice";
     case FieldType.MultiChoice:
       return "multi_choice";
-    default:
+    case FieldType.String:
       return "text";
   }
 }
@@ -326,7 +326,7 @@ export function resolveValue(target: Target, raw: unknown): Resolved {
         ? { ok: true, value: { optionIds: ids } }
         : { ok: false, reason: "unknown_option" };
     }
-    default: {
+    case FieldType.String: {
       const stringValue = asText(raw);
       return stringValue
         ? { ok: true, value: { stringValue } }

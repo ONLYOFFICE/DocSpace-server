@@ -244,10 +244,19 @@ describe("the rooms listings", () => {
   it.each([
     ["a list", () => HttpResponse.json([])],
     ["text", () => HttpResponse.json("rooms")],
-  ])("answers no room, with a warning, for a listing that is %s", async (_name, reply) => {
+    ["an object without an envelope", () => HttpResponse.json({ folders: [] })],
+  ])("rejects a listing that is %s instead of reading it as no room", async (_name, reply) => {
     upstream.use(http.get("*/api/2.0/files/rooms", reply));
+    await expect(getKnowledgeFolders()).rejects.toThrow(/unparseable response/);
+  });
+
+  it("answers no room, with a warning, for a first page whose envelope is null", async () => {
+    upstream.use(http.get("*/api/2.0/files/rooms", () => HttpResponse.json({ response: null })));
     await expect(getKnowledgeFolders()).resolves.toEqual([]);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(logger.warn).mock.calls).toEqual([
+      ["listRoomsOfType(11) -> unparseable response for startIndex 0"],
+    ]);
+    expect(upstream.seen).toHaveLength(1);
   });
 
   it("reads a page without folders as no room", async () => {
@@ -270,29 +279,68 @@ describe("the rooms listings", () => {
     await expect(getKnowledgeFolders()).resolves.toEqual([]);
   });
 
-  it.each([
-    ["no envelope", () => HttpResponse.json({ folders: [] })],
-    ["a null envelope", () => HttpResponse.json({ response: null })],
-  ])(
-    "stops with a warning on a page with %s, keeping the rooms read so far",
-    async (_n, second) => {
-      upstream.use(
-        http.get("*/api/2.0/files/rooms", ({ request }) =>
-          new URL(request.url).searchParams.get("startIndex") === "0"
-            ? page([{ id: 1, title: "R" }], 500)
-            : second(),
-        ),
-      );
-      await expect(getKnowledgeFolders()).resolves.toEqual([
-        { cloud: "docspace", rooms: [{ id: "1", name: "R" }] },
-      ]);
-      expect(vi.mocked(logger.warn).mock.calls).toEqual([
-        [
-          `listRoomsOfType(11) -> unparseable response from ${proxyBaseUrl}/api/2.0/files/rooms?type=11&searchArea=AiHub&count=100&startIndex=100`,
-        ],
-      ]);
-    },
-  );
+  it("stops with a warning at a page with a null envelope, keeping the pages before it", async () => {
+    upstream.use(
+      http.get("*/api/2.0/files/rooms", ({ request }) => {
+        const start = new URL(request.url).searchParams.get("startIndex");
+        return start === "100"
+          ? HttpResponse.json({ response: null })
+          : page([{ id: Number(start) + 1, title: `R${start}` }], 300);
+      }),
+    );
+    await expect(getKnowledgeFolders()).resolves.toEqual([
+      { cloud: "docspace", rooms: [{ id: "1", name: "R0" }] },
+    ]);
+    expect(vi.mocked(logger.warn).mock.calls).toEqual([
+      ["listRoomsOfType(11) -> unparseable response for startIndex 100"],
+    ]);
+  });
+
+  it("rejects when a later page has no envelope", async () => {
+    upstream.use(
+      http.get("*/api/2.0/files/rooms", ({ request }) =>
+        new URL(request.url).searchParams.get("startIndex") === "0"
+          ? page([{ id: 1, title: "R" }], 500)
+          : HttpResponse.json({ folders: [] }),
+      ),
+    );
+    await expect(getKnowledgeFolders()).rejects.toThrow(/unparseable response/);
+  });
+
+  it("reads the pages after the first at once and joins them in page order", async () => {
+    const started: string[] = [];
+    let release: () => void = () => undefined;
+    const allStarted = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    upstream.use(
+      http.get("*/api/2.0/files/rooms", async ({ request }) => {
+        const start = Number(new URL(request.url).searchParams.get("startIndex"));
+        if (start > 0) {
+          started.push(String(start));
+          if (started.length === 3) {
+            release();
+          }
+          // Every later page waits until all of them were asked for, and the
+          // last page answers first.
+          await allStarted;
+          await new Promise((resolve) => setTimeout(resolve, (400 - start) / 100));
+        }
+        return page([{ id: start + 1, title: `R${start}` }], 350);
+      }),
+    );
+
+    const folders = await getKnowledgeFolders();
+
+    expect(folders[0]?.rooms.map((room) => room.id)).toEqual(["1", "101", "201", "301"]);
+    expect(started.sort()).toEqual(["100", "200", "300"]);
+  });
+
+  it("reads the first page alone when it tells no total beyond itself", async () => {
+    upstream.use(http.get("*/api/2.0/files/rooms", () => page([{ id: 1, title: "R" }], 100)));
+    await getKnowledgeFolders();
+    expect(upstream.seen).toHaveLength(1);
+  });
 
   it.each([401, 403, 500])(
     "rethrows a %i of the listing as a DocspaceApiHttpError",
@@ -346,11 +394,19 @@ describe("presignedDownloadUrl", () => {
 
   it.each([
     ["an empty address", () => envelope("")],
-    ["no envelope", () => HttpResponse.json("https://portal/f")],
     ["an address that is not text", () => envelope({ url: "u" })],
   ])("throws on %s", async (_name, answer) => {
     upstream.use(http.get("*/api/2.0/files/file/:id/presigneduri", answer));
     await expect(presignedDownloadUrl("5")).rejects.toThrow("No download address for file 5");
+  });
+
+  it("throws on an answer without an envelope", async () => {
+    upstream.use(
+      http.get("*/api/2.0/files/file/:id/presigneduri", () =>
+        HttpResponse.json("https://portal/f"),
+      ),
+    );
+    await expect(presignedDownloadUrl("5")).rejects.toThrow(/unparseable response/);
   });
 
   it("throws a DocspaceApiHttpError for a refusal", async () => {

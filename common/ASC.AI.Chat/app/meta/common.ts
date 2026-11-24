@@ -60,6 +60,8 @@ const MAX_CHARS_PER_FILE = 40_000;
 const MAX_TOTAL_CHARS = 240_000;
 /** Conversions running at the same time. */
 const READ_CONCURRENCY = 4;
+/** File-info reads of the selected file ids running at the same time. */
+const FILE_INFO_CONCURRENCY = 4;
 /** Length of the user's refinement prompt that is passed on. */
 export const MAX_PROMPT_CHARS = 2_000;
 
@@ -237,6 +239,36 @@ function dedupeIds(ids: string[]): string[] {
   return [...new Set(ids.map((id) => id.trim()).filter((id) => id.length > 0))];
 }
 
+type FileInfoOutcome = { id: string } & ({ file: PortalFile | undefined } | { error: unknown });
+
+// The file info of each id, {@link FILE_INFO_CONCURRENCY} at a time, in the
+// order of the ids. After a read fails no new one starts: the ids after it
+// are never used, as the failure ends the request. The outcomes stop at the
+// first failure (or one of the reads already running beside it).
+async function readFileInfos(ids: readonly string[]): Promise<FileInfoOutcome[]> {
+  const outcomes: FileInfoOutcome[] = [];
+  let failed = false;
+  // One iterator for every worker: each takes the next id nobody has taken yet.
+  const queue = ids.entries();
+  const worker = async (): Promise<void> => {
+    for (const [index, id] of queue) {
+      if (failed) {
+        return;
+      }
+      try {
+        outcomes[index] = { id, file: await getPortalFile(id) };
+      } catch (error) {
+        outcomes[index] = { id, error };
+        if (!(error instanceof DocspaceApiHttpError && error.status === 403)) {
+          failed = true;
+        }
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(FILE_INFO_CONCURRENCY, ids.length) }, worker));
+  return outcomes;
+}
+
 /**
  * Expand the selection into the files to read: the listed files first, then
  * the top-level content of each folder in order, until {@link MAX_FILES}.
@@ -262,21 +294,23 @@ export async function collectFiles(
     files.push(file);
   };
 
-  for (const id of dedupeIds(fileIds)) {
-    try {
-      const file = await getPortalFile(id);
-      if (!file) {
-        skipped.push({ id, reason: "not_found" });
-        continue;
-      }
-      take(file);
-    } catch (err) {
-      if (err instanceof DocspaceApiHttpError && err.status === 403) {
+  // The reads overlap, the outcomes are applied in the order of the ids: the
+  // files, the skipped entries and the first failure are the ones a reading
+  // one after another would give.
+  for (const outcome of await readFileInfos(dedupeIds(fileIds))) {
+    const { id } = outcome;
+    if ("error" in outcome) {
+      if (outcome.error instanceof DocspaceApiHttpError && outcome.error.status === 403) {
         skipped.push({ id, reason: "forbidden" });
         continue;
       }
-      throw err;
+      throw outcome.error;
     }
+    if (!outcome.file) {
+      skipped.push({ id, reason: "not_found" });
+      continue;
+    }
+    take(outcome.file);
   }
 
   for (const folderId of dedupeIds(folderIds)) {

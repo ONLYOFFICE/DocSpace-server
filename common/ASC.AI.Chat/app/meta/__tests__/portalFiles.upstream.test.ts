@@ -201,13 +201,23 @@ describe("getPortalFile against the Files API", () => {
   it.each([
     ["a response that is an array", { response: [FILE_DTO] }],
     ["a response that is null", { response: null }],
-    ["no response", { status: 0 }],
-    ["a body that is an array", [FILE_DTO]],
-    ["a body that is a string", "file"],
   ])("answers undefined for %s", async (_what, body) => {
     upstream.use(http.get("*/api/2.0/files/file/:id", () => HttpResponse.json(body)));
 
     expect(await getPortalFile("10")).toBeUndefined();
+  });
+
+  // A 200 without the DocSpace envelope is an answer of the wrong shape, unknown rather than
+  // "no such file" (ts-ai-failure-paths.md §1); it read as absent before the read went through
+  // filesApiGet.
+  it.each([
+    ["no response", { status: 0 }],
+    ["a body that is an array", [FILE_DTO]],
+    ["a body that is a string", "file"],
+  ])("rejects a body with %s instead of reading it as absent", async (_what, body) => {
+    upstream.use(http.get("*/api/2.0/files/file/:id", () => HttpResponse.json(body)));
+
+    await expect(getPortalFile("10")).rejects.toThrow("DocSpace API: unparseable response");
   });
 
   it("answers undefined for 404 only and rethrows a 500 as the Files API error", async () => {
@@ -274,6 +284,13 @@ describe("listFolderFiles against the Files API", () => {
     upstream.use(http.get("*/api/2.0/files/:folder", () => envelope(response)));
 
     expect(await listFolderFiles("12", 21)).toEqual([]);
+  });
+
+  // Read through filesApiGet: a 200 without the envelope used to answer an empty folder.
+  it("rejects a 200 without the envelope instead of answering an empty folder", async () => {
+    upstream.use(http.get("*/api/2.0/files/:folder", () => HttpResponse.json([FILE_DTO])));
+
+    await expect(listFolderFiles("12", 21)).rejects.toThrow("DocSpace API: unparseable response");
   });
 
   it.each([
@@ -347,6 +364,22 @@ describe("textTargetFor and the conversion table", () => {
     );
 
     await expect(textTargetFor(DOCX)).rejects.toBeInstanceOf(DocspaceApiHttpError);
+    expect(await textTargetFor(DOCX)).toBe(".txt");
+    expect(reads).toBe(2);
+  });
+
+  // Read through filesApiGet: a 200 without the envelope used to read as "nothing converts".
+  it("rejects a settings answer without the envelope and asks the portal again next time", async () => {
+    const { textTargetFor } = await fresh();
+    let reads = 0;
+    upstream.use(
+      http.get("*/api/2.0/files/settings", () => {
+        reads += 1;
+        return reads === 1 ? HttpResponse.json(SETTINGS_DTO) : envelope(SETTINGS_DTO);
+      }),
+    );
+
+    await expect(textTargetFor(DOCX)).rejects.toThrow("DocSpace API: unparseable response");
     expect(await textTargetFor(DOCX)).toBe(".txt");
     expect(reads).toBe(2);
   });
@@ -564,6 +597,67 @@ describe("PortalTextReader against the Files API", () => {
       expect.objectContaining({ path: "/api/2.0/files/fileops?id=op-1" }),
       expect.objectContaining({ path: "/api/2.0/files/fileops?id=op-1" }),
     ]);
+  });
+});
+
+describe("PortalTextReader download of the text", () => {
+  function finished() {
+    return [
+      http.get("*/api/2.0/files/settings", () => envelope(SETTINGS_DTO)),
+      http.put("*/api/2.0/files/fileops/bulkdownload", () =>
+        envelope([operationDto("op-1", { finished: true, url: "/filehandler.ashx?op=1" })]),
+      ),
+    ];
+  }
+
+  it("keeps the first 256 KiB of a longer text", async () => {
+    const { readFileAsText } = await fresh();
+    upstream.use(
+      ...finished(),
+      // Streamed: msw settles the cancel of a body read only part-way for a stream only.
+      http.get(
+        "*/filehandler.ashx",
+        () =>
+          new HttpResponse(
+            new ReadableStream<Uint8Array>({
+              start(controller) {
+                controller.enqueue(new TextEncoder().encode("a".repeat(512 * 1024 + 3)));
+                controller.close();
+              },
+            }),
+          ),
+      ),
+    );
+
+    expect(await readFileAsText(DOCX)).toHaveLength(256 * 1024);
+  });
+
+  it("rejects a download that sends its headers and then stalls, once the conversion budget is spent", async () => {
+    const { readFileAsText } = await fresh();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    upstream.use(
+      ...finished(),
+      http.get(
+        "*/filehandler.ashx",
+        ({ request }) =>
+          new HttpResponse(
+            new ReadableStream<Uint8Array>({
+              start(controller) {
+                controller.enqueue(new TextEncoder().encode("the start"));
+                request.signal.addEventListener("abort", () =>
+                  controller.error(request.signal.reason),
+                );
+              },
+            }),
+          ),
+      ),
+    );
+
+    const read = readFileAsText(DOCX).catch((err: unknown) => err);
+    await vi.advanceTimersByTimeAsync(90_000);
+
+    expect(await read).toMatchObject({ message: "upstream timeout after 90000ms" });
+    vi.useRealTimers();
   });
 });
 

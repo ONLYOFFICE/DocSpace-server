@@ -54,6 +54,10 @@ import { badRequest } from "../httpErrors.js";
 // `generateMeta` and `fillMeta` stays for when that is settled. Metadata
 // lives on internal entries only (positive integer ids); a third-party id
 // has no metadata and the Files API would answer 404 anyway.
+// File ids of the portal are C# `int` (`FileEntry<int>` in products/ASC.Files):
+// a larger id names no file, and a number past 2^53 has already lost its digits.
+const MAX_FILE_ID = 2_147_483_647;
+
 function asEntry(body: Record<string, unknown>): { kind: EntryKind; id: string } {
   const kind = body["kind"];
   if (kind !== "file") {
@@ -66,7 +70,7 @@ function asEntry(body: Record<string, unknown>): { kind: EntryKind; id: string }
       : typeof rawId === "string"
         ? rawId.trim()
         : "";
-  if (!/^[1-9]\d*$/.test(id)) {
+  if (!/^[1-9]\d*$/.test(id) || Number(id) > MAX_FILE_ID) {
     badRequest("id must be the integer id of a file");
   }
   return { kind, id };

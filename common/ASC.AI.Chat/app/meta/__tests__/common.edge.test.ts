@@ -70,6 +70,7 @@ const {
   assertNotTimedOut,
   classifyModelError,
   collectFiles,
+  MAX_FILES,
   parseJsonObject,
   readDocuments,
   resolveMetaProfile,
@@ -92,8 +93,92 @@ describe("collectFiles when a file read fails", () => {
 
     await expect(collectFiles(["1", "2"], ["9"], skipped)).rejects.toBe(failure);
     expect(skipped).toEqual([]);
-    expect(portalFiles.getPortalFile).toHaveBeenCalledTimes(1);
+    // The second read runs beside the first; the folder is never listed.
+    expect(portalFiles.getPortalFile).toHaveBeenCalledTimes(2);
     expect(portalFiles.listFolderFiles).not.toHaveBeenCalled();
+  });
+
+  it("starts no read after one failed, beyond the ones already running", async () => {
+    const failure = new FakeDocspaceApiHttpError(500, "Server Error", "u");
+    vi.mocked(portalFiles.getPortalFile).mockImplementation(async (id) => {
+      if (id === "1") throw failure;
+      return file(id);
+    });
+    const ids = Array.from({ length: 12 }, (_, i) => String(i + 1));
+
+    await expect(collectFiles(ids, [], [])).rejects.toBe(failure);
+    expect(vi.mocked(portalFiles.getPortalFile).mock.calls.length).toBeLessThanOrEqual(4);
+  });
+
+  it("relays the failure of the earliest id, with the skips of the ids before it", async () => {
+    const early = new FakeDocspaceApiHttpError(500, "Server Error", "early");
+    const late = new FakeDocspaceApiHttpError(502, "Bad Gateway", "late");
+    vi.mocked(portalFiles.getPortalFile).mockImplementation(async (id) => {
+      if (id === "gone") return undefined;
+      if (id === "2") {
+        // Fails after "3" has failed already.
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        throw early;
+      }
+      if (id === "3") throw late;
+      return file(id);
+    });
+    const skipped: MetaSkipped[] = [];
+
+    await expect(collectFiles(["gone", "2", "3"], [], skipped)).rejects.toBe(early);
+    expect(skipped).toEqual([{ id: "gone", reason: "not_found" }]);
+  });
+});
+
+describe("collectFiles reading the file ids in parallel", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("reads at most four file infos at a time", async () => {
+    let running = 0;
+    let most = 0;
+    vi.mocked(portalFiles.getPortalFile).mockImplementation(async (id) => {
+      running += 1;
+      most = Math.max(most, running);
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      running -= 1;
+      return file(id);
+    });
+    const ids = Array.from({ length: 10 }, (_, i) => String(i + 1));
+
+    const files = await collectFiles(ids, [], []);
+
+    expect(files).toHaveLength(10);
+    expect(most).toBe(4);
+  });
+
+  it("keeps the order of the ids, the skip reasons and the limit when the reads finish out of order", async () => {
+    const ids = Array.from({ length: MAX_FILES + 4 }, (_, i) => `id${i}`);
+    vi.mocked(portalFiles.getPortalFile).mockImplementation(async (id) => {
+      const n = Number(id.slice(2));
+      // Later ids answer first.
+      await new Promise((resolve) => setTimeout(resolve, (ids.length - n) % 5));
+      if (n === 1) return undefined;
+      if (n === 2) throw new FakeDocspaceApiHttpError(403, "Forbidden", "u");
+      return file(id);
+    });
+    // The folder repeats a named file and adds one past the limit.
+    vi.mocked(portalFiles.listFolderFiles).mockResolvedValue([file("id3"), file("f1")]);
+    const skipped: MetaSkipped[] = [];
+
+    const files = await collectFiles([...ids, "id0"], ["9"], skipped);
+
+    const taken = ids.filter((id) => id !== "id1" && id !== "id2");
+    expect(files.map((f) => f.id)).toEqual(taken.slice(0, MAX_FILES));
+    expect(skipped).toEqual([
+      { id: "id1", reason: "not_found" },
+      { id: "id2", reason: "forbidden" },
+      ...[...taken.slice(MAX_FILES), "f1"].map((id) => ({
+        id,
+        title: `${id}.docx`,
+        reason: "limit",
+      })),
+    ]);
+    expect(portalFiles.getPortalFile).toHaveBeenCalledTimes(ids.length);
   });
 
   it("trims the ids, drops blank ones and asks for each distinct id once", async () => {

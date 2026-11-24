@@ -43,7 +43,10 @@ import { invoke } from "../../__tests__/helpers/http.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
 
 const readDisabled = vi.fn<(entityId?: string) => Promise<unknown>>();
-vi.mock("../../storage/index.js", () => ({ storage: { toolPrefs: { readDisabled } } }));
+vi.mock("../../storage/index.js", async (original) => ({
+  ...(await original<typeof import("../../storage/index.js")>()),
+  storage: { toolPrefs: { readDisabled } },
+}));
 const primeSourceMeta = vi.fn<(id: string | undefined, kind?: string) => Promise<unknown>>();
 vi.mock("../../storage/docspaceFilesApi.js", async (original) => ({
   ...(await original<typeof import("../../storage/docspaceFilesApi.js")>()),
@@ -147,19 +150,29 @@ describe("metaController.generate answers", () => {
     },
   );
 
-  // DEFECT ctl-72: an integer id above the portal's 32-bit file ids passes the check and is primed and handed to the generator — expected 400 "id must be the integer id of a file" before any upstream call (ts-ai-failure-paths.md §4: every input has a limit; FileEntry ids are `int` in products/ASC.Files)
-  it("passes an id above the portal's integer range on as its rounded decimal form", async () => {
+  it.each([
+    ["a number above the portal's integer range", 2 ** 60],
+    ["a number one above the portal's integer range", 2_147_483_648],
+    ["a string above the portal's integer range", "99999999999"],
+  ])("answers 400 for an id that is %s, before the entry is primed", async (_what, id) => {
+    const reply = await invoke(metaController.generate, { body: { kind: "file", id } });
+
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "id must be the integer id of a file" });
+    expect(responseViolations("aiMetaGenerate", 400, reply.body)).toEqual([]);
+    expect(primeSourceMeta).not.toHaveBeenCalled();
+    expect(generateMeta).not.toHaveBeenCalled();
+  });
+
+  it("passes the largest id of the portal's integer range on", async () => {
     generateMeta.mockResolvedValue(GENERATED);
 
-    const reply = await invoke(metaController.generate, { body: { kind: "file", id: 2 ** 60 } });
+    const reply = await invoke(metaController.generate, {
+      body: { kind: "file", id: 2_147_483_647 },
+    });
 
     expect(reply.status).toBe(200);
-    expect(primeSourceMeta).toHaveBeenCalledWith("1152921504606847000", "file");
-    expect(generateMeta).toHaveBeenCalledWith({
-      kind: "file",
-      id: "1152921504606847000",
-      prompt: undefined,
-    });
+    expect(primeSourceMeta).toHaveBeenCalledWith("2147483647", "file");
   });
 
   // node-mocks-http turns a null body into {}, so a JSON `null` goes through the real parser.

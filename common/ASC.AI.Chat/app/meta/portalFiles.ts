@@ -47,7 +47,12 @@
  */
 
 import { withTimeout, proxyBaseUrl } from "../storage/httpClient.js";
-import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
+import {
+  DocspaceApiHttpError,
+  filesApiDownloadText,
+  filesApiGet,
+  filesApiSend,
+} from "../storage/docspaceFilesApi.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { getObject, getObjectArray, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
@@ -73,6 +78,13 @@ const MAX_POLL_MISSES = 3;
 const START_ATTEMPTS = 4;
 /** Pause between two such attempts. */
 const START_RETRY_MS = 1_500;
+/**
+ * Bytes of a converted text read at most. The generator keeps 40 000
+ * characters of a file (`MAX_CHARS_PER_FILE` in common.ts); a UTF-8 character
+ * takes at most 4 bytes, so a text cut here is still longer than what is kept
+ * and still reads as truncated there.
+ */
+const MAX_TEXT_BYTES = 256 * 1024;
 
 export class UnsupportedFileError extends Error {
   constructor(
@@ -83,14 +95,13 @@ export class UnsupportedFileError extends Error {
   }
 }
 
-function envelope(raw: unknown): Record<string, unknown> | undefined {
-  return isObject(raw) ? getObject(raw, "response") : undefined;
+// The `response` of an answer, as the Files API clients unwrap it.
+function asRecord(response: unknown): Record<string, unknown> | undefined {
+  return isObject(response) ? response : undefined;
 }
 
-// The list-shaped envelope: `{ response: [...] }`.
-function envelopeList(raw: unknown): unknown[] {
-  const list = isObject(raw) ? raw["response"] : undefined;
-  return Array.isArray(list) ? list : [];
+function asList(response: unknown): unknown[] {
+  return Array.isArray(response) ? response : [];
 }
 
 function toPortalFile(raw: Record<string, unknown>): PortalFile | undefined {
@@ -116,28 +127,19 @@ function idForBody(id: string): number | string {
   return /^\d+$/.test(id) ? Number(id) : id;
 }
 
-async function portalGet(url: string, signal?: AbortSignal): Promise<unknown> {
-  const { signal: timed, cancel } = withTimeout(signal);
-  try {
-    const res = await fetch(url, { headers: getForwardedHeaders(), signal: timed });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
-    }
-    return await res.json();
-  } finally {
-    cancel();
-  }
-}
-
 /**
  * The files of a folder, top level only, newest first, at most `count`.
  * A folder the caller cannot open propagates the portal's 403 / 404.
  */
 export async function listFolderFiles(folderId: string, count: number): Promise<PortalFile[]> {
-  const url =
-    `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(folderId)}` +
-    `?filterType=FilesOnly&count=${count}&sortBy=DateAndTime&sortOrder=descending`;
-  const body = envelope(await portalGet(url));
+  const body = asRecord(
+    await filesApiGet(encodeURIComponent(folderId), {
+      filterType: "FilesOnly",
+      count,
+      sortBy: "DateAndTime",
+      sortOrder: "descending",
+    }),
+  );
   const files = body ? (getObjectArray(body, "files") ?? []) : [];
   const result: PortalFile[] = [];
   for (const raw of files) {
@@ -152,9 +154,8 @@ export async function listFolderFiles(folderId: string, count: number): Promise<
 
 /** One file as the Files API describes it; `undefined` on 404. */
 export async function getPortalFile(fileId: string): Promise<PortalFile | undefined> {
-  const url = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}`;
   try {
-    const body = envelope(await portalGet(url));
+    const body = asRecord(await filesApiGet(`file/${encodeURIComponent(fileId)}`));
     return body ? toPortalFile(body) : undefined;
   } catch (err) {
     if (err instanceof DocspaceApiHttpError && err.status === 404) {
@@ -172,7 +173,7 @@ let convertibleCache: Promise<Record<string, string[]>> | undefined;
 function getConvertible(): Promise<Record<string, string[]>> {
   if (!convertibleCache) {
     convertibleCache = (async () => {
-      const body = envelope(await portalGet(`${proxyBaseUrl}/api/2.0/files/settings`));
+      const body = asRecord(await filesApiGet("settings"));
       const table = body ? getObject(body, "extsConvertible") : undefined;
       const result: Record<string, string[]> = {};
       if (table) {
@@ -230,35 +231,26 @@ async function startConversion(
   target: string,
   signal: AbortSignal,
 ): Promise<FileOperation> {
-  const url = `${proxyBaseUrl}/api/2.0/files/fileops/bulkdownload`;
-  const { signal: timed, cancel } = withTimeout(signal);
-  try {
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: { ...getForwardedHeaders(), "content-type": "application/json" },
-      // `returnSingleOperation`: answer with this operation only. Without it
-      // the portal lists every operation of the user and drops the finished
-      // ones from its queue as it does so, which would hand another file's
-      // result (or an unrelated archive download) to this reader.
-      body: JSON.stringify({
-        fileConvertIds: [{ key: idForBody(file.id), value: target }],
-        returnSingleOperation: true,
-      }),
-      signal: timed,
-    });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+  // `returnSingleOperation`: answer with this operation only. Without it
+  // the portal lists every operation of the user and drops the finished
+  // ones from its queue as it does so, which would hand another file's
+  // result (or an unrelated archive download) to this reader.
+  const response = await filesApiSend(
+    "PUT",
+    "fileops/bulkdownload",
+    {
+      fileConvertIds: [{ key: idForBody(file.id), value: target }],
+      returnSingleOperation: true,
+    },
+    signal,
+  );
+  for (const raw of asList(response)) {
+    const op = isObject(raw) ? toOperation(raw) : undefined;
+    if (op) {
+      return op;
     }
-    for (const raw of envelopeList(await res.json())) {
-      const op = isObject(raw) ? toOperation(raw) : undefined;
-      if (op) {
-        return op;
-      }
-    }
-    throw new Error(`bulkdownload for file ${file.id} returned no operation`);
-  } finally {
-    cancel();
   }
+  throw new Error(`bulkdownload for file ${file.id} returned no operation`);
 }
 
 /**
@@ -331,8 +323,7 @@ class OperationWatcher {
 
   /** Reads one operation by id; a finished one is dequeued by the read. */
   private async fetchOperation(id: string): Promise<FileOperation | undefined> {
-    const url = `${proxyBaseUrl}/api/2.0/files/fileops?id=${encodeURIComponent(id)}`;
-    return envelopeList(await portalGet(url, this.signal))
+    return asList(await filesApiGet("fileops", { id }, this.signal))
       .flatMap((raw) => {
         const op = isObject(raw) ? toOperation(raw) : undefined;
         return op ? [op] : [];
@@ -428,8 +419,11 @@ export class PortalTextReader {
         }
       }
     };
+    // `then(run, run)` starts the next conversion whether this one succeeded
+    // or failed, so a refused conversion does not block the files after it;
+    // its rejection is the caller's, who awaits `turn`.
     const turn = this.conversionQueue.then(run, run);
-    this.conversionQueue = turn.catch(() => undefined);
+    this.conversionQueue = turn;
     return turn;
   }
 
@@ -454,15 +448,12 @@ export class PortalTextReader {
       if (!op.url) {
         throw new Error(`conversion of file ${file.id} finished without a download URL`);
       }
-      const url = throughProxy(op.url);
-      const res = await fetch(url, {
-        headers: { ...getForwardedHeaders(), accept: "text/plain" },
-        signal: timed,
-      });
-      if (!res.ok) {
-        throw new DocspaceApiHttpError(res.status, res.statusText, url);
-      }
-      const text = await res.text();
+      const text = await filesApiDownloadText(
+        throughProxy(op.url),
+        { ...getForwardedHeaders(), accept: "text/plain" },
+        MAX_TEXT_BYTES,
+        timed,
+      );
       logger.info(
         `meta.readFileAsText(${file.id} "${file.title}" -> ${target}) ${text.length} chars in ${Date.now() - started}ms`,
       );
