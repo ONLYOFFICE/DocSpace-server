@@ -378,40 +378,64 @@ describe("the profile", () => {
     expect(responseViolations("aiOpenaiImagesGenerations", 404, json(reply))).toEqual([]);
   });
 
-  // DEFECT passthrough-2: a 403 of the AI service (a guest, AI switched off) is answered as `{ error: "Forbidden" }`, while the operation publishes the OpenAI error envelope for 403 — expected the envelope the plugin's SDK reads (ts-ai-tests.md §2; apiCatalog.ts, aiOpenaiChatCompletions 403)
-  it("answers a 403 of the AI service with the plain error object", async () => {
+  it.each([
+    ["chat/completions", CHAT, "aiOpenaiChatCompletions"],
+    ["images/generations", IMAGES, "aiOpenaiImagesGenerations"],
+  ])(
+    "answers a 403 of the AI service on %s in the OpenAI envelope, before any other call",
+    async (_route, path, operationId) => {
+      upstream.use(
+        http.get(`${aiServiceBaseUrl}/internal/ai/profiles/:id`, () =>
+          docspaceError(403, "secret detail"),
+        ),
+      );
+
+      const reply = await post(path, '{"prompt":"a cat"}');
+
+      expect(reply.status).toBe(403);
+      expect(json(reply)).toEqual(envelope("Forbidden", "invalid_request_error"));
+      expect(responseViolations(operationId, 403, json(reply))).toEqual([]);
+      expect(reply.body).not.toContain("secret");
+      expect(upstream.seen).toHaveLength(1);
+      expect(logger.error).not.toHaveBeenCalled();
+    },
+  );
+
+  it("names a refusal of the AI service that carries no reason phrase generically", async () => {
     upstream.use(
-      http.get(`${aiServiceBaseUrl}/internal/ai/profiles/:id`, () => docspaceError(403)),
+      http.get(
+        `${aiServiceBaseUrl}/internal/ai/profiles/:id`,
+        () => new HttpResponse(null, { status: 499 }),
+      ),
     );
 
     const reply = await post(CHAT, "{}");
 
-    expect(reply.status).toBe(403);
-    expect(json(reply)).toEqual({ error: "Forbidden" });
-    expect(responseViolations("aiOpenaiChatCompletions", 403, json(reply))).toEqual([
-      "/error must be object",
-    ]);
-    expect(upstream.seen).toHaveLength(1);
+    expect(reply.status).toBe(499);
+    expect(json(reply)).toEqual(envelope("Upstream error", "invalid_request_error"));
   });
 
-  // DEFECT passthrough-3: a 5xx of the AI service on the profile read is answered 500 `{ error: "Internal Server Error" }`, which is not the OpenAI envelope the operation publishes for 500 — expected the envelope (ts-ai-tests.md §2)
-  it("answers a 500 of the AI service with 500 and the plain error object", async () => {
+  it("answers a 500 of the AI service with 500 in the OpenAI envelope, and logs it", async () => {
     upstream.use(
-      http.get(`${aiServiceBaseUrl}/internal/ai/profiles/:id`, () => docspaceError(500)),
+      http.get(`${aiServiceBaseUrl}/internal/ai/profiles/:id`, () =>
+        docspaceError(500, "secret detail"),
+      ),
     );
 
     const reply = await post(CHAT, "{}");
 
     expect(reply.status).toBe(500);
-    expect(json(reply)).toEqual({ error: "Internal Server Error" });
-    expect(responseViolations("aiOpenaiChatCompletions", 500, json(reply))).toEqual([
-      "/error must be object",
-    ]);
+    expect(json(reply)).toEqual(envelope("Internal Server Error", "server_error"));
+    expect(responseViolations("aiOpenaiChatCompletions", 500, json(reply))).toEqual([]);
+    expect(reply.body).not.toContain("secret");
+    expect(reply.body).not.toContain(aiServiceBaseUrl);
+    expect(vi.mocked(logger.error).mock.calls[0]?.[0]).toMatch(
+      /^openai passthrough chat\/completions failed: /,
+    );
   });
 
   // products/ASC.AI/Server/Models/ResponseDto/ProfileDto.cs: each required field of the DTO
   // missing, null and of the wrong type.
-  // DEFECT passthrough-4: the 502 of an AI-service answer of the wrong shape is the application's `{ error }`, not the OpenAI envelope the operation publishes — expected the envelope, as for every other refusal of the route (the published responses of aiOpenaiChatCompletions)
   it.each(
     ["id", "name", "providerType", "baseUrl", "modelId", "createdAt"].flatMap((field) => [
       [field, "missing", undefined],
@@ -430,7 +454,8 @@ describe("the profile", () => {
     const reply = await post(CHAT, "{}");
 
     expect(reply.status).toBe(502);
-    expect(json(reply)).toEqual({ error: "Bad Gateway" });
+    expect(json(reply)).toEqual(envelope("Bad Gateway", "server_error"));
+    expect(responseViolations("aiOpenaiChatCompletions", 502, json(reply))).toEqual([]);
   });
 
   it.each([
@@ -738,11 +763,13 @@ describe("the ONLYOFFICE provider", () => {
     );
   });
 
+  // A body over the 2 MB parse limit is not checked, so only such a body still reaches the splice.
   it.each([
-    ["a JSON array", '[{"prompt":"a cat"}]'],
-    ["text before the object", 'x{"prompt":"a cat"}'],
-    ["no object at all", '"a cat"'],
-  ])("splices no metadata into an image body that is %s", async (_what, body) => {
+    ["a JSON array", (big: string) => `[{"prompt":"${big}"}]`],
+    ["text before the object", (big: string) => `x{"prompt":"${big}"}`],
+    ["no object at all", (big: string) => `"${big}"`],
+  ])("splices no metadata into an image body over 2 MB that is %s", async (_what, make) => {
+    const body = make("x".repeat(2 * MB));
     onlyoffice();
     useFolder(upstream, "17", "Contracts");
     const calls = useProvider(`${GATEWAY}/images/generations`, () =>
@@ -863,23 +890,30 @@ describe("images/generations", () => {
     expect(calls[0]?.body).toBe(JSON.stringify(body));
   });
 
-  // DEFECT passthrough-5: a JSON body that is not an object (null, an array, a string) or does not parse skips the field checks of Bug 84414 and is forwarded to the provider — expected 400 naming the body, as for an object without a prompt (ts-ai-failure-paths.md §4)
   it.each([
     ["JSON null", "null"],
     ["a JSON array", "[]"],
     ["a JSON string", '"a cat"'],
     ["broken JSON", '{"prompt":'],
-  ])("forwards %s to the provider unchecked", async (_what, body) => {
-    useProfile();
-    const calls = useProvider(`${PROVIDER}/images/generations`, () =>
-      HttpResponse.json(imageResult),
-    );
+    ["empty", ""],
+  ])(
+    "answers 400 for a JSON body that is %s, and never calls the provider",
+    async (_what, body) => {
+      useProfile();
+      const calls = useProvider(`${PROVIDER}/images/generations`, () =>
+        HttpResponse.json(imageResult),
+      );
 
-    const reply = await post(IMAGES, body);
+      const reply = await post(IMAGES, body);
 
-    expect(reply.status).toBe(200);
-    expect(calls[0]?.body).toBe(body);
-  });
+      expect(reply.status).toBe(400);
+      expect(json(reply)).toEqual(
+        envelope("The request body must be a JSON object", "invalid_request_error"),
+      );
+      expect(responseViolations("aiOpenaiImagesGenerations", 400, json(reply))).toEqual([]);
+      expect(calls).toEqual([]);
+    },
+  );
 
   it("does not check a body of another content type", async () => {
     useProfile();

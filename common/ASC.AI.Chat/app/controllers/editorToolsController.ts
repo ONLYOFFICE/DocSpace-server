@@ -94,10 +94,7 @@ export const editorToolsController = {
         tools.push({
           name: item.name,
           description: item.description ?? "",
-          inputSchema: (item.inputSchema ?? {
-            type: "object",
-            properties: {},
-          }) as Record<string, unknown>,
+          inputSchema: item.inputSchema ?? { type: "object", properties: {} },
           // Server-type policy, overridable per tool: read-only (GET) MCP
           // operations arrive with `requireApproval: false` from
           // systemToolsSource and run without a dialog.

@@ -41,8 +41,7 @@ import type { SourceMeta } from "../storage/docspaceFilesApi.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, ENTITY_ID_PARAM, ENTITY_KIND_PARAM, sourceKindOf } from "./_helpers.js";
 import { errorBodyText } from "../storage/errorBody.js";
-import { withTimeout } from "../storage/httpClient.js";
-import { readBodyCapped } from "../storage/roomSkills.js";
+import { providerFetch, readBodyCapped, withTimeout } from "../storage/httpClient.js";
 
 // Web-search passthrough for the document editor's AI plugin.
 //
@@ -233,12 +232,12 @@ function passthrough(subPath: "search" | "contents") {
     try {
       let response: globalThis.Response;
       try {
-        response = await fetch(upstream.url, {
-          method: "POST",
-          headers: upstream.headers,
-          body: upstream.body,
-          signal,
-        });
+        // Bounded by the signal above, which covers the reading of the answer too.
+        response = await providerFetch(
+          upstream.url,
+          { method: "POST", headers: upstream.headers, body: upstream.body, signal },
+          "none",
+        );
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {
           return;

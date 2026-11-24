@@ -239,7 +239,7 @@ describe("editorToolsController.call", () => {
     expect(adapter.callTool).toHaveBeenCalledWith("docspace_list_rooms", {}, undefined);
   });
 
-  // DEFECT passthrough-13: the tool name is judged before the AI access gate, so a guest or a portal with AI switched off gets 400 "Unknown tool name" for an empty or excluded name instead of 403 — expected the gate first, 403 for any body (ts-ai-failure-paths.md §3)
+  // CONTRACT passthrough-13: the tool name is judged before the AI access gate, so a guest or a portal with AI switched off gets 400 "Unknown tool name" for an empty or excluded name, not 403. Pinned by EditorToolAiDisabledTests.BodyValidation_RunsBeforeTheSwitchIsChecked and EmptyName_IsValidatedBeforeTheSwitchIsChecked (products/ASC.AI/ASC.AI.Tests/Tests/EditorToolTests/EditorToolAiDisabledTests.cs).
   it.each([
     ["a string", "docspace_list_rooms"],
     ["an array", [{ name: "docspace_list_rooms" }]],

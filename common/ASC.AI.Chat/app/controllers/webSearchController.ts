@@ -103,19 +103,41 @@ function asConfig(value: unknown): WebSearchConfig {
   if (typeof provider !== "string" || !provider.trim()) {
     badRequest("config.provider is required and must be a non-empty string");
   }
-  if (isSet(key) && typeof key !== "string") {
+  const config: WebSearchConfig = { provider };
+  if (typeof key === "string") {
+    config.key = key;
+  } else if (isSet(key)) {
     badRequest("config.key must be a string");
   }
-  if (isSet(baseUrl) && typeof baseUrl !== "string") {
+  if (typeof baseUrl === "string") {
+    config.baseUrl = baseUrl;
+  } else if (isSet(baseUrl)) {
     badRequest("config.baseUrl must be a string");
   }
-  if (isSet(isCloudProvider) && typeof isCloudProvider !== "boolean") {
+  if (typeof isCloudProvider === "boolean") {
+    config.isCloudProvider = isCloudProvider;
+  } else if (isSet(isCloudProvider)) {
     badRequest("config.isCloudProvider must be a boolean");
   }
-  if (isSet(headers) && !isObject(headers)) {
+  if (isObject(headers)) {
+    config.headers = asHeaders(headers);
+  } else if (isSet(headers)) {
     badRequest("config.headers must be an object");
   }
-  return value as unknown as WebSearchConfig;
+  return config;
+}
+
+// The headers are sent to the provider with every search, so each value has to be a header
+// value: a number or an object would reach the request as whatever its string form is.
+function asHeaders(headers: Record<string, unknown>): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [name, value] of Object.entries(headers)) {
+    if (typeof value !== "string") {
+      badRequest("config.headers values must be strings");
+    }
+    result[name] = value;
+  }
+  return result;
 }
 
 /**
@@ -155,7 +177,7 @@ export const webSearchController = {
     res.json(value);
   }),
 
-  testConnection: asyncHandler<WebSearchConfig>(async (req, res) => {
+  testConnection: asyncHandler(async (req, res) => {
     // The access gate runs first: a Guest or an AI-disabled portal must get
     // its 403 rather than a report on the shape of the body it sent.
     await assertWebSearchAccess();

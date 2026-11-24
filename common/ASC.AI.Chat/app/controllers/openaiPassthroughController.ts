@@ -50,6 +50,8 @@ import {
 import { hasCacheBreakpoints, markCacheBreakpoints } from "./cacheBreakpoints.js";
 import { isObject } from "../narrow.js";
 import { errorBodyText } from "../storage/errorBody.js";
+import { AiServiceHttpError, providerFetch } from "../storage/httpClient.js";
+import { UpstreamShapeError } from "../storage/upstreamShape.js";
 
 // OpenAI-compatible passthrough for the document editor's AI plugin.
 //
@@ -315,6 +317,29 @@ const errorEnvelope = (message: string, type: string) => ({
 const openAiError = (res: Response, status: number, message: string, type: string) =>
   res.status(status).json(errorEnvelope(message, type));
 
+// What a failed profile read (a 403 of the AI service for a guest or a portal with AI switched
+// off, its 5xx, its timeout, an answer of the wrong shape) tells the caller. The status is the
+// one the application's error boundary would answer; the body is the OpenAI envelope these
+// operations publish for every status, since the plugin's SDK reads `error.message` out of it.
+// The upstream error's own message holds the internal URL and stays in the log.
+function failureOf(err: unknown): { status: number; message: string } {
+  if (err instanceof AiServiceHttpError) {
+    return { status: err.status, message: err.statusText || "Upstream error" };
+  }
+  if (err instanceof UpstreamShapeError) {
+    return { status: err.status, message: "Bad Gateway" };
+  }
+  return { status: 500, message: "Internal server error" };
+}
+
+function answerFailure(res: Response, route: string, err: unknown): void {
+  const { status, message } = failureOf(err);
+  if (status >= 500) {
+    logger.error(`${route} failed: ${String(err)}`);
+  }
+  openAiError(res, status, message, status >= 500 ? "server_error" : "invalid_request_error");
+}
+
 // The plugin never sends `Authorization` for external profiles (their key
 // is empty on the client by design); credentials are attached here from
 // the server-side profile, mirroring the ai-chat client factory: profile
@@ -419,10 +444,15 @@ function shapeBody(
   try {
     parsed = JSON.parse(body.toString("utf8"));
   } catch {
-    return { body };
+    parsed = undefined;
   }
   if (!isObject(parsed)) {
-    return { body };
+    // The image route checks its documented fields before forwarding (Bug 84414), and a body
+    // that is no JSON object has none of them, so it is refused the same way. A chat body is
+    // the provider's to judge, as before.
+    return subPath === "images/generations"
+      ? { error: "The request body must be a JSON object" }
+      : { body };
   }
   if (subPath === "images/generations") {
     const error = imageRequestError(parsed);
@@ -474,7 +504,13 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     markForwardHeadersToProvider();
 
     const profileId = req.params["profileId"] ?? "";
-    const profile = await storage.profiles.readById(profileId);
+    let profile: Awaited<ReturnType<typeof storage.profiles.readById>>;
+    try {
+      profile = await storage.profiles.readById(profileId);
+    } catch (err) {
+      answerFailure(res, `openai passthrough ${subPath}`, err);
+      return;
+    }
     if (!profile || !profile.baseUrl) {
       openAiError(res, 404, "Profile not found", "invalid_request_error");
       return;
@@ -560,13 +596,19 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     const canPing = () => atFrameBoundary;
 
     // Settled, not awaited: the grace window below races this promise, and a
-    // rejection reaching the race unhandled would take the process down.
-    const upstreamResult = fetch(target, {
-      method: "POST",
-      headers: providerHeaders(req.headers["content-type"], profile, sessionIdParam),
-      body,
-      signal: upstreamAbortSignal(res),
-    }).then(
+    // rejection reaching the race unhandled would take the process down. No
+    // timeout of the client's own: the reply is relayed as a stream that may
+    // run for minutes, and ends when the client hangs up.
+    const upstreamResult = providerFetch(
+      target,
+      {
+        method: "POST",
+        headers: providerHeaders(req.headers["content-type"], profile, sessionIdParam),
+        body,
+        signal: upstreamAbortSignal(res),
+      },
+      "none",
+    ).then(
       (response): UpstreamOutcome => ({ response }),
       (error: unknown): UpstreamOutcome => ({ error }),
     );
@@ -738,11 +780,7 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     });
 
     try {
-      await pipeline(
-        Readable.fromWeb(upstream.body as import("node:stream/web").ReadableStream),
-        relay,
-        res,
-      );
+      await pipeline(Readable.fromWeb(upstream.body), relay, res);
     } catch (err) {
       // Aborted mid-stream (client disconnect) or upstream drop; headers
       // are already sent, so just terminate the response.

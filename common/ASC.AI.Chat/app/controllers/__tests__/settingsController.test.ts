@@ -118,16 +118,50 @@ it("forwards the caller's credentials to the AI service", async () => {
   });
 });
 
-// DEFECT data-17: an answer of the AI service that is not JSON is relayed to the caller as a JSON string with 200 — expected 502 for an upstream body of the wrong shape (ts-ai-failure-paths.md §1)
-it("relays a text answer of the AI service as a JSON string", async () => {
-  upstream.use(http.get("*/internal/ai/config", () => HttpResponse.text("<html>proxy</html>")));
+// products/ASC.AI/Server/Api/SettingsController.cs answers every one of these routes with a DTO in
+// the .NET envelope; a body that is not a JSON object came from something else in front of it.
+it.each([
+  ["getAiSettings", "aiSettingsGet", "get", "/internal/ai/config", undefined],
+  [
+    "getVectorizationSettings",
+    "aiSettingsGetVectorization",
+    "get",
+    "/internal/ai/config/vectorization",
+    undefined,
+  ],
+  [
+    "setVectorizationSettings",
+    "aiSettingsSetVectorization",
+    "put",
+    "/internal/ai/config/vectorization",
+    { type: 1 },
+  ],
+  ["getUserSettings", "aiSettingsGetUser", "get", "/internal/ai/config/user", undefined],
+  [
+    "setUserSettings",
+    "aiSettingsSetUser",
+    "put",
+    "/internal/ai/config/user",
+    { chatRecommendedModelVisible: true },
+  ],
+  ["getToolMode", "aiSettingsGetToolMode", "get", "/internal/ai/config/tool-mode", undefined],
+  ["setToolMode", "aiSettingsSetToolMode", "put", "/internal/ai/config/tool-mode", { mode: 1 }],
+] as const)(
+  "%s answers 502 when the AI service answers a body that is not a JSON object",
+  async (method, operationId, verb, path, body) => {
+    upstream.use(http[verb](`*${path}`, () => HttpResponse.text("<html>proxy</html>")));
 
-  const reply = await invoke(settingsController.getAiSettings, { method: "GET" });
+    const reply = await invoke(settingsController[method], {
+      method: verb === "get" ? "GET" : "PUT",
+      body,
+    });
 
-  expect(reply.status).toBe(200);
-  expect(reply.body).toBe("<html>proxy</html>");
-  expect(published("aiSettingsGet", reply)).toEqual(["/ must be object"]);
-});
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
+    expect(JSON.stringify(reply.body)).not.toContain("proxy");
+    expect(published(operationId, reply)).toEqual([]);
+  },
+);
 
 describe.each([
   [

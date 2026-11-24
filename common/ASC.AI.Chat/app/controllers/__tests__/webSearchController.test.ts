@@ -186,6 +186,7 @@ const configErrors = {
   baseUrl: "config.baseUrl must be a string",
   isCloudProvider: "config.isCloudProvider must be a boolean",
   headers: "config.headers must be an object",
+  headerValue: "config.headers values must be strings",
 };
 
 // Each field of AiWebSearchConfig missing, null, of the wrong type and empty.
@@ -207,6 +208,11 @@ const badConfigs: Array<[string, unknown, string]> = [
   ],
   ["headers that are a string", { provider: "exa", headers: "X-A: 1" }, configErrors.headers],
   ["headers that are an array", { provider: "exa", headers: [] }, configErrors.headers],
+  [
+    "a header value that is a number",
+    { provider: "exa", headers: { "X-A": 1 } },
+    configErrors.headerValue,
+  ],
   [
     "a baseUrl that is not a URL",
     { provider: "exa", baseUrl: "search" },
@@ -272,7 +278,24 @@ describe("webSearchController.testConnection", () => {
     const reply = await call(nullFields);
 
     expect(reply.status).toBe(200);
-    expect(engine.testConnection).toHaveBeenCalledWith(nullFields);
+    expect(engine.testConnection).toHaveBeenCalledWith({ provider: "exa" });
+  });
+
+  it("hands the engine the documented fields only", async () => {
+    gateAnswers(404);
+    engine.testConnection.mockResolvedValue(true);
+    const full = {
+      provider: "onlyoffice",
+      key: "k",
+      baseUrl: "https://search.test",
+      isCloudProvider: false,
+      headers: { "X-Tenant": "t" },
+    };
+
+    const reply = await call({ ...full, extra: "x" });
+
+    expect(reply.status).toBe(200);
+    expect(engine.testConnection).toHaveBeenCalledWith(full);
   });
 
   // node-mocks-http turns a null body into `{}`, so the null row is left to configure, where

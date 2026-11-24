@@ -581,7 +581,6 @@ describe("the padded JSON of images/generations", () => {
 });
 
 describe("a profile read that never answers", () => {
-  // DEFECT passthrough-3 (as above): the timeout of the profile read is answered 500 `{ error: "Internal server error" }`, not the OpenAI envelope published for 500 (ts-ai-tests.md §2)
   it("answers 500 once the upstream timeout of 300 s has passed, and never calls the provider", async () => {
     upstream.use(
       http.get(`${aiServiceBaseUrl}/internal/ai/profiles/:id`, async () => {
@@ -599,10 +598,10 @@ describe("a profile read that never answers", () => {
     const reply = await exchange.done;
 
     expect(reply.status).toBe(500);
-    expect(JSON.parse(reply.body)).toEqual({ error: "Internal server error" });
-    expect(responseViolations("aiOpenaiChatCompletions", 500, JSON.parse(reply.body))).toEqual([
-      "/error must be object",
-    ]);
+    expect(JSON.parse(reply.body)).toEqual({
+      error: { message: "Internal server error", type: "server_error", code: null, param: null },
+    });
+    expect(responseViolations("aiOpenaiChatCompletions", 500, JSON.parse(reply.body))).toEqual([]);
     expect(upstream.seen).toHaveLength(1);
   });
 });
