@@ -133,10 +133,10 @@ public class SubscriptionMoveToWalletTests(AspireAppFixture fixture) : BaseTest(
     }
 
     [Fact]
-    public async Task MoveSubscriptionToWallet_YearlyPlan_BuysTheYearlyProductAtItsPrice()
+    public async Task MoveSubscriptionToWallet_YearlySubscriptionToTheYearlyPlan_BuysTheYearlyProductAtItsPrice()
     {
-        // Arrange: an empty wallet, nothing left of the period to move and no bonus
-        Payments.Paid(Plans.AdminProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1), Owner.Email)
+        // Arrange: a yearly subscription, an empty wallet, nothing left of the period to move and no bonus
+        Payments.Paid(Plans.AdminYearProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(6), Owner.Email)
             .Customer(Owner.Email)
             .Balance(0m)
             .On(PaymentService.Billing, "POST", "/billing/SubscriptionBalanceToWallet", """{"amount":0,"currency":"usd"}""")
@@ -181,6 +181,32 @@ public class SubscriptionMoveToWalletTests(AspireAppFixture fixture) : BaseTest(
         exception.ErrorCode.Should().Be(400);
         exception.ErrorContent!.ToString().Should().Contain("Invalid product");
         PaymentCalls.Should().NotContain(c => c.Route == "/billing/SubscriptionBalanceToWallet", "nothing is moved");
+    }
+
+    // The move keeps the period the payer paid for: the plan of the other period is refused before anything moves.
+    [Theory]
+    [InlineData(Plans.AdminYearProductId, Plans.AdminWalletPlanName)]
+    [InlineData(Plans.AdminProductId, Plans.AdminWalletYearPlanName)]
+    public async Task MoveSubscriptionToWallet_PlanOfTheOtherPeriod_ThrowsBadRequest(int subscriptionProductId, string requestedPlan)
+    {
+        // Arrange
+        Payments.Paid(subscriptionProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1), Owner.Email)
+            .Customer(Owner.Email)
+            .Balance(1000m)
+            .On(PaymentService.Billing, "POST", "/billing/SubscriptionBalanceToWallet", """{"amount":0,"currency":"usd"}""")
+            .On(PaymentService.Billing, "POST", "/billing/ChangeSubscription", "true");
+
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _paymentApi.MoveSubscriptionToWalletAsync(
+            new QuantityRequestDto(new Dictionary<string, int> { [requestedPlan] = Admins }), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("Invalid product");
+        PaymentCalls.Should().NotContain(c => c.Route == "/billing/SubscriptionBalanceToWallet", "nothing is moved");
+        PaymentCalls.Should().NotContain(c => c.Route == "/billing/ChangeSubscription", "nothing is bought");
     }
 
     private string GoodwillJson(decimal amount, string currency = "USD")

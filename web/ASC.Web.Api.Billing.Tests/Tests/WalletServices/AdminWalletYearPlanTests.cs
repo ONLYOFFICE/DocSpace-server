@@ -35,7 +35,8 @@ namespace ASC.Web.Api.Billing.Tests.Tests.WalletServices;
 
 /// <summary>
 /// The administrators plan paid from the wallet for a year, <c>adminwalletyear</c>: it is bought with
-/// <c>PUT payment/updatewallet</c> under the rules of the monthly <c>adminwallet</c>, and a portal holds one of the two.
+/// <c>PUT payment/updatewallet</c> under the rules of the monthly <c>adminwallet</c>, and <c>Add</c> refuses one while
+/// the other is in force.
 /// </summary>
 public class AdminWalletYearPlanTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -111,15 +112,76 @@ public class AdminWalletYearPlanTests(AspireAppFixture fixture) : BaseTest(fixtu
         PaymentCalls.Should().NotContain(c => c.Route == DepositRoute, "nothing is paid");
     }
 
-    [Fact]
-    public async Task GetPaymentQuotas_Wallet_ListsTheYearlyPlanWithItsStoredPrice()
+    // A plan whose period has ended is no longer the plan of the portal, so it does not stand in the way of the other one.
+    [Theory]
+    [InlineData(Plans.AdminWalletProductId, Plans.AdminWalletYearPlanName, Plans.AdminWalletYearProductId)]
+    [InlineData(Plans.AdminWalletYearProductId, Plans.AdminWalletPlanName, Plans.AdminWalletProductId)]
+    public async Task UpdateWalletPayment_AddOnePlanAfterTheOtherHasEnded_BuysIt(int endedProductId, string requestedPlan, int requestedProductId)
     {
+        // Arrange: the other administrators plan ended two days ago
+        Payments.Customer(Owner.Email)
+            .Balance(1000m)
+            .Paid(endedProductId, quantity: 1, DateTime.UtcNow.AddDays(-2), Owner.Email)
+            .On(PaymentService.Billing, "POST", ChangeRoute, "true");
+
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
         // Act
-        var quotas = (await _paymentApi.GetPaymentQuotasAsync(wallet: true, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var bought = (await _paymentApi.UpdateWalletPaymentAsync(
+            new WalletQuantityRequestDto(new Dictionary<string, int?> { [requestedPlan] = 1 }, ProductQuantityType.Add),
+            TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        var yearly = quotas.Should().ContainSingle(q => q.Id == Plans.AdminWalletYearQuotaId).Subject;
-        yearly.Price.Value.Should().Be((double)Plans.AdminWalletYearPrice);
-        yearly.Features.Should().Contain(f => f.Id == "year");
+        bought.Should().BeTrue();
+
+        var purchase = PaymentCalls.Should().ContainSingle(c => c.Route == ChangeRoute).Subject;
+        BillingValue(purchase, "ProductId").Should().Be(requestedProductId.ToString(CultureInfo.InvariantCulture));
+    }
+
+    // Only the other plan is refused: more administrators of the plan the portal holds are bought as before.
+    [Fact]
+    public async Task UpdateWalletPayment_AddThePlanThePortalHolds_BuysMoreOfIt()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .Balance(1000m)
+            .Paid(Plans.AdminWalletYearProductId, quantity: 1, DateTime.UtcNow.Date.AddMonths(1), Owner.Email)
+            .On(PaymentService.Billing, "POST", ChangeRoute, "true");
+
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // Act
+        var bought = (await _paymentApi.UpdateWalletPaymentAsync(
+            new WalletQuantityRequestDto(new Dictionary<string, int?> { [Plans.AdminWalletYearPlanName] = 2 }, ProductQuantityType.Add),
+            TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        bought.Should().BeTrue();
+
+        var purchase = PaymentCalls.Should().ContainSingle(c => c.Route == ChangeRoute).Subject;
+        BillingValue(purchase, "ProductId").Should().Be(Plans.AdminWalletYearProductId.ToString(CultureInfo.InvariantCulture));
+        BillingValue(purchase, "ProductQty").Should().Be("2");
+    }
+
+    // The next period's quantity can be set only for a plan the portal holds, so Set cannot bring the other plan in.
+    [Fact]
+    public async Task UpdateWalletPayment_SetThePlanThePortalDoesNotHold_ReturnsFalse()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .Balance(1000m)
+            .Paid(Plans.AdminWalletProductId, quantity: 1, DateTime.UtcNow.Date.AddMonths(1), Owner.Email)
+            .On(PaymentService.Billing, "POST", ChangeRoute, "true");
+
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // Act
+        var scheduled = (await _paymentApi.UpdateWalletPaymentAsync(
+            new WalletQuantityRequestDto(new Dictionary<string, int?> { [Plans.AdminWalletYearPlanName] = 3 }, ProductQuantityType.Set),
+            TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        scheduled.Should().BeFalse();
+        PaymentCalls.Should().NotContain(c => c.Route == ChangeRoute, "nothing is bought");
     }
 }

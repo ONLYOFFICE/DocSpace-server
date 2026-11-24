@@ -233,7 +233,7 @@ public class PaymentController(
     /// of admins the portal already has. With `Add`, the call checks the minimum only while the portal does not have
     /// the service yet. With `Add`, an empty or zero quantity also returns 400. The admins plan has two products,
     /// the monthly `adminwallet` and the yearly `adminwalletyear`. With `Add`, a request for one returns 400 while
-    /// the portal has the other. While Docs Connect is active, a
+    /// the portal has the other. A plan whose period has ended does not count. While Docs Connect is active, a
     /// request for Docs Connect Dev Pack returns 400. To move to Docs Connect Dev Pack, use
     /// `POST api/2.0/settings/docscloud/switchtodevpack`. While Docs Connect Dev Pack is active, `Set` with Docs
     /// Connect schedules the return to it. The return happens at the next period and needs a quantity above zero. In
@@ -248,7 +248,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/updatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the units were bought or the change was scheduled; `false` only in the `Set` form, when the portal does not have the service or the change could not be saved", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, that service is already set, or in the `Add` form the portal has the other administrators plan")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, that service is already set, or in the `Add` form the portal has the other administrators plan and its period has not ended")]
     [SwaggerResponse(402, "The payment for the plan of the portal is overdue and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or in the `Add` form the wallet balance cannot be read or the portal is known to have neither a wallet sub-account nor a bonus that has not ended in the accounting currency")]
@@ -337,9 +337,8 @@ public class PaymentController(
             throw new ArgumentException("Invalid quantity");
         }
 
-        // a portal holds one administrators plan: the monthly and the yearly one are not bought side by side
-        if (TenantWalletPlans.IsAdminPlan(quota.TenantId) &&
-            tariff.Quotas.Any(q => q.Id != quota.TenantId && TenantWalletPlans.IsAdminPlan(q.Id)))
+        // the monthly and the yearly administrators plan are not bought side by side; a plan that has ended does not count
+        if (TenantWalletPlans.IsAdminPlan(quota.TenantId) && TenantWalletPlans.HoldsOtherAdminPlan(tariff.Quotas, quota.TenantId))
         {
             throw new ArgumentException("Quota is already set");
         }
@@ -466,7 +465,9 @@ public class PaymentController(
     /// returns 403 if the installation has no billing service or the customer has no payment method. It returns 404 if
     /// the portal has no billing customer or its paid plan has no subscription. The call returns 400 if `quantity`
     /// names a product other than `adminwallet` or `adminwalletyear`. These are the monthly and the yearly admins
-    /// plan. It also returns 400 for zero admins or fewer than the
+    /// plan. The plan must have the period of the subscription. A monthly subscription moves to `adminwallet`
+    /// only, and a yearly one to `adminwalletyear` only. The other plan returns 400.
+    /// It also returns 400 for zero admins or fewer than the
     /// portal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan
     /// is not paid or the balance cannot be moved. Two errors come after the subscription has ended. If the wallet and
     /// the bonus still fall short after the top-up, the call returns 402. If the wallet balance cannot be read, the
@@ -478,7 +479,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/subscription/movetowallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the balance was moved to the wallet and the administrators were bought; `false` when the subscription has ended and the balance was moved, but the purchase of the administrators failed", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or names neither administrators wallet plan (`adminwallet`, `adminwalletyear`), the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or names neither administrators wallet plan (`adminwallet`, `adminwalletyear`) or names the plan of the other period than the subscription has, the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier")]
     [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet and the bonus are still short of the price after the top-up")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
     [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, or after the move the wallet balance cannot be read")]
@@ -519,7 +520,15 @@ public class PaymentController(
         }
 
         // Resolve the current Stripe subscription product before it is cancelled.
-        var productId = await paymentHelper.GetCurrentSubscriptionProductIdAsync(tenant.Id);
+        var subscriptionQuota = await paymentHelper.GetCurrentSubscriptionQuotaAsync(tenant.Id);
+
+        // The move keeps the period: a yearly subscription moves to the yearly plan, a monthly one to the monthly plan.
+        if (!TenantWalletPlans.KeepsPeriod(subscriptionQuota.Year, quota.Year))
+        {
+            throw new ArgumentException("Invalid product");
+        }
+
+        var productId = subscriptionQuota.ProductId;
 
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();

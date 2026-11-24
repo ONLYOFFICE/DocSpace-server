@@ -64,6 +64,51 @@ public class TenantWalletPlansTests
         Services.Select(row => row.Data.Item1).Should().BeEquivalentTo(Enum.GetValues<TenantWalletService>());
     }
 
+    private static ASC.Core.Billing.Quota Row(TenantWalletService service, DateTime? dueDate, bool additional = false)
+    {
+        return new ASC.Core.Billing.Quota((int)service, 1, additional, true, dueDate, null, null);
+    }
+
+    // The other plan counts while its period runs: its end later, in a minute, and with no end on record.
+    [Fact]
+    public void HoldsOtherAdminPlan_TheOtherPlanInForce_IsTrue()
+    {
+        var yearly = (int)TenantWalletService.AdminYear;
+
+        TenantWalletPlans.HoldsOtherAdminPlan([Row(TenantWalletService.Admin, DateTime.UtcNow.AddDays(20))], yearly).Should().BeTrue();
+        TenantWalletPlans.HoldsOtherAdminPlan([Row(TenantWalletService.Admin, DateTime.UtcNow.AddMinutes(1))], yearly).Should().BeTrue();
+        TenantWalletPlans.HoldsOtherAdminPlan([Row(TenantWalletService.Admin, null)], yearly).Should().BeTrue();
+        TenantWalletPlans.HoldsOtherAdminPlan([Row(TenantWalletService.AdminYear, DateTime.UtcNow.AddDays(200))], (int)TenantWalletService.Admin).Should().BeTrue();
+    }
+
+    [Fact]
+    public void HoldsOtherAdminPlan_TheOtherPlanHasEnded_IsFalse()
+    {
+        TenantWalletPlans.HoldsOtherAdminPlan([Row(TenantWalletService.Admin, DateTime.UtcNow.AddDays(-1))], (int)TenantWalletService.AdminYear).Should().BeFalse();
+        TenantWalletPlans.HoldsOtherAdminPlan([Row(TenantWalletService.Admin, DateTime.UtcNow.AddMinutes(-1))], (int)TenantWalletService.AdminYear).Should().BeFalse();
+        TenantWalletPlans.HoldsOtherAdminPlan([Row(TenantWalletService.AdminYear, DateTime.UtcNow.AddDays(-1))], (int)TenantWalletService.Admin).Should().BeFalse();
+    }
+
+    [Fact]
+    public void HoldsOtherAdminPlan_TheSamePlanOrAnAddOn_IsFalse()
+    {
+        var yearly = (int)TenantWalletService.AdminYear;
+
+        TenantWalletPlans.HoldsOtherAdminPlan([], yearly).Should().BeFalse();
+        TenantWalletPlans.HoldsOtherAdminPlan([Row(TenantWalletService.AdminYear, DateTime.UtcNow.AddDays(20))], yearly).Should().BeFalse();
+        TenantWalletPlans.HoldsOtherAdminPlan([Row(TenantWalletService.Storage, DateTime.UtcNow.AddDays(20), additional: true)], yearly).Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(false, false, true)]
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public void KeepsPeriod_ASubscriptionMovesToThePlanOfItsOwnPeriodOnly(bool subscriptionIsYearly, bool walletPlanIsYearly, bool expected)
+    {
+        TenantWalletPlans.KeepsPeriod(subscriptionIsYearly, walletPlanIsYearly).Should().Be(expected);
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(-9)]

@@ -691,7 +691,7 @@ public class TenantQuota
 
             if (!quota.Additional)
             {
-                // the primary wallet plan (adminwallet) contributes its price; additional wallet add-ons do not
+                // a primary wallet plan (adminwallet, adminwalletyear) contributes its price; additional wallet add-ons do not
                 newQuota.Price += quota.Price;
                 newQuota.Visible &= quota.Visible;
             }

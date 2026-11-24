@@ -140,10 +140,14 @@ public class QuotasRequestDto
 public class QuantityRequestDto
 {
     /// <summary>
-    /// The plan and the number of units it is to cover, as a single pair. While the portal is on a priced plan the
-    /// key has to be the `name` of that same plan, which `GET api/2.0/portal/payment/quota` reports, because the
-    /// subscription is resized rather than swapped; the value is the total the subscription is to have afterwards,
-    /// not the difference. Exactly one pair is accepted, and a value that is already in effect is refused with 400.
+    /// The plan and the number of units it is to cover, as a single pair; exactly one pair is accepted. In
+    /// `PUT api/2.0/portal/payment/update`, while the portal is on a priced plan the key has to be the `name` of
+    /// that same plan, which `GET api/2.0/portal/payment/quota` reports, because the subscription is resized
+    /// rather than swapped; the value is the total the subscription is to have afterwards, not the difference,
+    /// and a value that is already in effect is refused with 400. In
+    /// `POST api/2.0/portal/payment/subscription/movetowallet` the key is `adminwallet` for a monthly
+    /// subscription or `adminwalletyear` for a yearly one, and the value is the number of administrators to buy
+    /// from the wallet.
     /// </summary>
     /// <example>{ "admin": 1 }</example>
     [Length(1, 1)]
@@ -157,14 +161,14 @@ public class QuantityRequestDto
 public class WalletQuantityRequestDto
 {
     /// <summary>
-    /// The wallet service and the number of units of it, as a single pair. The key is the `serviceName` of a service
-    /// from `GET api/2.0/portal/payment/walletservices`, and the value is read according to
+    /// The wallet product and the number of units of it, as a single pair. The key is the product name: `storage`,
+    /// `docscloud`, `docsclouddevpack`, `adminwallet` or `adminwalletyear`. The value is read according to
     /// `productQuantityType`: the units to add, or the total the service is to have in the next period. Minimum
     /// quantities apply per service - disk storage starts at 100 units, the Docs Connect Dev Pack at 10, and the
     /// administrators may not be fewer than the portal already has. Exactly one pair is accepted, and a null or zero
     /// value cancels a change scheduled earlier rather than buying nothing.
     /// </summary>
-    /// <example>{ "admin": 1 }</example>
+    /// <example>{ "storage": 100 }</example>
     [Length(1, 1)]
     [Required]
     public Dictionary<string, int?> Quantity { get; set; }

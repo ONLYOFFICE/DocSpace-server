@@ -48,6 +48,9 @@ internal static class Plans
     public const int AdminProductId = 1006;
     public const string AdminPlanName = "admin";
 
+    // The yearly plan of the hosted checkout, "adminyear".
+    public const int AdminYearProductId = 1009;
+
     // The same plan paid from the wallet, "adminwallet": renewed by the stack itself when its due date comes, at 20 USD
     // per administrator.
     public const int AdminWalletProductId = 1013;

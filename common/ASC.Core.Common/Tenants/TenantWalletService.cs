@@ -48,6 +48,9 @@ public enum TenantWalletService
     [Description("AITools")]
     AITools = -13,
 
+    /// <summary>
+    /// The administrators plan paid from the wallet for a month.
+    /// </summary>
     [Description("Admin")]
     Admin = -14,
 
@@ -60,13 +63,16 @@ public enum TenantWalletService
     [Description("AISearch")]
     AISearch = -18,
 
+    /// <summary>
+    /// The administrators plan paid from the wallet for a year.
+    /// </summary>
     [Description("AdminYear")]
     AdminYear = -19
 }
 
 /// <summary>
 /// The wallet quotas that are the plan of the portal itself, not an add-on to it: the administrators plan paid
-/// from the wallet, with a monthly and a yearly period. A portal holds one of them.
+/// from the wallet, with a monthly and a yearly period.
 /// </summary>
 public static class TenantWalletPlans
 {
@@ -76,5 +82,23 @@ public static class TenantWalletPlans
     public static bool IsAdminPlan(int quotaId)
     {
         return quotaId is (int)TenantWalletService.Admin or (int)TenantWalletService.AdminYear;
+    }
+
+    /// <summary>
+    /// Whether the tariff holds, in force, the administrators plan other than <paramref name="quotaId"/>. A row whose
+    /// due date has passed does not count: a plan that has ended does not keep the portal from buying the other one.
+    /// </summary>
+    public static bool HoldsOtherAdminPlan(IEnumerable<Quota> tariffQuotas, int quotaId)
+    {
+        return tariffQuotas.Any(q => q.Id != quotaId && IsAdminPlan(q.Id) && q.State != QuotaState.Overdue);
+    }
+
+    /// <summary>
+    /// Whether a subscription may be moved to a wallet plan of that period: a yearly subscription moves to the
+    /// yearly plan only, and a monthly one to the monthly plan only.
+    /// </summary>
+    public static bool KeepsPeriod(bool subscriptionIsYearly, bool walletPlanIsYearly)
+    {
+        return subscriptionIsYearly == walletPlanIsYearly;
     }
 }

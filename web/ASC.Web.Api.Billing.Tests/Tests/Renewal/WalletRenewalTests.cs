@@ -115,9 +115,11 @@ public class WalletRenewalTests(AspireAppFixture fixture) : BaseTest(fixture)
         change.Should().NotBeNull("the subscription is renewed before its due date");
         BillingValue(change!, "ProductId").Should().Be(Plans.AdminWalletYearProductId.ToString(CultureInfo.InvariantCulture));
         BillingValue(change!, "ProductQty").Should().Be("2");
+        BillingValue(change!, "ProductQuantityType").Should().Be("3", "an unchanged subscription is renewed, not set anew");
 
         var deposit = calls.Should().ContainSingle(call => call.Route == "/billing/Deposit", "the shortfall is topped up once").Subject;
         decimal.Parse(BillingValue(deposit, "Amount")!, CultureInfo.InvariantCulture).Should().Be(Plans.AdminWalletYearPrice * 2 - 5m);
+        calls.IndexOf(deposit).Should().BeLessThan(calls.IndexOf(change!), "the wallet is topped up before the period is paid from it");
     }
 
     private async Task<List<PaymentServiceCall>> WaitForRenewalAsync()

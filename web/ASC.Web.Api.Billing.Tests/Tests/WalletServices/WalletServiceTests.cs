@@ -58,6 +58,20 @@ public class WalletServiceTests(AspireAppFixture fixture) : BaseTest(fixture)
         service.Response.Features.Should().NotBeNullOrEmpty();
     }
 
+    // The yearly administrators plan is a member of the service enum, so it is read like a service.
+    [Fact]
+    public async Task GetWalletService_YearlyAdministratorsPlan_ReturnsThePlanWithItsStoredPrice()
+    {
+        // Act
+        var service = await _paymentApi.GetWalletServiceAsync(TenantWalletService.AdminYear, TestContext.Current.CancellationToken);
+
+        // Assert
+        service.StatusCode.Should().Be(200);
+        service.Response.Id.Should().Be(Plans.AdminWalletYearQuotaId);
+        service.Response.ServiceName.Should().Be("adminyear");
+        service.Response.Price.Value.Should().Be((double)Plans.AdminWalletYearPrice);
+    }
+
     [Theory]
     [InlineData(TenantWalletService.AITools, "ai-tools")]
     [InlineData(TenantWalletService.AISearch, "ai-search")]

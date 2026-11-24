@@ -155,6 +155,17 @@ public class PaymentHelper(
 
     public async Task<string> GetCurrentSubscriptionProductIdAsync(int tenantId)
     {
+        return (await GetCurrentSubscriptionQuotaAsync(tenantId)).ProductId;
+    }
+
+    /// <summary>
+    /// Resolves the quota of the plan the portal currently pays for through a provider subscription.
+    /// </summary>
+    /// <exception cref="BillingException">Thrown when the plan is not paid.</exception>
+    /// <exception cref="ItemNotFoundException">Thrown when the tariff has no plan.</exception>
+    /// <exception cref="ArgumentException">Thrown when the plan is a wallet product or has no product identifier.</exception>
+    public async Task<TenantQuota> GetCurrentSubscriptionQuotaAsync(int tenantId)
+    {
         var tariff = await tariffService.GetTariffAsync(tenantId);
 
         if (tariff.State != TariffState.Paid)
@@ -175,7 +186,7 @@ public class PaymentHelper(
             throw new ArgumentException("Invalid product");
         }
 
-        return quota.ProductId;
+        return quota;
     }
 
     /// <summary>

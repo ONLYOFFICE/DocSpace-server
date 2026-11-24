@@ -4,10 +4,10 @@
 
 ### Requirement: Yearly administrators plan paid from the wallet
 
-A hosted portal SHALL be able to buy the administrators plan from the wallet for a year: the product
-`adminwalletyear` of `updateWalletPayment` and `moveSubscriptionToWallet`, listed by `getPaymentQuotas`
-with `wallet=true` and carrying the `year` feature. It follows the rules of `adminwallet`. A portal SHALL
-hold one of the two: buying one while the tariff holds the other answers 400 "Quota is already set".
+`updateWalletPayment` SHALL take the product `adminwalletyear`, the administrators plan paid from the wallet
+with the `year` feature, under the rules of `adminwallet`, and `getPaymentQuotas` with `wallet=true` lists
+it. The billing service decides the purchase and its period. With `Add`, the call SHALL refuse one
+administrators plan while the tariff holds the other with its period not ended (400 "Quota is already set").
 
 #### Scenario: Yearly plan bought from the wallet
 
@@ -20,20 +20,62 @@ hold one of the two: buying one while the tariff holds the other answers 400 "Qu
 - **WHEN** the owner calls `updateWalletPayment` with `Add` and `adminwalletyear` in a count below the portal's administrators, and the plan is not active
 - **THEN** the system answers 400 "Invalid quantity" and nothing is bought
 
-#### Scenario: The other administrators plan is in the tariff
+#### Scenario: The other administrators plan is in force
 
-- **WHEN** the owner calls `updateWalletPayment` with `Add` for `adminwalletyear` while the tariff holds `adminwallet`, or for `adminwallet` while it holds `adminwalletyear`
+- **WHEN** the owner calls `updateWalletPayment` with `Add` for `adminwalletyear` while the tariff holds `adminwallet` with a due date in the future, or for `adminwallet` while it holds `adminwalletyear` with a due date in the future
 - **THEN** the system answers 400 "Quota is already set" and nothing is paid
+
+#### Scenario: The other administrators plan has ended
+
+- **WHEN** the due date of the other administrators plan in the tariff has passed and the owner calls `updateWalletPayment` with `Add` for `adminwalletyear` or `adminwallet`
+- **THEN** the system answers 200 `true` and the billing service is asked for that product
+
+#### Scenario: More administrators of the plan the portal holds
+
+- **WHEN** the tariff holds `adminwalletyear` in force and the owner calls `updateWalletPayment` with `Add` and `adminwalletyear`
+- **THEN** the system answers 200 `true` and the billing service is asked for the yearly product
+
+#### Scenario: Next quantity of a plan the portal does not hold
+
+- **WHEN** the tariff holds `adminwallet` and the owner calls `updateWalletPayment` with `Set` and `adminwalletyear`
+- **THEN** the system answers 200 `false` and nothing is bought
 
 #### Scenario: Yearly plan in the catalogue
 
 - **WHEN** the owner calls `getPaymentQuotas` with `wallet=true` on a hosted portal
 - **THEN** the list holds the yearly plan with a price of 220 and the `year` feature, while the payment system does not know its price
 
-#### Scenario: Price once the payment system knows the plan
+### Requirement: Moving a subscription keeps its period
 
-- **WHEN** the payment system has a price for the plan and the price answer cached for up to an hour has expired
-- **THEN** `getPaymentQuotas` shows that price instead of 220
+`moveSubscriptionToWallet` SHALL move a subscription to the administrators plan of its own period only:
+`adminwalletyear` for a subscription that carries the `year` feature, `adminwallet` for one that does not.
+The plan of the other period answers 400 "Invalid product" before the balance is moved.
+
+#### Scenario: Plan of the other period
+
+- **WHEN** the payer of a portal on a paid yearly subscription calls `moveSubscriptionToWallet` with `adminwallet`, or the payer of one on a paid monthly subscription calls it with `adminwalletyear`
+- **THEN** the system answers 400 "Invalid product", the balance is not moved and nothing is bought
+
+#### Scenario: Yearly subscription to the yearly plan
+
+- **WHEN** the payer of a portal on a paid yearly subscription calls `moveSubscriptionToWallet` with `adminwalletyear` for 2 administrators, with an empty wallet and no bonus
+- **THEN** the wallet is topped up by 440 USD and the billing service is asked for 2 of the yearly product
+
+### Requirement: Yearly administrators plan as a wallet service
+
+`getWalletService` SHALL answer `service` `AdminYear` with the yearly administrators plan on a hosted portal:
+its `serviceName` `adminyear` and its price. The `serviceName` filter of `getCustomerOperations` SHALL take
+`adminyear` and pass the request to the accounting service.
+
+#### Scenario: Yearly plan read as a service
+
+- **WHEN** the owner calls `getWalletService` with `service` `AdminYear` on a hosted portal
+- **THEN** the system answers 200 with `serviceName` `adminyear` and a price of 220, while the payment system does not know its price
+
+#### Scenario: Wallet movements of the yearly plan
+
+- **WHEN** a billing customer calls `getCustomerOperations` with `serviceName` `adminyear`
+- **THEN** the system answers 200 with what the accounting service returns
 
 ## MODIFIED Requirements
 
@@ -70,3 +112,36 @@ move the balance, pay price times count from the wallet (402 when short) and buy
 - **WHEN** the payer names `adminwallet` or `adminwalletyear`
 - **THEN** the call goes on to the count checks for either
 - **AND** any other wallet product answers 400 "Invalid product"
+
+### Requirement: Wallet services switched on per portal
+
+`getTenantWalletServiceSettings` SHALL answer a DocSpace admin (else 403, also without billing) with
+`enabledServices` and `lastModified`. `changeTenantWalletServiceState` SHALL require the portal-settings
+right, a DocSpace admin and a customer (404), take `service` (`Storage`, `Backup`, `AITools`, `Admin`,
+`DocsCloud`, `DocsCloudDevPack`, `AISearch`, `AdminYear`; else 400) and `enabled`, refuse an AI service while AI is
+disabled and `AISearch` while `AITools` is off (403), and answer the set.
+
+#### Scenario: Owner switches AI tools, backup and storage on and off
+
+- **WHEN** the owner or a DocSpace admin posts `service` `AITools`, `Backup` or `Storage` with `enabled` true, then false
+- **THEN** each answer is 200 and `enabledServices` contains the service after the first call and not after the second
+
+#### Scenario: Other roles are refused
+
+- **WHEN** a Room admin, a User or a Guest calls `changeTenantWalletServiceState`, or an anonymous caller does
+- **THEN** the system answers 403 "Access denied" (401 for anonymous)
+
+#### Scenario: AI search needs AI tools
+
+- **WHEN** `AITools` is off and the owner switches `AISearch` on
+- **THEN** the system answers 403 "AI Tools service must be enabled before Search"
+
+#### Scenario: AI tools switched off takes AI search with it
+
+- **WHEN** `AISearch` is on and the owner switches `AITools` off
+- **THEN** `enabledServices` holds neither, the change is audited and the clients receive the AI configuration event
+
+#### Scenario: Administrators plans in the set
+
+- **WHEN** the owner posts `service` `Admin` or `AdminYear` with `enabled` true
+- **THEN** the system answers 200 and `enabledServices` holds that member
