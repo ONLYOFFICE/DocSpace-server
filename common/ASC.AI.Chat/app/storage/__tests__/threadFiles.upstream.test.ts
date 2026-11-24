@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
 import logger from "../../log.js";
@@ -145,15 +146,13 @@ describe("uploadThreadArtifact over the network", () => {
     const error = await failure(upload());
 
     expect(error).not.toBeInstanceOf(AiServiceHttpError);
-    expect(error).toMatchObject({ message: "the AI service returned an artifact without an id" });
+    expect(error).toEqual(new UpstreamShapeError("POST threads/{id}/artifacts"));
   });
 
   it("refuses an answer that is not JSON", async () => {
     upstream.use(http.post(ARTIFACTS, () => HttpResponse.text("ok")));
 
-    expect(await failure(upload())).toMatchObject({
-      message: "the AI service returned an artifact without an id",
-    });
+    expect(await failure(upload())).toEqual(new UpstreamShapeError("POST threads/{id}/artifacts"));
   });
 
   it.each([400, 403, 404])(

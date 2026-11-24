@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { describe, expect, it, vi } from "vitest";
 import {
   docspace,
@@ -189,8 +190,8 @@ describe("readAiProjectChatContext", () => {
     "throws on a project room answer %j",
     async (room) => {
       project({ room });
-      await expect(readAiProjectChatContext("42")).rejects.toThrow(
-        "AI project 42: unparseable answer",
+      await expect(readAiProjectChatContext("42")).rejects.toEqual(
+        new UpstreamShapeError("GET files/rooms/{id}"),
       );
     },
   );

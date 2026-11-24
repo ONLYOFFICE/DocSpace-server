@@ -393,14 +393,14 @@ describe("the portal's web-search config", () => {
     expect(responseViolations("aiWebSearchPassthroughSearch", 500, json(reply))).toEqual([]);
   });
 
-  // products/ASC.AI/Server/Models/ResponseDto/WebSearchConfigDto.cs: the required `provider`.
-  // HANDLED DOWNSTREAM passthrough-8: an AI-service answer whose provider is missing, null, empty or not a string is read as "not configured" and answered 404. In production `Provider` is required on WebSearchConfigDto, so the AI service never answers a config without it; it shows only with the engine or the service stubbed.
+  // products/ASC.AI/Server/Models/ResponseDto/WebSearchConfigDto.cs: the required `provider`. A
+  // config the AI service answers but cannot be read is unknown, not "not configured": 502.
   it.each([
     ["missing", undefined],
     ["null", null],
     ["empty", ""],
     ["of the wrong type", 42],
-  ])("answers 404 when the config's provider is %s", async (_what, provider) => {
+  ])("answers 502 when the config's provider is %s", async (_what, provider) => {
     const dto = configDto();
     if (provider === undefined) {
       delete dto["provider"];
@@ -411,16 +411,30 @@ describe("the portal's web-search config", () => {
 
     const reply = await post(SEARCH, { query: "docspace" });
 
-    expect(reply.status).toBe(404);
-    expect(json(reply)).toEqual({ error: "Web search is not configured" });
+    expect(reply.status).toBe(502);
+    expect(json(reply)).toEqual({ error: "Bad Gateway" });
+    expect(responseViolations("aiWebSearchPassthroughSearch", 502, json(reply))).toEqual([]);
   });
 
-  it("answers 404 when the AI service answers something that is not an object", async () => {
-    useConfig([configDto()]);
+  it.each([
+    ["a list", [configDto()]],
+    ["a string", "x"],
+  ])("answers 502 when the AI service answers %s", async (_what, body) => {
+    useConfig(body);
+
+    const reply = await post(SEARCH, { query: "docspace" });
+
+    expect(reply.status).toBe(502);
+    expect(json(reply)).toEqual({ error: "Bad Gateway" });
+  });
+
+  it("answers 404 when the AI service answers that nothing is configured", async () => {
+    useConfig(null);
 
     const reply = await post(SEARCH, { query: "docspace" });
 
     expect(reply.status).toBe(404);
+    expect(json(reply)).toEqual({ error: "Web search is not configured" });
   });
 });
 

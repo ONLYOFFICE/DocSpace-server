@@ -439,7 +439,7 @@ describe("promptsController.createFolder", () => {
     expect(published("aiPromptsCreateFolder", reply)).toEqual([]);
   });
 
-  it("answers a not_found refusal as 404, a status the operation does not publish", async () => {
+  it("answers a not_found refusal as the published 404", async () => {
     engine.createFolder.mockResolvedValue({
       success: false,
       error: { field: "name", message: "gone", code: "not_found" },

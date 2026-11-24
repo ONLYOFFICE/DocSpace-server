@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -110,6 +111,61 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs();
+});
+
+// The names config/index.ts reads from the environment, taken from its source: `process.env["X"]`,
+// the first argument of the readers that read one by name, and the `AI__MCP__<i>__ENDPOINT`
+// family. The roots of the keys it asks nconf for name variables too, as nconf copies the
+// environment over the settings (`OTEL_SERVICE_NAME`, `openTelemetry:enable`, `core:cors`).
+function environmentReadByConfig(): { names: string[]; families: RegExp[]; roots: string[] } {
+  const source = readFileSync(path.join(CONFIG_DIR, "index.ts"), "utf8");
+  const all = (pattern: RegExp) => [...source.matchAll(pattern)].map((m) => m[1] ?? "");
+  const names = [
+    ...all(/process\.env\["([^"]+)"\]/g),
+    ...all(/(?:baseUrl|envOrSetting)\(\s*"([^"]+)"/g),
+  ];
+  const families = [...source.matchAll(/process\.env\[`([^`$]*)\$\{[^}]+\}([^`]*)`\]/g)].map(
+    (m) => new RegExp(`^${m[1] ?? ""}\\d+${m[2] ?? ""}$`),
+  );
+  const roots = all(/nconf\.get\("([^"]+)"\)/g)
+    .map((key) => key.split(":")[0] ?? key)
+    .filter((root) => root !== "NODE_ENV");
+  return { names: [...new Set(names)], families, roots: [...new Set(roots)] };
+}
+
+describe("the environment the tests start in (setup.ts)", () => {
+  const read = environmentReadByConfig();
+
+  it("finds the variables of config/index.ts in its source", () => {
+    expect(read.names).toEqual(
+      expect.arrayContaining([
+        "core__cors",
+        "API_HOST",
+        "AI_SERVICE_URL",
+        "AI__DOCUMENT_AGENT__URL",
+        "AI__DOCUMENT_AGENT__TOKEN",
+        "AI__COMPACTION__ENABLED",
+        "AI_CHAT_UPSTREAM_TIMEOUT_MS",
+        "OTEL_METRIC_EXPORT_INTERVAL",
+      ]),
+    );
+    expect(read.families.map(String)).toEqual(["/^AI__MCP__\\d+__ENDPOINT$/"]);
+    expect(read.roots).toEqual(
+      expect.arrayContaining(["app", "ai", "core", "openTelemetry", "OTEL_SERVICE_NAME"]),
+    );
+  });
+
+  it("has none of them set, whatever the shell exports", () => {
+    const set = Object.keys(process.env).filter(
+      (name) =>
+        read.names.includes(name) ||
+        read.families.some((family) => family.test(name)) ||
+        // setup.ts sets this one itself, to a directory that does not exist.
+        (name !== "app:appsettings" && read.roots.includes(name.split(":")[0] ?? name)),
+    );
+
+    expect(set).toEqual([]);
+  });
 });
 
 describe("loading the configuration", () => {
@@ -592,6 +648,93 @@ describe("getDocumentAgent beyond the URL and the token", () => {
       portalUrl: "http://env-portal",
       filesUrl: "http://env-files:1",
     });
+  });
+});
+
+describe("getTelemetrySettings", () => {
+  const OFF = {
+    enabled: false,
+    otlpEndpoint: undefined,
+    otlpProtocol: "http/protobuf",
+    serviceName: "ASC.AI.Chat",
+  };
+
+  it("is off with the defaults when nothing is configured", () => {
+    expect(config.getTelemetrySettings()).toEqual(OFF);
+  });
+
+  it("takes every value as configured", () => {
+    settings({
+      openTelemetry: { enable: true, ServiceName: "DocSpace.AI.Chat" },
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector:4317",
+      OTEL_EXPORTER_OTLP_PROTOCOL: " grpc ",
+      OTEL_SERVICE_NAME: "FromEnv",
+    });
+
+    expect(config.getTelemetrySettings()).toEqual({
+      enabled: true,
+      otlpEndpoint: "http://collector:4317",
+      otlpProtocol: "grpc",
+      serviceName: "DocSpace.AI.Chat",
+    });
+  });
+
+  it.each([
+    ["true", true, true],
+    ['"true"', "true", true],
+    ['"TRUE"', "TRUE", false],
+    ["1", 1, false],
+    ['"1"', "1", false],
+    ["false", false, false],
+    ["an object", { a: 1 }, false],
+    ["null", null, false],
+  ])("reads openTelemetry:enable %s as %s", (_what, enable, expected) => {
+    settings({ openTelemetry: { enable } });
+
+    expect(config.getTelemetrySettings().enabled).toBe(expected);
+  });
+
+  it.each([
+    ["absent", undefined, undefined],
+    ["empty", "", undefined],
+    ["a number", 4318, undefined],
+    ["an object", { url: "x" }, undefined],
+    ["a URL", "http://c:4318/", "http://c:4318/"],
+  ])("reads an endpoint that is %s", (_what, endpoint, expected) => {
+    settings({ OTEL_EXPORTER_OTLP_ENDPOINT: endpoint });
+
+    expect(config.getTelemetrySettings().otlpEndpoint).toBe(expected);
+  });
+
+  it.each([
+    ["absent", undefined, "http/protobuf"],
+    ["empty", "", "http/protobuf"],
+    ["blank", "   ", "http/protobuf"],
+    ["a number", 1, "http/protobuf"],
+    ["an array", ["grpc"], "http/protobuf"],
+    ["padded", " http/json ", "http/json"],
+  ])("reads a protocol that is %s", (_what, protocol, expected) => {
+    settings({ OTEL_EXPORTER_OTLP_PROTOCOL: protocol });
+
+    expect(config.getTelemetrySettings().otlpProtocol).toBe(expected);
+  });
+
+  it.each([
+    ["the configured name", "Configured", "FromEnv", "Configured"],
+    ["OTEL_SERVICE_NAME for an empty configured name", "", "FromEnv", "FromEnv"],
+    ["OTEL_SERVICE_NAME for a non-string configured name", 5, "FromEnv", "FromEnv"],
+    ["the default for an empty OTEL_SERVICE_NAME", undefined, "", "ASC.AI.Chat"],
+    ["the default for a non-string OTEL_SERVICE_NAME", undefined, { a: 1 }, "ASC.AI.Chat"],
+  ])("names the service with %s", (_what, configured, env, expected) => {
+    settings({ openTelemetry: { ServiceName: configured }, OTEL_SERVICE_NAME: env });
+
+    expect(config.getTelemetrySettings().serviceName).toBe(expected);
+  });
+
+  it("is off for an openTelemetry section that is not an object", () => {
+    settings({ openTelemetry: "on" });
+
+    expect(config.getTelemetrySettings()).toEqual(OFF);
   });
 });
 

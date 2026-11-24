@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../../storage/upstreamShape.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
 import {
@@ -419,15 +420,25 @@ describe("the tools/list answer (ToolListResponse)", () => {
     ...over,
   });
 
+  // ToolListResponse carries `tools`: an answer without the list is unknown, not "no tools".
+  it.each<[string, () => Response]>([
+    ["a null response", () => docspace(null)],
+    ["a text answer", () => HttpResponse.text("hello")],
+    ["an array", () => docspace([TOOL_LIST])],
+    ["an empty object", () => docspace({})],
+    ["tools missing", () => docspace({ prompt: "p" })],
+    ["tools null", () => docspace({ prompt: "p", tools: null })],
+    ["tools a string", () => docspace({ prompt: "p", tools: "x" })],
+    ["tools an object", () => docspace({ prompt: "p", tools: {} })],
+  ])("throws UpstreamShapeError for %s", async (_name, answer) => {
+    upstream.use(http.post("*/internal/ai/tools/list", answer));
+
+    await expect(new HttpToolsAdapter().listToolset()).rejects.toEqual(
+      new UpstreamShapeError("POST tools/list"),
+    );
+  });
+
   it.each<[string, () => Response, unknown]>([
-    ["a null response", () => docspace(null), { tools: [], prompt: "" }],
-    ["a text answer", () => HttpResponse.text("hello"), { tools: [], prompt: "" }],
-    ["an array", () => docspace([TOOL_LIST]), { tools: [], prompt: "" }],
-    ["an empty object", () => docspace({}), { tools: [], prompt: "" }],
-    ["tools missing", () => docspace({ prompt: "p" }), { tools: [], prompt: "p" }],
-    ["tools null", () => docspace({ prompt: "p", tools: null }), { tools: [], prompt: "p" }],
-    ["tools a string", () => docspace({ prompt: "p", tools: "x" }), { tools: [], prompt: "p" }],
-    ["tools an object", () => docspace({ prompt: "p", tools: {} }), { tools: [], prompt: "p" }],
     ["prompt missing", () => docspace({ tools: [] }), { tools: [], prompt: "" }],
     ["prompt null", () => docspace({ tools: [], prompt: null }), { tools: [], prompt: "" }],
     ["prompt a number", () => docspace({ tools: [], prompt: 5 }), { tools: [], prompt: "" }],
@@ -787,13 +798,43 @@ describe("HttpToolsAdapter.callTool", () => {
     ],
     ["an error string", [{ error: "boom", result: "r" }], 'Tool "t" failed: boom'],
     ["a PascalCase Error", [{ Error: "BOOM" }], 'Tool "t" failed: BOOM'],
-    ["an empty error as success", [{ error: "", result: "r" }], "r"],
-    ["a non-string error as success", [{ error: 5, result: "r" }], "r"],
+    [
+      "an empty error as a failure",
+      [{ error: "", result: "r" }],
+      'Tool "t" failed: the tool service reported an error without a description',
+    ],
+    [
+      "a non-string error as a failure",
+      [{ error: 5, result: "r" }],
+      'Tool "t" failed: the tool service reported an error without a description',
+    ],
     ["a null error with an Error", [{ error: null, Error: "E" }], 'Tool "t" failed: E'],
-    ["an empty list as no result", [], 'Tool "t" returned no result'],
-    ["a list without objects as no result", [null, "x"], 'Tool "t" returned no result'],
-    ["an object answer as no result", { result: "r" }, 'Tool "t" returned no result'],
-    ["a null answer as no result", null, 'Tool "t" returned no result'],
+    // A call answered without a ToolCallResult is unknown: the model is told it failed.
+    [
+      "an empty list as a failure",
+      [],
+      'Tool "t" failed: the tool service answered in an unexpected shape',
+    ],
+    [
+      "a list without objects as a failure",
+      [null, "x"],
+      'Tool "t" failed: the tool service answered in an unexpected shape',
+    ],
+    [
+      "an object answer as a failure",
+      { result: "r" },
+      'Tool "t" failed: the tool service answered in an unexpected shape',
+    ],
+    [
+      "a null answer as a failure",
+      null,
+      'Tool "t" failed: the tool service answered in an unexpected shape',
+    ],
+    [
+      "a string answer as a failure",
+      "x",
+      'Tool "t" failed: the tool service answered in an unexpected shape',
+    ],
   ])("answers %s", async (_name, answer, expected) => {
     answerCall(answer);
 

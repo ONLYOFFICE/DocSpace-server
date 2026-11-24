@@ -46,6 +46,7 @@ import {
   getString,
   isObject,
   parseInt10,
+  parseInteger,
 } from "../narrow.js";
 import { sanitizeInstruction } from "../sanitizeInstruction.js";
 
@@ -219,6 +220,52 @@ describe("parseInt10", () => {
     [[1], 9, 9],
   ])("parseInt10(%j, %j) is %j", (value, fallback, expected) => {
     expect(parseInt10(value, fallback)).toBe(expected);
+  });
+});
+
+describe("parseInteger", () => {
+  it.each([
+    ["42", 42],
+    ["0", 0],
+    ["-0", 0],
+    ["-8", -8],
+    ["010", 10],
+    ["9007199254740991", Number.MAX_SAFE_INTEGER],
+    [65, 65],
+    [-3, -3],
+    [0, 0],
+  ])("reads %j as %j", (value, expected) => {
+    expect(parseInteger(value)).toBe(expected);
+  });
+
+  it.each([
+    "65abc",
+    "20abc",
+    "30s",
+    "1.5",
+    "1.0",
+    "1e3",
+    "0x10",
+    "+7",
+    " 7",
+    "7 ",
+    "",
+    " ",
+    "-",
+    "abc",
+    "9007199254740992",
+    65.5,
+    NaN,
+    Infinity,
+    2 ** 53,
+    undefined,
+    null,
+    true,
+    {},
+    [1],
+    ["1"],
+  ])("refuses %j", (value) => {
+    expect(parseInteger(value)).toBeUndefined();
   });
 });
 

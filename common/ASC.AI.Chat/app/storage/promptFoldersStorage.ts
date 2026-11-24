@@ -34,7 +34,7 @@
 import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { PromptFoldersStorage, PromptFolder } from "@onlyoffice/ai-chat/core";
-import { mapped, namesNoEntity } from "./upstreamShape.js";
+import { listAnswer, mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 const PATH = "/prompt-folders";
 
@@ -52,27 +52,15 @@ function parseFolder(raw: unknown): PromptFolder | null {
   return { id, name, createdAt, updatedAt };
 }
 
-function parseFolderList(raw: unknown): PromptFolder[] {
-  if (!Array.isArray(raw)) {
-    throw new Error("AI service returned a non-array prompt folder list");
-  }
-  return raw.map((item, i) => {
-    const f = parseFolder(item);
-    if (!f) {
-      throw new Error(`AI service returned an invalid prompt folder at index ${i}`);
-    }
-    return f;
-  });
+// A folder that cannot be read fails the whole list, as the list does not show it otherwise.
+function parseFolderList(raw: unknown, call: string): PromptFolder[] {
+  return listAnswer(raw, call).map((item) => mapped(parseFolder(item), call));
 }
 
 export class HttpPromptFoldersStorage implements PromptFoldersStorage {
   async create(input: Omit<PromptFolder, "id" | "createdAt" | "updatedAt">): Promise<PromptFolder> {
     const raw = await aiService.post(PATH, { name: input.name });
-    const folder = parseFolder(raw);
-    if (!folder) {
-      throw new Error("AI service returned an invalid prompt folder payload");
-    }
-    return folder;
+    return mapped(parseFolder(raw), "POST prompt-folders");
   }
 
   async createMany(
@@ -84,11 +72,9 @@ export class HttpPromptFoldersStorage implements PromptFoldersStorage {
     const raw = await aiService.post(`${PATH}/batch`, {
       names: folders.map((f) => f.name),
     });
-    const persisted = parseFolderList(raw);
+    const persisted = parseFolderList(raw, "POST prompt-folders/batch");
     if (persisted.length !== folders.length) {
-      throw new Error(
-        `AI service returned ${persisted.length} folders for ${folders.length} inputs`,
-      );
+      throw new UpstreamShapeError("POST prompt-folders/batch");
     }
     return persisted;
   }
@@ -110,7 +96,7 @@ export class HttpPromptFoldersStorage implements PromptFoldersStorage {
 
   async readAll(): Promise<PromptFolder[]> {
     const raw = await aiService.get(PATH);
-    return parseFolderList(raw).sort((a, b) => b.createdAt - a.createdAt);
+    return parseFolderList(raw, "GET prompt-folders").sort((a, b) => b.createdAt - a.createdAt);
   }
 
   async update(id: string, name: string): Promise<void> {

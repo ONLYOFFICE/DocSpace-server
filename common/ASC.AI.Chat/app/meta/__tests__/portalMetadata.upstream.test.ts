@@ -42,6 +42,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
 import { delay, http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
 import { DocspaceApiHttpError } from "../../storage/docspaceFilesApi.js";
+import { UpstreamShapeError } from "../../storage/upstreamShape.js";
 import {
   FieldType,
   getEntryMetadata,
@@ -378,7 +379,9 @@ describe("getEntryMetadata against the Files API", () => {
   ])("rejects %s instead of reading it as no metadata", async (_what, answer) => {
     upstream.use(http.get("*/api/2.0/files/metadata/:kind/:id", answer));
 
-    await expect(getEntryMetadata("file", "10")).rejects.toThrow(/unparseable response/);
+    await expect(getEntryMetadata("file", "10")).rejects.toEqual(
+      new UpstreamShapeError("GET files/metadata/file/10"),
+    );
   });
 
   it.each([
@@ -420,7 +423,9 @@ describe("getEntryMetadata against the Files API", () => {
   it("rejects a body that is not JSON", async () => {
     upstream.use(http.get("*/api/2.0/files/metadata/:kind/:id", () => HttpResponse.text("<html>")));
 
-    await expect(getEntryMetadata("file", "10")).rejects.toBeInstanceOf(SyntaxError);
+    await expect(getEntryMetadata("file", "10")).rejects.toEqual(
+      new UpstreamShapeError("GET files/metadata/file/10"),
+    );
   });
 });
 

@@ -122,34 +122,24 @@ describe("documentAgentController.getSettings", () => {
     expect(responseViolations("aiSettingsGetDocumentAgent", 200, reply.body)).toEqual([]);
   });
 
-  it("relays an answer without the envelope as it came", async () => {
+  // DocumentAgentController.ReadSettingsAsync answers a DocumentAgentSettingsDto in the envelope:
+  // anything else is unknown, answered 502 and never relayed as a 200.
+  it.each<[string, () => Response]>([
+    ["an answer without the envelope", () => HttpResponse.json(SETTINGS)],
+    ["a 204", () => new HttpResponse(null, { status: 204 })],
+    ["a text answer", () => HttpResponse.text("settings")],
+    ["a JSON string", () => HttpResponse.json("x")],
+    ["a JSON list", () => HttpResponse.json([])],
+    ["an empty object", () => HttpResponse.json({})],
+    ["a null response", () => docspace(null)],
+  ])("answers 502 for %s of the AI service", async (_what, answer) => {
     resetCalls();
-    upstream.use(route("get", () => HttpResponse.json(SETTINGS)));
+    upstream.use(route("get", answer));
 
     const reply = await invoke(documentAgentController.getSettings, { method: "GET" });
 
-    expect(reply.status).toBe(200);
-    expect(reply.body).toEqual(SETTINGS);
-  });
-
-  it("answers a 204 of the AI service as a JSON null", async () => {
-    resetCalls();
-    upstream.use(route("get", () => new HttpResponse(null, { status: 204 })));
-
-    const reply = await invoke(documentAgentController.getSettings, { method: "GET" });
-
-    expect(reply.status).toBe(200);
-    expect(reply.body).toBeNull();
-  });
-
-  it("answers a text answer of the AI service as a JSON string", async () => {
-    resetCalls();
-    upstream.use(route("get", () => HttpResponse.text("settings")));
-
-    const reply = await invoke(documentAgentController.getSettings, { method: "GET" });
-
-    expect(reply.status).toBe(200);
-    expect(reply.body).toBe("settings");
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
   });
 
   it.each([
@@ -192,6 +182,24 @@ describe("documentAgentController.getSettings", () => {
 });
 
 describe("documentAgentController.setSettings", () => {
+  it.each<[string, () => Response]>([
+    ["an answer without the envelope", () => HttpResponse.json(SETTINGS)],
+    ["a 204", () => new HttpResponse(null, { status: 204 })],
+    ["a text answer", () => HttpResponse.text("settings")],
+    ["a null response", () => docspace(null)],
+  ])("answers 502 for %s of the AI service to the write", async (_what, answer) => {
+    resetCalls();
+    upstream.use(route("put", answer));
+
+    const reply = await invoke(documentAgentController.setSettings, {
+      method: "PUT",
+      body: SETTINGS,
+    });
+
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
+  });
+
   it("writes the settings the tab sends and answers what the AI service stored", async () => {
     resetCalls();
     upstream.use(route("put", () => docspace(SETTINGS)));

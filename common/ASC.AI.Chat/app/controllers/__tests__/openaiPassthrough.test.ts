@@ -276,7 +276,7 @@ describe("chat/completions to a third-party provider", () => {
     expect(responseViolations("aiOpenaiChatCompletions", 429, json(reply))).toEqual([]);
   });
 
-  it("relays a provider 400, which the operation does not publish", async () => {
+  it("relays a provider 400 in the published error shape", async () => {
     useProfile();
     const providerError = {
       error: {

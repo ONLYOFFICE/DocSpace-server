@@ -168,6 +168,26 @@ const badInputs: Array<[string, unknown, string]> = [
     { ...input, type: { v: 1 } },
     "input.type is required and must be a number (ONLYOFFICE file type code)",
   ],
+  [
+    'with type "65abc", not its leading digits',
+    { ...input, type: "65abc" },
+    "input.type is required and must be a number (ONLYOFFICE file type code)",
+  ],
+  [
+    'with type "1.5", a string that is no integer',
+    { ...input, type: "1.5" },
+    "input.type is required and must be a number (ONLYOFFICE file type code)",
+  ],
+  [
+    'with type "1e3", in exponent notation',
+    { ...input, type: "1e3" },
+    "input.type is required and must be a number (ONLYOFFICE file type code)",
+  ],
+  [
+    'with type " 65", padded',
+    { ...input, type: " 65" },
+    "input.type is required and must be a number (ONLYOFFICE file type code)",
+  ],
   ["with title null", { ...input, title: null }, "input.title must be a string when present"],
   ["with title a number", { ...input, title: 5 }, "input.title must be a string when present"],
   [
@@ -211,11 +231,7 @@ describe("attachmentsController.saveFile", () => {
 
   it.each([
     ["a numeric string type, made a number", { ...input, type: "65" }, { ...input, type: 65 }],
-    [
-      "a type with trailing text, cut to its number",
-      { ...input, type: "65abc" },
-      { ...input, type: 65 },
-    ],
+    // CONTRACT data-21: a fractional number is kept as it is. Pinned by ASC.AI.Tests (AttachmentSaveFileTypeTests.SaveFile_AnyNumericType_IsAcceptedAndEchoedLikeAnInEnumOne echoes 1.5 back).
     ["a fractional type, kept as it is", { ...input, type: 65.5 }, { ...input, type: 65.5 }],
     ["an empty content", { ...input, content: "" }, { ...input, content: "" }],
     ["an empty title, kept", { ...input, title: "" }, { ...input, title: "" }],

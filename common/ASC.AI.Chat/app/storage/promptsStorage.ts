@@ -34,7 +34,7 @@
 import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { PromptsStorage, Prompt } from "@onlyoffice/ai-chat/core";
-import { mapped, namesNoEntity } from "./upstreamShape.js";
+import { listAnswer, mapped, namesNoEntity } from "./upstreamShape.js";
 
 const PATH = "/prompts";
 const FOLDERS_PATH = "/prompt-folders";
@@ -65,17 +65,9 @@ function parsePrompt(raw: unknown): Prompt | null {
   return prompt;
 }
 
-function parsePromptList(raw: unknown): Prompt[] {
-  if (!Array.isArray(raw)) {
-    throw new Error("AI service returned a non-array prompt list");
-  }
-  return raw.map((item, i) => {
-    const p = parsePrompt(item);
-    if (!p) {
-      throw new Error(`AI service returned an invalid prompt at index ${i}`);
-    }
-    return p;
-  });
+// A prompt that cannot be read fails the whole list, as the list does not show it otherwise.
+function parsePromptList(raw: unknown, call: string): Prompt[] {
+  return listAnswer(raw, call).map((item) => mapped(parsePrompt(item), call));
 }
 
 export class HttpPromptsStorage implements PromptsStorage {
@@ -85,11 +77,7 @@ export class HttpPromptsStorage implements PromptsStorage {
       body["folderId"] = input.folderId;
     }
     const raw = await aiService.post(PATH, body);
-    const prompt = parsePrompt(raw);
-    if (!prompt) {
-      throw new Error("AI service returned an invalid prompt payload");
-    }
-    return prompt;
+    return mapped(parsePrompt(raw), "POST prompts");
   }
 
   async createMany(prompts: Omit<Prompt, "id" | "createdAt" | "updatedAt">[]): Promise<Prompt[]> {
@@ -121,7 +109,7 @@ export class HttpPromptsStorage implements PromptsStorage {
 
   async readAll(): Promise<Prompt[]> {
     const raw = await aiService.get(PATH);
-    return parsePromptList(raw).sort((a, b) => b.createdAt - a.createdAt);
+    return parsePromptList(raw, "GET prompts").sort((a, b) => b.createdAt - a.createdAt);
   }
 
   async readByFolderId(folderId: string | null): Promise<Prompt[]> {
@@ -130,7 +118,9 @@ export class HttpPromptsStorage implements PromptsStorage {
       return all.filter((p) => !p.folderId);
     }
     const raw = await aiService.get(`${FOLDERS_PATH}/${encodeURIComponent(folderId)}/prompts`);
-    return parsePromptList(raw).sort((a, b) => b.createdAt - a.createdAt);
+    return parsePromptList(raw, "GET prompt-folders/{id}/prompts").sort(
+      (a, b) => b.createdAt - a.createdAt,
+    );
   }
 
   async update(

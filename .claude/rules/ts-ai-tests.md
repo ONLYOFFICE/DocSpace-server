@@ -109,8 +109,8 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
 - Anything that waits (a timeout, a poll, a retry, the stream heartbeat) runs on fake timers:
   `useFastTimers()` when only the outcome matters, `vi.useFakeTimers()` with
   `vi.advanceTimersByTimeAsync()` when the test asserts the moment. One file waiting on real
-  timers took 20 of the suite's 20.5 seconds until it moved to `useFastTimers()`. The whole suite,
-  6040 tests, runs in about 7 seconds: a single test stays under about 50 ms.
+  timers took 20 of the suite's 20.5 seconds until it moved to `useFastTimers()`. A single test
+  stays under about 50 ms.
 - `restoreMocks: true` resets spies between tests. Module state (a cache, a memoized promise) is
   not reset: re-import the module (`vi.resetModules()`), or the tests depend on their order.
 

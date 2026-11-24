@@ -434,9 +434,10 @@ describe("the knowledge rooms of a round", () => {
           "junk",
           null,
           { id: "9abc" },
+          { id: "1e3" },
         ],
       }),
-    ).toEqual([12, 5, 9]);
+    ).toEqual([12, 5]);
   });
 
   it("reads the single knowledgeRoom of an older widget", async () => {
@@ -769,6 +770,7 @@ describe.each(["sendWithStream", "sendWithStreamOpenAI"] as const)("pre-flight o
 
     expect(reply.status).toBe(status);
     expect(reply.body).toEqual({ error: message });
+    expect(responseViolations(OPERATION[name], status, reply.body)).toEqual([]);
     expect(h.engine[name]).not.toHaveBeenCalled();
   });
 
@@ -1243,22 +1245,18 @@ describe("approveToolCall", () => {
     expect(box.seen).toEqual(["p1", []]);
   });
 
-  it.each([
-    ["a numeric profileId", { profileId: 5 }, { id: "t1", profileId: "p-thread" }, "p-thread"],
-    ["a thread that is gone", {}, null, undefined],
-  ])("reads %s as no requested profile", async (_w, extra, thread, profile) => {
-    h.storage.threads.readById.mockResolvedValue(thread);
+  it("reads a thread that is gone as no requested profile", async () => {
+    h.storage.threads.readById.mockResolvedValue(null);
     const box = capture();
 
-    await h.call(aiController.approveToolCall, { ...VALID.approveToolCall, ...extra });
+    await h.call(aiController.approveToolCall, VALID.approveToolCall);
 
-    expect(box.seen).toEqual([profile, []]);
+    expect(box.seen).toEqual([undefined, []]);
   });
 
   it.each([
     ["missing", undefined],
     ["empty", ""],
-    ["a number", 3],
   ])("reads nothing of the thread when threadId is %s", async (_what, threadId) => {
     await h.call(aiController.approveToolCall, { ...VALID.approveToolCall, threadId });
 

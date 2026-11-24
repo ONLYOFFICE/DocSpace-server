@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { describe, expect, it, vi } from "vitest";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
 import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
@@ -92,12 +93,19 @@ describe("parseSkillsCatalog", () => {
     ]);
   });
 
+  // AiSkillsDto carries `rooms`: a catalog without the list is unknown, not a catalog of no room.
   it.each([null, "rooms", [], {}, { rooms: null }, { rooms: "x" }])(
-    "answers no room for %j",
+    "throws UpstreamShapeError for %j",
     (raw) => {
-      expect(parseSkillsCatalog(raw)).toEqual([]);
+      expect(() => parseSkillsCatalog(raw)).toThrow(
+        new UpstreamShapeError("GET files/rooms/skills"),
+      );
     },
   );
+
+  it("answers no room for an empty list", () => {
+    expect(parseSkillsCatalog({ rooms: [] })).toEqual([]);
+  });
 
   it.each([
     ["id missing", { title: "T" }],
@@ -247,23 +255,18 @@ describe("the rooms listings", () => {
     ["an object without an envelope", () => HttpResponse.json({ folders: [] })],
   ])("rejects a listing that is %s instead of reading it as no room", async (_name, reply) => {
     upstream.use(http.get("*/api/2.0/files/rooms", reply));
-    await expect(getKnowledgeFolders()).rejects.toThrow(/unparseable response/);
+    await expect(getKnowledgeFolders()).rejects.toEqual(new UpstreamShapeError("GET files/rooms"));
   });
 
-  it("answers no room, with a warning, for a first page whose envelope is null", async () => {
-    upstream.use(http.get("*/api/2.0/files/rooms", () => HttpResponse.json({ response: null })));
-    await expect(getKnowledgeFolders()).resolves.toEqual([]);
-    expect(vi.mocked(logger.warn).mock.calls).toEqual([
-      ["listRoomsOfType(11) -> unparseable response for startIndex 0"],
-    ]);
-    expect(upstream.seen).toHaveLength(1);
-  });
-
-  it("reads a page without folders as no room", async () => {
-    upstream.use(
-      http.get("*/api/2.0/files/rooms", () => HttpResponse.json({ response: { total: 0 } })),
-    );
-    await expect(getContextFolders()).resolves.toEqual([]);
+  // FolderContentDto carries `folders`: a page without the list is unknown, not a page of no room.
+  it.each([
+    ["whose envelope is null", { response: null }],
+    ["whose envelope is a string", { response: "x" }],
+    ["without folders", { response: { total: 0 } }],
+    ["whose folders are not a list", { response: { folders: {}, total: 0 } }],
+  ])("rejects a first page %s instead of reading it as no room", async (_name, body) => {
+    upstream.use(http.get("*/api/2.0/files/rooms", () => HttpResponse.json(body)));
+    await expect(getContextFolders()).rejects.toEqual(new UpstreamShapeError("GET files/rooms"));
     expect(upstream.seen).toHaveLength(1);
   });
 
@@ -279,7 +282,7 @@ describe("the rooms listings", () => {
     await expect(getKnowledgeFolders()).resolves.toEqual([]);
   });
 
-  it("stops with a warning at a page with a null envelope, keeping the pages before it", async () => {
+  it("rejects a listing with a later page whose envelope is null, not keeping the pages before it", async () => {
     upstream.use(
       http.get("*/api/2.0/files/rooms", ({ request }) => {
         const start = new URL(request.url).searchParams.get("startIndex");
@@ -288,12 +291,7 @@ describe("the rooms listings", () => {
           : page([{ id: Number(start) + 1, title: `R${start}` }], 300);
       }),
     );
-    await expect(getKnowledgeFolders()).resolves.toEqual([
-      { cloud: "docspace", rooms: [{ id: "1", name: "R0" }] },
-    ]);
-    expect(vi.mocked(logger.warn).mock.calls).toEqual([
-      ["listRoomsOfType(11) -> unparseable response for startIndex 100"],
-    ]);
+    await expect(getKnowledgeFolders()).rejects.toEqual(new UpstreamShapeError("GET files/rooms"));
   });
 
   it("rejects when a later page has no envelope", async () => {
@@ -304,27 +302,51 @@ describe("the rooms listings", () => {
           : HttpResponse.json({ folders: [] }),
       ),
     );
-    await expect(getKnowledgeFolders()).rejects.toThrow(/unparseable response/);
+    await expect(getKnowledgeFolders()).rejects.toEqual(new UpstreamShapeError("GET files/rooms"));
   });
 
   it("reads the pages after the first at once and joins them in page order", async () => {
-    const started: string[] = [];
-    let release: () => void = () => undefined;
-    const allStarted = new Promise<void>((resolve) => {
-      release = resolve;
+    const started: number[] = [];
+    const arrived: number[] = [];
+    const gate = (): { promise: Promise<void>; open: () => void } => {
+      let open: () => void = () => undefined;
+      const promise = new Promise<void>((resolve) => {
+        open = resolve;
+      });
+      return { promise, open };
+    };
+    // Page 300 is answered once all three were asked for; page 200 once the client has read
+    // page 300, page 100 once it has read page 200: they arrive in reverse order, every run.
+    const allStarted = gate();
+    const read = new Map([
+      [300, gate()],
+      [200, gate()],
+    ]);
+    const after = new Map([
+      [300, allStarted.promise],
+      [200, read.get(300)?.promise],
+      [100, read.get(200)?.promise],
+    ]);
+    // The client's own read of each answer, as it completes (filesApiGet reads it with json()).
+    const json = Response.prototype.json;
+    vi.spyOn(Response.prototype, "json").mockImplementation(async function (this: Response) {
+      const body: unknown = await json.call(this);
+      const start = Number(new URL(this.url).searchParams.get("startIndex"));
+      if (start > 0) {
+        arrived.push(start);
+        read.get(start)?.open();
+      }
+      return body;
     });
     upstream.use(
       http.get("*/api/2.0/files/rooms", async ({ request }) => {
         const start = Number(new URL(request.url).searchParams.get("startIndex"));
         if (start > 0) {
-          started.push(String(start));
+          started.push(start);
           if (started.length === 3) {
-            release();
+            allStarted.open();
           }
-          // Every later page waits until all of them were asked for, and the
-          // last page answers first.
-          await allStarted;
-          await new Promise((resolve) => setTimeout(resolve, (400 - start) / 100));
+          await after.get(start);
         }
         return page([{ id: start + 1, title: `R${start}` }], 350);
       }),
@@ -332,8 +354,9 @@ describe("the rooms listings", () => {
 
     const folders = await getKnowledgeFolders();
 
+    expect(arrived).toEqual([300, 200, 100]);
     expect(folders[0]?.rooms.map((room) => room.id)).toEqual(["1", "101", "201", "301"]);
-    expect(started.sort()).toEqual(["100", "200", "300"]);
+    expect(started.sort()).toEqual([100, 200, 300]);
   });
 
   it("reads the first page alone when it tells no total beyond itself", async () => {
@@ -397,7 +420,9 @@ describe("presignedDownloadUrl", () => {
     ["an address that is not text", () => envelope({ url: "u" })],
   ])("throws on %s", async (_name, answer) => {
     upstream.use(http.get("*/api/2.0/files/file/:id/presigneduri", answer));
-    await expect(presignedDownloadUrl("5")).rejects.toThrow("No download address for file 5");
+    await expect(presignedDownloadUrl("5")).rejects.toEqual(
+      new UpstreamShapeError("GET files/file/{id}/presigneduri"),
+    );
   });
 
   it("throws on an answer without an envelope", async () => {
@@ -406,7 +431,9 @@ describe("presignedDownloadUrl", () => {
         HttpResponse.json("https://portal/f"),
       ),
     );
-    await expect(presignedDownloadUrl("5")).rejects.toThrow(/unparseable response/);
+    await expect(presignedDownloadUrl("5")).rejects.toEqual(
+      new UpstreamShapeError("GET files/file/5/presigneduri"),
+    );
   });
 
   it("throws a DocspaceApiHttpError for a refusal", async () => {

@@ -80,6 +80,18 @@ const {
 
 const file = (id: string) => ({ id, title: `${id}.docx`, ext: ".docx" });
 
+/** A promise the test settles itself, to order the reads without waiting on the clock. */
+function deferred(): { promise: Promise<void>; resolve: () => void } {
+  let resolve: () => void = () => undefined;
+  const promise = new Promise<void>((r) => {
+    resolve = r;
+  });
+  return { promise, resolve };
+}
+
+/** Lets every pending promise callback run: a macrotask comes after all microtasks. */
+const settle = () => new Promise<void>((resolve) => setImmediate(resolve));
+
 describe("collectFiles when a file read fails", () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -113,14 +125,18 @@ describe("collectFiles when a file read fails", () => {
   it("relays the failure of the earliest id, with the skips of the ids before it", async () => {
     const early = new FakeDocspaceApiHttpError(500, "Server Error", "early");
     const late = new FakeDocspaceApiHttpError(502, "Bad Gateway", "late");
+    const lateFailed = deferred();
     vi.mocked(portalFiles.getPortalFile).mockImplementation(async (id) => {
       if (id === "gone") return undefined;
       if (id === "2") {
         // Fails after "3" has failed already.
-        await new Promise((resolve) => setTimeout(resolve, 5));
+        await lateFailed.promise;
         throw early;
       }
-      if (id === "3") throw late;
+      if (id === "3") {
+        lateFailed.resolve();
+        throw late;
+      }
       return file(id);
     });
     const skipped: MetaSkipped[] = [];
@@ -136,27 +152,44 @@ describe("collectFiles reading the file ids in parallel", () => {
   it("reads at most four file infos at a time", async () => {
     let running = 0;
     let most = 0;
+    const reads: ReturnType<typeof deferred>[] = [];
     vi.mocked(portalFiles.getPortalFile).mockImplementation(async (id) => {
       running += 1;
       most = Math.max(most, running);
-      await new Promise((resolve) => setTimeout(resolve, 1));
+      const read = deferred();
+      reads.push(read);
+      await read.promise;
       running -= 1;
       return file(id);
     });
     const ids = Array.from({ length: 10 }, (_, i) => String(i + 1));
 
-    const files = await collectFiles(ids, [], []);
+    const collected = collectFiles(ids, [], []);
+    await settle();
+    expect(reads).toHaveLength(4);
+    // Each read that ends lets the next one start, never more than four at once.
+    for (let done = 0; done < reads.length; done += 1) {
+      reads[done]?.resolve();
+      await settle();
+      expect(running).toBe(Math.min(4, ids.length - done - 1));
+    }
+    const files = await collected;
 
     expect(files).toHaveLength(10);
+    expect(reads).toHaveLength(10);
     expect(most).toBe(4);
   });
 
   it("keeps the order of the ids, the skip reasons and the limit when the reads finish out of order", async () => {
     const ids = Array.from({ length: MAX_FILES + 4 }, (_, i) => `id${i}`);
+    const pending: ReturnType<typeof deferred>[] = [];
+    const answered: number[] = [];
     vi.mocked(portalFiles.getPortalFile).mockImplementation(async (id) => {
       const n = Number(id.slice(2));
-      // Later ids answer first.
-      await new Promise((resolve) => setTimeout(resolve, (ids.length - n) % 5));
+      const read = deferred();
+      pending.push(read);
+      await read.promise;
+      answered.push(n);
       if (n === 1) return undefined;
       if (n === 2) throw new FakeDocspaceApiHttpError(403, "Forbidden", "u");
       return file(id);
@@ -165,8 +198,17 @@ describe("collectFiles reading the file ids in parallel", () => {
     vi.mocked(portalFiles.listFolderFiles).mockResolvedValue([file("id3"), file("f1")]);
     const skipped: MetaSkipped[] = [];
 
-    const files = await collectFiles([...ids, "id0"], ["9"], skipped);
+    const collected = collectFiles([...ids, "id0"], ["9"], skipped);
+    // The read started last answers first, each time.
+    await settle();
+    while (pending.length > 0) {
+      pending.pop()?.resolve();
+      await settle();
+    }
+    const files = await collected;
 
+    expect(answered).toHaveLength(ids.length);
+    expect(answered.slice(0, 4)).toEqual([3, 4, 5, 6]);
     const taken = ids.filter((id) => id !== "id1" && id !== "id2");
     expect(files.map((f) => f.id)).toEqual(taken.slice(0, MAX_FILES));
     expect(skipped).toEqual([

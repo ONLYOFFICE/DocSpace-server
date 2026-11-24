@@ -54,16 +54,7 @@ import {
 } from "../requestContext.js";
 import nconf, { chatContextDisabled } from "../../config/index.js";
 import type { AppConfig } from "../types.js";
-import {
-  isObject,
-  getArray,
-  getBoolean,
-  getEntityId,
-  getNumber,
-  getObject,
-  getString,
-  type JsonObject,
-} from "../narrow.js";
+import { isObject, getBoolean, getEntityId, getNumber, getObject, getString } from "../narrow.js";
 import logger from "../log.js";
 
 const PATH = "/chat-context";
@@ -107,11 +98,19 @@ function parseFolder(raw: unknown): DocspaceFolderInfo | undefined {
   return info;
 }
 
-function parseAssignments(raw: unknown): Record<string, string> {
-  const result: Record<string, string> = {};
+// The aggregate's required fields (ChatContextDto.cs) and its non-null
+// optional ones are read whole or not at all: a field of the wrong shape
+// makes the whole aggregate unreadable, and `primeChatContext` then installs
+// no snapshot, so the round reads each entity on its own. A snapshot of
+// empties would answer "no profiles", "no assignment" or "no thread" for what
+// is only unknown (`ts-ai-failure-paths.md` §1). One malformed element of a
+// list or a map is dropped, the rest kept.
+
+function parseAssignments(raw: unknown): Record<string, string> | undefined {
   if (!isObject(raw)) {
-    return result;
+    return undefined;
   }
+  const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(raw)) {
     if (typeof value === "string") {
       result[key] = value;
@@ -122,11 +121,11 @@ function parseAssignments(raw: unknown): Record<string, string> {
 
 // `List<McpServerDto>` (`{ name, config }`, config as a JSON string) -> the
 // name -> config map `HttpMcpServersStorage.readAll` returns.
-function parseMcpServers(raw: unknown): Record<string, McpServerConfig> {
-  const result: Record<string, McpServerConfig> = {};
+function parseMcpServers(raw: unknown): Record<string, McpServerConfig> | undefined {
   if (!Array.isArray(raw)) {
-    return result;
+    return undefined;
   }
+  const result: Record<string, McpServerConfig> = {};
   for (const item of raw) {
     if (!isObject(item)) {
       continue;
@@ -143,27 +142,41 @@ function parseMcpServers(raw: unknown): Record<string, McpServerConfig> {
   return result;
 }
 
-function parseScope(raw: unknown, entityId: string | undefined): ChatContextScope | null {
+/** A scope of the aggregate; `undefined` when it cannot be read as `ChatContextScopeDto`. */
+function parseScope(raw: unknown, entityId: string | undefined): ChatContextScope | undefined {
   if (!isObject(raw)) {
-    return null;
+    return undefined;
+  }
+  const assignments = parseAssignments(raw["assignments"]);
+  const toolPrefs = getObject(raw, "toolPrefs");
+  const mcpServers = parseMcpServers(raw["mcpServers"]);
+  if (assignments === undefined || toolPrefs === undefined || mcpServers === undefined) {
+    return undefined;
   }
   const preferences = getObject(raw, "preferences");
-  const toolPrefs = getObject(raw, "toolPrefs");
   return {
     entityId,
     folder: parseFolder(raw["folder"]),
-    assignments: parseAssignments(raw["assignments"]),
+    assignments,
     reasoningLevel: preferences ? depthToLevel(preferences["depth"]) : null,
-    toolPrefs: toolPrefs ?? ({} as JsonObject),
-    mcpServers: parseMcpServers(raw["mcpServers"]),
+    toolPrefs,
+    mcpServers,
   };
 }
 
-function parseProfiles(raw: unknown): DocspaceProfile[] {
-  const result: DocspaceProfile[] = [];
+/** An optional scope: `null` when the aggregate carries none, `undefined` when it is unreadable. */
+function parseOptionalScope(
+  raw: unknown,
+  entityId: string | undefined,
+): ChatContextScope | null | undefined {
+  return raw === null || raw === undefined ? null : parseScope(raw, entityId);
+}
+
+function parseProfiles(raw: unknown): DocspaceProfile[] | undefined {
   if (!Array.isArray(raw)) {
-    return result;
+    return undefined;
   }
+  const result: DocspaceProfile[] = [];
   for (const item of raw) {
     const profile = dtoToProfile(item);
     if (profile) {
@@ -173,6 +186,8 @@ function parseProfiles(raw: unknown): DocspaceProfile[] {
   return result;
 }
 
+// Messages that cannot be read leave the slice `null`, which the messages
+// storage reads as "not in the aggregate" and asks for on its own.
 function parseMessages(raw: unknown): ThreadMessageLike[] | null {
   if (!Array.isArray(raw)) {
     return null;
@@ -187,8 +202,12 @@ function parseMessages(raw: unknown): ThreadMessageLike[] | null {
   return result;
 }
 
-function parseThread(raw: unknown): Thread | null {
-  return raw === null || raw === undefined ? null : dtoToThread(raw);
+/** A nullable field read by `parse`: `null` when absent, `undefined` when present and unreadable. */
+function parseNullable<T>(raw: unknown, parse: (value: unknown) => T | null): T | null | undefined {
+  if (raw === null || raw === undefined) {
+    return null;
+  }
+  return parse(raw) ?? undefined;
 }
 
 export function parseChatContext(
@@ -199,17 +218,27 @@ export function parseChatContext(
     return undefined;
   }
   const global = parseScope(raw["global"], undefined);
-  if (!global) {
-    return undefined;
-  }
-  const config = getObject(raw, "config");
-  const entity = parseScope(raw["entity"], request.entityId);
+  const profiles = parseProfiles(raw["profiles"]);
+  const entity = parseOptionalScope(raw["entity"], request.entityId);
   // The C# side skips the second scope when both ids match; a read for
   // `contextEntityId` must then land on the same scope as `entityId`.
   const contextEntity =
     request.contextEntityId !== undefined && request.contextEntityId === request.entityId
       ? entity
-      : parseScope(raw["contextEntity"], request.contextEntityId);
+      : parseOptionalScope(raw["contextEntity"], request.contextEntityId);
+  const thread = parseNullable(raw["thread"], dtoToThread);
+  const webSearch = parseNullable(raw["webSearch"], parseWebSearchConfig);
+  if (
+    global === undefined ||
+    profiles === undefined ||
+    entity === undefined ||
+    contextEntity === undefined ||
+    thread === undefined ||
+    webSearch === undefined
+  ) {
+    return undefined;
+  }
+  const config = getObject(raw, "config");
   return {
     requested: {
       threadId: request.threadId,
@@ -218,13 +247,13 @@ export function parseChatContext(
     },
     aiReady: config ? getBoolean(config, "aiReady") : undefined,
     toolPermissionMode: config ? csharpToToolPermissionMode(config["toolPermissionMode"]) : null,
-    profiles: parseProfiles(getArray(raw, "profiles")),
+    profiles,
     global,
     entity,
     contextEntity,
-    thread: parseThread(raw["thread"]),
+    thread,
     messages: parseMessages(raw["messages"]),
-    webSearch: parseWebSearchConfig(raw["webSearch"]),
+    webSearch,
     documentAgentEnabled: getBoolean(raw, "documentAgentEnabled"),
     stale: new Set(),
   };

@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Attachment } from "@onlyoffice/ai-chat/core";
 import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
@@ -728,7 +729,7 @@ describe("createMany of portal files", () => {
     ["an object", attachmentDto(), "object"],
     ["null", null, "null"],
     ["a string", "ok", "string"],
-  ])("refuses an answer that is %s with a plain error", async (_case, response, type) => {
+  ])("refuses an answer that is %s as one of an unknown shape", async (_case, response, type) => {
     saved(response);
 
     const error = await failure(
@@ -736,9 +737,7 @@ describe("createMany of portal files", () => {
     );
 
     expect(error).not.toBeInstanceOf(AiServiceHttpError);
-    expect(error).toMatchObject({
-      message: "ai service returned a non-array response for attachments createMany",
-    });
+    expect(error).toEqual(new UpstreamShapeError("POST attachments"));
     expect(logged("error")[0]).toMatch(
       new RegExp(
         `^HttpAttachmentsStorage\\.createMany: backend returned non-array payload \\(type=${type}\\)`,
@@ -1044,7 +1043,7 @@ describe("createMany of a generated image", () => {
     expect(logged("info")).toEqual(
       expect.arrayContaining([
         "uploadToolImage: folder-info entityId=12 -> title=Marketing folderType=? canCreate=true",
-        "uploadToolImage: folder-info entityId=13 -> NOT FOUND (404 or unparseable) — the scope is not a folder this user can read",
+        "uploadToolImage: folder-info entityId=13 -> NOT FOUND (404) — the scope is not a folder this user can read",
       ]),
     );
   });
@@ -1125,26 +1124,18 @@ describe("createMany of a generated image", () => {
   });
 
   it.each([
-    ["the answer is a list", [fileDto()], "DocSpace insert returned an unexpected payload"],
-    ["the response is null", { response: null }, "DocSpace insert returned an unexpected payload"],
-    [
-      "the file has no id",
-      fileDto({ id: undefined }),
-      "DocSpace insert returned a file without an id",
-    ],
-    [
-      "the file's id is a boolean",
-      fileDto({ id: true }),
-      "DocSpace insert returned a file without an id",
-    ],
-  ])("answers a placeholder when %s", async (_case, body, message) => {
+    ["the answer is a list", [fileDto()]],
+    ["the response is null", { response: null }],
+    ["the file has no id", fileDto({ id: undefined })],
+    ["the file's id is a boolean", fileDto({ id: true })],
+  ])("answers a placeholder when %s", async (_case, body) => {
     filesApi({ insert: () => HttpResponse.json(body) });
     saveRecords();
 
     const result = await new HttpAttachmentsStorage().createMany([tool()]);
 
-    expect(logged("error")[1]).toMatch(
-      new RegExp(`^uploadToolImage: entityId=- FAILED at stage=insert: ${message}`),
+    expect(logged("error")[1]).toContain(
+      "uploadToolImage: entityId=- FAILED at stage=insert: POST files/{folderId}/insert: the answer has an unexpected shape",
     );
     expect(result[0]?.id).not.toBe("ref-90");
   });
@@ -1173,8 +1164,27 @@ describe("createMany of a generated image", () => {
       'the chat scope 12 cannot take an upload and "My documents" could not be resolved',
     ],
   ])(
-    "answers a placeholder when %s and My documents is unknown",
+    "answers a placeholder when %s and the caller has no My documents",
     async (_case, entityId, message) => {
+      filesApi({
+        folder: () => HttpResponse.json({}, { status: 404 }),
+        my: () => HttpResponse.json({}, { status: 403 }),
+      });
+
+      const result = await new HttpAttachmentsStorage().createMany([tool({ entityId })]);
+
+      expectPlaceholder(result, "my-documents", entityId ?? "-");
+      expect(logged("error")[0]).toContain(message);
+    },
+  );
+
+  it.each([
+    ["the round names no folder", undefined],
+    ["the folder cannot take the upload", "12"],
+  ])(
+    "answers a placeholder naming the unknown answer when %s and My documents cannot be read",
+    async (_case, entityId) => {
+      const message = "GET files/@my: the answer has an unexpected shape";
       filesApi({
         folder: () => HttpResponse.json({}, { status: 404 }),
         my: () => HttpResponse.json({ response: { current: null } }),
@@ -1206,7 +1216,7 @@ describe("createMany of a generated image", () => {
     expect(inserts).toHaveLength(1);
     expect(removed).toEqual([{ id: "90", body: { deleteAfter: false, immediately: true } }]);
     expect(logged("warn")).toContain(
-      "uploadToolImage: removed file 90, its attachment record was not written",
+      "uploadToolImage: asked to delete file 90 (a file operation), its attachment record was not written",
     );
   });
 

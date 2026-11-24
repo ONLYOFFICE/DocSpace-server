@@ -40,6 +40,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { mapped } from "./upstreamShape.js";
 
 const PATH = "/web-search";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
@@ -115,7 +116,12 @@ export class HttpWebSearchStorage implements WebSearchStorage {
     reportChatContextMiss("webSearch.read");
     try {
       const raw = await aiService.get(PATH);
-      return withWebSearchProviderOverrides(parseWebSearchConfig(raw));
+      // `null` (a 204 or `response: null`) is the AI service's own "not configured"
+      // (WebSearchStorageService.ReadVerifiedAsync); a config it cannot read is unknown.
+      if (raw === null) {
+        return null;
+      }
+      return withWebSearchProviderOverrides(mapped(parseWebSearchConfig(raw), "GET web-search"));
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;

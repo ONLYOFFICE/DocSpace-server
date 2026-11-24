@@ -52,7 +52,7 @@ const TOOL_NAME = "analyze_form";
 // Own serverType so composeToolsAdapters keeps this apart from the DocSpace tool groups.
 const SERVER_TYPE = FORM_ANALYSIS_TYPE;
 // Runaway-loop guard, not the normal stop (the model ends by answering without a tool call).
-// Twice the common agent defaults (LangChain 15, OpenAI Agents 10): a form is read field by field.
+// Twice the default of OpenAI Agents (10), above LangChain's 15: a form is read field by field.
 const MAX_ROUNDS = 20;
 
 const ANALYZE_FORM_TOOL: TMCPItem = {

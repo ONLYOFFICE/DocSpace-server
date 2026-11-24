@@ -34,7 +34,7 @@
 import { AttachmentsEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, MAX_ATTACHMENTS_PER_REQUEST, unpackPositional } from "./_helpers.js";
-import { isObject, parseInt10 } from "../narrow.js";
+import { asNumber, isObject, parseInteger } from "../narrow.js";
 import { setAnalyzeEntryIds } from "../requestContext.js";
 import { getSuggestedQuestions } from "../forms/suggestedQuestions.js";
 import { nonEmptyStrings, optionalString } from "./requestFields.js";
@@ -66,16 +66,19 @@ function declaredFileName(title: unknown, path: string): string {
   return path.split(/[\\/]/).pop() ?? path;
 }
 
-// Coerce a file `type` to a number. Accepts a real number or a numeric string
-// like "1" (Bugs 82745, 82746); anything else (boolean, object, non-numeric
-// string) yields `undefined` so the caller can reject it with a 400. The value
+// Coerce a file `type` to a number. Accepts any finite JSON number as it is (a
+// fraction too: ASC.AI.Tests, AttachmentSaveFileTypeTests, echoes 1.5 back) or
+// a string that is a whole integer, like "1" (Bugs 82745, 82746); anything
+// else (boolean, object, a string with more than the digits such as "65abc",
+// "1.5" or "1e3") yields `undefined` so the caller can reject it with a 400,
+// rather than storing the leading digits of the string. The value
 // is an open-ended ONLYOFFICE `c_oAscFileType` code (e.g. docx=65, pptx=129,
 // xlsx=257, pdf=513, vsd=16385 — see the client's `getOnlyofficeFileType`),
 // NOT the small `ASC.Web.Core` `FileType` category enum, so it is validated as
 // a number only — a closed enum-membership check would reject legitimate
 // attachments (see the Bug 82743 note).
 function normalizeFileType(value: unknown): number | undefined {
-  return parseInt10(value);
+  return typeof value === "number" ? asNumber(value) : parseInteger(value);
 }
 
 // Validate a single file-attachment input up front so a malformed shape returns

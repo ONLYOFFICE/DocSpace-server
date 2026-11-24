@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
 import {
@@ -123,7 +124,7 @@ describe("aiService answers", () => {
       ),
     );
 
-    expect(await failure(aiService.get("/broken"))).toBeInstanceOf(SyntaxError);
+    expect(await failure(aiService.get("/broken"))).toEqual(new UpstreamShapeError("GET /broken"));
   });
 });
 

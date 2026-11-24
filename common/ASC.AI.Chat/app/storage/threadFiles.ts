@@ -42,6 +42,7 @@
 import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { mapped, UpstreamShapeError } from "./upstreamShape.js";
 
 export interface ThreadArtifact {
   /** The ID of the new DocSpace file. */
@@ -76,10 +77,10 @@ export async function uploadThreadArtifact(
     }
     throw err;
   }
-  const id = isObject(file) ? getEntityId(file, "id") : undefined;
-  if (!isObject(file) || id === undefined) {
-    throw new Error("the AI service returned an artifact without an id");
+  if (!isObject(file)) {
+    throw new UpstreamShapeError("POST threads/{id}/artifacts");
   }
+  const id = mapped(getEntityId(file, "id"), "POST threads/{id}/artifacts");
   logger.info(
     `uploadThreadArtifact: ${title} -> thread ${threadId} as file ${id} (${bytes.length} bytes)`,
   );

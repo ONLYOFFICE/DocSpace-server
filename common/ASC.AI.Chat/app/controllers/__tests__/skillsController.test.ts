@@ -389,12 +389,12 @@ describe("skillsController.create", () => {
       200,
       { id: "77", title: "Sales report (1).md" },
     ],
-    ["no id", { ...UPLOADED_FILE_DTO, id: undefined }, 500, { error: "Internal server error" }],
-    ["a null id", { ...UPLOADED_FILE_DTO, id: null }, 500, { error: "Internal server error" }],
-    ["an empty id", { ...UPLOADED_FILE_DTO, id: "" }, 500, { error: "Internal server error" }],
-    ["a boolean id", { ...UPLOADED_FILE_DTO, id: true }, 500, { error: "Internal server error" }],
-    ["a response that is a string", "file", 500, { error: "Internal server error" }],
-    ["a null response", null, 500, { error: "Internal server error" }],
+    ["no id", { ...UPLOADED_FILE_DTO, id: undefined }, 502, { error: "Bad Gateway" }],
+    ["a null id", { ...UPLOADED_FILE_DTO, id: null }, 502, { error: "Bad Gateway" }],
+    ["an empty id", { ...UPLOADED_FILE_DTO, id: "" }, 502, { error: "Bad Gateway" }],
+    ["a boolean id", { ...UPLOADED_FILE_DTO, id: true }, 502, { error: "Bad Gateway" }],
+    ["a response that is a string", "file", 502, { error: "Bad Gateway" }],
+    ["a null response", null, 502, { error: "Bad Gateway" }],
   ])("answers an upload with %s", async (_what, dto, status, body) => {
     answerFolder();
     answerUpload(dto);

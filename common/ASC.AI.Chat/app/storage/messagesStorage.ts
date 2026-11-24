@@ -41,7 +41,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
-import { mapped, namesNoEntity } from "./upstreamShape.js";
+import { mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 const THREADS_PATH = "/threads";
 const MESSAGES_PATH = "/messages";
@@ -70,8 +70,12 @@ function toWireCursor(cursor: MessagesCursor | undefined): WireMessagesCursor | 
   return undefined;
 }
 
+/** A page of `GET threads/{id}/messages` (MessagesPageDto, or a bare list). */
 function parseMessagesPage(raw: unknown): MessagesPage {
-  const rawItems = Array.isArray(raw) ? raw : isObject(raw) ? (getArray(raw, "items") ?? []) : [];
+  const rawItems = Array.isArray(raw) ? raw : isObject(raw) ? getArray(raw, "items") : undefined;
+  if (rawItems === undefined) {
+    throw new UpstreamShapeError("GET threads/{id}/messages");
+  }
   const items: ThreadMessageLike[] = [];
   for (const item of rawItems) {
     const message = dtoToMessage(item);
@@ -147,11 +151,7 @@ export class HttpMessagesStorage implements MessagesStorage {
       contents: serializeContents(message),
     });
     invalidateChatContext("messages");
-    const result = dtoToMessage(raw);
-    if (!result) {
-      throw new Error("ai service returned invalid message");
-    }
-    return result;
+    return mapped(dtoToMessage(raw), "POST threads/{id}/messages");
   }
 
   async readById(messageId: string): Promise<ThreadMessageLike | null> {

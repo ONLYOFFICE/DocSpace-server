@@ -56,7 +56,7 @@ import { uploadThreadArtifact } from "./threadFiles.js";
 import { copyManyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 import { clientFault } from "../httpErrors.js";
-import { listAnswer, mapped, namesNoEntity } from "./upstreamShape.js";
+import { listAnswer, mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 const PATH = "/attachments";
 
@@ -204,7 +204,7 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
     logger.error(
       `insertGeneratedImage: POST ${url} -> 200 but unexpected payload=${JSON.stringify(json).slice(0, 1000)}`,
     );
-    throw new Error("DocSpace insert returned an unexpected payload");
+    throw new UpstreamShapeError("POST files/{folderId}/insert");
   }
   const numId = getNumber(file, "id");
   const id = numId !== undefined ? String(numId) : getString(file, "id");
@@ -212,7 +212,7 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
     logger.error(
       `insertGeneratedImage: POST ${url} -> 200 but no file id in payload=${JSON.stringify(file).slice(0, 1000)}`,
     );
-    throw new Error("DocSpace insert returned a file without an id");
+    throw new UpstreamShapeError("POST files/{folderId}/insert");
   }
   logger.info(
     `insertGeneratedImage: POST ${url} -> 200 entryId=${id} title=${getString(file, "title") ?? "?"} ` +
@@ -234,7 +234,9 @@ async function removeOrphanImage(entryId: string): Promise<void> {
     await filesApiRequest("DELETE", `file/${encodeURIComponent(entryId)}`, {
       json: { deleteAfter: false, immediately: true },
     });
-    logger.warn(`uploadToolImage: removed file ${entryId}, its attachment record was not written`);
+    logger.warn(
+      `uploadToolImage: asked to delete file ${entryId} (a file operation), its attachment record was not written`,
+    );
   } catch (err) {
     logger.error(
       `uploadToolImage: file ${entryId} is left without an attachment record, its removal failed: ${
@@ -507,7 +509,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         `HttpAttachmentsStorage.createMany: backend returned non-array payload ` +
           `(type=${raw === null ? "null" : typeof raw}); raw=${JSON.stringify(raw)}`,
       );
-      throw new Error("ai service returned a non-array response for attachments createMany");
+      throw new UpstreamShapeError("POST attachments");
     }
     // C# `AttachmentsStorageService` groups output by file kind (internal then
     // thirdparty) and so doesn't preserve input order in mixed-kind batches.
@@ -641,7 +643,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
             (folderInfo
               ? `title=${folderInfo.title ?? "-"} ` +
                 `folderType=${folderInfo.folderType ?? "?"} canCreate=${folderInfo.canCreate ?? "?"}`
-              : "NOT FOUND (404 or unparseable) — the scope is not a folder this user can read"),
+              : "NOT FOUND (404) — the scope is not a folder this user can read"),
         );
       }
       if (!targetFolderId || !canTakeUpload(folderInfo)) {

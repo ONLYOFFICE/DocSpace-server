@@ -86,19 +86,19 @@ code or the yaml, no test). No row is cited by test name alone. Exception mappin
 | **Addressee of a module event** | `Portal/ModuleEvents/ModuleEventKeyTests.cs:86`; `Module:88,105-134` | TEST-CONFIRMED [run: PASS] for the 413 of a body over 64 KB, refused before the key; the 400 and 404 stay CODE-ONLY (they follow a valid key, which the stand does not configure) |
 | **Delivery of a module event**: needs a configured module key, which the stand does not have | `Module:91-103,136`; `common/ASC.Core.Common/Notify/Signalr/PluginSocketManager.cs:53-57` | CODE-ONLY |
 | **Reading one skill file** | | |
-| Foreign file id: 404, file not fetched | `Unit/storage/__tests__/roomSkills.test.ts:91-96` (unit test) | TEST-CONFIRMED [run: NO-LINK] |
+| Foreign file id: 404, file not fetched | `Unit/storage/__tests__/roomSkills.test.ts:123-129` (unit test) | TEST-CONFIRMED [run: NO-LINK] |
 | 400 for a missing parameter | `AiSkills/SkillReadRulesTests.cs:47` | TEST-CONFIRMED [run: PASS] |
 | 256 KiB cut | `AiSkills/SkillReadRulesTests.cs:61` | TEST-CONFIRMED [run: PASS] |
 | **Requests to generate a skill** | | |
-| Other folder 400 before the model | `Unit/skills/__tests__/generateSkill.test.ts:143-147` | TEST-CONFIRMED [run: NO-LINK] |
-| Control characters only: 400, model not called | `Unit/skills/__tests__/generateSkill.test.ts:135-140` | TEST-CONFIRMED [run: NO-LINK] |
+| Other folder 400 before the model | `Unit/skills/__tests__/generateSkill.test.ts:230-234` | TEST-CONFIRMED [run: NO-LINK] |
+| Control characters only: 400, model not called | `Unit/skills/__tests__/generateSkill.test.ts:222-228` | TEST-CONFIRMED [run: NO-LINK] |
 | Access first; field limits; 404; 403 | `AiSkills/SkillGenerateRulesTests.cs:67,88,104,118` | TEST-CONFIRMED [run: PASS] |
 | **Result of generating a skill** | | |
-| Frontmatter rebuilt, tag dropped, nothing saved | `Unit/skills/__tests__/generateSkill.test.ts:104-115` | TEST-CONFIRMED [run: NO-LINK] |
-| Name folding and 64 characters | `Unit/skills/__tests__/generateSkill.test.ts:38-42` | TEST-CONFIRMED [run: NO-LINK] |
-| Fallback description | `Unit/skills/__tests__/generateSkill.test.ts:117-121` | TEST-CONFIRMED [run: NO-LINK] |
+| Frontmatter rebuilt, tag dropped, nothing saved | `Unit/skills/__tests__/generateSkill.test.ts:154-166` | TEST-CONFIRMED [run: NO-LINK] |
+| Name folding and 64 characters | `Unit/skills/__tests__/generateSkill.test.ts:66-76` | TEST-CONFIRMED [run: NO-LINK] |
+| Fallback description | `Unit/skills/__tests__/generateSkill.test.ts:204-208` | TEST-CONFIRMED [run: NO-LINK] |
 | **Failures of generating a skill** | | |
-| No profile: error type asserted; the 503 comes from that type | `Unit/skills/__tests__/generateSkill.test.ts:149-152`; `Skills:83-84` | TEST-CONFIRMED [run: NO-LINK] |
+| No profile: error type asserted; the 503 comes from that type | `Unit/skills/__tests__/generateSkill.test.ts:236-239`; `Skills:88-89` | TEST-CONFIRMED [run: NO-LINK] |
 | `empty_answer` 502; `providerMessage` filter | `AiSkills/SkillGenerateRulesTests.cs:169,186,205` (a blank answer; a 401 whose text is not relayed; a 429 whose text is) | TEST-CONFIRMED [run: PASS] — the lack-of-credit and spending-limit branches of the filter stay CODE-ONLY |
 
 ## Covered by other specifications

@@ -298,9 +298,7 @@ describe("webSearchController.testConnection", () => {
     expect(engine.testConnection).toHaveBeenCalledWith(full);
   });
 
-  // node-mocks-http turns a null body into `{}`, so the null row is left to configure, where
-  // the config is a field of the body.
-  it.each(badConfigs.filter(([what]) => what !== "null"))(
+  it.each(badConfigs)(
     "answers 400 to a config that is %s, and probes nothing",
     async (_what, body, error) => {
       gateAnswers(404);
@@ -375,8 +373,8 @@ describe.each([
     expect(paths()).toEqual(["GET /internal/ai/web-search", "GET /api/2.0/files/folder/17"]);
   });
 
-  // A null body is not in the table: node-mocks-http hands the handler `{}` for it.
   it.each([
+    ["null", null],
     ["a string", "exa"],
     ["an empty array", []],
     ["an empty object", {}],

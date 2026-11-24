@@ -57,6 +57,7 @@ import type { Profile } from "@onlyoffice/ai-chat/core";
 import { getBoolean, getNumber, getObjectArray, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import logger from "../log.js";
+import { UpstreamShapeError } from "./upstreamShape.js";
 
 /** The ids of the rooms linked to a project, by kind, in the order the server lists them. */
 interface AiProjectSources {
@@ -178,7 +179,7 @@ export async function readAiProjectChatContext(
     effectiveProfile(projectId),
   ]);
   if (!isObject(project)) {
-    throw new Error(`AI project ${projectId}: unparseable answer`);
+    throw new UpstreamShapeError("GET files/rooms/{id}");
   }
   return {
     projectId: getNumber(project, "id") ?? Number(projectId),

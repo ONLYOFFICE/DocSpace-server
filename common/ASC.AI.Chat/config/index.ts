@@ -186,6 +186,41 @@ export function getPersistIntervalMs(): number {
   );
 }
 
+/** How app/telemetry/sdk.ts starts OpenTelemetry, as {@link getTelemetrySettings} reads it. */
+export interface TelemetrySettings {
+  /** `openTelemetry:enable` is `true` or the string `"true"`; any other value is off. */
+  enabled: boolean;
+  /** The OTLP collector; undefined when it is absent, empty or not a string. */
+  otlpEndpoint: string | undefined;
+  /** `OTEL_EXPORTER_OTLP_PROTOCOL` trimmed; `http/protobuf` when absent, blank or not a string. */
+  otlpProtocol: string;
+  /** `openTelemetry:ServiceName`, then `OTEL_SERVICE_NAME`, then `ASC.AI.Chat`. */
+  serviceName: string;
+}
+
+// The OpenTelemetry settings mirror the .NET contract: `openTelemetry` of the shared appsettings
+// and the `OTEL_*` variables the Aspire AppHost injects. All of them go through nconf, so the
+// environment comes first and the settings files after it, the `OTEL_*` names at the root of
+// the settings tree. A value of the wrong type is no setting, so it cannot stop the host.
+export function getTelemetrySettings(): TelemetrySettings {
+  const enable: unknown = nconf.get("openTelemetry:enable");
+  return {
+    enabled: enable === true || enable === "true",
+    otlpEndpoint: nonEmptyText(nconf.get("OTEL_EXPORTER_OTLP_ENDPOINT")),
+    otlpProtocol: nonEmptyText(nconf.get("OTEL_EXPORTER_OTLP_PROTOCOL"))?.trim() || "http/protobuf",
+    // Matches the .NET services' fallback style (an assembly-like name).
+    serviceName:
+      nonEmptyText(nconf.get("openTelemetry:ServiceName")) ??
+      nonEmptyText(nconf.get("OTEL_SERVICE_NAME")) ??
+      "ASC.AI.Chat",
+  };
+}
+
+/** A string of at least one character, as given; anything else is undefined. */
+function nonEmptyText(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
 const DEFAULT_METRIC_EXPORT_INTERVAL_MS = 15_000;
 
 /** `OTEL_METRIC_EXPORT_INTERVAL`: a second to an hour, in milliseconds. */

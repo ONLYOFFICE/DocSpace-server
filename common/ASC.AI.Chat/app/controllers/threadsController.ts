@@ -48,15 +48,17 @@ import {
   attachmentLimitError,
   invalidMessageError,
 } from "./_helpers.js";
-import { asString, parseInt10, isObject, getString } from "../narrow.js";
+import { asString, parseInteger, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { getSourceMeta } from "../requestContext.js";
 import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 import { readStoredProfile, resolveStoredProfile } from "./storedProfile.js";
 import { clientFault } from "../httpErrors.js";
 
-// A profile id as the AI service binds it (`Guid`): with or without hyphens, braces allowed.
-const UUID = /^[{(]?[0-9a-f]{8}-?(?:[0-9a-f]{4}-?){3}[0-9a-f]{12}[)}]?$/i;
+// A profile id as the AI service binds it: `TouchThreadRequestDto.ProfileId` is a `Guid?` read by
+// System.Text.Json, which takes the hyphenated 36-character form alone. Braces, parentheses and
+// the form without hyphens are a 400 there.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -287,17 +289,20 @@ export const threadsController = {
       return;
     }
     // The engine stores the message and binds the profile to the thread side by side, and the
-    // AI service refuses a profile id that is no UUID: checked here, or the message is stored
-    // while the caller is told 400. `null` and "" stay what they were: no profile sent.
+    // AI service refuses the binding for a profile id that is no UUID (400) and for one no
+    // profile carries (404, ThreadStorageService.TouchAsync reads the profile): both are checked
+    // here, or the message is stored while the caller is told 4xx. A profile deleted between this
+    // read and the binding still ends that way. `null` and "" stay what they were: no profile sent.
     const sentProfileId: unknown = args.profileId;
-    if (
-      sentProfileId !== undefined &&
-      sentProfileId !== null &&
-      sentProfileId !== "" &&
-      (typeof sentProfileId !== "string" || !UUID.test(sentProfileId))
-    ) {
-      res.status(400).json({ error: "profileId must be the id of a profile (a UUID)" });
-      return;
+    if (sentProfileId !== undefined && sentProfileId !== null && sentProfileId !== "") {
+      if (typeof sentProfileId !== "string" || !UUID.test(sentProfileId)) {
+        res.status(400).json({ error: "profileId must be the id of a profile (a UUID)" });
+        return;
+      }
+      if (!(await readStoredProfile(sentProfileId))) {
+        res.status(404).json({ error: "the AI profile does not exist" });
+        return;
+      }
     }
     const messageId = await engine.appendUserMessage(
       args.threadId,
@@ -400,7 +405,10 @@ export const threadsController = {
 
   list: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    const count = parseInt10(req.query["count"]);
+    // A `count` that is not a whole integer ("20abc", "1.5") is left out like an
+    // absent one, so the service applies its own page size; its bounds are the
+    // AI service's (Range(1, 1000), 400 outside them).
+    const count = parseInteger(req.query["count"]);
     const cursor = parseThreadsCursor(req.query["cursor"]);
     const query = asString(req.query["query"]);
     const threads = await engine.list(entityId, count, cursor, query);
@@ -415,7 +423,8 @@ export const threadsController = {
       res.status(400).json({ error: "threadId required" });
       return;
     }
-    const count = parseInt10(req.query["count"]);
+    // Read as in `list`.
+    const count = parseInteger(req.query["count"]);
     const cursor = parseMessagesCursor(req.query["cursor"]);
     const direction = parseDirection(req.query["direction"]);
     const messages = await engine.readMessages(threadId, count, cursor, direction);

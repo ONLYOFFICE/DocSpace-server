@@ -527,7 +527,7 @@ describe("the served document", () => {
       knowledgeBases: [],
       warning: "installIncomplete",
     };
-    for (const status of [400, 403, 404, 413, 500, 502, 503]) {
+    for (const status of [400, 402, 403, 404, 413, 500, 502, 503]) {
       expect([status, responseViolations("aiTemplatesInstall", status, incomplete)]).toEqual([
         status,
         [],

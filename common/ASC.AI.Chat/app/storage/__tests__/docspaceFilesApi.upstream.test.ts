@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import type { JsonBodyType } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { http, HttpResponse, delay, useUpstream } from "../../__tests__/helpers/upstream.js";
@@ -140,13 +141,13 @@ describe("filesApiGet", () => {
     const error = await failure(filesApiGet("x"));
 
     expect(error).not.toBeInstanceOf(DocspaceApiHttpError);
-    expect(error).toEqual(new Error(`DocSpace API: unparseable response from ${FILES}/x`));
+    expect(error).toEqual(new UpstreamShapeError("GET files/x"));
   });
 
   it("refuses an answer that is not JSON", async () => {
     upstream.use(http.get(`${FILES}/x`, () => HttpResponse.text("<html>")));
 
-    expect(await failure(filesApiGet("x"))).toBeInstanceOf(SyntaxError);
+    expect(await failure(filesApiGet("x"))).toEqual(new UpstreamShapeError("GET files/x"));
   });
 
   it.each([400, 401, 403, 404, 500, 503])(
@@ -313,7 +314,9 @@ describe("filesApiRequest", () => {
   it("refuses an answer that is not JSON", async () => {
     upstream.use(http.post(`${FILES}/x`, () => HttpResponse.text("done")));
 
-    expect(await failure(filesApiRequest("POST", "x", { json: {} }))).toBeInstanceOf(SyntaxError);
+    expect(await failure(filesApiRequest("POST", "x", { json: {} }))).toEqual(
+      new UpstreamShapeError("POST files/x"),
+    );
   });
 
   it("rejects once the Files API has not answered for 300000 ms", async () => {
@@ -590,6 +593,14 @@ describe("getFolderInfo", () => {
     });
   });
 
+  it("rejects an answer that is not JSON as one of an unknown shape", async () => {
+    upstream.use(http.get(`${FILES}/folder/30`, () => HttpResponse.text("<html>")));
+
+    await expect(getFolderInfo("30")).rejects.toEqual(
+      new UpstreamShapeError("GET files/folder/{id}"),
+    );
+  });
+
   it("answers undefined for a 404 without a warning", async () => {
     upstream.use(http.get(`${FILES}/folder/30`, () => HttpResponse.json({}, { status: 404 })));
 
@@ -684,6 +695,12 @@ describe("getFileInfo", () => {
       status: 502,
       message: "GET files/file/{id}: the answer has an unexpected shape",
     });
+  });
+
+  it("rejects an answer that is not JSON as one of an unknown shape", async () => {
+    upstream.use(http.get(`${FILES}/file/40`, () => HttpResponse.text("<html>")));
+
+    await expect(getFileInfo("40")).rejects.toEqual(new UpstreamShapeError("GET files/file/{id}"));
   });
 
   it("answers undefined for a 404", async () => {
@@ -997,11 +1014,14 @@ describe("getMyDocumentsFolderId", () => {
     ["current.id is a boolean", my({ id: true })],
     ["response is missing", { status: 0 }],
     ["the body is a list", [my({ id: 4 })]],
-  ])("answers undefined and warns when %s", async (_case, body) => {
-    await expect(readMy(body)).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(
-      `getMyDocumentsFolderId: no current.id in the response from ${FILES}/@my?count=1`,
-    );
+  ])("throws UpstreamShapeError when %s, not as a missing section", async (_case, body) => {
+    await expect(readMy(body)).rejects.toEqual(new UpstreamShapeError("GET files/@my"));
+  });
+
+  it("throws UpstreamShapeError for an answer that is not JSON", async () => {
+    upstream.use(http.get(`${FILES}/@my`, () => HttpResponse.text("<html>")));
+
+    await expect(getMyDocumentsFolderId()).rejects.toEqual(new UpstreamShapeError("GET files/@my"));
   });
 
   it.each([403, 404])("answers undefined and warns for a %i", async (status) => {

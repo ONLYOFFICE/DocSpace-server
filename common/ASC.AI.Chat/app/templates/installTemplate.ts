@@ -66,6 +66,7 @@ import logger from "../log.js";
 import { findTemplate, readTemplateFile } from "./catalog.js";
 import type { AgentTemplate, SourceTemplate, Template, TemplateCatalog } from "./catalog.js";
 import { clientFault } from "../httpErrors.js";
+import { mapped, UpstreamShapeError } from "../storage/upstreamShape.js";
 
 /** `RoomType` on the C# side. */
 const ROOM_TYPES = { skillSet: 10, knowledgeBase: 11, agent: 12 } as const;
@@ -129,10 +130,10 @@ async function createRoom(
     ...(cover ? { cover } : {}),
     ...(tags.length > 0 ? { tags } : {}),
   });
-  const id = isObject(room) ? getEntityId(room, "id") : undefined;
-  if (!isObject(room) || id === undefined) {
-    throw new Error("DocSpace returned a room without an id");
+  if (!isObject(room)) {
+    throw new UpstreamShapeError("POST files/rooms");
   }
+  const id = mapped(getEntityId(room, "id"), "POST files/rooms");
   return { templateId, id, title: getString(room, "title") ?? title };
 }
 

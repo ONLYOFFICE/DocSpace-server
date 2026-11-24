@@ -48,7 +48,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
-import { listAnswer, mapped, namesNoEntity } from "./upstreamShape.js";
+import { listAnswer, mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
@@ -269,11 +269,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
   async create(profile: Omit<Profile, "id" | "createdAt">): Promise<Profile> {
     const raw = await aiService.post(PATH, toCreateBody(profile));
     invalidateChatContext("profiles");
-    const result = dtoToProfile(raw);
-    if (!result) {
-      throw new Error("ai service returned invalid profile");
-    }
-    return result;
+    return mapped(dtoToProfile(raw), "POST profiles");
   }
 
   async createMany(profiles: Omit<Profile, "id" | "createdAt">[]): Promise<Profile[]> {
@@ -509,9 +505,7 @@ export async function listOnlyofficeGatewayModels(signal?: AbortSignal): Promise
   const json = await aiServiceRootGet(`${ONLYOFFICE_GATEWAY_PATH}/models`, { signal, raw: true });
   const data = isObject(json) ? getArray(json, "data") : undefined;
   if (!data) {
-    throw new Error(
-      `gateway models listing returned no data array (${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}/models)`,
-    );
+    throw new UpstreamShapeError("GET ai/gateway/models");
   }
   return data.map(mapGatewayModel).filter((m): m is Model => m !== undefined);
 }

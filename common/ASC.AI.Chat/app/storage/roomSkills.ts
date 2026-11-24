@@ -63,8 +63,8 @@ import {
   filesApiDownloadText,
   filesApiGet,
 } from "./docspaceFilesApi.js";
-import logger from "../log.js";
 import { clientFault } from "../httpErrors.js";
+import { UpstreamShapeError } from "./upstreamShape.js";
 
 // The body readers moved to the clients' module; kept importable from here for their readers.
 export { readBodyCapped } from "./httpClient.js";
@@ -130,10 +130,17 @@ function parseSkill(raw: unknown): RoomSkill | undefined {
   return { id, name, description: getString(raw, "description") ?? "" };
 }
 
-/** The rooms of a catalog answer (`{ rooms: [{ id, title, logo, skills }] }`). */
+/**
+ * The rooms of a catalog answer (`{ rooms: [{ id, title, logo, skills }] }`). An answer without
+ * the list is unknown, not a catalog without rooms: it throws {@link UpstreamShapeError}.
+ */
 export function parseSkillsCatalog(raw: unknown): CatalogRoom[] {
+  const entries = isObject(raw) ? getObjectArray(raw, "rooms") : undefined;
+  if (entries === undefined) {
+    throw new UpstreamShapeError("GET files/rooms/skills");
+  }
   const rooms: CatalogRoom[] = [];
-  for (const entry of (isObject(raw) ? getObjectArray(raw, "rooms") : undefined) ?? []) {
+  for (const entry of entries) {
     const id = getEntityId(entry, "id");
     if (id === undefined) {
       continue;
@@ -180,15 +187,15 @@ export async function getRoomsSkills(roomIds: string[]): Promise<Map<string, Roo
   return result;
 }
 
-// The `response` of a rooms listing page: `{ folders: FolderDto[], total }`.
-function parseRoomsPage(
-  response: unknown,
-): { rooms: ContextFolder["rooms"]; total: number } | undefined {
-  if (!isObject(response)) {
-    return undefined;
+// The `response` of a rooms listing page: `{ folders: FolderDto[], total }`. A page without the
+// list is unknown, not a page without rooms.
+function parseRoomsPage(response: unknown): { rooms: ContextFolder["rooms"]; total: number } {
+  const folders = isObject(response) ? getObjectArray(response, "folders") : undefined;
+  if (!isObject(response) || folders === undefined) {
+    throw new UpstreamShapeError("GET files/rooms");
   }
   const rooms: ContextFolder["rooms"] = [];
-  for (const entry of getObjectArray(response, "folders") ?? []) {
+  for (const entry of folders) {
     const id = getEntityId(entry, "id");
     const name = getString(entry, "title");
     if (id !== undefined && name) {
@@ -224,25 +231,13 @@ async function listRoomsOfType(roomType: number): Promise<ContextFolder["rooms"]
     });
   // The first page tells the total, so the other pages (at most
   // MAX_PAGES - 1 of them) are read at once; they are joined in page order.
-  const pages = [await readPage(0)];
-  const first = parseRoomsPage(pages[0]);
-  const pageCount = first ? Math.min(Math.ceil(first.total / PAGE_SIZE), MAX_PAGES) : 1;
+  const first = parseRoomsPage(await readPage(0));
+  const pageCount = Math.min(Math.ceil(first.total / PAGE_SIZE), MAX_PAGES);
   const rest = Array.from({ length: Math.max(pageCount - 1, 0) }, (_, i) => i + 1);
-  pages.push(...(await Promise.all(rest.map(readPage))));
-  const rooms: ContextFolder["rooms"] = [];
-  for (const [page, response] of pages.entries()) {
-    const parsed = parseRoomsPage(response);
-    if (!parsed) {
-      // A page whose `response` is not an object ends the listing; the pages
-      // before it are kept, as they were read in order.
-      logger.warn(
-        `listRoomsOfType(${roomType}) -> unparseable response for startIndex ${page * PAGE_SIZE}`,
-      );
-      break;
-    }
-    rooms.push(...parsed.rooms);
-  }
-  return rooms;
+  // A page that cannot be read fails the listing: the rooms of the pages
+  // before it are not the caller's rooms.
+  const others = await Promise.all(rest.map(async (page) => parseRoomsPage(await readPage(page))));
+  return [first, ...others].flatMap((page) => page.rooms);
 }
 
 export async function getContextFolders(): Promise<ContextFolder[]> {
@@ -297,7 +292,7 @@ export async function presignedDownloadUrl(fileId: string): Promise<string> {
     await filesApiGet(`file/${encodeURIComponent(fileId)}/presigneduri`),
   );
   if (!downloadUrl) {
-    throw new Error(`No download address for file ${fileId}`);
+    throw new UpstreamShapeError("GET files/file/{id}/presigneduri");
   }
   return downloadUrl;
 }

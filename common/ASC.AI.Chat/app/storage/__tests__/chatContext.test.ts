@@ -213,8 +213,16 @@ describe("parseChatContext", () => {
   });
 
   describe("profiles", () => {
-    it.each([MISSING, null, "profiles", {}, 3])("reads profiles %s as none", (value) => {
-      expect(parseChatContext(withField(["profiles"], value), full)?.profiles).toEqual([]);
+    // ChatContextDto.Profiles is required: a list that cannot be read is unknown, not "no profiles".
+    it.each([MISSING, null, "profiles", {}, 3])(
+      "answers no snapshot when profiles is %s",
+      (value) => {
+        expect(parseChatContext(withField(["profiles"], value), full)).toBeUndefined();
+      },
+    );
+
+    it("reads an empty list as no profiles", () => {
+      expect(parseChatContext(withField(["profiles"], []), full)?.profiles).toEqual([]);
     });
 
     it("drops a profile dtoToProfile refuses and keeps the rest", () => {
@@ -226,12 +234,25 @@ describe("parseChatContext", () => {
   });
 
   describe("scopes", () => {
-    it.each([MISSING, null, "entity", 1, []])("reads entity %s as null", (value) => {
+    it.each([MISSING, null])("reads entity %s as null", (value) => {
       expect(parseChatContext(withField(["entity"], value), full)?.entity).toBeNull();
     });
 
-    it.each([MISSING, null, "contextEntity", 1, []])("reads contextEntity %s as null", (value) => {
+    it.each([MISSING, null])("reads contextEntity %s as null", (value) => {
       expect(parseChatContext(withField(["contextEntity"], value), full)?.contextEntity).toBeNull();
+    });
+
+    it.each([
+      ["entity", "entity"],
+      ["entity", 1],
+      ["entity", []],
+      ["entity", { assignments: {}, toolPrefs: {} }],
+      ["contextEntity", "contextEntity"],
+      ["contextEntity", 1],
+      ["contextEntity", []],
+      ["contextEntity", { assignments: {}, toolPrefs: {} }],
+    ])("answers no snapshot when %s is %j", (field, value) => {
+      expect(parseChatContext(withField([field], value), full)).toBeUndefined();
     });
 
     it("lands contextEntityId on the entity scope when both ids match, whatever the payload says", () => {
@@ -274,11 +295,27 @@ describe("parseChatContext", () => {
       ).toEqual(expected);
     });
 
+    // ChatContextScopeDto.Assignments, ToolPrefs and McpServers are required: one that cannot be
+    // read is unknown, not "none", and the round then reads each entity on its own.
     it.each([
-      [MISSING, {}],
-      [null, {}],
-      ["Chat", {}],
-      [[PROFILE_ID], {}],
+      ["assignments", MISSING],
+      ["assignments", null],
+      ["assignments", "Chat"],
+      ["assignments", [PROFILE_ID]],
+      ["toolPrefs", MISSING],
+      ["toolPrefs", null],
+      ["toolPrefs", "prefs"],
+      ["toolPrefs", [{ disabled: ["a"] }]],
+      ["mcpServers", MISSING],
+      ["mcpServers", null],
+      ["mcpServers", { jira: "{}" }],
+      ["mcpServers", "jira"],
+    ])("answers no snapshot when the global %s is %j", (field, value) => {
+      expect(parseChatContext(withField(["global", field], value), full)).toBeUndefined();
+    });
+
+    it.each([
+      [{}, {}],
       [
         { Chat: PROFILE_ID, Default: null, Code: 3, Vision: "" },
         { Chat: PROFILE_ID, Vision: "" },
@@ -306,10 +343,7 @@ describe("parseChatContext", () => {
     });
 
     it.each([
-      [MISSING, {}],
-      [null, {}],
-      ["prefs", {}],
-      [[{ disabled: ["a"] }], {}],
+      [{}, {}],
       [{ any: "thing" }, { any: "thing" }],
     ])("keeps toolPrefs %j raw as %j", (value, expected) => {
       expect(
@@ -318,9 +352,7 @@ describe("parseChatContext", () => {
     });
 
     it.each([
-      ["missing", MISSING, {}],
-      ["null", null, {}],
-      ["an object", { jira: "{}" }, {}],
+      ["an empty list", [], {}],
       ["a list of non-objects", [null, "jira", 1], {}],
       ["an entry without name", [{ config: "{}" }], {}],
       ["an entry with a numeric name", [{ name: 1, config: "{}" }], {}],
@@ -355,12 +387,14 @@ describe("parseChatContext", () => {
       expect(parseChatContext(withField(["thread"], value), full)?.thread).toBeNull();
     });
 
+    // A thread the aggregate carries but that cannot be read is unknown, not "absent": no
+    // snapshot, and the round reads the thread on its own.
     it.each([
       ["a string", "thread"],
       ["an empty object", {}],
       ["a thread without title", { id: THREAD_ID, lastEditDate: 1 }],
-    ])("reads a thread that is %s as null", (_name, value) => {
-      expect(parseChatContext(withField(["thread"], value), full)?.thread).toBeNull();
+    ])("answers no snapshot for a thread that is %s", (_name, value) => {
+      expect(parseChatContext(withField(["thread"], value), full)).toBeUndefined();
     });
 
     it.each([MISSING, null, "messages", { items: [] }])(
@@ -395,10 +429,15 @@ describe("parseChatContext", () => {
   });
 
   describe("webSearch and documentAgentEnabled", () => {
-    it.each([MISSING, null, "exa", {}, { provider: "" }, { provider: 1 }])(
-      "reads webSearch %j as null",
+    it.each([MISSING, null])("reads webSearch %s as not configured", (value) => {
+      expect(parseChatContext(withField(["webSearch"], value), full)?.webSearch).toBeNull();
+    });
+
+    // A config the aggregate carries but that cannot be read is unknown, not "not configured".
+    it.each(["exa", {}, { provider: "" }, { provider: 1 }, []])(
+      "answers no snapshot when webSearch is %j",
       (value) => {
-        expect(parseChatContext(withField(["webSearch"], value), full)?.webSearch).toBeNull();
+        expect(parseChatContext(withField(["webSearch"], value), full)).toBeUndefined();
       },
     );
 
@@ -556,6 +595,8 @@ describe("primeChatContext", () => {
 
   it.each([
     ["an answer without global", { config: {} }],
+    ["an answer whose thread cannot be read", { ...chatContextDto(), thread: {} }],
+    ["an answer whose profiles are not a list", { ...chatContextDto(), profiles: {} }],
     ["an empty answer", new HttpResponse(null, { status: 204 })],
     ["a text answer", new HttpResponse("ok", { headers: { "content-type": "text/plain" } })],
   ])("falls back on %s", async (_name, answer) => {

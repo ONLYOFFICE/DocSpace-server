@@ -71,7 +71,7 @@ import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { readStoredProfile } from "./storedProfile.js";
-import { asActionType, isObject } from "../narrow.js";
+import { asActionType, isObject, parseInteger } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
@@ -137,9 +137,9 @@ function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
       continue;
     }
     const id = room["id"];
-    const parsed =
-      typeof id === "string" ? Number.parseInt(id, 10) : typeof id === "number" ? id : NaN;
-    if (Number.isInteger(parsed) && parsed > 0 && !ids.includes(parsed)) {
+    // The whole value has to be an integer: "9abc" names no room, it is not room 9.
+    const parsed = parseInteger(id);
+    if (parsed !== undefined && parsed > 0 && !ids.includes(parsed)) {
       ids.push(parsed);
     }
   }
@@ -198,8 +198,9 @@ function stringField(body: unknown, key: string): string | undefined {
 // `profileId`) are strings on the wire: the engine's input types say so, and
 // the web client and the .NET suite send them as strings. `null` stays what it
 // was, an absent id. Any other type is the caller's mistake and answers 400
-// naming the field, so that a number never reaches the aggregate read, the
-// thread read or the profile read (ts-ai-failure-paths.md §4).
+// naming the field in every round (send, send-custom, the two stream routes,
+// regenerate, approve and deny), so that a number never reaches the aggregate
+// read, the thread read or the profile read (ts-ai-failure-paths.md §4).
 type ChatIdField = "threadId" | "entityId" | "contextEntityId" | "profileId";
 const STREAM_ID_FIELDS: readonly ChatIdField[] = [
   "threadId",
@@ -223,7 +224,10 @@ function idTypeError(body: unknown, fields: readonly ChatIdField[]): string | nu
 
 // An id of the body as the aggregate read takes it: a string as sent, else
 // absent. A round whose ids are of a wrong type is refused right after that
-// read (see idTypeError), which stays first as the access gate of the route.
+// read (see idTypeError). The read is the access gate of the route while it
+// runs: with the aggregate switched off (`AI_CHAT_CONTEXT`, or the
+// `x-ai-chat-context: off` header outside production) it makes no call, and
+// the first gated call is a later read of the round.
 function idOf(body: unknown, field: ChatIdField): string | undefined {
   if (!isObject(body)) {
     return undefined;
@@ -901,13 +905,6 @@ export const aiController = {
         return;
       }
     }
-    {
-      const idError = idTypeError(req.body, ["entityId", "contextEntityId"]);
-      if (idError) {
-        res.status(400).json({ error: idError });
-        return;
-      }
-    }
     // Without this the provider request runs without the forwarded auth /
     // request headers, so a correct call comes back with an empty message
     // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
@@ -915,9 +912,18 @@ export const aiController = {
     // profileId, so there is nothing for a caller to override.)
     markForwardHeadersToProvider();
     await primeChatContext({
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
+      entityId: idOf(req.body, "entityId"),
+      contextEntityId: idOf(req.body, "contextEntityId"),
     });
+    // After the gated read, as in the stream rounds: a caller without AI access gets the 403
+    // of that read, not a word about the ids.
+    {
+      const idError = idTypeError(req.body, ["entityId", "contextEntityId"]);
+      if (idError) {
+        res.status(400).json({ error: idError });
+        return;
+      }
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -967,6 +973,11 @@ export const aiController = {
       res.status(400).json({ error: "isStream must be a boolean" });
       return;
     }
+    // As with `send`, the forwarded headers must be marked before the
+    // provider call or a correct request fails with a 500 (Bug 82836).
+    markForwardHeadersToProvider();
+    await primeChatContext({ entityId: customScopeOf(req.body) });
+    // After the gated read, as in the stream rounds.
     {
       const idError = idTypeError(req.body, ["profileId"]);
       if (idError) {
@@ -974,10 +985,6 @@ export const aiController = {
         return;
       }
     }
-    // As with `send`, the forwarded headers must be marked before the
-    // provider call or a correct request fails with a 500 (Bug 82836).
-    markForwardHeadersToProvider();
-    await primeChatContext({ entityId: customScopeOf(req.body) });
     // A profileId that names no profile would otherwise fall back to another
     // model without a word, and an unpaid AI Tools wallet would answer inside
     // the stream (Bugs 83160, 83344): refuse both up front, as the stored
@@ -1114,11 +1121,9 @@ export const aiController = {
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -1157,11 +1162,9 @@ export const aiController = {
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -1175,6 +1178,15 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
+    // `allowAlways` stores a standing permission for the tool, and the engine reads it by
+    // truthiness: the string "false" would grant it (ts-ai-failure-paths.md §4).
+    {
+      const allowAlways: unknown = isObject(req.body) ? req.body["allowAlways"] : undefined;
+      if (allowAlways !== undefined && allowAlways !== null && typeof allowAlways !== "boolean") {
+        res.status(400).json({ error: "allowAlways must be a boolean" });
+        return;
+      }
+    }
     // An approved tool runs in THIS request, not in the one that streamed the
     // round: the document agent tool needs the round's profile and the
     // attachments of the message it answers, resolved from the thread.
@@ -1191,11 +1203,9 @@ export const aiController = {
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {

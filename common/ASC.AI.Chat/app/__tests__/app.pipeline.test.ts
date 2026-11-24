@@ -32,30 +32,23 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import request from "supertest";
-import { afterAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useUpstream } from "./helpers/upstream.js";
 import { publishedOperations, responseViolations } from "./helpers/schema.js";
+import logger from "../log.js";
+import { createApp } from "../createApp.js";
+import { API_PREFIX } from "../routes.js";
 
-// The whole application through supertest, with the parts of the configuration it reads pinned
-// by the environment, so that the developer's appsettings (`core:cors`, `ai.documentAgent`)
-// cannot change what these tests see: CORS off, the document agent off.
-
-vi.stubEnv("AI__DOCUMENT_AGENT__URL", "");
-vi.stubEnv("AI__DOCUMENT_AGENT__TOKEN", "");
-
-const { default: logger } = await import("../log.js");
-const { createApp } = await import("../createApp.js");
-const { API_PREFIX } = await import("../routes.js");
+// The whole application through supertest. setup.ts removes the environment variables the
+// service reads and points the appsettings at a directory that does not exist, so neither the
+// developer's shell (`core__cors`) nor their appsettings (`core:cors`, `ai.documentAgent`) can
+// change what these tests see: the defaults of the code, CORS off and the document agent off.
 
 const upstream = useUpstream({ localApp: true });
 const app = createApp();
 
 // What the app itself sent anywhere; supertest's own requests to it are not listed.
 const calledOut = () => upstream.seen;
-
-afterAll(() => {
-  vi.unstubAllEnvs();
-});
 
 const AUTH = { Authorization: "Bearer t" };
 const JSON_TYPE = { "Content-Type": "application/json" };

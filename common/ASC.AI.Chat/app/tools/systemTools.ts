@@ -210,10 +210,10 @@ const forwardingFetch: FetchLike = async (url, init) => {
   }
   new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
   try {
-    // Bound the connect/header phase so an unreachable or hung MCP server can't pin the request
-    // forever; once the headers are in, the timer is cleared and the transport reads its streams
-    // on its own.
-    const res = await providerFetch(url, { ...init, headers }, "headers");
+    // Bound the call and the reading of its answer: the library's MCP client reads every answer
+    // to its end and passes no signal, so a server that stalls after its headers would otherwise
+    // hold the round for ever. A tool call that runs longer than the upstream timeout ends with it.
+    const res = await providerFetch(url, { ...init, headers }, "body");
     if (res.ok) {
       logger.info(`MCP fetch <- ${res.status} ${res.statusText} for ${url}`);
     } else {

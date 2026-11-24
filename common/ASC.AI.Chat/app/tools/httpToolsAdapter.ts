@@ -43,6 +43,7 @@ import {
 } from "../requestContext.js";
 import { getArray, getString, isObject, parseInt10 } from "../narrow.js";
 import logger from "../log.js";
+import { UpstreamShapeError } from "../storage/upstreamShape.js";
 import type { ToolsAdapter, TMCPItem } from "@onlyoffice/ai-chat/core";
 
 const LIST_PATH = "/tools/list";
@@ -279,11 +280,23 @@ function parseTool(raw: unknown): TMCPItem | null {
   return { name, description, inputSchema, enabled: true };
 }
 
+/** The failure text of a call whose answer names no result. */
+const UNREADABLE_RESULT = "the tool service answered in an unexpected shape";
+
+/** The failure text of a result whose error is not a text. */
+const UNDESCRIBED_ERROR = "the tool service reported an error without a description";
+
+// `ToolListResponse` on the C# side — `{ prompt, tools }`. An answer without
+// the list is unknown, not "no tools": it throws UpstreamShapeError. One tool
+// that cannot be read is dropped.
 function parseList(raw: unknown): ToolsList {
   if (!isObject(raw)) {
-    return { tools: [], prompt: "" };
+    throw new UpstreamShapeError("POST tools/list");
   }
-  const rawTools = getArray(raw, "tools") ?? getArray(raw, "Tools") ?? [];
+  const rawTools = getArray(raw, "tools") ?? getArray(raw, "Tools");
+  if (rawTools === undefined) {
+    throw new UpstreamShapeError("POST tools/list");
+  }
   const tools: TMCPItem[] = [];
   for (const item of rawTools) {
     const tool = parseTool(item);
@@ -356,7 +369,7 @@ export class HttpToolsAdapter implements ToolsAdapter {
     };
     // Verbose lifecycle logging: DocSpace integration tools run silently
     // in-engine, so without this a tool that stalls the C# round-trip
-    // (up to the 60s upstream timeout) is invisible — the UI just shows a
+    // (up to the upstream timeout, getUpstreamTimeoutMs, 5 min by default) is invisible — the UI just shows a
     // hanging tool card. Log start, elapsed, and the result classification
     // (no-result / failed / ok) so the stall point is pinpointable.
     const started = Date.now();
@@ -376,16 +389,21 @@ export class HttpToolsAdapter implements ToolsAdapter {
       );
       throw err;
     }
-    const results = Array.isArray(raw) ? raw : [];
-    const result = results.find((r) => isObject(r)) ?? results[0];
+    // `IReadOnlyList<ToolCallResult>` (`{ id, name, result, error }`), one
+    // per call. An answer without one is unknown: the model is told the call
+    // failed, never that it succeeded with nothing to show.
+    const result = Array.isArray(raw) ? raw.find((r) => isObject(r)) : undefined;
     if (!isObject(result)) {
       logger.warn(
         `docspaceTools.callTool name=${toolName} no-result after ${Date.now() - started}ms`,
       );
-      return `Tool "${toolName}" returned no result`;
+      return `Tool "${toolName}" failed: ${UNREADABLE_RESULT}`;
     }
-    const error = getString(result, "error") ?? getString(result, "Error");
-    if (error) {
+    const errorValue = result["error"] ?? result["Error"];
+    if (errorValue !== undefined && errorValue !== null) {
+      // An error the service did not put into words is still an error.
+      const error =
+        typeof errorValue === "string" && errorValue !== "" ? errorValue : UNDESCRIBED_ERROR;
       // Contract: stringify failures into the result so the model can
       // react instead of aborting the stream.
       logger.warn(

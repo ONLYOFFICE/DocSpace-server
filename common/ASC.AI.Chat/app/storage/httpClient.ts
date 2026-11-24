@@ -35,6 +35,7 @@ import { getAiServiceUrl, getProxyUrl, getUpstreamTimeoutMs } from "../../config
 import { countUpstreamCall, countUpstreamRead, getForwardedHeaders } from "../requestContext.js";
 import { isObject } from "../narrow.js";
 import { errorBodyText } from "./errorBody.js";
+import { jsonAnswer } from "./upstreamShape.js";
 
 // Hard ceiling for a single upstream round-trip so a hung AI service / MCP
 // server can't pin a Node socket (and the caller's request) indefinitely.
@@ -163,7 +164,7 @@ async function jsonRequest(
     }
     const contentType = res.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
-      const json: unknown = await res.json();
+      const json = await jsonAnswer(res, `${method} ${path}`);
       return raw ? json : unwrapDocSpaceEnvelope(json);
     }
     // Awaited here, not returned as a promise: the finally below cancels the
@@ -219,14 +220,16 @@ export const aiServiceBaseUrl = AI_BASE_URL;
 
 /**
  * How {@link providerFetch} bounds a call:
- * - `"headers"`: the upstream timeout bounds the call until the answer's headers are in. Once they
- *   are, the timer is cleared and the caller's `signal` alone ends the reading of the body (the MCP
- *   transport, which reads its own streams and closes them through that signal).
+ * - `"body"`: the upstream timeout bounds the call and the reading of its body; the timer is
+ *   cleared when the body has been read to its end, has failed or was cancelled, and the caller's
+ *   `signal`, when it sends one, ends both earlier. For a caller that reads the answer through code
+ *   that passes no signal of its own: the MCP client of `@onlyoffice/ai-chat` reads each answer to
+ *   its end with a plain `fetch(url, { method, headers, body })`.
  * - `"none"`: no timeout of its own; the caller's `signal` alone ends the call and the body. For a
  *   relayed stream, ended by the client hanging up, and for a caller that bounds the call and the
  *   reading of its answer with its own {@link withTimeout}.
  */
-export type ProviderTimeout = "headers" | "none";
+export type ProviderTimeout = "body" | "none";
 
 /**
  * A request to a third-party address: an OpenAI-compatible provider, a web search provider, an
@@ -252,11 +255,45 @@ export async function providerFetch(
     UPSTREAM_TIMEOUT_MS,
   );
   const signal = init.signal ? AbortSignal.any([init.signal, timer.signal]) : timer.signal;
+  let res: Response;
   try {
-    return await fetch(url, { ...init, signal });
-  } finally {
+    res = await fetch(url, { ...init, signal });
+  } catch (err) {
     clearTimeout(handle);
+    throw err;
   }
+  if (!res.body) {
+    clearTimeout(handle);
+    return res;
+  }
+  // The body is read through a stream of our own, so that the timer ends with it. The abort of the
+  // signal errors the body of the fetch, and with it this stream.
+  const reader = res.body.getReader();
+  const body = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        const { done, value } = await reader.read();
+        if (done) {
+          clearTimeout(handle);
+          controller.close();
+        } else {
+          controller.enqueue(value);
+        }
+      } catch (err) {
+        clearTimeout(handle);
+        controller.error(err);
+      }
+    },
+    cancel(reason) {
+      clearTimeout(handle);
+      return reader.cancel(reason);
+    },
+  });
+  return new Response(body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: res.headers,
+  });
 }
 
 /**

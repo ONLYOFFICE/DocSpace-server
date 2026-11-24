@@ -152,7 +152,7 @@ function tag(name: string): string {
 // is rejected with an explicit 400 (`actionType`, `id`, `name`, `profileId`,
 // `providerType`, `baseUrl`, `threadId`, `messageId`, and the
 // `serverType`/`toolName` pair), while these six are read through
-// `asString`/`parseInt10`/`parseThreadsCursor`/`parseMessagesCursor`/
+// `asString`/`parseInteger`/`parseThreadsCursor`/`parseMessagesCursor`/
 // `parseDirection`, which all yield `undefined` on an absent value and let the
 // service apply its own default. A name means the same thing wherever it
 // appears, as with `PARAM_DOCS` - none of these is guarded in any operation.
@@ -411,7 +411,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiProfilesGetById:
     "Returns one AI provider profile by its ID, with its secrets stripped: neither the API key nor the custom headers are ever sent back, on any portal. The ID is required and is read from the query, and an unknown one answers 404. The `baseUrl` in the answer is the one that was stored, not the internal gateway address a round actually dials, so it cannot be used to reach the provider directly. Use `GET api/2.0/ai/profiles/list` to enumerate profiles instead of reading them one by one.",
   aiProfilesList:
-    "Lists the portal's AI provider profiles. A portal administrator receives each profile in full, `key` and `headers` included, because the settings page edits them; every other caller gets them with those secrets stripped, as the single-profile read always does. It takes no parameters and is not paginated, because a portal holds few profiles. On a portal running the AI gateway the answer is synthesised from the gateway's own catalogue rather than from stored records. The IDs in the answer are what the assignment operations and every round's `profileId` accept.",
+    "Lists the portal's AI provider profiles. A portal administrator receives each profile with its `key`, because the settings page edits it; every other caller gets the profiles without it, as the single-profile read always does. `headers` are never part of the answer. It takes no parameters and is not paginated, because a portal holds few profiles. On a portal running the AI gateway the answer is synthesised from the gateway's own catalogue rather than from stored records. The IDs in the answer are what the assignment operations and every round's `profileId` accept.",
   aiProfilesListModels:
     "Lists the models a stored profile's provider currently offers, asking the provider itself rather than reading a cached list. `profileId` is required and is read from the query. A failure is reported with the provider's own verdict: an unusable key comes back as 400 and a provider that is unreachable or broken as 502, while a profile the caller cannot see answers 404 before the provider is asked and a caller without access keeps the 403 the portal gave it. Use `POST api/2.0/ai/profiles/list-provider-models` to probe an endpoint that has no profile yet.",
   aiProfilesListProviderModels:
@@ -663,7 +663,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
       "profile could be resolved for the requested action, or `threadId`, `entityId`, " +
       "`contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
     "402": true,
-    "404": "The `entityId` names a room the caller cannot open, or no live profile is bound to it.",
+    "404":
+      "The `entityId` names a room the caller cannot open, no live profile is bound to it, or `threadId` names no thread of the caller.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
@@ -672,22 +673,27 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
       "The prompt is empty, more attachments were sent than the limit allows, `profileId` names no AI profile, " +
       "or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
     "402": true,
+    "404":
+      "The `entityId` names a room the caller cannot open, no live profile is bound to it, or `threadId` names no thread of the caller.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiRegenerateStream: {
-    "400": "The request has no body.",
+    "400":
+      "The request has no body, or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
     "404": "The thread does not exist or is not the caller's.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiApproveToolCall: {
-    "400": "The request has no body.",
+    "400":
+      "The request has no body, `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`), or `allowAlways` is not a boolean.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiDenyToolCall: {
-    "400": "The request has no body.",
+    "400":
+      "The request has no body, or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
@@ -792,12 +798,16 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiSkillsCreate: {
     "400":
       "`destId` is not an integer id, `title` is missing, too long or has no letter or digit, or the folder is not an Instructions room.",
+    "402":
+      "The Files service refused the file because the portal is over its storage quota; its answer is relayed.",
     "403": "The caller cannot create files in the room.",
     "404": "The room does not exist.",
   },
   aiTemplatesInstall: {
     "400":
       "`id` is missing or is not a string, or the Files service refused a step after the first room; then `warning` is `installIncomplete` and the body names the rooms made.",
+    "402":
+      "The Files service refused a room or a file because the portal is over its quota; its answer is relayed. After the first room, `warning` is `installIncomplete` and the body names the rooms made.",
     "403":
       "The caller may not create a room of the kind the template needs. When the Files service refuses a step after the first room, `warning` is `installIncomplete` and the body names the rooms made.",
     "404":
@@ -992,7 +1002,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiThreadsTouch: { "400": "`threadId` is missing." },
   aiThreadsAppendUserMessage: {
     "400":
-      "`threadId` is missing, the message is empty or does not carry `role: user`, or it carries more attachments than the limit allows.",
+      "`threadId` is missing, the message is empty or does not carry `role: user`, it carries more attachments than the limit allows, or `profileId` is not a hyphenated UUID.",
+    "404": "`profileId` names no profile; the message is not stored.",
   },
   aiThreadsReadMessages: { "400": "`threadId` is missing." },
   aiThreadsRename: { "400": "`threadId` or the new title is missing." },
@@ -1079,14 +1090,14 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404": "Web search is not configured for this portal.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx, or the AI service answered a web-search configuration that cannot be read; the detail is in the server log.",
   },
   aiWebSearchPassthroughContents: {
     "400": "`urls` is missing or not a non-empty array of strings; `field` names the input.",
     "404": "Web search is not configured for this portal.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx, or the AI service answered a web-search configuration that cannot be read; the detail is in the server log.",
   },
 
   // Relays of the DocSpace AI service: its refusals keep their status.
@@ -1572,13 +1583,14 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiPreferencesSetToolPermissionMode: "Confirms the preference was stored.",
 
   aiProfilesCreate:
-    "The created profile in `profile`, with `success: true`. A refusal answers 400 with " +
+    "The created profile in `profile`, by its listed fields and its `key`, with `success: true`. A refusal answers 400 with " +
     "`success: false` and the reason in `error`.",
   aiProfilesUpdate:
-    "The stored profile in `profile`, with `success: true`. A refusal answers 400 with " +
+    "The profile as sent, by its listed fields and its `key`, in `profile`, with `success: true`. A refusal answers 400 with " +
     "`success: false` and the reason in `error`.",
   aiProfilesDelete: "Confirms the request was accepted, whether or not a profile was deleted.",
-  aiProfilesList: "The portal's profiles, with their keys and headers stripped.",
+  aiProfilesList:
+    "The portal's profiles by their listed fields; `key` is present for a portal administrator only.",
   aiProfilesGetById: "The profile, with its key and headers stripped.",
   aiProfilesListModels: "The models the profile's provider currently offers.",
   aiProfilesListProviderModels: "The models the endpoint offers for the supplied credentials.",
@@ -2164,6 +2176,7 @@ const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, J
   aiSend: PROJECT_MODEL_ERRORS,
   aiTemplatesInstall: {
     "400": TEMPLATE_INSTALL_ERROR_SCHEMA,
+    "402": TEMPLATE_INSTALL_ERROR_SCHEMA,
     "403": TEMPLATE_INSTALL_ERROR_SCHEMA,
     "404": TEMPLATE_INSTALL_ERROR_SCHEMA,
     "413": TEMPLATE_INSTALL_ERROR_SCHEMA,

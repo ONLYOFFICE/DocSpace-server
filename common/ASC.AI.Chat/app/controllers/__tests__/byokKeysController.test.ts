@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../../storage/upstreamShape.js";
 import { invoke } from "../../__tests__/helpers/http.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Reply } from "../../__tests__/helpers/http.js";
@@ -199,13 +200,13 @@ describe("byokKeysController.set", () => {
     expect(published("aiByokKeysSet", reply)).toEqual([]);
   });
 
-  it("answers 500 for an answer of the AI service the storage cannot map", async () => {
-    byokKeys.set.mockRejectedValue(new Error("ai service returned invalid byok key"));
+  it("answers 502 for an answer of the AI service the storage cannot map", async () => {
+    byokKeys.set.mockRejectedValue(new UpstreamShapeError("PUT byok/{id}"));
 
     const reply = await invoke(byokKeysController.set, { params: { id: "rev-1" }, body: {} });
 
-    expect(reply.status).toBe(500);
-    expect(reply.body).toEqual({ error: "Internal server error" });
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
     expect(published("aiByokKeysSet", reply)).toEqual([]);
   });
 });

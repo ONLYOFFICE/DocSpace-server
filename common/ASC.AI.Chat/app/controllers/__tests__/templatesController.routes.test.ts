@@ -371,13 +371,10 @@ describe("templatesController.install", () => {
   it.each([
     ["a 401", () => docspaceError(401), 401, "Unauthorized"],
     ["a 500", () => docspaceError(500, "at http://people.internal"), 500, "Internal Server Error"],
-    [
-      "a body without the envelope",
-      () => HttpResponse.json(SELF_DTO),
-      500,
-      "Internal server error",
-    ],
-    ["a null response", () => docspace(null), 500, "Internal server error"],
+    ["a body without the envelope", () => HttpResponse.json(SELF_DTO), 502, "Bad Gateway"],
+    ["a null response", () => docspace(null), 502, "Bad Gateway"],
+    ["a string body", () => HttpResponse.json("x"), 502, "Bad Gateway"],
+    ["a body that is not JSON", () => HttpResponse.text("{"), 502, "Bad Gateway"],
   ])(
     "answers a caller read that answers %s before any room is made",
     async (_what, answer, status, error) => {
@@ -723,15 +720,15 @@ describe("templatesController.install", () => {
     ["a null id", { id: null }],
     ["an empty id", { id: "" }],
     ["a boolean id", { id: true }],
-  ])("answers 500 for a new room with %s, uploading nothing", async (_what, change) => {
+  ])("answers 502 for a new room with %s, uploading nothing", async (_what, change) => {
     answerRoomsWith(change);
 
     const reply = await invoke(templatesController.install, {
       body: { id: "skill-sets/budgeting" },
     });
 
-    expect(reply.status).toBe(500);
-    expect(reply.body).toEqual({ error: "Internal server error" });
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
     expect(calls.map((c) => c.step)).toEqual(["GET people/@self", "POST rooms"]);
   });
 
@@ -739,15 +736,15 @@ describe("templatesController.install", () => {
     ["no envelope", () => HttpResponse.json(roomDto(5, "x", 10))],
     ["a string response", () => docspace("room")],
     ["a body that is not JSON", () => HttpResponse.text("ok")],
-  ])("answers 500 for a new room answered with %s", async (_what, answer) => {
+  ])("answers 502 for a new room answered with %s", async (_what, answer) => {
     upstream.use(http.post("*/api/2.0/files/rooms", () => step("POST rooms", undefined, answer)));
 
     const reply = await invoke(templatesController.install, {
       body: { id: "skill-sets/budgeting" },
     });
 
-    expect(reply.status).toBe(500);
-    expect(reply.body).toEqual({ error: "Internal server error" });
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
   });
 
   it("answers 500 when the vectorization settings read times out, making no room", async () => {

@@ -509,11 +509,17 @@ describe("threadsController.appendUserMessage", () => {
 
   // The engine writes the message and binds the profile side by side, and the AI service
   // refuses a profile id that is no UUID: without this check the message would be stored
-  // while the caller reads 400.
+  // while the caller reads 400. `TouchThreadBody.ProfileId` is a `Guid?` of a JSON body
+  // (products/ASC.AI/Server/Models/RequestDto/Threads/TouchThreadRequestDto.cs), which
+  // System.Text.Json reads in the hyphenated form alone.
   it.each([
     ["a number", 7],
     ["an object", { id: "p1" }],
     ["a string that is no UUID", "p1"],
+    ["a UUID without hyphens", "3fa85f6457174562b3fc2c963f66afa6"],
+    ["a UUID in braces", `{${PROFILE_UUID}}`],
+    ["a UUID in parentheses", `(${PROFILE_UUID})`],
+    ["a UUID that lost one hyphen", "3fa85f645717-4562-b3fc-2c963f66afa6"],
   ])(
     "answers 400 for a profileId that is %s, before anything is stored",
     async (_what, profileId) => {
@@ -523,17 +529,61 @@ describe("threadsController.appendUserMessage", () => {
 
       expect(reply.status).toBe(400);
       expect(reply.body).toEqual({ error: "profileId must be the id of a profile (a UUID)" });
+      expect(readProfile).not.toHaveBeenCalled();
       expect(engine.appendUserMessage).not.toHaveBeenCalled();
       expect(published("aiThreadsAppendUserMessage", reply)).toEqual([]);
     },
   );
 
+  // The binding reads the profile (ThreadStorageService.TouchAsync) and answers 404 for one
+  // nobody stored, while the message is written beside it.
+  it("answers 404 for a profileId no profile carries, before anything is stored", async () => {
+    readProfile.mockResolvedValue(undefined);
+
+    const reply = await invoke(threadsController.appendUserMessage, {
+      body: ["t1", userMessage, PROFILE_UUID],
+    });
+
+    expect(reply.status).toBe(404);
+    expect(reply.body).toEqual({ error: "the AI profile does not exist" });
+    expect(readProfile).toHaveBeenCalledWith(PROFILE_UUID);
+    expect(engine.appendUserMessage).not.toHaveBeenCalled();
+    expect(published("aiThreadsAppendUserMessage", reply)).toEqual([]);
+  });
+
+  it("answers the failure of the profile read, not 404, and stores nothing", async () => {
+    readProfile.mockRejectedValue(new AiServiceHttpError(500, "Internal Server Error", "", "u"));
+
+    const reply = await invoke(threadsController.appendUserMessage, {
+      body: ["t1", userMessage, PROFILE_UUID],
+    });
+
+    expect(reply.status).toBe(500);
+    expect(engine.appendUserMessage).not.toHaveBeenCalled();
+  });
+
   it.each([
-    ["a UUID", PROFILE_UUID],
-    ["a UUID without hyphens", "3fa85f6457174562b3fc2c963f66afa6"],
     ["null, as the widget sends an omitted argument", null],
     ["an empty string", ""],
-  ])("hands a profileId that is %s to the engine as it came", async (_what, profileId) => {
+  ])(
+    "stores the message without reading a profile for a profileId that is %s",
+    async (_what, profileId) => {
+      engine.appendUserMessage.mockResolvedValue(storedMessage);
+
+      const reply = await invoke(threadsController.appendUserMessage, {
+        body: ["t1", userMessage, profileId],
+      });
+
+      expect(reply.status).toBe(200);
+      expect(readProfile).not.toHaveBeenCalled();
+      expect(engine.appendUserMessage).toHaveBeenCalledWith("t1", userMessage, profileId);
+    },
+  );
+
+  it.each([
+    ["a UUID", PROFILE_UUID],
+    ["an upper-case UUID", PROFILE_UUID.toUpperCase()],
+  ])("hands a profileId that is %s of a stored profile to the engine", async (_what, profileId) => {
     engine.appendUserMessage.mockResolvedValue(storedMessage);
 
     const reply = await invoke(threadsController.appendUserMessage, {
@@ -541,6 +591,7 @@ describe("threadsController.appendUserMessage", () => {
     });
 
     expect(reply.status).toBe(200);
+    expect(readProfile).toHaveBeenCalledWith(profileId);
     expect(engine.appendUserMessage).toHaveBeenCalledWith("t1", userMessage, profileId);
   });
 
@@ -847,12 +898,11 @@ describe("threadsController.list", () => {
     expect(engine.list).toHaveBeenCalledWith(undefined, undefined, parsed, undefined);
   });
 
-  // HANDLED DOWNSTREAM data-15: `count` has no bounds — a negative, a huge or a half-numeric value ("20abc" read as 20) goes to the engine, a value that is not a number is dropped silently. In production the AI service bounds `count` with 400 (ReadAllThreadsRequestDto: Range(1, 1000); ASC.AI.Tests, ThreadsListTests); it shows only with the engine or the service stubbed.
+  // HANDLED DOWNSTREAM data-15: `count` has no bounds of its own — a negative or a huge whole integer goes to the engine. In production the AI service bounds `count` with 400 (ReadAllThreadsRequestDto: Range(1, 1000); ASC.AI.Tests, ThreadsListTests); it shows only with the engine or the service stubbed.
   it.each([
     ["-5", -5],
+    ["0", 0],
     ["1000000", 1000000],
-    ["20abc", 20],
-    ["abc", undefined],
   ])("hands a count of %j to the engine as %j", async (count, parsed) => {
     engine.list.mockResolvedValue([]);
 
@@ -860,6 +910,17 @@ describe("threadsController.list", () => {
 
     expect(reply.status).toBe(200);
     expect(engine.list).toHaveBeenCalledWith(undefined, parsed, undefined, undefined);
+  });
+
+  // A count that is not a whole integer is left out as a whole, so the service applies its
+  // own page size, never the leading digits of the value.
+  it.each(["20abc", "1.5", "1e3", " 20", "", "abc"])("leaves out a count of %j", async (count) => {
+    engine.list.mockResolvedValue([]);
+
+    const reply = await invoke(threadsController.list, { method: "GET", query: { count } });
+
+    expect(reply.status).toBe(200);
+    expect(engine.list).toHaveBeenCalledWith(undefined, undefined, undefined, undefined);
   });
 
   it("ignores repeated entityId and query parameters", async () => {
@@ -875,6 +936,24 @@ describe("threadsController.list", () => {
 });
 
 describe("threadsController.readMessages", () => {
+  it.each([
+    ["10", 10],
+    ["-1", -1],
+    ["20abc", undefined],
+    ["1.5", undefined],
+    ["1e3", undefined],
+  ])("hands a count of %j to the engine as %j", async (count, parsed) => {
+    engine.readMessages.mockResolvedValue([]);
+
+    const reply = await invoke(threadsController.readMessages, {
+      method: "GET",
+      query: { threadId: "t1", count },
+    });
+
+    expect(reply.status).toBe(200);
+    expect(engine.readMessages).toHaveBeenCalledWith("t1", parsed, undefined, undefined);
+  });
+
   it("reads with every parameter of the query", async () => {
     engine.readMessages.mockResolvedValue([storedMessage]);
 

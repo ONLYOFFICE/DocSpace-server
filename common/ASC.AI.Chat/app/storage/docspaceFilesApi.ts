@@ -43,7 +43,7 @@ import { isObject, getNumber, getObject, getString, getEntityId } from "../narro
 import logger from "../log.js";
 import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 import { clientFault } from "../httpErrors.js";
-import { mapped, namesNoEntity } from "./upstreamShape.js";
+import { jsonAnswer, mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
@@ -147,8 +147,8 @@ export type FilesApiQuery = Record<string, string | number | readonly (string | 
  * `GET api/2.0/files/{path}` on behalf of the current user (the caller's
  * credentials relayed via {@link getForwardedHeaders}), answering the
  * `response` of the DocSpace envelope. Any non-2xx answer throws
- * {@link DocspaceApiHttpError} with its status; an answer without a
- * `response` throws a plain error. `path` is relative to `api/2.0/files/`
+ * {@link DocspaceApiHttpError} with its status; an answer that is not JSON
+ * or carries no `response` throws {@link UpstreamShapeError}. `path` is relative to `api/2.0/files/`
  * and must already be encoded. `signal` (the caller's own budget or its
  * client hanging up) ends the call as well as the timeout does.
  */
@@ -173,9 +173,9 @@ export async function filesApiGet(
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    const raw: unknown = await res.json();
+    const raw = await jsonAnswer(res, `GET files/${path}`);
     if (!isObject(raw) || !("response" in raw)) {
-      throw new Error(`DocSpace API: unparseable response from ${url}`);
+      throw new UpstreamShapeError(`GET files/${path}`);
     }
     return raw["response"];
   } finally {
@@ -240,7 +240,7 @@ export type FilesApiBody = { form: FormData } | { json: unknown };
  * with or without the DocSpace envelope, so the caller unwraps it (see
  * {@link envelopeResponse}). Any non-2xx answer throws
  * {@link DocspaceApiHttpError} with its status, and an answer that is not
- * JSON throws its `SyntaxError`. `path` is relative to `api/2.0/files/` and
+ * JSON throws {@link UpstreamShapeError}. `path` is relative to `api/2.0/files/` and
  * must already be encoded.
  */
 export async function filesApiRequest(
@@ -267,8 +267,7 @@ export async function filesApiRequest(
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    const raw: unknown = await res.json();
-    return raw;
+    return await jsonAnswer(res, `${method} files/${path}`);
   } finally {
     cancel();
   }
@@ -381,9 +380,9 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
  * Fetch folder details from the DocSpace Files API
  * (`GET /api/2.0/files/folder/{folderId}`) on behalf of the current user —
  * the caller's credentials are relayed via {@link getForwardedHeaders}.
- * Resolves to `undefined` when the folder does not exist (404) or the
- * response cannot be parsed; propagates other HTTP failures as
- * {@link DocspaceApiHttpError}.
+ * Resolves to `undefined` when the folder does not exist (404); an answer
+ * that cannot be parsed throws {@link UpstreamShapeError}, other HTTP
+ * failures {@link DocspaceApiHttpError}.
  */
 export async function getFolderInfo(folderId: string): Promise<DocspaceFolderInfo | undefined> {
   if (namesNoEntity(folderId)) {
@@ -400,7 +399,10 @@ export async function getFolderInfo(folderId: string): Promise<DocspaceFolderInf
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    return mapped(parseFolderInfo(await res.json()), "GET files/folder/{id}");
+    return mapped(
+      parseFolderInfo(await jsonAnswer(res, "GET files/folder/{id}")),
+      "GET files/folder/{id}",
+    );
   } finally {
     cancel();
   }
@@ -527,8 +529,9 @@ function parseFileInfo(raw: unknown): DocspaceFileInfo | undefined {
 /**
  * Fetch file details from the DocSpace Files API
  * (`GET /api/2.0/files/file/{fileId}`) on behalf of the current user. Same
- * contract as {@link getFolderInfo}: `undefined` on 404 or an unparseable
- * response, {@link DocspaceApiHttpError} for other HTTP failures.
+ * contract as {@link getFolderInfo}: `undefined` on 404,
+ * {@link UpstreamShapeError} for an answer that cannot be parsed,
+ * {@link DocspaceApiHttpError} for other HTTP failures.
  */
 export async function getFileInfo(fileId: string): Promise<DocspaceFileInfo | undefined> {
   if (namesNoEntity(fileId)) {
@@ -545,7 +548,10 @@ export async function getFileInfo(fileId: string): Promise<DocspaceFileInfo | un
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    return mapped(parseFileInfo(await res.json()), "GET files/file/{id}");
+    return mapped(
+      parseFileInfo(await jsonAnswer(res, "GET files/file/{id}")),
+      "GET files/file/{id}",
+    );
   } finally {
     cancel();
   }
@@ -629,9 +635,9 @@ export async function primeSourceMeta(
  * numeric id is resolved rather than posting to the `@my/insert` alias so the
  * upload goes through the same code path (and logs the real folder) as any
  * other target. Resolves to `undefined` when the Files API refuses the
- * section (403, 404) or its answer names no folder; any other refusal throws
- * {@link DocspaceApiHttpError}, and a timeout or a dropped connection throws
- * as well.
+ * section (403, 404); an answer that names no folder throws
+ * {@link UpstreamShapeError}, any other refusal {@link DocspaceApiHttpError},
+ * and a timeout or a dropped connection throws as well.
  */
 export async function getMyDocumentsFolderId(): Promise<string | undefined> {
   // `count` is [Range(1, …)]-validated on the C# side — ask for the smallest
@@ -649,15 +655,10 @@ export async function getMyDocumentsFolderId(): Promise<string | undefined> {
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    const raw: unknown = await res.json();
+    const raw = await jsonAnswer(res, "GET files/@my");
     const envelope = isObject(raw) ? getObject(raw, "response") : undefined;
     const current = envelope ? getObject(envelope, "current") : undefined;
-    const id = current ? getEntityId(current, "id") : undefined;
-    if (id === undefined) {
-      logger.warn(`getMyDocumentsFolderId: no current.id in the response from ${url}`);
-      return undefined;
-    }
-    return id;
+    return mapped(current ? getEntityId(current, "id") : undefined, "GET files/@my");
   } finally {
     cancel();
   }

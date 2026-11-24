@@ -56,6 +56,7 @@ import {
 import { getForwardedHeaders } from "../requestContext.js";
 import { getObject, getObjectArray, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { listAnswer, mapped, UpstreamShapeError } from "../storage/upstreamShape.js";
 
 /** A file as the folder listing or the file-info endpoint describes it. */
 export interface PortalFile {
@@ -100,10 +101,6 @@ function asRecord(response: unknown): Record<string, unknown> | undefined {
   return isObject(response) ? response : undefined;
 }
 
-function asList(response: unknown): unknown[] {
-  return Array.isArray(response) ? response : [];
-}
-
 function toPortalFile(raw: Record<string, unknown>): PortalFile | undefined {
   const idValue = raw["id"];
   const id =
@@ -140,7 +137,11 @@ export async function listFolderFiles(folderId: string, count: number): Promise<
       sortOrder: "descending",
     }),
   );
-  const files = body ? (getObjectArray(body, "files") ?? []) : [];
+  // A listing without its `files` is unknown, not an empty folder.
+  const files = body ? getObjectArray(body, "files") : undefined;
+  if (files === undefined) {
+    throw new UpstreamShapeError("GET files/{folderId}");
+  }
   const result: PortalFile[] = [];
   for (const raw of files) {
     const file = toPortalFile(raw);
@@ -152,11 +153,14 @@ export async function listFolderFiles(folderId: string, count: number): Promise<
   return result;
 }
 
-/** One file as the Files API describes it; `undefined` on 404. */
+/**
+ * One file as the Files API describes it; `undefined` on 404. An answer that
+ * names no file throws {@link UpstreamShapeError}: it is unknown, not absent.
+ */
 export async function getPortalFile(fileId: string): Promise<PortalFile | undefined> {
   try {
     const body = asRecord(await filesApiGet(`file/${encodeURIComponent(fileId)}`));
-    return body ? toPortalFile(body) : undefined;
+    return mapped(body ? toPortalFile(body) : undefined, "GET files/file/{id}");
   } catch (err) {
     if (err instanceof DocspaceApiHttpError && err.status === 404) {
       return undefined;
@@ -174,18 +178,20 @@ function getConvertible(): Promise<Record<string, string[]>> {
   if (!convertibleCache) {
     convertibleCache = (async () => {
       const body = asRecord(await filesApiGet("settings"));
-      const table = body ? getObject(body, "extsConvertible") : undefined;
+      // No table is an answer of an unknown shape, not "nothing converts";
+      // the rejection drops the cache below, so the next read asks again.
+      const table = mapped(
+        body ? getObject(body, "extsConvertible") : undefined,
+        "GET files/settings",
+      );
       const result: Record<string, string[]> = {};
-      if (table) {
-        for (const [ext, targets] of Object.entries(table)) {
-          if (Array.isArray(targets)) {
-            result[ext.toLowerCase()] = targets.filter((t): t is string => typeof t === "string");
-          }
+      for (const [ext, targets] of Object.entries(table)) {
+        if (Array.isArray(targets)) {
+          result[ext.toLowerCase()] = targets.filter((t): t is string => typeof t === "string");
         }
       }
       if (Object.keys(result).length === 0) {
-        // No table means the settings call answered something unexpected;
-        // keep asking rather than pinning "nothing converts" for the process.
+        // A table without a usable entry is not pinned for the process either.
         convertibleCache = undefined;
       }
       return result;
@@ -244,13 +250,13 @@ async function startConversion(
     },
     signal,
   );
-  for (const raw of asList(response)) {
+  for (const raw of listAnswer(response, "PUT files/fileops/bulkdownload")) {
     const op = isObject(raw) ? toOperation(raw) : undefined;
     if (op) {
       return op;
     }
   }
-  throw new Error(`bulkdownload for file ${file.id} returned no operation`);
+  throw new UpstreamShapeError("PUT files/fileops/bulkdownload");
 }
 
 /**
@@ -323,7 +329,7 @@ class OperationWatcher {
 
   /** Reads one operation by id; a finished one is dequeued by the read. */
   private async fetchOperation(id: string): Promise<FileOperation | undefined> {
-    return asList(await filesApiGet("fileops", { id }, this.signal))
+    return listAnswer(await filesApiGet("fileops", { id }, this.signal), "GET files/fileops")
       .flatMap((raw) => {
         const op = isObject(raw) ? toOperation(raw) : undefined;
         return op ? [op] : [];
@@ -446,7 +452,8 @@ export class PortalTextReader {
     try {
       const op = await this.convert(file, target, timed);
       if (!op.url) {
-        throw new Error(`conversion of file ${file.id} finished without a download URL`);
+        // A finished operation names its result; one without it is unknown.
+        throw new UpstreamShapeError("files/fileops");
       }
       const text = await filesApiDownloadText(
         throughProxy(op.url),

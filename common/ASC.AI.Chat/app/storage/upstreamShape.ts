@@ -70,3 +70,19 @@ export function listAnswer(raw: unknown, call: string): unknown[] {
 export function namesNoEntity(id: string): boolean {
   return id === "";
 }
+
+/**
+ * The JSON of a 2xx answer. A body that is not JSON is an answer of an unknown shape
+ * ({@link UpstreamShapeError}); any other failure of the read (a timeout, a dropped
+ * connection) is thrown as it came.
+ */
+export async function jsonAnswer(res: Response, call: string): Promise<unknown> {
+  try {
+    return (await res.json()) as unknown;
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new UpstreamShapeError(call);
+    }
+    throw err;
+  }
+}

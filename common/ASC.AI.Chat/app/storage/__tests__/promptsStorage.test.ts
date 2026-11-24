@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { describe, expect, it } from "vitest";
 import {
   docspace,
@@ -175,8 +176,8 @@ describe("create", () => {
     ["a DTO without id", docspace(dtoWith("id", MISSING))],
   ])("throws on %s", async (_name, answer) => {
     upstream.use(http.post("*/internal/ai/prompts", () => answer));
-    await expect(storage.create({ name: "n", text: "t" })).rejects.toThrow(
-      "AI service returned an invalid prompt payload",
+    await expect(storage.create({ name: "n", text: "t" })).rejects.toEqual(
+      new UpstreamShapeError("POST prompts"),
     );
   });
 
@@ -249,17 +250,15 @@ describe("readAll and readByFolderId", () => {
       http.get("*/internal/ai/prompts", answer),
       http.get("*/internal/ai/prompt-folders/:id/prompts", answer),
     );
-    await expect(storage.readAll()).rejects.toThrow("AI service returned a non-array prompt list");
-    await expect(storage.readByFolderId("f")).rejects.toThrow(
-      "AI service returned a non-array prompt list",
+    await expect(storage.readAll()).rejects.toEqual(new UpstreamShapeError("GET prompts"));
+    await expect(storage.readByFolderId("f")).rejects.toEqual(
+      new UpstreamShapeError("GET prompt-folders/{id}/prompts"),
     );
   });
 
-  it("throws naming the index of an invalid prompt", async () => {
+  it("throws on a list holding an invalid prompt", async () => {
     upstream.use(http.get("*/internal/ai/prompts", () => docspace([promptDto(), { id: "x" }])));
-    await expect(storage.readAll()).rejects.toThrow(
-      "AI service returned an invalid prompt at index 1",
-    );
+    await expect(storage.readAll()).rejects.toEqual(new UpstreamShapeError("GET prompts"));
   });
 
   it("rethrows a 500", async () => {

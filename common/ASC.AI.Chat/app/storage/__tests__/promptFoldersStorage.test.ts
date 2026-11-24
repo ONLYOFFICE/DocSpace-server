@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { describe, expect, it } from "vitest";
 import {
   docspace,
@@ -141,8 +142,8 @@ describe("create", () => {
     ["a DTO without name", docspace(dtoWith("name", MISSING))],
   ])("throws on %s", async (_name, answer) => {
     upstream.use(http.post("*/internal/ai/prompt-folders", () => answer));
-    await expect(storage.create({ name: "n" })).rejects.toThrow(
-      "AI service returned an invalid prompt folder payload",
+    await expect(storage.create({ name: "n" })).rejects.toEqual(
+      new UpstreamShapeError("POST prompt-folders"),
     );
   });
 });
@@ -168,22 +169,20 @@ describe("createMany", () => {
 
   it("throws when the batch answers another number of folders", async () => {
     upstream.use(http.post("*/internal/ai/prompt-folders/batch", () => docspace([folderDto()])));
-    await expect(storage.createMany([{ name: "A" }, { name: "B" }])).rejects.toThrow(
-      "AI service returned 1 folders for 2 inputs",
+    await expect(storage.createMany([{ name: "A" }, { name: "B" }])).rejects.toEqual(
+      new UpstreamShapeError("POST prompt-folders/batch"),
     );
   });
 
   it.each([
-    ["an empty answer", noContent(), "AI service returned a non-array prompt folder list"],
-    ["an object", docspace({ items: [] }), "AI service returned a non-array prompt folder list"],
-    [
-      "an invalid folder",
-      docspace([folderDto(), {}]),
-      "AI service returned an invalid prompt folder at index 1",
-    ],
-  ])("throws on %s", async (_name, answer, message) => {
+    ["an empty answer", noContent()],
+    ["an object", docspace({ items: [] })],
+    ["an invalid folder", docspace([folderDto(), {}])],
+  ])("throws on %s", async (_name, answer) => {
     upstream.use(http.post("*/internal/ai/prompt-folders/batch", () => answer));
-    await expect(storage.createMany([{ name: "A" }, { name: "B" }])).rejects.toThrow(message);
+    await expect(storage.createMany([{ name: "A" }, { name: "B" }])).rejects.toEqual(
+      new UpstreamShapeError("POST prompt-folders/batch"),
+    );
   });
 });
 
@@ -200,9 +199,7 @@ describe("readAll", () => {
 
   it("throws on a non-list and rethrows a 500", async () => {
     upstream.use(http.get("*/internal/ai/prompt-folders", () => docspace(null)));
-    await expect(storage.readAll()).rejects.toThrow(
-      "AI service returned a non-array prompt folder list",
-    );
+    await expect(storage.readAll()).rejects.toEqual(new UpstreamShapeError("GET prompt-folders"));
     upstream.use(http.get("*/internal/ai/prompt-folders", () => docspaceError(500)));
     await expect(storage.readAll()).rejects.toMatchObject({ status: 500 });
   });

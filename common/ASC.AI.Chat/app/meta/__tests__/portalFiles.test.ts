@@ -476,7 +476,8 @@ describe("PortalTextReader budget", () => {
   beforeEach(() => vi.unstubAllGlobals());
 
   it("gives up waiting for an operation when the read's own signal aborts", async () => {
-    const { fetchMock } = fakeFetch([
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const { fetchMock, calls } = fakeFetch([
       settingsRoute,
       {
         match: (url) => url.endsWith("/fileops/bulkdownload"),
@@ -490,8 +491,22 @@ describe("PortalTextReader budget", () => {
     vi.stubGlobal("fetch", fetchMock);
     const controller = new AbortController();
     const reader = new PortalTextReader(controller.signal);
-    const read = reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" });
-    setTimeout(() => controller.abort(new Error("budget")), 50);
-    await expect(read).rejects.toThrow(/budget/);
+    const polls = () => calls.filter((c) => c.url.includes("/api/2.0/files/fileops?id=")).length;
+    try {
+      const read = reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" });
+      const outcome = expect(read).rejects.toThrow(/budget/);
+      // Two polls of 500 ms each find the operation still running.
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(polls()).toBe(2);
+
+      controller.abort(new Error("budget"));
+
+      await outcome;
+      // The poller has no waiter left, so it stops.
+      await vi.advanceTimersByTimeAsync(2_000);
+      expect(polls()).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

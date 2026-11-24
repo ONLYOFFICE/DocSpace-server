@@ -473,6 +473,7 @@ describe("systemToolsSource.getTools", () => {
     );
   });
 
+  // DEFECT tools-10: one tool of one MCP server that cannot be read (null) makes withReadOnlyAutoAllow (tools/systemTools.ts) throw, and the catch of systemToolsSource.getTools answers {}, dropping the tools of every server — expected the malformed tool dropped and the other tools kept (ts-ai-failure-paths.md §1: dropping one malformed element of a list is fine, reading the whole answer as none is not).
   it("answers an empty map and logs when a listed tool cannot be read", async () => {
     mcpServer(upstream, DOCSPACE_URL, { tools: [null] });
     mcpServer(upstream, OTHER_URL, { tools: [PLAIN_TOOL] });

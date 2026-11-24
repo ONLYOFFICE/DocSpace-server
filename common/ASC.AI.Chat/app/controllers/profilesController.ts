@@ -202,7 +202,13 @@ function sendKeyRefusal(res: Response, message: string): void {
 // the published document lists 400 alone for these writes, so every refusal
 // is one status.
 function sendProfileMutation(res: Response, result: ProfileMutationResult): void {
-  res.status(result.success ? 200 : 400).json(result);
+  if (!result.success) {
+    res.status(400).json({ success: false, error: result.error });
+    return;
+  }
+  // The engine answers `create` with the stored profile and `update` with the body it was sent,
+  // spread: whatever else either carries stays here.
+  res.json({ success: true, profile: profileForSettings(result.profile) });
 }
 
 // The profile as an answer carries it: the fields of `AiProfile` in the
@@ -234,6 +240,19 @@ export function profileForResponse(profile: Profile): ProfileAnswer {
     useProxy: profile.useProxy,
     createdAt: profile.createdAt,
   };
+}
+
+// The profile as the settings cards read it: the listed fields and the provider key. The answer
+// of a write goes to the DocSpace admin who sent the key, and the widget puts it into its list as
+// it came; the list carries the key for an administrator alone, since the AI service reads it
+// `forClient` and drops the key for everyone else (spec ai-agents, "Key in the list for an
+// administrator"). `headers` and whatever else the object carries do not leave.
+export function profileForSettings(profile: Profile): ProfileAnswer & { key?: string } {
+  const answer: ProfileAnswer & { key?: string } = profileForResponse(profile);
+  if (typeof profile.key === "string") {
+    answer.key = profile.key;
+  }
+  return answer;
 }
 
 // 404 for a profile the caller cannot see, before the engine is involved:
@@ -436,9 +455,10 @@ export const profilesController = {
   // profiles its provider calls need, while this answer reaches the browser
   // - the chat model picker and the editor read it as any user - so the AI
   // service drops `key` and `headers` for everyone but an administrator,
-  // whose settings cards edit them.
+  // whose settings cards edit the key. Each entry leaves by its listed fields
+  // (see profileForSettings).
   list: asyncHandler(async (_req, res) => {
     const profiles = await storage.profiles.readAllForClient();
-    res.json(profiles);
+    res.json(profiles.map(profileForSettings));
   }),
 };

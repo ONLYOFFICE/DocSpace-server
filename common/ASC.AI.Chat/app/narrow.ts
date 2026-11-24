@@ -107,6 +107,28 @@ export function parseInt10(value: unknown, fallback?: number): number | undefine
   return Number.isFinite(n) ? n : fallback;
 }
 
+/**
+ * An integer of a request: a safe integer number, or a string that is one whole, written in
+ * decimal digits with an optional leading `-` (leading zeros read as decimal, `"010"` is 10).
+ * Anything else is `undefined`: `"65abc"`, `"1.5"`, `"1e3"`, `"0x10"`, `" 7"`, `"+7"`, `""`, a
+ * fraction, a number past `Number.MAX_SAFE_INTEGER`. Unlike {@link parseInt10}, which reads the
+ * leading digits of a string (`"20abc"` is 20), it does not take part of a value for the whole.
+ */
+export function parseInteger(value: unknown): number | undefined {
+  if (typeof value === "number") {
+    return Number.isSafeInteger(value) ? value : undefined;
+  }
+  if (typeof value !== "string" || !/^-?\d+$/.test(value)) {
+    return undefined;
+  }
+  const n = Number(value);
+  if (!Number.isSafeInteger(n)) {
+    return undefined;
+  }
+  // "-0" is 0, not -0.
+  return n === 0 ? 0 : n;
+}
+
 const ACTION_TYPES = new Set<string>(Object.values(ActionType));
 
 /** The {@link ActionType} named by a query or body value, or `undefined` for anything else. */

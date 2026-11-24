@@ -48,6 +48,7 @@ import {
   withWebSearchProviderOverrides,
 } from "../webSearchStorage.js";
 import { inRound, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
+import { UpstreamShapeError } from "../upstreamShape.js";
 
 // GET/PUT/DELETE internal/ai/web-search: products/ASC.AI/Server/Api/WebSearchStorageController.cs.
 const upstream = useUpstream();
@@ -173,6 +174,28 @@ describe("read", () => {
   ])("reads %s as none", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/web-search", answer));
     await expect(storage.read()).resolves.toBeNull();
+  });
+
+  // A config the AI service answers but that cannot be read is unknown, not "not configured".
+  it.each([
+    ["a string", "x"],
+    ["an empty object", {}],
+    ["a list", []],
+    ["a config without provider", { key: "k" }],
+    ["a config with an empty provider", { provider: "" }],
+  ])("throws UpstreamShapeError for %s", async (_name, body) => {
+    upstream.use(http.get("*/internal/ai/web-search", () => docspace(body)));
+    await expect(storage.read()).rejects.toBeInstanceOf(UpstreamShapeError);
+  });
+
+  it("throws UpstreamShapeError for a text answer", async () => {
+    upstream.use(
+      http.get(
+        "*/internal/ai/web-search",
+        () => new HttpResponse("exa", { headers: { "content-type": "text/plain" } }),
+      ),
+    );
+    await expect(storage.read()).rejects.toBeInstanceOf(UpstreamShapeError);
   });
 
   it.each([403, 500])("rethrows a %i", async (status) => {

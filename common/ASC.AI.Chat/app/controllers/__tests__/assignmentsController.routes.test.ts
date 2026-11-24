@@ -453,7 +453,7 @@ describe("assignmentsController.assign", () => {
     expect(responseViolations("aiAssignmentsAssign", 403, reply.body)).toEqual([]);
   });
 
-  it("relays an AI service 503 although the route does not publish it", async () => {
+  it("relays an AI service 503 in the published error shape", async () => {
     engine.assign.mockRejectedValue(
       new AiServiceHttpError(503, "Service Unavailable", "MARKER", "http://ai/x"),
     );

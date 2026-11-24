@@ -35,6 +35,38 @@ import os from "node:os";
 import path from "node:path";
 import { vi } from "vitest";
 
+// The service reads the environment as well as the appsettings: config/index.ts reads its
+// variables straight from `process.env`, and nconf copies the whole environment when the
+// config module is loaded (`nconf.env()`), so a name with `:` in it overrides the settings
+// tree and a top-level name (`OTEL_EXPORTER_OTLP_ENDPOINT`, `logLevel`) answers `nconf.get`.
+// A shell that exports `core__cors` or `AI__MCP__0__ENDPOINT` would change what a test sees,
+// so every such variable is removed here, before any test file imports the config module.
+// `vi.stubEnv` in a test still works: `vi.unstubAllEnvs` puts back the cleared state.
+// `NODE_ENV` stays: vitest sets it to `test`, and config/ holds no `test.json`.
+const SERVICE_ENV_NAMES = new Set([
+  "API_HOST",
+  "AI_SERVICE_URL",
+  "core__cors",
+  "logConsole",
+  "logPath",
+  "logLevel",
+  "aws",
+  "openTelemetry",
+  "core",
+  "ai",
+  "app",
+]);
+const SERVICE_ENV_PREFIXES = ["AI__", "AI_CHAT_", "OTEL_"];
+for (const name of Object.keys(process.env)) {
+  if (
+    SERVICE_ENV_NAMES.has(name) ||
+    name.includes(":") ||
+    SERVICE_ENV_PREFIXES.some((prefix) => name.startsWith(prefix))
+  ) {
+    delete process.env[name];
+  }
+}
+
 // The service reads the appsettings of the installation it runs in (config/config.json points
 // at ../buildtools/config). A test must see the same values on every machine, so the directory
 // is pointed at one that does not exist: CORS off, no document agent, no MCP servers, the

@@ -378,6 +378,24 @@ describe("formAnalysisSubAgent.callTool analysis", () => {
     expect(custom).not.toHaveBeenCalled();
   });
 
+  // A tools/list answer without the list is unknown, not "the table is not accessible".
+  it.each([
+    ["null", null],
+    ["a string", "x"],
+    ["an object without tools", { prompt: "Form rules" }],
+  ])(
+    "answers an internal error, not an inaccessible table, for a tool list that is %s",
+    async (_what, body) => {
+      useProfile("p-forms");
+      upstream.use(http.post("*/internal/ai/tools/list", () => docspace(body)));
+
+      await expect(run({ question: "q" })).resolves.toMatchObject({
+        result: "Form analysis could not be completed due to an internal error.",
+      });
+      expect(custom).not.toHaveBeenCalled();
+    },
+  );
+
   it.each<[string, unknown[], string]>([
     ["no event", [], "The analysis produced no answer."],
     ["an empty final text", [end("")], "The analysis produced no answer."],

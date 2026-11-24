@@ -21,8 +21,9 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
   Where an outage may degrade one optional part of an answer, write a `try/catch` that tests the
   status and says in a comment why unknown is safe to read as absent there.
 - A 200 whose body the mapper cannot read is unknown too: a single-entity read passes its result
-  through `mapped(value, call)` and a list read through `listAnswer(raw, call)`
-  (`storage/upstreamShape.ts`). Both throw `UpstreamShapeError`, which the error boundary answers
+  through `mapped(value, call)`, a list read through `listAnswer(raw, call)`, and a body that has to
+  be JSON is read with `jsonAnswer(res, call)` (`storage/upstreamShape.ts`). They throw
+  `UpstreamShapeError`, which the error boundary answers
   as `502 { error: "Bad Gateway" }` and logs with the name of the call. Dropping one malformed
   element of a list is fine; reading the whole answer as "none" is not.
 - A check that protects money or access fails closed: a read that failed does not count as "paid",
@@ -43,9 +44,12 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
   that maps `error.code` to 400, 404 or 409, as `sendMutation` in `promptsController.ts` does.
 - Where a refusal already goes out with 200, the status is contract: the "Soft refusals" scenario
   of `openspec/specs/ai-agents/spec.md` and the suites in `products/ASC.AI/ASC.AI.Tests` (MCP
-  servers, profiles, assignments) read `{ success: false }` from a 200 through the generated
+  servers, assignments) read `{ success: false }` from a 200 through the generated
   client, which throws on a 4xx. Moving such a route to a 4xx is an OpenSpec change
   (`openspec-propose`) with the .NET tests in the same branch, not a fix made in this service alone.
+  `profiles/create` and `profiles/update` are not among them: the spec asks 400 for an unusable
+  profile and `ProfileProviderTypeTests` accepts either answer, so they answer a refusal with 400
+  (`sendProfileMutation`).
 - A plain `Error` the engine throws for a state the caller caused (an unknown id, a missing field)
   is caught and mapped to its 4xx; left alone it becomes a 500.
 - Seen in review: prompt refusals went out with 200 (d50e326b63), and so did a refused

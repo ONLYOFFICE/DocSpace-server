@@ -242,13 +242,26 @@ describe("send", () => {
     ["entityId", true],
     ["contextEntityId", { id: 1 }],
     ["contextEntityId", ["8"]],
-  ])("answers 400 naming %s when it is %j, before anything is read", async (field, value) => {
+  ])("answers 400 naming %s when it is %j, after the aggregate read", async (field, value) => {
     const reply = await send({ ...valid, [field]: value });
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: `${field} must be a string` });
     expect(responseViolations("aiSend", 400, reply.body)).toEqual([]);
-    expect(h.primeChatContext).not.toHaveBeenCalled();
+    // The aggregate read is the route's access gate; the id of a wrong type is not sent with it.
+    expect(h.primeChatContext).toHaveBeenCalledWith({
+      entityId: undefined,
+      contextEntityId: undefined,
+    });
+    expect(h.engine.send).not.toHaveBeenCalled();
+  });
+
+  it("answers the 403 of the aggregate read, not 400, for an id of a wrong type", async () => {
+    h.primeChatContext.mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "", "u"));
+
+    const reply = await send({ ...valid, entityId: 5 });
+
+    expect(reply.status).toBe(403);
     expect(h.engine.send).not.toHaveBeenCalled();
   });
 
@@ -259,7 +272,10 @@ describe("send", () => {
     const reply = await send({ ...valid, entityId });
 
     expect(reply.status).toBe(200);
-    expect(h.primeChatContext).toHaveBeenCalledWith({ entityId, contextEntityId: undefined });
+    expect(h.primeChatContext).toHaveBeenCalledWith({
+      entityId: entityId ?? undefined,
+      contextEntityId: undefined,
+    });
   });
 });
 
@@ -368,14 +384,27 @@ describe("sendCustom", () => {
   it.each([
     ["a number", 7],
     ["an object", { id: "p1" }],
-  ])("answers 400 when profileId is %s, before the profile read", async (_what, profileId) => {
-    const reply = await sendCustom({ ...valid, profileId });
+  ])(
+    "answers 400 when profileId is %s, after the aggregate read and before the profile read",
+    async (_what, profileId) => {
+      const reply = await sendCustom({ ...valid, profileId });
 
-    expect(reply.status).toBe(400);
-    expect(reply.body).toEqual({ error: "profileId must be a string" });
-    expect(responseViolations("aiSendCustom", 400, reply.body)).toEqual([]);
-    expect(h.primeChatContext).not.toHaveBeenCalled();
-    expect(h.storage.profiles.readById).not.toHaveBeenCalled();
+      expect(reply.status).toBe(400);
+      expect(reply.body).toEqual({ error: "profileId must be a string" });
+      expect(responseViolations("aiSendCustom", 400, reply.body)).toEqual([]);
+      expect(h.primeChatContext).toHaveBeenCalledTimes(1);
+      expect(h.storage.profiles.readById).not.toHaveBeenCalled();
+      expect(h.engine.sendCustom).not.toHaveBeenCalled();
+    },
+  );
+
+  it("answers the 403 of the aggregate read, not 400, for a profileId of a wrong type", async () => {
+    h.primeChatContext.mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "", "u"));
+
+    const reply = await sendCustom({ ...valid, profileId: 7 });
+
+    expect(reply.status).toBe(403);
+    expect(h.engine.sendCustom).not.toHaveBeenCalled();
   });
 });
 
@@ -511,7 +540,38 @@ describe.each([
     expect(h.engine[name]).not.toHaveBeenCalled();
   });
 
-  // HANDLED DOWNSTREAM ai-3: the route checks nothing of the body (threadId, messageId, toolCallId) and runs the engine on it. In production the AI service refuses the missing ids (a Guid route parameter, 400) and the engine a tool call that is not pending (409); it shows only with the engine or the service stubbed.
+  it.each([
+    ["threadId", 9],
+    ["entityId", 12],
+    ["contextEntityId", false],
+    ["profileId", { id: "p1" }],
+    ["profileId", ["p1"]],
+  ])("answers 400 naming %s when it is %j, after the aggregate read", async (field, value) => {
+    const reply = await route({ threadId: "t1", messageId: "m1", [field]: value });
+
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: `${field} must be a string` });
+    expect(responseViolations(operationId, 400, reply.body)).toEqual([]);
+    // The aggregate read is the route's access gate; the id of a wrong type is not sent with it.
+    expect(h.primeChatContext).toHaveBeenCalledWith({
+      threadId: field === "threadId" ? undefined : "t1",
+      entityId: undefined,
+      contextEntityId: undefined,
+    });
+    expect(h.storage.threads.readById).not.toHaveBeenCalled();
+    expect(h.engine[name]).not.toHaveBeenCalled();
+  });
+
+  it("answers the 403 of the aggregate read before a word about an id of a wrong type", async () => {
+    h.primeChatContext.mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "", "u"));
+
+    const reply = await route({ threadId: 9 });
+
+    expect(reply.status).toBe(403);
+    expect(h.engine[name]).not.toHaveBeenCalled();
+  });
+
+  // HANDLED DOWNSTREAM ai-3: the route checks the types of the ids and nothing else of the body (a missing threadId, messageId, toolCallId) and runs the engine on it. In production the AI service refuses the missing ids (a Guid route parameter, 400) and the engine a tool call that is not pending (409); it shows only with the engine or the service stubbed.
   it.each([
     ["a string", "hello"],
     ["an array", ["t1", "m1"]],
@@ -523,7 +583,7 @@ describe.each([
     expect(upstream.seen).toEqual([]);
   });
 
-  // HANDLED DOWNSTREAM ai-3: the route checks nothing of the body (threadId, messageId, toolCallId) and runs the engine on it. In production the AI service refuses the missing ids (a Guid route parameter, 400) and the engine a tool call that is not pending (409); it shows only with the engine or the service stubbed.
+  // HANDLED DOWNSTREAM ai-3: the route checks the types of the ids and nothing else of the body (a missing threadId, messageId, toolCallId) and runs the engine on it. In production the AI service refuses the missing ids (a Guid route parameter, 400) and the engine a tool call that is not pending (409); it shows only with the engine or the service stubbed.
   it("hands an empty object to the engine with only the round's own additions", async () => {
     const reply = await route({});
 
@@ -537,6 +597,36 @@ describe.each([
 });
 
 // The 402 of the unpaid gateway reads /config only outside a primed round.
+// `allowAlways` stores a standing permission, and the engine reads it by truthiness.
+describe("approveToolCall, allowAlways", () => {
+  const approve = (body: unknown) => h.call(aiController.approveToolCall, body);
+
+  it.each([
+    ["the string false", "false"],
+    ["the string true", "true"],
+    ["a number", 1],
+    ["an object", {}],
+  ])("answers 400 when allowAlways is %s and runs nothing", async (_what, allowAlways) => {
+    const reply = await approve({ threadId: "t1", messageId: "m1", idx: 0, allowAlways });
+
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "allowAlways must be a boolean" });
+    expect(responseViolations("aiApproveToolCall", 400, reply.body)).toEqual([]);
+    expect(h.primeChatContext).toHaveBeenCalledTimes(1);
+    expect(h.engine.approveToolCall).not.toHaveBeenCalled();
+  });
+
+  it.each([[true], [false], [null], [undefined]])(
+    "runs the approval when allowAlways is %j",
+    async (allowAlways) => {
+      const reply = await approve({ threadId: "t1", messageId: "m1", idx: 0, allowAlways });
+
+      expect(reply.status).toBe(200);
+      expect(h.engine.approveToolCall).toHaveBeenCalledTimes(1);
+    },
+  );
+});
+
 describe("the published error answers", () => {
   it("lists the 402 of every route that sends it", async () => {
     h.storage.profiles.readById.mockResolvedValue({ id: "p1", providerType: "onlyoffice" });

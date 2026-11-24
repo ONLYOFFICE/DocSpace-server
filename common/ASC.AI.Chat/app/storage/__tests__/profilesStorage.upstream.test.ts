@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Profile } from "@onlyoffice/ai-chat/core";
 import {
@@ -434,9 +435,9 @@ describe("HttpProfilesStorage.create", () => {
   it("refuses an answer that is not a profile, after the write", async () => {
     upstream.use(http.post(PROFILES, () => docspace({ id: ID })));
 
-    expect(await failure(new HttpProfilesStorage().create(input))).toMatchObject({
-      message: "ai service returned invalid profile",
-    });
+    expect(await failure(new HttpProfilesStorage().create(input))).toEqual(
+      new UpstreamShapeError("POST profiles"),
+    );
     expect(upstream.seen).toHaveLength(1);
   });
 
@@ -1085,9 +1086,9 @@ describe("listOnlyofficeGatewayModels", () => {
   ])("refuses an answer with %s", async (_case, body) => {
     upstream.use(http.get(GATEWAY, () => HttpResponse.json(body)));
 
-    expect(await failure(listOnlyofficeGatewayModels())).toMatchObject({
-      message: `gateway models listing returned no data array (${GATEWAY})`,
-    });
+    expect(await failure(listOnlyofficeGatewayModels())).toEqual(
+      new UpstreamShapeError("GET ai/gateway/models"),
+    );
   });
 
   it.each([401, 403, 502])(

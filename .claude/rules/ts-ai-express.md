@@ -78,7 +78,9 @@ meet it yet. Cite this file as `[ts-ai-express.md §N]`.
 
 - TLS, compression and response caching belong to the portal's nginx, not to this process. A stream
   must not be buffered or compressed on its way: it sets `X-Accel-Buffering: no`, and every `GET`
-  answers `Cache-Control: no-store` (`routes.ts`), since the answers are per user and per entity.
+  behind the authentication gate answers `Cache-Control: no-store` (`routes.ts`), since the
+  answers are per user and per entity. The open routes (`/isLife`, `/health`, `/openapi.json`,
+  `/docs`) and the document agent's file routes do not set it.
 - The address the caller used (`req.protocol`, `req.hostname`, `req.ip`) is read through Express
   with `trust proxy` set to the proxies in front of the service. `Origin`, `Referer` and
   `X-Forwarded-*` are sent by the caller unless the proxy overwrites them: never take the portal's

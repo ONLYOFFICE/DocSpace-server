@@ -461,14 +461,16 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
       } catch (err) {
         // A failure of the portal fails the request only while nothing has been written: after
         // the first write landed, a bare 5xx would hide it and a retry would pay for the model
-        // again.
-        if (!(err instanceof DocspaceApiHttpError) || (err.status >= 500 && filled.length === 0)) {
+        // again. That holds for a write that got no answer too (a timeout, a dropped connection,
+        // a body that cannot be read), so after a landed write every failure is `write_failed`.
+        const refused = err instanceof DocspaceApiHttpError ? err : undefined;
+        if (filled.length === 0 && (!refused || refused.status >= 500)) {
           throw err;
         }
         logger.warn(
-          `meta.fill: writing ${fields.length} value(s) to ${input.kind} ${input.id} refused with ${err.status}`,
+          `meta.fill: writing ${fields.length} value(s) to ${input.kind} ${input.id} ${failureOf(err)}`,
         );
-        refusal ??= err;
+        refusal ??= refused;
         for (const field of fields) {
           unresolved.push({ fieldId: field.fieldId, name: field.name, reason: "write_failed" });
         }
@@ -505,12 +507,17 @@ async function metadataAfterWrite(
   try {
     return await getEntryMetadata(input.kind, input.id);
   } catch (err) {
-    if (!(err instanceof DocspaceApiHttpError)) {
-      throw err;
-    }
     logger.warn(
-      `meta.fill: the values of ${input.kind} ${input.id} were written, reading them back failed with ${err.status}`,
+      `meta.fill: the values of ${input.kind} ${input.id} were written, reading them back ${failureOf(err)}`,
     );
     return before;
   }
+}
+
+// How a call to the portal failed, for the log: the status of a refusal, else that no answer could
+// be read. The message of the error holds the address and the body, which stay out of the line.
+function failureOf(err: unknown): string {
+  return err instanceof DocspaceApiHttpError
+    ? `failed with ${err.status}`
+    : "got no answer that could be read";
 }

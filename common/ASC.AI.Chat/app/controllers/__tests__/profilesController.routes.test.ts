@@ -128,6 +128,27 @@ describe.each([
     expect(published(operationId, reply)).toEqual([]);
   });
 
+  it("answers the listed fields and the key of the written profile, nothing else the engine returns", async () => {
+    portalConfig(false);
+    engineCall().mockResolvedValue({
+      success: true,
+      profile: {
+        ...stored,
+        key: "sk-written",
+        headers: { "X-Auth": "MARKER" },
+        byokProvider: "openai",
+        extra: "MARKER",
+      } as typeof stored,
+    });
+
+    const reply = await invoke(profilesController[method], { body });
+
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual({ success: true, profile: { ...stored, key: "sk-written" } });
+    expect(JSON.stringify(reply.body)).not.toContain("MARKER");
+    expect(published(operationId, reply)).toEqual([]);
+  });
+
   it("answers 403 on a portal whose profiles the AI gateway manages, before any other work (Bug 83112)", async () => {
     portalConfig(true);
 
@@ -838,6 +859,23 @@ describe("profilesController.list", () => {
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual([stored]);
+    expect(published("aiProfilesList", reply)).toEqual([]);
+  });
+
+  it("answers each profile by its listed fields and the key the store left in it", async () => {
+    readAllForClient.mockResolvedValue([
+      { ...stored, key: "sk-admin", headers: { "X-Auth": "MARKER" }, byokProvider: "openai" },
+      { ...stored, id: "22222222-2222-2222-2222-222222222222", extra: "MARKER" },
+    ]);
+
+    const reply = await invoke(profilesController.list, { method: "GET" });
+
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual([
+      { ...stored, key: "sk-admin" },
+      { ...stored, id: "22222222-2222-2222-2222-222222222222" },
+    ]);
+    expect(JSON.stringify(reply.body)).not.toContain("MARKER");
     expect(published("aiProfilesList", reply)).toEqual([]);
   });
 

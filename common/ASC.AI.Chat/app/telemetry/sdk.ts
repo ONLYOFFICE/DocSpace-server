@@ -40,22 +40,8 @@ import { NodeSDK } from "@opentelemetry/sdk-node";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { UndiciInstrumentation } from "@opentelemetry/instrumentation-undici";
-import nconf, { getMetricExportIntervalMs } from "../../config/index.js";
+import { getMetricExportIntervalMs, getTelemetrySettings } from "../../config/index.js";
 import logger from "../log.js";
-
-function otelEnabled(): boolean {
-  const value: unknown = nconf.get("openTelemetry:enable");
-  return value === true || value === "true";
-}
-
-function resolveServiceName(): string {
-  const fromConfig: unknown = nconf.get("openTelemetry:ServiceName");
-  if (typeof fromConfig === "string" && fromConfig.length > 0) {
-    return fromConfig;
-  }
-  // Matches the .NET services' fallback style (assembly-like name).
-  return resolveOtelSetting("OTEL_SERVICE_NAME") ?? "ASC.AI.Chat";
-}
 
 // The endpoint may come from appsettings rather than env, so it is passed
 // explicitly — and an explicit `url` is taken verbatim, hence the per-signal
@@ -82,18 +68,10 @@ async function createExporters(protocol: string, endpoint: string) {
   };
 }
 
-// Env (Aspire) or shared appsettings root; nconf gives env precedence.
-function resolveOtelSetting(key: string): string | undefined {
-  const value: unknown = nconf.get(key);
-  return typeof value === "string" && value.length > 0 ? value : undefined;
-}
+const { enabled, otlpEndpoint, otlpProtocol: protocol, serviceName } = getTelemetrySettings();
 
-const otlpEndpoint = resolveOtelSetting("OTEL_EXPORTER_OTLP_ENDPOINT");
-
-if (otelEnabled() && otlpEndpoint) {
-  const protocol = resolveOtelSetting("OTEL_EXPORTER_OTLP_PROTOCOL")?.trim() || "http/protobuf";
+if (enabled && otlpEndpoint) {
   const { traceExporter, metricExporter } = await createExporters(protocol, otlpEndpoint);
-  const serviceName = resolveServiceName();
 
   const sdk = new NodeSDK({
     serviceName,

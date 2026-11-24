@@ -34,7 +34,7 @@ import { aiService } from "./httpClient.js";
 import { getObjectArray, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import { invalidateChatContext } from "./chatContextSnapshot.js";
-import { listAnswer } from "./upstreamShape.js";
+import { listAnswer, mapped } from "./upstreamShape.js";
 
 const PATH = "/byok";
 
@@ -86,11 +86,7 @@ export class HttpByokKeysStorage {
   async set(id: string, input: ByokKeyInput): Promise<ByokKey> {
     const raw = await aiService.put(`${PATH}/${encodeURIComponent(id)}`, input);
     invalidateChatContext("profiles");
-    const key = isObject(raw) ? dtoToByokKey(raw) : undefined;
-    if (!key) {
-      throw new Error("ai service returned invalid byok key");
-    }
-    return key;
+    return mapped(isObject(raw) ? dtoToByokKey(raw) : undefined, "PUT byok/{id}");
   }
 
   async delete(id: string): Promise<void> {

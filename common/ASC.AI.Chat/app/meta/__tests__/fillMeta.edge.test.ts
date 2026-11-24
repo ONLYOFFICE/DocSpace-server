@@ -244,14 +244,71 @@ describe("fillMeta", () => {
     );
   });
 
-  it("still fails when the read after the write fails for a reason that is no answer of the portal", async () => {
+  // ts-ai-failure-paths.md §6: a failure after the write, "a timeout and a non-HTTP error
+  // included", does not answer a bare error.
+  it.each([
+    ["a timeout", new Error("upstream timeout after 300000 ms: http://files.internal/x")],
+    ["a dropped connection", new TypeError("fetch failed")],
+    ["an answer that cannot be read", new Error("DocSpace API: unparseable response")],
+  ])(
+    "answers what was written when the read after the write ends in %s",
+    async (_what, failure) => {
+      customSync.mockResolvedValue(
+        assistantText(JSON.stringify({ values: [{ key: "f3", value: 1200 }] })),
+      );
+      vi.mocked(portalMetadata.getEntryMetadata)
+        .mockResolvedValueOnce(METADATA)
+        .mockRejectedValueOnce(failure);
+
+      const result = await fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false });
+
+      expect(result.metadata).toBe(METADATA);
+      expect(result.filled).toEqual([{ fieldId: 3, name: "Amount", value: { numberValue: 1200 } }]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        "meta.fill: the values of file 42 were written, reading them back got no answer that could be read",
+      );
+    },
+  );
+
+  it.each([
+    ["a timeout", new Error("upstream timeout after 300000 ms: http://files.internal/x")],
+    ["a dropped connection", new TypeError("fetch failed")],
+  ])(
+    "reports the second write as write_failed when it ends in %s after the first one landed",
+    async (_what, failure) => {
+      customSync.mockResolvedValue(
+        assistantText(
+          JSON.stringify({
+            values: [
+              { key: "f3", value: 1200 },
+              { key: "c0", value: "Apollo" },
+            ],
+          }),
+        ),
+      );
+      vi.mocked(portalMetadata.getEntryMetadata).mockResolvedValue(METADATA);
+      vi.mocked(portalMetadata.setValues).mockResolvedValue(undefined as never);
+      vi.mocked(portalMetadata.setCustomFields).mockRejectedValue(failure);
+
+      const result = await fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false });
+
+      expect(result.filled).toEqual([{ fieldId: 3, name: "Amount", value: { numberValue: 1200 } }]);
+      expect(result.unresolved).toContainEqual(
+        expect.objectContaining({ name: "Project", reason: "write_failed" }),
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        "meta.fill: writing 1 value(s) to file 42 got no answer that could be read",
+      );
+    },
+  );
+
+  it("fails the request when the first write got no answer: nothing is known to be written", async () => {
     customSync.mockResolvedValue(
       assistantText(JSON.stringify({ values: [{ key: "f3", value: 1200 }] })),
     );
-    const failure = new Error("timeout");
-    vi.mocked(portalMetadata.getEntryMetadata)
-      .mockResolvedValueOnce(METADATA)
-      .mockRejectedValueOnce(failure);
+    const failure = new Error("upstream timeout");
+    vi.mocked(portalMetadata.getEntryMetadata).mockResolvedValue(METADATA);
+    vi.mocked(portalMetadata.setValues).mockRejectedValue(failure);
 
     await expect(
       fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false }),

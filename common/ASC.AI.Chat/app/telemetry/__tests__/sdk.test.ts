@@ -50,11 +50,19 @@ function recorder(kind: string) {
   };
 }
 
-// The settings file is replaced; the readers of the environment stay the real ones.
-vi.mock("../../../config/index.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../../config/index.js")>()),
-  default: { get: (key: string): unknown => otel.config[key] },
-}));
+// nconf, the boundary of config/index.ts, answers from `otel.config` (the environment and the
+// settings files in one); the readers of config/index.ts stay the real ones. `app` is the
+// section the config module needs to load.
+vi.mock("nconf", () => {
+  const nconf = {
+    argv: () => nconf,
+    env: () => nconf,
+    file: () => nconf,
+    get: (key: string): unknown =>
+      key === "app" ? { appsettings: "/settings", environment: "test" } : otel.config[key],
+  };
+  return { default: nconf };
+});
 vi.mock("@opentelemetry/sdk-node", () => ({
   NodeSDK: class {
     constructor(options: unknown) {

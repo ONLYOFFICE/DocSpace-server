@@ -54,6 +54,7 @@ import { mediaTypeOf } from "./docspaceFileTransfer.js";
 import { FileTooLargeError, readFileBytes } from "./roomSkills.js";
 import { getEntityId, getNumber, getObject, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { UpstreamShapeError } from "./upstreamShape.js";
 
 /** The largest file copied: its bytes are held in memory on the way. */
 export const MAX_COPY_BYTES = 50 * 1024 * 1024;
@@ -127,7 +128,7 @@ export async function uploadInChunks(
   });
   const sessionId = isObject(session) ? getString(session, "id") : undefined;
   if (sessionId === undefined) {
-    throw new Error("DocSpace opened an upload session without an id");
+    throw new UpstreamShapeError("POST files/{folderId}/session");
   }
 
   const size = await chunkSize();
@@ -145,7 +146,7 @@ export async function uploadInChunks(
   const file = isObject(last) ? (getObject(last, "file") ?? last) : undefined;
   const id = file ? getEntityId(file, "id") : undefined;
   if (id === undefined) {
-    throw new Error("DocSpace finished an upload session without a file");
+    throw new UpstreamShapeError("POST files/{folderId}/session/{sessionId}");
   }
   return id;
 }

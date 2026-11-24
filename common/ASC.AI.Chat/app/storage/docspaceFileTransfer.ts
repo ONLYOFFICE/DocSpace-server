@@ -40,6 +40,7 @@
 import { envelopeResponse, filesApiRequest } from "./docspaceFilesApi.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { mapped, UpstreamShapeError } from "./upstreamShape.js";
 
 export interface UploadedFile {
   /** The new DocSpace entry id (internal int or thirdparty string, as a string). */
@@ -92,12 +93,9 @@ export async function uploadFile(
     await filesApiRequest("POST", `${encodeURIComponent(folderId)}/insert`, { form }),
   );
   if (!isObject(file)) {
-    throw new Error("DocSpace insert returned an unexpected payload");
+    throw new UpstreamShapeError("POST files/{folderId}/insert");
   }
-  const id = getEntityId(file, "id");
-  if (id === undefined) {
-    throw new Error("DocSpace insert returned a file without an id");
-  }
+  const id = mapped(getEntityId(file, "id"), "POST files/{folderId}/insert");
   const saved = getString(file, "title") ?? title;
   logger.info(`uploadFile: ${title} -> folder ${folderId} as entry ${id} (${bytes.length} bytes)`);
   return { id, title: saved };

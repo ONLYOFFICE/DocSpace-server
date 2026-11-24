@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
 import logger from "../../log.js";
@@ -188,7 +189,7 @@ describe("uploadFile", () => {
     const error = await failure(uploadFile("30", "a.txt", new Uint8Array([1]), "text/plain"));
 
     expect(error).not.toBeInstanceOf(AiServiceHttpError);
-    expect(error).toMatchObject({ message: "DocSpace insert returned an unexpected payload" });
+    expect(error).toEqual(new UpstreamShapeError("POST files/{folderId}/insert"));
   });
 
   it.each([
@@ -200,17 +201,17 @@ describe("uploadFile", () => {
   ])("refuses a file whose %s", async (_case, body) => {
     insert(() => HttpResponse.json(body));
 
-    expect(
-      await failure(uploadFile("30", "a.txt", new Uint8Array([1]), "text/plain")),
-    ).toMatchObject({ message: "DocSpace insert returned a file without an id" });
+    expect(await failure(uploadFile("30", "a.txt", new Uint8Array([1]), "text/plain"))).toEqual(
+      new UpstreamShapeError("POST files/{folderId}/insert"),
+    );
   });
 
   it("refuses an answer that is not JSON", async () => {
     insert(() => HttpResponse.text("ok"));
 
-    expect(
-      await failure(uploadFile("30", "a.txt", new Uint8Array([1]), "text/plain")),
-    ).toBeInstanceOf(SyntaxError);
+    expect(await failure(uploadFile("30", "a.txt", new Uint8Array([1]), "text/plain"))).toEqual(
+      new UpstreamShapeError("POST files/30/insert"),
+    );
   });
 
   it.each([400, 403, 413, 500])(

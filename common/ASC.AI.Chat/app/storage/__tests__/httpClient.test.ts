@@ -194,7 +194,7 @@ describe("providerFetch", () => {
     upstream.use(http.get("https://provider.example/x", () => HttpResponse.text("ok")));
 
     await inRequestContext({ cookie: "asc_auth_key=k", authorization: "Bearer s" }, () =>
-      providerFetch("https://provider.example/x", {}, "headers"),
+      providerFetch("https://provider.example/x", {}, "body"),
     );
 
     expect(upstream.seen[0]?.headers).not.toHaveProperty("cookie");
@@ -237,9 +237,7 @@ describe("providerFetch", () => {
       }),
     );
 
-    const call = providerFetch("https://mcp.example/mcp", {}, "headers").catch(
-      (err: unknown) => err,
-    );
+    const call = providerFetch("https://mcp.example/mcp", {}, "body").catch((err: unknown) => err);
     await vi.advanceTimersByTimeAsync(300_000);
 
     expect(await call).toMatchObject({ message: "upstream timeout after 300000ms" });
@@ -257,7 +255,7 @@ describe("providerFetch", () => {
     const call = providerFetch(
       "https://mcp.example/mcp",
       { signal: controller.signal },
-      "headers",
+      "body",
     ).catch((err: unknown) => err);
     controller.abort(new Error("closed"));
 
@@ -284,28 +282,106 @@ describe("providerFetch", () => {
     const res = await providerFetch(
       "https://mcp.example/mcp",
       { signal: controller.signal },
-      "headers",
+      "body",
     );
     const read = res.text().catch((err: unknown) => err);
 
     controller.abort(new Error("transport closed"));
+    // The abort errors the body at once: the read has settled before the next macrotask,
+    // which a body read on its own would not, as the stream never ends.
     const outcome = await Promise.race([
       read,
-      new Promise((resolve) => setTimeout(() => resolve("still reading"), 200)),
+      new Promise((resolve) => setImmediate(() => resolve("still reading"))),
     ]);
 
     expect(outcome).not.toBe("still reading");
     expect(outcome).toBeInstanceOf(Error);
   });
 
-  it("clears the timer once the headers are in", async () => {
+  // The MCP client of the library reads the answer without a signal of its own.
+  it("ends a body that stalls after the headers at the upstream timeout, with no signal of the caller", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    upstream.use(
+      http.post(
+        "https://mcp.example/mcp",
+        ({ request }) =>
+          new HttpResponse(
+            new ReadableStream({
+              start(stream) {
+                stream.enqueue(new TextEncoder().encode("data: 1\n\n"));
+                request.signal.addEventListener("abort", () => stream.error(request.signal.reason));
+              },
+            }),
+            { headers: { "content-type": "text/event-stream" } },
+          ),
+      ),
+    );
+    const res = await providerFetch("https://mcp.example/mcp", { method: "POST" }, "body");
+    let settled = false;
+    const read = res
+      .text()
+      .catch((err: unknown) => err)
+      .finally(() => {
+        settled = true;
+      });
+
+    await vi.advanceTimersByTimeAsync(299_000);
+    expect(settled).toBe(false);
+    await vi.advanceTimersByTimeAsync(1_000);
+
+    expect(await read).toBeInstanceOf(Error);
+  });
+
+  it("keeps the timer while the body is read and clears it once the body has ended", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     upstream.use(http.get("https://mcp.example/mcp", () => HttpResponse.text("ok")));
 
-    const res = await providerFetch("https://mcp.example/mcp", {}, "headers");
+    const res = await providerFetch("https://mcp.example/mcp", {}, "body");
 
-    expect(vi.getTimerCount()).toBe(0);
+    expect(vi.getTimerCount()).toBe(1);
     expect(await res.text()).toBe("ok");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  // The cancel of the stub's body does not settle here, so the test reads the timer as the cancel
+  // starts rather than awaiting it: the timer is cleared before the fetch body is cancelled.
+  it("clears the timer when the body is cancelled", async () => {
+    upstream.use(http.get("https://mcp.example/mcp", () => HttpResponse.text("ok")));
+    const set = vi.spyOn(globalThis, "setTimeout");
+    const cleared = vi.spyOn(globalThis, "clearTimeout");
+
+    const res = await providerFetch("https://mcp.example/mcp", {}, "body");
+    const timer = set.mock.results[set.mock.calls.findIndex(([, ms]) => ms === 300_000)]?.value;
+    cleared.mockClear();
+    void res.body?.cancel().catch(() => undefined);
+
+    expect(timer).toBeDefined();
+    expect(cleared).toHaveBeenCalledWith(timer);
+  });
+
+  it("clears the timer for an answer without a body and keeps its status", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    upstream.use(
+      http.get("https://mcp.example/mcp", () => new HttpResponse(null, { status: 204 })),
+    );
+
+    const res = await providerFetch("https://mcp.example/mcp", {}, "body");
+
+    expect(res.status).toBe(204);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("keeps the status, the reason and the headers of the answer", async () => {
+    upstream.use(
+      http.get("https://mcp.example/mcp", () =>
+        HttpResponse.text("no", { status: 503, statusText: "Busy", headers: { "x-a": "b" } }),
+      ),
+    );
+
+    const res = await providerFetch("https://mcp.example/mcp", {}, "body");
+
+    expect([res.status, res.statusText, res.headers.get("x-a")]).toEqual([503, "Busy", "b"]);
+    expect(await res.text()).toBe("no");
   });
 });
 

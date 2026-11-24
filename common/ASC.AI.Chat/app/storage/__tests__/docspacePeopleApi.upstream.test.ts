@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import type { JsonBodyType } from "msw";
 import { describe, expect, it } from "vitest";
 import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
@@ -135,13 +136,13 @@ describe("getSelf", () => {
     const error = await failure(getSelf());
 
     expect(error).not.toBeInstanceOf(DocspaceApiHttpError);
-    expect(error).toMatchObject({ message: `DocSpace API: unparseable response from ${SELF}` });
+    expect(error).toEqual(new UpstreamShapeError("GET people/@self"));
   });
 
   it("refuses an answer that is not JSON", async () => {
     upstream.use(http.get(SELF, () => HttpResponse.text("<html>")));
 
-    expect(await failure(getSelf())).toBeInstanceOf(SyntaxError);
+    expect(await failure(getSelf())).toEqual(new UpstreamShapeError("GET people/@self"));
   });
 
   it.each([401, 403, 500, 503])("rejects a %i with a DocspaceApiHttpError", async (status) => {

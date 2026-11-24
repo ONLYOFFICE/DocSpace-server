@@ -37,6 +37,7 @@
 // conversion table for the process, so every test of the table and of the reader imports a fresh
 // copy of the module; the file reads do not touch the table and use the static import.
 
+import { UpstreamShapeError } from "../../storage/upstreamShape.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useFastTimers } from "../../__tests__/helpers/time.js";
 import { delay, http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
@@ -160,15 +161,7 @@ describe("getPortalFile against the Files API", () => {
   });
 
   it.each([
-    ["id missing", { id: undefined }, undefined],
-    ["id null", { id: null }, undefined],
-    ["id a boolean", { id: true }, undefined],
-    ["id empty", { id: "" }, undefined],
     ["id a string", { id: "sbox-10" }, { id: "sbox-10", title: "Contract.docx", ext: ".docx" }],
-    ["title missing", { title: undefined }, undefined],
-    ["title null", { title: null }, undefined],
-    ["title a number", { title: 5 }, undefined],
-    ["title empty", { title: "" }, undefined],
     [
       "fileExst missing",
       { fileExst: undefined },
@@ -198,18 +191,38 @@ describe("getPortalFile against the Files API", () => {
     expect(await getPortalFile("10")).toEqual(expected);
   });
 
+  // A 200 that names no file is an answer of the wrong shape, unknown rather than "no such file"
+  // (ts-ai-failure-paths.md §1): only a 404 is absent.
+  it.each([
+    ["id missing", { id: undefined }],
+    ["id null", { id: null }],
+    ["id a boolean", { id: true }],
+    ["id empty", { id: "" }],
+    ["title missing", { title: undefined }],
+    ["title null", { title: null }],
+    ["title a number", { title: 5 }],
+    ["title empty", { title: "" }],
+  ])("rejects a file DTO with %s instead of reading it as absent", async (_what, patch) => {
+    upstream.use(http.get("*/api/2.0/files/file/:id", () => envelope({ ...FILE_DTO, ...patch })));
+
+    await expect(getPortalFile("10")).rejects.toEqual(
+      new UpstreamShapeError("GET files/file/{id}"),
+    );
+  });
+
   it.each([
     ["a response that is an array", { response: [FILE_DTO] }],
     ["a response that is null", { response: null }],
-  ])("answers undefined for %s", async (_what, body) => {
+    ["a response that is a string", { response: "x" }],
+    ["a response that is an empty object", { response: {} }],
+  ])("rejects %s instead of reading it as absent", async (_what, body) => {
     upstream.use(http.get("*/api/2.0/files/file/:id", () => HttpResponse.json(body)));
 
-    expect(await getPortalFile("10")).toBeUndefined();
+    await expect(getPortalFile("10")).rejects.toEqual(
+      new UpstreamShapeError("GET files/file/{id}"),
+    );
   });
 
-  // A 200 without the DocSpace envelope is an answer of the wrong shape, unknown rather than
-  // "no such file" (ts-ai-failure-paths.md §1); it read as absent before the read went through
-  // filesApiGet.
   it.each([
     ["no response", { status: 0 }],
     ["a body that is an array", [FILE_DTO]],
@@ -217,7 +230,7 @@ describe("getPortalFile against the Files API", () => {
   ])("rejects a body with %s instead of reading it as absent", async (_what, body) => {
     upstream.use(http.get("*/api/2.0/files/file/:id", () => HttpResponse.json(body)));
 
-    await expect(getPortalFile("10")).rejects.toThrow("DocSpace API: unparseable response");
+    await expect(getPortalFile("10")).rejects.toEqual(new UpstreamShapeError("GET files/file/10"));
   });
 
   it("answers undefined for 404 only and rethrows a 500 as the Files API error", async () => {
@@ -237,7 +250,7 @@ describe("getPortalFile against the Files API", () => {
   it("rejects a body that is not JSON instead of reading it as absent", async () => {
     upstream.use(http.get("*/api/2.0/files/file/:id", () => HttpResponse.text("<html>")));
 
-    await expect(getPortalFile("10")).rejects.toBeInstanceOf(SyntaxError);
+    await expect(getPortalFile("10")).rejects.toEqual(new UpstreamShapeError("GET files/file/10"));
   });
 
   it("rejects when the portal does not answer within the upstream timeout", async () => {
@@ -273,24 +286,38 @@ describe("listFolderFiles against the Files API", () => {
   });
 
   it.each([
-    ["files missing", { ...FOLDER_CONTENT_DTO, files: undefined }],
-    ["files null", { ...FOLDER_CONTENT_DTO, files: null }],
-    ["files an object", { ...FOLDER_CONTENT_DTO, files: { 0: FILE_DTO } }],
     ["files empty", { ...FOLDER_CONTENT_DTO, files: [] }],
     ["files of strings", { ...FOLDER_CONTENT_DTO, files: ["a.docx", 5, null] }],
-    ["a response that is a list", [FILE_DTO]],
-    ["a response that is null", null],
   ])("answers an empty list for a folder content with %s", async (_what, response) => {
     upstream.use(http.get("*/api/2.0/files/:folder", () => envelope(response)));
 
     expect(await listFolderFiles("12", 21)).toEqual([]);
   });
 
-  // Read through filesApiGet: a 200 without the envelope used to answer an empty folder.
+  // FolderContentDto carries `files`: a listing without it is unknown, not an empty folder.
+  it.each([
+    ["files missing", { ...FOLDER_CONTENT_DTO, files: undefined }],
+    ["files null", { ...FOLDER_CONTENT_DTO, files: null }],
+    ["files an object", { ...FOLDER_CONTENT_DTO, files: { 0: FILE_DTO } }],
+    ["a response that is a list", [FILE_DTO]],
+    ["a response that is null", null],
+    ["a response that is a string", "x"],
+    ["a response that is an empty object", {}],
+  ])(
+    "rejects a folder content with %s instead of answering an empty folder",
+    async (_what, response) => {
+      upstream.use(http.get("*/api/2.0/files/:folder", () => envelope(response)));
+
+      await expect(listFolderFiles("12", 21)).rejects.toEqual(
+        new UpstreamShapeError("GET files/{folderId}"),
+      );
+    },
+  );
+
   it("rejects a 200 without the envelope instead of answering an empty folder", async () => {
     upstream.use(http.get("*/api/2.0/files/:folder", () => HttpResponse.json([FILE_DTO])));
 
-    await expect(listFolderFiles("12", 21)).rejects.toThrow("DocSpace API: unparseable response");
+    await expect(listFolderFiles("12", 21)).rejects.toEqual(new UpstreamShapeError("GET files/12"));
   });
 
   it.each([
@@ -325,13 +352,35 @@ describe("textTargetFor and the conversion table", () => {
     expect(await textTargetFor({ id: "3", title: "a.rtf", ext: ".rtf" })).toBe(".csv");
   });
 
+  // The settings carry `extsConvertible`: an answer without the table is unknown, not
+  // "nothing converts".
   it.each([
     ["no extsConvertible", { extsWebEdited: [] }],
     ["extsConvertible null", { extsConvertible: null }],
     ["extsConvertible a list", { extsConvertible: [".docx"] }],
+    ["a response that is not an object", "settings"],
+  ])("rejects a table with %s and asks the portal again next time", async (_what, response) => {
+    const { textTargetFor } = await fresh();
+    let reads = 0;
+    upstream.use(
+      http.get("*/api/2.0/files/settings", () => {
+        reads += 1;
+        return reads === 1 ? envelope(response) : envelope(SETTINGS_DTO);
+      }),
+    );
+
+    await expect(textTargetFor(DOCX)).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      message: "GET files/settings: the answer has an unexpected shape",
+    });
+    expect(await textTargetFor(DOCX)).toBe(".txt");
+    expect(await textTargetFor(DOCX)).toBe(".txt");
+    expect(reads).toBe(2);
+  });
+
+  it.each([
     ["extsConvertible empty", { extsConvertible: {} }],
     ["only non-list targets", { extsConvertible: { ".docx": ".txt" } }],
-    ["a response that is not an object", "settings"],
   ])(
     "reads a table with %s as nothing converts and asks the portal again next time",
     async (_what, response) => {
@@ -379,7 +428,10 @@ describe("textTargetFor and the conversion table", () => {
       }),
     );
 
-    await expect(textTargetFor(DOCX)).rejects.toThrow("DocSpace API: unparseable response");
+    await expect(textTargetFor(DOCX)).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      message: "GET files/settings: the answer has an unexpected shape",
+    });
     expect(await textTargetFor(DOCX)).toBe(".txt");
     expect(reads).toBe(2);
   });
@@ -473,9 +525,10 @@ describe("PortalTextReader against the Files API", () => {
       http.put("*/api/2.0/files/fileops/bulkdownload", () => answer),
     );
 
-    await expect(readFileAsText(DOCX)).rejects.toThrow(
-      "bulkdownload for file 10 returned no operation",
-    );
+    await expect(readFileAsText(DOCX)).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      message: "PUT files/fileops/bulkdownload: the answer has an unexpected shape",
+    });
   });
 
   it("takes the first entry with an id and reads a missing error as none", async () => {
@@ -522,9 +575,10 @@ describe("PortalTextReader against the Files API", () => {
       ),
     );
 
-    await expect(readFileAsText(DOCX)).rejects.toThrow(
-      "conversion of file 10 finished without a download URL",
-    );
+    await expect(readFileAsText(DOCX)).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      message: "files/fileops: the answer has an unexpected shape",
+    });
   });
 
   it.each([

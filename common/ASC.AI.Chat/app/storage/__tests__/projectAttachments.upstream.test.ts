@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import type { JsonBodyType } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
@@ -297,9 +298,9 @@ describe("uploadInChunks over the network", () => {
   ])("refuses a session whose %s, sending no chunk", async (_case, answer) => {
     const { chunks } = session({ session: answer });
 
-    expect(
-      await failure(uploadInChunks("12", "x", new Uint8Array([1]), "text/plain")),
-    ).toMatchObject({ message: "DocSpace opened an upload session without an id" });
+    expect(await failure(uploadInChunks("12", "x", new Uint8Array([1]), "text/plain"))).toEqual(
+      new UpstreamShapeError("POST files/{folderId}/session"),
+    );
     expect(chunks).toEqual([]);
   });
 
@@ -325,9 +326,9 @@ describe("uploadInChunks over the network", () => {
   ])("refuses the last chunk's answer when %s", async (_case, chunk) => {
     session({ chunk });
 
-    expect(
-      await failure(uploadInChunks("12", "x", new Uint8Array([1]), "text/plain")),
-    ).toMatchObject({ message: "DocSpace finished an upload session without a file" });
+    expect(await failure(uploadInChunks("12", "x", new Uint8Array([1]), "text/plain"))).toEqual(
+      new UpstreamShapeError("POST files/{folderId}/session/{sessionId}"),
+    );
   });
 
   it.each([
@@ -468,7 +469,7 @@ describe("copyIntoProject over the network", () => {
 
     await expect(copyIntoProject("12", "40")).resolves.toBe("40");
     expect(logger.warn).toHaveBeenCalledWith(
-      "copyIntoProject: file 40 not copied into project 12, attached where it is: DocSpace opened an upload session without an id",
+      "copyIntoProject: file 40 not copied into project 12, attached where it is: POST files/{folderId}/session: the answer has an unexpected shape",
     );
   });
 });

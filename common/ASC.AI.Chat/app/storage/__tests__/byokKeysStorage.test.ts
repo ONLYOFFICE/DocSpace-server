@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { describe, expect, it } from "vitest";
 import {
   docspace,
@@ -235,7 +236,7 @@ describe("set", () => {
     const snapshot = snapshotOf();
     await expect(
       inRound(snapshot, () => storage.set("m", { provider: "anthropic", key: "k" })),
-    ).rejects.toThrow("ai service returned invalid byok key");
+    ).rejects.toEqual(new UpstreamShapeError("PUT byok/{id}"));
     expect([...snapshot.stale]).toEqual(["profiles"]);
   });
 

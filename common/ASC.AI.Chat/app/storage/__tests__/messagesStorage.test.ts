@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { describe, expect, it } from "vitest";
 import {
   docspace,
@@ -189,7 +190,7 @@ describe("create", () => {
 
     await expect(
       inRound(snapshot, () => storage.create("t", { role: "user", content: [] })),
-    ).rejects.toThrow("ai service returned invalid message");
+    ).rejects.toBeInstanceOf(UpstreamShapeError);
     expect([...snapshot.stale]).toEqual(["messages"]);
   });
 
@@ -350,10 +351,7 @@ describe("readByThread", () => {
 
   it.each([
     ["a bare list of messages", [messageDto({ id: "a" })], ["a"]],
-    ["a page without items", { cursor: null }, []],
-    ["a page whose items are not a list", { items: "a" }, []],
-    ["null", null, []],
-    ["a string", "page", []],
+    ["an empty page", { items: [], cursor: null }, []],
     [
       "a page with invalid items",
       { items: [null, { contents: "x" }, messageDto({ id: "b" })] },
@@ -364,6 +362,18 @@ describe("readByThread", () => {
     const items = await storage.readByThread("t");
     expect(items.map((m) => m.id)).toEqual(ids);
     expect(upstream.seen).toHaveLength(1);
+  });
+
+  // MessagesPageDto carries `items`; a page that cannot be read is unknown, not an empty thread.
+  it.each([
+    ["a page without items", { cursor: null }],
+    ["a page whose items are not a list", { items: "a" }],
+    ["an empty object", {}],
+    ["null", null],
+    ["a string", "page"],
+  ])("throws UpstreamShapeError for %s", async (_name, body) => {
+    upstream.use(http.get("*/internal/ai/threads/:id/messages", () => docspace(body)));
+    await expect(storage.readByThread("t")).rejects.toBeInstanceOf(UpstreamShapeError);
   });
 
   it.each([
