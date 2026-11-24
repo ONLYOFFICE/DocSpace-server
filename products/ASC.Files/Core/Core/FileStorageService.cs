@@ -77,7 +77,7 @@ public class FileStorageService //: IFileStorageService
     FileTrackerHelper fileTracker,
     IEventBus eventBus,
     EntryStatusManager entryStatusManager,
-    OFormRequestManager oFormRequestManager,
+    TemplateGalleryRequestManager templateGalleryRequestManager,
     ThumbnailSettings thumbnailSettings,
     CountRoomChecker countRoomChecker,
     CountAIAgentChecker countAIAgentChecker,
@@ -2007,9 +2007,9 @@ public class FileStorageService //: IFileStorageService
             file.Title = FileUtility.ReplaceFileExtension(title, fileExt);
         }
 
-        if (fileWrapper.FormId != 0)
+        if (fileWrapper.GalleryTemplateId != 0)
         {
-            await using var stream = await oFormRequestManager.Get(fileWrapper.FormId, fileExt);
+            await using var stream = await templateGalleryRequestManager.Get(fileWrapper.GalleryTemplateId, fileExt);
             file.ContentLength = stream.Length;
 
             if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
@@ -6970,5 +6970,5 @@ public class FileModel<T, TTempate>
     public T ParentId { get; init; }
     public string Title { get; set; }
     public TTempate TemplateId { get; init; }
-    public int FormId { get; init; }
+    public int GalleryTemplateId { get; init; }
 }

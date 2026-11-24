@@ -31,40 +31,16 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 /// <summary>
-/// The form settings.
+/// The template request data.
 /// </summary>
-public class OFormSettings
+public class TemplateGalleryRequestData
 {
     /// <summary>
-    /// The form domain.
+    /// The template data. The templates are requested by a filter, so the CMS answers
+    /// with a collection of at most one template.
     /// </summary>
-    public string Domain { get; set; }
-
-    /// <summary>
-    /// The form path.
-    /// </summary>
-    public string Path { get; set; }
-
-    /// <summary>
-    /// The form dashboard.
-    /// </summary>
-    public string Dashboard { get; set; }
-
-    /// <summary>
-    /// The form extension.
-    /// </summary>
-    public string Ext { get; set; }
-
-    /// <summary>
-    /// The form signature.
-    /// </summary>
-    public string Signature { get; set; }
-
-    /// <summary>
-    /// The form uploading settings.
-    /// </summary>
-    public OFormSettings Upload { get; set; }
+    public IEnumerable<TemplateGalleryData> Data { get; set; }
 }

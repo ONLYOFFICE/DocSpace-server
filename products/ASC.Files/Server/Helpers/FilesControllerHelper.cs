@@ -142,7 +142,7 @@ public class FilesControllerHelper(
         {
             JsonValueKind.Number => await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = templateId.GetInt32() }, enableExternalExt),
             JsonValueKind.String => await _fileStorageService.CreateNewFileAsync(new FileModel<T, string> { ParentId = folderId, Title = title, TemplateId = templateId.GetString() }, enableExternalExt),
-            _ => await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, FormId = formId }, enableExternalExt)
+            _ => await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, GalleryTemplateId = formId }, enableExternalExt)
         };
 
         return await _fileDtoHelper.GetAsync(file);

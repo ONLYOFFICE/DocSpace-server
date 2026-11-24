@@ -31,26 +31,40 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 /// <summary>
-/// The form data.
+/// The template gallery settings.
 /// </summary>
-public class OFromData
+public class TemplateGallerySettings
 {
     /// <summary>
-    /// The form ID.
+    /// The template gallery domain.
     /// </summary>
-    public int Id { get; set; }
+    public string Domain { get; set; }
 
     /// <summary>
-    /// The form data attributes. Strapi v4 only: v5 returns a flat entity.
+    /// The template gallery path.
     /// </summary>
-    public OFormDataAttributes Attributes { get; set; }
+    public string Path { get; set; }
 
     /// <summary>
-    /// The form files. Strapi v5 only: v4 nests them into the attributes.
+    /// The template gallery dashboard.
     /// </summary>
-    [JsonPropertyName("file_oform")]
-    public IEnumerable<OFromFileAttribute> Files { get; set; }
+    public string Dashboard { get; set; }
+
+    /// <summary>
+    /// The extension of the template gallery files.
+    /// </summary>
+    public string Ext { get; set; }
+
+    /// <summary>
+    /// The form signature.
+    /// </summary>
+    public string Signature { get; set; }
+
+    /// <summary>
+    /// The settings for uploading a form to the template gallery.
+    /// </summary>
+    public TemplateGallerySettings Upload { get; set; }
 }

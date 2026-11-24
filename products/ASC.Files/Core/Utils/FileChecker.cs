@@ -66,7 +66,7 @@ public class FileChecker(
             return ((byte)message[6] & Dse3FlagIsForm) != 0;
         }
 
-        var config = configuration.GetSection("files:oform").Get<OFormSettings>();
+        var config = configuration.GetSection("files:oform").Get<TemplateGallerySettings>();
 
         return IsExtendedPDFFile(message, config.Signature);
     }

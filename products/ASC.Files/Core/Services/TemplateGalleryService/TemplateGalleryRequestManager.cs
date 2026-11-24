@@ -31,15 +31,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 [Singleton]
-public class OFormRequestManager(
-    ILogger<OFormRequestManager> logger,
+public class TemplateGalleryRequestManager(
+    ILogger<TemplateGalleryRequestManager> logger,
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory)
 {
-    private readonly OFormSettings _configuration = configuration.GetSection("files:oform").Get<OFormSettings>();
+    private readonly TemplateGallerySettings _configuration = configuration.GetSection("files:oform").Get<TemplateGallerySettings>();
 
     private readonly JsonSerializerOptions _options = new()
     {
@@ -52,7 +52,7 @@ public class OFormRequestManager(
         {
             using var httpClient = httpClientFactory.CreateClient();
             using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}?filters[id][$eq]={id}&locale=*&populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={ext}");
-            var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(), _options);
+            var data = JsonSerializer.Deserialize<TemplateGalleryRequestData>(await response.Content.ReadAsStringAsync(), _options);
 
             var file = GetFile(data, ext) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
 
@@ -66,17 +66,17 @@ public class OFormRequestManager(
         }
     }
 
-    private static OFromFileAttribute GetFile(OFromRequestData data, string ext)
+    private static TemplateGalleryFileAttribute GetFile(TemplateGalleryRequestData data, string ext)
     {
-        var form = data?.Data?.FirstOrDefault();
-        if (form == null)
+        var template = data?.Data?.FirstOrDefault();
+        if (template == null)
         {
             return null;
         }
 
-        // Strapi v5 keeps the files right on the form, v4 wraps them into
+        // Strapi v5 keeps the files right on the template, v4 wraps them into
         // "attributes" and every file into a "data" envelope of its own.
-        var files = form.Files ?? form.Attributes?.File?.Data?.Select(f => f.Attributes);
+        var files = template.Files ?? template.Attributes?.File?.Data?.Select(f => f.Attributes);
 
         return files?.FirstOrDefault(f => f?.Ext == ext);
     }

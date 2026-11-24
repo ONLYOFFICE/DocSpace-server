@@ -31,64 +31,26 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 /// <summary>
-/// The form data attributes.
+/// The template data.
 /// </summary>
-public class OFormDataAttributes
+public class TemplateGalleryData
 {
     /// <summary>
-    /// The form file.
-    /// </summary>
-    [JsonPropertyName("file_oform")]
-    public OFromFile File { get; set; }
-}
-
-/// <summary>
-/// The form file.
-/// </summary>
-public class OFromFile
-{
-    /// <summary>
-    /// The form file data.
-    /// </summary>
-    public IEnumerable<OFromFileData> Data { get; set; }
-}
-
-/// <summary>
-/// The form file data.
-/// </summary>
-public class OFromFileData
-{
-    /// <summary>
-    /// The form file ID.
+    /// The template ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// The form file attributes.
+    /// The template data attributes. Strapi v4 only: v5 returns a flat entity.
     /// </summary>
-    public OFromFileAttribute Attributes { get; set; }
-}
-
-/// <summary>
-/// The form file attributes.
-/// </summary>
-public class OFromFileAttribute
-{
-    /// <summary>
-    /// The form file name.
-    /// </summary>
-    public string Name { get; set; }
+    public TemplateGalleryDataAttributes Attributes { get; set; }
 
     /// <summary>
-    /// The form file URL.
+    /// The template files. Strapi v5 only: v4 nests them into the attributes.
     /// </summary>
-    public string Url { get; set; }
-
-    /// <summary>
-    /// The form file extension.
-    /// </summary>
-    public string Ext { get; set; }
+    [JsonPropertyName("file_oform")]
+    public IEnumerable<TemplateGalleryFileAttribute> Files { get; set; }
 }

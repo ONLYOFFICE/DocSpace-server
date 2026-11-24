@@ -195,7 +195,7 @@ public partial class SettingsController(
                 settings.Plugins.Delete = pluginsDelete;
             }
 
-            var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
+            var formGallerySettings = configuration.GetSection("files:oform").Get<TemplateGallerySettings>();
             settings.FormGallery = formGallerySettings.Map();
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();

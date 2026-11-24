@@ -31,16 +31,64 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 /// <summary>
-/// The form request data.
+/// The template data attributes.
 /// </summary>
-public class OFromRequestData
+public class TemplateGalleryDataAttributes
 {
     /// <summary>
-    /// The form data. The forms are requested by a filter, so the CMS answers
-    /// with a collection of at most one form.
+    /// The template file.
     /// </summary>
-    public IEnumerable<OFromData> Data { get; set; }
+    [JsonPropertyName("file_oform")]
+    public TemplateGalleryFile File { get; set; }
+}
+
+/// <summary>
+/// The template file.
+/// </summary>
+public class TemplateGalleryFile
+{
+    /// <summary>
+    /// The template file data.
+    /// </summary>
+    public IEnumerable<TemplateGalleryFileData> Data { get; set; }
+}
+
+/// <summary>
+/// The template file data.
+/// </summary>
+public class TemplateGalleryFileData
+{
+    /// <summary>
+    /// The template file ID.
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The template file attributes.
+    /// </summary>
+    public TemplateGalleryFileAttribute Attributes { get; set; }
+}
+
+/// <summary>
+/// The template file attributes.
+/// </summary>
+public class TemplateGalleryFileAttribute
+{
+    /// <summary>
+    /// The template file name.
+    /// </summary>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// The template file URL.
+    /// </summary>
+    public string Url { get; set; }
+
+    /// <summary>
+    /// The template file extension.
+    /// </summary>
+    public string Ext { get; set; }
 }

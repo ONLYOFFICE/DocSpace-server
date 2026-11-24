@@ -153,6 +153,7 @@ global using ASC.Files.Core.Services.ExternalDbSync;
 global using ASC.Files.Core.Services.FormRecovery;
 global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Files.Core.Services.OFormService;
+global using ASC.Files.Core.Services.TemplateGalleryService;
 global using ASC.Files.Core.Services.WCFService.Wrappers;
 global using ASC.Files.Core.Text;
 global using ASC.Files.Core.Thirdparty;
