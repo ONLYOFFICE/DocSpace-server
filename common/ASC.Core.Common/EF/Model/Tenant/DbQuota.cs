@@ -288,6 +288,20 @@ public static class DbQuotaExtension
                     Visible = true,
                     Wallet = true,
                     Additional = true
+                },
+                new DbQuota
+                {
+                    TenantId = -19,
+                    Name = "adminwalletyear",
+                    Description = null,
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
+                    Price = 220,
+                    ProductId = "1020", // placeholder until the payment system has the product
+                    ServiceName = "adminyear",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = false // primary quota, not additive
                 }
                 );
         return modelBuilder;

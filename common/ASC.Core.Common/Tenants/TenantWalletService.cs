@@ -58,5 +58,8 @@ public enum TenantWalletService
     DocsCloudDevPack = -16,
 
     [Description("AISearch")]
-    AISearch = -18
+    AISearch = -18,
+
+    [Description("AdminYear")]
+    AdminYear = -19
 }

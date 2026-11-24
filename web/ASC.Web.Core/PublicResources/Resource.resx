@@ -1461,6 +1461,9 @@
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminwalletyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
     <value>Docs Connect</value>
   </data>

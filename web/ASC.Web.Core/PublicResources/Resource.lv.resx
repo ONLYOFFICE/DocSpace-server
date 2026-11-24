@@ -1443,6 +1443,9 @@
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminwalletyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
     <value>Lietotāji</value>
   </data>

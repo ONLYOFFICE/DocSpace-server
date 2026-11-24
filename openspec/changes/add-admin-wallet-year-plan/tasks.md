@@ -2,11 +2,11 @@
 
 ## 1. Catalogue: seed, enum, migrations, title
 
-- [ ] 1.1 Add the `adminwalletyear` row (id -19) to the quota seed and `AdminYear` to the wallet service enum; verify `ASC.Core.Common` builds with `--no-incremental` and no new warnings
+- [x] 1.1 Add the `adminwalletyear` row (id -19) to the quota seed and `AdminYear` to the wallet service enum; verify `ASC.Core.Common` builds with `--no-incremental` and no new warnings
 - [ ] 1.2 Add the title resource `Tariffs_adminwalletyear` (resx, hand-edited designer, the locales that have `Tariffs_adminwallet`); verify the `WalletServiceTextsTests` class of `ASC.Notify.Tests` passes
-- [ ] 1.3 Create the MySQL SaaS migration that inserts the row and the MySQL Standalone migration that deletes it (`db-migrations` skill); verify by applying them with `ASC.Migration.Runner` and reading the row from `tenants_quota`
-- [ ] 1.4 Add a unit test over the seed: unique non-empty product ids, unique service names of wallet rows; verify it fails when the new row is given product id `1013` (`prove-red.sh`)
-- [ ] 1.5 Add a unit test that the merged quota of the yearly wallet plan carries its price and the `year` feature; verify it passes in `ASC.Core.Common.Tests`
+- [x] 1.3 Create the MySQL SaaS migration that inserts the row and the MySQL Standalone migration that deletes it (`db-migrations` skill); verify by applying them with `ASC.Migration.Runner` and reading the row from `tenants_quota`
+- [x] 1.4 Add a unit test over the seed: unique non-empty product ids, unique service names of wallet rows; verify it fails when the new row is given product id `1013` (`prove-red.sh`)
+- [x] 1.5 Add a unit test that the merged quota of the yearly wallet plan carries its price and the `year` feature; verify it passes in `ASC.Core.Common.Tests`
 
 ## 2. Buying and moving: both administrators plans
 

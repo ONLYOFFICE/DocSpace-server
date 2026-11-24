@@ -58,6 +58,18 @@ public class TenantQuotaOperatorTests
         CountRoomAdmin = 1
     };
 
+    // The yearly admin-via-wallet plan: the same as AdminWallet with its own price and the year feature.
+    private static TenantQuota AdminWalletYear() => new((int)TenantWalletService.AdminYear)
+    {
+        Name = "adminwalletyear",
+        Price = 220m,
+        Wallet = true,
+        Additional = false,
+        Visible = true,
+        CountRoomAdmin = 1,
+        Year = true
+    };
+
     // A wallet add-on: wallet + additional. Its price must NOT be added to the aggregate.
     private static TenantQuota StorageWalletAddon() => new((int)TenantWalletService.Storage)
     {
@@ -129,5 +141,20 @@ public class TenantQuotaOperatorTests
         combined.Price.Should().Be(30m);           // additional wallet add-on price is excluded
         combined.CountRoomAdmin.Should().Be(3);    // base features preserved
         combined.Wallet.Should().BeFalse();        // identity stays the non-wallet base plan
+    }
+
+    [Fact]
+    public void Add_YearlyAdminWallet_AddsPriceAndAdminCount_AndCarriesYear()
+    {
+        var adminWalletYear = AdminWalletYear();
+        adminWalletYear *= 3; // Price 660, CountRoomAdmin 3
+
+        TenantQuota? combined = null;
+        combined += adminWalletYear;
+        combined += StorageWalletAddon();
+
+        combined.Price.Should().Be(660m);          // the primary wallet plan is priced, the add-on is not
+        combined.CountRoomAdmin.Should().Be(3);
+        combined.Year.Should().BeTrue();           // feature flags of the rows are OR-ed
     }
 }

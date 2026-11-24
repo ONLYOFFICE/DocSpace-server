@@ -38,7 +38,7 @@ See proposal.md for the motivation. What shapes the approach:
 ## Decisions
 
 1. **Seed row.** Quota id -19, name `adminwalletyear`, features of `adminyear`, price 220, wallet, primary
-   (not additional), product id `1017` and service name `adminyear` as placeholders. The service name
+   (not additional), product id `1020` and service name `adminyear` as placeholders. The service name
    reuses the existing description and unit texts of the wallet operations, so no new letter or report text
    is needed. *Alternative:* an empty product id until the product exists — rejected: a wallet quota without
    a product id cannot be found by name for a purchase, so nothing could be tested.
