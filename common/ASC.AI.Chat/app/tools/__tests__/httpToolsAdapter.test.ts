@@ -666,14 +666,14 @@ describe("HttpToolsAdapter.getPrompt", () => {
     expect(upstream.seen).toEqual([]);
   });
 
-  it("leaves the prompt empty and warns when the attachments read fails under safeGetToolsPrompt", async () => {
+  it("fails safeGetToolsPrompt with the read's own failure when the attachments read fails", async () => {
     upstream.use(http.post("*/internal/ai/attachments/read", () => docspaceError(503)));
     answerList();
 
-    await expect(safeGetToolsPrompt(new HttpToolsAdapter(), "4", ["a"])).resolves.toBe("");
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringMatching(/^tools\/list prompt fetch failed: AI service 503 /),
-    );
+    await expect(safeGetToolsPrompt(new HttpToolsAdapter(), "4", ["a"])).rejects.toMatchObject({
+      status: 503,
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(upstream.seen.map((r) => r.path)).toEqual(["/internal/ai/attachments/read"]);
   });
 });

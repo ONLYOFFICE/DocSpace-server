@@ -220,8 +220,8 @@ export const aiServiceBaseUrl = AI_BASE_URL;
 /**
  * How {@link providerFetch} bounds a call:
  * - `"headers"`: the upstream timeout bounds the call until the answer's headers are in. Once they
- *   are, the timer is cleared and the caller's `signal` is detached as well, so neither ends the
- *   reading of the body (the MCP transport, which reads its own streams).
+ *   are, the timer is cleared and the caller's `signal` alone ends the reading of the body (the MCP
+ *   transport, which reads its own streams and closes them through that signal).
  * - `"none"`: no timeout of its own; the caller's `signal` alone ends the call and the body. For a
  *   relayed stream, ended by the client hanging up, and for a caller that bounds the call and the
  *   reading of its answer with its own {@link withTimeout}.
@@ -242,11 +242,20 @@ export async function providerFetch(
   if (timeout === "none") {
     return fetch(url, init);
   }
-  const { signal, cancel } = withTimeout(init.signal ?? undefined);
+  // `AbortSignal.any` rather than `withTimeout`: its `cancel()` would detach the caller's signal
+  // along with the timer, and a body the caller can no longer end outlives the caller. The
+  // combined signal holds the caller's weakly, so a long-lived transport signal shared by many
+  // calls collects no listeners.
+  const timer = new AbortController();
+  const handle = setTimeout(
+    () => timer.abort(new Error(`upstream timeout after ${UPSTREAM_TIMEOUT_MS}ms`)),
+    UPSTREAM_TIMEOUT_MS,
+  );
+  const signal = init.signal ? AbortSignal.any([init.signal, timer.signal]) : timer.signal;
   try {
     return await fetch(url, { ...init, signal });
   } finally {
-    cancel();
+    clearTimeout(handle);
   }
 }
 

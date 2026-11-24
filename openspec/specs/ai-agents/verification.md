@@ -432,7 +432,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Metadata values filled from a file** | | |
 | `dryRun`, `overwrite`, per-field report (scenario) | `Chat/meta/fillMeta.ts`; `Chat/meta/__tests__/fillMeta.test.ts`; yaml 5871 | TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] at unit level - `fillMeta.test.ts:116,258,304,353,406` |
 | **The model and the failures of the metadata routes** | | |
-| GenerateMeta else Default, 503; 402, 429, 502, 504 (scenario) | `Chat/meta/common.ts`; `Chat/meta/__tests__/common.test.ts`; `Chat/controllers/__tests__/metaController.test.ts` | TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] at unit level - `common.test.ts:52,67,207,233`, `generateMeta.test.ts:121,135`, `metaController.test.ts:104` |
+| GenerateMeta else Default, 503; 402, 429, 502, 504 (scenario) | `Chat/meta/common.ts`; `Chat/meta/__tests__/common.test.ts`; `Chat/controllers/__tests__/metaController.test.ts` | TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] at unit level - `common.test.ts:52,67,207,233`, `generateMeta.test.ts:121,135`, `metaController.test.ts:134` |
 | **Billing of AI usage on a hosted portal** | | |
 | Charges; source (scenario); off stops | `TS/billing/billing.spec.ts:145,255,350,437` | TS-ONLY (TS block skipped) |
 | **Spending limits on the AI services** | | |

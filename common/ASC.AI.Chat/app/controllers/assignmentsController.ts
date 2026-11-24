@@ -77,8 +77,9 @@ class ResolveStorage extends HttpStorageAdapter {
 const resolveEngine = new AssignmentsEngine({ storage: new ResolveStorage() });
 
 // Both resolve operations answer the gone profile as an empty slot (404 and
-// an empty result respectively) instead of a 500.
-async function resolveOrNull(
+// an empty result respectively) instead of a 500, and so does the gate of a
+// new thread (`assertThreadCreatable`).
+export async function resolveOrNull(
   actionType: ActionType,
   entityId: string | undefined,
 ): Promise<Awaited<ReturnType<AssignmentsEngine["tryResolveForAction"]>>> {

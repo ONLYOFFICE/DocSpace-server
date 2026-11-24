@@ -203,6 +203,18 @@ async function resolveForm(
   return { formId: 0, attachmentId: "" };
 }
 
+// The failures of a read of the round's form, told apart from a failed
+// tools/list call: the prompt may go missing, the form may not
+// (`safeGetToolsPrompt`). The error itself travels on unchanged, so a caller
+// still sees the read's own status.
+const formReadFailures = new WeakSet<Error>();
+
+function formReadFailure(err: unknown): Error {
+  const failure = err instanceof Error ? err : new Error(String(err), { cause: err });
+  formReadFailures.add(failure);
+  return failure;
+}
+
 // Resolve the round's form context from the attachment refs the controller
 // passes — the current message's own, or the thread history's when it has none
 // (see `withToolsPrompt`). The resolved formId is cached in the per-request
@@ -217,7 +229,12 @@ async function toContext(
   const knowledgeRoomIds = getKnowledgeRoomIds();
   const knowledgeRoomId = knowledgeRoomIds[0] ?? 0;
   if (attachmentId && attachmentId.length > 0) {
-    const resolved = await resolveForm(attachmentId);
+    let resolved: { formId: number; attachmentId: string };
+    try {
+      resolved = await resolveForm(attachmentId);
+    } catch (err) {
+      throw formReadFailure(err);
+    }
     if (resolved.formId > 0) {
       setResolvedFormId(resolved.formId);
       setResolvedAttachmentId(resolved.attachmentId);
@@ -443,8 +460,10 @@ export class HttpToolsAdapter implements ToolsAdapter {
 }
 
 /**
- * Best-effort prompt fetch for the controller. Never throws — a failed
- * fetch leaves the system prompt unchanged.
+ * The tools prompt for the controller. A failed tools/list call leaves the
+ * system prompt unchanged with a warning; a failed read of the round's form
+ * rejects with that read's own error, so the round fails instead of running
+ * without its form (ts-ai-failure-paths.md §1).
  */
 export async function safeGetToolsPrompt(
   adapter: HttpToolsAdapter,
@@ -454,6 +473,9 @@ export async function safeGetToolsPrompt(
   try {
     return await adapter.getPrompt(entityId, attachmentId);
   } catch (err) {
+    if (err instanceof Error && formReadFailures.has(err)) {
+      throw err;
+    }
     logger.warn(
       `tools/list prompt fetch failed: ${err instanceof Error ? err.message : String(err)}`,
     );

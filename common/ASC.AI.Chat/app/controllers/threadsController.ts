@@ -31,7 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ThreadsEngine, AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
+import { ThreadsEngine, ActionType } from "@onlyoffice/ai-chat/core";
+import { resolveOrNull } from "./assignmentsController.js";
 import type {
   Profile,
   OpenOrCreateInput,
@@ -135,8 +136,6 @@ interface CreateBody {
   entityId?: string;
 }
 
-const assignmentsEngine = new AssignmentsEngine({ storage });
-
 // Gate for creating a thread (review #6, Bug 82719). Two requirements:
 //  1. If an `entityId` is supplied it must reference a folder the caller can
 //     access — a missing folder surfaces as 404, a no-access response as 403
@@ -173,7 +172,8 @@ export async function assertThreadCreatable(
   if (profileId && (await readStoredProfile(profileId))) {
     return;
   }
-  const resolved = await assignmentsEngine.tryResolveForAction(ActionType.Chat, entityId);
+  // A chat slot whose profile is gone is no profile, not a server failure.
+  const resolved = await resolveOrNull(ActionType.Chat, entityId);
   if (resolved?.profile) {
     return;
   }

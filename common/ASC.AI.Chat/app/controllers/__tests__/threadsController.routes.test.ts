@@ -54,12 +54,15 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
 const readThread = vi.fn<(id: string) => Promise<unknown>>();
 const readMessage = vi.fn<(id: string) => Promise<unknown>>();
 const readProfile = vi.fn<(id: string) => Promise<unknown>>();
+// HttpStorageAdapter: the base of the resolve engine's storage in assignmentsController, which
+// the thread gate calls; the engine class itself is mocked.
 vi.mock("../../storage/index.js", () => ({
   storage: {
     threads: { readById: readThread },
     messages: { readById: readMessage },
     profiles: { readById: readProfile },
   },
+  HttpStorageAdapter: class {},
 }));
 const assertEntityAccessible = vi.fn<(entityId?: string) => Promise<void>>();
 const primeSourceMeta = vi.fn<(entityId?: string) => Promise<void>>();

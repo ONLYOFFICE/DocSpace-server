@@ -967,6 +967,17 @@ describe("the prompt of a streaming round", () => {
     expect(h.engine.sendWithStream).not.toHaveBeenCalled();
   });
 
+  it("fails the round before its stream when the round's form cannot be read", async () => {
+    h.safeGetToolsPrompt.mockRejectedValue(
+      new AiServiceHttpError(503, "Service Unavailable", "", "u"),
+    );
+
+    const reply = await stream({});
+
+    expect(reply.status).toBe(503);
+    expect(h.engine.sendWithStream).not.toHaveBeenCalled();
+  });
+
   it("reads no history for a new thread", async () => {
     await h.call(aiController.sendWithStream, { userMessage: text("hi") });
 

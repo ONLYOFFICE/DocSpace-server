@@ -48,7 +48,12 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
   };
 });
 const readById = vi.fn();
-vi.mock("../../storage/index.js", () => ({ storage: { profiles: { readById } } }));
+// HttpStorageAdapter: the base of the resolve engine's storage in assignmentsController, which
+// the thread gate calls; the engine class itself is the mock above.
+vi.mock("../../storage/index.js", () => ({
+  storage: { profiles: { readById } },
+  HttpStorageAdapter: class {},
+}));
 const assertEntityAccessible = vi.fn(async () => {});
 vi.mock("../../storage/docspaceFilesApi.js", () => ({
   DocspaceApiHttpError: class extends Error {},

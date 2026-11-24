@@ -264,6 +264,40 @@ describe("providerFetch", () => {
     expect(await call).toMatchObject({ message: "closed" });
   });
 
+  it("keeps the caller's signal on the body once the headers are in", async () => {
+    upstream.use(
+      http.get(
+        "https://mcp.example/mcp",
+        ({ request }) =>
+          new HttpResponse(
+            new ReadableStream({
+              start(stream) {
+                stream.enqueue(new TextEncoder().encode("data: 1\n\n"));
+                request.signal.addEventListener("abort", () => stream.error(request.signal.reason));
+              },
+            }),
+            { headers: { "content-type": "text/event-stream" } },
+          ),
+      ),
+    );
+    const controller = new AbortController();
+    const res = await providerFetch(
+      "https://mcp.example/mcp",
+      { signal: controller.signal },
+      "headers",
+    );
+    const read = res.text().catch((err: unknown) => err);
+
+    controller.abort(new Error("transport closed"));
+    const outcome = await Promise.race([
+      read,
+      new Promise((resolve) => setTimeout(() => resolve("still reading"), 200)),
+    ]);
+
+    expect(outcome).not.toBe("still reading");
+    expect(outcome).toBeInstanceOf(Error);
+  });
+
   it("clears the timer once the headers are in", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     upstream.use(http.get("https://mcp.example/mcp", () => HttpResponse.text("ok")));
