@@ -34,7 +34,7 @@
 // The catalog reader over folders written for each test, and the per-process memo of the
 // shipped catalog.
 
-import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, mkdir, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -173,15 +173,31 @@ describe("readTemplateCatalog", () => {
     });
   });
 
-  // DEFECT ctl-44: a template folder that cannot be listed (here `skill-sets` is a file, ENOTDIR; an EACCES goes the same way) is read as a folder without templates and the catalog loads without them — expected the read to fail, as the module comment says of a broken entry and as a failed read is not "absent" (catalog.ts subfolders `.catch(() => [])`; ts-ai-failure-paths.md §1)
-  it("reads a template folder it cannot list as holding no templates", async () => {
+  it("fails the read when a template folder cannot be listed instead of reading it as empty", async () => {
     const root = await folder({ "skill-sets": "a file, not a folder" });
 
-    expect(await readTemplateCatalog(root)).toEqual({
-      agents: [],
-      skillSets: [],
-      knowledgeBases: [],
-    });
+    await expect(readTemplateCatalog(root)).rejects.toMatchObject({ code: "ENOTDIR" });
+  });
+
+  // A process running as root reads a folder whatever its mode, so the refusal cannot be made there.
+  it.skipIf(process.getuid?.() === 0)(
+    "fails the read when a template folder may not be listed instead of reading it as empty",
+    async () => {
+      const root = await folder(tree());
+      await chmod(path.join(root, "skill-sets"), 0o000);
+      try {
+        await expect(readTemplateCatalog(root)).rejects.toMatchObject({ code: "EACCES" });
+      } finally {
+        await chmod(path.join(root, "skill-sets"), 0o755);
+      }
+    },
+  );
+
+  it("fails the read when a named file cannot be examined instead of calling it missing", async () => {
+    const root = await folder(tree({ "skill-sets/set/a.md": undefined }));
+    await symlink("a.md", path.join(root, "skill-sets/set/a.md"));
+
+    await expect(readTemplateCatalog(root)).rejects.toMatchObject({ code: "ELOOP" });
   });
 
   const SET_FILE = "skill-sets/set/template.json";

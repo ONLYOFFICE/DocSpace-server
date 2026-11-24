@@ -39,8 +39,10 @@
  * bases, which are installed with it, and given the portal's chat model.
  *
  * Every install makes new rooms: nothing is matched against what the portal
- * already holds. A step the Files service refuses fails the install with its
- * status, and the rooms made before it stay. The agent's model is the
+ * already holds. A step that fails before the first room fails the install
+ * as it is; one that fails after it throws `TemplateInstallIncompleteError`,
+ * which carries the step's error and the rooms already made, so that the
+ * answer can name them (they stay in the portal). The agent's model is the
  * exception: a portal that has no chat model, or does not store it, still
  * gets the agent, and the answer says so in `warnings`. A template that
  * holds a knowledge base is refused with 409 before the first room on a
@@ -86,6 +88,33 @@ export interface InstalledTemplate extends InstalledRoom {
   warnings: string[];
 }
 
+/** The rooms an installation has made so far. */
+export interface InstalledRooms {
+  skillSets: InstalledRoom[];
+  knowledgeBases: InstalledRoom[];
+  /** The agent's room, once it is made. */
+  agent?: InstalledRoom;
+}
+
+/**
+ * A step of an installation failed after its first room was made. `cause` is the step's own
+ * error, which decides the status of the answer; `made` lists the rooms that exist.
+ */
+export class TemplateInstallIncompleteError extends Error {
+  constructor(
+    readonly made: InstalledRooms,
+    cause: unknown,
+  ) {
+    super("The template was installed in part", { cause });
+    this.name = "TemplateInstallIncompleteError";
+  }
+}
+
+/** Whether the installation has made any room yet. */
+function madeAny(made: InstalledRooms): boolean {
+  return made.skillSets.length + made.knowledgeBases.length > 0 || made.agent !== undefined;
+}
+
 async function createRoom(
   template: Template,
   roomType: number,
@@ -107,8 +136,13 @@ async function createRoom(
   return { templateId, id, title: getString(room, "title") ?? title };
 }
 
-async function installSource(template: SourceTemplate): Promise<InstalledRoom> {
+/** Makes the room of a skill set or a knowledge base, adds it to `made` and fills it. */
+async function installSource(
+  template: SourceTemplate,
+  made: InstalledRoom[],
+): Promise<InstalledRoom> {
   const room = await createRoom(template, ROOM_TYPES[template.kind]);
+  made.push(room);
   for (const file of template.files) {
     await uploadFile(room.id, file, await readTemplateFile(template, file), mediaTypeOf(file));
   }
@@ -130,20 +164,31 @@ async function installAgent(
       }
       return source;
     });
-  const skillSets: InstalledRoom[] = [];
-  for (const source of sources(template.skills)) {
-    skillSets.push(await installSource(source));
+  // Both lists are checked before the first room is made.
+  const skillTemplates = sources(template.skills);
+  const knowledgeTemplates = sources(template.knowledges);
+  const made: InstalledRooms = { skillSets: [], knowledgeBases: [] };
+  let agent: InstalledRoom;
+  try {
+    for (const source of skillTemplates) {
+      await installSource(source, made.skillSets);
+    }
+    for (const source of knowledgeTemplates) {
+      await installSource(source, made.knowledgeBases);
+    }
+    agent = await createRoom(template, ROOM_TYPES.agent, [template.category]);
+    made.agent = agent;
+    const roomIds = [...made.skillSets, ...made.knowledgeBases].map((room) => Number(room.id));
+    if (roomIds.length > 0) {
+      await filesApiSend("POST", `rooms/${encodeURIComponent(agent.id)}/sources`, { roomIds });
+    }
+  } catch (err) {
+    if (!madeAny(made)) {
+      throw err;
+    }
+    throw new TemplateInstallIncompleteError(made, err);
   }
-  const knowledgeBases: InstalledRoom[] = [];
-  for (const source of sources(template.knowledges)) {
-    knowledgeBases.push(await installSource(source));
-  }
-
-  const agent = await createRoom(template, ROOM_TYPES.agent, [template.category]);
-  const roomIds = [...skillSets, ...knowledgeBases].map((room) => Number(room.id));
-  if (roomIds.length > 0) {
-    await filesApiSend("POST", `rooms/${encodeURIComponent(agent.id)}/sources`, { roomIds });
-  }
+  const { skillSets, knowledgeBases } = made;
 
   const warnings: string[] = [];
   // A template names no model, so the agent is given the one the portal
@@ -223,6 +268,17 @@ export async function installTemplate(
   if (template.kind === "agent") {
     return installAgent(template, catalog);
   }
-  const room = await installSource(template);
-  return { ...room, kind: template.kind, skillSets: [], knowledgeBases: [], warnings: [] };
+  const made: InstalledRooms = { skillSets: [], knowledgeBases: [] };
+  try {
+    const room = await installSource(
+      template,
+      template.kind === "skillSet" ? made.skillSets : made.knowledgeBases,
+    );
+    return { ...room, kind: template.kind, skillSets: [], knowledgeBases: [], warnings: [] };
+  } catch (err) {
+    if (!madeAny(made)) {
+      throw err;
+    }
+    throw new TemplateInstallIncompleteError(made, err);
+  }
 }

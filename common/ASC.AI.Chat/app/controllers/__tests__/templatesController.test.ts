@@ -46,6 +46,7 @@ const catalog = { agents: [], skillSets: [], knowledgeBases: [] };
 vi.mock("../../templates/catalog.js", () => ({ getTemplateCatalog: async () => catalog }));
 
 const { templatesController } = await import("../templatesController.js");
+const { handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: never, res: never, next: never) => unknown;
 
@@ -65,7 +66,8 @@ async function install(body: unknown) {
     },
   };
   const req = { body, method: "POST", originalUrl: "/ai/templates/install" };
-  await (templatesController.install as Handler)(req as never, res as never, vi.fn() as never);
+  (templatesController.install as Handler)(req as never, res as never, vi.fn() as never);
+  await handlerSettled(res);
   return res;
 }
 

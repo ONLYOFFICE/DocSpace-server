@@ -58,7 +58,7 @@ const logger = (await import("../../log.js")).default;
 const { uploadFile } = await import("../../storage/docspaceFileTransfer.js");
 const { filesApiSend } = await import("../../storage/docspaceFilesApi.js");
 const { readTemplateCatalog } = await import("../catalog.js");
-const { installTemplate } = await import("../installTemplate.js");
+const { installTemplate, TemplateInstallIncompleteError } = await import("../installTemplate.js");
 import type { AgentTemplate, TemplateCatalog } from "../catalog.js";
 
 const shipped = await readTemplateCatalog();
@@ -154,15 +154,36 @@ describe("installTemplate", () => {
     expect(filesApiSend).not.toHaveBeenCalled();
   });
 
-  it("leaves the skill set rooms made before a knowledge link that is broken", async () => {
+  it("makes no room when a knowledge link is broken, the skill links being sound", async () => {
     await expect(
       installTemplate(
         catalogWith({ skills: [skillSet.id], knowledges: ["knowledge-bases/none"] }),
         "agents/test/agent",
       ),
-    ).rejects.toThrow("links an unknown template: knowledge-bases/none");
-    expect(vi.mocked(filesApiSend).mock.calls.map(([, apiPath]) => apiPath)).toEqual(["rooms"]);
-    expect(uploadFile).toHaveBeenCalledTimes(skillSet.files.length);
+    ).rejects.toThrow(
+      new Error("Template agents/test/agent links an unknown template: knowledge-bases/none"),
+    );
+    expect(filesApiSend).not.toHaveBeenCalled();
+    expect(uploadFile).not.toHaveBeenCalled();
+  });
+
+  it("carries the step's own error and the rooms made when a later step fails", async () => {
+    const failure = new Error("socket hang up");
+    vi.mocked(uploadFile).mockRejectedValueOnce(failure);
+
+    const thrown: unknown = await installTemplate(
+      catalogWith({ skills: [skillSet.id] }),
+      "agents/test/agent",
+    ).catch((err: unknown) => err);
+
+    expect(thrown).toBeInstanceOf(TemplateInstallIncompleteError);
+    expect(thrown).toMatchObject({
+      cause: failure,
+      made: {
+        skillSets: [{ templateId: skillSet.id, id: "101", title: skillSet.name }],
+        knowledgeBases: [],
+      },
+    });
   });
 
   it("warns with the text of a model read that fails with something other than an error", async () => {

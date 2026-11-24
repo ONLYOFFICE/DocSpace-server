@@ -118,8 +118,7 @@ function refName(ref: unknown): string | null {
   if (typeof ref !== "string") {
     return null;
   }
-  const match = ref.match(/^#\/components\/schemas\/(.+)$/);
-  return match ? match[1]! : null;
+  return ref.match(/^#\/components\/schemas\/(.+)$/)?.[1] ?? null;
 }
 
 // A lifted polymorphic base keeps its subtypes only by name: the copy of its
@@ -255,8 +254,7 @@ export function extractDotnetProxySchemas(): DotnetProxySchemas {
   const closure = new Set<string>();
   const dangling = new Set<string>();
   const stack = [...rootRefs];
-  while (stack.length > 0) {
-    const name = stack.pop()!;
+  for (let name = stack.pop(); name !== undefined; name = stack.pop()) {
     if (closure.has(name)) {
       continue;
     }

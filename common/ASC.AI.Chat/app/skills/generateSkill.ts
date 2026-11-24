@@ -192,10 +192,11 @@ function readScalar(yaml: string, key: "name" | "description"): string | undefin
   const start = new RegExp(`^${key}\\s*:`);
   const lines = yaml.split(/\r?\n/);
   const index = lines.findIndex((line) => start.test(line));
-  if (index < 0) {
+  const line = lines[index];
+  if (line === undefined) {
     return undefined;
   }
-  const value = lines[index]!.replace(start, "").trim();
+  const value = line.replace(start, "").trim();
   if (!/^[>|][+-]?$/.test(value)) {
     return unquote(value);
   }
@@ -219,14 +220,18 @@ export function parseSkill(text: string): {
     .trim()
     .replace(/^```[\w-]*\r?\n([\s\S]*?)\r?\n```$/, "$1")
     .trim();
-  const match = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)([\s\S]*)$/.exec(unfenced);
-  if (!match) {
+  const match = /^---\r?\n(?<yaml>[\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)(?<body>[\s\S]*)$/.exec(
+    unfenced,
+  );
+  const yaml = match?.groups?.["yaml"];
+  const body = match?.groups?.["body"];
+  if (yaml === undefined || body === undefined) {
     return { body: unfenced };
   }
   return {
-    name: readScalar(match[1]!, "name"),
-    description: readScalar(match[1]!, "description"),
-    body: match[2]!.trim(),
+    name: readScalar(yaml, "name"),
+    description: readScalar(yaml, "description"),
+    body: body.trim(),
   };
 }
 

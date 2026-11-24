@@ -539,40 +539,114 @@ describe("templatesController.install", () => {
     expect(calls.map((c) => c.step)).toEqual(STEPS.slice(0, n));
   });
 
-  // DEFECT ctl-43: when a step after the first room fails (an upload, a later room, the sources link), the install answers the bare status of that step and leaves the rooms it already made, without their ids or a warning — expected it to undo them or answer the ids of what exists with a warning (ts-ai-failure-paths.md §6; installTemplate.ts installAgent / installSource)
+  const SKILL_ROOM = {
+    templateId: "skill-sets/contract-review",
+    id: "101",
+    title: "Contract review",
+  };
+  const KNOWLEDGE_ROOM = {
+    templateId: "knowledge-bases/contract-standards",
+    id: "102",
+    title: "Contract standards",
+  };
+  const AGENT_ROOM = { templateId: AGENT, id: "103", title: "Contract Reviewer" };
+
+  // A step after the first room keeps its status and names every room made before it
+  // (ts-ai-failure-paths.md §6): they stay in the portal, as nothing undoes them.
   it.each([
-    [4, 1],
-    [5, 1],
-    [6, 1],
-    [7, 2],
-    [8, 2],
-    [9, 2],
-    [10, 3],
-  ])("answers a bare 500 when step %i fails, with %i rooms already made", async (n, rooms) => {
-    failAt = n;
+    [4, [SKILL_ROOM], [], undefined],
+    [5, [SKILL_ROOM], [], undefined],
+    [6, [SKILL_ROOM], [], undefined],
+    [7, [SKILL_ROOM], [KNOWLEDGE_ROOM], undefined],
+    [8, [SKILL_ROOM], [KNOWLEDGE_ROOM], undefined],
+    [9, [SKILL_ROOM], [KNOWLEDGE_ROOM], undefined],
+    [10, [SKILL_ROOM], [KNOWLEDGE_ROOM], AGENT_ROOM],
+  ])(
+    "names the rooms already made when step %i fails with 500",
+    async (n, skillSets, knowledgeBases, agent) => {
+      failAt = n;
+
+      const reply = await invoke(templatesController.install, { body: { id: AGENT } });
+
+      expect(reply.status).toBe(500);
+      expect(reply.body).toEqual({
+        error: "Internal Server Error",
+        skillSets,
+        knowledgeBases,
+        ...(agent ? { agent } : {}),
+        warning: "installIncomplete",
+      });
+      expect(responseViolations("aiTemplatesInstall", 500, reply.body)).toEqual([]);
+      expect(calls.map((c) => c.step)).toEqual(STEPS.slice(0, n));
+    },
+  );
+
+  it("names the rooms already made when a step fails without an answer", async () => {
+    failAt = 7;
+    failure = () => HttpResponse.error();
 
     const reply = await invoke(templatesController.install, { body: { id: AGENT } });
 
     expect(reply.status).toBe(500);
-    expect(reply.body).toEqual({ error: "Internal Server Error" });
+    expect(reply.body).toEqual({
+      error: "Internal server error",
+      skillSets: [SKILL_ROOM],
+      knowledgeBases: [KNOWLEDGE_ROOM],
+      warning: "installIncomplete",
+    });
     expect(responseViolations("aiTemplatesInstall", 500, reply.body)).toEqual([]);
-    expect(calls.map((c) => c.step)).toEqual(STEPS.slice(0, n));
-    // The rooms made before the failed step stay; the answer names none of them.
-    expect(calls.slice(0, n - 1).filter((c) => c.step === "POST rooms")).toHaveLength(rooms);
-    expect(JSON.stringify(reply.body)).not.toMatch(/10[123]/);
+  });
+
+  it.each([
+    ["skill-sets/budgeting", 3, "skillSets", "Budgeting"],
+    ["knowledge-bases/contract-standards", 4, "knowledgeBases", "Contract standards"],
+  ])("names the room of %s when its file upload (step %i) fails", async (id, n, list, title) => {
+    failAt = n;
+    failure = () => docspaceError(503);
+
+    const reply = await invoke(templatesController.install, { body: { id } });
+
+    expect(reply.status).toBe(503);
+    expect(reply.body).toEqual({
+      error: "Service Unavailable",
+      skillSets: [],
+      knowledgeBases: [],
+      [list]: [{ templateId: id, id: "101", title }],
+      warning: "installIncomplete",
+    });
+    expect(responseViolations("aiTemplatesInstall", 503, reply.body)).toEqual([]);
+  });
+
+  it("answers a bare error when the room of a skill set is refused", async () => {
+    failAt = 2;
+    failure = () => docspaceError(403);
+
+    const reply = await invoke(templatesController.install, {
+      body: { id: "skill-sets/budgeting" },
+    });
+
+    expect(reply.status).toBe(403);
+    expect(reply.body).toEqual({ error: "Forbidden" });
+    expect(calls.map((c) => c.step)).toEqual(["GET people/@self", "POST rooms"]);
   });
 
   it.each([
     [403, "Forbidden"],
     [413, "Payload Too Large"],
-  ])("relays a refused upload's status %i", async (status, error) => {
+  ])("relays a refused upload's status %i with the room already made", async (status, error) => {
     failAt = 4;
     failure = () => docspaceError(status);
 
     const reply = await invoke(templatesController.install, { body: { id: AGENT } });
 
     expect(reply.status).toBe(status);
-    expect(reply.body).toEqual({ error });
+    expect(reply.body).toEqual({
+      error,
+      skillSets: [SKILL_ROOM],
+      knowledgeBases: [],
+      warning: "installIncomplete",
+    });
+    expect(responseViolations("aiTemplatesInstall", status, reply.body)).toEqual([]);
   });
 
   it.each([

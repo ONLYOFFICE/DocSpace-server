@@ -33,12 +33,12 @@
 // The templates shipped with the service: the catalog and its installation
 // into the caller's portal. See app/templates.
 
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, sendError } from "./_helpers.js";
 import { assertAiAccess } from "./aiAccess.js";
 import { getString, isObject } from "../narrow.js";
 import { mayCreateAiRooms } from "../storage/docspacePeopleApi.js";
 import { getTemplateCatalog } from "../templates/catalog.js";
-import { installTemplate } from "../templates/installTemplate.js";
+import { installTemplate, TemplateInstallIncompleteError } from "../templates/installTemplate.js";
 import { badRequest, clientFault } from "../httpErrors.js";
 
 /** The longest id a request may carry; the shipped ids are far shorter. */
@@ -65,6 +65,23 @@ export const templatesController = {
     if (!id || id.length > MAX_ID_LENGTH) {
       badRequest("id must be the id of a template");
     }
-    res.json(await installTemplate(await getTemplateCatalog(), id));
+    const catalog = await getTemplateCatalog();
+    try {
+      res.json(await installTemplate(catalog, id));
+    } catch (err) {
+      if (!(err instanceof TemplateInstallIncompleteError)) {
+        throw err;
+      }
+      // A step failed after rooms were made, and they stay in the portal: the answer keeps the
+      // failed step's status and names them, in the fields the success answer uses, so the
+      // caller can find them (ts-ai-failure-paths.md §6).
+      const { skillSets, knowledgeBases, agent } = err.made;
+      sendError(req, res, err.cause, {
+        skillSets,
+        knowledgeBases,
+        ...(agent ? { agent } : {}),
+        warning: "installIncomplete",
+      });
+    }
   }),
 };

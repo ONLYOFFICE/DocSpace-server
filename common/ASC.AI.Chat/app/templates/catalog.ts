@@ -49,7 +49,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { getArray, getString, isObject } from "../narrow.js";
+import { getArray, getString, isObject, readProp } from "../narrow.js";
 
 export type SourceTemplateKind = "skillSet" | "knowledgeBase";
 
@@ -106,8 +106,25 @@ const SOURCE_DIRS: Record<SourceTemplateKind, string> = {
 };
 const MANIFEST = "template.json";
 
+/**
+ * The result of a read of the shipped folder, or `undefined` when nothing is at
+ * the path (ENOENT). Any other failure, a file where a folder should be
+ * (ENOTDIR) or a folder the process may not read (EACCES), is a broken
+ * package and fails the read instead of hiding the templates behind it.
+ */
+async function unlessAbsent<T>(read: Promise<T>): Promise<T | undefined> {
+  try {
+    return await read;
+  } catch (err) {
+    if (readProp(err, "code") === "ENOENT") {
+      return undefined;
+    }
+    throw err;
+  }
+}
+
 async function subfolders(dir: string): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
+  const entries = (await unlessAbsent(readdir(dir, { withFileTypes: true }))) ?? [];
   return entries
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
@@ -173,7 +190,7 @@ async function readSources(root: string, kind: SourceTemplateKind): Promise<Sour
       if (kind === "skillSet" && !file.toLowerCase().endsWith(".md")) {
         throw new Error(`Template ${manifest} holds a skill that is not Markdown: ${file}`);
       }
-      const info = await stat(path.join(root, dir, name, file)).catch(() => undefined);
+      const info = await unlessAbsent(stat(path.join(root, dir, name, file)));
       if (!info?.isFile()) {
         throw new Error(`Template ${manifest} names a missing file: ${file}`);
       }

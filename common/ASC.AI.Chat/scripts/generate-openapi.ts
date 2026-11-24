@@ -77,8 +77,9 @@ const DEFAULT_OUTPUT = path.resolve(
 
 function parseOutput(argv: string[]): string {
   const i = argv.indexOf("--out");
-  if (i !== -1 && argv[i + 1]) {
-    return path.resolve(argv[i + 1]!);
+  const value = i === -1 ? undefined : argv[i + 1];
+  if (value) {
+    return path.resolve(value);
   }
   return DEFAULT_OUTPUT;
 }
