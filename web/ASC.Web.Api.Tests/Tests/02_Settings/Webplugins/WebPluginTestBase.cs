@@ -201,4 +201,5 @@ public sealed record WebPluginView(
     string? Settings,
     Dictionary<string, string>? NameLocale,
     Dictionary<string, string>? DescriptionLocale,
-    bool Personal);
+    bool Personal,
+    string? CspDomains);

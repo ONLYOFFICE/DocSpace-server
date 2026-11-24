@@ -111,8 +111,8 @@ None.
   the member's own. The answer can set or delete the `asc_personal_csp` cookie. Affected:
   - the web client (`../client`) loads exactly this list and shows the portal plugins in the admin settings
     through `portalPluginList`; its branch `feature/personal-plugins` handles `personal`;
-  - SDKs and the OpenAPI document: a new `personal` field on `WebPluginDto`, required in the schema, so the SDKs
-    will type it non-optional, and a new `personal` query parameter;
+  - SDKs and the OpenAPI document: new `personal` and `cspDomains` fields on `WebPluginDto`, required in the schema, so the
+    SDKs will type them non-optional, and a new `personal` query parameter;
   - webhooks, socket events, backup and restore, portal migration, stored data: none for portal plugins.
 
   For a member without personal plugins the entries only gain `personal` false, and a request that carries a

@@ -289,7 +289,7 @@ SHALL carry the manifest data, `createBy`, `createOn`, the state (`enabled`, `se
 #### Scenario: Fields of an entry
 
 - **WHEN** a plugin is listed
-- **THEN** the entry carries `name`, `version`, `minDocSpaceVersion`, `description`, `license`, `author`, `homePage`, `pluginName`, `scopes`, `image`, `nameLocale`, `descriptionLocale` and `runtime` from its manifest
+- **THEN** the entry carries `name`, `version`, `minDocSpaceVersion`, `description`, `license`, `author`, `homePage`, `pluginName`, `scopes`, `image`, `cspDomains`, `nameLocale`, `descriptionLocale` and `runtime` from its manifest
 
 #### Scenario: Installation-wide plugin shadows a portal plugin
 

@@ -80,6 +80,7 @@ public class PersonalWebPluginTests(
         var uploadedPlugin = await _webApi.ReadAsync<WebPluginView>(uploadResponse, TestContext.Current.CancellationToken);
         uploadedPlugin.Personal.Should().BeTrue();
         uploadedPlugin.Enabled.Should().BeTrue();
+        uploadedPlugin.CspDomains.Should().BeEmpty();
         ownerPlugins.Should().ContainSingle(x => x.Name == pluginName && x.Personal);
         otherPlugins.Should().NotContain(x => x.Name == pluginName);
         otherPersonalPlugins.Should().BeEmpty();
@@ -331,6 +332,7 @@ public class PersonalWebPluginTests(
         // Act
         var ownerCsp = await GetCspAsync(personalCspCookie);
         var ownerCspWithoutCookie = await GetCspAsync(null);
+        var personalPlugins = await ListPluginsAsync(personal: true);
 
         await _webApiClient.Authenticate(otherUser);
         var otherUserCsp = await GetCspAsync(personalCspCookie);
@@ -342,6 +344,7 @@ public class PersonalWebPluginTests(
         ownerCsp.Domains.Should().NotContain(cspDomain);
         ownerCspWithoutCookie.Header.Should().NotContain(cspDomain);
         otherUserCsp.Header.Should().NotContain(cspDomain);
+        personalPlugins.Should().ContainSingle(x => x.Name == "personal-csp-autotest" && x.CspDomains == cspDomain);
     }
 
     [Fact]

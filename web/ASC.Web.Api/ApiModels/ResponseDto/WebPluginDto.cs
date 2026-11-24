@@ -156,6 +156,13 @@ public class WebPluginDto
     public required string CssUrl { get; set; }
 
     /// <summary>
+    /// The domains the plugin's manifest declares for the Content Security Policy, comma-separated as the manifest
+    /// lists them, and an empty string for a plugin that declares none.
+    /// </summary>
+    /// <example>https://api.example.com,https://cdn.example.com</example>
+    public required string CspDomains { get; set; }
+
+    /// <summary>
     /// The settings string kept for the plugin, by the portal or, for a personal plugin, for its owner, stored and
     /// returned verbatim - only the plugin knows its shape. It is empty until `PUT api/2.0/settings/webplugins/{name}`
     /// saves one.
@@ -189,12 +196,15 @@ public class WebPluginDto
 [Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
 public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
 {
-    [MapperIgnoreSource(nameof(WebPlugin.CspDomains))]
     [MapProperty(nameof(WebPluginDto.CreateBy), nameof(WebPlugin.CreateBy), Use = nameof(MapCreateBy))]
+    [MapProperty(nameof(WebPlugin.CspDomains), nameof(WebPluginDto.CspDomains), Use = nameof(MapCspDomains))]
     private partial WebPluginDto ToDto(WebPlugin webPlugin);
 
     [UserMapping(Default = false)]
     private static EmployeeDto MapCreateBy(Guid _) => new();
+
+    [UserMapping(Default = false)]
+    private static string MapCspDomains(string cspDomains) => cspDomains ?? string.Empty;
 
     public async Task<WebPluginDto> ToDtoManual(WebPlugin source)
     {
