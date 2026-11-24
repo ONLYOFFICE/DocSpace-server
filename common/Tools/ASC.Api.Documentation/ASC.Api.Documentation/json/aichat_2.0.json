@@ -178,7 +178,7 @@
             }
           },
           "400": {
-            "description": "`actionType` is missing or unknown, or `userMessage` carries neither text nor an attachment.",
+            "description": "`actionType` is missing or unknown, `userMessage` carries neither text nor an attachment, or `entityId` or `contextEntityId` is neither a string nor null (`<field> must be a string`). A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -312,7 +312,7 @@
             }
           },
           "400": {
-            "description": "`systemPrompt` is missing or empty, `userMessage` carries neither text nor an attachment, `isStream` is not a boolean, or `profileId` names no AI profile.",
+            "description": "`systemPrompt` is missing or empty, `userMessage` carries neither text nor an attachment, `isStream` is not a boolean, `profileId` is neither a string nor null (`profileId must be a string`), or `profileId` names no AI profile. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -332,7 +332,7 @@
             }
           },
           "402": {
-            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. `error` carries the portal's explanation in the caller's language.",
+            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. `error` is a fixed English sentence: `The AI Tools service is not paid for the current portal`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -432,7 +432,7 @@
             }
           },
           "400": {
-            "description": "The prompt is empty, more attachments were sent than the limit allows, or no AI profile could be resolved for the requested action.",
+            "description": "The prompt is empty, more attachments were sent than the limit allows, no AI profile could be resolved for the requested action, or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`). A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -452,7 +452,7 @@
             }
           },
           "402": {
-            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. `error` carries the portal's explanation in the caller's language.",
+            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. `error` is a fixed English sentence: `The AI Tools service is not paid for the current portal`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -586,7 +586,7 @@
             }
           },
           "400": {
-            "description": "The prompt is empty, more attachments were sent than the limit allows, or `profileId` names no AI profile.",
+            "description": "The prompt is empty, more attachments were sent than the limit allows, `profileId` names no AI profile, or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`). A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -606,7 +606,7 @@
             }
           },
           "402": {
-            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. `error` carries the portal's explanation in the caller's language.",
+            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. `error` is a fixed English sentence: `The AI Tools service is not paid for the current portal`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -737,7 +737,7 @@
             }
           },
           "400": {
-            "description": "The request has no body.",
+            "description": "The request has no body. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -887,7 +887,7 @@
             }
           },
           "400": {
-            "description": "The request has no body.",
+            "description": "The request has no body. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1027,7 +1027,7 @@
             }
           },
           "400": {
-            "description": "The request has no body.",
+            "description": "The request has no body. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1404,7 +1404,7 @@
             }
           },
           "400": {
-            "description": "`actionType` or `profileId` is missing.",
+            "description": "`actionType` or `profileId` is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1507,7 +1507,7 @@
             }
           },
           "400": {
-            "description": "`actionType` is missing.",
+            "description": "`actionType` is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1611,7 +1611,7 @@
             }
           },
           "400": {
-            "description": "The body is not a map of action type to profile ID, or one of its keys is not a known action type.",
+            "description": "The body is not a map of action type to profile ID, or one of its keys is not a known action type. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1939,7 +1939,7 @@
             }
           },
           "400": {
-            "description": "`profileId` is missing.",
+            "description": "`profileId` is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2043,7 +2043,7 @@
             }
           },
           "400": {
-            "description": "The attachment payload is malformed, or `input.path` is missing or empty.",
+            "description": "The attachment payload is malformed, or `input.path` is missing or empty. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2149,7 +2149,7 @@
             }
           },
           "400": {
-            "description": "`inputs` is not an array, names more than 100 files, or one of its entries is malformed.",
+            "description": "`inputs` is not an array, names more than 100 files, or one of its entries is malformed. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2259,7 +2259,7 @@
             }
           },
           "400": {
-            "description": "The attachment ID is missing.",
+            "description": "The attachment ID is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2377,7 +2377,7 @@
             }
           },
           "400": {
-            "description": "The list of attachment IDs is malformed or names more than 100 attachments.",
+            "description": "The list of attachment IDs is malformed or names more than 100 attachments. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2491,7 +2491,7 @@
             }
           },
           "400": {
-            "description": "The attachment ID is missing.",
+            "description": "The attachment ID is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2599,7 +2599,7 @@
             }
           },
           "400": {
-            "description": "The body is not a list of attachment IDs, or names more than 100 attachments.",
+            "description": "The body is not a list of attachment IDs, or names more than 100 attachments. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2713,7 +2713,7 @@
             }
           },
           "400": {
-            "description": "The attachment or message reference is malformed, or `ids` names more than 100 attachments.",
+            "description": "The attachment or message reference is malformed, or `ids` names more than 100 attachments. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2826,7 +2826,7 @@
             }
           },
           "400": {
-            "description": "The attachment ID is missing.",
+            "description": "The attachment ID is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3417,7 +3417,7 @@
             }
           },
           "400": {
-            "description": "`value` is missing or is not a boolean, or `entityId` is not a room ID.",
+            "description": "`value` is missing or is not a boolean, or `entityId` is not a room ID. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3520,7 +3520,7 @@
             }
           },
           "400": {
-            "description": "`entityId` is not a room ID.",
+            "description": "`entityId` is not a room ID. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3820,7 +3820,7 @@
             }
           },
           "400": {
-            "description": "`value` is not one of the depths, or `entityId` is not a room ID.",
+            "description": "`value` is not one of the depths, or `entityId` is not a room ID. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4019,7 +4019,7 @@
             }
           },
           "400": {
-            "description": "`value` is not one of `ask`, `auto`, `allow`, or `entityId` is not a room ID.",
+            "description": "`value` is not one of `ask`, `auto`, `allow`, or `entityId` is not a room ID. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4112,7 +4112,7 @@
         "description": "Creates an AI provider profile - the endpoint, credentials and model that a chat round runs on - and returns it. The name has to be unique, the credentials are probed against the live provider before anything is stored, and the portal's first profile also takes the `Default` assignment slot. Two inputs are refused outright: a `baseUrl` pointing at a private network address, and `providerType: \"external\"`, which delegates transport to the host application and therefore cannot work for a profile the server manages. On a portal running the AI gateway, profiles are managed centrally and this operation answers 403.",
         "responses": {
           "200": {
-            "description": "Whether the profile was created, with it in `profile`. A refusal is reported in `error` rather than as a status.",
+            "description": "The created profile in `profile`, with `success: true`. A refusal answers 400 with `success: false` and the reason in `error`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4122,7 +4122,7 @@
             }
           },
           "400": {
-            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header - that one answers with the profile result shape, `success: false` and an `error` naming the `key` field.",
+            "description": "`name` is missing or not a string, the provider URL is not a string, is malformed or points at a private network address, or `providerType` is `\"external\"` - these answer the plain `{ error }`. A key that holds characters that cannot travel in an HTTP header, and a profile the engine refuses (a name already taken, an unknown provider type, a key the provider refuses), answer with the profile result shape: `success: false` and an `error` naming the field. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4223,7 +4223,7 @@
         "description": "Replaces a stored AI provider profile and returns it, re-checking name uniqueness and probing the credentials against the live provider again. The same two inputs are refused as on create - a private-network `baseUrl` and `providerType: \"external\"` - and the whole profile is overwritten by the one supplied rather than merged. On a portal running the AI gateway this answers 403, because profiles are managed centrally there. A profile that is bound to an action keeps that binding.",
         "responses": {
           "200": {
-            "description": "Whether the profile was updated, with the stored profile in `profile`.",
+            "description": "The stored profile in `profile`, with `success: true`. A refusal answers 400 with `success: false` and the reason in `error`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4233,7 +4233,7 @@
             }
           },
           "400": {
-            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header - that one answers with the profile result shape, `success: false` and an `error` naming the `key` field.",
+            "description": "`name` is missing or not a string, the provider URL is not a string, is malformed or points at a private network address, or `providerType` is `\"external\"` - these answer the plain `{ error }`. A key that holds characters that cannot travel in an HTTP header, and a profile the engine refuses (a name already taken, an unknown provider type, a key the provider refuses, an id that names no stored profile), answer with the profile result shape: `success: false` and an `error` naming the field. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4344,7 +4344,7 @@
             }
           },
           "400": {
-            "description": "The profile ID is missing.",
+            "description": "The profile ID is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4564,7 +4564,7 @@
             }
           },
           "400": {
-            "description": "`baseUrl` is missing, points at a private network address, `apiKey` holds characters that cannot travel in an HTTP header, or the provider rejected the supplied API key.",
+            "description": "`baseUrl` is missing, points at a private network address, `apiKey` holds characters that cannot travel in an HTTP header, or the provider rejected the supplied API key. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4714,7 +4714,7 @@
             }
           },
           "400": {
-            "description": "`profileId` is missing.",
+            "description": "`profileId` is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5083,11 +5083,18 @@
             }
           },
           "400": {
-            "description": "`name` or `text` is missing, empty or not a string, or `folderId` is neither a string nor null.",
+            "description": "`name` or `text` is missing, empty or not a string, or `folderId` is neither a string nor null. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiPromptMutationResult"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiPromptMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -5207,11 +5214,18 @@
             }
           },
           "400": {
-            "description": "`id` is missing, `updates` is not an object, or a field in it has the wrong type or is empty.",
+            "description": "`id` is missing, `updates` is not an object, or a field in it has the wrong type or is empty. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiPromptMutationResult"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiPromptMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -5330,11 +5344,18 @@
             }
           },
           "400": {
-            "description": "`id` is missing or `folderId` is neither a string nor null.",
+            "description": "`id` is missing or `folderId` is neither a string nor null. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiPromptMutationResult"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiPromptMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -5453,7 +5474,7 @@
             }
           },
           "400": {
-            "description": "The prompt ID is missing.",
+            "description": "The prompt ID is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5660,11 +5681,18 @@
             }
           },
           "400": {
-            "description": "`name` is missing, empty or not a string.",
+            "description": "`name` is missing, empty or not a string. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiFolderMutationResult"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiFolderMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -5788,11 +5816,18 @@
             }
           },
           "400": {
-            "description": "`id` or `name` is missing, or `name` is empty or not a string.",
+            "description": "`id` or `name` is missing, or `name` is empty or not a string. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiFolderMutationResult"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiFolderMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -5911,7 +5946,7 @@
             }
           },
           "400": {
-            "description": "The folder ID is missing.",
+            "description": "The folder ID is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6176,11 +6211,18 @@
             }
           },
           "400": {
-            "description": "The bundle is malformed, references a folder it does not carry, holds an empty entry or two entries of the same name, or `mode` is unknown.",
+            "description": "The bundle is malformed, references a folder it does not carry, holds an empty entry or two entries of the same name, or `mode` is unknown. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiImportResult"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiImportResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -6494,6 +6536,16 @@
               }
             }
           },
+          "400": {
+            "description": "The request body or query is malformed, or a required value is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
             "content": {
@@ -6603,6 +6655,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiOpenOrCreateResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body or query is malformed, or a required value is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -6731,7 +6793,7 @@
             }
           },
           "400": {
-            "description": "`threadId` is missing, the message is empty or does not carry `role: user`, or it carries more attachments than the limit allows.",
+            "description": "`threadId` is missing, the message is empty or does not carry `role: user`, or it carries more attachments than the limit allows. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6834,7 +6896,7 @@
             }
           },
           "400": {
-            "description": "`threadId` is missing.",
+            "description": "`threadId` is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6937,7 +6999,7 @@
             }
           },
           "400": {
-            "description": "`threadId` or the new title is missing.",
+            "description": "`threadId` or the new title is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7040,7 +7102,7 @@
             }
           },
           "400": {
-            "description": "`threadId` is missing.",
+            "description": "`threadId` is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7158,7 +7220,7 @@
             }
           },
           "400": {
-            "description": "`threadId` is missing.",
+            "description": "`threadId` is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7279,7 +7341,7 @@
             }
           },
           "400": {
-            "description": "`threadId` is missing.",
+            "description": "`threadId` is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7878,7 +7940,7 @@
             }
           },
           "400": {
-            "description": "`messageId` is missing, the message is empty or has an unknown role, or its role differs from the stored message's.",
+            "description": "`messageId` is missing, the message is empty or has an unknown role, or its role differs from the stored message's. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7991,7 +8053,7 @@
             }
           },
           "400": {
-            "description": "`messageId` is missing.",
+            "description": "`messageId` is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8099,7 +8161,7 @@
             }
           },
           "400": {
-            "description": "The server name is missing or is not routable.",
+            "description": "The server name is missing or is not routable. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8212,7 +8274,7 @@
             }
           },
           "400": {
-            "description": "The server name is missing or is not routable.",
+            "description": "The server name is missing or is not routable. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8325,7 +8387,7 @@
             }
           },
           "400": {
-            "description": "The server name is missing.",
+            "description": "The server name is missing. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8760,7 +8822,7 @@
             }
           },
           "400": {
-            "description": "The body is not a map of server name to configuration, or a name is not routable.",
+            "description": "The body is not a map of server name to configuration, or a name is not routable. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8873,7 +8935,7 @@
             }
           },
           "400": {
-            "description": "`toolNames` is missing or not an array of non-empty tool names, `serverType` is unknown, or `scope` is not `user` or `tenant`.",
+            "description": "`toolNames` is missing or not an array of non-empty tool names, `serverType` is unknown, or `scope` is not `user` or `tenant`. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9216,7 +9278,7 @@
             }
           },
           "400": {
-            "description": "`serverType` or `toolName` is missing or empty, or `value` is not a boolean.",
+            "description": "`serverType` or `toolName` is missing or empty, or `value` is not a boolean. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9776,7 +9838,7 @@
             }
           },
           "400": {
-            "description": "The configuration is missing or malformed, or the provider URL points at a private network address.",
+            "description": "The configuration is missing or malformed (a field of the wrong type, or a value of `headers` that is not a string), or the provider URL points at a private network address. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9880,7 +9942,7 @@
             }
           },
           "400": {
-            "description": "The configuration is missing or malformed, the provider URL points at a private network address, or the provider refused the configuration - the body then carries `success: false` and an `error` naming the field. Nothing is stored in any of these cases.",
+            "description": "The configuration is missing or malformed (a field of the wrong type, or a value of `headers` that is not a string), the provider URL points at a private network address, or the provider refused the configuration - the body then carries `success: false` and an `error` naming the field. Nothing is stored in any of these cases. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10000,7 +10062,7 @@
             }
           },
           "400": {
-            "description": "The configuration is missing or malformed, or the provider URL points at a private network address.",
+            "description": "The configuration is missing or malformed (a field of the wrong type, or a value of `headers` that is not a string), or the provider URL points at a private network address. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10112,6 +10174,16 @@
               }
             }
           },
+          "400": {
+            "description": "The request body or query is malformed, or a required value is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
             "content": {
@@ -10218,7 +10290,7 @@
             }
           },
           "400": {
-            "description": "`title`, `content` or `folderId` is missing, or `format` is not one of `Docx`, `Pdf`, `Md`.",
+            "description": "`title`, `content` or `folderId` is missing, or `format` is not one of `Docx`, `Pdf`, `Md`. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10410,7 +10482,7 @@
             }
           },
           "400": {
-            "description": "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, or `prompt` is not a string.",
+            "description": "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not a positive integer id of at most 2147483647 (a number or a string of digits), or `prompt` is not a string. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10870,7 +10942,7 @@
             }
           },
           "400": {
-            "description": "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, `prompt` is not a string, or `overwrite` / `dryRun` is not a boolean.",
+            "description": "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not a positive integer id of at most 2147483647 (a number or a string of digits), `prompt` is not a string, or `overwrite` / `dryRun` is not a boolean. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11215,7 +11287,7 @@
             }
           },
           "400": {
-            "description": "`destId` is not an integer id, `description` is missing or too long, `title` is not a string, is too long or has no letter or digit, or the folder is not an Instructions room.",
+            "description": "`destId` is not an integer id, `description` is missing or too long, `title` is not a string, is too long or has no letter or digit, or the folder is not an Instructions room. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11492,7 +11564,7 @@
             }
           },
           "400": {
-            "description": "`destId` is not an integer id, `title` is missing, too long or has no letter or digit, or the folder is not an Instructions room.",
+            "description": "`destId` is not an integer id, `title` is missing, too long or has no letter or digit, or the folder is not an Instructions room. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11844,7 +11916,7 @@
         ],
         "operationId": "aiTemplatesInstall",
         "summary": "Install a template",
-        "description": "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
+        "description": "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step that fails before the first room is made answers its status with the plain `{ error }`. A step that fails after it - a room, a file upload or the link to the sources refused by the Files service, a timeout or a dropped connection - answers the same status (500 when the step got no answer) with a body that names what exists: `skillSets` and `knowledgeBases` list the rooms already made, in the shape the success answer uses, `agent` is the agent's room when it was made, and `warning` is `installIncomplete`. Those rooms stay in the portal; nothing is undone. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
         "responses": {
           "200": {
             "description": "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",
@@ -11952,11 +12024,139 @@
             }
           },
           "400": {
-            "description": "`id` is missing or is not a string.",
+            "description": "`id` is missing or is not a string, or the Files service refused a step after the first room; then `warning` is `installIncomplete` and the body names the rooms made. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The reason phrase of the step that failed, as a plain refusal carries it.",
+                          "examples": [
+                            "Internal Server Error"
+                          ]
+                        },
+                        "skillSets": {
+                          "type": "array",
+                          "description": "The Instructions rooms made before the failure, for skill sets.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "knowledgeBases": {
+                          "type": "array",
+                          "description": "The Knowledge rooms made before the failure, for knowledge bases.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "agent": {
+                          "type": "object",
+                          "description": "The agent's room, present when it was made and linking it to its rooms failed.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The id of the template the room was made from.",
+                              "examples": [
+                                "skill-sets/contract-review"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "description": "The ID of the new room.",
+                              "examples": [
+                                "101"
+                              ]
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was created with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "id",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "warning": {
+                          "type": "string",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "enum": [
+                            "installIncomplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "skillSets",
+                        "knowledgeBases",
+                        "warning"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -11972,21 +12172,277 @@
             }
           },
           "403": {
-            "description": "The caller may not create a room of the kind the template needs.",
+            "description": "The caller may not create a room of the kind the template needs. When the Files service refuses a step after the first room, `warning` is `installIncomplete` and the body names the rooms made.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The reason phrase of the step that failed, as a plain refusal carries it.",
+                          "examples": [
+                            "Internal Server Error"
+                          ]
+                        },
+                        "skillSets": {
+                          "type": "array",
+                          "description": "The Instructions rooms made before the failure, for skill sets.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "knowledgeBases": {
+                          "type": "array",
+                          "description": "The Knowledge rooms made before the failure, for knowledge bases.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "agent": {
+                          "type": "object",
+                          "description": "The agent's room, present when it was made and linking it to its rooms failed.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The id of the template the room was made from.",
+                              "examples": [
+                                "skill-sets/contract-review"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "description": "The ID of the new room.",
+                              "examples": [
+                                "101"
+                              ]
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was created with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "id",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "warning": {
+                          "type": "string",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "enum": [
+                            "installIncomplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "skillSets",
+                        "knowledgeBases",
+                        "warning"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
           },
           "404": {
-            "description": "The catalog has no template with this `id`.",
+            "description": "The catalog has no template with this `id`, or the Files service answered 404 to a step after the first room; then `warning` is `installIncomplete` and the body names the rooms made.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The reason phrase of the step that failed, as a plain refusal carries it.",
+                          "examples": [
+                            "Internal Server Error"
+                          ]
+                        },
+                        "skillSets": {
+                          "type": "array",
+                          "description": "The Instructions rooms made before the failure, for skill sets.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "knowledgeBases": {
+                          "type": "array",
+                          "description": "The Knowledge rooms made before the failure, for knowledge bases.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "agent": {
+                          "type": "object",
+                          "description": "The agent's room, present when it was made and linking it to its rooms failed.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The id of the template the room was made from.",
+                              "examples": [
+                                "skill-sets/contract-review"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "description": "The ID of the new room.",
+                              "examples": [
+                                "101"
+                              ]
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was created with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "id",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "warning": {
+                          "type": "string",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "enum": [
+                            "installIncomplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "skillSets",
+                        "knowledgeBases",
+                        "warning"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -12002,22 +12458,283 @@
             }
           },
           "413": {
-            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "description": "The request body is larger than 100 KB, the JSON parser's limit (plain text), or the Files service refused a template file as too large; then `warning` is `installIncomplete` and the body names the rooms made.",
             "content": {
               "text/plain": {
                 "schema": {
                   "type": "string",
                   "example": "Payload Too Large"
                 }
+              },
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The reason phrase of the step that failed, as a plain refusal carries it.",
+                          "examples": [
+                            "Internal Server Error"
+                          ]
+                        },
+                        "skillSets": {
+                          "type": "array",
+                          "description": "The Instructions rooms made before the failure, for skill sets.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "knowledgeBases": {
+                          "type": "array",
+                          "description": "The Knowledge rooms made before the failure, for knowledge bases.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "agent": {
+                          "type": "object",
+                          "description": "The agent's room, present when it was made and linking it to its rooms failed.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The id of the template the room was made from.",
+                              "examples": [
+                                "skill-sets/contract-review"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "description": "The ID of the new room.",
+                              "examples": [
+                                "101"
+                              ]
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was created with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "id",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "warning": {
+                          "type": "string",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "enum": [
+                            "installIncomplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "skillSets",
+                        "knowledgeBases",
+                        "warning"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
+                }
               }
             }
           },
           "500": {
-            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "description": "Unhandled failure, logged server-side and never echoed back. A step after the first room that got no answer (a timeout, a dropped connection) or failed with 500 answers it too, with `warning: installIncomplete` and the rooms made.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The reason phrase of the step that failed, as a plain refusal carries it.",
+                          "examples": [
+                            "Internal Server Error"
+                          ]
+                        },
+                        "skillSets": {
+                          "type": "array",
+                          "description": "The Instructions rooms made before the failure, for skill sets.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "knowledgeBases": {
+                          "type": "array",
+                          "description": "The Knowledge rooms made before the failure, for knowledge bases.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "agent": {
+                          "type": "object",
+                          "description": "The agent's room, present when it was made and linking it to its rooms failed.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The id of the template the room was made from.",
+                              "examples": [
+                                "skill-sets/contract-review"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "description": "The ID of the new room.",
+                              "examples": [
+                                "101"
+                              ]
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was created with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "id",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "warning": {
+                          "type": "string",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "enum": [
+                            "installIncomplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "skillSets",
+                        "knowledgeBases",
+                        "warning"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -12027,7 +12744,135 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The reason phrase of the step that failed, as a plain refusal carries it.",
+                          "examples": [
+                            "Internal Server Error"
+                          ]
+                        },
+                        "skillSets": {
+                          "type": "array",
+                          "description": "The Instructions rooms made before the failure, for skill sets.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "knowledgeBases": {
+                          "type": "array",
+                          "description": "The Knowledge rooms made before the failure, for knowledge bases.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "agent": {
+                          "type": "object",
+                          "description": "The agent's room, present when it was made and linking it to its rooms failed.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The id of the template the room was made from.",
+                              "examples": [
+                                "skill-sets/contract-review"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "description": "The ID of the new room.",
+                              "examples": [
+                                "101"
+                              ]
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was created with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "id",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "warning": {
+                          "type": "string",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "enum": [
+                            "installIncomplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "skillSets",
+                        "knowledgeBases",
+                        "warning"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -12037,7 +12882,135 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "The reason phrase of the step that failed, as a plain refusal carries it.",
+                          "examples": [
+                            "Internal Server Error"
+                          ]
+                        },
+                        "skillSets": {
+                          "type": "array",
+                          "description": "The Instructions rooms made before the failure, for skill sets.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "knowledgeBases": {
+                          "type": "array",
+                          "description": "The Knowledge rooms made before the failure, for knowledge bases.",
+                          "items": {
+                            "type": "object",
+                            "description": "A room the installation made.",
+                            "properties": {
+                              "templateId": {
+                                "type": "string",
+                                "description": "The id of the template the room was made from.",
+                                "examples": [
+                                  "skill-sets/contract-review"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the new room.",
+                                "examples": [
+                                  "101"
+                                ]
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "The title the room was created with."
+                              }
+                            },
+                            "required": [
+                              "templateId",
+                              "id",
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "agent": {
+                          "type": "object",
+                          "description": "The agent's room, present when it was made and linking it to its rooms failed.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The id of the template the room was made from.",
+                              "examples": [
+                                "skill-sets/contract-review"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "description": "The ID of the new room.",
+                              "examples": [
+                                "101"
+                              ]
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was created with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "id",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "warning": {
+                          "type": "string",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "enum": [
+                            "installIncomplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error",
+                        "skillSets",
+                        "knowledgeBases",
+                        "warning"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -12217,7 +13190,7 @@
             }
           },
           "400": {
-            "description": "The AI service refused the settings.",
+            "description": "The AI service refused the settings. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12393,7 +13366,7 @@
             }
           },
           "400": {
-            "description": "`chatRecommendedModelVisible` is missing or not a boolean.",
+            "description": "`chatRecommendedModelVisible` is missing or not a boolean. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12569,7 +13542,7 @@
             }
           },
           "400": {
-            "description": "`mode` is not one of the `ToolPermissionMode` members.",
+            "description": "`mode` is not one of the `ToolPermissionMode` members. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12820,7 +13793,7 @@
             }
           },
           "400": {
-            "description": "A field is missing, has the wrong type, or a limit is above the agent's ceiling.",
+            "description": "A field is missing, has the wrong type, or a limit is above the agent's ceiling. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12976,7 +13949,7 @@
             }
           },
           "400": {
-            "description": "The AI service refused the request, for instance one that names no file.",
+            "description": "The AI service refused the request, for instance one that names no file. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13237,7 +14210,7 @@
             }
           },
           "400": {
-            "description": "The AI service refused the key; `error` carries its message.",
+            "description": "The AI service refused the key; `error` carries its message. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13513,7 +14486,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "description": "Relayed from the AI service, which refused to read the profile: AI is disabled for this portal or the caller is a guest.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13717,7 +14690,7 @@
             }
           },
           "500": {
-            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "description": "The profile could not be read (a timeout, a dropped connection) or another failure occurred; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13906,7 +14879,7 @@
         ],
         "operationId": "aiOpenaiImagesGenerations",
         "summary": "OpenAI image generation passthrough",
-        "description": "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - `prompt` has to be a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with the detail kept in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
+        "description": "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - a body sent as JSON has to be a JSON object, `prompt` a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with the detail kept in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
         "responses": {
           "200": {
             "description": "The provider's own response, relayed with its status and content type (a 5xx excepted).",
@@ -13921,7 +14894,7 @@
             }
           },
           "400": {
-            "description": "`prompt` is missing or empty, `n` is not a positive integer, or a documented string field has another type.",
+            "description": "A body sent as JSON is not a JSON object (it does not parse, or is an array or a scalar), `prompt` is missing or empty, `n` is not a positive integer, or a documented string field has another type.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13982,7 +14955,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "description": "Relayed from the AI service, which refused to read the profile: AI is disabled for this portal or the caller is a guest.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14186,7 +15159,7 @@
             }
           },
           "500": {
-            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "description": "The profile could not be read (a timeout, a dropped connection) or another failure occurred; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14515,7 +15488,7 @@
             }
           },
           "400": {
-            "description": "The tool name is missing or not one `GET api/2.0/ai/editor-tools/list` reports.",
+            "description": "The tool name is missing or not one `GET api/2.0/ai/editor-tools/list` reports. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14621,7 +15594,7 @@
             }
           },
           "400": {
-            "description": "`query` is missing or empty, or `numResults` is not a positive integer; `field` names the input.",
+            "description": "`query` is missing or empty, or `numResults` is not a positive integer; `field` names the input. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14777,7 +15750,7 @@
             }
           },
           "400": {
-            "description": "`urls` is missing or not a non-empty array of strings; `field` names the input.",
+            "description": "`urls` is missing or not a non-empty array of strings; `field` names the input. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {

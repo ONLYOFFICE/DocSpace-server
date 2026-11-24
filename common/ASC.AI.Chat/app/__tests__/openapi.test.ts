@@ -37,7 +37,7 @@ import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import { buildOpenApiDocument, docsHtml } from "../openapi.js";
 import type { CustomRouteDoc, EngineDoc, OpenApiOptions } from "../openapi.js";
 import { EXAMPLE_AT_ISO, EXAMPLE_AT_MS, EXAMPLE_IDS } from "../exampleIds.js";
-import { openApiDocument } from "./helpers/schema.js";
+import { openApiDocument, responseViolations } from "./helpers/schema.js";
 
 type Json = Record<string, unknown>;
 
@@ -103,6 +103,10 @@ const STREAM_ERROR_EVENT = {
   required: ["type", "message"],
   additionalProperties: false,
 };
+const BAD_REQUEST = json(
+  "The request body or query is malformed, or a required value is missing.",
+  ERROR_REF,
+);
 const TOO_LARGE = {
   description: "The request body is larger than 100 KB, the JSON parser's limit on this route.",
   content: { "text/plain": { schema: { type: "string", example: "Payload Too Large" } } },
@@ -202,7 +206,7 @@ describe("an engine operation", () => {
     expect(pathsOf(doc)["/p/w"]?.["get"]).not.toHaveProperty("parameters");
   });
 
-  it("takes a free-form JSON body and declares the 413 of the parser for a non-GET", () => {
+  it("takes a free-form JSON body and declares the 400 and 413 of the parser for a non-GET", () => {
     const doc = build({
       engines: [engine("widgets", { make_one: { method: "POST", path: "w/make" } })],
     });
@@ -213,6 +217,7 @@ describe("an engine operation", () => {
       summary: "Make one",
       responses: {
         "200": json("Success.", SUCCESS_REF),
+        "400": BAD_REQUEST,
         "401": UNAUTHORIZED,
         "403": FORBIDDEN,
         "413": TOO_LARGE,
@@ -445,6 +450,90 @@ describe("the served document", () => {
     for (const operation of operations) {
       expect((operation["responses"] as Json)["401"]).toEqual(UNAUTHORIZED);
     }
+  });
+
+  // The parser's refusal is answered by `errorHandler` before any handler runs.
+  const PARSER_REFUSAL = { error: "The request body is not valid JSON" };
+  const UNPARSED = ["aiOpenaiChatCompletions", "aiOpenaiImagesGenerations"];
+  const bodyOperations = Object.values(pathsOf(openApiDocument))
+    .flatMap((item) => Object.values(item))
+    .filter((operation) => "requestBody" in operation)
+    .map((operation) => String(operation["operationId"]));
+
+  it("publishes the parser's 400 on every operation whose body is parsed", () => {
+    const parsed = bodyOperations.filter((id) => !UNPARSED.includes(id));
+
+    expect(parsed.length).toBeGreaterThan(50);
+    for (const operationId of parsed) {
+      expect([operationId, responseViolations(operationId, 400, PARSER_REFUSAL)]).toEqual([
+        operationId,
+        [],
+      ]);
+    }
+  });
+
+  const badRequestOf = (operationId: string): Json =>
+    (
+      Object.values(pathsOf(openApiDocument))
+        .flatMap((item) => Object.values(item))
+        .find((operation) => operation["operationId"] === operationId)?.["responses"] as Json
+    )["400"] as Json;
+
+  it("names the parser's 400 in an operation's own 400 text, and not where the body is relayed raw", () => {
+    expect(badRequestOf("aiAssignmentsAssign")["description"]).toBe(
+      "`actionType` or `profileId` is missing. A body that is not valid JSON is refused with 400 as well.",
+    );
+    expect(badRequestOf("aiOpenaiChatCompletions")["description"]).toBe(
+      "Relayed from the provider, which refused the request body.",
+    );
+  });
+
+  it("admits the plain error beside an operation's own 400 envelope, once", () => {
+    expect(badRequestOf("aiPromptsCreate")["content"]).toEqual({
+      "application/json": {
+        schema: { anyOf: [{ $ref: "#/components/schemas/AiPromptMutationResult" }, ERROR_REF] },
+      },
+    });
+    expect(badRequestOf("aiProfilesCreate")["content"]).toEqual({
+      "application/json": {
+        schema: { anyOf: [{ $ref: "#/components/schemas/AiProfileMutationResult" }, ERROR_REF] },
+      },
+    });
+  });
+
+  const responseOf = (operationId: string, status: string): Json =>
+    (
+      Object.values(pathsOf(openApiDocument))
+        .flatMap((item) => Object.values(item))
+        .find((operation) => operation["operationId"] === operationId)?.["responses"] as Json
+    )[status] as Json;
+
+  it("keeps the parser's plain-text 413 beside an operation's own JSON 413", () => {
+    const content = responseOf("aiTemplatesInstall", "413")["content"] as Json;
+
+    expect(Object.keys(content)).toEqual(["text/plain", "application/json"]);
+    expect(responseViolations("aiTemplatesInstall", 413, { error: "Payload Too Large" })).toEqual(
+      [],
+    );
+    expect(Object.keys(responseOf("aiSkillsCreate", "413")["content"] as Json)).toEqual([
+      "text/plain",
+    ]);
+  });
+
+  it("publishes the rooms a failed template install made on the statuses it relays", () => {
+    const incomplete = {
+      error: "Service Unavailable",
+      skillSets: [{ templateId: "skill-sets/budgeting", id: "101", title: "Budgeting" }],
+      knowledgeBases: [],
+      warning: "installIncomplete",
+    };
+    for (const status of [400, 403, 404, 413, 500, 502, 503]) {
+      expect([status, responseViolations("aiTemplatesInstall", status, incomplete)]).toEqual([
+        status,
+        [],
+      ]);
+    }
+    expect(responseViolations("aiTemplatesInstall", 409, incomplete)).not.toEqual([]);
   });
 
   it("answers text-to-docx with 202", () => {

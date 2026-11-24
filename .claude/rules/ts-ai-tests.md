@@ -176,7 +176,7 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   prompt), which changes only through an OpenSpec change with the .NET tests; and
   `// HANDLED DOWNSTREAM <id>: <what it does>. In production <who refuses or prevents it>.` for
   what the AI service or the engine refuses itself, so that only the stubbed test shows it.
-  `grep -rn "// DEFECT"` then lists what is open (36 on 2026-11-24).
+  `grep -rn "// DEFECT"` then lists what is open (none on 2026-11-24, after the 36 open that morning were fixed or relabelled).
 - A defect that touches security (a secret or a credential in an answer or a log, a credential
   sent to another host, a missing access check, a request to an address the caller chose) is not
   pinned and not described in the repository: it goes to the private register
