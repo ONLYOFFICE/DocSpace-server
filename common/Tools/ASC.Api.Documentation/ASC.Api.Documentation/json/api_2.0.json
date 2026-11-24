@@ -2701,7 +2701,7 @@
           "Portal / Payment"
         ],
         "summary": "Change a wallet service quantity",
-        "description": "Buys units of a wallet service, or schedules the quantity of the service for the next period. The mode comes\r\nfrom `productQuantityType`. With `Add`, the call buys the units immediately and pays for them from the portal\r\nwallet. With `Set`, the call charges nothing and changes the quantity from the next period. With `Set`, an\r\nempty quantity cancels a change that was scheduled earlier. With a zero quantity, the portal does not renew the\r\nservice at the next period. The call returns 400 for `Renew` and `Sub`. If the portal has no billing customer,\r\nthe call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the\r\ninstallation has no billing service. An `Add` call spends money. Do not repeat an `Add` call. Each call buys\r\nthe units again. You can repeat a `Set` call with the same body. With `Add`, the call needs a wallet\r\nsub-account or a bonus in the accounting currency. A bonus counts only until it ends. Without either, the call\r\nreturns 404. A wallet that was never topped up has no sub-account. If the bonus cannot be read, the call goes\r\non. If the wallet balance cannot be read, the call returns 404. The wallet money and the bonus balance together must cover the price. The bonus is spent first. If the\r\nbilling service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402\r\nfor an add-on to the plan if the plan payment is overdue. A trial plan passes this check. The call returns 400\r\nif the quantity is below the minimum of the service. By default, the minimum is 100 units for disk storage and\r\n10 for Docs Connect Dev Pack. With `Add`, the minimum for admins is the number\r\nof admins the portal already has. With `Add`, the call checks the minimum only while the portal does not have\r\nthe service yet. With `Add`, an empty or zero quantity also returns 400. While Docs Connect is active, a\r\nrequest for Docs Connect Dev Pack returns 400. To move to Docs Connect Dev Pack, use\r\n`POST api/2.0/settings/docscloud/switchtodevpack`. While Docs Connect Dev Pack is active, `Set` with Docs\r\nConnect schedules the return to it. The return happens at the next period and needs a quantity above zero. In\r\nthis case, `Add` with Docs Connect returns 400. With `Add`, the call returns `true`. With `Set`, it returns\r\n`true`, or `false` if the portal does not have the service or cannot save the change. By default, the limit\r\nis 10 calls a minute per user. More calls return 429. To get the price first, use\r\n`PUT api/2.0/portal/payment/calculatewallet`.",
+        "description": "Buys units of a wallet service, or schedules the quantity of the service for the next period. The mode comes\r\nfrom `productQuantityType`. With `Add`, the call buys the units immediately and pays for them from the portal\r\nwallet. With `Set`, the call charges nothing and changes the quantity from the next period. With `Set`, an\r\nempty quantity cancels a change that was scheduled earlier. With a zero quantity, the portal does not renew the\r\nservice at the next period. The call returns 400 for `Renew` and `Sub`. If the portal has no billing customer,\r\nthe call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the\r\ninstallation has no billing service. An `Add` call spends money. Do not repeat an `Add` call. Each call buys\r\nthe units again. You can repeat a `Set` call with the same body. With `Add`, the call needs a wallet\r\nsub-account or a bonus in the accounting currency. A bonus counts only until it ends. Without either, the call\r\nreturns 404. A wallet that was never topped up has no sub-account. If the bonus cannot be read, the call goes\r\non. If the wallet balance cannot be read, the call returns 404. The wallet money and the bonus balance together must cover the price. The bonus is spent first. If the\r\nbilling service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402\r\nfor an add-on to the plan if the plan payment is overdue. A trial plan passes this check. The call returns 400\r\nif the quantity is below the minimum of the service. By default, the minimum is 100 units for disk storage and\r\n10 for Docs Connect Dev Pack. With `Add`, the minimum for admins is the number\r\nof admins the portal already has. With `Add`, the call checks the minimum only while the portal does not have\r\nthe service yet. With `Add`, an empty or zero quantity also returns 400. The admins plan has two products,\r\nthe monthly `adminwallet` and the yearly `adminwalletyear`. With `Add`, a request for one returns 400 while\r\nthe portal has the other. While Docs Connect is active, a\r\nrequest for Docs Connect Dev Pack returns 400. To move to Docs Connect Dev Pack, use\r\n`POST api/2.0/settings/docscloud/switchtodevpack`. While Docs Connect Dev Pack is active, `Set` with Docs\r\nConnect schedules the return to it. The return happens at the next period and needs a quantity above zero. In\r\nthis case, `Add` with Docs Connect returns 400. With `Add`, the call returns `true`. With `Set`, it returns\r\n`true`, or `false` if the portal does not have the service or cannot save the change. By default, the limit\r\nis 10 calls a minute per user. More calls return 429. To get the price first, use\r\n`PUT api/2.0/portal/payment/calculatewallet`.",
         "operationId": "updateWalletPayment",
         "requestBody": {
           "content": {
@@ -2762,7 +2762,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, or that service is already set"
+            "description": "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, that service is already set, or in the `Add` form the portal has the other administrators plan"
           },
           "402": {
             "description": "The payment for the plan of the portal is overdue and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached"
@@ -3080,7 +3080,7 @@
           "Portal / Payment"
         ],
         "summary": "Move the subscription to the wallet",
-        "description": "Ends the paid subscription of the portal and moves the portal to the wallet. First, the call adds the unused\r\nbalance of the period to the wallet. If the wallet and the bonus balance fall short, it tops up the wallet from\r\nthe payment method. Then it buys the requested admins as a wallet service and spends the bonus first. To read\r\nthe credit beforehand, use `GET api/2.0/portal/payment/subscription/balance`. The payer is the user with the\r\nemail of the billing customer. Only the payer can call it. Other callers get 403. The call spends money and\r\ncannot be undone. Do not repeat it. It returns `true` if it bought the admins. If the purchase fails, it returns\r\n`false` with 200. The portal then stays on the wallet with the moved money. To buy the admins after that, use\r\n`Add` in `PUT api/2.0/portal/payment/updatewallet`. With a delayed payment method, the wallet and the bonus must\r\nalready cover the price. By default, the limit is 10 calls a minute per user. More calls return 429. The call\r\nreturns 403 if the installation has no billing service or the customer has no payment method. It returns 404 if\r\nthe portal has no billing customer or its paid plan has no subscription. The call returns 400 if `quantity`\r\nnames a product other than the admins wallet service. It also returns 400 for zero admins or fewer than the\r\nportal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan\r\nis not paid or the balance cannot be moved. Two errors come after the subscription has ended. If the wallet and\r\nthe bonus still fall short after the top-up, the call returns 402. If the wallet balance cannot be read, the\r\ncall returns 404.",
+        "description": "Ends the paid subscription of the portal and moves the portal to the wallet. First, the call adds the unused\r\nbalance of the period to the wallet. If the wallet and the bonus balance fall short, it tops up the wallet from\r\nthe payment method. Then it buys the requested admins as a wallet service and spends the bonus first. To read\r\nthe credit beforehand, use `GET api/2.0/portal/payment/subscription/balance`. The payer is the user with the\r\nemail of the billing customer. Only the payer can call it. Other callers get 403. The call spends money and\r\ncannot be undone. Do not repeat it. It returns `true` if it bought the admins. If the purchase fails, it returns\r\n`false` with 200. The portal then stays on the wallet with the moved money. To buy the admins after that, use\r\n`Add` in `PUT api/2.0/portal/payment/updatewallet`. With a delayed payment method, the wallet and the bonus must\r\nalready cover the price. By default, the limit is 10 calls a minute per user. More calls return 429. The call\r\nreturns 403 if the installation has no billing service or the customer has no payment method. It returns 404 if\r\nthe portal has no billing customer or its paid plan has no subscription. The call returns 400 if `quantity`\r\nnames a product other than `adminwallet` or `adminwalletyear`. These are the monthly and the yearly admins\r\nplan. It also returns 400 for zero admins or fewer than the\r\nportal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan\r\nis not paid or the balance cannot be moved. Two errors come after the subscription has ended. If the wallet and\r\nthe bonus still fall short after the top-up, the call returns 402. If the wallet balance cannot be read, the\r\ncall returns 404.",
         "operationId": "moveSubscriptionToWallet",
         "requestBody": {
           "content": {
@@ -3141,7 +3141,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or does not name the administrators wallet product, the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier"
+            "description": "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or names neither administrators wallet plan (`adminwallet`, `adminwalletyear`), the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier"
           },
           "402": {
             "description": "The plan of the portal is not paid, the balance could not be moved, or the wallet and the bonus are still short of the price after the top-up"
@@ -17906,7 +17906,7 @@
           "Settings / DocsCloud"
         ],
         "summary": "Start the Docs Connect trial",
-        "description": "Starts the free Docs Connect trial for the current portal. If the trial is granted, the call adds the assigned\r\nDocs Connect server to the Content Security Policy settings. To check the subscriptions and the tariff state\r\nfirst, use `GET api/2.0/portal/tariff`. Requires the EditPortalSettings permission, which the portal owner and\r\nDocSpace admins have. Other callers get 403. The call changes data, and a repeated call returns 400. It\r\nreturns `true` if the trial is granted. It returns `false` if the billing service declines it, for example\r\nafter an earlier trial. Then nothing changes. It also returns `false` if the billing service does not answer,\r\nor the portal cannot read its answer. Then the trial may be granted. So check `GET api/2.0/portal/tariff` with\r\n`refresh=true` before you call again. The call never buys a paid plan. To move a paid Docs Connect\r\nsubscription to Docs Connect Dev Pack, use `POST api/2.0/settings/docscloud/switchtodevpack`. The call returns\r\n400 if the portal already has a Docs Connect trial, Docs Connect, or Docs Connect Dev Pack. It returns 402 if\r\nthe tariff is delayed or not paid. It returns 403 if the billing service is not configured. If the\r\ninstallation has no Docs Connect trial quota, the call returns 404. After a granted trial, the call returns\r\n403 if the server address makes the Content Security Policy header too long. The trial then stays granted.",
+        "description": "Starts the free Docs Connect trial for the current portal. If the trial is granted, the call adds the assigned\r\nDocs Connect server to the Content Security Policy settings. To check the subscriptions and the tariff state\r\nfirst, use `GET api/2.0/portal/tariff`. Requires the EditPortalSettings permission, which the portal owner and\r\nDocSpace admins have. Other callers get 403. The call changes data, and a repeated call returns 400. It\r\nreturns `true` if the trial is granted. It also returns `true` if the portal cannot get the server from Docs\r\nConnect. Then the Content Security Policy stays unchanged. To check that Docs Connect is active, use\r\n`GET api/2.0/settings/docscloud/tenant`. The call returns `false` if the billing service declines the trial,\r\nfor example after an earlier trial. Then nothing changes. It also returns `false` if the billing service does\r\nnot answer, or the portal cannot read its answer. Then the trial may be granted. So check\r\n`GET api/2.0/portal/tariff` with `refresh=true` before you call again. The call never buys a paid plan. To move\r\na paid Docs Connect subscription to Docs Connect Dev Pack, use `POST api/2.0/settings/docscloud/switchtodevpack`.\r\nThe call returns 400 if the portal already has a Docs Connect trial, Docs Connect, or Docs Connect Dev Pack. It\r\nreturns 402 if the tariff is delayed or not paid. It returns 403 if the billing service is not configured. If\r\nthe installation has no Docs Connect trial quota, the call returns 404. After a granted trial, the call returns\r\n403 if the server address makes the Content Security Policy header too long. The trial then stays granted.",
         "operationId": "startDocsCloudTrial",
         "responses": {
           "200": {
@@ -49775,9 +49775,10 @@
         "oneOf": [
           {
             "examples": [
-              "AISearch"
+              "AdminYear"
             ],
             "enum": [
+              "AdminYear",
               "AISearch",
               "DocsCloudDevPack",
               "DocsCloud",
@@ -49787,13 +49788,14 @@
               "Storage"
             ],
             "type": "string",
-            "description": "[AISearch - AISearch, DocsCloudDevPack - DocsCloudDevPack, DocsCloud - DocsCloud, Admin - Admin, AITools - AITools, Backup - Backup, Storage - Storage]"
+            "description": "[AdminYear - AdminYear, AISearch - AISearch, DocsCloudDevPack - DocsCloudDevPack, DocsCloud - DocsCloud, Admin - Admin, AITools - AITools, Backup - Backup, Storage - Storage]"
           },
           {
             "examples": [
-              -18
+              -19
             ],
             "enum": [
+              -19,
               -18,
               -16,
               -15,
@@ -49803,8 +49805,9 @@
               -11
             ],
             "type": "integer",
-            "description": "[-18 - AISearch, -16 - DocsCloudDevPack, -15 - DocsCloud, -14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
+            "description": "[-19 - AdminYear, -18 - AISearch, -16 - DocsCloudDevPack, -15 - DocsCloud, -14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
             "x-enum-varnames": [
+              "AdminYear",
               "AISearch",
               "DocsCloudDevPack",
               "DocsCloud",
@@ -49836,9 +49839,10 @@
               "anyOf": [
                 {
                   "examples": [
-                    "AISearch"
+                    "AdminYear"
                   ],
                   "enum": [
+                    "AdminYear",
                     "AISearch",
                     "DocsCloudDevPack",
                     "DocsCloud",
@@ -49848,13 +49852,14 @@
                     "Storage"
                   ],
                   "type": "string",
-                  "description": "[AISearch - AISearch, DocsCloudDevPack - DocsCloudDevPack, DocsCloud - DocsCloud, Admin - Admin, AITools - AITools, Backup - Backup, Storage - Storage]"
+                  "description": "[AdminYear - AdminYear, AISearch - AISearch, DocsCloudDevPack - DocsCloudDevPack, DocsCloud - DocsCloud, Admin - Admin, AITools - AITools, Backup - Backup, Storage - Storage]"
                 },
                 {
                   "examples": [
-                    -18
+                    -19
                   ],
                   "enum": [
+                    -19,
                     -18,
                     -16,
                     -15,
@@ -49864,8 +49869,9 @@
                     -11
                   ],
                   "type": "integer",
-                  "description": "[-18 - AISearch, -16 - DocsCloudDevPack, -15 - DocsCloud, -14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
+                  "description": "[-19 - AdminYear, -18 - AISearch, -16 - DocsCloudDevPack, -15 - DocsCloud, -14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
                   "x-enum-varnames": [
+                    "AdminYear",
                     "AISearch",
                     "DocsCloudDevPack",
                     "DocsCloud",

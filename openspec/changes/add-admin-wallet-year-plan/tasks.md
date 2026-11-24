@@ -3,7 +3,7 @@
 ## 1. Catalogue: seed, enum, migrations, title
 
 - [x] 1.1 Add the `adminwalletyear` row (id -19) to the quota seed and `AdminYear` to the wallet service enum; verify `ASC.Core.Common` builds with `--no-incremental` and no new warnings
-- [ ] 1.2 Add the title resource `Tariffs_adminwalletyear` (resx, hand-edited designer, the locales that have `Tariffs_adminwallet`); verify the `WalletServiceTextsTests` class of `ASC.Notify.Tests` passes
+- [x] 1.2 Add the title resource `Tariffs_adminwalletyear` (resx, hand-edited designer, the locales that have `Tariffs_adminwallet`); verify the `WalletServiceTextsTests` class of `ASC.Notify.Tests` passes
 - [x] 1.3 Create the MySQL SaaS migration that inserts the row and the MySQL Standalone migration that deletes it (`db-migrations` skill); verify by applying them with `ASC.Migration.Runner` and reading the row from `tenants_quota`
 - [x] 1.4 Add a unit test over the seed: unique non-empty product ids, unique service names of wallet rows; verify it fails when the new row is given product id `1013` (`prove-red.sh`)
 - [x] 1.5 Add a unit test that the merged quota of the yearly wallet plan carries its price and the `year` feature; verify it passes in `ASC.Core.Common.Tests`
@@ -21,9 +21,9 @@
 
 ## 3. Contract and integration checks
 
-- [ ] 3.1 Re-emit the OpenAPI documents and regenerate the SDKs for the new enum member (`generate-sdk` skill); verify the diff of the documents shows only the enum member and the changed texts
-- [ ] 3.2 Run `dotnet format style --verify-no-changes` on the edited files and the style build of the touched projects; verify no new warnings
-- [ ] 3.3 Run `openspec validate --specs --no-interactive` and `python -I -X utf8 .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec billing`; the change adds no operationId, so verify that `updateWalletPayment`, `moveSubscriptionToWallet` and `getPaymentQuotas` are each called by a test
+- [x] 3.1 Re-emit the OpenAPI documents and regenerate the SDKs for the new enum member (`generate-sdk` skill); verify the diff of the documents shows only the enum member and the changed texts
+- [x] 3.2 Run `dotnet format style --verify-no-changes` on the edited files and the style build of the touched projects; verify no new warnings
+- [x] 3.3 Run `openspec validate --specs --no-interactive` and `python -I -X utf8 .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec billing`; the change adds no operationId, so verify that `updateWalletPayment`, `moveSubscriptionToWallet` and `getPaymentQuotas` are each called by a test
 
 ## Workflow follow-up
 
