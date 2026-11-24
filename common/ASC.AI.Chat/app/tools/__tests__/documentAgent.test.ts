@@ -176,7 +176,7 @@ function arrange(
       docspace((options.settings ?? tenantSettings) as never),
     ),
     http.get("*/api/2.0/files/@my", () =>
-      options.my === null ? docspaceError(500) : docspace({ current: { id: options.my ?? 500 } }),
+      options.my === null ? docspaceError(404) : docspace({ current: { id: options.my ?? 500 } }),
     ),
     http.get("*/api/2.0/files/folder/:id", ({ params }) => {
       const folder = options.folders?.[String(params["id"])];
@@ -251,7 +251,6 @@ function snapshot(patch: Partial<ChatContextSnapshot>): ChatContextSnapshot {
     requested: { threadId: undefined, entityId: undefined, contextEntityId: undefined },
     aiReady: true,
     toolPermissionMode: null,
-    aiNotReadyMessage: undefined,
     profiles: [],
     global: {
       entityId: undefined,
@@ -639,11 +638,35 @@ describe("documentAgentTools.callTool running a task", () => {
     });
   });
 
-  // DEFECT docagent-6: a read-back of a saved file that fails with 500 is taken as "no details" and the file is listed under the artifact's name, without its folder and link — expected the unknown answer kept apart from a 404 by its status, with a comment why it is safe (ts-ai-failure-paths.md §1; the second suppressed `.catch(() => undefined)` of documentAgent.ts)
-  it("lists a saved file under the artifact's name when its read-back fails", async () => {
+  it.each([
+    ["500", () => docspaceError(500), "500"],
+    ["a dropped connection", () => HttpResponse.error(), "no HTTP answer"],
+  ])(
+    "lists a saved file under the artifact's name and warns when its read-back answers %s",
+    async (_what, answer, status) => {
+      arrange();
+      completes();
+      upstream.use(http.get("*/api/2.0/files/file/:id", answer));
+
+      expect(await run({ task: "Do" })).toEqual({
+        data: {
+          summary: "Made the report.",
+          files: [
+            { id: "901", title: "Report.docx", url: "/doceditor?fileId=901", fileExst: ".docx" },
+          ],
+        },
+      });
+      expect(warnings()).toContain(
+        `document_agent: saved file 901 could not be read back (${status}), listing it without its details`,
+      );
+      expect(warnings().join("\n")).not.toContain("http");
+    },
+  );
+
+  it("lists a saved file the read-back no longer finds under the artifact's name without a warning", async () => {
     arrange();
     completes();
-    upstream.use(http.get("*/api/2.0/files/file/:id", () => docspaceError(500)));
+    upstream.use(http.get("*/api/2.0/files/file/:id", () => docspaceError(404)));
 
     expect(await run({ task: "Do" })).toEqual({
       data: {
@@ -653,6 +676,7 @@ describe("documentAgentTools.callTool running a task", () => {
         ],
       },
     });
+    expect(warnings().filter((w) => w.includes("could not be read back"))).toEqual([]);
   });
 
   it("answers a completed task that saved nothing with an empty list", async () => {
@@ -990,6 +1014,16 @@ describe("where the files of a task go", () => {
     expect(client.sendMessageStream).not.toHaveBeenCalled();
   });
 
+  it("answers that the workspace could not be reached when the My documents read fails", async () => {
+    arrange();
+    upstream.use(http.get("*/api/2.0/files/@my", () => docspaceError(500)));
+
+    const answer = await call({ task: "Do" });
+
+    expect(answer).toBe("The workspace could not be reached: it answered 500.");
+    expect(client.sendMessageStream).not.toHaveBeenCalled();
+  });
+
   it("answers that the workspace could not be reached when the folder read fails", async () => {
     arrange({ folders: { "42": 500 } });
 
@@ -1065,11 +1099,10 @@ describe("the task's log", () => {
     );
   });
 
-  // DEFECT docagent-5: a failed read of the log folder (500) is taken as "not writable" and the log silently moves next to the results — expected the unknown answer kept apart from a refusal (ts-ai-failure-paths.md §1; the `.catch(() => undefined)` is one of the two suppressed no-restricted-syntax hits of documentAgent.ts)
-  it("goes next to the results when the log folder cannot be read", async () => {
+  it("goes next to the results from a folder the user may not see, and says so", async () => {
     arrange({
       settings: { ...tenantSettings, taskLog: true, taskLogFolderId: "61" },
-      folders: { "61": 500 },
+      folders: { "61": 403 },
     });
     completes();
 
@@ -1079,6 +1112,23 @@ describe("the task's log", () => {
       "http://chat:5157/document-agent/files/outputs?folder=500",
     );
     expect(warnings()).toContain(
+      "document_agent: log folder 61 is not writable for the user, logging next to the results",
+    );
+  });
+
+  it("answers that the workspace could not be reached when the log folder read fails, without calling the agent", async () => {
+    arrange({
+      settings: { ...tenantSettings, taskLog: true, taskLogFolderId: "61" },
+      folders: { "61": 500 },
+    });
+    completes();
+
+    const answer = await call({ task: "Do" });
+
+    expect(answer).toBe("The workspace could not be reached: it answered 500.");
+    expect(answer).not.toContain("http");
+    expect(client.sendMessageStream).not.toHaveBeenCalled();
+    expect(warnings()).not.toContain(
       "document_agent: log folder 61 is not writable for the user, logging next to the results",
     );
   });

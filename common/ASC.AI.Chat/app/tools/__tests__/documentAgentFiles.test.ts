@@ -578,16 +578,61 @@ describe("the document agent's MCP server", () => {
     expect(reply.text).toBe("");
   });
 
-  // DEFECT docagent-2: a body that is not JSON is answered by the application's `{ error }`, not in the envelope of the protocol — expected the JSON-RPC parse error the transport answers for every other bad body (ts-ai-express.md §1)
-  it("answers a body that is not JSON with the application's 400", async () => {
+  it.each([
+    ["the exact path", DOCUMENT_AGENT_FILES_PATH],
+    ["another spelling of it", `${DOCUMENT_AGENT_FILES_PATH.toUpperCase()}/`],
+  ])(
+    "answers a body that is not JSON on %s with the protocol's 400 parse error",
+    async (_what, path) => {
+      const reply = await request(app)
+        .post(path)
+        .set({ ...MCP_ACCEPT, ...AGENT, "Content-Type": "application/json" })
+        .send("{bad");
+
+      expect(reply.status).toBe(400);
+      expect(reply.body).toEqual({
+        jsonrpc: "2.0",
+        error: { code: -32700, message: "Parse error: Invalid JSON" },
+        id: null,
+      });
+      expect(reply.text).not.toContain("SyntaxError");
+      expect(reply.text).not.toContain("{bad");
+    },
+  );
+
+  it("answers a body that is not JSON without the agent's token with the application's 400", async () => {
     const reply = await request(app)
       .post(DOCUMENT_AGENT_FILES_PATH)
-      .set({ ...MCP_ACCEPT, ...AGENT, "Content-Type": "application/json" })
+      .set({ ...MCP_ACCEPT, "Content-Type": "application/json" })
       .send("{bad");
 
     expect(reply.status).toBe(400);
     expect(reply.body).toEqual({ error: "The request body is not valid JSON" });
-    expect(reply.text).not.toContain("SyntaxError");
+  });
+
+  it("answers a body that is not JSON with the application's 400 when no document agent is configured", async () => {
+    vi.stubEnv("AI__DOCUMENT_AGENT__TOKEN", "");
+    try {
+      const reply = await request(app)
+        .post(DOCUMENT_AGENT_FILES_PATH)
+        .set({ ...MCP_ACCEPT, ...AGENT, "Content-Type": "application/json" })
+        .send("{bad");
+
+      expect(reply.status).toBe(400);
+      expect(reply.body).toEqual({ error: "The request body is not valid JSON" });
+    } finally {
+      vi.stubEnv("AI__DOCUMENT_AGENT__TOKEN", "secret");
+    }
+  });
+
+  it("passes a body over the limit on to the application's 413", async () => {
+    const reply = await request(app)
+      .post(DOCUMENT_AGENT_FILES_PATH)
+      .set({ ...MCP_ACCEPT, ...AGENT, "Content-Type": "application/json" })
+      .send(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "x".repeat(200_000) }));
+
+    expect(reply.status).toBe(413);
+    expect(reply.text).toBe("Payload Too Large");
   });
 
   it("answers 406 to a client that does not take an event stream", async () => {

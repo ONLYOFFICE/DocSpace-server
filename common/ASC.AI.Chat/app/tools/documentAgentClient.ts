@@ -214,7 +214,11 @@ function stateOf(state: TaskState | undefined): DocumentTaskOutput["state"] {
       return "input-required";
     case TaskState.TASK_STATE_AUTH_REQUIRED:
       return "auth-required";
-    default:
+    case TaskState.TASK_STATE_SUBMITTED:
+    case TaskState.TASK_STATE_WORKING:
+    case TaskState.TASK_STATE_UNSPECIFIED:
+    case TaskState.UNRECOGNIZED:
+    case undefined:
       return "unknown";
   }
 }
@@ -423,7 +427,9 @@ export async function runDocumentTask(
         }
         break;
       }
-      default:
+      // A reply message of its own carries no task state: the task's status says how it ends.
+      case "message":
+      case undefined:
         break;
     }
   };

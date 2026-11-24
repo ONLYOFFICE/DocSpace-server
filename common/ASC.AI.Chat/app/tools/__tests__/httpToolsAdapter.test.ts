@@ -642,33 +642,39 @@ describe("HttpToolsAdapter.getPrompt", () => {
     expect(upstream.seen[2]?.body).toMatchObject({ formId: 55, attachmentId: "old" });
   });
 
-  // DEFECT tools-2: a failed attachments read (5xx, timeout) is read as "no form attached" and the round's tools are listed without the form — expected the unknown outcome to fail the list, or a status test with a comment why absent is safe ([ts-ai-failure-paths.md §1])
-  it("lists the tools without a form when the attachments read fails", async () => {
+  it("fails the list and lists nothing when the attachments read answers 500", async () => {
     upstream.use(http.post("*/internal/ai/attachments/read", () => docspaceError(500, "boom")));
     answerList();
 
-    await expect(new HttpToolsAdapter().getPrompt("4", ["a", "b"])).resolves.toBe(
-      "Use the DocSpace tools.",
-    );
+    const failure = await new HttpToolsAdapter().getPrompt("4", ["a", "b"]).catch((e) => e);
 
-    expect(upstream.seen[1]?.body).toEqual({ ...EMPTY_CONTEXT, folderId: 4 });
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /^resolveForm: failed to resolve attachment\(s\) \[a,b\]: AI service 500 /,
-      ),
-    );
+    expect(failure).toBeInstanceOf(AiServiceHttpError);
+    expect(failure).toMatchObject({ status: 500 });
+    expect(upstream.seen.map((r) => r.path)).toEqual(["/internal/ai/attachments/read"]);
   });
 
-  it("logs a non-Error failure of the attachments read as text", async () => {
+  it("fails the list with the read's own failure when it is not an HTTP answer", async () => {
     answerList();
     const { storage } = await import("../../storage/index.js");
-    vi.spyOn(storage.attachments, "readManyByIds").mockRejectedValueOnce("gone");
-
-    await new HttpToolsAdapter().getPrompt(undefined, ["a"]);
-
-    expect(logger.warn).toHaveBeenCalledWith(
-      "resolveForm: failed to resolve attachment(s) [a]: gone",
+    vi.spyOn(storage.attachments, "readManyByIds").mockRejectedValueOnce(
+      new Error("upstream timeout after 60000ms"),
     );
+
+    await expect(new HttpToolsAdapter().getPrompt(undefined, ["a"])).rejects.toThrow(
+      "upstream timeout after 60000ms",
+    );
+    expect(upstream.seen).toEqual([]);
+  });
+
+  it("leaves the prompt empty and warns when the attachments read fails under safeGetToolsPrompt", async () => {
+    upstream.use(http.post("*/internal/ai/attachments/read", () => docspaceError(503)));
+    answerList();
+
+    await expect(safeGetToolsPrompt(new HttpToolsAdapter(), "4", ["a"])).resolves.toBe("");
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringMatching(/^tools\/list prompt fetch failed: AI service 503 /),
+    );
+    expect(upstream.seen.map((r) => r.path)).toEqual(["/internal/ai/attachments/read"]);
   });
 });
 

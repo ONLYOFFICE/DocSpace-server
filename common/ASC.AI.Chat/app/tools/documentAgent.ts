@@ -72,6 +72,7 @@ import {
   getFileInfo,
 } from "../storage/docspaceFilesApi.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
+import type { DocspaceFileInfo, DocspaceFolderInfo } from "../storage/docspaceFilesApi.js";
 import {
   getForwardedHeaders,
   getRoundAttachmentIds,
@@ -374,7 +375,7 @@ export async function savedFilesOf(
       logger.warn(`${DOCUMENT_AGENT_TOOL_NAME}: artifact ${artifact.name} names no file of ours`);
       continue;
     }
-    const info = await getFileInfo(id).catch(() => undefined);
+    const info = await readBackSavedFile(id);
     const title = info?.title ?? artifact.name;
     const fileExst = info?.fileExst ?? extensionOf(title);
     saved.push({
@@ -387,6 +388,27 @@ export async function savedFilesOf(
     });
   }
   return saved;
+}
+
+/**
+ * The details of a file the outputs endpoint saved. A 404 answers undefined through
+ * `getFileInfo`; any other failure (a 5xx, a timeout, a body of the wrong shape) is unknown and
+ * is logged with its status, then read as "no details" too. That is safe here, unlike for a read
+ * that decides access: the file exists, as the endpoint took it, and failing or dropping it would
+ * hide a file the task made from the user (ts-ai-failure-paths.md §6). It is listed under the
+ * artifact's name, without its folder and link.
+ */
+async function readBackSavedFile(id: string): Promise<DocspaceFileInfo | undefined> {
+  try {
+    return await getFileInfo(id);
+  } catch (err) {
+    // The status only: the message of a failure names the internal address it was read from.
+    const status = err instanceof DocspaceApiHttpError ? String(err.status) : "no HTTP answer";
+    logger.warn(
+      `${DOCUMENT_AGENT_TOOL_NAME}: saved file ${id} could not be read back (${status}), listing it without its details`,
+    );
+    return undefined;
+  }
 }
 
 /** The extension of a file name, with its dot, as the Files API writes `fileExst`. */
@@ -433,14 +455,27 @@ async function resolveLogTarget(tenant: TenantSettings, resultsFolderId: string)
   if (chosen === null || chosen === resultsFolderId) {
     return resultsFolderId;
   }
-  const info = await getFolderInfo(chosen).catch(() => undefined);
-  if (canTakeUpload(info)) {
+  if (canTakeUpload(await readLogFolder(chosen))) {
     return chosen;
   }
   logger.warn(
     `${DOCUMENT_AGENT_TOOL_NAME}: log folder ${chosen} is not writable for the user, logging next to the results`,
   );
   return resultsFolderId;
+}
+
+// The chosen log folder's details. A 404 answers undefined through `getFolderInfo` and a 403 is
+// read as undefined here: both say the user cannot write there. Any other failure is unknown and
+// rethrown, so the task fails with the workspace's status instead of silently logging elsewhere.
+async function readLogFolder(folderId: string): Promise<DocspaceFolderInfo | undefined> {
+  try {
+    return await getFolderInfo(folderId);
+  } catch (err) {
+    if (err instanceof DocspaceApiHttpError && err.status === 403) {
+      return undefined;
+    }
+    throw err;
+  }
 }
 
 // The model the task runs on: the portal's pick for the agent when it has

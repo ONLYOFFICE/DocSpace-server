@@ -188,22 +188,17 @@ async function resolveForm(
   if (!attachmentId || attachmentId.length === 0) {
     return { formId: 0, attachmentId: "" };
   }
-  try {
-    const records = await storage.attachments.readManyByIds(attachmentId);
-    for (const record of records) {
-      const entryId = record?.path?.split("/", 1)[0];
-      const numeric = parseInt10(entryId, 0) ?? 0;
-      if (numeric > 0) {
-        // The attachment id keys the analyze intent on the C# side.
-        return { formId: numeric, attachmentId: record?.id ?? "" };
-      }
+  // A failed read (5xx, timeout, a body of the wrong shape) is not "no form attached": it
+  // rejects, so the list fails instead of offering the round's tools without the form. A ref
+  // the AI service does not know comes back as null and is skipped below.
+  const records = await storage.attachments.readManyByIds(attachmentId);
+  for (const record of records) {
+    const entryId = record?.path?.split("/", 1)[0];
+    const numeric = parseInt10(entryId, 0) ?? 0;
+    if (numeric > 0) {
+      // The attachment id keys the analyze intent on the C# side.
+      return { formId: numeric, attachmentId: record?.id ?? "" };
     }
-  } catch (err) {
-    logger.warn(
-      `resolveForm: failed to resolve attachment(s) [${attachmentId.join(",")}]: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
-    );
   }
   return { formId: 0, attachmentId: "" };
 }

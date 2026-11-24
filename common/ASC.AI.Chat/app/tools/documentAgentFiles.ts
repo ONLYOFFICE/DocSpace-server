@@ -63,7 +63,7 @@ import { timingSafeEqual } from "crypto";
 import type { IncomingMessage } from "http";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import type { Application, Request, Response } from "express";
+import type { Application, NextFunction, Request, Response } from "express";
 import { z } from "zod";
 import { getDocumentAgent } from "../../config/index.js";
 import type { DocumentAgentConfig } from "../../config/index.js";
@@ -76,6 +76,7 @@ import { fileEditorUrl } from "./httpToolsAdapter.js";
 import { FileTooLargeError, readFileBytes } from "../storage/roomSkills.js";
 import { authorizationValue } from "./systemTools.js";
 import logger from "../log.js";
+import { readProp } from "../narrow.js";
 
 /** The server's name in the agent's `mcpServers`: its tools reach the model as `workspace_*`. */
 export const DOCUMENT_AGENT_FILES_SERVER = "workspace";
@@ -117,6 +118,29 @@ export function registerDocumentAgentFiles(app: Application): void {
   app.all(DOCUMENT_AGENT_FILES_PATH, (req, res) => {
     void serve(req, res);
   });
+  // A body the JSON parser refused never reaches `serve`: the agent's MCP client reads the
+  // answer as JSON-RPC, so it gets the same parse error the transport answers for every other
+  // malformed message, not the application's `{ error }`. Only after the token: a caller
+  // without it gets what the application answers everyone.
+  app.use(
+    DOCUMENT_AGENT_FILES_PATH,
+    (err: unknown, req: Request, res: Response, next: NextFunction) => {
+      const config = getDocumentAgent();
+      if (
+        readProp(err, "type") !== "entity.parse.failed" ||
+        config === undefined ||
+        !presentsToken(req, config)
+      ) {
+        next(err);
+        return;
+      }
+      res.status(400).json({
+        jsonrpc: "2.0",
+        error: { code: -32700, message: "Parse error: Invalid JSON" },
+        id: null,
+      });
+    },
+  );
   app.post(DOCUMENT_AGENT_OUTPUTS_PATH, (req, res) => {
     void receive(req, res);
   });
@@ -288,7 +312,8 @@ async function receive(req: Request, res: Response): Promise<void> {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.warn(`documentAgentFiles: ${name} not saved into folder ${folderId}: ${message}`);
-    if (err instanceof AiServiceHttpError) {
+    // The Files API refuses the upload into a folder, the AI service the one into a thread.
+    if (err instanceof DocspaceApiHttpError || err instanceof AiServiceHttpError) {
       res.status(err.status === 403 ? 403 : 502).json({
         error:
           err.status === 403

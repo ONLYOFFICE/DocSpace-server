@@ -36,9 +36,10 @@ import type { FetchLike, McpHttpServerConfig, ToolsAdapter } from "@onlyoffice/a
 import type { TMCPItem } from "@onlyoffice/ai-chat";
 import { getMcpServers, mcpPortalBaseUrl, PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
-import { withTimeout } from "../storage/httpClient.js";
+import { providerFetch } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
 import logger from "../log.js";
+import { getArray, getString, isObject, readProp } from "../narrow.js";
 
 // docspace-mcp resolves the target portal from the `Referer` header — it
 // mirrors the C# `HttpClientTransport`, which sends `Referer` = portal root
@@ -188,7 +189,6 @@ export function sessionCookie(): string | undefined {
 // round-trip is logged (method, url, status, errors) to pinpoint where the
 // flow breaks — unreachable endpoint, auth, referer, or an empty tool list.
 const forwardingFetch: FetchLike = async (url, init) => {
-  const provided = (init?.headers as Record<string, string> | undefined) ?? {};
   const forwarded = stripNegotiation(getForwardedHeaders());
   const referer = portalReferer(forwarded);
   const authorization = authorizationValue(forwarded);
@@ -198,23 +198,22 @@ const forwardingFetch: FetchLike = async (url, init) => {
       authorization,
     )}, referer=${referer ?? "-"}, headers=[${Object.keys(forwarded).sort().join(",")}])`,
   );
-  // Bound the connect/header phase so an unreachable or hung MCP server
-  // can't pin the request forever; the timer is cleared once the response
-  // is in hand, leaving streamed bodies to flow under the MCP client's own
-  // signal.
-  const { signal, cancel } = withTimeout(init?.signal ?? undefined);
+  // Header names are case-insensitive: a forwarded `mcp-protocol-version` and the library's
+  // `MCP-Protocol-Version` are one header, and a plain object spread would send both, which the
+  // server reads as one joined value. `Headers.set` replaces whatever spelling came first.
+  const headers = new Headers(forwarded);
+  if (referer) {
+    headers.set("referer", referer);
+  }
+  if (authorization) {
+    headers.set("authorization", authorization);
+  }
+  new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
   try {
-    const res = await fetch(url, {
-      ...init,
-      signal,
-      headers: {
-        ...forwarded,
-        ...(referer ? { referer } : {}),
-        ...(authorization ? { authorization } : {}),
-        ...provided,
-      },
-    });
-    cancel();
+    // Bound the connect/header phase so an unreachable or hung MCP server can't pin the request
+    // forever; once the headers are in, the timer is cleared and the transport reads its streams
+    // on its own.
+    const res = await providerFetch(url, { ...init, headers }, "headers");
     if (res.ok) {
       logger.info(`MCP fetch <- ${res.status} ${res.statusText} for ${url}`);
     } else {
@@ -224,7 +223,6 @@ const forwardingFetch: FetchLike = async (url, init) => {
     }
     return res;
   } catch (err) {
-    cancel();
     logger.error(
       `MCP fetch failed for ${url}: ${err instanceof Error ? err.message : String(err)}`,
     );
@@ -302,6 +300,9 @@ function withReadOnlyAutoAllow(grouped: Record<string, TMCPItem[]>): Record<stri
 // were completely invisible. Detect that shape and return the last line of
 // the error text (the MCP server's own step trace ends with the actual
 // failure, e.g. "GET …/files/rooms: 401 Unauthorized"; never user content).
+// The library itself answers a call it could not make (an unknown tool, a
+// JSON-RPC error of the server) with `{"error": "<text>"}` instead of
+// throwing: that text is the library's own wording, logged the same way.
 // Returns undefined for successful or unrecognized results.
 function describeToolErrorResult(result: unknown): string | undefined {
   let payload: unknown = result;
@@ -312,24 +313,23 @@ function describeToolErrorResult(result: unknown): string | undefined {
       return undefined;
     }
   }
-  if (!payload || typeof payload !== "object") {
+  if (!isObject(payload)) {
     return undefined;
   }
-  const { isError, content } = payload as {
-    isError?: unknown;
-    content?: unknown;
-  };
-  if (isError !== true) {
+  const libraryError = getString(payload, "error");
+  if (libraryError !== undefined && payload["isError"] === undefined) {
+    return lastLine(libraryError);
+  }
+  if (payload["isError"] !== true) {
     return undefined;
   }
-  let text = "";
-  if (Array.isArray(content)) {
-    const first = content.find(
-      (part): part is { text: string } =>
-        !!part && typeof part === "object" && typeof (part as { text?: unknown }).text === "string",
-    );
-    text = first?.text ?? "";
-  }
+  const first = getArray(payload, "content")
+    ?.map((part) => readProp(part, "text"))
+    .find((text): text is string => typeof text === "string");
+  return lastLine(first ?? "");
+}
+
+function lastLine(text: string): string {
   const lines = text
     .split("\n")
     .map((line) => line.trim())

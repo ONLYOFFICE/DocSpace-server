@@ -407,8 +407,7 @@ describe("systemToolsSource.getTools", () => {
     expect(docspace[0]?.headers["referer"]).toBe("http://host.docker.internal:8092/");
   });
 
-  // DEFECT tools-6: a forwarded `mcp-protocol-version` is sent next to the library's `MCP-Protocol-Version` and the two are joined into one value — expected the library's header to win, as the comment above forwardingFetch says; the spread compares keys case-sensitively (systemTools.ts:210)
-  it("joins a forwarded protocol version with the library's and derives referer and authorization", async () => {
+  it("lets the library's protocol version replace a forwarded one in any spelling and derives referer and authorization", async () => {
     const docspace = mcpServer(upstream, DOCSPACE_URL, { sessionId: "own" });
     mcpServer(upstream, OTHER_URL);
 
@@ -423,7 +422,7 @@ describe("systemToolsSource.getTools", () => {
 
     expect(docspace[1]?.headers).toEqual({
       ...LIBRARY_HEADERS,
-      "mcp-protocol-version": "1999-01-01, 2025-06-18",
+      "mcp-protocol-version": "2025-06-18",
       "mcp-session-id": "own",
       referer: "https://portal.example.com/",
       authorization: "Bearer H",
@@ -652,29 +651,38 @@ describe("systemToolsSource.callTool", () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  // DEFECT tools-5: a call the library answers with `{"error": ...}` (unknown tool, JSON-RPC error, a server that fails the call) is logged at info as "ok" — expected a warn like the isError result, the case the comment above describeToolErrorResult says was invisible (systemTools.ts:303)
   it.each<[string, (string | undefined)[], () => Record<string, unknown>, string]>([
-    [
-      "an unknown tool",
-      [],
-      () => ({ result: {} }),
-      JSON.stringify({ error: "Unknown system tool: get_room" }),
-    ],
+    ["an unknown tool", [], () => ({ result: {} }), "Unknown system tool: get_room"],
     [
       "a JSON-RPC error",
       ["get_room"],
       () => ({ error: { code: -32000, message: "bad" } }),
-      JSON.stringify({ error: "MCP tool error (-32000): bad" }),
+      "MCP tool error (-32000): bad",
     ],
-  ])("answers %s as an error text and logs ok", async (_name, names, call, expected) => {
+  ])("answers %s as an error text and warns with it", async (_name, names, call, expected) => {
     mcpServer(upstream, DOCSPACE_URL, {
       tools: names.map((name) => ({ name, inputSchema: {} })),
       call,
     });
     mcpServer(upstream, OTHER_URL);
 
-    await expect(systemToolsSource.callTool("get_room", {})).resolves.toBe(expected);
+    await expect(systemToolsSource.callTool("get_room", {})).resolves.toBe(
+      JSON.stringify({ error: expected }),
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      `systemTools.callTool name=get_room returned an error result: ${expected}`,
+    );
+    expect(logger.info).not.toHaveBeenCalledWith("systemTools.callTool name=get_room ok");
+  });
+
+  it("logs ok for a result that carries an error field next to isError false", async () => {
+    const result = { isError: false, error: "not a failure", content: [] };
+    mcpServer(upstream, DOCSPACE_URL, { tools: [READ_TOOL], call: () => ({ result }) });
+    mcpServer(upstream, OTHER_URL);
+
+    await expect(systemToolsSource.callTool("get_room", {})).resolves.toBe(JSON.stringify(result));
     expect(logger.info).toHaveBeenCalledWith("systemTools.callTool name=get_room ok");
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it("logs and rethrows when the listing cannot be searched", async () => {
