@@ -47,6 +47,10 @@ public class PaymentQuotasTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Assert
         var yearly = quotas.Should().ContainSingle(q => q.Id == Plans.AdminWalletYearQuotaId).Subject;
         yearly.Price.Value.Should().Be((double)Plans.AdminWalletYearPrice);
-        yearly.Features.Should().Contain(f => f.Id == "year");
+        yearly.Features.Should().ContainSingle(f => f.Id == "year").Which.Value.Should().Be(true);
+
+        // the flag is listed for every quota, so the monthly plan carries it switched off
+        var monthly = quotas.Should().ContainSingle(q => q.Id == Plans.AdminWalletQuotaId).Subject;
+        monthly.Features.Should().ContainSingle(f => f.Id == "year").Which.Value.Should().Be(false);
     }
 }

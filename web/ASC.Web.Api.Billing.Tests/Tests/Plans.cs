@@ -53,6 +53,7 @@ internal static class Plans
 
     // The same plan paid from the wallet, "adminwallet": renewed by the stack itself when its due date comes, at 20 USD
     // per administrator.
+    public const int AdminWalletQuotaId = -14;
     public const int AdminWalletProductId = 1013;
     public const decimal AdminWalletPrice = 20m;
 
