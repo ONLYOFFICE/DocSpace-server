@@ -36,6 +36,7 @@ import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstrea
 import logger from "../../log.js";
 import { mediaTypeOf, uploadFile } from "../docspaceFileTransfer.js";
 import { AiServiceHttpError, proxyBaseUrl } from "../httpClient.js";
+import { DocspaceApiHttpError } from "../docspaceFilesApi.js";
 import { fileDto, fileDtoBody, inRequest } from "../../__tests__/fixtures/filesApi.js";
 
 // The upload of the document agent's files over a stubbed network, with the real httpClient.js
@@ -212,21 +213,20 @@ describe("uploadFile", () => {
     ).toBeInstanceOf(SyntaxError);
   });
 
-  // DEFECT stor1-8: a refusal of the Files API is thrown as an AiServiceHttpError carrying the upstream body — expected a DocspaceApiHttpError, the class of a Files API error (ts-ai-style.md, Upstream calls)
   it.each([400, 403, 413, 500])(
-    "rejects a %i with an AiServiceHttpError that carries the body",
+    "rejects a %i with the Files API error, without the upstream body",
     async (status) => {
       insert(() => HttpResponse.text("refused", { status, statusText: "Reason" }));
 
       const error = await failure(uploadFile("30", "a.txt", new Uint8Array([1]), "text/plain"));
 
-      expect(error).toBeInstanceOf(AiServiceHttpError);
+      expect(error).toBeInstanceOf(DocspaceApiHttpError);
       expect(error).toMatchObject({
         status,
         statusText: "Reason",
-        body: "refused",
         url: `${proxyBaseUrl}/api/2.0/files/30/insert`,
       });
+      expect(String(error)).not.toContain("refused");
     },
   );
 

@@ -31,10 +31,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import nconf, { getUpstreamTimeoutMs } from "../../config/index.js";
+import { getAiServiceUrl, getProxyUrl, getUpstreamTimeoutMs } from "../../config/index.js";
 import { countUpstreamCall, countUpstreamRead, getForwardedHeaders } from "../requestContext.js";
 import { isObject } from "../narrow.js";
-import type { AppConfig } from "../types.js";
 import { errorBodyText } from "./errorBody.js";
 
 // Hard ceiling for a single upstream round-trip so a hung AI service / MCP
@@ -87,34 +86,8 @@ export class AiServiceHttpError extends Error {
   }
 }
 
-function resolveProxyUrl(): string {
-  const fromEnv = process.env["API_HOST"];
-  if (fromEnv) {
-    return fromEnv.replace(/\/+$/, "");
-  }
-  const app: AppConfig | undefined = nconf.get("app");
-  const fromConfig = app?.proxy?.url;
-  if (fromConfig) {
-    return fromConfig.replace(/\/+$/, "");
-  }
-  return "http://localhost:8092";
-}
-
-function resolveAiServiceUrl(): string {
-  const fromEnv = process.env["AI_SERVICE_URL"];
-  if (fromEnv) {
-    return fromEnv.replace(/\/+$/, "");
-  }
-  const app: AppConfig | undefined = nconf.get("app");
-  const fromConfig = app?.aiService?.url;
-  if (fromConfig) {
-    return fromConfig.replace(/\/+$/, "");
-  }
-  return "http://localhost:5157";
-}
-
-const PROXY_BASE_URL = resolveProxyUrl();
-const AI_BASE_URL = resolveAiServiceUrl();
+const PROXY_BASE_URL = getProxyUrl();
+const AI_BASE_URL = getAiServiceUrl();
 const API_PREFIX = "/internal/ai";
 
 // A string array is sent as a repeated parameter (`tags=a&tags=b`), the
@@ -123,6 +96,7 @@ export type QueryValue =
   string | number | boolean | null | undefined | readonly (string | number | boolean)[];
 
 export interface RequestOptions {
+  // A `FormData` goes out as multipart (an upload), anything else as JSON.
   body?: unknown;
   query?: Record<string, QueryValue>;
   signal?: AbortSignal;
@@ -168,7 +142,10 @@ async function jsonRequest(
 
   const headers: Record<string, string> = { ...getForwardedHeaders() };
   const init: RequestInit = { method, headers };
-  if (body !== undefined) {
+  if (body instanceof FormData) {
+    // No Content-Type: `fetch` derives the multipart boundary from the body.
+    init.body = body;
+  } else if (body !== undefined) {
     headers["Content-Type"] = "application/json";
     init.body = JSON.stringify(body);
   }
@@ -222,6 +199,130 @@ export const aiService = {
     aiServiceRequest("DELETE", path, opts),
 };
 
+/**
+ * A `GET` of a route the AI service serves outside `internal/ai`: the portal's
+ * own `api/2.0/ai/...` routes, such as the model gateway it proxies. `path`
+ * starts at the service's root. Same contract as {@link aiService}.
+ */
+export async function aiServiceRootGet(
+  path: string,
+  options: RequestOptions = {},
+): Promise<unknown> {
+  countUpstreamRead();
+  countUpstreamCall("GET");
+  return jsonRequest(AI_BASE_URL, "GET", path, options);
+}
+
 export const proxyBaseUrl = PROXY_BASE_URL;
 
 export const aiServiceBaseUrl = AI_BASE_URL;
+
+/**
+ * How {@link providerFetch} bounds a call:
+ * - `"headers"`: the upstream timeout bounds the call until the answer's headers are in. Once they
+ *   are, the timer is cleared and the caller's `signal` is detached as well, so neither ends the
+ *   reading of the body (the MCP transport, which reads its own streams).
+ * - `"none"`: no timeout of its own; the caller's `signal` alone ends the call and the body. For a
+ *   relayed stream, ended by the client hanging up, and for a caller that bounds the call and the
+ *   reading of its answer with its own {@link withTimeout}.
+ */
+export type ProviderTimeout = "headers" | "none";
+
+/**
+ * A request to a third-party address: an OpenAI-compatible provider, a web search provider, an
+ * MCP server. The URL is the caller's to check (`assertSafeBaseUrl`) and the headers its to
+ * choose: nothing of the caller's session is added here. Answers the `Response` as it came, a
+ * non-2xx included, and rejects only when no answer arrived (a refused connection, an abort).
+ */
+export async function providerFetch(
+  url: string | URL,
+  init: RequestInit,
+  timeout: ProviderTimeout,
+): Promise<Response> {
+  if (timeout === "none") {
+    return fetch(url, init);
+  }
+  const { signal, cancel } = withTimeout(init.signal ?? undefined);
+  try {
+    return await fetch(url, { ...init, signal });
+  } finally {
+    cancel();
+  }
+}
+
+/**
+ * The body of a response, or `null` once it proves larger than `limit`
+ * bytes: by its declared length, or by what has arrived when it declares
+ * none. The rest of an oversized body is not read.
+ */
+export async function readBodyCapped(res: Response, limit: number): Promise<Uint8Array | null> {
+  const declared = Number(res.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > limit) {
+    await res.body?.cancel();
+    return null;
+  }
+  if (!res.body) {
+    return new Uint8Array(0);
+  }
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      received += value.byteLength;
+      if (received > limit) {
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    await cancelReader(reader);
+  }
+  return Buffer.concat(chunks, received);
+}
+
+/**
+ * The body decoded as UTF-8, at most `limit` bytes of it. The stream is
+ * cancelled once the limit is reached, so a body far larger than the limit
+ * costs neither the download nor the memory beyond that point.
+ */
+export async function readTextCapped(res: Response, limit: number): Promise<string> {
+  if (!res.body) {
+    return "";
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let text = "";
+  let received = 0;
+  try {
+    while (received < limit) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      const room = limit - received;
+      const chunk = value.length > room ? value.subarray(0, room) : value;
+      received += chunk.length;
+      text += decoder.decode(chunk, { stream: true });
+    }
+  } finally {
+    // Past the limit, or on an error: drop the rest of the download.
+    await cancelReader(reader);
+  }
+  return text + decoder.decode();
+}
+
+// The read is over either way: a stream that refuses to be cancelled changes nothing for the
+// caller, which already has its answer or its error.
+async function cancelReader(reader: { cancel(): Promise<void> }): Promise<void> {
+  const pending = reader.cancel();
+  try {
+    await pending;
+  } catch {
+    // nothing to do: see above
+  }
+}

@@ -67,25 +67,19 @@ describe("the base URLs", () => {
     expect(client.aiServiceBaseUrl).toBe("http://ai.example");
   });
 
-  it("are taken from app.proxy.url and app.aiService.url when the environment names none", async () => {
-    const client = await load(
-      { API_HOST: "", AI_SERVICE_URL: "" },
-      { proxy: { url: "http://cfg-portal/" }, aiService: { url: "http://cfg-ai///" } },
-    );
+  // The settings entries and the defaults are the readers' own, tabled in
+  // app/__tests__/config.test.ts; here only that the module takes what they answer.
+  it("are what the config readers answer when the module loads", async () => {
+    vi.resetModules();
+    vi.doMock("../../../config/index.js", async (importOriginal) => ({
+      ...(await importOriginal<typeof import("../../../config/index.js")>()),
+      getProxyUrl: () => "http://reader-portal",
+      getAiServiceUrl: () => "http://reader-ai",
+    }));
+    const client = await import("../httpClient.js");
 
-    expect(client.proxyBaseUrl).toBe("http://cfg-portal");
-    expect(client.aiServiceBaseUrl).toBe("http://cfg-ai");
-  });
-
-  it.each([
-    ["no app section", undefined],
-    ["an app section without the two entries", {}],
-    ["empty URLs", { proxy: { url: "" }, aiService: { url: "" } }],
-  ])("fall back to localhost with %s", async (_case, app) => {
-    const client = await load({ API_HOST: "", AI_SERVICE_URL: "" }, app);
-
-    expect(client.proxyBaseUrl).toBe("http://localhost:8092");
-    expect(client.aiServiceBaseUrl).toBe("http://localhost:5157");
+    expect(client.proxyBaseUrl).toBe("http://reader-portal");
+    expect(client.aiServiceBaseUrl).toBe("http://reader-ai");
   });
 });
 

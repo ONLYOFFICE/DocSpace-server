@@ -215,6 +215,69 @@ describe("getAppConfig and getRootConfig", () => {
   });
 });
 
+describe.each([
+  ["getProxyUrl", "API_HOST", "proxy", "http://localhost:8092"],
+  ["getAiServiceUrl", "AI_SERVICE_URL", "aiService", "http://localhost:5157"],
+] as const)("%s", (reader, envName, entry, fallback) => {
+  const read = (): string => config[reader]();
+  const withEntry = (url: unknown) => settings({ app: { ...APP, [entry]: { url } } });
+
+  it.each([
+    ["absent", undefined],
+    ["empty", ""],
+  ])("takes the settings entry when %s is the environment variable", (_case, value) => {
+    vi.stubEnv(envName, value);
+    withEntry("http://file.example/");
+
+    expect(read()).toBe("http://file.example");
+  });
+
+  it.each([
+    ["absent", undefined],
+    ["empty", ""],
+    ["not a string", 42],
+  ])("falls back to the default when the settings entry is %s", (_case, url) => {
+    vi.stubEnv(envName, undefined);
+    withEntry(url);
+
+    expect(read()).toBe(fallback);
+  });
+
+  it("falls back to the default without an app section entry", () => {
+    vi.stubEnv(envName, "");
+    settings({ app: undefined });
+
+    expect(read()).toBe(fallback);
+  });
+
+  it.each([
+    ["a value", "http://env.example", "http://env.example"],
+    ["a trailing slash", "http://env.example/", "http://env.example"],
+    ["several trailing slashes", "http://env.example/base//", "http://env.example/base"],
+  ])("takes the environment variable with %s over the settings entry", (_case, value, url) => {
+    vi.stubEnv(envName, value);
+    withEntry("http://file.example");
+
+    expect(read()).toBe(url);
+  });
+});
+
+describe("chatContextDisabled", () => {
+  it.each([
+    ["absent", undefined, false],
+    ["empty", "", false],
+    ["off", "off", true],
+    ["OFF", "OFF", false],
+    ["false", "false", false],
+    ["0", "0", false],
+    ["on", "on", false],
+  ])("is %s -> %s", (_case, value, disabled) => {
+    vi.stubEnv("AI_CHAT_CONTEXT", value);
+
+    expect(config.chatContextDisabled()).toBe(disabled);
+  });
+});
+
 describe("mcpPortalBaseUrl", () => {
   it("is undefined when unset or empty", () => {
     expect(config.mcpPortalBaseUrl()).toBeUndefined();

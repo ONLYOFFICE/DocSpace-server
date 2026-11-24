@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { proxyBaseUrl, withTimeout } from "./httpClient.js";
+import { proxyBaseUrl, readBodyCapped, readTextCapped, withTimeout } from "./httpClient.js";
 import {
   countFilesApiRead,
   getForwardedHeaders,
@@ -149,9 +149,14 @@ export type FilesApiQuery = Record<string, string | number | readonly (string | 
  * `response` of the DocSpace envelope. Any non-2xx answer throws
  * {@link DocspaceApiHttpError} with its status; an answer without a
  * `response` throws a plain error. `path` is relative to `api/2.0/files/`
- * and must already be encoded.
+ * and must already be encoded. `signal` (the caller's own budget or its
+ * client hanging up) ends the call as well as the timeout does.
  */
-export async function filesApiGet(path: string, query?: FilesApiQuery): Promise<unknown> {
+export async function filesApiGet(
+  path: string,
+  query?: FilesApiQuery,
+  signal?: AbortSignal,
+): Promise<unknown> {
   const params = new URLSearchParams();
   for (const [name, value] of Object.entries(query ?? {})) {
     for (const item of Array.isArray(value) ? value : [value]) {
@@ -161,10 +166,10 @@ export async function filesApiGet(path: string, query?: FilesApiQuery): Promise<
   const qs = params.toString();
   const search = qs ? `?${qs}` : "";
   const url = `${proxyBaseUrl}/api/2.0/files/${path}${search}`;
-  const { signal, cancel } = withTimeout(undefined);
+  const timed = withTimeout(signal);
   countFilesApiRead();
   try {
-    const res = await fetch(url, { headers: getForwardedHeaders(), signal });
+    const res = await fetch(url, { headers: getForwardedHeaders(), signal: timed.signal });
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
@@ -174,7 +179,7 @@ export async function filesApiGet(path: string, query?: FilesApiQuery): Promise<
     }
     return raw["response"];
   } finally {
-    cancel();
+    timed.cancel();
   }
 }
 
@@ -183,30 +188,150 @@ export async function filesApiGet(path: string, query?: FilesApiQuery): Promise<
  * JSON body, answering the `response` of the DocSpace envelope (`undefined`
  * when the answer carries none). Any non-2xx answer throws
  * {@link DocspaceApiHttpError} with its status. `path` is relative to
- * `api/2.0/files/` and must already be encoded.
+ * `api/2.0/files/` and must already be encoded. `signal` ends the call as
+ * well as the timeout does.
  */
 export async function filesApiSend(
   method: "POST" | "PUT",
   path: string,
   body: unknown,
+  signal?: AbortSignal,
 ): Promise<unknown> {
   const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
-  const { signal, cancel } = withTimeout(undefined);
+  const timed = withTimeout(signal);
   try {
     const res = await fetch(url, {
       method,
       headers: { ...getForwardedHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      signal,
+      signal: timed.signal,
     });
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    const raw: unknown = await res.json().catch(() => undefined);
-    return isObject(raw) ? raw["response"] : undefined;
+    return responseOfWrite(await res.text());
+  } finally {
+    timed.cancel();
+  }
+}
+
+/**
+ * The `response` of a write's answer. The 2xx has already said the write was
+ * done, and the callers read the answer only for details of what was made
+ * (they check those themselves), so an empty or unreadable body is "no
+ * details", not a failed write.
+ */
+function responseOfWrite(text: string): unknown {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+  return isObject(raw) ? raw["response"] : undefined;
+}
+
+/** The body of {@link filesApiRequest}: a form (an upload) or a JSON value. */
+export type FilesApiBody = { form: FormData } | { json: unknown };
+
+/**
+ * A write to `api/2.0/files/{path}` on behalf of the current user, answering
+ * the JSON of the answer as it came: the upload routes answer the new file
+ * with or without the DocSpace envelope, so the caller unwraps it (see
+ * {@link envelopeResponse}). Any non-2xx answer throws
+ * {@link DocspaceApiHttpError} with its status, and an answer that is not
+ * JSON throws its `SyntaxError`. `path` is relative to `api/2.0/files/` and
+ * must already be encoded.
+ */
+export async function filesApiRequest(
+  method: "POST" | "PUT" | "DELETE",
+  path: string,
+  body: FilesApiBody,
+): Promise<unknown> {
+  const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
+  const { signal, cancel } = withTimeout(undefined);
+  try {
+    // A form carries no Content-Type here: `fetch` derives the multipart
+    // boundary from the body.
+    const res = await fetch(
+      url,
+      "form" in body
+        ? { method, headers: getForwardedHeaders(), body: body.form, signal }
+        : {
+            method,
+            headers: { ...getForwardedHeaders(), "Content-Type": "application/json" },
+            body: JSON.stringify(body.json),
+            signal,
+          },
+    );
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    const raw: unknown = await res.json();
+    return raw;
   } finally {
     cancel();
   }
+}
+
+/**
+ * A `GET` of a file's bytes from the address the Files API handed out for it
+ * (a pre-signed link on the portal or on its storage's own host), with the
+ * `headers` the caller chose for that host. `read` takes the answer and runs
+ * inside the timeout, so a body that stalls is cut off as well. Any non-2xx
+ * answer throws {@link DocspaceApiHttpError} with its status before `read`
+ * is called; its message names the status and the address, never the body.
+ * `signal` ends the call and the read as well as the timeout does.
+ */
+export async function filesApiDownload<T>(
+  href: string,
+  headers: Record<string, string>,
+  read: (res: Response) => Promise<T>,
+  signal?: AbortSignal,
+): Promise<T> {
+  const timed = withTimeout(signal);
+  try {
+    const res = await fetch(href, { headers, signal: timed.signal });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, href);
+    }
+    return await read(res);
+  } finally {
+    timed.cancel();
+  }
+}
+
+/**
+ * {@link filesApiDownload} of a text: the body decoded as UTF-8, cut at
+ * `limit` bytes. The rest of a longer body is not downloaded.
+ */
+export function filesApiDownloadText(
+  href: string,
+  headers: Record<string, string>,
+  limit: number,
+  signal?: AbortSignal,
+): Promise<string> {
+  return filesApiDownload(href, headers, (res) => readTextCapped(res, limit), signal);
+}
+
+/**
+ * {@link filesApiDownload} of the bytes as they are, or `null` once the body
+ * proves larger than `limit` bytes (by its declared length or by what has
+ * arrived); the rest of it is not downloaded. The caller names the file in
+ * its own error.
+ */
+export function filesApiDownloadBytes(
+  href: string,
+  headers: Record<string, string>,
+  limit: number,
+  signal?: AbortSignal,
+): Promise<Uint8Array | null> {
+  return filesApiDownload(href, headers, (res) => readBodyCapped(res, limit), signal);
+}
+
+/** The `response` of a DocSpace envelope, or the answer itself when it has none. */
+export function envelopeResponse(raw: unknown): unknown {
+  return isObject(raw) && "response" in raw ? raw["response"] : raw;
 }
 
 function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
@@ -503,7 +628,10 @@ export async function primeSourceMeta(
  * upload, and the folder context of a round inside an AI project. The
  * numeric id is resolved rather than posting to the `@my/insert` alias so the
  * upload goes through the same code path (and logs the real folder) as any
- * other target. Resolves to `undefined` when the section is unavailable.
+ * other target. Resolves to `undefined` when the Files API refuses the
+ * section (403, 404) or its answer names no folder; any other refusal throws
+ * {@link DocspaceApiHttpError}, and a timeout or a dropped connection throws
+ * as well.
  */
 export async function getMyDocumentsFolderId(): Promise<string | undefined> {
   // `count` is [Range(1, …)]-validated on the C# side — ask for the smallest
@@ -512,9 +640,14 @@ export async function getMyDocumentsFolderId(): Promise<string | undefined> {
   const { signal, cancel } = withTimeout(undefined);
   try {
     const res = await fetch(url, { headers: getForwardedHeaders(), signal });
-    if (!res.ok) {
+    // Only a refusal says the caller has no such section; any other failure
+    // is unknown and is rethrown, so it is not read as "no My documents".
+    if (res.status === 403 || res.status === 404) {
       logger.warn(`getMyDocumentsFolderId: ${url} -> ${res.status} ${res.statusText}`);
       return undefined;
+    }
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
     const raw: unknown = await res.json();
     const envelope = isObject(raw) ? getObject(raw, "response") : undefined;

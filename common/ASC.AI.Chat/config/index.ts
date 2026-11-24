@@ -108,6 +108,35 @@ export function coreCors(): string | undefined {
   return typeof fromFile === "string" ? fromFile : undefined;
 }
 
+// The base URL of a service this one calls: the environment variable when it is set and not
+// empty, else the settings entry when it is not empty, else the default; trailing slashes are
+// stripped, as every caller appends a path that starts with one. A settings entry that is not a
+// string is no setting: it used to stop the service at load.
+function baseUrl(envName: string, fromSettings: unknown, fallback: string): string {
+  const value =
+    process.env[envName] || (typeof fromSettings === "string" ? fromSettings : "") || fallback;
+  return value.replace(/\/+$/, "");
+}
+
+/** The portal's proxy, the Files and People APIs behind it: `API_HOST`, then `app.proxy.url`. */
+export function getProxyUrl(): string {
+  const app: AppConfig | undefined = nconf.get("app");
+  return baseUrl("API_HOST", app?.proxy?.url, "http://localhost:8092");
+}
+
+/** The AI service: `AI_SERVICE_URL`, then `app.aiService.url`. */
+export function getAiServiceUrl(): string {
+  const app: AppConfig | undefined = nconf.get("app");
+  return baseUrl("AI_SERVICE_URL", app?.aiService?.url, "http://localhost:5157");
+}
+
+// `AI_CHAT_CONTEXT=off` switches the chat-context read of a round off for the whole process
+// (the per-request header of chatContext.ts does the same for one request). Only the exact
+// value `off`: any other value, `OFF` included, leaves the read on.
+export function chatContextDisabled(): boolean {
+  return process.env["AI_CHAT_CONTEXT"] === "off";
+}
+
 // SSRF egress policy for user-supplied provider / web-search `baseUrl`s.
 // By default loopback and RFC1918 private ranges are rejected before any
 // outbound call (see `assertSafeBaseUrl` in app/security.ts), mirroring the

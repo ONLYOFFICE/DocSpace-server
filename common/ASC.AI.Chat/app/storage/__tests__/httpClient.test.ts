@@ -41,7 +41,14 @@ import {
   HttpResponse,
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
-import { AiServiceHttpError, aiService, withTimeout } from "../httpClient.js";
+import {
+  AiServiceHttpError,
+  aiService,
+  providerFetch,
+  readBodyCapped,
+  readTextCapped,
+  withTimeout,
+} from "../httpClient.js";
 
 // The real client over a stubbed network: nothing of httpClient.js or requestContext.js is
 // mocked here, which is what the other suites cannot show.
@@ -155,5 +162,144 @@ describe("withTimeout", () => {
     vi.advanceTimersByTime(30);
 
     expect(signal.aborted).toBe(false);
+  });
+});
+
+describe("providerFetch", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("sends the request as given and answers a refusal as it came", async () => {
+    upstream.use(
+      http.post("https://provider.example/v1/chat", () =>
+        HttpResponse.json({ error: "no" }, { status: 429, statusText: "Too Many" }),
+      ),
+    );
+
+    const res = await providerFetch(
+      "https://provider.example/v1/chat",
+      { method: "POST", headers: { authorization: "Bearer k" }, body: '{"a":1}' },
+      "none",
+    );
+
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ error: "no" });
+    expect(upstream.seen).toMatchObject([
+      { method: "POST", body: { a: 1 }, headers: { authorization: "Bearer k" } },
+    ]);
+  });
+
+  it("adds nothing of the caller's session", async () => {
+    upstream.use(http.get("https://provider.example/x", () => HttpResponse.text("ok")));
+
+    await inRequestContext({ cookie: "asc_auth_key=k", authorization: "Bearer s" }, () =>
+      providerFetch("https://provider.example/x", {}, "headers"),
+    );
+
+    expect(upstream.seen[0]?.headers).not.toHaveProperty("cookie");
+    expect(upstream.seen[0]?.headers).not.toHaveProperty("authorization");
+  });
+
+  it("without a timeout waits past the upstream timeout and ends on the caller's signal", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    upstream.use(
+      http.get("https://provider.example/stream", async () => {
+        await delay("infinite");
+        return HttpResponse.text("never");
+      }),
+    );
+    const controller = new AbortController();
+    let settled = false;
+
+    const call = providerFetch(
+      "https://provider.example/stream",
+      { signal: controller.signal },
+      "none",
+    )
+      .catch((err: unknown) => err)
+      .finally(() => {
+        settled = true;
+      });
+    await vi.advanceTimersByTimeAsync(400_000);
+    expect(settled).toBe(false);
+    controller.abort();
+
+    expect(await call).toMatchObject({ name: "AbortError" });
+  });
+
+  it("bounds the wait for the headers by the upstream timeout", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    upstream.use(
+      http.get("https://mcp.example/mcp", async () => {
+        await delay("infinite");
+        return HttpResponse.text("never");
+      }),
+    );
+
+    const call = providerFetch("https://mcp.example/mcp", {}, "headers").catch(
+      (err: unknown) => err,
+    );
+    await vi.advanceTimersByTimeAsync(300_000);
+
+    expect(await call).toMatchObject({ message: "upstream timeout after 300000ms" });
+  });
+
+  it("ends the wait for the headers on the caller's signal", async () => {
+    upstream.use(
+      http.get("https://mcp.example/mcp", async () => {
+        await delay("infinite");
+        return HttpResponse.text("never");
+      }),
+    );
+    const controller = new AbortController();
+
+    const call = providerFetch(
+      "https://mcp.example/mcp",
+      { signal: controller.signal },
+      "headers",
+    ).catch((err: unknown) => err);
+    controller.abort(new Error("closed"));
+
+    expect(await call).toMatchObject({ message: "closed" });
+  });
+
+  it("clears the timer once the headers are in", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    upstream.use(http.get("https://mcp.example/mcp", () => HttpResponse.text("ok")));
+
+    const res = await providerFetch("https://mcp.example/mcp", {}, "headers");
+
+    expect(vi.getTimerCount()).toBe(0);
+    expect(await res.text()).toBe("ok");
+  });
+});
+
+describe("readBodyCapped", () => {
+  const body = (bytes: number[], headers: Record<string, string> = {}) =>
+    new Response(new Uint8Array(bytes), { headers });
+
+  it("answers the bytes of a body within the limit", async () => {
+    expect(Array.from((await readBodyCapped(body([1, 2, 3]), 3)) ?? [])).toEqual([1, 2, 3]);
+  });
+
+  it("answers null for a body that declares more than the limit, or proves larger", async () => {
+    expect(await readBodyCapped(body([1], { "content-length": "9" }), 3)).toBeNull();
+    expect(await readBodyCapped(body([1, 2, 3, 4]), 3)).toBeNull();
+  });
+
+  it("answers no bytes for a response without a body", async () => {
+    expect(await readBodyCapped(new Response(null), 3)).toEqual(new Uint8Array(0));
+  });
+});
+
+describe("readTextCapped", () => {
+  it("answers the whole text within the limit and cuts a longer one at the limit", async () => {
+    expect(await readTextCapped(new Response("héllo"), 100)).toBe("héllo");
+    expect(await readTextCapped(new Response("abcdef"), 4)).toBe("abcd");
+  });
+
+  it("answers an empty text for a response without a body", async () => {
+    expect(await readTextCapped(new Response(null), 4)).toBe("");
   });
 });

@@ -37,11 +37,9 @@
 // agent cannot save. The agent reads its inputs itself, through the portal's
 // MCP server, by the ids it is handed.
 
-import { proxyBaseUrl, withTimeout, AiServiceHttpError } from "./httpClient.js";
-import { getForwardedHeaders } from "../requestContext.js";
+import { envelopeResponse, filesApiRequest } from "./docspaceFilesApi.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
-import { errorBodyText } from "./errorBody.js";
 
 export interface UploadedFile {
   /** The new DocSpace entry id (internal int or thirdparty string, as a string). */
@@ -89,31 +87,18 @@ export async function uploadFile(
   form.append("createNewIfExist", "true");
   form.append("file", new Blob([bytes], { type: mediaType }), title);
 
-  const url = `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(folderId)}/insert`;
-  // No Content-Type: `fetch` derives the multipart boundary from the body.
-  const headers = getForwardedHeaders();
-  const { signal, cancel } = withTimeout(undefined);
-  try {
-    const res = await fetch(url, { method: "POST", headers, body: form, signal });
-    if (!res.ok) {
-      const text = await errorBodyText(res);
-      throw new AiServiceHttpError(res.status, res.statusText, text, url);
-    }
-    const json: unknown = await res.json();
-    const file = isObject(json) && "response" in json ? json["response"] : json;
-    if (!isObject(file)) {
-      throw new Error("DocSpace insert returned an unexpected payload");
-    }
-    const id = getEntityId(file, "id");
-    if (id === undefined) {
-      throw new Error("DocSpace insert returned a file without an id");
-    }
-    const saved = getString(file, "title") ?? title;
-    logger.info(
-      `uploadFile: ${title} -> folder ${folderId} as entry ${id} (${bytes.length} bytes)`,
-    );
-    return { id, title: saved };
-  } finally {
-    cancel();
+  // A refusal is a DocspaceApiHttpError with its status (its message carries no body).
+  const file = envelopeResponse(
+    await filesApiRequest("POST", `${encodeURIComponent(folderId)}/insert`, { form }),
+  );
+  if (!isObject(file)) {
+    throw new Error("DocSpace insert returned an unexpected payload");
   }
+  const id = getEntityId(file, "id");
+  if (id === undefined) {
+    throw new Error("DocSpace insert returned a file without an id");
+  }
+  const saved = getString(file, "title") ?? title;
+  logger.info(`uploadFile: ${title} -> folder ${folderId} as entry ${id} (${bytes.length} bytes)`);
+  return { id, title: saved };
 }

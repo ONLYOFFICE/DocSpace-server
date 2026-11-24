@@ -40,7 +40,12 @@ import {
   assertEntityAccessible,
   canTakeUpload,
   DocspaceApiHttpError,
+  envelopeResponse,
+  filesApiDownload,
+  filesApiDownloadBytes,
+  filesApiDownloadText,
   filesApiGet,
+  filesApiRequest,
   filesApiSend,
   folderSourceType,
   getFileInfo,
@@ -236,6 +241,244 @@ describe("filesApiSend", () => {
 
     expect(error).toBeInstanceOf(DocspaceApiHttpError);
     expect(error).toMatchObject({ status: 403, statusText: "Forbidden", url: `${FILES}/x` });
+  });
+});
+
+// Any write to `api/2.0/files/{path}` whose answer is read as it came: the uploads
+// (`POST {folderId}/insert`, `POST {folderId}/session[/{id}]`) and `DELETE file/{fileId}`.
+describe("filesApiRequest", () => {
+  it("sends a form as multipart with the caller's headers and answers the JSON as it came", async () => {
+    const parts: unknown[] = [];
+    upstream.use(
+      http.post(`${FILES}/12/insert`, async ({ request }) => {
+        const form = await request.formData();
+        parts.push({
+          title: form.get("title"),
+          contentType: request.headers.get("content-type"),
+          cookie: request.headers.get("cookie"),
+        });
+        return HttpResponse.json({ id: 9 });
+      }),
+    );
+    const form = new FormData();
+    form.append("title", "a.png");
+
+    const answer = await inRequest(() => filesApiRequest("POST", "12/insert", { form }), {
+      headers: CALLER,
+    });
+
+    expect(answer).toEqual({ id: 9 });
+    expect(parts).toEqual([
+      {
+        title: "a.png",
+        contentType: expect.stringMatching(/^multipart\/form-data; boundary=/),
+        cookie: CALLER.cookie,
+      },
+    ]);
+  });
+
+  it.each(["POST", "PUT", "DELETE"] as const)("sends a %s with a JSON body", async (method) => {
+    upstream.use(http.all(`${FILES}/file/40`, () => HttpResponse.json({ response: [] })));
+
+    await expect(
+      inRequest(() => filesApiRequest(method, "file/40", { json: { immediately: true } }), {
+        headers: CALLER,
+      }),
+    ).resolves.toEqual({ response: [] });
+
+    expect(upstream.seen[0]).toMatchObject({ method, body: { immediately: true } });
+    expect(upstream.seen[0]?.headers).toMatchObject({
+      ...CALLER,
+      "content-type": "application/json",
+    });
+  });
+
+  it.each([400, 403, 500])(
+    "rejects a %i with a DocspaceApiHttpError without the body",
+    async (status) => {
+      upstream.use(
+        http.delete(`${FILES}/file/40`, () =>
+          HttpResponse.text("secret", { status, statusText: "Reason" }),
+        ),
+      );
+
+      const error = await failure(filesApiRequest("DELETE", "file/40", { json: {} }));
+
+      expect(error).toBeInstanceOf(DocspaceApiHttpError);
+      expect(error).toMatchObject({ status, statusText: "Reason", url: `${FILES}/file/40` });
+      expect((error as Error).message).not.toContain("secret");
+    },
+  );
+
+  it("refuses an answer that is not JSON", async () => {
+    upstream.use(http.post(`${FILES}/x`, () => HttpResponse.text("done")));
+
+    expect(await failure(filesApiRequest("POST", "x", { json: {} }))).toBeInstanceOf(SyntaxError);
+  });
+
+  it("rejects once the Files API has not answered for 300000 ms", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    try {
+      upstream.use(
+        http.post(`${FILES}/slow`, async () => {
+          await delay("infinite");
+          return HttpResponse.json({});
+        }),
+      );
+      const pending = failure(filesApiRequest("POST", "slow", { form: new FormData() }));
+
+      await vi.advanceTimersByTimeAsync(300_000);
+
+      expect(String(await pending)).toContain("upstream timeout after 300000ms");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe("envelopeResponse", () => {
+  it.each([
+    ["the response of an envelope", { response: { id: 1 }, status: 0 }, { id: 1 }],
+    ["a null response", { response: null }, null],
+    ["an object without one as it is", { id: 2 }, { id: 2 }],
+    ["a list as it is", [1], [1]],
+    ["null as it is", null, null],
+  ])("answers %s", (_case, raw, expected) => {
+    expect(envelopeResponse(raw)).toEqual(expected);
+  });
+});
+
+// The address a file's bytes are served from: a pre-signed link of the portal or of its storage.
+describe("filesApiDownload", () => {
+  const LINK = "https://storage.example/files/1.png?sig=s";
+
+  it("sends the headers it is given and hands the answer to the reader", async () => {
+    upstream.use(http.get("https://storage.example/files/1.png", () => HttpResponse.text("bytes")));
+
+    await expect(
+      filesApiDownload(LINK, { cookie: "c=1" }, async (res) => res.text()),
+    ).resolves.toBe("bytes");
+
+    expect(upstream.seen[0]?.headers).toMatchObject({ cookie: "c=1" });
+  });
+
+  it.each([403, 404, 500])(
+    "rejects a %i with a DocspaceApiHttpError before reading",
+    async (status) => {
+      upstream.use(
+        http.get("https://storage.example/files/1.png", () =>
+          HttpResponse.text("secret", { status, statusText: "Reason" }),
+        ),
+      );
+      const read = vi.fn(async () => "x");
+
+      const error = await failure(filesApiDownload(LINK, {}, read));
+
+      expect(error).toBeInstanceOf(DocspaceApiHttpError);
+      expect(error).toMatchObject({ status, url: LINK });
+      expect(read).not.toHaveBeenCalled();
+    },
+  );
+
+  it("rejects a body that stalls once 300000 ms have passed", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    try {
+      upstream.use(
+        http.get(
+          "https://storage.example/files/1.png",
+          ({ request }) =>
+            new HttpResponse(
+              new ReadableStream({
+                start(controller) {
+                  controller.enqueue(new Uint8Array([1]));
+                  request.signal.addEventListener("abort", () =>
+                    controller.error(request.signal.reason),
+                  );
+                },
+              }),
+            ),
+        ),
+      );
+      const pending = failure(filesApiDownload(LINK, {}, async (res) => res.arrayBuffer()));
+
+      await vi.advanceTimersByTimeAsync(300_000);
+
+      expect(String(await pending)).toContain("upstream timeout after 300000ms");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe("the caller's signal", () => {
+  function hanging(method: "get" | "put", path: string) {
+    upstream.use(
+      http[method](path, async () => {
+        await delay("infinite");
+        return HttpResponse.json({ response: 1 });
+      }),
+    );
+  }
+
+  it.each([
+    ["filesApiGet", (signal: AbortSignal) => filesApiGet("settings", undefined, signal)],
+    ["filesApiSend", (signal: AbortSignal) => filesApiSend("PUT", "settings", {}, signal)],
+    [
+      "filesApiDownload",
+      (signal: AbortSignal) =>
+        filesApiDownload(`${proxyBaseUrl}/api/2.0/files/settings`, {}, async (r) => r, signal),
+    ],
+  ])("ends %s before the timeout", async (_name, call) => {
+    hanging("get", "*/api/2.0/files/settings");
+    hanging("put", "*/api/2.0/files/settings");
+    const controller = new AbortController();
+
+    const pending = failure(call(controller.signal));
+    controller.abort(new Error("client gone"));
+
+    expect(await pending).toMatchObject({ message: "client gone" });
+  });
+});
+
+describe("filesApiDownloadText and filesApiDownloadBytes", () => {
+  const LINK = "https://storage.example/files/1.txt?sig=s";
+  // Streamed: msw settles the cancel of a body read only part-way for a stream only.
+  const streamed = (text: string) =>
+    new HttpResponse(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(text));
+          controller.close();
+        },
+      }),
+    );
+
+  it("cuts a text at the limit", async () => {
+    upstream.use(http.get("https://storage.example/files/1.txt", () => streamed("abcdef")));
+
+    await expect(filesApiDownloadText(LINK, { cookie: "c=1" }, 4)).resolves.toBe("abcd");
+    expect(upstream.seen[0]?.headers).toMatchObject({ cookie: "c=1" });
+  });
+
+  it("answers the bytes within the limit and null past it", async () => {
+    upstream.use(http.get("https://storage.example/files/1.txt", () => streamed("abc")));
+
+    expect(Array.from((await filesApiDownloadBytes(LINK, {}, 3)) ?? [])).toEqual([97, 98, 99]);
+    expect(await filesApiDownloadBytes(LINK, {}, 2)).toBeNull();
+  });
+
+  it("rejects a refusal with the status and without the body", async () => {
+    upstream.use(
+      http.get("https://storage.example/files/1.txt", () =>
+        HttpResponse.text("secret", { status: 500, statusText: "Boom" }),
+      ),
+    );
+
+    const error = await failure(filesApiDownloadText(LINK, {}, 4));
+
+    expect(error).toBeInstanceOf(DocspaceApiHttpError);
+    expect(error).toMatchObject({ status: 500 });
+    expect(String(error)).not.toContain("secret");
   });
 });
 
@@ -761,8 +1004,7 @@ describe("getMyDocumentsFolderId", () => {
     );
   });
 
-  // DEFECT stor1-4: any refusal of `GET files/@my` — a 5xx and a 401 included — is answered undefined ("no My documents"), so the caller cannot tell an outage from a missing section — expected a 5xx (and a timeout) to be rethrown (ts-ai-failure-paths.md §1)
-  it.each([401, 403, 404, 500, 503])("answers undefined and warns for a %i", async (status) => {
+  it.each([403, 404])("answers undefined and warns for a %i", async (status) => {
     upstream.use(
       http.get(`${FILES}/@my`, () => HttpResponse.json({}, { status, statusText: "Reason" })),
     );
@@ -771,6 +1013,47 @@ describe("getMyDocumentsFolderId", () => {
     expect(logger.warn).toHaveBeenCalledWith(
       `getMyDocumentsFolderId: ${FILES}/@my?count=1 -> ${status} Reason`,
     );
+  });
+
+  it.each([400, 401, 500, 503])(
+    "rejects a %i with a DocspaceApiHttpError, not as a missing section",
+    async (status) => {
+      upstream.use(
+        http.get(`${FILES}/@my`, () =>
+          HttpResponse.json({ error: "secret" }, { status, statusText: "Reason" }),
+        ),
+      );
+
+      const error = await failure(getMyDocumentsFolderId());
+
+      expect(error).toBeInstanceOf(DocspaceApiHttpError);
+      expect(error).toMatchObject({ status, url: `${FILES}/@my?count=1` });
+      expect((error as Error).message).not.toContain("secret");
+      expect(logger.warn).not.toHaveBeenCalled();
+    },
+  );
+
+  describe("on fake timers", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("rejects once the Files API has not answered for 300000 ms", async () => {
+      upstream.use(
+        http.get(`${FILES}/@my`, async () => {
+          await delay("infinite");
+          return HttpResponse.json(my({ id: 4 }));
+        }),
+      );
+      const pending = failure(getMyDocumentsFolderId());
+
+      await vi.advanceTimersByTimeAsync(300_000);
+
+      expect(String(await pending)).toContain("upstream timeout after 300000ms");
+    });
   });
 
   it("rejects a dropped connection", async () => {
