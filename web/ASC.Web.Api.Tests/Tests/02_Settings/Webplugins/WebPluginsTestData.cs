@@ -191,14 +191,23 @@ internal static class WebPluginsTestData
     /// Uploads a package built from <paramref name="manifest"/>, for the caller alone when <paramref name="personal"/>
     /// is set, sending the given <paramref name="headers"/> the way a browser would add them.
     /// </summary>
-    public static async Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, Dictionary<string, object?> manifest, bool personal, CancellationToken cancellationToken, params (string Name, string Value)[] headers)
+    public static Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, Dictionary<string, object?> manifest, bool personal, CancellationToken cancellationToken, params (string Name, string Value)[] headers)
+    {
+        return UploadPluginAsync(webApiClient, personal ? $"{UploadPath}?personal=true" : UploadPath, manifest, cancellationToken, headers);
+    }
+
+    /// <summary>
+    /// Uploads a package built from <paramref name="manifest"/> to <paramref name="path"/>, which carries the query
+    /// flags, sending the given <paramref name="headers"/> the way a browser would add them.
+    /// </summary>
+    public static async Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, string path, Dictionary<string, object?> manifest, CancellationToken cancellationToken, params (string Name, string Value)[] headers)
     {
         using var content = new MultipartFormDataContent();
         var fileContent = new ByteArrayContent(CreatePluginZip(manifest));
         fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/zip");
         content.Add(fileContent, "file", "plugin.zip");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, personal ? $"{UploadPath}?personal=true" : UploadPath) { Content = content };
+        using var request = new HttpRequestMessage(HttpMethod.Post, path) { Content = content };
 
         foreach (var (name, value) in headers)
         {

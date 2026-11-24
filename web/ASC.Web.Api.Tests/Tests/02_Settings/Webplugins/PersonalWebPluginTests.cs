@@ -35,13 +35,28 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webplugins;
 
 /// <summary>
 /// Personal web plugins — installed by a member for themselves with <c>personal=true</c>, listed for that member
-/// alone, and shadowed by a portal plugin that takes the same name.
+/// alone, and shadowed by a portal plugin that takes the same name. The calls on one personal plugin by name are in
+/// <see cref="PersonalWebPluginManagementTests"/>.
 /// </summary>
+/// <remarks>
+/// A refusal for want of rights is a <c>SecurityException</c>, and the API answers every one of them with the message
+/// "Access denied" whatever text the exception carries (<c>CustomExceptionHandler</c>), so that is what a 403 here is
+/// checked for.
+/// </remarks>
 [Trait("Category", "Settings")]
 public class PersonalWebPluginTests(
     AspireAppFixture fixture)
-    : BaseTest(fixture)
+    : WebPluginTestBase(fixture)
 {
+    public static TheoryData<string> InvalidCspDomains => new()
+    {
+        "'unsafe-inline'",
+        "https://first.personal-csp.example https://second.personal-csp.example",
+        "https://personal-csp.example;script-src",
+        // every address is valid, only the length of the list (over 15 KB) is not
+        string.Join(',', Enumerable.Range(0, 400).Select(i => $"https://d{i:000}.personal-csp-limit.example.com"))
+    };
+
     [Fact]
     public async Task UploadPersonalWebPlugin_User_ListedForOwnerOnly()
     {
@@ -54,14 +69,17 @@ public class PersonalWebPluginTests(
         await _webApiClient.Authenticate(pluginOwner);
         using var uploadResponse = await WebPluginsTestData.UploadPluginAsync(
             _webApiClient, pluginName, true, TestContext.Current.CancellationToken);
-        var ownerPlugins = await GetPluginsAsync(false);
+        var ownerPlugins = await ListPluginsAsync();
 
         await _webApiClient.Authenticate(otherUser);
-        var otherPlugins = await GetPluginsAsync(false);
-        var otherPersonalPlugins = await GetPluginsAsync(true);
+        var otherPlugins = await ListPluginsAsync();
+        var otherPersonalPlugins = await ListPluginsAsync(personal: true);
 
         // Assert
         uploadResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var uploadedPlugin = await _webApi.ReadAsync<WebPluginView>(uploadResponse, TestContext.Current.CancellationToken);
+        uploadedPlugin.Personal.Should().BeTrue();
+        uploadedPlugin.Enabled.Should().BeTrue();
         ownerPlugins.Should().ContainSingle(x => x.Name == pluginName && x.Personal);
         otherPlugins.Should().NotContain(x => x.Name == pluginName);
         otherPersonalPlugins.Should().BeEmpty();
@@ -89,6 +107,52 @@ public class PersonalWebPluginTests(
     }
 
     [Fact]
+    public async Task UploadPersonalWebPlugin_PluginNameOfPortalPlugin_Refused()
+    {
+        // Arrange
+        const string pluginName = "personal-js-autotest";
+        var portalManifest = WebPluginsTestData.Manifest("portal-js-autotest");
+        portalManifest["pluginName"] = "sharedJsAutotest";
+        await UploadAsOwnerAsync(portalManifest);
+        var personalManifest = WebPluginsTestData.Manifest(pluginName);
+        personalManifest["pluginName"] = "sharedJsAutotest";
+        await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
+
+        // Act
+        using var response = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, personalManifest, true, TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, TestContext.Current.CancellationToken);
+        var personalPlugins = await ListPluginsAsync(personal: true);
+
+        // Assert
+        status.Should().Be(400, body);
+        body.Should().Contain("Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal");
+        personalPlugins.Should().NotContain(x => x.Name == pluginName);
+    }
+
+    [Fact]
+    public async Task UploadPersonalWebPlugin_PluginNameOfOwnPersonalPlugin_Refused()
+    {
+        // Arrange
+        var firstManifest = WebPluginsTestData.Manifest("first-js-autotest");
+        firstManifest["pluginName"] = "ownJsAutotest";
+        var secondManifest = WebPluginsTestData.Manifest("second-js-autotest");
+        secondManifest["pluginName"] = "ownJsAutotest";
+        await UploadPersonalAsync(await InviteMember(EmployeeType.User), firstManifest);
+
+        // Act
+        using var response = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, secondManifest, true, TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, TestContext.Current.CancellationToken);
+        var personalPlugins = await ListPluginsAsync(personal: true);
+
+        // Assert
+        status.Should().Be(400, body);
+        body.Should().Contain("Wrong plugin archive. Plugin already exist");
+        personalPlugins.Select(x => x.Name).Should().Equal("first-js-autotest");
+    }
+
+    [Fact]
     public async Task UploadPortalWebPlugin_NameOfPersonalPlugin_ShadowsPersonalCopy()
     {
         // Arrange
@@ -104,8 +168,8 @@ public class PersonalWebPluginTests(
             _webApiClient, pluginName, TestContext.Current.CancellationToken);
 
         await _webApiClient.Authenticate(user);
-        var availablePlugins = await GetPluginsAsync(false);
-        var personalPlugins = await GetPluginsAsync(true);
+        var availablePlugins = await ListPluginsAsync();
+        var personalPlugins = await ListPluginsAsync(personal: true);
 
         // Assert
         personalResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -129,7 +193,50 @@ public class PersonalWebPluginTests(
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
-            .Should().Contain("Personal plugins disabled");
+            .Should().Contain("Access denied");
+    }
+
+    [Theory]
+    [InlineData(EmployeeType.User, 400, "Changes to system plugins are prohibited")]
+    [InlineData(EmployeeType.Guest, 403, "Access denied")]
+    public async Task UploadPersonalWebPlugin_SystemFlag_RefusedAndNotInstalled(EmployeeType employeeType, int expectedStatus, string expectedMessage)
+    {
+        // Arrange
+        const string pluginName = "personal-system-autotest";
+        await _webApiClient.Authenticate(await InviteMember(employeeType));
+
+        // Act
+        using var response = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, $"{WebPluginsTestData.UploadPath}?personal=true&system=true", WebPluginsTestData.Manifest(pluginName), TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, TestContext.Current.CancellationToken);
+        var availablePlugins = await ListPluginsAsync();
+
+        // Assert
+        status.Should().Be(expectedStatus, body);
+        body.Should().Contain(expectedMessage);
+        availablePlugins.Should().NotContain(x => x.Name == pluginName);
+    }
+
+    [Theory]
+    [MemberData(nameof(InvalidCspDomains))]
+    public async Task UploadPersonalWebPlugin_InvalidCspDomains_RefusedAndNotInstalled(string cspDomains)
+    {
+        // Arrange
+        const string pluginName = "invalid-csp-autotest";
+        var manifest = WebPluginsTestData.Manifest(pluginName);
+        manifest["cspDomains"] = cspDomains;
+        await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
+
+        // Act
+        using var response = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, manifest, true, TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, TestContext.Current.CancellationToken);
+        var personalPlugins = await ListPluginsAsync(personal: true);
+
+        // Assert
+        status.Should().Be(400, body);
+        body.Should().Contain("Wrong plugin archive. The cspDomains value lists an invalid address or is too long");
+        personalPlugins.Should().NotContain(x => x.Name == pluginName);
     }
 
     [Theory]
@@ -149,51 +256,60 @@ public class PersonalWebPluginTests(
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
-            .Should().Contain("The request comes from another origin");
+            .Should().Contain("Access denied");
     }
 
     [Fact]
     public async Task UploadPersonalWebPlugin_RequestFromPortalPage_Installed()
     {
         // Arrange
+        const string pluginName = "same-origin-autotest";
         var user = await InviteMember(EmployeeType.User);
         await _webApiClient.Authenticate(user);
 
         // Act
         using var response = await WebPluginsTestData.UploadPluginAsync(
-            _webApiClient, "same-origin-autotest", true, TestContext.Current.CancellationToken, AuthCookie(user), ("Sec-Fetch-Site", "same-origin"));
+            _webApiClient, pluginName, true, TestContext.Current.CancellationToken, AuthCookie(user), ("Sec-Fetch-Site", "same-origin"));
+        var personalPlugins = await ListPluginsAsync(personal: true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+        personalPlugins.Should().ContainSingle(x => x.Name == pluginName && x.Personal);
     }
 
     [Fact]
     public async Task UploadPersonalWebPlugin_CookieWithPortalOrigin_Installed()
     {
         // Arrange
+        const string pluginName = "portal-origin-autotest";
         var user = await InviteMember(EmployeeType.User);
         await _webApiClient.Authenticate(user);
 
         // Act
         using var response = await WebPluginsTestData.UploadPluginAsync(
-            _webApiClient, "portal-origin-autotest", true, TestContext.Current.CancellationToken, AuthCookie(user));
+            _webApiClient, pluginName, true, TestContext.Current.CancellationToken, AuthCookie(user));
+        var personalPlugins = await ListPluginsAsync(personal: true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+        personalPlugins.Should().ContainSingle(x => x.Name == pluginName && x.Personal);
     }
 
     [Fact]
     public async Task UploadPersonalWebPlugin_BearerFromAnotherSite_Installed()
     {
         // Arrange
+        const string pluginName = "bearer-autotest";
         await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
 
         // Act
         using var response = await WebPluginsTestData.UploadPluginAsync(
-            _webApiClient, "bearer-autotest", true, TestContext.Current.CancellationToken, ("Sec-Fetch-Site", "cross-site"));
+            _webApiClient, pluginName, true, TestContext.Current.CancellationToken, ("Sec-Fetch-Site", "cross-site"));
+        var personalPlugins = await ListPluginsAsync(personal: true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+        personalPlugins.Should().ContainSingle(x => x.Name == pluginName && x.Personal);
     }
 
     [Fact]
@@ -228,64 +344,25 @@ public class PersonalWebPluginTests(
         otherUserCsp.Header.Should().NotContain(cspDomain);
     }
 
+    [Fact]
+    public async Task GetPortalSettings_User_ReportsPersonalPluginsOn()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
+
+        // Act
+        using var response = await _webApiClient.GetAsync("api/2.0/settings", TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, TestContext.Current.CancellationToken);
+
+        // Assert: read raw, the generated PluginsDto has no personal field yet; the stand does not set plugins:personal,
+        // which defaults to true
+        status.Should().Be(200, body);
+        using var json = JsonDocument.Parse(body);
+        json.RootElement.GetProperty("response").GetProperty("plugins").GetProperty("personal").GetBoolean().Should().BeTrue();
+    }
+
     private static (string Name, string Value) AuthCookie(User user)
     {
         return ("Cookie", $"asc_auth_key={user.Token}");
-    }
-
-    private static string GetPersonalCspCookie(HttpResponseMessage response)
-    {
-        const string prefix = "asc_personal_csp=";
-
-        var cookie = response.Headers.TryGetValues("Set-Cookie", out var values)
-            ? values.FirstOrDefault(x => x.StartsWith(prefix, StringComparison.Ordinal))
-            : null;
-
-        return cookie?[prefix.Length..].Split(';')[0] ?? string.Empty;
-    }
-
-    /// <summary>
-    /// Reads the CSP over raw HTTP: the generated SDK cannot send the <c>asc_personal_csp</c> cookie.
-    /// </summary>
-    private async Task<(string Header, List<string> Domains)> GetCspAsync(string personalCspCookie)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Get, "api/2.0/security/csp");
-
-        if (!string.IsNullOrEmpty(personalCspCookie))
-        {
-            request.Headers.TryAddWithoutValidation("Cookie", $"asc_personal_csp={personalCspCookie}");
-        }
-
-        using var response = await _webApiClient.SendAsync(request, TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(body);
-        var csp = json.RootElement.GetProperty("response");
-
-        return (
-            csp.GetProperty("header").GetString() ?? string.Empty,
-            csp.GetProperty("domains").EnumerateArray().Select(x => x.GetString() ?? string.Empty).ToList());
-    }
-
-    /// <summary>
-    /// Lists the plugins over raw HTTP: the generated SDK has no <c>personal</c> parameter on the list operation yet,
-    /// and its plugin model fails on a plugin without the optional fields (P8 of the plugins spec).
-    /// </summary>
-    private async Task<List<(string Name, bool Personal)>> GetPluginsAsync(bool personal)
-    {
-        var url = personal ? "api/2.0/settings/webplugins?personal=true" : "api/2.0/settings/webplugins";
-
-        using var response = await _webApiClient.GetAsync(url, TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(body);
-
-        return json.RootElement.GetProperty("response").EnumerateArray()
-            .Select(x => (
-                x.GetProperty("name").GetString() ?? string.Empty,
-                x.TryGetProperty("personal", out var personalProperty) && personalProperty.GetBoolean()))
-            .ToList();
     }
 }
