@@ -72,7 +72,11 @@ public class WebPluginsController(
     {
         await DemandSameOriginRequestAsync();
 
-        if (!inDto.Personal)
+        if (inDto.Personal)
+        {
+            await webPluginManager.DemandPersonalWebPluginsAsync(upload: true);
+        }
+        else
         {
             await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         }

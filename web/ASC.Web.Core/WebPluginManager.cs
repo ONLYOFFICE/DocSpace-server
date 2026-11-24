@@ -111,7 +111,7 @@ public class WebPluginManager(
         }
     }
 
-    private async Task DemandPersonalWebPluginsAsync(bool upload = false)
+    public async Task DemandPersonalWebPluginsAsync(bool upload = false)
     {
         DemandWebPlugins(upload: upload);
 
@@ -193,12 +193,12 @@ public class WebPluginManager(
     {
         if (personal)
         {
+            await DemandPersonalWebPluginsAsync(upload: true);
+
             if (system)
             {
                 throw new ArgumentException(Resource.ErrorWebPluginForbiddenSystem);
             }
-
-            await DemandPersonalWebPluginsAsync(upload: true);
         }
         else
         {
