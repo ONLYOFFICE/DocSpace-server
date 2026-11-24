@@ -17,7 +17,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20261123083948_MigrationContextMigrate")]
+    [Migration("20261124093457_MigrationContextMigrate")]
     partial class MigrationContextMigrate
     {
         /// <inheritdoc />
@@ -158,6 +158,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_ai_integration_assignments");
+
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("ix_ai_integration_assignments_tenant_id_entry_id");
 
                     b.HasIndex("TenantId", "ActionType", "EntryId")
                         .HasDatabaseName("ix_ai_integration_assignments_tenant_id_action_type_entry_id");
@@ -303,6 +306,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("pk_ai_integration_mcp_servers");
 
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("ix_ai_integration_mcp_servers_tenant_id_entry_id");
+
                     b.HasIndex("TenantId", "Name", "EntryId")
                         .HasDatabaseName("ix_ai_integration_mcp_servers_tenant_id_name_entry_id");
 
@@ -366,6 +372,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_ai_integration_preferences");
+
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("ix_ai_integration_preferences_tenant_id_entry_id");
 
                     b.HasIndex("TenantId", "CreatedBy", "EntryId")
                         .HasDatabaseName("ix_ai_integration_preferences_tenant_id_created_by_entry_id");
@@ -584,6 +593,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.HasIndex("DeletedOn", "Id")
                         .HasDatabaseName("IX_ai_integration_threads_deleted_on_id");
 
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("IX_ai_integration_threads_tenant_id_entry_id");
+
                     b.HasIndex("TenantId", "LastEditDate")
                         .HasDatabaseName("IX_ai_integration_threads_tenant_id_last_edit_date");
 
@@ -635,6 +647,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_ai_integration_tool_preferences");
+
+                    b.HasIndex("TenantId", "EntryId")
+                        .HasDatabaseName("ix_ai_integration_tool_preferences_tenant_id_entry_id");
 
                     b.HasIndex("TenantId", "CreatedBy", "ServerType", "EntryId")
                         .HasDatabaseName("ix_ai_integration_tool_preferences_tenant_id_created_by_server_type_entry_id");

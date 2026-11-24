@@ -35,6 +35,9 @@ namespace ASC.AppHost.Configuration;
 
 public static class NginxConfiguration
 {
+    /// <summary>Where buildtools/config/nginx/includes is mounted; the router reads the copy in /etc/nginx/includes.</summary>
+    private const string IncludesSource = "/etc/nginx/includes-src";
+
     public static IResourceBuilder<ContainerResource> ConfigureOpenResty(
         IDistributedApplicationBuilder builder,
         string basePath,
@@ -67,7 +70,9 @@ public static class NginxConfiguration
 
         var openResty = builder.AddContainer(Constants.OpenRestyContainer, "openresty/openresty", restyTag)
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
-            .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx", "includes"), "/etc/nginx/includes/")
+            // Read-only and copied into the container at start (see the command below): the upstream map is rendered
+            // there, so a run never writes it into the buildtools folder every checkout and every other run shares.
+            .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx", "includes"), IncludesSource, isReadOnly: true)
             .WithBindMount(Path.Combine(basePath, "buildtools", "install", "docker", "config", "nginx", "templates"), "/etc/nginx/templates/")
             .WithBindMount(Path.Combine(clientBasePath, "public"), "/var/www/public")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
@@ -76,8 +81,8 @@ public static class NginxConfiguration
             .WithBindMount(certDir, "/etc/nginx/certs/", isReadOnly: true)
             .WithBindMount(sslConfPath, "/etc/nginx/dev-templates/docspace-ssl.conf.template", isReadOnly: true)
             .WithContainerRuntimeArgs(
-                "-p", $"0.0.0.0:{Constants.AppHostPort}:{Constants.RestyPort}",
-                "-p", $"0.0.0.0:{Constants.AppHostHttpsPort}:{Constants.RestyHttpsPort}");
+                "-p", $"0.0.0.0:{HostPorts.Of(Constants.AppHostPort)}:{Constants.RestyPort}",
+                "-p", $"0.0.0.0:{HostPorts.Of(Constants.AppHostHttpsPort)}:{Constants.RestyHttpsPort}");
 
         if (otel)
         {
@@ -151,8 +156,17 @@ public static class NginxConfiguration
             // the -fat image the otel path runs on already carries envsubst
             (otel ? "" : "apk add --no-cache gettext && ") +
             otelInstall +
+            $"mkdir -p /etc/nginx/includes && cp -R {IncludesSource}/. /etc/nginx/includes/ && " +
             $"envsubst '{string.Join(' ', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/includes/onlyoffice-upstream-map.conf.template > /etc/nginx/includes/onlyoffice-upstream-map.conf && " +
-            $"envsubst '${sslEnvVar}' < /etc/nginx/dev-templates/docspace-ssl.conf.template > /etc/nginx/conf.d/docspace-ssl.conf && " +
+            // conf.d is the buildtools folder every checkout and run shares. The vhost names only the container's own
+            // port, so it differs between runs only when their checkouts' templates do; a router keeps the vhost it read
+            // at its start, so then each one runs on the one last written before it started. It is written only when it
+            // differs, and then under a name nginx does not include (*.conf only) and renamed over the old one in the
+            // same folder - a temporary name mktemp makes unique there ($$ is not: the shell is PID 1 in every router,
+            // so it would be one name for all of them) - so a router starting next to this one reads a whole vhost.
+            $"envsubst '${sslEnvVar}' < /etc/nginx/dev-templates/docspace-ssl.conf.template > /tmp/docspace-ssl.conf && " +
+            "{ cmp -s /tmp/docspace-ssl.conf /etc/nginx/conf.d/docspace-ssl.conf || " +
+            "{ t=$(mktemp -p /etc/nginx/conf.d .docspace-ssl.XXXXXX) && cp /tmp/docspace-ssl.conf \"$t\" && chmod 644 \"$t\" && mv -f \"$t\" /etc/nginx/conf.d/docspace-ssl.conf; }; } && " +
             $"/usr/local/openresty/bin/openresty -g 'daemon off;'");
 
         return openResty;
@@ -164,23 +178,33 @@ public static class NginxConfiguration
         {
             return isDocker
                 ? $"http://{ProjectConfigurator.GetProjectName<ASC_Monolith>()}:{Constants.MonolithPort}"
-                : $"http://{Constants.HostDockerInternal}:{Constants.MonolithPort}";
+                : HostUrl(Constants.MonolithPort, isDocker: false);
         }
 
         return isDocker
             ? $"http://{ProjectConfigurator.GetProjectName<TProject>()}:{port}"
-            : $"http://{Constants.HostDockerInternal}:{port}";
+            : HostUrl(port, isDocker: false);
+    }
+
+    /// <summary>
+    /// A listener on the host, reached from the router container. Its port is this run's (HostPorts): in a test run
+    /// a free one, and what nothing of the run starts then answers nothing instead of a development stack's service
+    /// on the fixed port. In docker mode the services publish their fixed ports, so the fixed port it stays.
+    /// </summary>
+    private static string HostUrl(int port, bool isDocker)
+    {
+        return $"http://{Constants.HostDockerInternal}:{(isDocker ? port : HostPorts.Of(port))}";
     }
 
     private static Dictionary<string, string> GetServiceUrls(bool isDocker, bool isPreview = false)
     {
         return new Dictionary<string, string>
         {
-            { "SERVICE_CLIENT", $"http://{Constants.HostDockerInternal}:5001" },
-            { "SERVICE_DOCEDITOR", $"http://{Constants.HostDockerInternal}:5013" },
+            { "SERVICE_CLIENT", HostUrl(5001, isDocker) },
+            { "SERVICE_DOCEDITOR", HostUrl(5013, isDocker) },
             { "DOCUMENT_SERVER_URL_EXTERNAL", $"http://{Constants.EditorsContainer}" },
             { "DOCUMENT_CONTAINER_NAME", $"http://{Constants.EditorsContainer}" },
-            { "SERVICE_MANAGEMENT", $"http://{Constants.HostDockerInternal}:5015" },
+            { "SERVICE_MANAGEMENT", HostUrl(5015, isDocker) },
             { "SERVICE_PEOPLE_SERVER", BackendUrl<ASC_People>(Constants.PeoplePort, isDocker, isPreview) },
             { "SERVICE_FILES", BackendUrl<ASC_Files>(Constants.FilesPort, isDocker, isPreview) },
             { "SERVICE_API", BackendUrl<ASC_Web_Api>(Constants.WebApiPort, isDocker, isPreview) },
@@ -191,16 +215,16 @@ public static class NginxConfiguration
             { "SERVICE_API_CACHE", BackendUrl<ASC_Web_Api>(Constants.MonolithPort, isDocker, isPreview) },
             { "SERVICE_HELTHCHECKS", BackendUrl<ASC_Web_Api>(5033, isDocker, isPreview) },
             { "SERVICE_MIGRATION", BackendUrl<ASC_Web_Studio>(5034, isDocker, isPreview) },
-            { "SERVICE_PLUGINS", $"http://{Constants.HostDockerInternal}:5014" },
+            { "SERVICE_PLUGINS", HostUrl(5014, isDocker) },
             { "SERVICE_IDENTITY_API", $"http://{Constants.IdentityRegistrationContainer}:{Constants.IdentityRegistrationPort}" },
             { "SERVICE_IDENTITY", $"http://{Constants.IdentityAuthorizationContainer}:{Constants.IdentityAuthorizationPort}" },
-            { "SERVICE_SSOAUTH", $"http://{Constants.HostDockerInternal}:9834" },
-            { "SERVICE_AI_CHAT", $"http://{Constants.HostDockerInternal}:{Constants.AiChatPort}" },
-            { "SERVICE_SOCKET", $"http://{Constants.HostDockerInternal}:9899" },
-            { "SERVICE_LOGIN", $"http://{Constants.HostDockerInternal}:5011" },
-            { "SERVICE_SDK", $"http://{Constants.HostDockerInternal}:5099" },
-            { "DASHBOARDS_CONTAINER_NAME", $"http://{Constants.HostDockerInternal}:5601" },
-            { "STORYBOOK_CONTAINER_NAME", $"http://{Constants.HostDockerInternal}:6006" },
+            { "SERVICE_SSOAUTH", HostUrl(Constants.SsoAuthPort, isDocker) },
+            { "SERVICE_AI_CHAT", HostUrl(Constants.AiChatPort, isDocker) },
+            { "SERVICE_SOCKET", HostUrl(Constants.SocketIoPort, isDocker) },
+            { "SERVICE_LOGIN", HostUrl(5011, isDocker) },
+            { "SERVICE_SDK", HostUrl(5099, isDocker) },
+            { "DASHBOARDS_CONTAINER_NAME", HostUrl(5601, isDocker) },
+            { "STORYBOOK_CONTAINER_NAME", HostUrl(6006, isDocker) },
             { "DNS_NAMESERVER", "127.0.0.11" }
         };
     }

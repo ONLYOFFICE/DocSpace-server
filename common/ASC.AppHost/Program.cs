@@ -44,7 +44,29 @@ var storybook = string.Compare(builder.Configuration["STORYBOOK"], "true", Strin
 
 var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
 var otelFileLogging = string.Compare(builder.Configuration["OTEL_FILE_LOGGING"], "true", StringComparison.OrdinalIgnoreCase) == 0;
-var connectionManager = new ConnectionStringManager(builder, basePath).AddEditors();
+var isIntegrationTest = launchProfile is "integration-test" or "notify-test" or "integration-test-billing";
+
+// A test run binds free ports instead of the fixed ones of a development stack, so runs from checkouts on different
+// branches, and a test run next to a development stack, do not compete for them (HostPorts). Before anything reads a
+// port; the test fixture has already switched them on in its own process, which this AppHost runs in. Not in the
+// docker mode: the socket and the other unproxied listeners keep their constants there (the testing builder still
+// re-ports the proxied ones, the service containers included), and the fixture passes the same Docker value it
+// decided by.
+if (isIntegrationTest && !isDocker)
+{
+    HostPorts.UseFreePorts();
+}
+else if (isDocker && HostPorts.FreePorts)
+{
+    throw new InvalidOperationException(
+        "Docker=true keeps the fixed ports, but this process was switched to free ones before the AppHost started: " +
+        "pass the same Docker value to both (AspireHostFixture.IsDocker).");
+}
+
+// A test run keeps no editing state of the editors across runs, nor shares the development stack's: its database is
+// thrown away with the run (see AddEditors).
+var connectionManager = new ConnectionStringManager(builder, basePath)
+    .AddEditors(isIntegrationTest ? null : ConnectionStringManager.EditorsStateVolume);
 
 var baseConfigurationBuilder = new ConfigurationManager().AddJsonFile(Path.Combine(basePath, "buildtools", "config", "appsettings.json"), true, true);
 var baseConfig = baseConfigurationBuilder.Build();
@@ -58,7 +80,6 @@ if (otelFileLogging)
 // DB_PROVIDER=postgresql puts the main database on PostgreSQL in every profile; see ConnectionStringManager.AddMainPostgres.
 var mainDbOnPostgres = ConnectionStringManager.IsMainDatabaseOnPostgreSql(builder.Configuration[Constants.DbProviderKey]);
 
-var isIntegrationTest = launchProfile is "integration-test" or "notify-test" or "integration-test-billing";
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker, isIntegrationTest);
 
 switch (launchProfile)
@@ -125,7 +146,7 @@ switch (launchProfile)
             .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()
             .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
-            .UsePaymentServices($"http://{Constants.PaymentStubHost}:{Constants.PaymentStubPort}")
+            .UsePaymentServices($"http://{Constants.PaymentStubHost}:{HostPorts.Of(Constants.PaymentStubPort)}")
             .AllowPortalRegistration();
 
         configurator
@@ -251,7 +272,7 @@ if (!skipClient)
         .WithPnpm()
         .WithEnvironment("NODE_OPTIONS", $"--use-system-ca")
         .WithEnvironment("NODE_EXTRA_CA_CERTS", crtPath)
-        .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}");
+        .WithEnvironment("API_HOST", $"http://localhost:{HostPorts.Of(Constants.AppHostPort).ToString(CultureInfo.InvariantCulture)}");
 }
 
 if (storybook)
@@ -263,14 +284,20 @@ if (storybook)
 }
 
 // The letter and billing suites never go through the proxy - their clients call the services directly - and
-// OpenResty binds fixed host ports (8092, 443) and mounts the client packages, which a server-only checkout does
-// not have.
+// OpenResty mounts the client packages, which a server-only checkout does not have.
 if (launchProfile is not ("notify-test" or "integration-test-billing"))
 {
     var isPreview = launchProfile == "preview";
     var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
 
     playwright?.WaitFor(openresty);
+}
+
+if (HostPorts.FreePorts)
+{
+    // Which port of this run stands for which fixed one: the router is not on 8092 and the services are not on 50xx.
+    Console.WriteLine("Host ports of this run (fixed -> used): "
+        + string.Join(", ", HostPorts.Assigned.OrderBy(pair => pair.Key).Select(pair => $"{pair.Key} -> {pair.Value}")));
 }
 
 await builder.Build().RunAsync();

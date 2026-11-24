@@ -2788,6 +2788,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: new[] { "tenant_id", "action_type", "entry_id" });
 
             migrationBuilder.CreateIndex(
+                name: "ix_ai_integration_assignments_tenant_id_entry_id",
+                table: "ai_integration_assignments",
+                columns: new[] { "tenant_id", "entry_id" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_ai_integration_attachments_deleted_on_id",
                 table: "ai_integration_attachments",
                 columns: new[] { "deleted_on", "id" });
@@ -2813,6 +2818,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: new[] { "tenant_id", "thirdparty_entry_id" });
 
             migrationBuilder.CreateIndex(
+                name: "ix_ai_integration_mcp_servers_tenant_id_entry_id",
+                table: "ai_integration_mcp_servers",
+                columns: new[] { "tenant_id", "entry_id" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_ai_integration_mcp_servers_tenant_id_name_entry_id",
                 table: "ai_integration_mcp_servers",
                 columns: new[] { "tenant_id", "name", "entry_id" });
@@ -2826,6 +2836,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 name: "ix_ai_integration_preferences_tenant_id_created_by_entry_id",
                 table: "ai_integration_preferences",
                 columns: new[] { "tenant_id", "created_by", "entry_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ai_integration_preferences_tenant_id_entry_id",
+                table: "ai_integration_preferences",
+                columns: new[] { "tenant_id", "entry_id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ai_integration_profiles_tenant_id",
@@ -2863,6 +2878,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: new[] { "deleted_on", "id" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ai_integration_threads_tenant_id_entry_id",
+                table: "ai_integration_threads",
+                columns: new[] { "tenant_id", "entry_id" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ai_integration_threads_tenant_id_last_edit_date",
                 table: "ai_integration_threads",
                 columns: new[] { "tenant_id", "last_edit_date" });
@@ -2876,6 +2896,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 name: "ix_ai_integration_tool_preferences_tenant_id_created_by_server_type_entry_id",
                 table: "ai_integration_tool_preferences",
                 columns: new[] { "tenant_id", "created_by", "server_type", "entry_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ai_integration_tool_preferences_tenant_id_entry_id",
+                table: "ai_integration_tool_preferences",
+                columns: new[] { "tenant_id", "entry_id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ai_mcp_room_servers_room_id",

@@ -70,4 +70,9 @@ public static class LockKeyHelper
         return $"ai_project_rooms_{tenantId}_{projectId}";
     }
 
+    public static string GetAiAgentMigrationKey(int tenantId, int roomId)
+    {
+        return $"ai_agent_migration_{tenantId}_{roomId}";
+    }
+
 }

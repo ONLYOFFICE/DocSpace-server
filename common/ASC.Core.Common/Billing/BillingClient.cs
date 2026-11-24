@@ -36,6 +36,7 @@ namespace ASC.Core.Billing;
 [Scope]
 public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillingApi billingApi)
 {
+    private const string OkAnswer = "ok";
     private const int StripePaymentSystemId = 9;
     private const int AccountingPaymentSystemId = 11;
 
@@ -308,7 +309,8 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
         return await billingApi.ApplyPromoCodeAsync(requestDto);
     }
 
-    public async Task<bool> GetDocsCloudTrialAsync(string portalId, DocsCloudTrialCustomer customer)
+    // Returns the answer of billing with the decision, so the caller can name its refusal.
+    public async Task<(bool Granted, string Answer)> GetDocsCloudTrialAsync(string portalId, DocsCloudTrialCustomer customer)
     {
         EnsureConfigured();
 
@@ -325,7 +327,9 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
 
         var result = await billingApi.GetDocsCloudTrialAsync(requestDto);
 
-        return IsOk(result, "POST /billing/getwdocstrial");
+        var answer = ReadAnswer(result, "POST /billing/getwdocstrial");
+
+        return (answer == OkAnswer, answer);
     }
 
     // A deposit and a trial are answered with the JSON string "ok" when billing did what was asked; another string is
@@ -334,11 +338,14 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
     // after a refusal could pay twice.
     private static bool IsOk(string answer, string operation)
     {
-        var value = ReadJsonString(answer, operation)
+        return ReadAnswer(answer, operation) == OkAnswer;
+    }
+
+    private static string ReadAnswer(string answer, string operation)
+    {
+        return ReadJsonString(answer, operation)
             ?? throw new PaymentServiceContractException(BillingHttpClientExtension.ServiceName, operation, null,
                 new JsonException("The answer is null, not a JSON string"));
-
-        return value == "ok";
     }
 
     // The links come back as a JSON string the client reads itself, past the deserialization factory of Refit, so an

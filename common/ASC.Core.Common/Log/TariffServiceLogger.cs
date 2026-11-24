@@ -55,6 +55,15 @@ internal static partial class TariffServiceLogger
     [LoggerMessage(LogLevel.Error, "Billing tenant {tenantId}: {message}")]
     public static partial void ErrorBilling(this ILogger<TariffService> logger, string tenantId, string message);
 
+    [LoggerMessage(LogLevel.Warning, "Docs Connect trial for tenant {tenantId} is not requested: the billing service is not configured")]
+    public static partial void WarningDocsCloudTrialBillingNotConfigured(this ILogger<TariffService> logger, int tenantId);
+
+    [LoggerMessage(LogLevel.Warning, "Docs Connect trial for tenant {tenantId} is declined by billing: {answer}")]
+    public static partial void WarningDocsCloudTrialDeclined(this ILogger<TariffService> logger, int tenantId, string answer);
+
+    [LoggerMessage(LogLevel.Warning, "Docs Connect trial for tenant {tenantId}: the billing answer could not be read, the trial may be granted")]
+    public static partial void WarningDocsCloudTrialAnswerUnreadable(this ILogger<TariffService> logger, int tenantId);
+
     [LoggerMessage(LogLevel.Warning, "The clients of tenant {tenantId} were not told that the wallet changed")]
     public static partial void WarningWalletChangeNotSent(this ILogger<TariffService> logger, int tenantId, Exception exception);
 

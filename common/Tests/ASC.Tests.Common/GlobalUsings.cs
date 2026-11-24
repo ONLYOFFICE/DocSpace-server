@@ -80,4 +80,5 @@ global using Xunit;
 global using AppHostConstants = ASC.AppHost.Configuration.Constants;
 global using AppPaths = ASC.AppHost.Configuration.AppPaths;
 global using ConnectionStringManager = ASC.AppHost.Configuration.ConnectionStringManager;
+global using HostPorts = ASC.AppHost.Configuration.HostPorts;
 global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;

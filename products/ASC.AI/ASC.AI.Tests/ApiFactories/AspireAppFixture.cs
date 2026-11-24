@@ -46,8 +46,9 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
     protected override IEnumerable<string> Resources =>
         [ResourceNames.AiChat, ResourceNames.Ai, ResourceNames.AiWorker, ResourceNames.Files, ResourceNames.People];
 
-    // Only the third-party room tests (NeedsLazyResources) connect to Nextcloud, and they wait for it themselves.
-    protected override IEnumerable<string> LazyResources => [ResourceNames.Nextcloud];
+    // The third-party room tests connect to Nextcloud and the logo test of the agent conversion reads through
+    // Web.Studio; they wait for them themselves.
+    protected override IEnumerable<string> LazyResources => [ResourceNames.Nextcloud, ResourceNames.WebStudio];
 
     /// <summary>The model provider shared by the run: profiles are created against it, chats answered by it.</summary>
     public StubModelProvider ModelProvider { get; } = StubModelProvider.CreateShared();

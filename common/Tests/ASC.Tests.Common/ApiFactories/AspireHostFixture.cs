@@ -151,6 +151,53 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// </summary>
     public string MainDatabaseProviderName => MainDatabaseOnPostgreSql ? "Npgsql" : "MySql.Data.MySqlClient";
 
+    /// <summary>
+    /// Whether this suite's services run as containers (the AppHost's docker mode): see <see cref="IsDocker"/>.
+    /// </summary>
+    protected bool Docker => IsDocker(LaunchProfile);
+
+    /// <summary>
+    /// Whether a run of <paramref name="launchProfile"/> is in the docker mode: the <c>Docker</c> environment variable
+    /// of the test process when it is set, otherwise the <c>Docker</c> value of the profile's
+    /// <c>environmentVariables</c> in the AppHost's <c>launchSettings.json</c>, otherwise not - the order in which the
+    /// AppHost would read them, where the testing builder adds a profile's values only for keys nothing else set. The
+    /// fixture decides it before the AppHost starts, because it decides whether the run takes free ports
+    /// (<see cref="HostPorts.UseFreePorts"/>) or the fixed ones, and hands the AppHost the value it decided by.
+    /// </summary>
+    public static bool IsDocker(string launchProfile)
+    {
+        var value = Environment.GetEnvironmentVariable("Docker");
+
+        if (string.IsNullOrEmpty(value))
+        {
+            value = ReadLaunchProfileVariable(launchProfile, "Docker");
+        }
+
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // For the AppHost itself Aspire generates ProjectPath as the project directory.
+    private static string? ReadLaunchProfileVariable(string launchProfile, string name)
+    {
+        var path = Path.Combine(Projects.ASC_AppHost.ProjectPath, "Properties", "launchSettings.json");
+
+        if (!File.Exists(path))
+        {
+            return null;
+        }
+
+        using var document = JsonDocument.Parse(File.ReadAllText(path),
+            new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+
+        return document.RootElement.TryGetProperty("profiles", out var profiles)
+               && profiles.TryGetProperty(launchProfile, out var profile)
+               && profile.TryGetProperty("environmentVariables", out var variables)
+               && variables.TryGetProperty(name, out var value)
+               && value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
+    }
+
     /// <summary>Builds the suite's own client bundle for a freshly registered portal.</summary>
     protected abstract TClients CreateClients(PortalContext context);
 
@@ -201,6 +248,18 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     public async ValueTask InitializeAsync()
     {
+        // Before anything reads a port, the stubs of OnStartingAsync included: the listeners with a port of their own -
+        // services, router, socket, published container ports, stubs - take a free one (HostPorts), the proxied
+        // endpoints get one from DCP, so a run of another checkout or a development stack can run at the same time.
+        // The AppHost runs in this process and reads the same table. Not in the docker mode, whose containers publish
+        // their fixed ports: the AppHost is handed this decision (Docker below), so both sides read the same ports.
+        var docker = Docker;
+
+        if (!docker)
+        {
+            HostPorts.UseFreePorts();
+        }
+
         await OnStartingAsync();
 
         // Start the Aspire AppHost with the suite's launch profile.
@@ -212,6 +271,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
                 $"DOTNET_LAUNCH_PROFILE={LaunchProfile}",
                 "SKIP_CLIENT=true",
                 $"APP_HOSTING_STANDALONE={(Standalone ? "true" : "false")}",
+                $"Docker={(docker ? "true" : "false")}",
                 $"{AppHostConstants.DbProviderKey}={(MainDatabaseOnPostgreSql ? AppHostConstants.PostgreSqlDbProvider : AppHostConstants.MySqlDbProvider)}"
             ]);
 
@@ -732,7 +792,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     {
         using var startUp = new CancellationTokenSource(_startUpBudget);
         using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
-        var probe = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/api/2.0/people/@self");
+        var probe = new Uri($"http://localhost:{HostPorts.Of(AppHostConstants.AppHostPort)}/api/2.0/people/@self");
 
         try
         {
@@ -769,7 +829,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         using var startUp = new CancellationTokenSource(_startUpBudget);
         using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
         // The router port the services reach the document server through.
-        var healthCheck = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/ds-vpath/healthcheck");
+        var healthCheck = new Uri($"http://localhost:{HostPorts.Of(AppHostConstants.AppHostPort)}/ds-vpath/healthcheck");
 
         try
         {
@@ -868,7 +928,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         }
         finally
         {
-            // Also when stopping the stack fails: a stub left running would hold its fixed port until the process ends.
+            // Also when stopping the stack fails: a stub left running would hold its port until the process ends.
             try
             {
                 await OnStoppedAsync();
@@ -902,7 +962,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// </summary>
     public Task<Dictionary<string, int>> FindSocketHubRefusalsAsync()
     {
-        var logs = AppPaths.GetTestLogsDirectory(AppPaths.GetBasePath(Projects.ASC_AppHost.ProjectPath));
+        var logs = AppPaths.GetTestLogsDirectory(Projects.ASC_AppHost.ProjectPath);
 
         return SocketHubRefusals.FindAsync(logs, _startedAt);
     }

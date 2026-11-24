@@ -54,7 +54,7 @@ public static class TestArtifacts
     /// </returns>
     public static async Task<Exception?> DeleteStorageAsync(string appHostDirectory)
     {
-        var storageRoot = AppPaths.GetTestStorageRoot(AppPaths.GetBasePath(appHostDirectory));
+        var storageRoot = AppPaths.GetTestStorageRoot(appHostDirectory);
 
         if (!Directory.Exists(storageRoot))
         {
