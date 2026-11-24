@@ -96,7 +96,7 @@ public class WebPluginReuploadTests(
         await FillToTheLimitAsync();
 
         // Act + Assert
-        await AssertUploadRefusedAsync(WebPluginsTestData.CreatePluginZip("limit-over"), 400, "Wrong plugin archive.");
+        await AssertUploadRefusedAsync(WebPluginsTestData.CreatePluginZip("limit-over"), 400, "The number of plugins exceeds the limit");
         await UploadAsOwnerAsync($"limit-{MaxCount - 1:000}", "2.0.0");
         var plugins = await ListPluginsAsync();
         plugins.Should().HaveCount(MaxCount);
@@ -114,7 +114,15 @@ public class WebPluginReuploadTests(
         // Arrange
         await FillToTheLimitAsync();
 
-        // Act + Assert
-        await AssertUploadRefusedAsync(WebPluginsTestData.CreatePluginZip("limit-over"), 400, "Wrong plugin archive. The number of plugins exceeds the limit");
+        await _webApiClient.Authenticate(Owner);
+
+        // Act
+        using var response = await WebPluginsTestData.UploadAsync(
+            _webApiClient, WebPluginsTestData.CreatePluginZip("limit-over"), "plugin.zip", TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, TestContext.Current.CancellationToken);
+
+        // Assert
+        status.Should().Be(400, body);
+        body.Should().Contain("The number of plugins exceeds the limit").And.NotContain("Wrong plugin archive");
     }
 }

@@ -250,7 +250,7 @@ public class WebPluginManager(
             if (existingWebPlugins.Count + 1 > maxCount &&
                 !existingWebPlugins.Exists(x => string.Equals(x.Name, webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
-                throw new InvalidOperationException(Resource.ErrorWebPluginMaxCount);
+                throw new WebPluginRefusedException(Resource.ErrorWebPluginMaxCount);
             }
 
             var storage = await GetPluginStorageAsync(system ? Tenant.DefaultTenant : tenantId);
@@ -281,7 +281,7 @@ public class WebPluginManager(
 
             return webPlugin;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not WebPluginRefusedException)
         {
             throw new ArgumentException($"{Resource.ErrorWebPluginArchive}. {ex.Message}");
         }
@@ -312,7 +312,7 @@ public class WebPluginManager(
         {
             if (ClashesWith(webPlugin, await GetWebPluginsForTenantAsync(tenantId)))
             {
-                throw new Exception(Resource.ErrorWebPluginInstalledForPortal);
+                throw new WebPluginRefusedException(Resource.ErrorWebPluginInstalledForPortal);
             }
 
             var personalWebPlugins = await GetWebPluginsFromCacheAsync(tenantId, owner);
@@ -321,12 +321,12 @@ public class WebPluginManager(
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
                     !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
-                throw new Exception(Resource.ErrorWebPluginExist);
+                throw new WebPluginRefusedException(Resource.ErrorWebPluginExist);
             }
 
             if (!IsValidPersonalCspDomains(webPlugin.CspDomains))
             {
-                throw new Exception(Resource.ErrorWebPluginCspDomains);
+                throw new WebPluginRefusedException(Resource.ErrorWebPluginCspDomains);
             }
 
             return;
@@ -342,14 +342,14 @@ public class WebPluginManager(
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
                     x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
-                throw new Exception(Resource.ErrorWebPluginExist);
+                throw new WebPluginRefusedException(Resource.ErrorWebPluginExist);
             }
 
             if (systemWebPlugins.Any(x =>
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
                     !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
-                throw new Exception(Resource.ErrorWebPluginExist);
+                throw new WebPluginRefusedException(Resource.ErrorWebPluginExist);
             }
         }
         else
@@ -358,14 +358,14 @@ public class WebPluginManager(
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
                     x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
-                throw new Exception(Resource.ErrorWebPluginExist);
+                throw new WebPluginRefusedException(Resource.ErrorWebPluginExist);
             }
 
             if (tenantWebPlugins.Any(x =>
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
                     !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
-                throw new Exception(Resource.ErrorWebPluginExist);
+                throw new WebPluginRefusedException(Resource.ErrorWebPluginExist);
             }
         }
     }
@@ -1025,4 +1025,6 @@ public class WebPluginManager(
             await storage.SaveAsync(string.Empty, path, stream, acl);
         }
     }
+
+    private sealed class WebPluginRefusedException(string message) : ArgumentException(message);
 }

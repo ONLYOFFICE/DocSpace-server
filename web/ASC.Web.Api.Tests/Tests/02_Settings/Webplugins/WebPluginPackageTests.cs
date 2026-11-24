@@ -34,8 +34,9 @@
 namespace ASC.Web.Api.Tests.Tests._02_Settings.Webplugins;
 
 /// <summary>
-/// POST /api/2.0/settings/webplugins — what the archive and its manifest must contain. Every refusal raised
-/// while the archive is read comes back as 400 "Wrong plugin archive. &lt;reason&gt;".
+/// POST /api/2.0/settings/webplugins — what the archive and its manifest must contain. A fault of the archive or
+/// its manifest comes back as 400 "Wrong plugin archive. &lt;reason&gt;"; a refusal by the installed plugins or the
+/// limit comes back as 400 with its reason alone.
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebPluginPackageTests(

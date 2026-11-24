@@ -33,7 +33,7 @@ alone, while the administrator keeps control of what runs for the portal.
   default state of the other portals.
 - A personal plugin's `cspDomains` are checked at upload: an entry that is no valid address (the check of
   `POST security/csp`) or that holds whitespace, `;` or quotes, and a value longer than 15360 characters, answer
-  400 "Wrong plugin archive. The cspDomains value lists an invalid address or is too long".
+  400 "The cspDomains value lists an invalid address or is too long".
 - The domains a personal plugin declares in `cspDomains` never reach the portal Content Security Policy. A
   signed-in member whose request carries the `asc_personal_csp` cookie gets them in the `header` that
   `getCspSettings` returns, unless the header would pass its size limit; if reading them fails, the portal
@@ -132,13 +132,19 @@ None.
   personal upload can set or delete the `asc_personal_csp` cookie. Affected: the web client, which uploads
   personal plugins from the profile's Plugins tab; plugin packages whose manifest carries a `cssUrl`; the SDKs
   and the OpenAPI document (the new query parameter). Manifests stored before keep these fields.
+- **Plugin name and uniqueness** (`addWebPluginFromFile`). A refusal because an installed plugin holds the
+  `name` or `pluginName`, or because of the plugin limit, answers 400 with its reason alone, such as "Plugin
+  already exist"; before the branch the reason came after "Wrong plugin archive. ", which a fault of the archive
+  or its manifest keeps. Affected: API clients and scripts that match the whole text of these errors; the web
+  client shows the text as it comes. SDKs, webhooks, socket events, backup and stored data: none.
 - **Re-uploading a plugin under the same name** (`addWebPluginFromFile`). A personal re-upload keeps the
   settings stored in the member's row and answers 400 once a portal or installation-wide plugin has the
   `name` or `pluginName`. A portal re-upload changes only as every upload does (see "Uploading a plugin
   package"). Affected: members re-uploading a shadowed personal plugin, in the web client among others.
 - **Portal plugin count limit**: the 100 still caps the portal and installation-wide plugins; the list may hold
   more because the caller's personal plugins come on top. An upload of a new name at the limit now answers 400
-  "Wrong plugin archive. The number of plugins exceeds the limit", as the requirement says (see P9 below).
+  "The number of plugins exceeds the limit" (see P9 below), without the "Wrong plugin archive. " the requirement
+  put before it (see "Plugin name and uniqueness").
   Affected: callers of `getWebPlugins` that assumed at most 100 entries.
 - **Installation-wide plugins** (`addWebPluginFromFile` with `system=true`). With `personal=true` as well the
   call now answers 400 "Changes to system plugins are prohibited", and a guest 403; before the branch an
@@ -201,8 +207,10 @@ None.
 - **P2** (state saved before the CSP save, then 403): kept, and extended to personal plugins. A personal upload,
   or a personal update with `enabled` true, after which the member's policy header would pass the size limit
   answers 403 after its change was saved, as a portal call does.
-- **P4** (every failure after the size checks becomes 400 "Wrong plugin archive. …"): kept. The new name and
-  `cspDomains` refusals for personal uploads are more such 400s.
+- **P4** (every failure after the size checks becomes 400 "Wrong plugin archive. …"): narrowed. A refusal
+  because an installed plugin holds the `name` or `pluginName`, because of the plugin limit or, for a personal
+  upload, because of its `cspDomains` now answers 400 with its reason alone; a fault of the archive or its
+  manifest and a storage failure are still wrapped, so P4 stays open for the storage failures.
 - **P3, P6** (shadowed portal plugin, de-duplicated count): kept for portal plugins. The personal count limit
   counts the member's own plugins only.
 - **P8** (required fields the server leaves out): kept. `personal` is always sent, so marking it required adds

@@ -104,7 +104,7 @@ public class PersonalWebPluginTests(
         portalResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         personalResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         (await personalResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
-            .Should().Contain("Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal");
+            .Should().Contain("A plugin with the same name or pluginName is already installed for the whole portal").And.NotContain("Wrong plugin archive");
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class PersonalWebPluginTests(
 
         // Assert
         status.Should().Be(400, body);
-        body.Should().Contain("Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal");
+        body.Should().Contain("A plugin with the same name or pluginName is already installed for the whole portal").And.NotContain("Wrong plugin archive");
         personalPlugins.Should().NotContain(x => x.Name == pluginName);
     }
 
@@ -149,7 +149,7 @@ public class PersonalWebPluginTests(
 
         // Assert
         status.Should().Be(400, body);
-        body.Should().Contain("Wrong plugin archive. Plugin already exist");
+        body.Should().Contain("Plugin already exist").And.NotContain("Wrong plugin archive");
         personalPlugins.Select(x => x.Name).Should().Equal("first-js-autotest");
     }
 
@@ -236,7 +236,7 @@ public class PersonalWebPluginTests(
 
         // Assert
         status.Should().Be(400, body);
-        body.Should().Contain("Wrong plugin archive. The cspDomains value lists an invalid address or is too long");
+        body.Should().Contain("The cspDomains value lists an invalid address or is too long").And.NotContain("Wrong plugin archive");
         personalPlugins.Should().NotContain(x => x.Name == pluginName);
     }
 

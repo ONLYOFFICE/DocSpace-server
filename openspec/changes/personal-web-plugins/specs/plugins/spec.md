@@ -63,26 +63,26 @@ listed, with its state and `settings`, for its owner only. With `system=true` to
 
 ### Requirement: A plugin name belongs to the higher level
 
-A personal upload SHALL answer 400 "Wrong plugin archive. A plugin with the same name or pluginName is already
+A personal upload SHALL answer 400 "A plugin with the same name or pluginName is already
 installed for the whole portal" when a portal or installation-wide plugin has its `name` (any case) or
-`pluginName`, and 400 "Wrong plugin archive. Plugin already exist" when another personal plugin of the same
+`pluginName`, and 400 "Plugin already exist" when another personal plugin of the same
 member has its `pluginName`. A portal upload SHALL NOT be refused for a personal plugin; that plugin SHALL be
 left out of its owner's list until the portal plugin is deleted.
 
 #### Scenario: Name of a portal plugin
 
 - **WHEN** the owner installed a portal plugin and a User uploads a package with the same `name` and `personal=true`
-- **THEN** the system answers 400 "Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal"
+- **THEN** the system answers 400 "A plugin with the same name or pluginName is already installed for the whole portal"
 
 #### Scenario: JavaScript object of a portal plugin
 
 - **WHEN** the owner installed a portal plugin and a User uploads with `personal=true` a package with another `name` and the same `pluginName`
-- **THEN** the system answers 400 "Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal"
+- **THEN** the system answers 400 "A plugin with the same name or pluginName is already installed for the whole portal"
 
 #### Scenario: JavaScript object of another personal plugin
 
 - **WHEN** a User holds a personal plugin and uploads with `personal=true` a package with another `name` and the same `pluginName`
-- **THEN** the system answers 400 "Wrong plugin archive. Plugin already exist"
+- **THEN** the system answers 400 "Plugin already exist"
 
 #### Scenario: Portal plugin shadows a personal one
 
@@ -99,7 +99,7 @@ left out of its owner's list until the portal plugin is deleted.
 ### Requirement: Personal plugin count limit
 
 A member SHALL hold at most 10 personal plugins by default: an upload of a new name beyond that SHALL answer
-400 "Wrong plugin archive. The number of plugins exceeds the limit", while a re-upload of a name the member
+400 "The number of plugins exceeds the limit", while a re-upload of a name the member
 holds is accepted unless a portal or installation-wide plugin has taken its `name` or `pluginName`. Personal
 plugins SHALL NOT count toward the portal limit. Uploads of the same member that run at the same time can
 together pass the limit.
@@ -107,7 +107,7 @@ together pass the limit.
 #### Scenario: Limit reached
 
 - **WHEN** a User holds 10 personal plugins and uploads a package with a new name and `personal=true`
-- **THEN** the system answers 400 "Wrong plugin archive. The number of plugins exceeds the limit"
+- **THEN** the system answers 400 "The number of plugins exceeds the limit"
 
 #### Scenario: Re-upload at the limit
 
@@ -132,7 +132,7 @@ point to `plugin.js` in a folder of its owner, with the same `hash` query as a p
 
 ### Requirement: Content Security Policy domains of a personal plugin
 
-A personal upload SHALL answer 400 "Wrong plugin archive. The cspDomains value lists an invalid address or is
+A personal upload SHALL answer 400 "The cspDomains value lists an invalid address or is
 too long" when the manifest's `cspDomains` is longer than 15360 characters, or when one of its comma-separated
 entries, trimmed, is an address `configureCsp` would refuse or holds whitespace, `;`, `'` or `"`. An empty
 value SHALL declare no domain. The domains SHALL reach only their owner's policy header, never the portal's
@@ -141,7 +141,7 @@ domains.
 #### Scenario: Invalid entry
 
 - **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` is `https://a.example,https://b.example; script-src *`
-- **THEN** the system answers 400 "Wrong plugin archive. The cspDomains value lists an invalid address or is too long" and stores nothing
+- **THEN** the system answers 400 "The cspDomains value lists an invalid address or is too long" and stores nothing
 
 #### Scenario: Value at the length limit
 
@@ -151,7 +151,7 @@ domains.
 #### Scenario: Value over the length limit
 
 - **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` lists valid addresses in 15361 characters
-- **THEN** the system answers 400 "Wrong plugin archive. The cspDomains value lists an invalid address or is too long"
+- **THEN** the system answers 400 "The cspDomains value lists an invalid address or is too long"
 
 #### Scenario: Empty value
 
@@ -361,6 +361,29 @@ not a form). It SHALL store the package, without the manifest's `enabled`, `sett
 - **WHEN** a User uploads with `personal=true` a plugin whose domains push the User's policy header over its size limit
 - **THEN** the system answers 403 "CSP header size exceeds maximum allowed size of 15360 bytes." and the plugin stays installed and on
 
+### Requirement: Plugin name and uniqueness
+
+The manifest `name` SHALL consist of lower-case letters, digits, `_`, `.` and `-` and not start with a
+dot (it is also the storage folder); `pluginName` SHALL be a JavaScript identifier. Either failing SHALL
+answer 400 "Wrong plugin archive. Wrong plugin name". A portal package SHALL be refused with 400 "Plugin
+already exist" when an installation-wide plugin has its `name` (any case) or its `pluginName`, or another
+portal plugin with a different `name` has its `pluginName`.
+
+#### Scenario: Upper-case name
+
+- **WHEN** the manifest says `"name": "MyPlugin"`
+- **THEN** the system answers 400 "Wrong plugin archive. Wrong plugin name"
+
+#### Scenario: Same JavaScript object as another plugin
+
+- **WHEN** a package named `b` declares the `pluginName` an installed plugin `a` already registers
+- **THEN** the system answers 400 "Plugin already exist"
+
+#### Scenario: Name taken by an installation-wide plugin
+
+- **WHEN** a portal package carries the `name` of a plugin that ships with the installation
+- **THEN** the system answers 400 "Plugin already exist"
+
 ### Requirement: Re-uploading a plugin under the same name
 
 A package whose `name` is already installed in the same scope SHALL replace the stored files of that plugin,
@@ -382,19 +405,19 @@ installation-wide plugin has its `name` or `pluginName`.
 #### Scenario: Personal plugin re-uploaded after a portal plugin took its name
 
 - **WHEN** a User holds a personal plugin `x`, the owner then installs a portal plugin `x`, and the User uploads `x` again with `personal=true`
-- **THEN** the system answers 400 "Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal"
+- **THEN** the system answers 400 "A plugin with the same name or pluginName is already installed for the whole portal"
 
 ### Requirement: Portal plugin count limit
 
 A portal SHALL hold at most 100 plugins, the installation-wide ones counted in: an upload that would add
-a new name beyond that SHALL answer 400 "Wrong plugin archive. The number of plugins exceeds the limit",
+a new name beyond that SHALL answer 400 "The number of plugins exceeds the limit",
 while a re-upload of an installed name is accepted. The portal and installation-wide part of the list SHALL
 never return more than that number; the caller's personal plugins come on top.
 
 #### Scenario: Limit reached
 
 - **WHEN** 100 plugins are available to the portal and the owner uploads a package with a new name
-- **THEN** the system answers 400 "Wrong plugin archive. The number of plugins exceeds the limit"
+- **THEN** the system answers 400 "The number of plugins exceeds the limit"
 
 #### Scenario: Personal plugins on top of a full portal
 
