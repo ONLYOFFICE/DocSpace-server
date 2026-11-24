@@ -115,13 +115,14 @@ public class OwnerController(
     /// 401. Pass the link's `type`, `key`, `uid`, and `encemail` parameters in the `confirm` header. An invalid or
     /// expired link returns 401. A link expires after seven days by default. It also becomes invalid when its address
     /// no longer belongs to the portal owner. A deleted or disabled `uid` account has the same effect. To check that
-    /// the link still works, use `POST api/2.0/authentication/confirm`. The call changes data, and a repeated call
-    /// with the same link returns 401. If the new owner is not a DocSpace admin yet, the call makes them one first.
-    /// The previous owner keeps their account and role but loses the owner's rights. The call returns no body. To read
-    /// the new `ownerId`, use `GET api/2.0/settings` as a signed-in user. After this call, a new transfer needs the
-    /// new owner. The new owner must be an active account of the portal, not a guest. If promoting the new owner
-    /// needs a paid seat that the portal lacks, the call returns 402. Then ownership does not move. Without `ownerId`,
-    /// the call returns 400.
+    /// the link still works, use `POST api/2.0/authentication/confirm`. The call changes data, and a repeated call with
+    /// the same link returns 401. If the new owner is not a DocSpace admin yet, the call makes them one first. The
+    /// previous owner keeps their account and role but loses the owner's rights. The call returns no body. To read the
+    /// new `ownerId`, use `GET api/2.0/settings` as a signed-in user. After this call, a new transfer needs the new
+    /// owner. The new owner must be an active account of the portal, not a guest. If promoting the new owner needs a
+    /// paid seat that the portal lacks, the call returns 402. It also returns 402 in that case if the tariff is
+    /// restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. Then ownership does not move. Without
+    /// `ownerId`, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Confirm the portal owner change
@@ -131,7 +132,7 @@ public class OwnerController(
     [SwaggerResponse(200, "The portal owner has been changed to the user named in the request")]
     [SwaggerResponse(400, "The request body cannot be read or has no `ownerId`")]
     [SwaggerResponse(401, "The caller is not signed in and sent no owner change link, or the link is invalid or expired, its address no longer belongs to the portal owner, or its `uid` account is deleted or disabled")]
-    [SwaggerResponse(402, "The user named as the new owner is a regular user, and promoting them to DocSpace administrator needs a paid seat the portal has run out of")]
+    [SwaggerResponse(402, "The user named as the new owner is a regular user, and promoting them to DocSpace administrator needs a paid seat the portal has run out of, or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows")]
     [SwaggerResponse(403, "The caller is signed in but sent no owner change link, whatever their role, or sent a valid confirmation link of another type")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]

@@ -415,15 +415,16 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Adds a portal member to the administrators of one module, or removes the member, by the `administrator` flag. The
-    /// all-zero `productId` means the DocSpace admin role for the whole portal. Requires the EditPortalSettings
+    /// Adds a portal member to the administrators of one module, or removes the member, by the `administrator` flag.
+    /// The all-zero `productId` means the DocSpace admin role for the whole portal. Requires the EditPortalSettings
     /// permission, which the portal owner and DocSpace admins have. Other callers get 403. Only the portal owner can
     /// grant the DocSpace admin role or take any role away from a DocSpace admin. Other callers get 403 for these
     /// changes. On a free cloud plan, the call returns 402. Promoting a guest or a user takes a paid seat. If no paid
-    /// seat is left, the call returns 402. Removing the DocSpace admin role also removes the member from every product
-    /// group. The call changes data immediately, and you can repeat it with the same body. It never creates a user, so
-    /// invite the member first. If the body cannot be read or has no `productId` or `userId`, the call returns 400. The
-    /// call returns the identifiers and the flag as sent. To check membership, use
+    /// seat is left, the call returns 402. It also returns 402 for a promotion that takes a paid seat if the tariff is
+    /// restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. Removing the DocSpace admin role also removes
+    /// the member from every product group. The call changes data immediately, and you can repeat it with the same
+    /// body. It never creates a user, so invite the member first. If the body cannot be read or has no `productId` or
+    /// `userId`, the call returns 400. The call returns the identifiers and the flag as sent. To check membership, use
     /// `GET api/2.0/settings/security/administrator`.
     /// </remarks>
     /// <summary>
@@ -433,7 +434,7 @@ public class SecurityController(
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The module, the user and the administrator flag as they were stored", typeof(ProductAdministratorDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `productId` or `userId`")]
-    [SwaggerResponse(402, "The portal plan does not offer product administrators, or no paid seat is left for the member being promoted")]
+    [SwaggerResponse(402, "The portal plan does not offer product administrators, no paid seat is left for the member being promoted, or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or is not the portal owner and grants the portal-wide administrator role or takes a role away from a DocSpace administrator")]
     [HttpPut("administrator")]
     public async Task<ProductAdministratorDto> SetProductAdministrator(SecurityRequestsDto inDto)

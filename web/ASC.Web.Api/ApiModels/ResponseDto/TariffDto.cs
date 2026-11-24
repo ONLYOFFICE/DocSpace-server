@@ -91,13 +91,13 @@ public class TariffDto
     public TariffState State { get; set; }
 
     /// <summary>
-    /// Whether the subscription limits the portal now. While it is true, the portal cannot add admins, room admins,
-    /// guests, rooms or AI agents, buy add-ons to the plan, start the Docs Connect trial, price or make the move to
-    /// Docs Connect Dev Pack, or read or move the subscription balance to the wallet. Scheduled backups and add-on
-    /// renewals stop. Paying for the plan itself stays open. It is true when the subscription is unpaid. Inside the
-    /// grace period it is false only for a customer whose payment method settles days after the charge. That needs
-    /// an answer from billing in the last grace days plus one. A client shows the grace period by `state` and limits
-    /// its controls by this flag.
+    /// Whether the subscription limits the portal now. While it is true, the portal cannot add accounts of any type
+    /// (DocSpace admins, room admins, users, guests), give an account a paid type, add rooms or AI agents, buy add-ons
+    /// to the plan, start the Docs Connect trial, price or make the move to Docs Connect Dev Pack, or read or move the
+    /// subscription balance to the wallet. Scheduled backups and add-on renewals stop. Paying for the plan itself stays
+    /// open. It is true when the subscription is unpaid. Inside the grace period it is false only for a customer whose
+    /// payment method settles days after the charge. That needs an answer from billing in the last grace days plus one.
+    /// A client shows the grace period by `state` and limits its controls by this flag.
     /// </summary>
     /// <example>false</example>
     public bool Restricted { get; set; }

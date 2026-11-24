@@ -266,7 +266,7 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): only endpoint descriptions and doc
 | Agrees with the listing (ids and `total`) | `T/MetadataTypedSearchTests.cs:46-72`; `T/MetadataFilterOperatorsTests.cs:70-82, 138-148` | TEST-CONFIRMED [run: PASS] |
 | `count` 101/0/-1/absent, `startIndex` -1 → 400 on `searchFolder`; 101/-1 on `searchRooms` | `T/MetadataRequestLimitsTests.cs:50-96`; `Request` (`[Range(1, 100)]`, `[Range(0, int.MaxValue)]`) | TEST-CONFIRMED [run: PASS] |
 | Recent through the body; Templates 400 | `T/MetadataTypedSearchTests.cs:126-167` | TEST-CONFIRMED [run: PASS] |
-| Body fields and routes | `T/MetadataTypedSearchPagingTests.cs:43-99` (`count`, `startIndex`, `sortBy`, `sortOrder`, `total` on both routes); the filter, text and hidden members by `T/MetadataTypedSearchTests.cs`; `FoldersController:489-505`; `RoomsController:1369-1398` | TEST-CONFIRMED [run: PASS] |
+| Body fields and routes | `T/MetadataTypedSearchPagingTests.cs:43-99` (`count`, `startIndex`, `sortBy`, `sortOrder`, `total` on both routes); the filter, text and hidden members by `T/MetadataTypedSearchTests.cs`; `FoldersController:489-505`; `RoomsController:1371-1400` | TEST-CONFIRMED [run: PASS] |
 | **String metadata values in the free text search** | | |
 | Found by a custom field, match with null ids (sub-folder and room) | `T/FoldersMetadataSearchTests.cs:254-275`; `T/RoomsMetadataSearchTests.cs:69-89` | TEST-CONFIRMED [run: PASS] |
 | Found by a template field, match with template/field ids and the whole value | `T/FoldersMetadataSearchTests.cs:277-297`; `T/RoomsMetadataSearchTests.cs:91-111` | TEST-CONFIRMED [run: PASS] |

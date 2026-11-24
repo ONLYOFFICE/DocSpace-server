@@ -25,8 +25,10 @@ portal, but should not limit it until it ends and the tariff becomes NotPaid.
 - When billing does not answer `getCustomerInfo`, the portal keeps the last answer billing gave (kept for the
   grace days plus one after it was given); with no answer ever received, or one older than that, the grace period
   restricts as today. A read of a cached tariff never waits for billing: it decides by the cached customer.
-- When that last answer changes, the portal's clients are told that the tariff changed (the existing tariff
-  socket event), so they re-read `getPortalTariff`.
+- When that last answer changes, the existing tariff socket event is queued for the portal's clients (best
+  effort), so they re-read `getPortalTariff`.
+- A "cannot find" of billing under a 5xx, 408 or 429 is an unknown outcome, not "no customer / no payments / no
+  invoice": it keeps the last answer, keeps a paid tariff as it was, and makes `getDepositInvoice` answer 402.
 - NotPaid is unchanged: the payment gate answers 402 to every call outside the allowed list, whatever the
   payment method.
 - **BREAKING** for the requirements listed under "Breaks current behaviour": they say the grace period refuses
@@ -45,7 +47,8 @@ None.
   the automatic renewal of wallet subscriptions. Requirements modified: "Reading the tariff", "Payment gate while
   the portal is not paid" (scenario "Grace period"), "Buying wallet services", "Moving the subscription balance to
   the wallet", "Automatic renewal of a wallet subscription" (scenario "Additional wallet service while the tariff
-  is overdue"), "Paid seats and tariff limits". Requirement added: the grace period of a delayed payment method.
+  is overdue"), "Paid seats and tariff limits", "Tariff of a hosted portal follows the billing service" (a
+  scenario added). Requirement added: the grace period of a delayed payment method.
 - `quotas`: found by `createRoom`, `createRoomFromTemplate`, `createRoomThirdParty`, `addMember`,
   `getInvitationLink`, `getInvitationLinkByEmployeeType`, `createInvitationLink`. Requirement modified: "Count
   limits of the tariff" (scenario "Bulk invitation and a lapsed tariff").
@@ -73,6 +76,10 @@ None.
 - **Running the schedule**: the scheduled backup of such a portal runs in the grace period instead of being
   skipped; it counts against the free allowance as on a paid tariff.
 - **Reading the tariff**: `getPortalTariff` gains `restricted`; `state` and every other field are unchanged.
+- **Tariff of a hosted portal follows the billing service** (extended): a "cannot find" of the payments request
+  under a 5xx, 408 or 429 no longer moves a paid tariff to yesterday. `getDepositInvoice` ("Top-up without an
+  invoice") answers 402 instead of 404 when billing gives "cannot find" under such a status, as its scenario
+  already says for a failing billing service.
 
 Who sees it:
 

@@ -81,21 +81,23 @@ public class VirtualRoomsInternalController(
     private readonly AuthContext _authContext = authContext;
 
     /// <remarks>
-    /// Creates a room in the Rooms section and returns it. The call creates an Instructions room, a Knowledge room,
-    /// or an AI project in the AI rooms section instead. You cannot change `roomType` after this call. Requires a DocSpace admin
-    /// or a room admin. Other callers get 403. The call changes data. Do not repeat it. Each call creates another room.
-    /// A repeat with the same `logo` returns 404 but still creates a room. That room has no logo, tags, or primary
-    /// external link. The call adds the tag names that the portal does not have yet. A public room and a form filling
-    /// room get a primary external link. To invite members, use `PUT api/2.0/files/rooms/{id}/share` after this call.
-    /// The call returns 400 if `title` is blank, `cover` is unknown, or `share` is not empty. It also returns 400 if
-    /// `private` is set together with `indexing`, a lifetime, or a watermark. A room of the AI rooms section also
-    /// returns 400 with settings that do not apply to its type. The call returns 402 if the portal reached the room
-    /// limit of its plan. It also returns 402 if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. A room of the AI rooms section passes
-    /// both checks. A logo that does not fit into the storage quota also returns 402. The call returns 403 if `quota` is set while
-    /// room quotas are turned off, or is over the portal limit. It also returns 403 for a public room while the portal
-    /// forbids external sharing. A private room also returns 403 if the caller has no encryption keys. A Knowledge room
-    /// returns 403 while vectorization is turned off. If `logo.tmpFile` names no uploaded picture, or one already used,
-    /// the call returns 404.
+    /// Creates a room in the Rooms section and returns it. The call creates an Instructions room, a Knowledge room, or
+    /// an AI project in the AI rooms section instead. You cannot change `roomType` after this call. Requires a DocSpace
+    /// admin or a room admin. Other callers get 403. A user or a guest gets 402 instead of 403 while the room limit is
+    /// reached or the tariff is restricted. This does not apply to a room of the AI rooms section. The call changes
+    /// data. Do not repeat it. Each call creates another room. A repeat with the same `logo` returns 404 but still
+    /// creates a room. That room has no logo, tags, or primary external link. The call adds the tag names that the
+    /// portal does not have yet. A public room and a form filling room get a primary external link. To invite members,
+    /// use `PUT api/2.0/files/rooms/{id}/share` after this call. The call returns 400 if `title` is blank, `cover` is
+    /// unknown, or `share` is not empty. It also returns 400 if `private` is set together with `indexing`, a lifetime,
+    /// or a watermark. A room of the AI rooms section also returns 400 with settings that do not apply to its type. The
+    /// call returns 402 if the portal reached the room limit of its plan. It also returns 402 if the tariff is
+    /// restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. A room of the AI rooms section passes both
+    /// checks. A logo that does not fit into the storage quota also returns 402. The call returns 403 if `quota` is set
+    /// while room quotas are turned off, or is over the portal limit. It also returns 403 for a public room while the
+    /// portal forbids external sharing. A private room also returns 403 if the caller has no encryption keys. A
+    /// Knowledge room returns 403 while vectorization is turned off. If `logo.tmpFile` names no uploaded picture, or
+    /// one already used, the call returns 404.
     /// </remarks>
     /// <summary>Create a room</summary>
     /// <path>api/2.0/files/rooms</path>
@@ -143,16 +145,17 @@ public class VirtualRoomsInternalController(
     }
 
     /// <remarks>
-    /// Starts a job that creates a room in the Rooms section from a room template. Requires read access to the
-    /// template and the right to create rooms. Other callers get 403. A user or a guest cannot create rooms. The call
-    /// queues work and returns the progress record of the job. The room does not exist yet when the response arrives.
-    /// Repeat `GET api/2.0/files/rooms/fromtemplate/status` until `isCompleted` is true. Then take `roomId` from it. A
+    /// Starts a job that creates a room in the Rooms section from a room template. Requires read access to the template
+    /// and the right to create rooms. Other callers get 403. A user or a guest cannot create rooms. The call queues
+    /// work and returns the progress record of the job. The room does not exist yet when the response arrives. Repeat
+    /// `GET api/2.0/files/rooms/fromtemplate/status` until `isCompleted` is true. Then take `roomId` from it. A
     /// non-empty `error` means that the job failed. The job fails if the template is a public room while the portal
-    /// forbids external sharing. The portal keeps one job record per account. Starting a new job deletes the record of
-    /// a finished one. Wait for the running job to end before you start the next one. Settings that the body leaves
-    /// out come from the template. With `copyLogo`, the call ignores `logo`. The call returns 400 if `title` is blank.
-    /// It returns 403 if `quota` is set while the quota for this kind of room is turned off. If no room template has
-    /// the `templateId`, the call returns 404.
+    /// forbids external sharing. It also fails if the portal reached the room limit of its plan. The same holds if the
+    /// tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. The portal keeps one job record per
+    /// account. Starting a new job deletes the record of a finished one. Wait for the running job to end before you
+    /// start the next one. Settings that the body leaves out come from the template. With `copyLogo`, the call ignores
+    /// `logo`. The call returns 400 if `title` is blank. It returns 403 if `quota` is set while the quota for this kind
+    /// of room is turned off. If no room template has the `templateId`, the call returns 404.
     /// </remarks>
     /// <summary>Create a room from the template</summary>
     /// <path>api/2.0/files/rooms/fromtemplate</path>
@@ -366,18 +369,17 @@ public class VirtualRoomsThirdPartyController(
     /// Creates a room in the Rooms section from a folder of a connected third-party storage account. The files of the
     /// room stay in that storage. First, connect the storage account for rooms with `POST api/2.0/files/thirdparty`.
     /// Requires a DocSpace admin or a room admin who connected this storage account. Other callers get 403. The call
-    /// changes data. One storage account backs only one room. So a repeated call returns 403. With
-    /// `createAsNewFolder`, the room is a new subfolder named after `title`. Otherwise the folder from the path
-    /// becomes the room, and the call ignores `tags` and `logo`. The call ignores `indexing` and `denyDownload` in
-    /// both modes. A public room and a form filling room get a primary external link. To read it, use
-    /// `GET api/2.0/files/rooms/{id}/link`. The call returns 400 if the storage account is not connected. It returns
-    /// 402 if the portal reached the room limit of its plan. It also returns 402 if the tariff is restricted, as
-    /// `restricted` of `GET api/2.0/portal/tariff` shows. It returns 403 if the storage
-    /// account was not connected for rooms. It also returns 403 for a public room while the portal forbids external
-    /// sharing. A room type of the AI rooms section also returns 403. With `createAsNewFolder`, a subfolder that
-    /// cannot be created also returns 403. If a storage other than SharePoint is full, the call can return 400
-    /// instead. The user has to free up space there first. If `id` is not a folder of a connected storage account,
-    /// the call returns 404.
+    /// changes data. One storage account backs only one room. So a repeated call returns 403. With `createAsNewFolder`,
+    /// the room is a new subfolder named after `title`. Otherwise the folder from the path becomes the room, and the
+    /// call ignores `tags` and `logo`. The call ignores `indexing` and `denyDownload` in both modes. A public room and
+    /// a form filling room get a primary external link. To read it, use `GET api/2.0/files/rooms/{id}/link`. The call
+    /// returns 400 if the storage account is not connected. It returns 402 if the portal reached the room limit of its
+    /// plan. It also returns 402 if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. It
+    /// returns 403 if the storage account was not connected for rooms. It also returns 403 for a public room while the
+    /// portal forbids external sharing. A room type of the AI rooms section also returns 403. With `createAsNewFolder`,
+    /// a subfolder that cannot be created also returns 403. If a storage other than SharePoint is full, the call can
+    /// return 400 instead. The user has to free up space there first. If `id` is not a folder of a connected storage
+    /// account, the call returns 404.
     /// </remarks>
     /// <summary>Create a third-party room</summary>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>

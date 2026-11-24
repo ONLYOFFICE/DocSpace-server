@@ -208,15 +208,15 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Creates the invitation link of the portal for one role and returns it with the URL to share. If inviting
-    /// members is turned off in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can
-    /// create a link for any role. A DocSpace admin can create the `RoomAdmin` and `User` links, and a room admin
-    /// only the `User` link. Other callers get 403. The call changes data. A role has at most one link, so a repeated
-    /// call returns 400. To change an existing link, use `PUT api/2.0/portal/users/invitationlink`. Without
-    /// `expiration`, the link never expires. Without `maxUseCount`, it has no use limit. The answer has the `id` that
-    /// the update and delete calls need. The call returns 400 for another role, an `expiration` in the past, or a
-    /// `maxUseCount` out of range. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if no paid seat is free.
-    /// It also returns 402 for such a link if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows.
+    /// Creates the invitation link of the portal for one role and returns it with the URL to share. If inviting members
+    /// is turned off in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can create a
+    /// link for any role. A DocSpace admin can create the `RoomAdmin` and `User` links, and a room admin only the
+    /// `User` link. Other callers get 403. The call changes data. A role has at most one link, so a repeated call
+    /// returns 400. To change an existing link, use `PUT api/2.0/portal/users/invitationlink`. Without `expiration`,
+    /// the link never expires. Without `maxUseCount`, it has no use limit. The answer has the `id` that the update and
+    /// delete calls need. The call returns 400 for another role, an `expiration` in the past, or a `maxUseCount` out of
+    /// range. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if no paid seat is free. It also returns 402
+    /// for such a link if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows.
     /// </remarks>
     /// <summary>
     /// Create an invitation link
@@ -286,10 +286,10 @@ public class PortalController(
     /// members is turned off in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can
     /// read every link. A DocSpace admin can read the `RoomAdmin` and `User` links, and a room admin only the `User`
     /// link. Other callers get 403. The call is read-only. If the role has no link yet, the call returns 200 with no
-    /// link. To create one, use `POST api/2.0/portal/users/invitationlink`. The call returns 400 for a role other
-    /// than `DocSpaceAdmin`, `RoomAdmin`, or `User`. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if no
-    /// paid seat is free. It also returns 402 for such a link if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. It returns 402 even
-    /// when the role has no link.
+    /// link. To create one, use `POST api/2.0/portal/users/invitationlink`. The call returns 400 for a role other than
+    /// `DocSpaceAdmin`, `RoomAdmin`, or `User`. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if no paid
+    /// seat is free. It also returns 402 for such a link if the tariff is restricted, as `restricted` of
+    /// `GET api/2.0/portal/tariff` shows. It returns 402 even when the role has no link.
     /// </remarks>
     /// <summary>
     /// Get an invitation link by role
@@ -550,9 +550,9 @@ public class PortalController(
     /// other fields. The portal owner and DocSpace admins have this permission. The call is read-only and also works
     /// while the portal is unpaid. With `refresh` set to `true`, the call reads the tariff from billing, not from the
     /// cache. If the tariff is in the grace period, the call also reads the billing customer again. Without
-    /// `refresh`, a change of the payment method takes up to 15 minutes to reach `restricted`. It can take longer if
-    /// billing does not answer or a background read caches the tariff first. To see what the next period costs, use
-    /// `GET api/2.0/portal/tariff/upcoming`.
+    /// `refresh`, `restricted` follows the billing customer as the portal last read it. The portal reads the customer
+    /// again after its 10-minute cache, when a call needs it. Until then, a change of the payment method does not
+    /// show. To see what the next period costs, use `GET api/2.0/portal/tariff/upcoming`.
     /// </remarks>
     /// <summary>
     /// Get the portal tariff

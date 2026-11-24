@@ -72,8 +72,9 @@
   balance to the wallet".
 - [x] 4.9 Tests citing the modified "Reading the tariff" (`BT/Tariff/TariffRoleTests.cs:45-101`,
   `web/ASC.Web.Api.Tests/.../Quota/PortalTariffTests.cs:41-62`, `Quota/PortalTariffPermissionsTests.cs:47-77`):
-  assert `restricted` false on a paid plan, once the SDK carries the field (raw JSON until then). Done with the
-  regenerated C# SDK (`TariffDto.Restricted`), `GracePeriodTests` moved off raw JSON too. A missing field reads as
+  assert `restricted` false on a paid plan, once the SDK carries the field (raw JSON until then). Done with a
+  local build of the regenerated C# SDK package (`TariffDto.Restricted`, `.nuget/packages`), `GracePeriodTests`
+  moved off raw JSON too; the SDK submodule pointers are not moved in this branch. A missing field reads as
   false, so the guard that every role gets it is a new case of `TariffRoleTests`: in a grace period with a card the
   owner, a Room admin, a User and a Guest read `restricted` true.
 - [x] 4.10 Update the CODE-ONLY rows that describe the grace period refusals (`billing` "Payment gate…" grace row,
@@ -91,6 +92,15 @@
   the client and of the last answer); a refresh whose tariff enters the grace period only after the payments are
   read again reads the customer from billing, as saving the tariff drops the cached customer (billing suite); a read of a cached tariff, before the tariff lock or after waiting for
   it, asks no billing and takes no customer lock (unit test through `GetTariffAsync`).
+- [x] 4.14 Second review round: "cannot find" under 408 or 429 is an unknown outcome too (`BillingClient`, unit
+  theory); when the earlier last answer cannot be read, `change-tariff` is queued once the new answer is kept, the
+  read asking FusionCache to report a failure of the distributed level (unit tests with a failing read and with a
+  failing distributed cache); the texts of `restricted`, `getPortalTariff`, the 402 texts of the member, owner,
+  product-admin, room and room-from-template operations, and `createAgent` name the transitions that are refused.
+- [ ] 4.15 Billing suite: a payments request answered "cannot find" under 500, 408 and 429 leaves a paid tariff's
+  due date as it was (scenario "Not-found answer under a failing status"). Not done: the billing suite could not
+  be built in this round, as the shared NuGet cache held another checkout's `DocSpace.API.SDK` package without
+  `restricted`; the client mapping is covered by the unit theory, the tariff path is read from the code.
 
 ## 5. Checks
 
@@ -109,6 +119,7 @@
 
 ## Workflow follow-up
 
-- Regenerate the OpenAPI documents and the SDKs (`generate-sdk`) so `TariffDto` carries `restricted`.
+- Commit the regenerated SDK submodules (`sdk/docspace-api-sdk-csharp`, `sdk/docspace-api-spec`) and move their
+  pointers; the OpenAPI documents and the package in `.nuget/packages` are regenerated in this branch.
 - Tell the frontend: show the grace period by `state`, disable controls by `restricted`, re-read on `change-tariff`.
 - Archive the change after the merge (`openspec-archive-change`).

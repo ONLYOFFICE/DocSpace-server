@@ -13,9 +13,9 @@ See proposal.md (Why). Facts the design builds on:
   (`billing`, "Payment gate while the portal is not paid") reads another helper and is left alone.
 - `getCustomerInfo` (`billing`, "Billing account page and payment method") already reads `isDelayedPaymentMethod`
   from billing and keeps the answer in the distributed cache for 10 minutes. After a failure it keeps an empty
-  answer for 10 minutes. For a portal that is not its customer billing answers "error: cannot find" with 200 OK,
-  which the client raises as a not-found billing error and which the cache keeps as the same empty answer. The
-  same body under a 5xx is an ordinary billing failure, an unknown outcome; under a 4xx it stays billing's answer.
+  answer for 10 minutes. For a portal that is not its customer billing answers "error: cannot find" with 200 OK
+  (as the client's comment and the test stub say; not checked against the billing service), which the client
+  raises as a not-found billing error and which the cache keeps as the same empty answer.
 
 ## Goals / Non-Goals
 
@@ -72,10 +72,19 @@ See proposal.md (Why). Facts the design builds on:
    one (an absent value counts as false), `change-tariff` is sent to the portal's quota room, best effort, after
    the key is written. The tariff is not read at that point: the customer read can run inside the tariff
    computation, which holds the tariff lock, and a tariff read there would wait on it. The event is sent in
-   the free lane, since the state is not known there.
+   the free lane, since the state is not known there. When the stored answer cannot be read, the event is sent
+   once the new answer is kept: an extra nudge costs the clients one tariff read, a missed one leaves them with a
+   stale tariff. The read asks FusionCache to report a failure of the distributed level, which it otherwise takes
+   for a missing value, that is for a card.
 
 4. **`restricted` is part of the tariff response for every member**, next to `state`, filled from
    `IsRestricted`. The other fields keep their role grading.
+
+5. **A "cannot find" under a 5xx, 408 or 429 is an unknown outcome.** The client raises the not-found error only
+   for a "cannot find" under 2xx or another 4xx; under these statuses it is an ordinary billing failure, so it
+   writes no last answer. The rule is in the client, so every caller follows it: a payments read whose "cannot
+   find" comes with such a status no longer moves a paid tariff to yesterday ("Tariff of a hosted portal follows
+   the billing service"), and `getDepositInvoice` answers 402 instead of 404 under such a status.
 
 ## Risks / Trade-offs
 
@@ -85,11 +94,15 @@ See proposal.md (Why). Facts the design builds on:
   once per 10 minutes per portal, on every call with `refresh`, and after a saved change of the tariff] → it adds to a billing call that read makes
   anyway, so readers waiting for the lock wait for both calls when billing is slow; reads of a cached tariff, the
   payment gate among them, never ask; paid portals never ask.
-- [A switch of the payment method takes effect within 15 minutes: the customer cache, then the tariff cache] →
-  `getCustomerInfo` or `getPortalTariff` with `refresh=true` applies it at once; stated in the spec. The 15 minutes
-  hold while billing answers and the tariff, once its entry expires, is read by a read that asks billing: a read
-  without a request to the payment system (the audit trail cleaner) caches the tariff for 5 more minutes without
-  asking. When the last answer cannot be written, no `change-tariff` is queued, and the event itself is best-effort.
+- [A switch of the payment method takes effect only once the customer is read again after its 10-minute cache] →
+  every tariff read, a cached one included, works the state out again from the cached customer, so the first call
+  that reads the customer after the cache expired applies the switch: opening a document, an AI call, the payment
+  pages, `getCustomerInfo`, or a tariff read that asks billing in the grace period. The payment gate of every
+  request reads the tariff without asking billing (`IsNotPaidAsync(false)`), so on a portal where no call reads the
+  customer, the answer is not renewed, and one paying by SEPA with no remembered answer stays restricted until a
+  call does. `getCustomerInfo` or `getPortalTariff` with `refresh=true` applies it at once; stated in the spec.
+  Asking billing on the gate's misses was declined by decision, to keep billing off the payment gate. When the last answer cannot be written, no `change-tariff` is
+  queued, and the event itself is best-effort.
 - [The last answer expires the grace days plus one after it was given] → billing silent since before the grace
   period started restricts the portal once it expires, as with no answer at all; stated in the spec. No
   `change-tariff` is sent for the expiry: clients see it on their next tariff read.

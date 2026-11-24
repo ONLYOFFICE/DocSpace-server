@@ -109,9 +109,18 @@ public class AgentsController(
     }
 
     /// <remarks>
-    /// Creates an ai agent. The call returns 402 if the portal reached the AI agent limit of its plan. It also returns
-    /// 402 if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. A logo that does not fit
-    /// into the storage quota also returns 402.
+    /// Creates an AI agent in the AI Agents section and returns it. Requires a room admin, a DocSpace admin or the
+    /// portal owner. Other callers get 403. A user or a guest gets 402 instead of 403 while the AI agent limit is
+    /// reached or the tariff is restricted. The call changes data, and a repeated call creates another agent. The call
+    /// ignores the members in `share`. To invite them, use `PUT api/2.0/files/rooms/{id}/share` after this call. The
+    /// call returns 400 if the body cannot be read, or `title` is blank or too long. It also returns 400 for a
+    /// malformed address in `share`, or for more addresses than the portal allows at once. The call returns 402 if the
+    /// portal reached the AI agent limit of its plan. It also returns 402 if the tariff is restricted, as `restricted`
+    /// of `GET api/2.0/portal/tariff` shows. A logo that does not fit into the storage quota also returns 402. The call
+    /// returns 403 if `private` is set and the caller has no encryption keys. It also returns 403 if `quota` is set
+    /// while the AI agent quota is turned off. A `quota` over the portal limit also returns 403. If `logo.tmpFile`
+    /// names no uploaded picture, or one already used, the call returns 404. A `logo.width` or `logo.height` above
+    /// 2147483647 returns 500.
     /// </remarks>
     /// <summary>Create an ai agent</summary>
     /// <path>api/2.0/ai/agents</path>

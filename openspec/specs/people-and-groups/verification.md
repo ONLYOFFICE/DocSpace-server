@@ -73,7 +73,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Roles Activation, EmailActivation; list must be the caller alone, else 400; welcome letter once | `User:2117-2159` | CODE-ONLY (unreachable: the confirmation key arrives only in a letter) |
 | **Who may start an email change** | | |
 | Allowed pairs | `E/EmailChangeInstructionsTests.cs:43-55,124-134` | TEST-CONFIRMED [run: PASS] |
-| DocSpace admin on a Guest: 200 (the web client offers "Change email" too) | live check 2026-11-14 on the `test` stand; `products/ASC.People/Server/Api/UserController.cs:1883-1897` (only an admin target needs the Owner) | LIVE-CONFIRMED |
+| DocSpace admin on a Guest: 200 (the web client offers "Change email" too) | live check 2026-11-14 on the `test` stand; `products/ASC.People/Server/Api/UserController.cs:1886-1900` (only an admin target needs the Owner) | LIVE-CONFIRMED |
 | Denied pairs 403 "Access denied" | `E/EmailChangeInstructionsPermissionsTests.cs:42-73` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | `E/EmailChangeInstructionsPermissionsTests.cs:134` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Immediate change versus instructions** | | |

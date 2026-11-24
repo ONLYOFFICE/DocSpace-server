@@ -187,4 +187,4 @@ D-numbers are the ones of `openspec/deviations.md`; R-numbers are new.
 | Claim | Source | Status |
 |---|---|---|
 | Public room: auto-created external link, primary true; custom room empty by default; `type` external / invitation / none | `products/ASC.Files/Tests/Tests/03_Rooms/Links/RoomLinkReadTests.cs:50,67,83,173,193,213` | TEST-CONFIRMED [run: PASS] (by name) |
-| Read access required (403), unknown room 404, member without the link right gets an empty list, at most 100, paging ignored | `products/ASC.Files/Server/Api/VirtualRoomsController.cs:905-926`; yaml `getRoomLinks` | CODE-ONLY |
+| Read access required (403), unknown room 404, member without the link right gets an empty list, at most 100, paging ignored | `products/ASC.Files/Server/Api/VirtualRoomsController.cs:907-928`; yaml `getRoomLinks` | CODE-ONLY |

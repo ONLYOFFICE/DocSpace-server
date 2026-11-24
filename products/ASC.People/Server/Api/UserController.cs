@@ -240,10 +240,11 @@ public class UserController(
     /// emailed, a repeat returns 403. If `password` breaks the portal password policy, the call returns 400. It also
     /// returns 400 if the first and last names are not valid. Without `password` and `passwordHash`, the portal sets a
     /// random password that nobody knows. Without a free paid seat, the call creates a user instead. If the user limit
-    /// is also reached, it returns 402. So check the type flags of the returned profile, such as `isRoomAdmin`. The
-    /// call also downloads the avatar from `files`. If the portal refuses that URL, the call returns 403 and creates no
-    /// account. If its server returns an error, the call also returns 403. Any failed download keeps the created
-    /// account. To invite several people by email, use `POST api/2.0/people/invite`.
+    /// is also reached, it returns 402. So check the type flags of the returned profile, such as `isRoomAdmin`. If the
+    /// tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows, creating an account of any type
+    /// returns 402. The call also downloads the avatar from `files`. If the portal refuses that URL, the call returns
+    /// 403 and creates no account. If its server returns an error, the call also returns 403. Any failed download keeps
+    /// the created account. To invite several people by email, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Add a user
@@ -253,6 +254,7 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The new profile with its detailed information", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The password does not meet the portal password policy")]
+    [SwaggerResponse(402, "No user seat is left for the new account after a paid type fell back to a user, or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows")]
     [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
@@ -431,19 +433,20 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Invites people to the portal by email. For each new address, the call creates a pending account and emails it
-    /// an invitation link. Requires a room admin or a DocSpace admin. Other callers get 403. Only a DocSpace admin
-    /// can invite a room admin, and only the portal owner can invite a DocSpace admin. The `Guest` type and a portal
-    /// that does not allow inviting members also return 403. For an address that already has an account, the call
-    /// sends no email. It links that account to the caller and raises its type if needed. The call changes data. A
-    /// repeated call sends no new emails, since the accounts then exist. Its seat check still counts each room admin
-    /// and DocSpace admin in the body. So a repeat can return 402. If the pending account was deleted, a new invitation
-    /// to its address soon after the first sends no email. The first link still works. If the invitations need more
-    /// paid seats than the tariff has left, the call returns 402 and sends nothing. The call returns 400 for a
-    /// malformed or punycode address, or for the address of a disabled account. The call handles the addresses in
-    /// order. So a 400 or 403 in the middle leaves the earlier invitations sent. The call returns every pending account
-    /// that the caller can see, not only the new ones. The portal limits the rate of these calls. To send an invitation
-    /// again, use `PUT api/2.0/people/invite`.
+    /// Invites people to the portal by email. For each new address, the call creates a pending account and emails it an
+    /// invitation link. Requires a room admin or a DocSpace admin. Other callers get 403. Only a DocSpace admin can
+    /// invite a room admin, and only the portal owner can invite a DocSpace admin. The `Guest` type and a portal that
+    /// does not allow inviting members also return 403. For an address that already has an account, the call sends no
+    /// email. It links that account to the caller and raises its type if needed. The call changes data. A repeated call
+    /// sends no new emails, since the accounts then exist. Its seat check still counts each room admin and DocSpace
+    /// admin in the body. So a repeat can return 402. If the pending account was deleted, a new invitation to its
+    /// address soon after the first sends no email. The first link still works. If the invitations need more paid seats
+    /// than the tariff has left, the call returns 402 and sends nothing. It also returns 402 if the tariff is
+    /// restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. The call returns 400 for a malformed or
+    /// punycode address, or for the address of a disabled account. The call handles the addresses in order. So a 400 or
+    /// 403 in the middle leaves the earlier invitations sent. The call returns every pending account that the caller
+    /// can see, not only the new ones. The portal limits the rate of these calls. To send an invitation again, use
+    /// `PUT api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Invite users
@@ -454,7 +457,7 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Every pending profile the caller may see, not only the ones just invited", typeof(List<EmployeeDto>))]
     [SwaggerResponse(400, "An address is malformed or written in punycode, or it belongs to a disabled account")]
-    [SwaggerResponse(402, "The invitations would need more paid seats than the tariff has left")]
+    [SwaggerResponse(402, "The invitations would need more paid seats than the tariff has left, or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("invite")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
@@ -2136,7 +2139,8 @@ public class UserController(
     /// names and location. If the names are not valid, the call returns 400. With `disable` set to true, the account
     /// gets the `Terminated` status, and its sessions end. Deletion with `DELETE api/2.0/people/{userId}` requires this
     /// status. With `isUser` set to true, the account becomes a guest, and false makes it a user again. If the tariff
-    /// or quota has no free seat for this, the call returns 402. The call ignores a request to make the portal owner, a
+    /// or quota has no free seat for this, the call returns 402. It also returns 402 if the tariff is restricted, as
+    /// `restricted` of `GET api/2.0/portal/tariff` shows. The call ignores a request to make the portal owner, a
     /// DocSpace admin, or a module admin a guest. If the portal refuses the `files` URL or its server returns an error,
     /// the call returns 403. If no account has the ID, the call returns 404. The call changes data. You can repeat it
     /// with the same body. It returns the profile after the update. To change the language, use
@@ -2151,7 +2155,7 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The first and last name pair is not a valid user name")]
-    [SwaggerResponse(402, "The tariff or the user quota does not allow the requested guest or member seat")]
+    [SwaggerResponse(402, "The tariff or the user quota does not allow the requested guest or member seat, or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows")]
     [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status")]
     [SwaggerResponse(404, "No user has the specified ID")]
     [HttpPut("{userId}", Order = 1)]
@@ -2326,10 +2330,11 @@ public class UserController(
     /// get 403. The call checks the whole list before it changes anything. If the list has a system or LDAP account,
     /// the portal owner, or the caller, the call returns 403. Only the portal owner can change a DocSpace admin. The
     /// call changes data. You can repeat it with the same body. Disabling ends all sessions of the account and frees
-    /// its seat. Enabling takes a seat again. If the tariff or quota has no free seat, the call returns 402. The call
-    /// enables the accounts one by one, so a 402 leaves the earlier ones enabled. Enabling changes only disabled
-    /// accounts. An account with no name and an unused invitation becomes `Pending`, not `Active`. So check `status` in
-    /// the response. Deletion with `DELETE api/2.0/people/{userId}` requires the `Terminated` status.
+    /// its seat. Enabling takes a seat again. If the tariff or quota has no free seat, the call returns 402. It also
+    /// returns 402 if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. The call enables
+    /// the accounts one by one, so a 402 leaves the earlier ones enabled. Enabling changes only disabled accounts. An
+    /// account with no name and an unused invitation becomes `Pending`, not `Active`. So check `status` in the
+    /// response. Deletion with `DELETE api/2.0/people/{userId}` requires the `Terminated` status.
     /// </remarks>
     /// <summary>
     /// Change a user status
@@ -2340,7 +2345,7 @@ public class UserController(
     [Tags("People / User status")]
     [SwaggerResponse(200, "The listed accounts with their statuses after the change", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The requested status is neither Active nor Terminated")]
-    [SwaggerResponse(402, "The tariff or the user quota does not allow enabling one more account")]
+    [SwaggerResponse(402, "The tariff or the user quota does not allow enabling one more account, or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows")]
     [SwaggerResponse(403, "No permissions to perform this action, or the list names a system, LDAP, owner, self or DocSpace admin account")]
     [HttpPut("status/{status}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserStatus(UpdateMemberStatusRequestDto inDto)
@@ -2463,16 +2468,17 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes the type of the listed accounts to the type in the route. Only these changes work: a guest to `User`,
-    /// a user or guest to `RoomAdmin`, and any account to `DocSpaceAdmin`. The portal owner can also make a DocSpace
+    /// Changes the type of the listed accounts to the type in the route. Only these changes work: a guest to `User`, a
+    /// user or guest to `RoomAdmin`, and any account to `DocSpaceAdmin`. The portal owner can also make a DocSpace
     /// admin a `RoomAdmin`. Any other change returns 403, including any change to `Guest`. A room admin can make a
     /// guest a `User`. Only a DocSpace admin can set `RoomAdmin`, and only the portal owner can set `DocSpaceAdmin`.
     /// Other callers get 403. Nobody can change their own type or the type of the portal owner. The caller must see
     /// each account, and no account can be disabled. Otherwise the call returns 403. The call changes data, and a
     /// repeated call returns 403. It emails each changed account. An account that got an email about the same type
-    /// recently gets no new one. The call changes the accounts one by one, so an error in the middle leaves the
-    /// earlier ones changed. A paid type takes a paid seat. If the tariff has no free paid seat, the call returns
-    /// 402. If `userIds` is missing, the call returns 400. The call does not move rooms or shared files. To move them
+    /// recently gets no new one. The call changes the accounts one by one, so an error in the middle leaves the earlier
+    /// ones changed. A paid type takes a paid seat. If the tariff has no free paid seat, the call returns 402. A change
+    /// to a paid type also returns 402 if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff`
+    /// shows. If `userIds` is missing, the call returns 400. The call does not move rooms or shared files. To move them
     /// in the same step, use `POST api/2.0/people/type`.
     /// </remarks>
     /// <summary>
@@ -2484,7 +2490,7 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "The converted users with their detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userIds`")]
-    [SwaggerResponse(402, "The tariff or the paid-user quota does not allow one more paid user")]
+    [SwaggerResponse(402, "The tariff or the paid-user quota does not allow one more paid user, or a change to a paid type meets a restricted tariff, as `restricted` of `GET api/2.0/portal/tariff` shows")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("type/{type}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserType(UpdateMemberTypeRequestDto inDto)

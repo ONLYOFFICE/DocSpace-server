@@ -5,7 +5,7 @@
 ### Requirement: Grace period of a delayed payment method
 
 A hosted portal in the grace period SHALL be restricted unless its billing customer pays by a delayed method
-(`isDelayedPaymentMethod` of `getCustomerInfo`). A restricted tariff refuses what the grace period refuses; an
+(`isDelayedPaymentMethod` of `getCustomerInfo`, as billing last reported it). A restricted tariff refuses what the grace period refuses; an
 unrestricted one SHALL let those actions through as a paid tariff does, keeping `state` Delay, `delayDueDate`,
 the grace letters and the payment URL. NotPaid and the grace period of a self-hosted installation SHALL always be
 restricted.
@@ -35,10 +35,10 @@ restricted.
 ### Requirement: Delayed payment method when billing does not answer
 
 Without a customer answer, the last answer of billing for the portal SHALL decide for the grace days plus one
-after it was given, while the distributed cache answers; with none, the grace period SHALL be restricted. While
-billing answers, a changed answer SHALL take effect within 15 minutes unless a read not asking billing caches
-the tariff first, at once after `getCustomerInfo` or `getPortalTariff` with `refresh=true`, and SHALL queue
-`change-tariff` to the portal's quota room once remembered.
+after it was given, while the distributed cache answers; with none, the grace period SHALL be restricted. A
+changed answer SHALL take effect once a call reads the customer again after its 10-minute cache, at once after
+`getCustomerInfo` or `getPortalTariff` with `refresh=true`, and SHALL queue `change-tariff` to the portal's
+quota room once remembered.
 
 #### Scenario: Billing fails after a delayed answer
 
@@ -53,7 +53,7 @@ the tariff first, at once after `getCustomerInfo` or `getPortalTariff` with `ref
 #### Scenario: Customer switches to a delayed payment method
 
 - **WHEN** the billing customer of a portal in the grace period switches from card to a delayed payment method and a DocSpace admin calls `getCustomerInfo` with `refresh=true`
-- **THEN** the portal's clients receive `change-tariff` and `getPortalTariff` reports `restricted` false
+- **THEN** `change-tariff` is queued for the portal's quota room and `getPortalTariff` reports `restricted` false
 
 #### Scenario: Refresh of the tariff after a switch
 
@@ -95,6 +95,24 @@ portal-settings right also `id`, `customerId`, `licenseDate`, `openSource`, `ent
 
 - **WHEN** a Room admin, a User or a Guest calls `getPortalTariff`
 - **THEN** the system answers 200 with `id` 0, `state` Paid and `restricted` false, and no `customerId` or `quotas`
+
+### Requirement: Tariff of a hosted portal follows the billing service
+
+On a hosted portal with a billing service the tariff SHALL be re-read from the payments of the billing
+customer when the cache expires or `refresh=true` is passed: the paid quotas with their quantities, the
+payer e-mail as `customerId` and the due date of the earliest payment. When billing stops reporting the
+payment of a paid, non-free tariff (a refund), the due date SHALL become yesterday so the portal enters the
+grace period; a portal with no payment and no free quota SHALL become NotPaid.
+
+#### Scenario: Refund
+
+- **WHEN** the billing service stops reporting the payment of a portal on a priced plan
+- **THEN** the tariff's due date becomes yesterday and the portal is in the grace period on the next read
+
+#### Scenario: Not-found answer under a failing status
+
+- **WHEN** the billing service answers the payments request of a portal on a priced plan with "error: cannot find" under a 5xx, 408 or 429
+- **THEN** the answer counts as a billing failure, not as a stop of reporting, and the tariff keeps its due date
 
 ### Requirement: Payment gate while the portal is not paid
 
