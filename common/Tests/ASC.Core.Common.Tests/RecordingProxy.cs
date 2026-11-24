@@ -41,16 +41,19 @@ namespace ASC.Core.Common.Tests;
 public class RecordingProxy<T> : DispatchProxy where T : class
 {
     private T? _inner;
+    private Action<MethodInfo, object?[]>? _onCall;
 
     /// <summary>The calls in the order they were made: the member and its arguments.</summary>
     public List<(MethodInfo Method, object?[] Args)> Calls { get; } = [];
 
     /// <param name="inner">The implementation every call is passed to; null fails each call after recording it.</param>
-    public static (T Proxy, RecordingProxy<T> Recorder) Create(T? inner)
+    /// <param name="onCall">Runs after a call is recorded and before it is passed on: what another request does meanwhile.</param>
+    public static (T Proxy, RecordingProxy<T> Recorder) Create(T? inner, Action<MethodInfo, object?[]>? onCall = null)
     {
         var proxy = Create<T, RecordingProxy<T>>();
         var recorder = (RecordingProxy<T>)(object)proxy;
         recorder._inner = inner;
+        recorder._onCall = onCall;
 
         return (proxy, recorder);
     }
@@ -59,6 +62,7 @@ public class RecordingProxy<T> : DispatchProxy where T : class
     {
         ArgumentNullException.ThrowIfNull(targetMethod);
         Calls.Add((targetMethod, args ?? []));
+        _onCall?.Invoke(targetMethod, args ?? []);
 
         if (_inner is null)
         {

@@ -1196,8 +1196,8 @@ public class TariffService(
 
     // askBilling: the read already asks billing (a missed or refreshed tariff read with a request to the payment
     // system, each of its calculations), so in the grace period it may ask for the customer too; any other read decides
-    // from the cached customer or the last answer of billing. refresh is passed to the first calculation only, so one
-    // read asks billing for the customer at most once.
+    // from the cached customer or the last answer of billing. refresh is passed to the first calculation only: a later
+    // one follows a saved change of the tariff, which drops the cached customer, so it reads the customer from billing.
     private async Task<Tariff> CalculateTariffAsync(int tenantId, Tariff tariff, bool askBilling = false, bool refresh = false)
     {
         tariff.State = TariffState.Paid;

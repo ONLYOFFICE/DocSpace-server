@@ -151,12 +151,13 @@ internal static class PaymentStubs
         IServiceProvider? serviceProvider = null,
         IDistributedLockProvider? distributedLockProvider = null,
         DocsCloudClient? docsCloudClient = null,
-        ResiliencePipelineProvider<string>? resiliencePipelineProvider = null)
+        ResiliencePipelineProvider<string>? resiliencePipelineProvider = null,
+        CoreBaseSettings? coreBaseSettings = null)
     {
         return new TariffService(
             quotaService: null!,
             tenantService: null!,
-            coreBaseSettings: null!,
+            coreBaseSettings: coreBaseSettings!,
             coreSettings: coreSettings!,
             configuration: configuration!,
             coreDbContextManager: null!,

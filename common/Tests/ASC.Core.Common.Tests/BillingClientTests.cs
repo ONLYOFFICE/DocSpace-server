@@ -268,6 +268,23 @@ public class BillingClientTests
         handler.CallCount.Should().Be(1);
     }
 
+    [Theory]
+    [InlineData(HttpStatusCode.OK, true)]
+    [InlineData(HttpStatusCode.NotFound, true)]
+    [InlineData(HttpStatusCode.InternalServerError, false)]
+    [InlineData(HttpStatusCode.BadGateway, false)]
+    public async Task CannotFindErrorBody_IsAnAnswerUnlessTheStatusIsAServerError(HttpStatusCode status, bool answer)
+    {
+        // The callers take "cannot find" as "no customer, no payments, no invoice" and act on it. Billing gives it with
+        // 200 OK, and a 4xx is billing's answer too; under a 5xx the body says nothing certain about the portal.
+        var (client, _) = CreateBillingClient(_ => Reply(status, """{"Message":"error: cannot find portal"}"""));
+
+        var act = async () => await client.GetCustomerInfoAsync("portal-1");
+
+        var thrown = (await act.Should().ThrowAsync<BillingException>()).Which;
+        thrown.Should().BeOfType(answer ? typeof(BillingNotFoundException) : typeof(BillingException));
+    }
+
     [Fact]
     public async Task OtherErrorBody_ThrowsBillingException_CaseInsensitive()
     {

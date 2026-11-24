@@ -674,9 +674,12 @@ public static class BillingHttpClientExtension
             return new BillingPromoCodeException(reason);
         }
 
+        // Callers take "cannot find" as an answer (no customer, no payments, no invoice). Billing gives it with 200 OK;
+        // a 4xx is still billing's answer about the request, but under a 5xx the outcome is unknown, so the same body
+        // is an ordinary billing failure there.
         if (content.StartsWith(ErrorMarker, StringComparison.OrdinalIgnoreCase))
         {
-            return content.Contains(NotFoundMarker)
+            return (int)response.StatusCode < 500 && content.Contains(NotFoundMarker)
                 ? new BillingNotFoundException(content)
                 : new BillingException(content);
         }

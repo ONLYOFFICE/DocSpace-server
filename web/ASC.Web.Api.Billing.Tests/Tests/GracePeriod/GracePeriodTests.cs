@@ -200,6 +200,31 @@ public class GracePeriodTests(AspireAppFixture fixture) : GracePeriodTestBase(fi
     }
 
     [Fact]
+    public async Task GracePeriod_EnteredByTheRefreshAfterASwitchToADelayedPaymentMethod_IsNotRestricted()
+    {
+        // Arrange: a paid plan whose customer pays by card, both read and cached. The tariff goes first: saving it
+        // drops the cached customer, so the customer read after it is the one in the cache when the Act starts.
+        Payments.Paid(Plans.AdminProductId, quantity: 10, DateTime.UtcNow.Date.AddYears(1), Owner.Email).Customer(Owner.Email);
+        (await ReadTariffAsync()).State.Should().Be(TariffState.Paid);
+        await RefreshCustomerAsync();
+        var customerCallsBefore = CustomerCalls();
+        await _paymentApi.GetCustomerInfoAsync(false, TestContext.Current.CancellationToken);
+        CustomerCalls().Should().Be(customerCallsBefore, "the card is cached");
+
+        // Act: the plan lapsed and the customer moved to SEPA. The stored tariff is still paid, so the read enters the
+        // grace period only once it has read the payments again; saving that tariff drops the cached card, so the
+        // calculation that needs the customer reads it from billing.
+        Payments.Paid(Plans.AdminProductId, quantity: 10, DateTime.UtcNow.Date.AddDays(-2), Owner.Email)
+            .Customer(Owner.Email, delayedPaymentMethod: true);
+        var (state, restricted) = await ReadTariffAsync(refresh: true);
+
+        // Assert
+        CustomerCalls().Should().Be(customerCallsBefore + 1, "the refresh reads the customer when the tariff enters the grace period");
+        state.Should().Be(TariffState.Delay);
+        restricted.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task PaidPlan_IsNotRestricted()
     {
         // Arrange

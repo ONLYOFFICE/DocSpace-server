@@ -66,8 +66,9 @@ public sealed class TariffRestrictionTests
 /// clients of the portal to read the tariff again.
 /// </summary>
 /// <remarks>
-/// The change event is read from the channel the socket service reads, so no socket service runs. The tariff read
-/// itself needs a database; <see cref="TariffRestrictionTests"/> covers the decision it takes from this answer.
+/// The change event is read from the channel the socket service reads, so no socket service runs. A tariff read that
+/// misses the cache needs a database, so only the read of a cached tariff is run here; <see cref="TariffRestrictionTests"/>
+/// covers the decision the tariff takes from this answer.
 /// </remarks>
 public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
 {
@@ -219,16 +220,21 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
     [Theory]
     [InlineData("unreadable")]
     [InlineData("dropped")]
+    [InlineData("cannot find under 500")]
     public async Task GetCustomerInfoAsync_UnknownOutcomeAfterADelayedAnswer_KeepsTheDelayedAnswer(string outcome)
     {
         _billingAnswer = () => Customer(delayed: true);
         await _tariffService.GetCustomerInfoAsync(TenantId, refresh: true);
         await ShouldHaveSentChangeTariffAsync();
 
-        // A body that is not the customer, or a dropped connection, says nothing about the payment method
-        _billingAnswer = outcome == "unreadable"
-            ? () => Reply(HttpStatusCode.OK, "<html><body>Bad gateway</body></html>")
-            : TransportFault;
+        // A body that is not the customer, a dropped connection, or "cannot find" under a 5xx (billing answers it with
+        // 200 OK) says nothing about the payment method
+        _billingAnswer = outcome switch
+        {
+            "unreadable" => () => Reply(HttpStatusCode.OK, "<html><body>Bad gateway</body></html>"),
+            "dropped" => TransportFault,
+            _ => () => Reply(HttpStatusCode.InternalServerError, """{"Message":"error: cannot find portal"}""")
+        };
         var callsBefore = _billing.CallCount;
         (await _tariffService.GetCustomerInfoAsync(TenantId, refresh: true)).Should().BeNull();
 
@@ -260,6 +266,36 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
         (await _tariffService.IsDelayedPaymentMethodAsync(TenantId)).Should().BeFalse();
 
         _billing.CallCount.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetTariffAsync_CachedTariffInTheGracePeriod_DecidesByTheLastAnswerWithoutAskingBilling(bool cachedWhileWaitingForTheLock)
+    {
+        // The payment gate reads the tariff on every request: a cached one, found before the tariff lock or by a reader
+        // that waited for another to fill it, never asks billing for the customer nor takes the customer lock
+        await _hybridCache.SetAsync(TariffService.GetDelayedPaymentMethodCacheKey(TenantId), true, TimeSpan.FromDays(GraceDays + 1),
+            token: TestContext.Current.CancellationToken);
+        _billingAnswer = () => Customer(delayed: false);
+        var tariffKey = TariffService.GetTariffCacheKey(TenantId);
+
+        if (!cachedWhileWaitingForTheLock)
+        {
+            await _hybridCache.SetAsync(tariffKey, LapsedTariff(), TimeSpan.FromMinutes(5), token: TestContext.Current.CancellationToken);
+        }
+
+        var (locks, lockCalls) = RecordingProxy<IDistributedLockProvider>.Create(new InMemoryLockProvider(),
+            (_, _) => _hybridCache.Set(tariffKey, LapsedTariff(), TimeSpan.FromMinutes(5)));
+        var service = CreateService(_hybridCache, CreateBillingClient(_billing).client, locks);
+
+        var tariff = await service.GetTariffAsync(TenantId);
+
+        tariff.State.Should().Be(TariffState.Delay);
+        tariff.DelayedPaymentMethod.Should().BeTrue("the last answer of billing decides");
+        tariff.IsRestricted.Should().BeFalse();
+        _billing.CallCount.Should().Be(0, "a read of a cached tariff never waits for billing");
+        lockCalls.Calls.Select(call => (string)call.Args[0]!).Should().Equal(cachedWhileWaitingForTheLock ? new[] { tariffKey + "_lock" } : []);
     }
 
     [Fact]
@@ -328,6 +364,12 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
         };
     }
 
+    // A plan with a quota of its own that lapsed two days ago: inside the grace days, and computed without a database.
+    private static Tariff LapsedTariff()
+    {
+        return new Tariff { Id = 1, DueDate = DateTime.UtcNow.Date.AddDays(-2), Quotas = [new ASC.Core.Billing.Quota(-3, 10)] };
+    }
+
     private TariffService CreateService(IFusionCache cache, BillingClient billingClient, IDistributedLockProvider lockProvider)
     {
         return CreateTariffService(
@@ -336,7 +378,8 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
             coreSettings: CreateCoreSettings(PaymentRegion),
             configuration: _configuration,
             serviceProvider: _serviceProvider,
-            distributedLockProvider: lockProvider);
+            distributedLockProvider: lockProvider,
+            coreBaseSettings: new CoreBaseSettings(_configuration));
     }
 
     private static StubResponse Failure()
