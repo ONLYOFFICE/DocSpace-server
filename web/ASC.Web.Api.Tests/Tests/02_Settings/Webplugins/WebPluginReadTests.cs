@@ -135,6 +135,7 @@ public class WebPluginReadTests(
         manifest["minDocSpaceVersion"] = "3.0.0";
         manifest["image"] = "logo.png";
         manifest["homePage"] = "https://example.com/plugin";
+        manifest["cspDomains"] = "https://read-fields.example.com";
         manifest["nameLocale"] = new Dictionary<string, string> { ["en"] = "Fields plugin" };
         manifest["descriptionLocale"] = new Dictionary<string, string> { ["en"] = "Fields description" };
         var before = DateTime.UtcNow.AddMinutes(-5);
@@ -154,6 +155,7 @@ public class WebPluginReadTests(
         plugin.PluginName.Should().Be("readfields");
         plugin.Scopes.Should().Be("rooms");
         plugin.Image.Should().Be("logo.png");
+        plugin.CspDomains.Should().Be("https://read-fields.example.com");
         plugin.NameLocale.Should().Contain("en", "Fields plugin");
         plugin.DescriptionLocale.Should().Contain("en", "Fields description");
         plugin.CreateBy!.Id.Should().Be(Owner.Id);

@@ -165,9 +165,16 @@ public class WebPluginPackageTests(
         await UploadAsOwnerAsync("pkg-first");
         var manifest = WebPluginsTestData.Manifest("pkg-second");
         manifest["pluginName"] = WebPluginsTestData.JsName("pkg-first");
+        await _webApiClient.Authenticate(Owner);
 
-        // Act + Assert
-        await AssertUploadRefusedAsync(WebPluginsTestData.CreatePluginZip(manifest), 400, "Plugin already exist");
+        // Act
+        using var response = await WebPluginsTestData.UploadAsync(
+            _webApiClient, WebPluginsTestData.CreatePluginZip(manifest), "plugin.zip", TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, TestContext.Current.CancellationToken);
+
+        // Assert
+        status.Should().Be(400, body);
+        body.Should().Contain("Plugin already exist").And.NotContain("Wrong plugin archive");
         (await ListPluginsAsync()).Select(p => p.Name).Should().NotContain("pkg-second");
     }
 }
