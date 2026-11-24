@@ -49,12 +49,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@anthropic-ai/sdk@npm:^0.60.0":
-  version: 0.60.0
-  resolution: "@anthropic-ai/sdk@npm:0.60.0"
+"@anthropic-ai/sdk@npm:^1.11.0":
+  version: 1.13.0
+  resolution: "@anthropic-ai/sdk@npm:1.13.0"
+  dependencies:
+    "@opentelemetry/api": "npm:^1.4.1"
+    json-schema-to-ts: "npm:^3.1.1"
+    standardwebhooks: "npm:^1.0.0"
+  peerDependencies:
+    zod: ^3.25.0 || ^4.0.0
+  peerDependenciesMeta:
+    zod:
+      optional: true
   bin:
     anthropic-ai-sdk: bin/cli
-  checksum: 10/03ebdf0eaf7a6604b2276d8432aecabb9b68fe2d219c83cf07ecbe40b30ff40f4a1fc33cef0c7f0d9f42b4b0ab47b4c4cf6d0f875ad44625be8fd49e323b5629
+  checksum: 10/3a6622133b166a8e22f88a8ac844ea8ec429714834fa297bad5b5c87afef56e98439d1a01f1cfb027f07f7601382dc08a1f6dffd977d839e00c0c8cefc723e64
   languageName: node
   linkType: hard
 
@@ -305,6 +314,13 @@ __metadata:
   bin:
     parser: ./bin/babel-parser.js
   checksum: 10/5d3866c3baaa4f21cdbf3eca12a293bc0d0f6916f8180ca6a3109a7813f600bc97746101f7283d83329e8977ce269af5f501ac2b4e1df6acfffa640c578d77cd
+  languageName: node
+  linkType: hard
+
+"@babel/runtime@npm:^7.18.3":
+  version: 7.29.15
+  resolution: "@babel/runtime@npm:7.29.15"
+  checksum: 10/11d9dc2d66f1f34e036b035c1efba0d205f73754b3153d4da0c24d722222f0d077498bb8ade47298f6889696fff69d2f2078213ad998706d39b6016f4ac16de0
   languageName: node
   linkType: hard
 
@@ -795,20 +811,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google/genai@npm:^1.30.0":
-  version: 1.52.0
-  resolution: "@google/genai@npm:1.52.0"
+"@google/genai@npm:^3.6.1":
+  version: 3.6.1
+  resolution: "@google/genai@npm:3.6.1"
   dependencies:
     google-auth-library: "npm:^10.3.0"
     p-retry: "npm:^4.6.2"
-    protobufjs: "npm:^7.5.4"
-    ws: "npm:^8.18.0"
+    protobufjs: "npm:^7.6.5"
+    ws: "npm:^8.21.0"
   peerDependencies:
     "@modelcontextprotocol/sdk": ^1.25.2
   peerDependenciesMeta:
     "@modelcontextprotocol/sdk":
       optional: true
-  checksum: 10/4815bb7198910e20bc1976cb9c649d31c0d90b9352c5a433fc60a8906c74cd4022768daf75a7bdf86daa73beb9d0a6e426efbc2e5d6ed02df5c21ea63d335eae
+  checksum: 10/01b9b19e31895446771c80a7a0ce4562ed6c301734a833d36ac3101b24713aede9c6b09b02c7e0ed4b00f5d273ea35730abc936348309c941dc707e279712726
   languageName: node
   linkType: hard
 
@@ -1026,18 +1042,58 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mistralai/mistralai@npm:^1.11.0":
-  version: 1.15.1
-  resolution: "@mistralai/mistralai@npm:1.15.1"
+"@mistralai/mistralai@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@mistralai/mistralai@npm:3.5.0"
   dependencies:
+    "@modelcontextprotocol/sdk": "npm:^1.29.0"
+    "@opentelemetry/semantic-conventions": "npm:^1.40.0"
     ws: "npm:^8.18.0"
     zod: "npm:^3.25.0 || ^4.0.0"
-    zod-to-json-schema: "npm:^3.24.1"
-  checksum: 10/c12b9edcb0ab7bc3cf0aa04e9f1085d89aaf91e6c42b4d87626f1f76189f73d936c5885d94659a1b0c7da04b53e280a936fad1f8b3429fafa07e66a0ba18fc88
+    zod-to-json-schema: "npm:^3.25.0"
+  peerDependencies:
+    "@aws-sdk/client-s3": ^3.300.0
+    "@azure/identity": ^4.0.0
+    "@azure/storage-blob": ^12.24.0
+    "@google-cloud/storage": ^7.0.0 || ^8.0.0
+    "@hpcc-js/wasm-zstd": ^1.16.0
+    "@livekit/rtc-node": ^0.13.28
+    "@msgpack/msgpack": ^3.0.0
+    "@opentelemetry/api": ^1.9.0
+    "@opentelemetry/exporter-trace-otlp-http": ^0.220.0
+    "@opentelemetry/resources": ^2.9.0
+    "@opentelemetry/sdk-trace-base": ^2.9.0
+    livekit-client: ^2.19.0
+  peerDependenciesMeta:
+    "@aws-sdk/client-s3":
+      optional: true
+    "@azure/identity":
+      optional: true
+    "@azure/storage-blob":
+      optional: true
+    "@google-cloud/storage":
+      optional: true
+    "@hpcc-js/wasm-zstd":
+      optional: true
+    "@livekit/rtc-node":
+      optional: true
+    "@msgpack/msgpack":
+      optional: true
+    "@opentelemetry/api":
+      optional: true
+    "@opentelemetry/exporter-trace-otlp-http":
+      optional: true
+    "@opentelemetry/resources":
+      optional: true
+    "@opentelemetry/sdk-trace-base":
+      optional: true
+    livekit-client:
+      optional: true
+  checksum: 10/b22d985a0a04e19812b357ba2aaf78743c012c3596b523c7d2c5921db882aff6ffc16308efcb6663da90b3a894db265d85d01ac3cfd0d97d13a214584fa33546
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/sdk@npm:^1.32.0":
+"@modelcontextprotocol/sdk@npm:^1.29.0, @modelcontextprotocol/sdk@npm:^1.32.0":
   version: 1.32.2
   resolution: "@modelcontextprotocol/sdk@npm:1.32.2"
   dependencies:
@@ -1098,46 +1154,46 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.59.tgz::locator=asc-ai-chat%40workspace%3A.":
-  version: 1.0.2-progress.59
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.59.tgz#onlyoffice-ai-chat-1.0.2-progress.59.tgz::hash=e7b2e9&locator=asc-ai-chat%40workspace%3A."
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.70.tgz::locator=asc-ai-chat%40workspace%3A.":
+  version: 1.0.2-progress.70
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.70.tgz#onlyoffice-ai-chat-1.0.2-progress.70.tgz::hash=22a0e8&locator=asc-ai-chat%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
-    "@anthropic-ai/sdk": ^0.60.0
-    "@assistant-ui/react": ^0.11.0
-    "@assistant-ui/react-markdown": ^0.11.0
+    "@anthropic-ai/sdk": ^1.11.0
+    "@assistant-ui/react": ^0.15.37
+    "@assistant-ui/react-markdown": ^0.14.26
     "@codemirror/lang-json": ^6.0.2
-    "@codemirror/state": ^6.5.2
-    "@codemirror/view": ^6.38.2
-    "@google/genai": ^1.30.0
-    "@mistralai/mistralai": ^1.11.0
-    "@radix-ui/react-dialog": ^1.1.15
-    "@radix-ui/react-dropdown-menu": ^2.1.16
-    "@radix-ui/react-slot": ^1.2.3
-    "@radix-ui/react-switch": ^1.2.6
-    "@radix-ui/react-tabs": ^1.1.13
-    "@radix-ui/react-toast": ^1.2.15
-    "@radix-ui/react-tooltip": ^1.2.8
-    assistant-stream: ^0.2.47
+    "@codemirror/state": ^6.7.6
+    "@codemirror/view": ^6.43.15
+    "@google/genai": ^3.6.1
+    "@mistralai/mistralai": ^3.5.0
+    "@radix-ui/react-dialog": ^1.3.1
+    "@radix-ui/react-dropdown-menu": ^2.2.1
+    "@radix-ui/react-slot": ^1.5.0
+    "@radix-ui/react-switch": ^1.4.1
+    "@radix-ui/react-tabs": ^1.2.1
+    "@radix-ui/react-toast": ^1.3.1
+    "@radix-ui/react-tooltip": ^1.4.1
+    assistant-stream: ^0.3.58
     class-variance-authority: ^0.7.1
     clsx: ^2.1.1
-    codemirror: ^6.0.2
-    framer-motion: ^12.23.12
-    i18next: ^25.5.2
+    codemirror: ~6.0.2
+    framer-motion: ^14.14.0
+    i18next: ^27.2.2
     katex: ^0.17.0
-    openai: ^5.22.0
+    openai: ^5.22.0 || ^6.0.0 || ^7.0.0
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
-    react-i18next: ^15.7.3
-    react-shiki: ^0.8.0
-    react-svg: ^16.3.0
+    react-i18next: ^18.0.3
+    react-shiki: ^0.11.3
+    react-svg: ^19.2.7
     rehype-katex: ^7.0.1
     remark-gfm: ^4.0.1
     remark-math: ^6.0.0
-    shiki: ^3.11.0
-    tailwind-merge: ^3.3.1
-    zustand: ^5.0.7
+    shiki: ^4.6.0
+    tailwind-merge: ^3.7.1
+    zustand: ^5.1.0
   peerDependenciesMeta:
     "@anthropic-ai/sdk":
       optional: true
@@ -1199,7 +1255,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/135061503cf081e5de0f43d073837b11951faf59b85d78c05a66de46ede84f6df9e95dfd8ecfa814bf611d54fb749937809ad5b29967d074c4d1f35878a725a6
+  checksum: 10/90f8d48a33ed0dcec4c111f237648f5f26d83bd4473732d75f8ff46f84a64e1789c2b4b49d181097258d9f05092b660a758b3c4e5a8022c5433a3e9d3fa75c0d
   languageName: node
   linkType: hard
 
@@ -1247,6 +1303,13 @@ __metadata:
   version: 1.9.1
   resolution: "@opentelemetry/api@npm:1.9.1"
   checksum: 10/b26032739d3c54ca99b5a2920844a1fbd4c3ee383cacbb0915e8c706a2626fe91e96feaa6e893397abe0545dc8d0a765b220aa18a31b1773176eeaf3a225e10e
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/api@npm:^1.4.1":
+  version: 1.10.0
+  resolution: "@opentelemetry/api@npm:1.10.0"
+  checksum: 10/630356af2c4caa2e15a102060360fac708651a9e21f45a9035a6c846dd01e51ff4cc2d28fadc471d4dcdf6997561163631ab69c2efa7604ad2307529e22b593f
   languageName: node
   linkType: hard
 
@@ -1657,6 +1720,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/semantic-conventions@npm:^1.40.0":
+  version: 1.45.0
+  resolution: "@opentelemetry/semantic-conventions@npm:1.45.0"
+  checksum: 10/a95d97b3ee90bcb50097044ceae014a061904b87bffe45b659ba2a3b122e66e5373628fc8298cfee43f49a0bd79e7098f016766c0d7e2c8afcfc215a81a5f1ce
+  languageName: node
+  linkType: hard
+
 "@paralleldrive/cuid2@npm:^2.2.2":
   version: 2.3.1
   resolution: "@paralleldrive/cuid2@npm:2.3.1"
@@ -1983,6 +2053,13 @@ __metadata:
     color: "npm:^5.0.2"
     text-hex: "npm:1.0.x"
   checksum: 10/fc3285e5cb9a458d255aa678d9453174ca40689a4c692f1617907996ab8eb78839542439604ced484c4f674a5297f7ba8b0e63fcfe901174f43c3d9c3c881b52
+  languageName: node
+  linkType: hard
+
+"@stablelib/base64@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@stablelib/base64@npm:1.0.1"
+  checksum: 10/93f3edb05d5a828a775d23ebde49884abeb456b8946942acbe6a0815630e769c59c06c7275983031c8707bdcefc1c62917aaa99522ff1ec5f457704c83b686da
   languageName: node
   linkType: hard
 
@@ -2645,12 +2722,12 @@ __metadata:
   resolution: "asc-ai-chat@workspace:."
   dependencies:
     "@a2a-js/sdk": "npm:^1.3.0"
-    "@anthropic-ai/sdk": "npm:^0.60.0"
+    "@anthropic-ai/sdk": "npm:^1.11.0"
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
-    "@google/genai": "npm:^1.30.0"
-    "@mistralai/mistralai": "npm:^1.11.0"
+    "@google/genai": "npm:^3.6.1"
+    "@mistralai/mistralai": "npm:^3.5.0"
     "@modelcontextprotocol/sdk": "npm:^1.32.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-1.0.2-progress.59.tgz"
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-1.0.2-progress.70.tgz"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.222.0"
     "@opentelemetry/exporter-metrics-otlp-proto": "npm:^0.222.0"
@@ -3925,6 +4002,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-sha256@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "fast-sha256@npm:1.3.0"
+  checksum: 10/3bef0491f10a254348ec11dcddb26e4d951cfd3b4c0662ea5843ad1be3fe184ed74d640df68565fcc60f6437548cddf49e3ac886f88a69e05b5142e862840bf9
+  languageName: node
+  linkType: hard
+
 "fast-string-truncated-width@npm:^3.0.2":
   version: 3.0.3
   resolution: "fast-string-truncated-width@npm:3.0.3"
@@ -4694,6 +4778,16 @@ __metadata:
   version: 3.0.1
   resolution: "json-buffer@npm:3.0.1"
   checksum: 10/82876154521b7b68ba71c4f969b91572d1beabadd87bd3a6b236f85fbc7dc4695089191ed60bb59f9340993c51b33d479f45b6ba9f3548beb519705281c32c3c
+  languageName: node
+  linkType: hard
+
+"json-schema-to-ts@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "json-schema-to-ts@npm:3.1.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.18.3"
+    ts-algebra: "npm:^2.0.0"
+  checksum: 10/9fd0490279d36ff8b4604cc10632df05e4e5f5ee1d0a77841c927623fc1e636c47eb4ace488018c4e9a2e7e5dde5520d0870e06dfc84b930d9c98c6eacd0f041
   languageName: node
   linkType: hard
 
@@ -5584,26 +5678,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:^7.5.4":
-  version: 7.6.5
-  resolution: "protobufjs@npm:7.6.5"
-  dependencies:
-    "@protobufjs/aspromise": "npm:^1.1.2"
-    "@protobufjs/base64": "npm:^1.1.2"
-    "@protobufjs/codegen": "npm:^2.0.5"
-    "@protobufjs/eventemitter": "npm:^1.1.1"
-    "@protobufjs/fetch": "npm:^1.1.1"
-    "@protobufjs/float": "npm:^1.0.2"
-    "@protobufjs/path": "npm:^1.1.2"
-    "@protobufjs/pool": "npm:^1.1.0"
-    "@protobufjs/utf8": "npm:^1.1.1"
-    "@types/node": "npm:>=13.7.0"
-    long: "npm:^5.3.2"
-  checksum: 10/58a5a635fbe0632a5c48a1ab659fabfc26d5b994915a20ad623a2cfb59a2ca7411d9f4f690ca79074967b632e2db58ecc184ab507927f5b7d0852fc16568d3da
-  languageName: node
-  linkType: hard
-
-"protobufjs@npm:^7.5.5":
+"protobufjs@npm:^7.5.5, protobufjs@npm:^7.6.5":
   version: 7.6.6
   resolution: "protobufjs@npm:7.6.6"
   dependencies:
@@ -6110,6 +6185,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"standardwebhooks@npm:^1.0.0":
+  version: 1.3.0
+  resolution: "standardwebhooks@npm:1.3.0"
+  dependencies:
+    "@stablelib/base64": "npm:^1.0.0"
+    fast-sha256: "npm:^1.3.0"
+  checksum: 10/9b603521b65d259807d2934c13e9475a89cfc8f51dcf65b6c3a467bef0db40b98f835d454ff86b490f60981f02979ac3b1155ab2e0492dfcce625ee148e3f31f
+  languageName: node
+  linkType: hard
+
 "statuses@npm:>= 1.5.0 < 2, statuses@npm:~1.5.0":
   version: 1.5.0
   resolution: "statuses@npm:1.5.0"
@@ -6388,6 +6473,13 @@ __metadata:
   version: 1.4.1
   resolution: "triple-beam@npm:1.4.1"
   checksum: 10/2e881a3e8e076b6f2b85b9ec9dd4a900d3f5016e6d21183ed98e78f9abcc0149e7d54d79a3f432b23afde46b0885bdcdcbff789f39bc75de796316961ec07f61
+  languageName: node
+  linkType: hard
+
+"ts-algebra@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ts-algebra@npm:2.0.0"
+  checksum: 10/b970eef64ca9594a77337e03b9c1732c1b7a0d2c4d316638b654e921a47b40c4cc42f41821445e9e54408d5dfdf4ecca27ffa59554373033b9c92dee8b52066d
   languageName: node
   linkType: hard
 
@@ -6909,6 +7001,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ws@npm:^8.21.0":
+  version: 8.23.0
+  resolution: "ws@npm:8.23.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 10/b9e8e16346288769bc945595e4dbb79e94f921e944e798ff7319e422efa05b10f670b2724b34729223689f4b9678e3089998392d236f10cbeccd5465a1b32c0a
+  languageName: node
+  linkType: hard
+
 "xss@npm:^1.0.15":
   version: 1.0.15
   resolution: "xss@npm:1.0.15"
@@ -6995,7 +7102,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod-to-json-schema@npm:^3.24.1, zod-to-json-schema@npm:^3.25.1":
+"zod-to-json-schema@npm:^3.25.0, zod-to-json-schema@npm:^3.25.1":
   version: 3.25.2
   resolution: "zod-to-json-schema@npm:3.25.2"
   peerDependencies:
