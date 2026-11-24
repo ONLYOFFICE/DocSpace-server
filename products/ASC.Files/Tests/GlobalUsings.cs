@@ -69,6 +69,7 @@ global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.EntityFrameworkCore.Migrations.Operations;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 

@@ -700,11 +700,12 @@ public abstract class FoldersController<T>(
     /// `GET api/2.0/files/folder/{id}/link` returns 404. On an item of a private room, a link needs `linkPublicKey`,
     /// `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and takes `passwordRequired` instead of
     /// `password`. A new link without `passwordRequired` asks for a password. Only a file link with `expirationDate`
-    /// may set `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. Such a link does not open yet. Every visit gets `RequiredPassword`. In
+    /// may set `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. A visitor opens such a link only with its proof, through `POST api/2.0/files/share/{key}/password`. In
     /// a private room, only the room owner and room managers create links. Other callers get 403. The call also returns
     /// 403 for such a link without key fields, with other access, or with `denyDownload`. It also returns 403 if
     /// `passwordRequired` is false on any other link. It returns 400 if `linkPublicKey` or `linkProofHash` is not
     /// base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc` is empty or too long, or `password` is sent.
+    /// A wrap in `linkSecretWraps` for anybody but the room owner and room managers also returns 400.
     /// </remarks>
     /// <summary>
     /// Create the folder primary external link
@@ -712,7 +713,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/link</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item is not of its size or not canonical base64, or such a link carries `password`")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item is not of its size or not canonical base64, such a link carries `password`, or `linkSecretWraps` names anybody but the room owner and room managers")]
     [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{id}/link")]
@@ -729,7 +730,7 @@ public abstract class FoldersController<T>(
             denyDownload: inDto.FolderLink.DenyDownload,
             password: inDto.FolderLink.Password,
             recreateRevoked: true,
-            keyMaterial: LinkKeyMaterial.From(inDto.FolderLink.LinkPublicKey, inDto.FolderLink.LinkPrivateKeyEnc, inDto.FolderLink.LinkProofHash),
+            keyMaterial: LinkKeyMaterial.From(inDto.FolderLink.LinkPublicKey, inDto.FolderLink.LinkPrivateKeyEnc, inDto.FolderLink.LinkProofHash, inDto.FolderLink.LinkSecretWraps.Map()),
             passwordRequired: inDto.FolderLink.PasswordRequired);
 
         return await fileShareDtoHelper.Get(linkAce);
@@ -782,11 +783,12 @@ public abstract class FoldersController<T>(
     /// room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and takes
     /// `passwordRequired` instead of `password`. A new link without `passwordRequired` asks for a password. A changed
     /// link keeps its value. Only a file link with `expirationDate` may set `passwordRequired` to false. On other
-    /// items, the call ignores `passwordRequired` and the key fields. Such a link does not open yet. Every visit gets `RequiredPassword`. In a private room, only the room owner and room
+    /// items, the call ignores `passwordRequired` and the key fields. A visitor opens such a link only with its proof, through `POST api/2.0/files/share/{key}/password`. In a private room, only the room owner and room
     /// managers set and revoke links. Other callers get 403. The call also returns 403 for such a link without key
     /// fields, with other access, or with `denyDownload`. It also returns 403 if `passwordRequired` is false on any
     /// other link. It returns 400 if `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. It also returns 400
-    /// if `linkPrivateKeyEnc` is empty or too long, or `password` is sent. A new `linkId` that belongs to a user, a
+    /// if `linkPrivateKeyEnc` is empty or too long, or `password` is sent.
+    /// A wrap in `linkSecretWraps` for anybody but the room owner and room managers also returns 400. A new `linkId` that belongs to a user, a
     /// group, or another link also returns 400. A changed link with another `linkPublicKey` also returns 400.
     /// </remarks>
     /// <summary>
@@ -812,7 +814,7 @@ public abstract class FoldersController<T>(
             inDto.FolderLink.DenyDownload,
             inDto.FolderLink.Internal,
             inDto.FolderLink.Primary,
-            LinkKeyMaterial.From(inDto.FolderLink.LinkPublicKey, inDto.FolderLink.LinkPrivateKeyEnc, inDto.FolderLink.LinkProofHash),
+            LinkKeyMaterial.From(inDto.FolderLink.LinkPublicKey, inDto.FolderLink.LinkPrivateKeyEnc, inDto.FolderLink.LinkProofHash, inDto.FolderLink.LinkSecretWraps.Map()),
             inDto.FolderLink.PasswordRequired);
 
         if (linkAce == null)

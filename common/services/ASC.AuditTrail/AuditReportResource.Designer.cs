@@ -2725,6 +2725,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to External link &quot;{1}&quot; of &quot;{0}&quot; opened.
+        /// </summary>
+        public static string PrivateLinkOpened {
+            get {
+                return ResourceManager.GetString("PrivateLinkOpened", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to File keys in the room &quot;{0}&quot; removed for: {1}.
         /// </summary>
         public static string RoomFileKeysRevoked {

@@ -47,6 +47,15 @@ public partial class FilesDbContext
         return ShareLinkKeyQueries.ShareLinkKeysAsync(this, tenantId, linkIds);
     }
 
+    /// <summary>
+    /// The external links with key material of a room and of every folder and file in it, with the options of each link.
+    /// </summary>
+    [PreCompileQuery]
+    public IAsyncEnumerable<ShareLinkInRoom> ShareLinksInRoomAsync(int tenantId, int roomId)
+    {
+        return ShareLinkKeyQueries.ShareLinksInRoomAsync(this, tenantId, roomId);
+    }
+
     [PreCompileQuery]
     public Task<int> DeleteShareLinkKeyAsync(int tenantId, Guid linkId)
     {
@@ -112,6 +121,26 @@ static file class ShareLinkKeyQueries
                 ctx.ShareLinkKeys
                     .AsNoTracking()
                     .Where(r => r.TenantId == tenantId && linkIds.Contains(r.LinkId)));
+
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<ShareLinkInRoom>> ShareLinksInRoomAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId) =>
+                from s in ctx.Security.AsNoTracking()
+                join k in ctx.ShareLinkKeys.AsNoTracking() on new { s.TenantId, LinkId = s.Subject } equals new { k.TenantId, k.LinkId }
+                where s.TenantId == tenantId &&
+                      (s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink) &&
+                      (s.EntryType == FileEntryType.Folder
+                          ? ctx.Tree.Any(t => t.FolderId == s.InternalEntryId && t.ParentId == roomId)
+                          : ctx.Files.Any(f => f.TenantId == tenantId && f.Id == s.InternalEntryId && f.CurrentVersion &&
+                                               ctx.Tree.Any(t => t.FolderId == f.ParentId && t.ParentId == roomId)))
+                select new ShareLinkInRoom
+                {
+                    LinkId = s.Subject,
+                    EntryId = s.InternalEntryId,
+                    EntryType = s.EntryType,
+                    Options = s.Options,
+                    PublicKey = k.PublicKey
+                });
 
     public static readonly Func<FilesDbContext, int, Guid, Task<int>> DeleteShareLinkKeyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

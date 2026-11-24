@@ -1,8 +1,8 @@
 # Spec Delta: private-rooms
 
 Field names (`linkPublicKey`, `linkPrivateKeyEnc`, `linkProofHash`, `passwordRequired`, `proof`, `isLink`,
-`linkSecretWraps`) are proposals from the client's draft; they may be renamed before the change is applied, together
-with the client change.
+`linkSecretWraps`) and the setting's route (`PUT files/settings/external/private`) were agreed with the client change on
+2026-11-23.
 
 ## RENAMED Requirements
 
@@ -363,9 +363,10 @@ request carrying `password` for such a link MUST be refused with 400.
 
 ### Requirement: A link of a private item is served against its proof
 
-`applyExternalSharePassword` called with `proof` SHALL open the link session and answer `linkPrivateKeyEnc` only when the
-hash of `proof` equals `linkProofHash`. Without that session `getExternalShareData`, `getEncryptionAccess` and the file
-content MUST answer as for a link that requires a password. Wrong proofs SHALL be counted and blocked as wrong passwords.
+`applyExternalSharePassword` called with `proof`, the base64 of 32 bytes, SHALL open the link session and answer
+`linkPrivateKeyEnc` only when SHA-256 of those 32 bytes equals `linkProofHash`. Without that session
+`getExternalShareData`, `getEncryptionAccess` and the file content MUST answer as for a link that requires a password,
+and `getExternalShareData` SHALL mark the link as private. Wrong proofs SHALL be counted and blocked as wrong passwords.
 
 #### Scenario: Valid proof
 
@@ -376,6 +377,16 @@ content MUST answer as for a link that requires a password. Wrong proofs SHALL b
 
 - **WHEN** a request names the link without a proof, or with a wrong one
 - **THEN** the answer carries no sealed key, no wrap and no content
+
+#### Scenario: Visitor's page reads the link before the proof
+
+- **WHEN** `getExternalShareData` is called for a link of a private item without a link session
+- **THEN** the status is RequiredPassword, and the answer marks the link as private and carries `passwordRequired`
+
+#### Scenario: Proof sent as the base64 text
+
+- **WHEN** a visitor sends a proof whose base64 text, not the 32 bytes it encodes, hashes to `linkProofHash`
+- **THEN** the proof is wrong and no session opens
 
 #### Scenario: Too many wrong proofs
 
@@ -389,14 +400,21 @@ content MUST answer as for a link that requires a password. Wrong proofs SHALL b
 
 ### Requirement: Wraps for a link are served to its visitor
 
-In a link session, `getEncryptionAccess` SHALL answer the wrap made for the link for each file the link covers and nothing
-for other files; a member's call keeps its answer. A file the link covers and has no wrap for SHALL be listed, so that the
-visitor's page can say it is not ready yet.
+In a link session of a visitor who is not a member, signed in or not, `getEncryptionAccess` SHALL answer, for a file the
+link covers, the wrap made for the link and the public keys of the room's members, among them the member who made the
+wrap, and 403 for other files; a member's call keeps its answer. A covered file without a wrap SHALL get the link's entry with no wrap, so that the visitor's page can
+say it is not ready yet.
 
 #### Scenario: File with a wrap
 
 - **WHEN** a visitor in a link session asks for the keys of a file the link covers
-- **THEN** the answer carries the wrap made for the link and no member's private material
+- **THEN** the answer carries the wrap made for the link and the public keys of the members, the author of the wrap among
+  them, and no member's private material
+
+#### Scenario: File without a wrap
+
+- **WHEN** a visitor asks for a covered file before any member wrapped its key for the link
+- **THEN** the answer holds the link's entry with no wrap
 
 #### Scenario: File outside the link
 
@@ -411,12 +429,18 @@ such a session MUST be refused as an unencrypted save is.
 
 #### Scenario: Opening a document
 
-- **WHEN** a visitor of a link opens an encrypted document
+- **WHEN** a visitor of a link opens an encrypted document, also asking for the edit mode
 - **THEN** the configuration is for viewing and keeps the public document address
 
 #### Scenario: Upload through a link
 
 - **WHEN** a visitor of a link starts an upload into the folder the link covers
+- **THEN** the answer is 403 for a signed-in visitor who is not a member, and 401 for a visitor who has not signed in,
+  as for every operation that changes data and is not open without signing in
+
+#### Scenario: Signed-in visitor without the session
+
+- **WHEN** a signed-in visitor who is not a member opens a covered file without the cookie of the link session
 - **THEN** the answer is 403
 
 ### Requirement: The address of a link of a private item carries no secret
@@ -434,7 +458,7 @@ address MUST redirect to the portal root with an empty fragment, so that the bro
 #### Scenario: Short address opened
 
 - **WHEN** a visitor requests the short address of such a link
-- **THEN** the answer redirects to the stored address, and its `Location` has no fragment
+- **THEN** the answer redirects to the stored address of the visitor's page, and its `Location` has no fragment
 
 #### Scenario: Unknown short address
 
@@ -442,11 +466,49 @@ address MUST redirect to the portal root with an empty fragment, so that the bro
 - **THEN** the answer redirects to the portal root with `Location` ending in `/#`, and the secret appended by the sender
   does not reach the portal's page
 
+### Requirement: A link of a private item opens the visitor's page
+
+`shareLink` of a link of a private item SHALL be the address of the visitor's page, `share/private?key=<key>` for a room
+or a file and `share/private?key=<key>&folder=<id>` for a folder, whatever the file type; the address of an ordinary
+link, its download address and the editor page MUST NOT be used for it. Ordinary links keep their addresses.
+
+#### Scenario: Link of a document
+
+- **WHEN** a manager sets a link with key material on an encrypted docx
+- **THEN** `shareLink` is `share/private?key=<key>`, and the short address redirects there, not to the editor
+
+#### Scenario: Link of a folder
+
+- **WHEN** a manager sets a link with key material on a folder of a private room
+- **THEN** `shareLink` is `share/private?key=<key>&folder=<id>` with the folder's id
+
+#### Scenario: Ordinary link
+
+- **WHEN** a link is set on an item outside private rooms
+- **THEN** its `shareLink` is the address it had before this change
+
+### Requirement: Managers see how many links a private item has
+
+An item of a private room SHALL report the number of its working external links (`externalLinksCount`) to the room owner
+and the room managers, and none to other members; a revoked or expired link is not counted. The link settings of such an item keep reporting no
+limit outside the link-setting path.
+
+#### Scenario: Item with two links
+
+- **WHEN** a room manager reads a file of a private room that has two working links and one revoked
+- **THEN** the file reports two links
+
+#### Scenario: Reader of the room
+
+- **WHEN** a reader of the room reads the same file
+- **THEN** the file reports no link count
+
 ### Requirement: The page of a link visitor admits no third-party script
 
 The page that opens a link of a private item SHALL be served with a Content-Security-Policy whose script and connect sources
 are only the portal, its storage and its Document Server. The domains of the portal's CSP settings, of plugins, of the
-support chat and of the tag manager MUST NOT be in it. Every other page SHALL keep the portal's policy.
+support chat and of the tag manager MUST NOT be in it. Every other page SHALL keep the portal's policy. `GET security/csp`
+SHALL return that value as `privateLinkHeader` beside `header`.
 
 #### Scenario: Portal with extra domains
 
@@ -513,7 +575,7 @@ wraps of its secret, and end the sessions opened with it.
 ### Requirement: The portal switches external links of private rooms
 
 A portal setting, on by default, SHALL allow external links of private items; only the portal owner and DocSpace admins
-SHALL change it, and `getFilesSettings` SHALL report it. While it is off, setting such a link MUST answer 403 and an existing
+SHALL change it (`PUT files/settings/external/private`), and `getFilesSettings` SHALL report it as `privateRoomLinks`. While it is off, setting such a link MUST answer 403 and an existing
 one MUST be served as an invalid link; nothing is deleted.
 
 #### Scenario: Setting off
@@ -577,7 +639,7 @@ restored.
 ### Requirement: Links of private items are audited
 
 Creating, changing, revoking and opening a link of a private item SHALL be recorded in the audit trail, the room named as
-"Titles in the audit trail" states. An opening is recorded once per link session, not per file read.
+"Titles in the audit trail" states. An opening (`PrivateLinkOpened`) is recorded once per link session, not per file read.
 
 #### Scenario: Created and opened
 

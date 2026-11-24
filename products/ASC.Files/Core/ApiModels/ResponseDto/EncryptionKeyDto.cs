@@ -86,6 +86,22 @@ public class EncryptionKeyDto
     /// <example>{DC522726-5E0E-43E5-AA02-8EA156BECBC5}</example>
     public string CryptoEngineId { get; set; } = DefaultCryptoEngineId;
     //public string CryptoEngineId => DefaultCryptoEngineId;
+
+    /// <summary>
+    /// True when the entry is an external link of a private room or of an item in it, not a member's key. Then
+    /// `id` and `userId` are the link's id, `publicKey` is its public key, and there is never a private half. A client
+    /// wraps the key of a file for each link that covers the file. The field is absent for a member's key.
+    /// </summary>
+    /// <example>true</example>
+    public bool? IsLink { get; set; }
+
+    /// <summary>
+    /// The key of the file, wrapped for the link by the member who issued it. It is present only on the link entry that
+    /// a visitor of a link gets for a file. Null means that no member has wrapped the key for the link yet, so the file
+    /// cannot be opened through the link for now.
+    /// </summary>
+    /// <example>BASE64WRAPPEDFILEKEY</example>
+    public string FileKeyEnc { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

@@ -102,8 +102,10 @@ removal"; `file-sharing` "The Favorites section" (`addFavorites` answers `true` 
    go back to `RemoveProgressItem` and into the progress DTO as `keptPrivateRoomIds`, empty when every room moved. The other rooms move as today.
    A data transfer (`ReassignProgressItem`) moves every folder of its source, rooms included, so it applies the same
    rule with the recipient in place of the user who started the job, and leaves the kept rooms out of its folder and file
-   reassignment. Since disabling an owner of a private room is refused (decision 13) and only a disabled user's data is removed, this
-   path is reached only for owners disabled before the change. A kept room stays usable: `deleteMember` deletes the
+   reassignment. Since disabling an owner of a private room is refused (decision 13) and only a disabled user's data is
+   removed or transferred (`startRemove`, `startReassign` answer 400 for an active source), this path is reached only
+   for owners disabled before the change or by a directory synchronization (decision 15); the client noted on
+   2026-11-23 that the list is almost always empty, which is intended. A kept room stays usable: `deleteMember` deletes the
    profile softly (`UserManager.DeleteUserAsync` -> `DbUserService.RemoveUserAsync` without `immediate` marks the account
    removed and keeps its row), so the room keeps that account as its owner, and the members keep their access and keys.
    Alternative: refuse `startRemove` and `deleteMember` while nobody with a key can take the room. Rejected (2026-11-20):
@@ -159,11 +161,21 @@ removal"; `file-sharing` "The Favorites section" (`addFavorites` answers `true` 
 18. **The ownership refusal has a type of its own.** Disabling the owner of a private room and a type change whose
     recipient cannot take the rooms throw `PrivateRoomOwnershipException` (an `InvalidOperationException`, so 403), and
     `error.type` tells a client the reason, as decision 2 does for a missing key.
+19. **Guests made before decision 17 are cleaned up once, by SQL (client answer of 2026-11-23).** A data migration of
+    MySQL SaaS deletes, for every account in the guests group, its access records on private rooms and on entries inside
+    them, its wrapped file keys and its key pair (the `e2e` row of `account_links`). It writes no audit record, no
+    revocation record and no socket event. Alternative: a one-off background job through `LeavePrivateRoomsAsync`, with
+    the records of decision 17. Rejected by the product owner: private rooms have not been released, so the data is
+    small and a record of each exit is not needed. A guest owns no room, so no room changes owner.
+20. **Deleting the key pair of a new guest is audited.** `LeavePrivateRoomsAsync` deletes the pair through
+    `EncryptionLoginProvider.DeleteAllKeysAsync`, which writes nothing, while `DELETE privacyroom/keys/{id}` writes
+    `PrivacyRoomKeyDeleted`. The job writes the same action once per deleted key, after the deletion, in a catch of its
+    own (`failure-paths.md` §3). The cleanup of decision 19 does not, as decided there.
 
 ## Risks / Trade-offs
 
 - [Decision 5 revokes keys of a removal that later fails] -> the member stays and lacks keys until a member issues them
-  again; `getRoomMissingFileKeys` reports it.
+  again; `getRoomMissingFileKeys` reports it. Recorded as deviation PR7, as the client asked (2026-11-23).
 - [Decision 10 hides private entries in every read while the app is off] -> a member who has an editor open loses it at
   the next request; this is what the app switch is for.
 - [Decision 9 turns ReadHistory off for encrypted files] -> the version history of an encrypted file is closed to its
@@ -180,7 +192,9 @@ removal"; `file-sharing` "The Favorites section" (`addFavorites` answers `true` 
 
 ## Migration Plan
 
-No schema change and no data migration. Existing data under the "Breaks current behaviour" items:
+No schema change. One data migration, decision 19: guests made before decision 17 leave the private rooms and lose
+their file keys and key pair. Other existing data under the "Breaks current behaviour" items, kept as the client agreed
+on 2026-11-23:
 
 - Private Public or Form filling rooms saved by the old refusal stay; decision 8 keeps them out of the Forms areas, and the
   owner may delete them.
@@ -189,9 +203,12 @@ No schema change and no data migration. Existing data under the "Breaks current 
 - Disabled users who still hold file keys keep them until they are deleted or re-enabled and removed; the change does not
   backfill.
 
-Rollback is a plain revert: nothing is stored that the old code cannot read.
+Rollback is a plain revert: nothing is stored that the old code cannot read. The cleanup of decision 19 is not undone by
+it: the guests stay out of the rooms, and their keys are gone.
 
 ## Open Questions
 
 None left: the status code, the field name and the two checks of the code are settled in tasks 0.1, 2.2 and 5.1;
-decisions 15 and 16 were agreed on 2026-11-20 after task 2.3 found that a kept room could not be handed over.
+decisions 15 and 16 were agreed on 2026-11-20 after task 2.3 found that a kept room could not be handed over; decisions
+19 and 20 follow the client's answers of 2026-11-23. Which migration projects the cleanup of decision 19 goes into (a
+standalone installation reads `migrations/mysql/Standalone`) is checked when task 11.1 is done.

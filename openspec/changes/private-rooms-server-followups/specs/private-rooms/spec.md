@@ -417,14 +417,20 @@ their role there. A DocSpace admin or the Owner who is not a member MUST get 403
 ### Requirement: A user made a guest leaves the private rooms
 
 `startUserTypeUpdate` to `Guest` SHALL give the user's own private rooms to the recipient, take the user out of every
-private room, delete their file keys with a revocation record and delete their key pair; a later type change restores
-none of it. If the recipient lacks an encryption key or a key of an encrypted file of such a room, the call MUST answer
+private room, delete their file keys with a revocation record and delete their key pair with a key deletion record; a
+later type change restores none of it. If the recipient lacks an encryption key or a key of an encrypted file of such a room, the call MUST answer
 403 with the `error.type` of the ownership refusal before anything changes.
 
 #### Scenario: Member made a guest
 
 - **WHEN** a member of a private room holding file keys is made a guest, and later a user again
-- **THEN** they are no member of the room, hold no file key and no key pair, and inviting them back is refused
+- **THEN** they are no member of the room, hold no file key and no key pair, the audit trail holds a key deletion
+  record for each of their keys, and inviting them back is refused
+
+#### Scenario: Guest made before this requirement
+
+- **WHEN** the data migration of this change runs on a portal with a guest who is still a member of a private room
+- **THEN** the guest is no member of the room and holds no file key and no key pair, and no audit record is written
 
 #### Scenario: Owner made a guest
 

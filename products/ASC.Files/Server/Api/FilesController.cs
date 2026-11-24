@@ -878,11 +878,12 @@ public abstract class FilesController<T>(
     /// private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and
     /// takes `passwordRequired` instead of `password`. A new link without `passwordRequired` asks for a password. Only
     /// a file link with `expirationDate` may set `passwordRequired` to false. On other items, the call ignores
-    /// `passwordRequired` and the key fields. Such a link does not open yet. Every visit gets `RequiredPassword`. In a private room, only the room owner and room managers create links.
+    /// `passwordRequired` and the key fields. A visitor opens such a link only with its proof, through `POST api/2.0/files/share/{key}/password`. In a private room, only the room owner and room managers create links.
     /// Other callers get 403. The call also returns 403 for such a link without key fields, with other access, or with
     /// `denyDownload`. It also returns 403 if `passwordRequired` is false on any other link. It returns 400 if
     /// `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc` is
     /// empty or too long, or `password` is sent.
+    /// A wrap in `linkSecretWraps` for anybody but the room owner and room managers also returns 400.
     /// </remarks>
     /// <summary>
     /// Create the file primary external link
@@ -890,7 +891,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The primary external link of the file", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item is not of its size or not canonical base64, or such a link carries `password`")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item is not of its size or not canonical base64, such a link carries `password`, or `linkSecretWraps` names anybody but the room owner and room managers")]
     [SwaggerResponse(403, "The caller may not share the file or, in a private room, manage its links, the access level is not available for links to this file, the link limit is reached, or the admin restricts external links to public rooms, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPost("file/{id}/link")]
@@ -906,7 +907,7 @@ public abstract class FilesController<T>(
             denyDownload: inDto.File.DenyDownload,
             password: inDto.File.Password,
             recreateRevoked: true,
-            keyMaterial: LinkKeyMaterial.From(inDto.File.LinkPublicKey, inDto.File.LinkPrivateKeyEnc, inDto.File.LinkProofHash),
+            keyMaterial: LinkKeyMaterial.From(inDto.File.LinkPublicKey, inDto.File.LinkPrivateKeyEnc, inDto.File.LinkProofHash, inDto.File.LinkSecretWraps.Map()),
             passwordRequired: inDto.File.PasswordRequired);
 
         return await fileShareDtoHelper.Get(linkAce);
@@ -993,11 +994,12 @@ public abstract class FilesController<T>(
     /// 404. On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such
     /// a link reads only and takes `passwordRequired` instead of `password`. A new link without `passwordRequired` asks
     /// for a password. A changed link keeps its value. Only a file link with `expirationDate` may set
-    /// `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. Such a link does not open yet. Every visit gets `RequiredPassword`. In a
+    /// `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. A visitor opens such a link only with its proof, through `POST api/2.0/files/share/{key}/password`. In a
     /// private room, only the room owner and room managers set and revoke links. Other callers get 403. The call also
     /// returns 403 for such a link without key fields, with other access, or with `denyDownload`. It also returns 403
     /// if `passwordRequired` is false on any other link. It returns 400 if `linkPublicKey` or `linkProofHash` is not
-    /// base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc` is empty or too long, or `password` is sent. A
+    /// base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc` is empty or too long, or `password` is sent.
+    /// A wrap in `linkSecretWraps` for anybody but the room owner and room managers also returns 400. A
     /// new `linkId` that belongs to a user, a group, or another link also returns 400. A changed link with another
     /// `linkPublicKey` also returns 400.
     /// </remarks>
@@ -1024,7 +1026,7 @@ public abstract class FilesController<T>(
             inDto.File.DenyDownload,
             inDto.File.Internal,
             inDto.File.Primary,
-            LinkKeyMaterial.From(inDto.File.LinkPublicKey, inDto.File.LinkPrivateKeyEnc, inDto.File.LinkProofHash),
+            LinkKeyMaterial.From(inDto.File.LinkPublicKey, inDto.File.LinkPrivateKeyEnc, inDto.File.LinkProofHash, inDto.File.LinkSecretWraps.Map()),
             inDto.File.PasswordRequired);
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
@@ -1312,8 +1314,10 @@ public abstract class FilesController<T>(
     /// other keys. Requires read access to the file and the right to create content in the room. Other callers
     /// get 403. The call changes data. You can repeat it with the same body. If the file does not exist or is not in
     /// a private room, the call also returns 403. If `fileId` is neither a number nor the id of a third-party file,
-    /// the call returns 404. The call skips recipients without read access to the file. It returns them in
-    /// `skippedUserIds`. To read the keys, use `GET api/2.0/files/{fileId}/access`.
+    /// the call returns 404. A recipient may also be a working external link of the file, of a folder above it, or of
+    /// the room. Take its id and public key from the `isLink` entries of `GET api/2.0/privacyroom/{roomId}/access`. The
+    /// call skips other recipients without read access to the file, and links of other items or revoked links. It
+    /// returns them in `skippedUserIds`. To read the keys, use `GET api/2.0/files/{fileId}/access`.
     /// </remarks>
     /// <summary>
     /// Set file encryption information

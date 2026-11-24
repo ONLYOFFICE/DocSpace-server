@@ -76,6 +76,9 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     // listen on 127.0.0.1 only, so every new connection waited ~2 s for the refusal before falling back.
     private readonly SocketsHttpHandler _sharedHandler = new() { UseCookies = false, ConnectCallback = ConnectAsync };
 
+    // The same, for a test that reads a redirect itself: the answer comes back with its Location instead of being followed.
+    private readonly SocketsHttpHandler _noRedirectHandler = new() { UseCookies = false, AllowAutoRedirect = false, ConnectCallback = ConnectAsync };
+
     /// <summary>The base domain of the test portals: each one is <c>&lt;alias&gt;.docspace.localhost</c>.</summary>
     public const string BaseDomain = "docspace.localhost";
 
@@ -494,7 +497,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         };
 
         return CreateClients(new PortalContext(
-            portalName, registration.Tenant.TenantId, owner, _baseAddresses, CreateRawClient));
+            portalName, registration.Tenant.TenantId, owner, _baseAddresses, CreateRawClient,
+            (baseAddress, origin) => CreateRawClient(baseAddress, origin, _noRedirectHandler)));
     }
 
     /// <summary>
@@ -838,11 +842,13 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         return baseClient.BaseAddress!;
     }
 
-    private HttpClient CreateRawClient(Uri baseAddress, string? origin)
+    private HttpClient CreateRawClient(Uri baseAddress, string? origin) => CreateRawClient(baseAddress, origin, _sharedHandler);
+
+    private HttpClient CreateRawClient(Uri baseAddress, string? origin, SocketsHttpHandler handler)
     {
         // disposeHandler: false — the shared connection pool outlives individual clients and is
         // disposed once with the fixture. Disposing a per-test client must NOT tear down the pool.
-        var client = new HttpClient(_sharedHandler, disposeHandler: false) { BaseAddress = baseAddress };
+        var client = new HttpClient(handler, disposeHandler: false) { BaseAddress = baseAddress };
 
         if (!string.IsNullOrEmpty(origin))
         {
@@ -896,6 +902,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         }
 
         _sharedHandler.Dispose();
+        _noRedirectHandler.Dispose();
 
         // Only after the services are gone: while they run they hold handles inside the folder.
         // For the AppHost itself Aspire generates ProjectPath as the project *directory*.

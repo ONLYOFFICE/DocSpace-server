@@ -92,6 +92,20 @@ public class AceWrapper
     public LinkKeyMaterial KeyMaterial { get; init; }
 
     /// <summary>
+    /// For a link of an item in a private room read by one who manages its links: the wrap of the link's secret made for
+    /// that reader, or null when there is none.
+    /// </summary>
+    [JsonIgnore]
+    public LinkSecretWrap OwnLinkSecretWrap { get; set; }
+
+    /// <summary>
+    /// For a link of an item in a private room: the room owner and room managers the link's secret is not wrapped for.
+    /// Null on every other link.
+    /// </summary>
+    [JsonIgnore]
+    public List<Guid> ManagersWithoutLinkSecretWrap { get; set; }
+
+    /// <summary>
     /// Specifies whether a user with the access rights to a file can edit it or not.
     /// </summary>
     public bool CanEditAccess { get; set; }

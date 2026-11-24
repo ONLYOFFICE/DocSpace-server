@@ -110,6 +110,14 @@ public abstract class FileEntryBaseDto
     public bool SharedExternal { get; set; }
 
     /// <summary>
+    /// For a private room or an item in one, read by the room owner or a room manager: how many working external links
+    /// are set on this entry itself, not counting revoked or expired ones and links of the folders around it. Null for
+    /// every other reader and entry.
+    /// </summary>
+    /// <example>2</example>
+    public int? ExternalLinksCount { get; set; }
+
+    /// <summary>
     /// Whether the entry is reachable because the room or folder around it is shared, rather than through rights of
     /// its own. A copy or a move takes the entry out of that scope.
     /// </summary>
@@ -410,8 +418,12 @@ public class FileEntryDtoHelper(
     IFusionCache fusionCache,
     TenantManager tenantManager,
     MetadataTemplatesCache metadataTemplatesCache,
+    ShareLinkKeyDao shareLinkKeyDao,
     ILogger<FileEntryDtoHelper> logger)
 {
+    // The working links of each private room a request lists, read once per room.
+    private readonly Dictionary<int, List<ShareLinkInRoom>> _privateRoomLinks = [];
+
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
     protected readonly IDaoFactory _daoFactory = daoFactory;
@@ -660,6 +672,7 @@ public class FileEntryDtoHelper(
             OwnedBy = securityContext.IsAuthenticated && ownedBy.HasValue ? await employeeWrapperHelper.GetAsync(ownedBy.Value) : null,
             SharedForUser = entry.SharedForUser,
             SharedExternal = entry.SharedExternal,
+            ExternalLinksCount = await GetPrivateLinksCountAsync(entry),
             ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,
             Created = _apiDateTimeHelper.Get(entry.CreateOn),
@@ -681,6 +694,38 @@ public class FileEntryDtoHelper(
             OriginRoomTitle = entry.OriginRoomTitle,
             AutoDelete = permanentlyDeletedOn != default ? _apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
+    }
+
+    /// <summary>
+    /// The number of working links set on an entry of a private room, for those who manage the room's links only: the
+    /// links belong to them, and any other member learns nothing of them.
+    /// </summary>
+    private async Task<int?> GetPrivateLinksCountAsync<T>(FileEntry<T> entry)
+    {
+        if (!securityContext.IsAuthenticated || entry.Id is not int entryId)
+        {
+            return null;
+        }
+
+        var room = entry is Folder<T> { IsRoom: true } itself
+            ? itself
+            : entry.RootFolderType == FolderType.VirtualRooms ? await DocSpaceHelper.GetParentRoom(entry, _daoFactory.GetCacheFolderDao<T>()) : null;
+
+        if (room is not { SettingsPrivate: true, Id: int roomId } ||
+            !(await fileSharingHelper.GetLinkManagersAsync(room)).Contains(securityContext.CurrentAccount.ID))
+        {
+            return null;
+        }
+
+        if (!_privateRoomLinks.TryGetValue(roomId, out var links))
+        {
+            links = await shareLinkKeyDao.GetWorkingLinksInRoomAsync(roomId);
+            _privateRoomLinks[roomId] = links;
+        }
+
+        var entryType = entry.FileEntryType;
+
+        return links.Count(l => l.EntryId == entryId && l.EntryType == entryType);
     }
 
     private async ValueTask<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)

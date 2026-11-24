@@ -661,6 +661,11 @@ public enum MessageAction
     /// </summary>
     RoomFileKeysRevoked = 5165,
 
+    /// <summary>
+    /// An external link of an item in a private room opened with its proof, once per link session
+    /// </summary>
+    PrivateLinkOpened = 5166,
+
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 

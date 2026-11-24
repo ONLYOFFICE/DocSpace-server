@@ -85,16 +85,6 @@ public class PrivateRoomEditorTests(AspireAppFixture fixture) : PrivacyRoomTestB
         return await response.Content.ReadAsStringAsync(linked.Token);
     }
 
-    /// <summary>The token a document server wraps its callback in. The secret is the one the stack gives the editors and the services.</summary>
-    private static string SignAsDocumentServer(string payload)
-    {
-        static string Encode(byte[] bytes) => Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-
-        var content = $"{Encode(Encoding.UTF8.GetBytes("""{"alg":"HS256","typ":"JWT"}"""))}.{Encode(Encoding.UTF8.GetBytes(payload))}";
-
-        return $"{content}.{Encode(HMACSHA256.HashData(Encoding.UTF8.GetBytes("secret"), Encoding.UTF8.GetBytes(content)))}";
-    }
-
     private async Task<int> CurrentVersion(int fileId)
     {
         await _filesClient.Authenticate(Owner);

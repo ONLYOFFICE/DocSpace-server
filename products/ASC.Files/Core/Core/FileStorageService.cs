@@ -112,7 +112,8 @@ public class FileStorageService //: IFileStorageService
     DocumentServiceEncryptionChecker documentServiceEncryptionChecker,
     AiAccessibility aiAccessibility,
     DocumentServiceLicense documentServiceLicense,
-    PrivateRoomsGate privateRoomsGate)
+    PrivateRoomsGate privateRoomsGate,
+    ShareLinkKeyDao shareLinkKeyDao)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
 
@@ -5573,12 +5574,21 @@ public class FileStorageService //: IFileStorageService
 
         var accepted = new List<FileKeyData>();
         var skipped = new List<Guid>();
+        HashSet<Guid> coveringLinks = null;
 
         foreach (var k in keys)
         {
             // A security check keeps the share record it found on the entry and reuses it for whoever is asked about
             // next, so each recipient gets an instance of their own or they would pass on the previous one's access.
             if (await fileSecurity.CanReadAsync(await fileDao.GetFileAsync(fileId), k.UserId))
+            {
+                accepted.Add(k);
+                continue;
+            }
+
+            // A working link that covers the file is a recipient too: its wrap is a file-key row under the link id.
+            coveringLinks ??= await GetCoveringLinksAsync(file, parentRoom);
+            if (coveringLinks.Contains(k.UserId))
             {
                 accepted.Add(k);
             }
@@ -5596,6 +5606,29 @@ public class FileStorageService //: IFileStorageService
         }
 
         return skipped;
+    }
+
+    /// <summary>
+    /// The working links of a private room that cover the file: set on the file, on a folder above it or on the room.
+    /// </summary>
+    private async Task<HashSet<Guid>> GetCoveringLinksAsync<T>(File<T> file, Folder<T> room)
+    {
+        if (file is not File<int> internalFile || room is not Folder<int> internalRoom)
+        {
+            return [];
+        }
+
+        var links = await shareLinkKeyDao.GetWorkingLinksInRoomAsync(internalRoom.Id);
+        if (links.Count == 0)
+        {
+            return [];
+        }
+
+        var folderIds = await daoFactory.GetCacheFolderDao<int>().GetParentFoldersAsync(internalFile.ParentId)
+            .Select(f => f.Id)
+            .ToHashSetAsync();
+
+        return links.Where(l => l.Covers(internalFile.Id, folderIds)).Select(l => l.LinkId).ToHashSet();
     }
 
     // demandFileKeys refuses a private room whose encrypted files the new owner could not open. The call that reassigns the

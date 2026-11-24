@@ -62,6 +62,68 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
     }
 
     /// <summary>
+    /// A target that answers every request with 200, for a subscription whose journal is read from the database: the
+    /// subscription is saved only when its address answers the HEAD probe. It listens on the loopback alias the
+    /// integration-test blacklist leaves open (<c>Constants.WebhookReceiverHost</c>), on a port of its own, so it
+    /// does not collide with the receiver of the Web.Api suite when both suites run at once.
+    /// </summary>
+    private static readonly Lazy<WireMock.Server.WireMockServer> _webhookTarget = new(() =>
+    {
+        var server = WireMock.Server.WireMockServer.Start(new WireMock.Settings.WireMockServerSettings
+        {
+            Urls = [$"http://{ASC.AppHost.Configuration.Constants.WebhookReceiverHost}:18091"]
+        });
+
+        server.Given(WireMock.RequestBuilders.Request.Create().UsingAnyMethod())
+            .RespondWith(WireMock.ResponseBuilders.Response.Create().WithStatusCode(200).WithBody("ok"));
+
+        return server;
+    });
+
+    /// <summary>Subscribes the portal to the triggers as <paramref name="user"/> (the owner by default) and returns the subscription's id.</summary>
+    protected async Task<int> SubscribeToWebhook(WebhookTrigger triggers, User? user = null)
+    {
+        await _webApiClient.Authenticate(user ?? Owner);
+
+        var config = await _webhooksApi.CreateWebhookAsync(
+            new CreateWebhooksConfigRequestDto(
+                name: $"webhook-{Guid.NewGuid():N}"[..20],
+                uri: $"{_webhookTarget.Value.Url}/hooks/{Guid.NewGuid():N}",
+                // the secret passes the password rules of the portal: 8 to 30 Latin letters
+                secretKey: "Secret" + new string([.. Guid.NewGuid().ToString("N").Select(c => (char)('a' + (c % 26)))])[..20],
+                enabled: true,
+                ssl: false,
+                triggers: triggers),
+            TestContext.Current.CancellationToken);
+
+        return config.Response.Id;
+    }
+
+    /// <summary>The token a document server wraps its callback in. The secret is the one the stack gives the editors and the services.</summary>
+    /// <summary>The audit records of this portal with the action whose description names the id.</summary>
+    protected async Task<long> AuditRecords(int action, Guid mentioned)
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT COUNT(*) FROM audit_events WHERE tenant_id = @tenant AND action = @action AND description LIKE @mentioned;";
+        command.Parameters.AddWithValue("@tenant", TenantId);
+        command.Parameters.AddWithValue("@action", action);
+        command.Parameters.AddWithValue("@mentioned", $"%{mentioned}%");
+
+        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    protected static string SignAsDocumentServer(string payload)
+    {
+        static string Encode(byte[] bytes) => Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+        var content = $"{Encode(Encoding.UTF8.GetBytes("""{"alg":"HS256","typ":"JWT"}"""))}.{Encode(Encoding.UTF8.GetBytes(payload))}";
+
+        return $"{content}.{Encode(HMACSHA256.HashData(Encoding.UTF8.GetBytes("secret"), Encoding.UTF8.GetBytes(content)))}";
+    }
+
+    /// <summary>
     /// Polls <paramref name="probe"/> on a deadline until <paramref name="until"/> is satisfied, for
     /// state that is written asynchronously (key deletion propagating to room-access checks). Never
     /// throws on timeout — it returns the last observed value so the caller's own assertion message

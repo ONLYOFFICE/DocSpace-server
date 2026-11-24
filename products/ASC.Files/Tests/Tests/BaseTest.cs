@@ -55,6 +55,9 @@ public class BaseTest(
     /// <summary>The assembly's Aspire host, for the rare test that has to reach past the API.</summary>
     protected AspireAppFixture Fixture => fixture;
 
+    /// <summary>A client of this portal that returns a redirect with its <c>Location</c> instead of following it.</summary>
+    protected HttpClient CreateClientWithoutRedirects(string resourceName) => _clients.CreateClientWithoutRedirects(resourceName);
+
     protected HttpClient _filesClient = null!;
     protected HttpClient _peopleClient = null!;
     protected HttpClient _webApiClient = null!;

@@ -137,7 +137,9 @@ public class PrivacyRoomControllerCommon(
     /// Returns the encryption keys of all members of a private room, one entry per key. An app uses them to encrypt a
     /// file key for every member. Requires membership in the room, with any access level, and a key of the caller's
     /// own. Other callers get 403. A DocSpace admin who is not a member also gets 403. The call is read-only. Only the
-    /// caller's own entries include `privateKeyEnc`. The call skips entries without a public key. An archived private
+    /// caller's own entries include `privateKeyEnc`. The call skips entries without a public key. The answer also has one
+    /// entry with `isLink` true for each working external link of the room or of an item in it. A link entry carries the
+    /// link's id and public key, never `privateKeyEnc`. A revoked or expired link is not listed. An archived private
     /// room still returns its keys. To get the keys of one file, use `GET api/2.0/files/file/{fileId}/publickeys`. To
     /// get the keys of users before you invite them, use `GET api/2.0/privacyroom/{roomId}/access/candidates`. If the
     /// room is not private, the call returns 400. If the room is unknown or in Trash, the call returns 404.
@@ -195,7 +197,9 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Returns the encrypted files of a private room that each user cannot open yet, in all folders of the room. An app
     /// then writes only the missing keys with `PUT api/2.0/files/{fileId}/access`. With `userIds`, the call checks
-    /// these users, members or not. Without `userIds`, it checks the members of the room and the room owner. Before
+    /// these users, members or not, and the links of the room named there. Without `userIds`, it checks the members of the
+    /// room, the room owner and every working external link of the room or of an item in it. A link is checked only for
+    /// the files it opens, and its entry has `isLink` true. Before
     /// you change the room owner with `POST api/2.0/files/owner`, check the new owner here. That call refuses a new
     /// owner who misses a key. Requires the right to change the access of the room, which the room owner and room
     /// managers have. Other callers get 403. A DocSpace admin who is not a member also gets 403. It also returns 403

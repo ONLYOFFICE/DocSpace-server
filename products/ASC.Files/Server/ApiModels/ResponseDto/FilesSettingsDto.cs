@@ -283,6 +283,13 @@ public class FilesSettingsDto
     public bool ExternalShare { get; set; }
 
     /// <summary>
+    /// Whether external links of items in private rooms may be created and opened in this portal. Set portal-wide by an
+    /// administrator, separately from `externalShare`; while it is false, the links stored before stay and open nothing.
+    /// </summary>
+    /// <example>true</example>
+    public bool PrivateRoomLinks { get; set; }
+
+    /// <summary>
     /// Whether the share-to-network buttons are offered next to an external link. It is reported as false whenever
     /// external sharing itself is off.
     /// </summary>
@@ -533,6 +540,7 @@ public class FilesSettingsDtoConverter(
             ConfirmDelete = await filesSettingsHelper.GetConfirmDelete(),
             EnableThirdParty = await filesSettingsHelper.GetEnableThirdParty(),
             ExternalShare = await filesSettingsHelper.GetExternalShare(),
+            PrivateRoomLinks = await filesSettingsHelper.GetPrivateRoomLinks(),
             ExternalShareSocialMedia = await filesSettingsHelper.GetExternalShareSocialMedia(),
             StoreOriginalFiles = await filesSettingsHelper.GetStoreOriginalFiles(),
             KeepNewFileName = await filesSettingsHelper.GetKeepNewFileName(),

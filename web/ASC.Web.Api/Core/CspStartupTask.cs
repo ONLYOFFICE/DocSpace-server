@@ -64,19 +64,24 @@ public class CspStartupTask(
 
         var currentHeaderValue = await helper.CreateHeaderAsync(null, false);
 
-        if (oldHeaderValue != currentHeaderValue || oldScheme)
+        // The value for the page of a link of a private item follows the same defaults; a portal cached before it existed
+        // has none, so the pass also runs when it is missing or out of date.
+        var oldPrivateLinkValue = await cache.GetOrDefaultAsync<string>(CspSettingsHelper.GetPrivateLinkKey(HeaderKey), token: cancellationToken);
+        var currentPrivateLinkValue = await helper.CreateHeaderAsync(null, false, privateLink: true);
+
+        if (oldHeaderValue != currentHeaderValue || oldPrivateLinkValue != currentPrivateLinkValue || oldScheme)
         {
             var tenantService = provider.GetService<ITenantService>();
             var tenants = await tenantService.GetTenantsAsync((DateTime)default);
             var t = Task.Run(async () =>
             {
-                await Update(tenants, currentHeaderValue, cancellationToken);
+                await Update(tenants, currentHeaderValue, currentPrivateLinkValue, cancellationToken);
             }, cancellationToken);
             _ = t.ConfigureAwait(false);
         }
     }
 
-    private async Task Update(IEnumerable<Tenant> tenants, string currentHeaderValue, CancellationToken cancellationToken)
+    private async Task Update(IEnumerable<Tenant> tenants, string currentHeaderValue, string currentPrivateLinkValue, CancellationToken cancellationToken)
     {
         foreach (var t in tenants)
         {
@@ -100,5 +105,6 @@ public class CspStartupTask(
         }
 
         await cache.SetAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
+        await cache.SetAsync(CspSettingsHelper.GetPrivateLinkKey(HeaderKey), currentPrivateLinkValue, token: cancellationToken);
     }
 }

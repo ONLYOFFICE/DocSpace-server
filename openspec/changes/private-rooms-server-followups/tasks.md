@@ -166,4 +166,32 @@
     call answers 200 before the switch. No product change, so nothing to prove red.
 - Client item 1.8 (a failed revocation leaves the member in the room with their keys): the order is in the code
   (decision 5, revocation before the access record), but no test makes the revocation fail. The stand cannot fail one DAO
-  call, and there is no decision to move into a unit test: it is the order of two writes. Not proven.
+  call, and there is no decision to move into a unit test: it is the order of two writes. Not proven. The client accepted
+  the code reading on 2026-11-23 and asked to record the case left over (task 11.3).
+
+## 11. Client answers of 2026-11-23
+
+- [x] 11.1 Data migration (design decision 19): for every account in the guests group, delete its access records on
+  private rooms and on entries inside them, its rows in `files_file_keys` and its `e2e` row in `account_links`; no audit
+  record. Check which migration projects it goes into (MySQL SaaS, and whether `migrations/mysql/Standalone` needs it too).
+  Test for "Guest made before this requirement": a guest given access to a private room and keys directly in the
+  database is out of the room with no keys after the migration runs, and a member who is not a guest keeps both.
+  - 2026-11-24: `MigrationContext_Upgrade113` (MySQL SaaS, SQL only, the designer a copy of Upgrade112 since the model
+    does not change): the access records of guests on private rooms and on folders and files in them, their
+    `files_file_keys` rows and their `e2e` rows of `account_links`; no record of any kind. Not in
+    `migrations/mysql/Standalone`: its snapshot does not hold the private room tables (design of private-rooms-external-
+    links, Migration Plan). `T/PrivateRoomGuestCleanupMigrationTests.cs` plants a guest's records and runs the migration's
+    statements (the Files suite references the migrations project); prove-red.sh --patch: RED as expected, 1 of 1.
+- [x] 11.2 Write `PrivacyRoomKeyDeleted` once per deleted key when `LeavePrivateRoomsAsync` deletes the key pair of a new
+  guest, after the deletion and in a catch of its own (design decision 20); extend
+  `T/PrivateRoomGuestDemotionTests.cs` to read the records, and add a test that `POST`, `PUT` and `DELETE`
+  `privacyroom/keys` write `PrivacyRoomKeyCreated`, `PrivacyRoomKeyUpdated` and `PrivacyRoomKeyDeleted` (none has a test
+  today).
+  - 2026-11-24: `PrivateRoomAccountHelper.LeavePrivateRoomsAsync` reads the key ids before the deletion and writes one
+    record per key after it, in a catch of its own, through `SendHeadersMessage` (the type change is a background job, and
+    the request overloads record nothing outside a request). `T/PrivateRoomGuestDemotionTests.cs` reads the record;
+    `T/PrivacyRoomKeyAuditTests.cs` covers the three key routes. prove-red.sh --patch: RED as expected, 1 of 3 failed
+    without the change (the other two are the ownership cases of the class).
+- [x] 11.3 Record the case left by client item 1.8 (the access record fails after the file keys were revoked, so the
+  member stays in the room without keys) as deviation PR7 in `openspec/deviations.md`.
+  - 2026-11-23: row PR7 under "Access and integrity".

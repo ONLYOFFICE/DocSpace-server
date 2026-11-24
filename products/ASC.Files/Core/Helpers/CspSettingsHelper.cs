@@ -117,6 +117,7 @@ public class CspSettingsHelper(
         }
 
         var headerValue = await CreateHeaderAsync(domains);
+        var privateLinkHeaderValue = await CreateHeaderAsync(domains, privateLink: true);
         var defaultOptions = configuration.GetSection("csp:default").Get<CspOptions>();
         if (!string.IsNullOrEmpty(headerValue) && Encoding.UTF8.GetByteCount(headerValue) > defaultOptions.MaxSize)
         {
@@ -130,6 +131,16 @@ public class CspSettingsHelper(
         else
         {
             await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.RemoveAsync(headerKey, token: cs));
+        }
+
+        // Beside every key of the full value, under the same host: the proxy sends it on the page of a link of a private item.
+        if (!string.IsNullOrEmpty(privateLinkHeaderValue))
+        {
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.SetAsync(GetPrivateLinkKey(headerKey), privateLinkHeaderValue, token: cs));
+        }
+        else
+        {
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.RemoveAsync(GetPrivateLinkKey(headerKey), token: cs));
         }
 
         if (updateInDb)
@@ -180,6 +191,13 @@ public class CspSettingsHelper(
             await hybridCache.RemoveAsync(oldKey);
             await hybridCache.SetAsync(GetKey(newDomain), val);
         }
+
+        var privateLinkValue = await hybridCache.GetOrDefaultAsync<string>(GetPrivateLinkKey(oldKey));
+        if (!string.IsNullOrEmpty(privateLinkValue))
+        {
+            await hybridCache.RemoveAsync(GetPrivateLinkKey(oldKey));
+            await hybridCache.SetAsync(GetPrivateLinkKey(GetKey(newDomain)), privateLinkValue);
+        }
     }
 
     public async Task UpdateBaseDomainAsync()
@@ -211,11 +229,19 @@ public class CspSettingsHelper(
         }
 
         await hybridCache.SetAsync(GetKey(baseDomain), val);
+
+        var privateLinkValue = await hybridCache.GetOrDefaultAsync<string>(GetPrivateLinkKey(GetKey(domain)));
+        await hybridCache.SetAsync(GetPrivateLinkKey(GetKey(baseDomain)), privateLinkValue);
     }
 
-    public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)
+    /// <summary>
+    /// Builds the Content-Security-Policy value of the portal. With <paramref name="privateLink"/>, the value of the page
+    /// that opens a link of a private item: the defaults, the storage and the Document Server only, without the domains
+    /// of the CSP settings, plugins and the integrations, whose scripts could read the secret in the address.
+    /// </summary>
+    public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true, bool privateLink = false)
     {
-        domains ??= [];
+        domains = privateLink ? [] : domains ?? [];
 
         var options = domains.Select(r => new CspOptions(r)).ToList();
 
@@ -251,6 +277,11 @@ public class CspSettingsHelper(
         if (Uri.IsWellFormedUriString(docServiceUrl, UriKind.Absolute))
         {
             options.Add(new CspOptions { Script = [docServiceUrl], Frame = [docServiceUrl], Connect = [docServiceUrl] });
+        }
+
+        if (privateLink)
+        {
+            return Build(options);
         }
 
         var firebaseDomain = configuration["firebase:authDomain"];
@@ -305,6 +336,11 @@ public class CspSettingsHelper(
             }
         }
 
+        return Build(options);
+    }
+
+    private static string Build(List<CspOptions> options)
+    {
         var csp = new CspBuilder();
 
         foreach (var domain in options.SelectMany(r => r.Def).Distinct())
@@ -356,6 +392,7 @@ public class CspSettingsHelper(
     {
         var headerKey = GetKey(domain);
         await hybridCache.RemoveAsync(headerKey);
+        await hybridCache.RemoveAsync(GetPrivateLinkKey(headerKey));
     }
 
     public async Task<bool> ExistsInCacheAsync()
@@ -366,8 +403,9 @@ public class CspSettingsHelper(
 
         try
         {
+            // A portal whose values were cached before the value for links of private items existed is saved again.
             var val = await hybridCache.GetOrDefaultAsync<string>(key);
-            return !string.IsNullOrEmpty(val);
+            return !string.IsNullOrEmpty(val) && !string.IsNullOrEmpty(await hybridCache.GetOrDefaultAsync<string>(GetPrivateLinkKey(key)));
         }
         catch (FusionCacheSerializationException)
         {
@@ -379,6 +417,12 @@ public class CspSettingsHelper(
     private static string GetKey(string domain)
     {
         return $"csp:{domain}";
+    }
+
+    /// <summary>The key of the value for the page of a link of a private item, beside the full one: <c>csp:{host}:private</c>.</summary>
+    public static string GetPrivateLinkKey(string headerKey)
+    {
+        return $"{headerKey}:private";
     }
 }
 

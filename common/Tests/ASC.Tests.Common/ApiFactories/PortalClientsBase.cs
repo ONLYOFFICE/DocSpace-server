@@ -48,7 +48,8 @@ public sealed record PortalContext(
     int TenantId,
     User Owner,
     IReadOnlyDictionary<string, Uri> BaseAddresses,
-    Func<Uri, string?, HttpClient> CreateClient);
+    Func<Uri, string?, HttpClient> CreateClient,
+    Func<Uri, string?, HttpClient> CreateClientWithoutRedirects);
 
 /// <summary>
 /// A self-contained set of HTTP clients bound to a single portal via the <c>Origin</c> header.
@@ -127,7 +128,22 @@ public abstract class PortalClientsBase : IDisposable
         return await PortalSocket.ConnectAsync(PortalName, user.Token, cancellationToken);
     }
 
-    private HttpClient NewHttpClient(string resourceName)
+    /// <summary>
+    /// Creates a client for the given Aspire resource, bound to this portal and able to sign in, that returns a redirect
+    /// with its <c>Location</c> instead of following it. The client is disposed together with the bundle.
+    /// </summary>
+    public HttpClient CreateClientWithoutRedirects(string resourceName)
+    {
+        var client = NewHttpClient(resourceName, _context.CreateClientWithoutRedirects);
+
+        Initializer.RegisterAuthApi(client, WebApi);
+
+        return client;
+    }
+
+    private HttpClient NewHttpClient(string resourceName) => NewHttpClient(resourceName, _context.CreateClient);
+
+    private HttpClient NewHttpClient(string resourceName, Func<Uri, string?, HttpClient> create)
     {
         if (!_context.BaseAddresses.TryGetValue(resourceName, out var baseAddress))
         {
@@ -136,7 +152,7 @@ public abstract class PortalClientsBase : IDisposable
         }
 
         // The clients are per-test (own Origin/Auth headers) but share the fixture's connection pool.
-        var client = _context.CreateClient(baseAddress, $"http://{PortalName}");
+        var client = create(baseAddress, $"http://{PortalName}");
 
         _httpClients.Add(client);
 

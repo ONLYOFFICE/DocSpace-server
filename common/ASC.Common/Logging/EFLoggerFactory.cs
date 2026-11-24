@@ -52,8 +52,18 @@ public class EFLoggerFactory(ILoggerFactory loggerFactory) : ILoggerFactory
     public void Dispose() { }
 }
 
-public class EFLogger(ILogger logger) : ILogger
+public partial class EFLogger(ILogger logger) : ILogger
 {
+    internal const string RedactedParameters = "[redacted]";
+
+    // The key material of private rooms and of their external links: sealed private keys, the proof hash of a link,
+    // the wraps of file keys and of link secrets. A command that writes these tables is logged without its parameter
+    // values, which the SQL log would otherwise keep (sensitive data logging is on), so they never reach a log file
+    // or the OTLP exporter. Reads keep their parameters: they bind ids only, never the values.
+    [GeneratedRegex(@"\b(INSERT\s+INTO|UPDATE)\s+[`""]?(files_share_link_keys|files_share_link_secret_wraps|files_file_keys)[`""]?(\s|\()",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex WritesKeyMaterial();
+
     public IDisposable BeginScope<TState>(TState state)
     {
         return logger.BeginScope(state);
@@ -69,6 +79,16 @@ public class EFLogger(ILogger logger) : ILogger
         switch (eventId.Id)
         {
             case 20101:
+                if (TryRedact(state, out var redacted, out var parameters))
+                {
+                    logger.Log(LogLevel.Debug,
+                        default,
+                        redacted,
+                        exception,
+                        (_, e) => formatter(state, e).Replace(parameters, RedactedParameters));
+                    break;
+                }
+
                 logger.Log(LogLevel.Debug,
                         default,
                         state,
@@ -76,5 +96,45 @@ public class EFLogger(ILogger logger) : ILogger
                         formatter);
                 break;
         }
+    }
+
+    /// <summary>
+    /// Gives the properties of a logged command with the parameter values replaced, when the command writes key material.
+    /// </summary>
+    internal static bool TryRedact<TState>(TState state, out IReadOnlyList<KeyValuePair<string, object>> redacted, out string parameters)
+    {
+        redacted = null;
+        parameters = null;
+
+        if (state is not IReadOnlyList<KeyValuePair<string, object>> properties)
+        {
+            return false;
+        }
+
+        string commandText = null;
+        foreach (var (key, value) in properties)
+        {
+            switch (key)
+            {
+                case "commandText":
+                    commandText = value as string;
+                    break;
+                case "parameters":
+                    parameters = value as string;
+                    break;
+            }
+        }
+
+        if (string.IsNullOrEmpty(parameters) || commandText == null || !WritesKeyMaterial().IsMatch(commandText))
+        {
+            parameters = null;
+            return false;
+        }
+
+        redacted = properties
+            .Select(p => p.Key == "parameters" ? new KeyValuePair<string, object>(p.Key, RedactedParameters) : p)
+            .ToList();
+
+        return true;
     }
 }

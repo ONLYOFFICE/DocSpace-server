@@ -181,6 +181,20 @@ public class FileShareLink
     public string LinkPublicKey { get; set; }
 
     /// <summary>
+    /// For an external link of an item in a private room: the link's secret wrapped for the caller, who manages the
+    /// room's links. Null when no manager has wrapped it for the caller yet, and on every other link.
+    /// </summary>
+    public LinkSecretWrapDto LinkSecretWrap { get; set; }
+
+    /// <summary>
+    /// For an external link of an item in a private room: the room owner and room managers the link's secret is not
+    /// wrapped for, ordered by id; a manager who has the address can wrap it for them. Empty when every one has a wrap,
+    /// null on every other link.
+    /// </summary>
+    /// <example>["4f9c6a1e-2b7d-4c3a-9e8f-1a2b3c4d5e6f"]</example>
+    public List<Guid> ManagersWithoutLinkSecretWrap { get; set; }
+
+    /// <summary>
     /// Whether visitors coming through this link may only read the entry in the editor and not download or print it.
     /// </summary>
     /// <example>false</example>
@@ -300,6 +314,8 @@ public class FileShareDtoHelper(
                     aceWrapper.FileShareOptions?.PasswordRequired != null)
                 {
                     result.SharedLink.LinkPublicKey = (await shareLinkKeyDao.GetAsync(aceWrapper.Id))?.PublicKey;
+                    result.SharedLink.LinkSecretWrap = aceWrapper.OwnLinkSecretWrap?.Map();
+                    result.SharedLink.ManagersWithoutLinkSecretWrap = aceWrapper.ManagersWithoutLinkSecretWrap;
                 }
 
                 if (result.SharedLink.LinkType == LinkType.Invitation)

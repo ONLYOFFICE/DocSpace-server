@@ -290,8 +290,9 @@ public class FolderDtoHelper(
     IFusionCache fusionCache,
     MetadataTemplatesCache metadataTemplatesCache,
     AiProjectRoomDao aiProjectRoomDao,
+    ShareLinkKeyDao shareLinkKeyDao,
     ILogger<FileEntryDtoHelper> logger)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, builtinFormsDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, builtinFormsDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, shareLinkKeyDao, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
     private readonly TenantManager _tenantManager = tenantManager;

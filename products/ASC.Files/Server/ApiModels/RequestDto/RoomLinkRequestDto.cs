@@ -122,6 +122,13 @@ public class RoomLinkRequest
     public bool? PasswordRequired { get; set; }
 
     /// <summary>
+    /// For an item of a private room: the link's secret wrapped by the browser for the room owner and room managers,
+    /// one wrap per user, so that each of them can copy the full address later. It may come without the key fields, to
+    /// add the wrap of a manager to an existing link.
+    /// </summary>
+    public List<LinkSecretWrapRequest> LinkSecretWraps { get; set; }
+
+    /// <summary>
     /// Whether people arriving through the link are stopped from downloading and printing what they open. They can
     /// still read the documents in the editor.
     /// </summary>

@@ -34,8 +34,11 @@ it is merged yet. This change takes the items that belong to the server's own co
   record; disabling the owner of a private room is refused with 403 until the room has another owner. An account disabled
   any other way (an LDAP synchronization) loses its file keys too, shortly after, through the Files worker.
 - **BREAKING** A user made a guest (`startUserTypeUpdate`) leaves every private room: their own private rooms go to the
-  recipient, their file keys and key pair are deleted. If the recipient cannot open a room they would get, the call
-  answers 403 before anything changes. The refusals about owned private rooms carry an `error.type` of their own.
+  recipient, their file keys and key pair are deleted, and the audit trail records the deleted keys. If the recipient
+  cannot open a room they would get, the call answers 403 before anything changes. The refusals about owned private
+  rooms carry an `error.type` of their own.
+- **BREAKING** A data migration takes the guests made before this change out of the private rooms and deletes their
+  file keys and key pair, without audit records (private rooms have not been released, so the data is small).
 - **BREAKING** A DocSpace admin who is a member of a private room, in any role, may change its owner with
   `changeFileOwner`; the new owner must still hold every file key. Today only the owner may, so a room whose owner a
   directory synchronization disabled, or whose owner was removed, could not get a new one.
@@ -113,6 +116,9 @@ room, and the new rules for private rooms are added to `private-rooms`.
 
 - PR2 ("A private room or its subfolder can be added to Favorites") is fixed by this change.
 - PR6 (titles in letters in the default culture) is kept: translators add the resources.
+- PR7 (a member left in a private room without file keys when the access record fails after the revocation) is added
+  by this change, at the client's request of 2026-11-23: the order of decision 5 chooses that state over a former
+  member who keeps keys.
 
 ## Out of scope
 
@@ -138,4 +144,7 @@ room, and the new rules for private rooms are added to `private-rooms`.
 - `products/ASC.People/Server/Api/UserController.cs` (disabling); `common/ASC.Core.Common/Context/Impl/UserManager.cs` and
   `common/ASC.Core.Common/Users/UserDisabledIntegrationEvent.cs` (the announcement),
   `products/ASC.Files/Worker/IntegrationEvents/EventHandling/UserDisabledIntegrationEventHandler.cs` (its handler).
+- `common/ASC.Data.Reassigns/UpdateUserTypeProgressItem.cs` and `products/ASC.Files/Core/Helpers/PrivateRoomAccountHelper.cs`
+  (a user made a guest, its key deletion records); a data migration in `migrations/mysql/SaaS` for the guests made before
+  this change (decision 19).
 - The OpenAPI documents and the SDKs; the web client after this lands.

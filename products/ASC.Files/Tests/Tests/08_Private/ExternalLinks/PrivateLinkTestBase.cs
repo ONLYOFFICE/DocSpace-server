@@ -56,6 +56,7 @@ public abstract class PrivateLinkTestBase(AspireAppFixture fixture) : PrivacyRoo
         public string? LinkPrivateKeyEnc { get; set; } = RandomBase64(96);
         public string? LinkProofHash { get; set; } = RandomBase64(32);
         public bool? PasswordRequired { get; set; } = true;
+        public SecretWrap[]? LinkSecretWraps { get; set; }
 
         public LinkBody WithoutKeys()
         {
@@ -65,6 +66,65 @@ public abstract class PrivateLinkTestBase(AspireAppFixture fixture) : PrivacyRoo
 
             return this;
         }
+    }
+
+    /// <summary>A wrap of a link's secret for one user who manages the room's links.</summary>
+    protected sealed record SecretWrap(Guid UserId, Guid PublicKeyId, string Wrap)
+    {
+        public static SecretWrap For(Guid userId) => new(userId, Guid.NewGuid(), RandomBase64(80));
+    }
+
+    /// <summary>The links of a room with their key fields, read raw: the SDK model of a link has no key fields yet.</summary>
+    protected async Task<List<JsonElement>> RoomLinksJson(int roomId)
+    {
+        using var response = await Raw.GetAsync($"api/2.0/files/rooms/{roomId}/links", TestContext.Current.CancellationToken);
+        ((int)response.StatusCode).Should().Be(200);
+
+        return [.. (await Raw.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken)).EnumerateArray().Select(l => l.GetProperty("sharedTo"))];
+    }
+
+    /// <summary>A link secret's proof and what the creator's browser stores for it.</summary>
+    protected sealed record Proof(string Value, string Hash)
+    {
+        public static Proof New()
+        {
+            var bytes = RandomNumberGenerator.GetBytes(32);
+
+            return new Proof(Convert.ToBase64String(bytes), Convert.ToBase64String(SHA256.HashData(bytes)));
+        }
+    }
+
+    /// <summary>
+    /// Sends the proof on the caller's current identity and returns the cookies of the link session it opens, as a
+    /// browser keeps them; the test client keeps none.
+    /// </summary>
+    protected async Task<string[]> OpenLinkSession(string token, Proof proof)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/2.0/files/share/{Uri.EscapeDataString(token)}/password")
+        {
+            Content = JsonContent.Create(new { proof = proof.Value })
+        };
+
+        using var response = await _filesClient.SendAsync(request, TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return response.Headers.TryGetValues("Set-Cookie", out var values) ? [.. values.Select(v => v.Split(';')[0])] : [];
+    }
+
+    private static readonly JsonSerializerOptions _withoutNulls = new(JsonSerializerDefaults.Web) { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+
+    /// <summary>Sends a request on the caller's current identity, on a link token and with the cookies of its session.</summary>
+    protected async Task<HttpResponseMessage> SendOnLink(HttpMethod method, string path, string token, IEnumerable<string> cookies, object? body = null)
+    {
+        using var request = new HttpRequestMessage(method, path);
+        request.Headers.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, token);
+        request.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", cookies));
+        if (body != null)
+        {
+            request.Content = JsonContent.Create(body, options: _withoutNulls);
+        }
+
+        return await _filesClient.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
     protected static string RandomBase64(int bytes) => Convert.ToBase64String(RandomNumberGenerator.GetBytes(bytes));

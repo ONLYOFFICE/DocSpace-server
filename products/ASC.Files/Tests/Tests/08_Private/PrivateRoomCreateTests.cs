@@ -113,43 +113,7 @@ public class PrivateRoomCreateTests(AspireAppFixture fixture) : PrivacyRoomTestB
         (await CountRows(audit, title)).Should().Be(0);
     }
 
-    /// <summary>
-    /// A target that answers every request with 200, for a subscription whose journal is read from the database: the
-    /// subscription is saved only when its address answers the HEAD probe. It listens on the loopback alias the
-    /// integration-test blacklist leaves open (<c>Constants.WebhookReceiverHost</c>), on a port of its own, so it
-    /// does not collide with the receiver of the Web.Api suite when both suites run at once.
-    /// </summary>
-    private static readonly Lazy<WireMock.Server.WireMockServer> _webhookTarget = new(() =>
-    {
-        var server = WireMock.Server.WireMockServer.Start(new WireMock.Settings.WireMockServerSettings
-        {
-            Urls = [$"http://{ASC.AppHost.Configuration.Constants.WebhookReceiverHost}:18091"]
-        });
-
-        server.Given(WireMock.RequestBuilders.Request.Create().UsingAnyMethod())
-            .RespondWith(WireMock.ResponseBuilders.Response.Create().WithStatusCode(200).WithBody("ok"));
-
-        return server;
-    });
-
-    /// <summary>Subscribes the portal to <c>RoomCreated</c> as the owner and returns the subscription's id.</summary>
-    private async Task<int> SubscribeToRoomCreated()
-    {
-        await _webApiClient.Authenticate(Owner);
-
-        var config = await _webhooksApi.CreateWebhookAsync(
-            new CreateWebhooksConfigRequestDto(
-                name: $"webhook-{Guid.NewGuid():N}"[..20],
-                uri: $"{_webhookTarget.Value.Url}/hooks/{Guid.NewGuid():N}",
-                // the secret passes the password rules of the portal: 8 to 30 Latin letters
-                secretKey: "Secret" + new string([.. Guid.NewGuid().ToString("N").Select(c => (char)('a' + (c % 26)))])[..20],
-                enabled: true,
-                ssl: false,
-                triggers: WebhookTrigger.RoomCreated),
-            TestContext.Current.CancellationToken);
-
-        return config.Response.Id;
-    }
+    private Task<int> SubscribeToRoomCreated() => SubscribeToWebhook(WebhookTrigger.RoomCreated);
 
     [Fact]
     public async Task CreateRoom_PrivateUnsupportedType_RaisesNoRoomCreatedWebhook()

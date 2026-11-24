@@ -43,6 +43,8 @@ namespace ASC.Files.Tests.Tests._08_Privacy;
 [Trait("Feature", "PrivacyRoom")]
 public class PrivateRoomGuestDemotionTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fixture)
 {
+    private const int PrivacyRoomKeyDeleted = 5163;
+
     private const string OwnershipRefusalType = "ASC.Files.Core.Helpers.PrivateRoomOwnershipException";
 
     /// <summary>Makes the user a guest through the type change job, as the portal owner, and waits for the job.</summary>
@@ -107,6 +109,8 @@ public class PrivateRoomGuestDemotionTests(AspireAppFixture fixture) : PrivacyRo
         (await MemberIds(room.Id)).Should().Contain(member.Id);
         (await FileKeyRows(member.Id)).Should().Be(1);
         (await KeyPairRows(member.Id)).Should().Be(1);
+        // InviteWithKeys gives the member the key with the all-zero id; nobody else of the portal deletes a key here.
+        (await AuditRecords(PrivacyRoomKeyDeleted, Guid.Empty)).Should().Be(0);
 
         var progress = await MakeGuest(member, Owner);
 
@@ -114,6 +118,9 @@ public class PrivateRoomGuestDemotionTests(AspireAppFixture fixture) : PrivacyRo
         (await MemberIds(room.Id)).Should().NotContain(member.Id);
         (await FileKeyRows(member.Id)).Should().Be(0);
         (await KeyPairRows(member.Id)).Should().Be(0);
+
+        // The deleted key is on record as one deleted through DELETE privacyroom/keys/{id} would be.
+        (await PollUntil(() => AuditRecords(PrivacyRoomKeyDeleted, Guid.Empty), count => count > 0)).Should().Be(1);
 
         // A guest holds no key, so the ordinary key check refuses inviting them again.
         await _filesClient.Authenticate(Owner);

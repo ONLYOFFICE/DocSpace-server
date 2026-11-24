@@ -47,6 +47,19 @@ public class ShareLinkKeyDao(IDbContextFactory<FilesDbContext> dbContextFactory,
     }
 
     /// <summary>
+    /// The working external links of a private room: those of the room itself and of every folder and file in it that
+    /// hold key material and have not expired.
+    /// </summary>
+    public async Task<List<ShareLinkInRoom>> GetWorkingLinksInRoomAsync(int roomId)
+    {
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.ShareLinksInRoomAsync(tenantManager.GetCurrentTenantId(), roomId)
+            .Where(r => r.Options is not { IsExpired: true })
+            .ToListAsync();
+    }
+
+    /// <summary>
     /// Stores the key material of a link, replacing what the link had. The public key of an existing link is checked by
     /// the caller before this call.
     /// </summary>
@@ -65,6 +78,67 @@ public class ShareLinkKeyDao(IDbContextFactory<FilesDbContext> dbContextFactory,
         });
 
         await filesDbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Stores the wraps of a link's secret, replacing the wrap each named user had; the wraps of other users stay.
+    /// </summary>
+    public async Task SaveSecretWrapsAsync(Guid linkId, IEnumerable<LinkSecretWrap> wraps)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        foreach (var wrap in wraps)
+        {
+            await filesDbContext.AddOrUpdateAsync(context => context.ShareLinkSecretWraps, new DbFilesShareLinkSecretWrap
+            {
+                TenantId = tenantId,
+                LinkId = linkId,
+                UserId = wrap.UserId,
+                PublicKeyId = wrap.PublicKeyId,
+                Wrap = wrap.Wrap,
+                CreateOn = DateTime.UtcNow
+            });
+        }
+
+        await filesDbContext.SaveChangesAsync();
+    }
+
+    /// <summary>The wrap of a link's secret made for one user, or null.</summary>
+    public async Task<DbFilesShareLinkSecretWrap> GetSecretWrapAsync(Guid linkId, Guid userId)
+    {
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.ShareLinkSecretWrapsOfUserAsync(tenantManager.GetCurrentTenantId(), [linkId], userId).FirstOrDefaultAsync();
+    }
+
+    /// <summary>The users a link's secret is wrapped for.</summary>
+    public async Task<HashSet<Guid>> GetSecretWrapUsersAsync(Guid linkId)
+    {
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.ShareLinkSecretWrapUsersAsync(tenantManager.GetCurrentTenantId(), linkId).ToHashSetAsync();
+    }
+
+    /// <summary>
+    /// Deletes the wraps of the secrets of every link of a private room, of its folders and files, made for the given
+    /// users: those who stop managing the room's links. The links themselves stay.
+    /// </summary>
+    public async Task DeleteSecretWrapsInRoomAsync(int roomId, IEnumerable<Guid> userIds)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var linkIds = await filesDbContext.ShareLinksInRoomAsync(tenantId, roomId).Select(r => r.LinkId).ToListAsync();
+        if (linkIds.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var userId in userIds)
+        {
+            await filesDbContext.DeleteShareLinkSecretWrapsOfUserAsync(tenantId, linkIds, userId);
+        }
     }
 
     /// <summary>
@@ -91,5 +165,28 @@ public class ShareLinkKeyDao(IDbContextFactory<FilesDbContext> dbContextFactory,
 
             await tr.CommitAsync();
         });
+    }
+}
+
+/// <summary>An external link with key material on a private room or on an item in it.</summary>
+public class ShareLinkInRoom
+{
+    public Guid LinkId { get; init; }
+
+    /// <summary>The room, folder or file the link is set on.</summary>
+    public int EntryId { get; init; }
+
+    public FileEntryType EntryType { get; init; }
+
+    public FileShareOptions Options { get; init; }
+
+    public string PublicKey { get; init; }
+
+    /// <summary>
+    /// Whether the link covers a file: it is set on the file itself, or on a folder above it, the room included.
+    /// </summary>
+    public bool Covers(int fileId, IReadOnlySet<int> fileFolderIds)
+    {
+        return EntryType == FileEntryType.File ? EntryId == fileId : fileFolderIds.Contains(EntryId);
     }
 }

@@ -60,7 +60,9 @@ public class UrlShortRewriter
         }
         else
         {
-            httpContext.Response.Redirect($"{httpContext.Request.Scheme}://{httpContext.Request.Host}");
+            // The empty fragment replaces the one the browser would carry over to the target: a link of a private item has
+            // its secret there, which must not reach a page of the portal.
+            httpContext.Response.Redirect($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/#");
         }
     }
 }

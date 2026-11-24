@@ -328,6 +328,11 @@ internal class PrivacyRoomActionMapper : ILocationActionMapper
                     MessageAction.PrivacyRoomKeyDeleted,
                     MessageAction.RoomFileKeysRevoked
                 ]
+            },
+            {
+                ActionType.Follow, [
+                    MessageAction.PrivateLinkOpened
+                ]
             }
         };
     }

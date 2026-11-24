@@ -315,6 +315,9 @@
   <data name="RoomFileKeysRevoked" xml:space="preserve">
     <value>File keys in the room "{0}" removed for: {1}</value>
   </data>
+  <data name="PrivateLinkOpened" xml:space="preserve">
+    <value>External link "{1}" of "{0}" opened</value>
+  </data>
   <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
     <value>Subscription balance moved to wallet: {0}</value>
   </data>

@@ -51,6 +51,7 @@ public class PrivateRoomAccountHelper(
     EncryptionLoginProvider encryptionLoginProvider,
     UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
+    MessageService messageService,
     ILogger<PrivateRoomAccountHelper> logger)
 {
     /// <summary>
@@ -161,7 +162,25 @@ public class PrivateRoomAccountHelper(
             }
         }
 
+        var stored = await encryptionLoginProvider.GetKeysAsync(userId);
+        var keyIds = string.IsNullOrEmpty(stored) ? [] : EncryptionKeyPairDtoHelper.ParseKeyIds(stored, userId);
+
         await encryptionLoginProvider.DeleteAllKeysAsync(userId);
+
+        // The same record as the deletion of a key through the privacy room routes, once per key and after the deletion;
+        // the key pair is gone either way, so a failure here is only logged. The type change runs as a background job,
+        // and only the headers overload records outside a request.
+        try
+        {
+            foreach (var keyId in keyIds)
+            {
+                messageService.SendHeadersMessage(MessageAction.PrivacyRoomKeyDeleted, MessageTarget.Create(keyId), null, keyId.ToString());
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.WarningAuditGuestKeysDeletedFailed(userId, exception);
+        }
     }
 
     /// <summary>

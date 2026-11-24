@@ -50,4 +50,11 @@ public class RoomMissingFileKeysDto
     /// </summary>
     /// <example>[1234, 1235]</example>
     public required List<int> FileIds { get; set; }
+
+    /// <summary>
+    /// True when `userId` is the id of an external link, not of a user. Its `fileIds` are then the encrypted files the
+    /// link opens that hold no wrap for it. The field is absent for a user.
+    /// </summary>
+    /// <example>true</example>
+    public bool? IsLink { get; set; }
 }

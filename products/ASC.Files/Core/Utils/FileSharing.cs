@@ -60,6 +60,8 @@ public class FileSharingAceHelper(
     EncryptionLoginProvider encryptionLoginProvider,
     FilesMessageService filesMessageService,
     ShareLinkKeyDao shareLinkKeyDao,
+    FilesSettingsHelper filesSettingsHelper,
+    PrivateRoomsGate privateRoomsGate,
     ILogger<FileSharingAceHelper> logger)
 {
     private const int MaxInvitationLinks = 1;
@@ -151,6 +153,19 @@ public class FileSharingAceHelper(
         {
             var usersLeavingPrivateRoom = await ValidatePrivateRoomMembersAsync(aceWrappers, room, shares, beforeOwnerChange);
             await RevokeFileKeysAsync(room, usersLeavingPrivateRoom);
+
+            // A room manager who gets a lower role stays a member, but no longer manages the links: the wraps of their
+            // secrets go before the role does. The owner keeps them whatever their own record says.
+            var demotedManagers = aceWrappers
+                .Where(w => !w.IsLink && w.Id != room.CreateBy && w.Access is not (FileShare.RoomManager or FileShare.None) &&
+                            shares.Get(w.Id) is { Share: FileShare.RoomManager })
+                .Select(w => w.Id)
+                .ToList();
+
+            if (demotedManagers.Count > 0 && room.Id is int privateRoomId)
+            {
+                await shareLinkKeyDao.DeleteSecretWrapsInRoomAsync(privateRoomId, demotedManagers);
+            }
         }
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
@@ -717,6 +732,12 @@ public class FileSharingAceHelper(
 
         await fileDao.DeleteFileKeysAsync(fileIds, userIds);
 
+        // Whoever leaves no longer manages the links either: the wraps of their secrets go, and the links stay.
+        if (room is { SettingsPrivate: true, Id: int roomId })
+        {
+            await shareLinkKeyDao.DeleteSecretWrapsInRoomAsync(roomId, userIds);
+        }
+
         // the array overload records the revocation outside a request too (the Files worker revokes the keys of an account
         // disabled by a directory synchronization); the two-string one drops the record when there is no request
         await filesMessageService.SendAsync(MessageAction.RoomFileKeysRevoked, room, [room.Title, string.Join(", ", userIds)]);
@@ -866,6 +887,13 @@ public class FileSharingAceHelper(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
+        // The gates that close a stored link (ExternalShare) refuse a new one too; revoking stays possible.
+        if (!await filesSettingsHelper.GetPrivateRoomLinks() || !await privateRoomsGate.IsEnabledAsync() ||
+            !ExternalShare.IsPrivateLinkAllowedIn(privateRoom))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         foreach (var w in links)
         {
             var existedShare = shares.Get(w.Id);
@@ -886,7 +914,7 @@ public class FileSharingAceHelper(
                 throw new ArgumentException(null, "linkId");
             }
 
-            if (w.KeyMaterial == null)
+            if (w.KeyMaterial is not { HasKeys: true })
             {
                 // A change of an existing link may leave its key material as it is; a new link has to bring it.
                 if (storedKey == null)
@@ -894,15 +922,26 @@ public class FileSharingAceHelper(
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
             }
-            else
+
+            if (w.KeyMaterial != null)
             {
                 w.KeyMaterial.Validate();
 
                 // A new password seals the same key pair again: the wraps made for the link stay valid only with
                 // the same public key.
-                if (storedKey != null && storedKey.PublicKey != w.KeyMaterial.PublicKey)
+                if (w.KeyMaterial.HasKeys && storedKey != null && storedKey.PublicKey != w.KeyMaterial.PublicKey)
                 {
                     throw new ArgumentException(null, "linkPublicKey");
+                }
+
+                // The secret is wrapped only for those who manage the room's links: nobody else may copy the address.
+                if (w.KeyMaterial.SecretWraps.Count > 0)
+                {
+                    var managers = await fileSharingHelper.GetLinkManagersAsync(privateRoom);
+                    if (w.KeyMaterial.SecretWraps.Any(r => !managers.Contains(r.UserId)))
+                    {
+                        throw new ArgumentException(null, "linkSecretWraps");
+                    }
                 }
             }
 
@@ -975,9 +1014,10 @@ public class FileSharingAceHelper(
                 throw new ArgumentException(null, "linkId");
             }
 
-            if (w.KeyMaterial == null)
+            if (w.KeyMaterial is not { HasKeys: true })
             {
                 await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions, owner: existedShare?.Owner);
+                await SaveLinkSecretWrapsAsync(w);
 
                 return;
             }
@@ -994,6 +1034,8 @@ public class FileSharingAceHelper(
 
                 throw;
             }
+
+            await SaveLinkSecretWrapsAsync(w);
         }
         finally
         {
@@ -1028,6 +1070,19 @@ public class FileSharingAceHelper(
 
     private static string PrivateLinkLockKey(Guid linkId) => $"{linkId}_private_link";
 
+    /// <summary>
+    /// Stores the wraps of the link's secret the request sent, after the share record: a wrap without its link opens
+    /// nothing, and a failure here leaves a working link that a repeated request gives the wraps.
+    /// </summary>
+    private async Task SaveLinkSecretWrapsAsync(AceWrapper w)
+    {
+        if (w.KeyMaterial is { SecretWraps.Count: > 0 })
+        {
+            await shareLinkKeyDao.SaveSecretWrapsAsync(w.Id, w.KeyMaterial.SecretWraps);
+        }
+    }
+
+
     private async Task PutBackLinkKeyAsync(Guid linkId, DbFilesShareLinkKey storedKey)
     {
         try
@@ -1058,6 +1113,34 @@ public class FileSharingHelper(
     UserManager userManager,
     IDaoFactory daoFactory)
 {
+    /// <summary>
+    /// Those who manage the links of a private room, and so the only users a link's secret is wrapped for: its owner and
+    /// its room managers. Read once per room and request.
+    /// </summary>
+    public async Task<HashSet<Guid>> GetLinkManagersAsync<T>(Folder<T> room)
+    {
+        var key = room.Id.ToString();
+        if (_linkManagers.TryGetValue(key, out var managers))
+        {
+            return managers;
+        }
+
+        managers = [room.CreateBy];
+        await foreach (var r in fileSecurity.GetPureSharesAsync(room, ShareFilterType.UserOrGroup, null, null))
+        {
+            if (r is { SubjectType: SubjectType.User, Share: FileShare.RoomManager })
+            {
+                managers.Add(r.Subject);
+            }
+        }
+
+        _linkManagers[key] = managers;
+
+        return managers;
+    }
+
+    private readonly Dictionary<string, HashSet<Guid>> _linkManagers = [];
+
     /// <summary>
     /// Whether the current user may set or revoke an external link of the entry. Nobody manages the access of a file
     /// or a folder of a private room (<see cref="FileSecurity"/> refuses EditAccess there), so its links belong to
@@ -1132,7 +1215,8 @@ public class FileSharing(
     InvitationService invitationService,
     ExternalShare externalShare,
     IUrlShortener urlShortener,
-    PermissionContext permissionContext)
+    PermissionContext permissionContext,
+    ShareLinkKeyDao shareLinkKeyDao)
 {
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
@@ -1785,6 +1869,18 @@ public class FileSharing(
         if (room is { FolderType: FolderType.FillingFormsRoom })
         {
             w.CanRevoke = true;
+        }
+
+        // Only those who manage the room's links read them (FileSecurity), so the reader gets the wrap made for them.
+        if (room is { SettingsPrivate: true } && record.Options?.PasswordRequired != null &&
+            record.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink)
+        {
+            var currentId = authContext.CurrentAccount.ID;
+            var own = await shareLinkKeyDao.GetSecretWrapAsync(record.Subject, currentId);
+            w.OwnLinkSecretWrap = own == null ? null : new LinkSecretWrap(own.UserId, own.PublicKeyId, own.Wrap);
+
+            var wrapped = await shareLinkKeyDao.GetSecretWrapUsersAsync(record.Subject);
+            w.ManagersWithoutLinkSecretWrap = [.. (await fileSharingHelper.GetLinkManagersAsync(room)).Where(id => !wrapped.Contains(id)).Order()];
         }
 
         return w;

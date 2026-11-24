@@ -212,6 +212,13 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("BlockExistingLinksOnRestrict")]
     public bool BlockExistingLinksOnRestrictSetting { get; set; }
 
+    /// <summary>
+    /// Whether external links of items in private rooms are switched off for the portal. The links stay stored and are
+    /// served again when they are switched on.
+    /// </summary>
+    [JsonPropertyName("DisablePrivateRoomLinks")]
+    public bool DisablePrivateRoomLinksSetting { get; set; }
+
     public FilesSettings GetDefault()
     {
         return new FilesSettings
@@ -324,6 +331,31 @@ public class FilesSettingsHelper(
         messageService.SendHeadersMessage(MessageAction.DocumentsExternalShareSettingsUpdated);
 
         return await GetExternalShare();
+    }
+
+    /// <summary>
+    /// Whether external links of items in private rooms are allowed in the portal; on by default. Read from the tenant's
+    /// settings whoever asks, since a visitor of a link has not signed in.
+    /// </summary>
+    public async Task<bool> GetPrivateRoomLinks()
+    {
+        return !(await GetTenantFilesSettingsAsync()).DisablePrivateRoomLinksSetting;
+    }
+
+    public async Task<bool> ChangePrivateRoomLinksSettingsAsync(bool enable)
+    {
+        if (!await global.IsDocSpaceAdministratorAsync)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var settings = await Load();
+        settings.DisablePrivateRoomLinksSetting = !enable;
+        await Save(settings);
+
+        messageService.SendHeadersMessage(MessageAction.DocumentsExternalShareSettingsUpdated);
+
+        return await GetPrivateRoomLinks();
     }
 
     public async Task<bool> ChangeExternalShareSocialMediaSettingsAsync(bool enable)

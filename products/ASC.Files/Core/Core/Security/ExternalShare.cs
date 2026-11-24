@@ -44,16 +44,37 @@ public class ExternalShare(
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
     CoreSettings coreSettings,
-    FilesSettingsHelper filesSettingsHelper)
+    FilesSettingsHelper filesSettingsHelper,
+    ShareLinkKeyDao shareLinkKeyDao,
+    PrivateRoomsGate privateRoomsGate)
 {
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
+    private readonly Dictionary<Guid, DbFilesShareLinkKey> _linkKeys = [];
     private const string RoomLinkPattern = "rooms/share?key={0}";
+    private const string PrivateLinkPath = "share/private";
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
         var key = await CreateShareKeyAsync(linkId);
         string url = null;
+
+        // Every link of a private item opens the visitor's page, which decrypts in the browser: the ordinary addresses
+        // would serve ciphertext or an editor that cannot open it, under the policy of the whole portal.
+        if (await DocSpaceHelper.IsOrLocatedInPrivateRoomAsync(entry, daoFactory.GetCacheFolderDao<T>()))
+        {
+            url = QueryHelpers.AddQueryString(PrivateLinkPath, "key", key);
+            if (entry is Folder<T> { IsRoom: false } privateFolder)
+            {
+                url = QueryHelpers.AddQueryString(url, "folder", privateFolder.Id.ToString()!);
+            }
+
+            return new LinkData
+            {
+                Url = commonLinkUtility.GetFullAbsolutePath(url),
+                Token = key
+            };
+        }
 
         switch (entry)
         {
@@ -95,7 +116,7 @@ public class ExternalShare(
         return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
 
-    public async Task<Status> ValidateRecordAsync<T>(FileShareRecord<T> record, string password, bool isAuthenticated, FileEntry entry = null)
+    public async Task<Status> ValidateRecordAsync<T>(FileShareRecord<T> record, string password, bool isAuthenticated, FileEntry entry = null, string proof = null)
     {
         if (record.SubjectType is not (SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) ||
             record.Options == null)
@@ -127,11 +148,16 @@ public class ExternalShare(
         }
 
         // A link of an item in a private room (the only kind that stores PasswordRequired) opens only against the proof
-        // that the creator's browser derived from the link's secret, with a password or without one. No proof is
-        // accepted yet, so such a link always asks for it and nothing is served on its address alone.
+        // that the visitor's page derives from the link's secret, with a password or without one, so nothing is served
+        // on its address alone. A password sent for such a link is not looked at.
         if (record.Options.PasswordRequired != null)
         {
-            return Status.RequiredPassword;
+            if (!await IsPrivateLinkOpenAsync(record, entry))
+            {
+                return Status.Invalid;
+            }
+
+            return await ValidatePrivateLinkAsync(record.Subject, proof);
         }
 
         if (string.IsNullOrEmpty(record.Options.Password))
@@ -171,6 +197,97 @@ public class ExternalShare(
         }
 
         cookiesManager.ClearCookies(CookiesType.ShareLink, record.Subject.ToString());
+
+        return Status.InvalidPassword;
+    }
+
+    /// <summary>
+    /// The gates of a link of a private item, which close it without deleting it: the portal setting, the end-to-end
+    /// encrypted rooms app, an archived room, and the room-wide restriction on downloading of a private Virtual Data Room.
+    /// </summary>
+    private async Task<bool> IsPrivateLinkOpenAsync<T>(FileShareRecord<T> record, FileEntry entry)
+    {
+        if (!await filesSettingsHelper.GetPrivateRoomLinks() || !await privateRoomsGate.IsEnabledAsync())
+        {
+            return false;
+        }
+
+        // The records come typed by the caller (a string for a link token); a private room is internal, so its ids are ints.
+        return entry switch
+        {
+            FileEntry<int> internalEntry => await IsPrivateLinkAllowedForAsync(internalEntry),
+            FileEntry<string> => false,
+            _ when int.TryParse(record.EntryId?.ToString(), out var entryId) => await IsPrivateLinkAllowedForAsync(record.EntryType == FileEntryType.File
+                ? await daoFactory.GetCacheFileDao<int>().GetFileAsync(entryId)
+                : await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(entryId)),
+            _ => false
+        };
+    }
+
+    private async Task<bool> IsPrivateLinkAllowedForAsync(FileEntry<int> entry)
+    {
+        if (entry == null)
+        {
+            return false;
+        }
+
+        var room = entry as Folder<int> is { IsRoom: true } itself
+            ? itself
+            : await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<int>());
+
+        return IsPrivateLinkAllowedIn(room);
+    }
+
+    /// <summary>
+    /// Whether a private room admits links of its items: not while it is archived, and not in a Virtual Data Room that
+    /// restricts downloading for the whole room.
+    /// </summary>
+    public static bool IsPrivateLinkAllowedIn<T>(Folder<T> room)
+    {
+        return room is not null &&
+               room.RootFolderType != FolderType.Archive &&
+               room is not { FolderType: FolderType.VirtualDataRoom, SettingsDenyDownload: true };
+    }
+
+    /// <summary>
+    /// A link of a private item: a proof that matches the stored hash opens the link session, a wrong one closes it and
+    /// counts as a wrong password, and without a proof the session decides. The session value is signed from the stored
+    /// hash, so a new password of the link (a new hash) or its revocation (no key material) ends every open session.
+    /// </summary>
+    private async Task<Status> ValidatePrivateLinkAsync(Guid linkId, string proof)
+    {
+        // Read once per request: a listing in a link session validates the link for every entry it shows.
+        if (!_linkKeys.TryGetValue(linkId, out var keyMaterial))
+        {
+            keyMaterial = await shareLinkKeyDao.GetAsync(linkId);
+            _linkKeys[linkId] = keyMaterial;
+        }
+
+        if (keyMaterial == null)
+        {
+            return Status.Invalid;
+        }
+
+        var sessionKey = await CreatePasswordKeyAsync(keyMaterial.ProofHash);
+
+        if (string.IsNullOrEmpty(proof))
+        {
+            var passwordKey = _snapshot?.PasswordKey;
+            if (string.IsNullOrEmpty(passwordKey))
+            {
+                passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, linkId.ToString(), true);
+            }
+
+            return passwordKey == sessionKey ? Status.Ok : Status.RequiredPassword;
+        }
+
+        if (LinkKeyMaterial.ProofMatches(proof, keyMaterial.ProofHash))
+        {
+            await cookiesManager.SetCookiesAsync(CookiesType.ShareLink, sessionKey, true, linkId.ToString());
+            return Status.Ok;
+        }
+
+        cookiesManager.ClearCookies(CookiesType.ShareLink, linkId.ToString());
 
         return Status.InvalidPassword;
     }
@@ -519,6 +636,21 @@ public class ValidationInfo
     /// The room ID of the external data.
     /// </summary>
     public bool IsRoomMember { get; set; }
+
+    /// <summary>
+    /// True for a link of an item in a private room, which opens against a proof; null for any other link.
+    /// </summary>
+    public bool? IsPrivate { get; set; }
+
+    /// <summary>
+    /// For a link of an item in a private room, whether a person has to type a password to derive the proof.
+    /// </summary>
+    public bool? PasswordRequired { get; set; }
+
+    /// <summary>
+    /// The sealed private key of a link of an item in a private room, answered to the request whose proof opened it.
+    /// </summary>
+    public string LinkPrivateKeyEnc { get; set; }
 }
 
 public record DownloadSession

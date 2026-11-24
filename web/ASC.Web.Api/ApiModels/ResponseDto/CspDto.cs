@@ -53,4 +53,12 @@ public class CspDto
     /// </summary>
     /// <example>default-src 'self'; script-src 'self' https://example.com</example>
     public required string Header { get; set; }
+
+    /// <summary>
+    /// The policy value of the page that opens a link of an item of a private room: only the portal's own sources, its
+    /// storage and its Document Server, without `domains`, plugins or integrations, so no third-party script can read
+    /// the secret that the address of such a link carries after `#`. The portal's other pages use `header`.
+    /// </summary>
+    /// <example>default-src 'self'; script-src 'self' https://docs.example.com</example>
+    public required string PrivateLinkHeader { get; set; }
 }

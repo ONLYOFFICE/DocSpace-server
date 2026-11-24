@@ -49,6 +49,11 @@ product decision.
 - The server builds the address of such a link and its short address without the secret, and shortens no address a
   caller sends, so the short-link store and Bitly never hold the part after `#`. An unknown short address, which
   redirects to the portal root as today, gets an empty fragment, so the browser does not carry a secret there.
+- **BREAKING** The address of a link of a private item is the visitor's page `share/private?key=<key>` (with
+  `&folder=<id>` for a folder), whatever the file type, instead of the address of an ordinary link.
+- The visitor's page learns from `getExternalShareData` that a link is private, and gets with each wrap the public key
+  of the member who made it.
+- An item of a private room reports the number of its working links to the room owner and room managers.
 - The page that opens such a link gets a Content-Security-Policy without the portal's extra domains, plugins, support
   chat and tag manager, so no third-party script can read the secret from the address.
 - Creating, changing, revoking and opening such a link are recorded in the audit trail, with the room named as other
@@ -83,6 +88,8 @@ None.
     `private-rooms-external-links` shows the controls only after this lands.
   - SDKs and the OpenAPI document: three optional request fields and `passwordRequired` on the link operations; the link
     fields on the link responses; a `proof` field on `applyExternalSharePassword`; the new setting.
+  - `shareLink` of a link of a private item: the visitor's page instead of the download, editor or `rooms/share`
+    address. No such link exists before this change, so no stored address changes.
   - Webhooks and socket events: the link events now also occur for private items, under the delivery rule of "Titles in
     webhooks" (no delivery to subscribers outside the room).
   - Backup and restore: see the backup item below.
@@ -128,5 +135,7 @@ None of the rows of `openspec/deviations.md` is touched.
   backup declaration.
 - `web/ASC.Web.Core/UrlShortRewriter.cs` (the redirect of an unknown short address).
 - `products/ASC.Files/Core/Helpers/CspSettingsHelper.cs` (a restricted policy for the visitor's page); outside this
-  repository, the CSP handling of the proxy in `buildtools` and the route of that page in the client.
+  repository, the `location` of `share/private` in the proxy of `buildtools` and that page itself, both made by the
+  client change.
+- Field names, the setting's route, the proof format and the visitor's page were agreed with the client on 2026-11-23.
 - The OpenAPI documents and the SDKs; the web client after this lands.

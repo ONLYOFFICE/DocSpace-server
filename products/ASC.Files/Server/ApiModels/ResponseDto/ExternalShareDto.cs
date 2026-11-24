@@ -133,6 +133,28 @@ public class ExternalShareDto
     /// </summary>
     /// <example>false</example>
     public bool IsRoomMember { get; set; }
+
+    /// <summary>
+    /// True when the link belongs to an item of a private room. Such a link opens only against a proof sent to
+    /// `POST api/2.0/files/share/{key}/password`, never against an ordinary password. The field is absent for other
+    /// links.
+    /// </summary>
+    /// <example>true</example>
+    public bool? IsPrivate { get; set; }
+
+    /// <summary>
+    /// For a link of an item of a private room: true when the visitor has to type a password to derive the proof,
+    /// false when the address alone gives it. The field is absent for other links.
+    /// </summary>
+    /// <example>false</example>
+    public bool? PasswordRequired { get; set; }
+
+    /// <summary>
+    /// The private key of the link, sealed under the link's secret, as the creator's browser stored it. It is present
+    /// only in the answer to the request whose proof opened the link; the server cannot open it.
+    /// </summary>
+    /// <example>BASE64SEALEDKEY</example>
+    public string LinkPrivateKeyEnc { get; set; }
 }
 
 

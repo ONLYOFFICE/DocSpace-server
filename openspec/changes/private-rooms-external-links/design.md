@@ -65,7 +65,8 @@ section follows the app".
    ciphertext. `getExternalShareData` reports `passwordRequired` and that the link is private, so the visitor's page
    knows whether to ask a person for a password. Alternative: a new pair of anonymous operations. Rejected: they would
    duplicate the status, the counter and the cookie of the password path. The proof needs no salt: it carries 256 random
-   bits.
+   bits. Format, agreed with the client on 2026-11-23: `proof` is the ordinary base64 of 32 bytes, and `linkProofHash`
+   is SHA-256 of those 32 bytes (not of the base64 text), in canonical base64.
 4. **All the gates sit in link validation.** The portal setting, the `e2e-rooms` app, the archive and the room-wide
    download restriction of a private Virtual Data Room are checked in `ExternalShare.ValidateRecordAsync`, which answers
    Invalid, and in the link-setting path, which answers 403. Records are never deleted by a gate, so turning a gate off
@@ -93,10 +94,11 @@ section follows the app".
    for the owner and current room managers only. The place where a member's access is removed or lowered, which already
    revokes file keys (`FileSharingAceHelper.RevokeFileKeysAsync`), also deletes that user's secret wraps, in the same
    transaction as the access change. `getRoomLinks` returns, per link, the caller's own wrap and the ids of managers
-   without one.
+   without one (`linkSecretWrap`, `managersWithoutLinkSecretWrap`).
 8. **A separate portal setting, next to the external sharing switch.** Stored with the files settings of the tenant,
-   default on, written by a new admin-only operation beside `PUT files/settings/external` (proposed
-   `PUT files/settings/external/private`) and reported by `getFilesSettings`. Alternative: reuse the external sharing
+   default on, written by a new admin-only operation beside `PUT files/settings/external`
+   (`PUT files/settings/external/private`, stored as `DisablePrivateRoomLinks`) and reported by `getFilesSettings` as
+   `privateRoomLinks`. It is read from the tenant's settings, since a visitor of a link has not signed in. Alternative: reuse the external sharing
    switch. Rejected: an organisation may want ordinary links and no links out of encrypted rooms.
 9. **Audit and events reuse what links have.** The existing link-created, link-updated and link-revoked actions are sent
    for private items, with the room named as "Titles in the audit trail" requires; one new action records an opening,
@@ -119,18 +121,44 @@ section follows the app".
     the visitor's page. Alternative: only a `<meta>` policy in the page, which the browser enforces together with the
     header. Kept as the client's second line, not instead: it covers only what the page loads after it, and the
     server's tests cannot see it.
-    The proxy is `buildtools/config/nginx` with the CSP Lua of the docker entrypoint, outside this repository, and the
-    route of the visitor's page is the client's; both are dependencies of this decision.
-12. **An entry of a private room still reports no link settings.** `FileSecurity.GetLinksSettings` answers 0 for an item
-    of a private room, and `FileEntryDto` shows no link counts there, so today's client offers no link it could not
-    create. Only the link-setting path asks for the limit of a link with key material (`privateLink: true`), which is the
-    limit of a room of the same type. The counts are reported once the client change lands, in that change or behind
-    the portal setting of decision 8.
+    The proxy is `buildtools/config/nginx` with the CSP Lua of the docker entrypoint, outside this repository; the
+    route is `share/private` (decision 13), and the client change adds the `location` for it with the restricted value.
+    The value is cached under `csp:<host>:private` beside `csp:<host>` (and `csp:private` beside the default `csp`),
+    rebuilt wherever the full one is (`SaveAsync`, a rename of the domain, the base domain, the start-up pass, which also
+    runs when the cached restricted default is missing), and returned by `GET security/csp` as `privateLinkHeader`, the
+    answer the proxy falls back on when the cache has no value.
+12. **An entry of a private room still reports no link settings, but managers see the number of its links.**
+    `FileSecurity.GetLinksSettings` answers 0 for an item of a private room, so a client offers no link it could not
+    create there; only the link-setting path asks for the limit of a link with key material (`privateLink: true`), which
+    is the limit of a room of the same type. The `shared` and `sharedExternal` flags already show that an item has a
+    link. The client asked on 2026-11-23 for the number too (low priority): the item reports the count of its working
+    links to the room owner and room managers only, since the links of a private item belong to them
+    (`externalLinksCount`, counted from one read of the room's working links per request).
+13. **One visitor's page for every link of a private item.** `ExternalShare.GetLinkDataAsync` builds `shareLink` of
+    such a link as `share/private?key=<key>`, with `&folder=<id>` for a folder, for any file type, and the short address
+    redirects there. Today a private link gets the address of an ordinary one: the download address serves ciphertext
+    with no page to decrypt it, the editor page cannot open it, and `rooms/share` and `share/preview` serve ordinary
+    links too, so the restricted policy of decision 11 cannot be hung on them. `private/…` is taken by the private rooms
+    section, so the client chose `share/private`. Alternative: keep the ordinary addresses and redirect on the client.
+    Rejected: the page would load under the full policy first.
+
+14. **A visitor finds the author of a wrap among the members' public keys.** A wrap is opened with the public key of
+    the member who made it, and the visitor has no account to read it. `getEncryptionAccess` in a link session answers
+    the link's entry (`isLink`, the link's public key, the wrap in `fileKeyEnc`) and the public keys of the room's
+    members; the client reads the author's id from the wrap itself and picks the key. The server does not record who
+    wrote a file key. Alternative: a column for the author in `files_file_keys`. Rejected: a schema change for what the
+    wrap already says. A wrap whose author left the room or replaced the key is not usable until a member wraps the key
+    again; `getRoomMissingFileKeys` does not see that case. A signed-in visitor who is not a member of the room (a
+    private VDR link asks the visitor to sign in) gets the same answer: the members' key set holds nothing they can
+    open. A member who sends a link token keeps the member answer.
 
 ## Risks / Trade-offs
 
-- [A proof or a sealed key is written to a log] → The request DTO fields are excluded from request logging and from
-  exception messages; a test reads the log of a refused request.
+- [A proof or a sealed key is written to a log] → No log records request or response bodies, and the key checks name
+  the field in their exception, never the value. The SQL log keeps the parameter values it binds (sensitive data
+  logging is on), so the EF logger (`EFLogger`) writes a command that inserts into or updates `files_share_link_keys`,
+  `files_share_link_secret_wraps` or `files_file_keys` without them, for the file and the OTLP exporter alike; reads
+  keep their parameters, which are ids. A test reads the log files of the run after a refused and an accepted request.
 - [A visitor's link session survives a revocation or a new password] → The session cookie is derived from the stored
   proof hash (decision 3), so changing or deleting the hash ends it; a test covers both.
 - [An ordinary link changes behaviour] → The new validation runs only when the item is in a private room; the existing
@@ -162,9 +190,11 @@ section follows the app".
 
 ## Open Questions
 
-- The route of the visitor's page (client) and who changes the proxy (`buildtools`) for decision 11.
+- Whether Document Server opens an encrypted document for viewing to a visitor without an account (decision 6, task
+  3.5); a question to the Document Server team. Without it the visitor downloads the file and sees only what the
+  browser shows by itself.
 
-- Final names of the request and response fields and of the setting's route, agreed with the client change before
-  implementation starts; the specs name the proposals.
-- Whether `private-rooms-release-gate` 1.13 (a portal setting for private rooms as a whole) ends up as the same switch.
-  If it turns private rooms off, links stop by decision 4 either way.
+Settled on 2026-11-23 with the client: the field names and the setting's route (as in the specs); the route of the
+visitor's page (decision 13) and the proxy change, made by the client change; release-gate 1.13 is the `e2e-rooms` app
+flag, and links of private items keep a setting of their own (decision 8). The order of work: 3.1 first, since no link
+opens before it, then 4.1, so that the wraps for a link are written on upload.

@@ -177,6 +177,25 @@ public class SettingsController(
     }
 
     /// <remarks>
+    /// Turns external links of items in private rooms on or off for the whole portal. It returns the value that is now
+    /// stored. Requires a DocSpace admin. Other callers get 403. The call changes data, and you can repeat it with the
+    /// same body. It turns off only these links: `PUT api/2.0/files/settings/external` restricts them too, with all
+    /// other links. While it is off, setting such a link returns 403 and a stored one opens as an invalid link. The
+    /// call deletes no link, so turning it on again serves the stored links as before. To read the value, use the
+    /// `privateRoomLinks` field of `GET api/2.0/files/settings`.
+    /// </remarks>
+    /// <summary>Change the links of private rooms</summary>
+    /// <path>api/2.0/files/settings/external/private</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "true if external links of items in private rooms may be created and opened in this portal", typeof(bool))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
+    [HttpPut("settings/external/private")]
+    public async Task<bool> PrivateRoomLinks(DisplayRequestDto inDto)
+    {
+        return await filesSettingsHelper.ChangePrivateRoomLinksSettingsAsync(inDto.Set);
+    }
+
+    /// <remarks>
     /// Changes the whole external sharing policy of the portal. It returns the policy that is now in force. Requires
     /// a DocSpace admin. Other callers get 403. The call changes data, and you can repeat it with the same body. The
     /// call writes every field, so an omitted field becomes false. Send the whole policy, not only the changed field.

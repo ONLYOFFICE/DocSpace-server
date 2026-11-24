@@ -330,8 +330,9 @@ public class FileDtoHelper(
     TenantManager tenantManager,
     FileTrackerHelper fileTracker,
     MetadataTemplatesCache metadataTemplatesCache,
+    ShareLinkKeyDao shareLinkKeyDao,
     ILogger<FileEntryDtoHelper> logger)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, builtinFormsDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, builtinFormsDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, shareLinkKeyDao, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 

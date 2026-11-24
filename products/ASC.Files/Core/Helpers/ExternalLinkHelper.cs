@@ -44,9 +44,15 @@ public class ExternalLinkHelper(
     FileSecurity fileSecurity,
     FileMarker fileMarker,
     SocketManager socketManager,
-    GlobalFolderHelper globalFolderHelper)
+    GlobalFolderHelper globalFolderHelper,
+    ShareLinkKeyDao shareLinkKeyDao,
+    FilesMessageService filesMessageService)
 {
-    public async Task<ValidationInfo> ValidateAsync(string key, string password = null, string fileId = null, string folderId = null)
+    /// <summary>
+    /// Validates a link token. For a link of an item in a private room, <paramref name="proof"/> takes the place of the
+    /// password; a proof that opens the link also brings back the link's sealed private key.
+    /// </summary>
+    public async Task<ValidationInfo> ValidateAsync(string key, string password = null, string fileId = null, string folderId = null, string proof = null)
     {
         var result = new ValidationInfo { Status = Status.Invalid, Access = FileShare.Restrict };
 
@@ -62,8 +68,15 @@ public class ExternalLinkHelper(
             return result;
         }
 
-        var status = await externalShare.ValidateRecordAsync(record, password, isAuth);
+        var status = await externalShare.ValidateRecordAsync(record, password, isAuth, proof: proof);
         result.Status = status;
+
+        // Only a link of an item in a private room stores PasswordRequired.
+        if (record.Options?.PasswordRequired is { } passwordRequired)
+        {
+            result.IsPrivate = true;
+            result.PasswordRequired = passwordRequired;
+        }
 
         if (status != Status.Ok && status != Status.RequiredPassword)
         {
@@ -132,6 +145,20 @@ public class ExternalLinkHelper(
             }
 
             return result;
+        }
+
+        // The sealed key goes only to the request whose proof opened the link, and only once every check of the entry
+        // passed; a session opened earlier gets the content, not the key again.
+        if (result.IsPrivate == true && !string.IsNullOrEmpty(proof))
+        {
+            result.LinkPrivateKeyEnc = (await shareLinkKeyDao.GetAsync(record.Subject))?.PrivateKeyEnc;
+
+            // A matching proof opens a link session, and the reads of that session are not recorded one by one. The
+            // audit trail names a private room and its items by the neutral titles of FilesMessageService.
+            if (result.LinkPrivateKeyEnc != null && entry is FileEntry<int> privateEntry)
+            {
+                await filesMessageService.SendAsync(MessageAction.PrivateLinkOpened, privateEntry, privateEntry.Title, record.Options?.Title);
+            }
         }
 
         result.Access = record.Share;

@@ -36,6 +36,8 @@
       <ProjectReference Include="..\..\ASC.People\Server\ASC.People.csproj" Aliases="ASCPeople" />
       <ProjectReference Include="..\Server\ASC.Files.csproj" Aliases="ASCFiles"/>
       <ProjectReference Include="..\Worker\ASC.Files.Worker.csproj"  Aliases="ASCFilesService"/>
+      <!-- Data migrations whose statements a test runs against planted rows (PrivateRoomGuestCleanupMigrationTests). -->
+      <ProjectReference Include="..\..\..\migrations\mysql\SaaS\ASC.Migrations.MySql.SaaS.csproj" />
     </ItemGroup>
 
     <ItemGroup>

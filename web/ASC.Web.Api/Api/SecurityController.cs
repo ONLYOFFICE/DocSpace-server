@@ -637,7 +637,8 @@ public class SecurityController(
 
     /// <remarks>
     /// Replaces the list of external domains that the Content Security Policy of the portal trusts. It returns the
-    /// stored list and the policy header that browsers now get. Send the complete list in `domains`. An empty or
+    /// stored list, the policy header that browsers now get, and the value for the page of a link of a private item.
+    /// Send the complete list in `domains`. An empty or
     /// omitted list restores the built-in policy of the portal. Every domain becomes an allowed source for scripts,
     /// styles, images, fonts, frames, media, and connections. Requires the EditPortalSettings permission, which the
     /// portal owner and DocSpace admins have. Other callers get 403. The call changes data for the whole portal, and
@@ -686,14 +687,19 @@ public class SecurityController(
 
         var header = await cspSettingsHelper.SaveAsync(request.Domains);
 
-        return new CspDto { Domains = request.Domains, Header = header };
+        return new CspDto
+        {
+            Domains = request.Domains,
+            Header = header,
+            PrivateLinkHeader = await cspSettingsHelper.CreateHeaderAsync(request.Domains, privateLink: true)
+        };
     }
 
     /// <remarks>
     /// Returns the Content Security Policy of the portal, with the allowed external domains and the full header
-    /// value. Anyone can call it without signing in, from any origin. The call is read-only. To skip an unchanged
-    /// policy, send the `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value exactly as
-    /// you got it. If the policy has not changed since then, the call returns 304 with an empty body. To change the
+    /// value. It also returns `privateLinkHeader`, the narrower value of the page that opens a link of a private item.
+    /// Anyone can call it without signing in, from any origin. The call is read-only. To skip an unchanged policy,
+    /// send the `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value exactly as you got it. If the policy has not changed since then, the call returns 304 with an empty body. To change the
     /// allowed domains, use `POST api/2.0/security/csp`, which requires the EditPortalSettings permission.
     /// </remarks>
     /// <summary>
@@ -726,7 +732,8 @@ public class SecurityController(
         return new CspDto
         {
             Domains = settings.Domains ?? [],
-            Header = await cspSettingsHelper.CreateHeaderAsync(settings.Domains)
+            Header = await cspSettingsHelper.CreateHeaderAsync(settings.Domains),
+            PrivateLinkHeader = await cspSettingsHelper.CreateHeaderAsync(settings.Domains, privateLink: true)
         };
     }
 
