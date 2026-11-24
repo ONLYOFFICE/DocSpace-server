@@ -135,8 +135,8 @@ None.
 - **Plugin name and uniqueness** (`addWebPluginFromFile`). A refusal because an installed plugin holds the
   `name` or `pluginName`, or because of the plugin limit, answers 400 with its reason alone, such as "Plugin
   already exist"; before the branch the reason came after "Wrong plugin archive. ", which a fault of the archive
-  or its manifest keeps. Affected: API clients and scripts that match the whole text of these errors; the web
-  client shows the text as it comes. SDKs, webhooks, socket events, backup and stored data: none.
+  or its manifest keeps, and the error's `type` is no longer `System.ArgumentException`. Affected: API clients
+  and scripts that match the whole text or the type of these errors; the web client shows the text as it comes. SDKs, webhooks, socket events, backup and stored data: none.
 - **Re-uploading a plugin under the same name** (`addWebPluginFromFile`). A personal re-upload keeps the
   settings stored in the member's row and answers 400 once a portal or installation-wide plugin has the
   `name` or `pluginName`. A portal re-upload changes only as every upload does (see "Uploading a plugin
@@ -213,5 +213,5 @@ None.
   manifest and a storage failure are still wrapped, so P4 stays open for the storage failures.
 - **P3, P6** (shadowed portal plugin, de-duplicated count): kept for portal plugins. The personal count limit
   counts the member's own plugins only.
-- **P8** (required fields the server leaves out): kept. `personal` is always sent, so marking it required adds
-  nothing to it.
+- **P8** (required fields the server leaves out): kept. `personal` and `cspDomains` (an empty string when the
+  manifest declares none) are always sent, so marking them required adds nothing to it.
