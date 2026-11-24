@@ -69,4 +69,35 @@ public class TariffStateTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Assert
         tariff.State.Should().Be(TariffState.NotPaid);
     }
+
+    [Theory]
+    [InlineData(HttpStatusCode.OK, true)]
+    [InlineData(HttpStatusCode.InternalServerError, false)]
+    [InlineData(HttpStatusCode.RequestTimeout, false)]
+    [InlineData(HttpStatusCode.TooManyRequests, false)]
+    public async Task GetPortalTariff_BillingAnswersCannotFind_IsARefundOnlyWhenTheOutcomeIsKnown(HttpStatusCode status, bool refund)
+    {
+        // Arrange: a paid plan, read once, then billing answers its payments with "cannot find"
+        var endDate = DateTime.UtcNow.Date.AddYears(1);
+        Payments.Paid(Plans.AdminProductId, quantity: 10, endDate);
+        (await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken)).Response.State.Should().Be(TariffState.Paid);
+        Payments.On(PaymentService.Billing, "POST", "/billing/GetActiveResources", $$"""{"Message":"error: cannot find {{Payments.PortalId}}"}""", status);
+
+        // Act
+        var tariff = (await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken)).Response;
+
+        // Assert: under 200 billing stopped reporting the payment, so the read takes it for a refund and moves the due
+        // date into the past; under a failing status the outcome is unknown and the paid tariff keeps its due date. The
+        // state of a refund is not asserted: the stack does not save the moved due date (billing verification, "Refund").
+        PaymentCalls.Count(call => call.Route == "/billing/GetActiveResources").Should().BeGreaterThan(1);
+        if (refund)
+        {
+            tariff.DueDate.UtcTime.Should().BeBefore(DateTime.UtcNow, "the read takes the answer for a refund");
+        }
+        else
+        {
+            tariff.State.Should().Be(TariffState.Paid);
+            tariff.DueDate.UtcTime.Date.Should().Be(endDate);
+        }
+    }
 }

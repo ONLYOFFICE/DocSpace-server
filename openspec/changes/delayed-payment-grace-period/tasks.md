@@ -97,10 +97,11 @@
   read asking FusionCache to report a failure of the distributed level (unit tests with a failing read and with a
   failing distributed cache); the texts of `restricted`, `getPortalTariff`, the 402 texts of the member, owner,
   product-admin, room and room-from-template operations, and `createAgent` name the transitions that are refused.
-- [ ] 4.15 Billing suite: a payments request answered "cannot find" under 500, 408 and 429 leaves a paid tariff's
-  due date as it was (scenario "Not-found answer under a failing status"). Not done: the billing suite could not
-  be built in this round, as the shared NuGet cache held another checkout's `DocSpace.API.SDK` package without
-  `restricted`; the client mapping is covered by the unit theory, the tariff path is read from the code.
+- [x] 4.15 Billing suite: a payments request answered "cannot find" under 500, 408 and 429 leaves a paid tariff's
+  due date as it was (scenario "Not-found answer under a failing status"), and under 200 the read takes it for a
+  refund (`TariffStateTests.GetPortalTariff_BillingAnswersCannotFind_IsARefundOnlyWhenTheOutcomeIsKnown`). The
+  stack does not save the due date of a refund (billing verification, "Refund"), so the refund case asserts only
+  that the read moved the due date into the past.
 
 ## 5. Checks
 
