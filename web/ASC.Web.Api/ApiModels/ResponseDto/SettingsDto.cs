@@ -333,7 +333,7 @@ public class SettingsDto
 
     /// <summary>
     /// Where the template gallery serves its ready-made templates from. Filled in for a
-    /// signed-in caller only.
+    /// signed-in caller only, and absent when the installation has no gallery settings at all.
     /// </summary>
     /// <example>{ "path": "/forms/templates", "domain": "https://forms.example.com" }</example>
     public TemplateGalleryDto TemplateGallery { get; set; }

@@ -63,8 +63,8 @@ public class CreateFileRequest<T>
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
-    /// A ready form from the form gallery of the portal to copy instead of a template, named by the identifier the
-    /// gallery reports for it. It takes precedence over `templateId`; 0 means no form.
+    /// A ready form from the template gallery to copy instead of a template, named by the identifier the gallery
+    /// reports for it. Ignored when `templateId` is a number or a string; 0 means no form.
     /// </summary>
     /// <example>0</example>
     public int FormId { get; set; }

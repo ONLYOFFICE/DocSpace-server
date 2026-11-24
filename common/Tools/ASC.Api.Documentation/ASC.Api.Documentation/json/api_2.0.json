@@ -38491,91 +38491,6 @@
         "description": "The folder type.",
         "x-enum-type": "integer"
       },
-      "FormGalleryDto": {
-        "required": [
-          "domain",
-          "ext",
-          "path",
-          "uploadDashboard",
-          "uploadDomain",
-          "uploadExt",
-          "uploadPath"
-        ],
-        "type": "object",
-        "properties": {
-          "path": {
-            "examples": [
-              "/forms/templates"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The path under `domain` that the gallery's own listing API is reached at. It is joined to `domain` by the\r\nclient; the portal only relays the values from its configuration."
-          },
-          "domain": {
-            "examples": [
-              "https://forms.example.com"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The address of the gallery service, which is a service of the vendor rather than part of the portal. Every\r\nfield of this object is empty on an installation that configures no gallery, and a client should then not\r\noffer the gallery at all."
-          },
-          "ext": {
-            "examples": [
-              ".docxf"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The file extension to ask the gallery for, which decides which rendition of a template is downloaded when\r\nseveral are published."
-          },
-          "uploadPath": {
-            "examples": [
-              "/forms/upload"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The path used for submitting a form of one's own to the gallery, the counterpart of `path` for the upload\r\nside. The four `upload` fields are empty when the installation allows browsing but not submitting."
-          },
-          "uploadDomain": {
-            "examples": [
-              "https://upload.forms.example.com"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The address the submission is sent to, which may differ from `domain`."
-          },
-          "uploadExt": {
-            "examples": [
-              ".docxf"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The file extension a submitted form has to carry."
-          },
-          "uploadDashboard": {
-            "examples": [
-              "/dashboard/forms"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The page a person is sent to in order to follow up on a submission, joined to `uploadDomain` the same way\r\nas `uploadPath`."
-          }
-        },
-        "description": "Where the ready-made form templates are served from, for browsing them and for submitting new ones."
-      },
       "GoodwillBalanceDto": {
         "allOf": [
           {
@@ -46164,9 +46079,9 @@
             "description": "What a mobile client needs to hand a document link over to the installed application instead of opening it\r\nin the browser. Its fields are empty strings when the installation configures no application.",
             "$ref": "#/components/schemas/DeepLinkDto"
           },
-          "formGallery": {
-            "description": "Where the ready-made form templates are served from and which extension they carry. Filled in for a\r\nsigned-in caller only.",
-            "$ref": "#/components/schemas/FormGalleryDto"
+          "templateGallery": {
+            "description": "Where the template gallery serves its ready-made templates from. Filled in for a\r\nsigned-in caller only, and absent when the installation has no gallery settings at all.",
+            "$ref": "#/components/schemas/TemplateGalleryDto"
           },
           "maxImageUploadSize": {
             "examples": [
@@ -48316,6 +48231,69 @@
           }
         },
         "description": "The successful API response containing the TelegramStatusDto object."
+      },
+      "TemplateGalleryDto": {
+        "required": [
+          "domain",
+          "path",
+          "uploadDashboard",
+          "uploadDomain",
+          "uploadPath"
+        ],
+        "type": "object",
+        "properties": {
+          "path": {
+            "examples": [
+              "/forms/templates"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The path under `domain` that the gallery's own listing API is reached at. It is joined to `domain` by the\r\nclient; the portal only relays the values from its configuration."
+          },
+          "domain": {
+            "examples": [
+              "https://forms.example.com"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The address of the gallery service, which is a service of the vendor rather than part of the portal. When it\r\nis empty or absent, the installation configures no gallery, and a client should not offer the gallery at all."
+          },
+          "uploadPath": {
+            "examples": [
+              "/forms/upload"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The path used for submitting a form of one's own to the gallery, the counterpart of `path` for the upload\r\nside. The three `upload` fields are empty or absent when the installation allows browsing but not submitting."
+          },
+          "uploadDomain": {
+            "examples": [
+              "https://upload.forms.example.com"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The address the submission is sent to, which may differ from `domain`."
+          },
+          "uploadDashboard": {
+            "examples": [
+              "/dashboard/forms"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The page a person is sent to in order to follow up on a submission, joined to `uploadDomain` the same way\r\nas `uploadPath`."
+          }
+        },
+        "description": "Where the template gallery serves its ready-made templates from, for browsing them and for submitting new forms."
       },
       "TenantAiAccessSettingsDto": {
         "type": "object",

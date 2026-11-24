@@ -322,7 +322,7 @@ public abstract class FilesController<T>(
     /// without an extension. It keeps an unknown extension and the few formats that the portal stores as they are. With
     /// `enableExternalExt=true`, the call keeps the extension of `title` in lower case and does not change the format.
     /// If `templateId` is set, the call copies that file, which the caller must be able to read. Otherwise, `formId`
-    /// copies a form from the form gallery. Without both, the call uses the blank template of the format in the
+    /// copies a form from the template gallery. Without both, the call uses the blank template of the format in the
     /// caller's language. Requires the right to create files in the folder. Other callers get 403. The call changes
     /// data. Do not repeat it. Each call creates another file. The call returns 403 in the Rooms root, the archive, and
     /// the template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable template. The
@@ -343,7 +343,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
-    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
+    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the template gallery has no form with this `formId` or no file of the title's format for it")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -1312,8 +1312,8 @@ public class FilesControllerCommon(
     /// without an extension gets DOCX. The portal keeps an unknown extension and a few other formats. If
     /// `enableExternalExt` is true, the portal keeps the extension of the title in lower case. If `templateId` is set,
     /// the portal copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that form
-    /// from the form gallery. If neither is set, the portal uses its blank template for the format and the language of
-    /// the caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any signed-in user
+    /// from the template gallery. If neither is set, the portal uses its blank template for the format and the language
+    /// of the caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any signed-in user
     /// can call it, except a guest. A guest who has My documents gets 403. The call changes data. Do not repeat it.
     /// Each call creates another file. The returned title shows the extension that the portal stored. To create a file
     /// in a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title` is
@@ -1332,7 +1332,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller is a guest whose My documents still exists, or the template does not exist or cannot be read")]
-    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
+    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the template gallery has no form with this `formId` or no file of the title's format for it")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {

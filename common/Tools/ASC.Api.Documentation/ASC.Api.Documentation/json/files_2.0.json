@@ -2825,7 +2825,7 @@
           "Files / Files"
         ],
         "summary": "Create a file",
-        "description": "Creates a file in a folder and returns the stored file. The extension in `title` decides the format. The call\r\nchanges a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. It adds DOCX to a title\r\nwithout an extension. It keeps an unknown extension and the few formats that the portal stores as they are. With\r\n`enableExternalExt=true`, the call keeps the extension of `title` in lower case and does not change the format.\r\nIf `templateId` is set, the call copies that file, which the caller must be able to read. Otherwise, `formId`\r\ncopies a form from the form gallery. Without both, the call uses the blank template of the format in the\r\ncaller's language. Requires the right to create files in the folder. Other callers get 403. The call changes\r\ndata. Do not repeat it. Each call creates another file. The call returns 403 in the Rooms root, the archive, and\r\nthe template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable template. The\r\ncall returns 404 for an unknown `formId` or a gallery form without a file of this format. It also returns 404 if\r\n`templateId` is a string that matches no third-party file. If the new file exceeds the storage quota, the call\r\nreturns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own\r\nsection, use `POST api/2.0/files/@my/file`.\r\nIf the folder is in a full connected storage other than SharePoint, the call returns 400.\r\nThe user has to free up space there first.\n\nRaises the `file.created` webhook.",
+        "description": "Creates a file in a folder and returns the stored file. The extension in `title` decides the format. The call\r\nchanges a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. It adds DOCX to a title\r\nwithout an extension. It keeps an unknown extension and the few formats that the portal stores as they are. With\r\n`enableExternalExt=true`, the call keeps the extension of `title` in lower case and does not change the format.\r\nIf `templateId` is set, the call copies that file, which the caller must be able to read. Otherwise, `formId`\r\ncopies a form from the template gallery. Without both, the call uses the blank template of the format in the\r\ncaller's language. Requires the right to create files in the folder. Other callers get 403. The call changes\r\ndata. Do not repeat it. Each call creates another file. The call returns 403 in the Rooms root, the archive, and\r\nthe template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable template. The\r\ncall returns 404 for an unknown `formId` or a gallery form without a file of this format. It also returns 404 if\r\n`templateId` is a string that matches no third-party file. If the new file exceeds the storage quota, the call\r\nreturns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own\r\nsection, use `POST api/2.0/files/@my/file`.\r\nIf the folder is in a full connected storage other than SharePoint, the call returns 400.\r\nThe user has to free up space there first.\n\nRaises the `file.created` webhook.",
         "operationId": "createFile",
         "parameters": [
           {
@@ -2886,7 +2886,7 @@
             "description": "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room"
           },
           "404": {
-            "description": "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it"
+            "description": "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the template gallery has no form with this `formId` or no file of the title's format for it"
           },
           "401": {
             "description": "Unauthorized",
@@ -6844,7 +6844,7 @@
           "Files / Files"
         ],
         "summary": "Create a file in My documents",
-        "description": "Creates a file in the \"My documents\" section of the caller and returns it. The extension in the title sets the\r\nformat. The portal changes a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. A title\r\nwithout an extension gets DOCX. The portal keeps an unknown extension and a few other formats. If\r\n`enableExternalExt` is true, the portal keeps the extension of the title in lower case. If `templateId` is set,\r\nthe portal copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that form\r\nfrom the form gallery. If neither is set, the portal uses its blank template for the format and the language of\r\nthe caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any signed-in user\r\ncan call it, except a guest. A guest who has My documents gets 403. The call changes data. Do not repeat it.\r\nEach call creates another file. The returned title shows the extension that the portal stored. To create a file\r\nin a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title` is\r\nmissing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403 if the\r\ntemplate does not exist or the caller cannot read it. It returns 404 for an unknown `formId` or a gallery form\r\nwithout a file of the format of the title. If a string `templateId` is not a file of a connected third-party\r\nstorage, the call also returns 404.\n\nRaises the `file.created` webhook.",
+        "description": "Creates a file in the \"My documents\" section of the caller and returns it. The extension in the title sets the\r\nformat. The portal changes a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. A title\r\nwithout an extension gets DOCX. The portal keeps an unknown extension and a few other formats. If\r\n`enableExternalExt` is true, the portal keeps the extension of the title in lower case. If `templateId` is set,\r\nthe portal copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that form\r\nfrom the template gallery. If neither is set, the portal uses its blank template for the format and the language\r\nof the caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any signed-in user\r\ncan call it, except a guest. A guest who has My documents gets 403. The call changes data. Do not repeat it.\r\nEach call creates another file. The returned title shows the extension that the portal stored. To create a file\r\nin a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title` is\r\nmissing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403 if the\r\ntemplate does not exist or the caller cannot read it. It returns 404 for an unknown `formId` or a gallery form\r\nwithout a file of the format of the title. If a string `templateId` is not a file of a connected third-party\r\nstorage, the call also returns 404.\n\nRaises the `file.created` webhook.",
         "operationId": "createFileInMyDocuments",
         "requestBody": {
           "content": {
@@ -6888,7 +6888,7 @@
             "description": "The caller is a guest whose My documents still exists, or the template does not exist or cannot be read"
           },
           "404": {
-            "description": "`templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it"
+            "description": "`templateId` is a string that is not the id of a file in a known third-party storage, or the template gallery has no form with this `formId` or no file of the title's format for it"
           },
           "401": {
             "description": "Unauthorized",
@@ -39665,7 +39665,7 @@
               0
             ],
             "type": "integer",
-            "description": "A ready form from the form gallery of the portal to copy instead of a template, named by the identifier the\r\ngallery reports for it. It takes precedence over `templateId`; 0 means no form.",
+            "description": "A ready form from the template gallery to copy instead of a template, named by the identifier the gallery\r\nreports for it. Ignored when `templateId` is a number or a string; 0 means no form.",
             "format": "int32"
           }
         },

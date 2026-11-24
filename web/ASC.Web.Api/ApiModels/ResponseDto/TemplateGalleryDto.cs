@@ -46,16 +46,15 @@ public class TemplateGalleryDto
     public required string Path { get; set; }
 
     /// <summary>
-    /// The address of the gallery service, which is a service of the vendor rather than part of the portal. Every
-    /// field of this object is empty on an installation that configures no gallery, and a client should then not
-    /// offer the gallery at all.
+    /// The address of the gallery service, which is a service of the vendor rather than part of the portal. When it
+    /// is empty or absent, the installation configures no gallery, and a client should not offer the gallery at all.
     /// </summary>
     /// <example>https://forms.example.com</example>
     public required string Domain { get; set; }
 
     /// <summary>
     /// The path used for submitting a form of one's own to the gallery, the counterpart of `path` for the upload
-    /// side. The three `upload` fields are empty when the installation allows browsing but not submitting.
+    /// side. The three `upload` fields are empty or absent when the installation allows browsing but not submitting.
     /// </summary>
     /// <example>/forms/upload</example>
     public required string UploadPath { get; set; }
@@ -74,7 +73,7 @@ public class TemplateGalleryDto
     public required string UploadDashboard { get; set; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class TemplateGalleryDtoMapper
 {
     public static partial TemplateGalleryDto Map(this TemplateGallerySettings source);
