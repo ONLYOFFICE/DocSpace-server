@@ -1122,7 +1122,7 @@ public class FileSecurity(
 
             var security = new ConcurrentDictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
-            var shares = await PreloadEntrySharesAsync(entry, userId, isDocSpaceAdmin);
+            var shares = new EntryShares<T>(() => PreloadEntrySharesAsync(entry, userId, isDocSpaceAdmin));
 
             foreach (var action in _securityEntries[entry.FileEntryType])
             {
@@ -1201,7 +1201,7 @@ public class FileSecurity(
         var parentFolders = await GetFileParentFolders(entry.ParentId);
         var cachedFileDao = daoFactory.GetCacheFileDao<T>();
 
-        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+        var haveAccess = await FilterEntryAsync(entry, action, userId, new EntryShares<T>(shares), isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
 
         if (!setEntryAccess)
         {
@@ -1226,7 +1226,7 @@ public class FileSecurity(
         await foreach (var entry in entries)
         {
             var parentFolders = await GetFileParentFolders(entry.ParentId);
-            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao));
+            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, new EntryShares<T>(shares: null), isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao));
         }
     }
 
@@ -1234,7 +1234,7 @@ public class FileSecurity(
         FileEntry<T> e,
         FilesSecurityActions action,
         Guid userId,
-        IEnumerable<FileShareRecord<T>> shares,
+        EntryShares<T> shares,
         bool isOutsider,
         bool isGuest,
         bool isAuthenticated,
@@ -1909,7 +1909,7 @@ public class FileSecurity(
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
 
                         var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
-                        var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, shares);
+                        var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, await shares.GetAsync());
 
                         var hasFullAccessToForm = userHasFullAccess || shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager };
 
@@ -1956,7 +1956,6 @@ public class FileSecurity(
 
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
                         var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
-                        var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, shares);
 
                         var hasFullAccessToForm = userHasFullAccess || shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager };
 
@@ -2177,7 +2176,7 @@ public class FileSecurity(
                 var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
                 if (e.RootFolderType != FolderType.RoomTemplates || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
                 {
-                    ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, shares);
+                    ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, await shares.GetAsync());
 
                     if (e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
                         ace is { SubjectType: SubjectType.User or SubjectType.AiProject or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
@@ -4114,18 +4113,39 @@ public class FileSecurity(
         }
     }
 
-    private async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares)
+    private async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, EntryShares<T> shares)
     {
         var cachedRecords = GetCachedRecords<T>();
         var cacheKey = GetCacheKey(room.Id, userId);
 
         if (!cachedRecords.TryGetValue(cacheKey, out var record))
         {
-            record = await GetCurrentShareAsync(room, userId, isDocSpaceAdmin, shares);
+            record = await GetCurrentShareAsync(room, userId, isDocSpaceAdmin, await shares.GetAsync());
             cachedRecords.TryAdd(cacheKey, record);
         }
 
         return record;
+    }
+
+    private sealed class EntryShares<T>
+    {
+        private readonly Func<Task<IEnumerable<FileShareRecord<T>>>> _load;
+        private Task<IEnumerable<FileShareRecord<T>>> _shares;
+
+        public EntryShares(IEnumerable<FileShareRecord<T>> shares)
+        {
+            _shares = Task.FromResult(shares);
+        }
+
+        public EntryShares(Func<Task<IEnumerable<FileShareRecord<T>>>> load)
+        {
+            _load = load;
+        }
+
+        public Task<IEnumerable<FileShareRecord<T>>> GetAsync()
+        {
+            return _shares ??= _load();
+        }
     }
 
     /// <summary>
