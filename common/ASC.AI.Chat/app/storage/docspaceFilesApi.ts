@@ -43,7 +43,7 @@ import { isObject, getNumber, getObject, getString, getEntityId } from "../narro
 import logger from "../log.js";
 import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 import { clientFault } from "../httpErrors.js";
-import { mapped } from "./upstreamShape.js";
+import { mapped, namesNoEntity } from "./upstreamShape.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
@@ -261,6 +261,9 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
  * {@link DocspaceApiHttpError}.
  */
 export async function getFolderInfo(folderId: string): Promise<DocspaceFolderInfo | undefined> {
+  if (namesNoEntity(folderId)) {
+    return undefined;
+  }
   const url = `${proxyBaseUrl}/api/2.0/files/folder/${encodeURIComponent(folderId)}`;
   const { signal, cancel } = withTimeout(undefined);
   countFilesApiRead();
@@ -403,6 +406,9 @@ function parseFileInfo(raw: unknown): DocspaceFileInfo | undefined {
  * response, {@link DocspaceApiHttpError} for other HTTP failures.
  */
 export async function getFileInfo(fileId: string): Promise<DocspaceFileInfo | undefined> {
+  if (namesNoEntity(fileId)) {
+    return undefined;
+  }
   const url = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}`;
   const { signal, cancel } = withTimeout(undefined);
   countFilesApiRead();

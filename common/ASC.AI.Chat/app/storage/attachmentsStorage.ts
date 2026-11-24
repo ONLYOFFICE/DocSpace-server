@@ -53,7 +53,7 @@ import { copyManyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 import { errorBodyText } from "./errorBody.js";
 import { clientFault } from "../httpErrors.js";
-import { listAnswer, mapped } from "./upstreamShape.js";
+import { listAnswer, mapped, namesNoEntity } from "./upstreamShape.js";
 
 const PATH = "/attachments";
 
@@ -723,6 +723,9 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
   }
 
   async readById(id: string): Promise<Attachment | null> {
+    if (namesNoEntity(id)) {
+      return null;
+    }
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       const a = mapped(dtoToAttachment(raw), "GET attachments/{id}");

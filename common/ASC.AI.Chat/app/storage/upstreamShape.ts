@@ -61,3 +61,12 @@ export function listAnswer(raw: unknown, call: string): unknown[] {
   }
   return raw;
 }
+
+/**
+ * An empty id names no entity. Sent as it is, `GET <path>/` reaches the list route of the same
+ * path, whose array the single-entity mapper cannot read: a read by id answers "absent" for it
+ * without calling out.
+ */
+export function namesNoEntity(id: string): boolean {
+  return id === "";
+}

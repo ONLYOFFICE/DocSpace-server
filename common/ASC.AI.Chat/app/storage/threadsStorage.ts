@@ -43,7 +43,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
-import { mapped } from "./upstreamShape.js";
+import { mapped, namesNoEntity } from "./upstreamShape.js";
 
 // A thread belongs to the AI project it was started in (`entityId`, the
 // project's id) or to none. The C# storage keeps the two apart: a list asked
@@ -152,6 +152,9 @@ export class HttpThreadsStorage implements ThreadsStorage {
   }
 
   async readById(threadId: string): Promise<Thread | null> {
+    if (namesNoEntity(threadId)) {
+      return null;
+    }
     // The aggregate carries exactly the round's thread; `null` there means
     // the thread is absent or foreign, the same answer the 404 path gives.
     const snapshot = readChatContext("thread");

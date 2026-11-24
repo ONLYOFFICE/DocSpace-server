@@ -574,6 +574,14 @@ function jsonResponse(description: string, schema: Json = JSON_OBJECT_SCHEMA): J
   };
 }
 
+// The body parser's refusal of a body over its limit: `errorHandler` sends it as plain text.
+function tooLargeResponse(description: string): Json {
+  return {
+    description,
+    content: { "text/plain": { schema: { type: "string", example: "Payload Too Large" } } },
+  };
+}
+
 const UNAUTHORIZED_RESPONSE: Json = jsonResponse(
   "Missing `asc_auth_key` cookie or `Authorization` header.",
   ERROR_RESPONSE_REF,
@@ -1076,10 +1084,13 @@ function errorResponses(operationId: string, hasBody: boolean): Record<string, J
     const override = spec[code];
     const description = typeof override === "string" ? override : ERROR_DESCRIPTIONS[code];
     const envelopes = OPERATION_ERROR_SCHEMAS[operationId];
-    responses[code] = jsonResponse(
-      description as string,
-      envelopes?.[code] ?? envelopes?.["*"] ?? ERROR_RESPONSE_REF,
-    );
+    const envelope = envelopes?.[code] ?? envelopes?.["*"];
+    // The parser's own 413 is plain text (`errorHandler`); a route that refuses a size itself
+    // declares its envelope.
+    responses[code] =
+      code === "413" && envelope === undefined
+        ? tooLargeResponse(description as string)
+        : jsonResponse(description as string, envelope ?? ERROR_RESPONSE_REF);
   }
   return responses;
 }

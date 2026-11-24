@@ -28,6 +28,9 @@ meet it yet. Cite this file as `[ts-ai-express.md §N]`.
 - An error handler takes four arguments `(err, req, res, next)` and is registered last, after the
   routes and the 404 handler. It answers the same `{ error }` JSON as `asyncHandler` and is what
   catches an error raised before a handler runs: a body that does not parse, a body over the limit.
+  The one exception is the 413 of a body over the limit, sent as plain text: a stream client reads
+  every JSON line of an answer as a frame, and the spec's "no frame is streamed" for a refused
+  `send-with-stream` is pinned by `ChatHiddenFailureTests` in `ASC.AI.Tests`.
 - **After the headers are sent** a status can no longer say that the answer failed. A stream writes
   its error frame (`streamNdjson`, `streamOpenAiSse`); anything else passes the error on with
   `next(err)`, so Express closes the connection and the client sees a failed transfer. Ending the
@@ -35,7 +38,7 @@ meet it yet. Cite this file as `[ts-ai-express.md §N]`.
 - Never listen for `uncaughtException` to keep the process running: after it the state is unknown.
   The process manager restarts the service; the code's job is to leave no promise unhandled
   (`no-floating-promises`).
-- Guard: a request with a broken JSON body and one over the limit answer 400 and 413 as JSON, with
+- Guard: a request with a broken JSON body answers 400 as JSON and one over the limit 413 in plain text, with
   no stack (`app/__tests__/app.pipeline.test.ts`); `errorHandler` itself in
   `controllers/__tests__/errorHandler.test.ts`. An unknown path answers 404 `{ error }` as well.
 

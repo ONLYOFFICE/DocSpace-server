@@ -54,7 +54,7 @@ import {
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
 import { errorBodyText } from "./errorBody.js";
-import { listAnswer, mapped } from "./upstreamShape.js";
+import { listAnswer, mapped, namesNoEntity } from "./upstreamShape.js";
 
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
@@ -298,6 +298,9 @@ export class HttpProfilesStorage implements ProfilesStorage {
   }
 
   async readById(id: string): Promise<Profile | undefined> {
+    if (namesNoEntity(id)) {
+      return undefined;
+    }
     // A primed round holds the portal's full profile list — the id either
     // resolves there or does not exist for this user.
     const snapshot = readChatContext("profiles");
@@ -329,6 +332,9 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // `forClient=true` like `readAllForClient`; get-by-id drops `key` and
   // `headers` on top for every caller.
   async readByIdRaw(id: string): Promise<DocspaceProfile | undefined> {
+    if (namesNoEntity(id)) {
+      return undefined;
+    }
     const snapshot = readChatContext("profiles");
     if (snapshot) {
       return snapshot.profiles.find((p) => p.id === id);

@@ -41,7 +41,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
-import { mapped } from "./upstreamShape.js";
+import { mapped, namesNoEntity } from "./upstreamShape.js";
 
 const THREADS_PATH = "/threads";
 const MESSAGES_PATH = "/messages";
@@ -155,6 +155,9 @@ export class HttpMessagesStorage implements MessagesStorage {
   }
 
   async readById(messageId: string): Promise<ThreadMessageLike | null> {
+    if (namesNoEntity(messageId)) {
+      return null;
+    }
     try {
       const raw = await aiService.get(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
       return mapped(dtoToMessage(raw), "GET messages/{id}");
@@ -171,6 +174,9 @@ export class HttpMessagesStorage implements MessagesStorage {
   // C# DTO's `threadId`; attachments/link-to-message needs it to verify the
   // caller-supplied pair (Bug 82771 reopen).
   async readThreadId(messageId: string): Promise<string | null> {
+    if (namesNoEntity(messageId)) {
+      return null;
+    }
     try {
       const raw = await aiService.get(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
       return mapped(isObject(raw) ? getString(raw, "threadId") : undefined, "GET messages/{id}");

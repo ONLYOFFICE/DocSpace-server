@@ -305,17 +305,17 @@ describe("the body parsers", () => {
     expect(calledOut()).toEqual([]);
   });
 
-  it("answers a JSON body over 100 kB with the published 413", async () => {
+  it("answers a JSON body over 100 kB with a 413 in plain text", async () => {
     const reply = await request(app)
       .post(`${API_PREFIX}/threads/create`)
       .set(AUTH)
       .set(JSON_TYPE)
       .send(big(100 * 1024));
 
+    // Plain text: a stream client would read a JSON line as a frame of the stream.
     expect(reply.status).toBe(413);
-    expect(reply.body).toEqual({ error: "request entity too large" });
-    expect(reply.text).not.toContain("PayloadTooLargeError");
-    expect(responseViolations("aiThreadsCreate", 413, reply.body)).toEqual([]);
+    expect(reply.type).toBe("text/plain");
+    expect(reply.text).toBe("Payload Too Large");
   });
 
   it("takes a JSON body just under 100 kB", async () => {
@@ -363,8 +363,7 @@ describe("the body parsers", () => {
       .send(big(15 * 1024 * 1024));
 
     expect(reply.status).toBe(413);
-    expect(reply.body).toEqual({ error: "request entity too large" });
-    expect(responseViolations("aiExportTextToDocx", 413, reply.body)).toEqual([]);
+    expect(reply.text).toBe("Payload Too Large");
   });
 
   it("parses a text-to-docx body: a broken one answers 400 before the gate", async () => {

@@ -103,10 +103,10 @@ const STREAM_ERROR_EVENT = {
   required: ["type", "message"],
   additionalProperties: false,
 };
-const TOO_LARGE = json(
-  "The request body is larger than 100 KB, the JSON parser's limit on this route.",
-  ERROR_REF,
-);
+const TOO_LARGE = {
+  description: "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+  content: { "text/plain": { schema: { type: "string", example: "Payload Too Large" } } },
+};
 
 describe("buildOpenApiDocument with no routes", () => {
   it("emits the document frame", () => {

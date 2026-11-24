@@ -240,9 +240,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -353,9 +354,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -512,9 +514,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -655,9 +658,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -805,9 +809,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -944,9 +949,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -1083,9 +1089,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -1429,9 +1436,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -1531,9 +1539,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -1634,9 +1643,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -1961,9 +1971,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -2064,9 +2075,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -2169,9 +2181,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -2278,9 +2291,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -2395,9 +2409,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -2508,9 +2523,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -2615,9 +2631,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -2738,9 +2755,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -2840,9 +2858,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -3430,9 +3449,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -3532,9 +3552,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -3831,9 +3852,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -4029,9 +4051,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -4138,9 +4161,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -4248,9 +4272,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -4351,9 +4376,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -4598,9 +4624,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -4729,9 +4756,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -5107,9 +5135,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -5230,9 +5259,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -5352,9 +5382,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -5454,9 +5485,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -5680,9 +5712,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -5807,9 +5840,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -5919,9 +5953,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -6183,9 +6218,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -6501,9 +6537,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -6613,9 +6650,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -6725,9 +6763,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -6827,9 +6866,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -6929,9 +6969,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -7041,9 +7082,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -7148,9 +7190,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -7278,9 +7321,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -7876,9 +7920,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -7978,9 +8023,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -8095,9 +8141,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -8207,9 +8254,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -8319,9 +8367,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -8753,9 +8802,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -8865,9 +8915,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -9207,9 +9258,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -9756,9 +9808,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -9876,9 +9929,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -9988,9 +10042,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -10080,9 +10135,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -10194,9 +10250,10 @@
           "413": {
             "description": "The transcript is larger than 15 MB, this route's own parser limit.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -10433,9 +10490,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -10892,9 +10950,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -11236,9 +11295,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -11474,9 +11534,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -11943,9 +12004,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -12187,9 +12249,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -12362,9 +12425,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -12537,9 +12601,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -12797,9 +12862,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -12952,9 +13018,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -13212,9 +13279,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -14479,9 +14547,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -14622,9 +14691,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }
@@ -14777,9 +14847,10 @@
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "string",
+                  "example": "Payload Too Large"
                 }
               }
             }

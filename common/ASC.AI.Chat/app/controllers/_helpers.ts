@@ -265,7 +265,8 @@ function errorDetails(err: unknown): string {
 
 /**
  * The application's error handler, registered after the routes: it answers what was raised
- * before a handler ran (by a body parser) in the `{ error }` JSON of every other refusal.
+ * before a handler ran (by a body parser) in the `{ error }` JSON of every other refusal, except
+ * a body over the limit, which is refused in plain text.
  */
 export const errorHandler: ErrorRequestHandler = (err: unknown, req, res, next) => {
   if (res.headersSent) {
@@ -275,6 +276,13 @@ export const errorHandler: ErrorRequestHandler = (err: unknown, req, res, next) 
   // The parser's own message quotes the text it could not parse.
   if (readProp(err, "type") === "entity.parse.failed") {
     res.status(400).json({ error: "The request body is not valid JSON" });
+    return;
+  }
+  // A body over the parser's limit is refused in plain text. A stream client reads every JSON
+  // line of an answer as a frame of the stream, and `ASC.AI.Tests` pins that the refusal of
+  // `send-with-stream` carries none (ChatHiddenFailureTests).
+  if (readProp(err, "type") === "entity.too.large") {
+    res.status(413).type("text/plain").send("Payload Too Large");
     return;
   }
   const { status, message } = clientError(err);

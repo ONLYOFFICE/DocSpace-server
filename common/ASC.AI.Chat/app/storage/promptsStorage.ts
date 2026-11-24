@@ -34,7 +34,7 @@
 import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { PromptsStorage, Prompt } from "@onlyoffice/ai-chat/core";
-import { mapped } from "./upstreamShape.js";
+import { mapped, namesNoEntity } from "./upstreamShape.js";
 
 const PATH = "/prompts";
 const FOLDERS_PATH = "/prompt-folders";
@@ -105,6 +105,9 @@ export class HttpPromptsStorage implements PromptsStorage {
   }
 
   async readById(id: string): Promise<Prompt | null> {
+    if (namesNoEntity(id)) {
+      return null;
+    }
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       return mapped(parsePrompt(raw), "GET prompts/{id}");
