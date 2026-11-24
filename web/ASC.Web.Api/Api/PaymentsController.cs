@@ -82,7 +82,8 @@ public class PaymentController(
     DepositDtoMapper depositDtoMapper,
     BalanceDtoMapper balanceDtoMapper,
     GoodwillBalanceDtoMapper goodwillBalanceDtoMapper,
-    PromoCodeDtoMapper promoCodeDtoMapper)
+    PromoCodeDtoMapper promoCodeDtoMapper,
+    IDistributedLockProvider distributedLockProvider)
     : ControllerBase
 {
     /// <remarks>
@@ -337,17 +338,32 @@ public class PaymentController(
             throw new ArgumentException("Invalid quantity");
         }
 
-        // the monthly and the yearly administrators plan are not bought side by side; a plan that has ended does not count
-        if (TenantWalletPlans.IsAdminPlan(quota.TenantId) && TenantWalletPlans.HoldsOtherAdminPlan(tariff.Quotas, quota.TenantId))
+        if (!TenantWalletPlans.IsAdminPlan(quota.TenantId))
         {
-            throw new ArgumentException("Quota is already set");
+            return await AddWalletProductAsync(tenantId, tariff, quota, productQty.Value, minValue);
         }
 
-        if (TenantWalletPlans.IsAdminPlan(quota.TenantId))
+        // Two requests for the two administrators plans must not both pass the check of the other plan. So the check
+        // and the purchase are one step per portal, on a tariff read anew: a request that waited sees what the
+        // request before it bought.
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"wallet_admin_plan_{tenantId}"))
         {
+            tariff = await tariffService.GetTariffAsync(tenantId, refresh: true);
+
+            // the monthly and the yearly administrators plan are not bought side by side; a plan that has ended does not count
+            if (TenantWalletPlans.HoldsOtherAdminPlan(tariff.Quotas, quota.TenantId))
+            {
+                throw new ArgumentException("Quota is already set");
+            }
+
             minValue = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupRoomAdmin.ID)).Length;
-        }
 
+            return await AddWalletProductAsync(tenantId, tariff, quota, productQty.Value, minValue);
+        }
+    }
+
+    private async Task<bool> AddWalletProductAsync(int tenantId, Tariff tariff, TenantQuota quota, int productQty, int minValue)
+    {
         var hasActiveWalletQuota = tariff.Quotas.Any(q => q.Id == quota.TenantId && q.State == QuotaState.Active);
         if (!hasActiveWalletQuota && productQty < minValue)
         {
@@ -359,9 +375,9 @@ public class PaymentController(
 
         await paymentHelper.DemandWalletOrBonusAsync(tenantId, defaultCurrency, refresh: true);
 
-        var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
+        var quantity = new Dictionary<string, int> { { quota.Name, productQty } };
 
-        return await paymentHelper.PaymentChangeAsync(tenantId, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString(), true);
+        return await paymentHelper.PaymentChangeAsync(tenantId, quantity, ProductQuantityType.Add, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString(), true);
     }
 
     /// <remarks>

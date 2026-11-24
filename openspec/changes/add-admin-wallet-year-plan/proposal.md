@@ -16,8 +16,9 @@ the plan behaves like `adminwallet`.
 - `updateWalletPayment` with `Add` sells `adminwalletyear` under the rules of `adminwallet`: the quantity is
   not below the portal's administrators unless the plan is already active.
 - `updateWalletPayment` with `Add` refuses one administrators plan with 400 "Quota is already set" while the
-  tariff holds the other with its period not ended. A plan that has ended does not count. Switching between
-  the two while one is in force is not part of this change.
+  tariff holds the other with its period not ended. A plan that has ended does not count. The check and the
+  purchase are one step per portal, so two requests sent together do not buy both. Switching between the two
+  while one is in force is not part of this change.
 - `moveSubscriptionToWallet` accepts `adminwalletyear` as well as `adminwallet`, and the move keeps the
   period: a yearly subscription moves to `adminwalletyear` only, a monthly one to `adminwallet` only. The plan
   of the other period answers 400 "Invalid product".

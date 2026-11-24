@@ -4,7 +4,7 @@
 
 - [x] 1.1 Add the `adminwalletyear` row (id -19) to the quota seed and `AdminYear` to the wallet service enum; verify `ASC.Core.Common` builds with `--no-incremental` and no new warnings
 - [x] 1.2 Add the title resource `Tariffs_adminwalletyear` (resx, hand-edited designer, the locales that have `Tariffs_adminwallet`); verify the `WalletServiceTextsTests` class of `ASC.Notify.Tests` passes
-- [x] 1.3 Create the MySQL SaaS migration that inserts the row and the MySQL Standalone migration that deletes it (`db-migrations` skill); verify that both migration projects build, and that the SaaS one, applied with `ASC.Migration.Runner`, leaves the row in `tenants_quota` (read back with the product id the migration had at that moment, `1017`)
+- [x] 1.3 Create the MySQL SaaS migration that inserts the row and the MySQL Standalone migration that deletes it (`db-migrations` skill); verify that both migration projects build, and that the SaaS one, applied with `ASC.Migration.Runner` before it was committed, leaves the row in `tenants_quota` (read back with the product id it had then, `1017`; the id was changed twice afterwards, in the migration and by hand in that database, and the migration was not applied again)
 - [ ] 1.6 Apply the Standalone migration on a standalone database and verify the row is gone. Not done: no standalone database on the development stand
 - [x] 1.4 Add a unit test over the seed: unique non-empty product ids, unique service names of wallet rows; verify by hand that both uniqueness tests fail when the new row is given product id `1013` and service name `admin`
 - [x] 1.5 Add a unit test that the merged quota of the yearly wallet plan carries its price and the `year` feature; verify it passes in `ASC.Core.Common.Tests`
@@ -39,6 +39,8 @@
 ## 5. Registered product
 
 - [x] 5.1 Set the product id the payment system registered (`1021`) in the seed, the SaaS migration with its designer and snapshot, and the test constants; verify the seed tests and the billing classes of the change pass
+
+- [x] 5.2 Make the check of the other administrators plan and the purchase one step per portal: a distributed lock in `updatewallet` with `Add` and a tariff read anew under it; verify with an integration test of two `Add` requests sent together (`prove-red.sh`)
 
 ## Workflow follow-up
 

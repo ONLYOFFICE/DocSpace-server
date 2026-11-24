@@ -36,14 +36,14 @@ See proposal.md for the motivation. What shapes the approach:
 - Registering the product in the payment system.
 - The PostgreSQL migrations, which hold none of the wallet quotas.
 - The hosted checkout (`getPaymentUrl`), which keeps refusing yearly and wallet products.
-- A lock around the check of the other plan and the purchase (see Risks).
 - What `changeTenantWalletServiceState` means for a plan: it stores `AdminYear` as it stores `Admin`.
 
 ## Decisions
 
 1. **Seed row.** Quota id -19, name `adminwalletyear`, features of `adminyear`, price 220, wallet, primary
    (not additional), visible. Product id `1021` and service name `adminyear` are the ones the payment system
-   registered for the plan (the billing product and the accounting service, given by the task owner). The
+   registered for the plan (the billing product and the accounting service, given by the task owner), at the
+   same price of 220 per administrator. The
    service name has the description and unit texts of the wallet operations already, so no new letter or
    report text is needed. *Alternative:* an empty product id until the product exists — rejected: a wallet
    quota without a product id cannot be found by name for a purchase, so nothing could be tested.
@@ -61,7 +61,11 @@ See proposal.md for the motivation. What shapes the approach:
    topped up. A row whose due date has passed does not count: it does not leave the tariff when the plan
    ends, so counting it would block the other plan for good. The decision is a function of the tariff rows,
    next to the predicate, with a unit test for an end later, in a minute and in the past. `Set` cannot bring
-   the other plan in: the next quantity is stored only for a quota the tariff holds. `movetowallet` has no
+   the other plan in: the next quantity is stored only for a quota the tariff holds. The check and the
+   purchase of an administrators plan run under one lock per portal, on a tariff read anew from the billing
+   service, so of two `Add` requests sent together the second sees what the first bought; the DocsCloud
+   switch to the Dev Pack is guarded the same way. The lock is released when the request ends, also on a
+   failure, and a request that cannot get it fails instead of buying. `movetowallet` has no
    check of its own: it answers 400 "Invalid product" when the first primary row of the tariff is a wallet
    product, and a tariff with a provider subscription and a wallet administrators plan side by side is not a
    state the purchase paths produce.
@@ -90,13 +94,12 @@ See proposal.md for the motivation. What shapes the approach:
   other plan reads its end.
 - [The period of the subscription is read from the `year` feature of its quota] → only the plan `adminyear`
   carries it, so the other paid plans, the legacy ones included, move to `adminwallet` only.
-- [The price shown differs from the registered one after registration] → the API reads the price through a
+- [The registered price differs from the seeded 220, or changes later] → the API reads the price through a
   cache of an hour. The renewal worker keeps its list of wallet quotas, prices included, for the life of its
   process, so a changed price, product id or service name reaches renewals after the worker restarts.
-- [Two `Add` requests for the two plans at the same moment both pass the check] → not closed here: the
-  check reads the tariff and the purchase follows without a lock, as for the DocsCloud / Dev Pack pair.
-  Whether the billing service refuses the second product is its decision. A portal that ends up with both
-  rows in force gets 400 for `Add` of either plan until one of them ends.
+- [An `Add` of an administrators plan and `movetowallet` at the same moment] → not under the lock:
+  `movetowallet` is refused for a portal whose plan is a wallet product, and a provider subscription with a
+  wallet administrators plan beside it is not a state the purchase paths produce.
 - [`feature/business-tools` uses quota id -19 for another quota] → that branch is
   renumbered (row, enum member, migration) when it meets this one; decided by the task owner.
 - [The in-flight change `wallet-bonus` modifies "Moving the subscription balance to the wallet" too] → the

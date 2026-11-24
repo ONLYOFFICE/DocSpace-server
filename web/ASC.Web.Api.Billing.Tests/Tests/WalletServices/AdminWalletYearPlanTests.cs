@@ -138,6 +138,46 @@ public class AdminWalletYearPlanTests(AspireAppFixture fixture) : BaseTest(fixtu
         BillingValue(purchase, "ProductId").Should().Be(requestedProductId.ToString(CultureInfo.InvariantCulture));
     }
 
+    // The check of the other plan and the purchase are one step per portal: of two requests sent together, the one
+    // that comes second sees the plan the first one bought.
+    [Fact]
+    public async Task UpdateWalletPayment_BothPlansAddedAtTheSameMoment_BuysOne()
+    {
+        // Arrange: billing lists a product as paid for from the moment it sells it
+        Payments.Customer(Owner.Email)
+            .Balance(1000m)
+            .On(PaymentService.Billing, "POST", ChangeRoute, call =>
+            {
+                var productId = int.Parse(BillingValue(call, "ProductId")!, CultureInfo.InvariantCulture);
+                Payments.Paid(productId, quantity: 1, DateTime.UtcNow.Date.AddMonths(1), Owner.Email);
+
+                return PaymentServiceAnswer.Json("true");
+            });
+
+        // Act
+        var statuses = await Task.WhenAll(AddStatusAsync(Plans.AdminWalletPlanName), AddStatusAsync(Plans.AdminWalletYearPlanName));
+
+        // Assert
+        statuses.Should().BeEquivalentTo([200, 400]);
+        PaymentCalls.Where(c => c.Route == ChangeRoute).Should().ContainSingle("one of the two plans is bought");
+    }
+
+    private async Task<int> AddStatusAsync(string plan)
+    {
+        try
+        {
+            var answer = await _paymentApi.UpdateWalletPaymentAsync(
+                new WalletQuantityRequestDto(new Dictionary<string, int?> { [plan] = 1 }, ProductQuantityType.Add),
+                TestContext.Current.CancellationToken);
+
+            return (int)answer.StatusCode;
+        }
+        catch (ApiException exception)
+        {
+            return exception.ErrorCode;
+        }
+    }
+
     // Only the other plan is refused: more administrators of the plan the portal holds are bought as before.
     [Fact]
     public async Task UpdateWalletPayment_AddThePlanThePortalHolds_BuysMoreOfIt()

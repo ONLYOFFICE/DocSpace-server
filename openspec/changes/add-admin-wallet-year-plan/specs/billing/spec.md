@@ -25,6 +25,11 @@ administrators plan while the tariff holds the other with its period not ended (
 - **WHEN** the owner calls `updateWalletPayment` with `Add` for `adminwalletyear` while the tariff holds `adminwallet` with a due date in the future, or for `adminwallet` while it holds `adminwalletyear` with a due date in the future
 - **THEN** the system answers 400 "Quota is already set" and nothing is paid
 
+#### Scenario: Both plans asked for at the same moment
+
+- **WHEN** two `updateWalletPayment` requests with `Add`, one for `adminwallet` and one for `adminwalletyear`, reach a portal without an administrators plan together, and the billing service lists a product as paid once it sells it
+- **THEN** one answers 200 `true`, the other 400 "Quota is already set", and the billing service is asked for one product
+
 #### Scenario: The other administrators plan has ended
 
 - **WHEN** the due date of the other administrators plan in the tariff has passed and the owner calls `updateWalletPayment` with `Add` for `adminwalletyear` or `adminwallet`
@@ -43,7 +48,7 @@ administrators plan while the tariff holds the other with its period not ended (
 #### Scenario: Yearly plan in the catalogue
 
 - **WHEN** the owner calls `getPaymentQuotas` with `wallet=true` on a hosted portal
-- **THEN** the list holds the yearly plan with a price of 220 and the `year` feature, while the payment system does not know its price
+- **THEN** the list holds the yearly plan with the `year` feature, at the catalogue price of 220 when the accounting service gives no price for `adminyear`
 
 ### Requirement: Moving a subscription keeps its period
 
@@ -70,7 +75,7 @@ its `serviceName` `adminyear` and its price. The `serviceName` filter of `getCus
 #### Scenario: Yearly plan read as a service
 
 - **WHEN** the owner calls `getWalletService` with `service` `AdminYear` on a hosted portal
-- **THEN** the system answers 200 with `serviceName` `adminyear` and a price of 220, while the payment system does not know its price
+- **THEN** the system answers 200 with `serviceName` `adminyear`, at the catalogue price of 220 when the accounting service gives no price for it
 
 #### Scenario: Wallet movements of the yearly plan
 
