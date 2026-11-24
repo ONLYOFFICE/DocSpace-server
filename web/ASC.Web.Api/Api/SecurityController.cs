@@ -72,7 +72,8 @@ public class SecurityController(
         CommonLinkUtility commonLinkUtility,
         IEventBus eventBus,
         DocumentBuilderTaskManager<AuditReportTask, int, AuditReportTaskData> documentBuilderTaskManager,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ILogger<SecurityController> logger)
     : ControllerBase
 {
     /// <remarks>
@@ -666,19 +667,7 @@ public class SecurityController(
         {
             foreach (var domain in request.Domains)
             {
-                var uriString = domain.Replace($"{Uri.SchemeDelimiter}*.", Uri.SchemeDelimiter);
-
-                if (uriString.StartsWith("*."))
-                {
-                    uriString = uriString.Replace("*.", "");
-                }
-
-                if (!uriString.Contains(Uri.SchemeDelimiter))
-                {
-                    uriString = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, uriString);
-                }
-
-                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _) || Encoding.UTF8.GetByteCount(domain) != domain.Length)
+                if (!CspSettings.IsValidDomain(domain))
                 {
                     throw new ArgumentException(domain, nameof(request.Domains));
                 }
@@ -716,9 +705,19 @@ public class SecurityController(
     {
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var personalCspDomains = Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName)
-            ? await webPluginManager.GetPersonalCspDomainsAsync(tenantManager.GetCurrentTenantId())
-            : [];
+        List<string> personalCspDomains = [];
+
+        if (Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName))
+        {
+            try
+            {
+                personalCspDomains = await webPluginManager.GetPersonalCspDomainsAsync(tenantManager.GetCurrentTenantId());
+            }
+            catch (Exception e)
+            {
+                logger.WarningPersonalCspDomainsNotRead(e);
+            }
+        }
 
         var settings = personalCspDomains.Count == 0
             ? await cspSettingsHelper.LoadAsync(HttpContext.GetIfModifiedSince())
@@ -734,10 +733,14 @@ public class SecurityController(
             await cspSettingsHelper.SaveAsync(settings.Domains, false);
         }
 
+        var personalHeader = personalCspDomains.Count == 0
+            ? null
+            : await cspSettingsHelper.CreatePersonalHeaderAsync(settings.Domains, personalCspDomains);
+
         return new CspDto
         {
             Domains = settings.Domains ?? [],
-            Header = await cspSettingsHelper.CreateHeaderAsync((settings.Domains ?? []).Concat(personalCspDomains))
+            Header = personalHeader ?? await cspSettingsHelper.CreateHeaderAsync(settings.Domains)
         };
     }
 

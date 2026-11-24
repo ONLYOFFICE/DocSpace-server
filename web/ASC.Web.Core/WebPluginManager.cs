@@ -89,6 +89,7 @@ public class WebPluginManager(
     public const string PersonalCspCookieName = "asc_personal_csp";
     private const string ConfigFileName = "config.json";
     private const string PersonalConfigFileName = "personal.json";
+    private const int MaxPersonalCspDomainsLength = 15 * 1024;
     private const string PluginFileName = "plugin.js";
     private const string PluginCssFileName = "plugin.css";
     private const string AssetsFolderName = "assets";
@@ -323,6 +324,11 @@ public class WebPluginManager(
                 throw new Exception(Resource.ErrorWebPluginExist);
             }
 
+            if (!IsValidPersonalCspDomains(webPlugin.CspDomains))
+            {
+                throw new Exception(Resource.ErrorWebPluginCspDomains);
+            }
+
             return;
         }
 
@@ -427,9 +433,25 @@ public class WebPluginManager(
     {
         return availableWebPlugins
             .Where(x => x.Personal && x.Enabled && !string.IsNullOrWhiteSpace(x.CspDomains))
-            .SelectMany(x => x.CspDomains.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .SelectMany(x => SplitCspDomains(x.CspDomains))
             .Distinct()
             .ToList();
+    }
+
+    private static string[] SplitCspDomains(string cspDomains)
+    {
+        return cspDomains.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    }
+
+    private static bool IsValidPersonalCspDomains(string cspDomains)
+    {
+        if (string.IsNullOrWhiteSpace(cspDomains))
+        {
+            return true;
+        }
+
+        return cspDomains.Length <= MaxPersonalCspDomainsLength &&
+               SplitCspDomains(cspDomains).All(x => !x.Any(c => char.IsWhiteSpace(c) || c is ';' or '\'' or '"') && CspSettings.IsValidDomain(x));
     }
 
     public async Task<WebPlugin> GetPersonalWebPluginByNameAsync(int tenantId, string name)

@@ -181,6 +181,11 @@ public class CookiesManager(
         var httpContext = httpContextAccessor.HttpContext;
         var cookieName = GetFullCookiesName(type, itemId);
 
+        if (type == CookiesType.AuthKey && httpContext.Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName))
+        {
+            httpContext.Response.Cookies.Delete(WebPluginManager.PersonalCspCookieName);
+        }
+
         if (!httpContext.Request.Cookies.ContainsKey(cookieName))
         {
             return;

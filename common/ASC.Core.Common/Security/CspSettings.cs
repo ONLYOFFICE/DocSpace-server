@@ -43,5 +43,22 @@ public class CspSettings : ISettings<CspSettings>
         return new CspSettings { Domains = new List<string>() };
     }
 
+    public static bool IsValidDomain(string domain)
+    {
+        var uriString = domain.Replace($"{Uri.SchemeDelimiter}*.", Uri.SchemeDelimiter);
+
+        if (uriString.StartsWith("*."))
+        {
+            uriString = uriString.Replace("*.", "");
+        }
+
+        if (!uriString.Contains(Uri.SchemeDelimiter))
+        {
+            uriString = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, uriString);
+        }
+
+        return Uri.TryCreate(uriString, UriKind.Absolute, out _) && Encoding.UTF8.GetByteCount(domain) == domain.Length;
+    }
+
     public DateTime LastModified { get; set; }
 }

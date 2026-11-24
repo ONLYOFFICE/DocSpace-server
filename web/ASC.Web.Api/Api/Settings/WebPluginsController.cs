@@ -97,7 +97,7 @@ public class WebPluginsController(
 
         if (inDto.Personal)
         {
-            await SyncPersonalCspAsync(tenant.Id);
+            await SyncPersonalCspAsync(tenant.Id, refuseTooLarge: true);
         }
         else
         {
@@ -223,7 +223,7 @@ public class WebPluginsController(
 
         if (inDto.Personal)
         {
-            await SyncPersonalCspAsync(tenant.Id);
+            await SyncPersonalCspAsync(tenant.Id, refuseTooLarge: inDto.WebPlugin.Enabled);
         }
         else
         {
@@ -347,13 +347,16 @@ public class WebPluginsController(
         return originTenant?.Id == tenantManager.GetCurrentTenantId();
     }
 
-    private async Task SyncPersonalCspAsync(int tenantId, List<string> personalCspDomains = null)
+    private async Task SyncPersonalCspAsync(int tenantId, List<string> personalCspDomains = null, bool refuseTooLarge = false)
     {
+        var personalChange = personalCspDomains == null;
+
         try
         {
             personalCspDomains ??= await webPluginManager.GetPersonalCspDomainsAsync(tenantId);
 
             var personalCspToken = webPluginManager.GetPersonalCspToken(tenantId);
+            var hasCookie = Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName);
 
             if (personalCspDomains.Count != 0)
             {
@@ -367,16 +370,19 @@ public class WebPluginsController(
 
                 await cspSettingsHelper.SavePersonalAsync(personalCspToken, personalCspDomains);
             }
-            else if (Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName))
+            else if (hasCookie || personalChange)
             {
-                Response.Cookies.Delete(WebPluginManager.PersonalCspCookieName);
+                if (hasCookie)
+                {
+                    Response.Cookies.Delete(WebPluginManager.PersonalCspCookieName);
+                }
 
                 await cspSettingsHelper.RemovePersonalAsync(personalCspToken);
             }
         }
-        catch (Exception e)
+        catch (Exception e) when (!refuseTooLarge || e is not InvalidOperationException)
         {
-            logger.WarningWithException("Failed to update the personal CSP", e);
+            logger.WarningPersonalCspNotUpdated(e);
         }
     }
 

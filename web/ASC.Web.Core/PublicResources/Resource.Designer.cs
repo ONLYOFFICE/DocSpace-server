@@ -3112,6 +3112,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The cspDomains value lists an invalid address or is too long.
+        /// </summary>
+        public static string ErrorWebPluginCspDomains {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginCspDomains", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Plugin already exist.
         /// </summary>
         public static string ErrorWebPluginExist {

@@ -951,6 +951,9 @@
   <data name="ErrorWebPluginArchive" xml:space="preserve">
     <value>Wrong plugin archive</value>
   </data>
+  <data name="ErrorWebPluginCspDomains" xml:space="preserve">
+    <value>The cspDomains value lists an invalid address or is too long</value>
+  </data>
   <data name="ErrorWebPluginExist" xml:space="preserve">
     <value>Plugin already exist</value>
   </data>
