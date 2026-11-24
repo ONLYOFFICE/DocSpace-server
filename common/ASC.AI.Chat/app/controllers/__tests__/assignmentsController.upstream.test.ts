@@ -33,6 +33,7 @@
 
 import { describe, expect, it } from "vitest";
 import { invoke } from "../../__tests__/helpers/http.js";
+import { responseViolations } from "../../__tests__/helpers/schema.js";
 import { docspace, docspaceError, http, useUpstream } from "../../__tests__/helpers/upstream.js";
 import { assignmentsController } from "../assignmentsController.js";
 
@@ -61,6 +62,7 @@ describe("assignmentsController resolve operations over the real engine", () => 
 
     expect(reply.status).toBe(404);
     expect(reply.body).toEqual({ error: "no AI profile is available for ActionType.Chat" });
+    expect(responseViolations("aiAssignmentsResolveForAction", 404, reply.body)).toEqual([]);
     expect(upstream.seen.map((r) => r.path)).toEqual([
       "/internal/ai/assignments/Chat",
       `/internal/ai/profiles/${ASSIGNED}`,
@@ -77,6 +79,7 @@ describe("assignmentsController resolve operations over the real engine", () => 
 
     expect(reply.status).toBe(200);
     expect(reply.body).toBeNull();
+    expect(responseViolations("aiAssignmentsTryResolveForAction", 200, reply.body)).toEqual([]);
   });
 
   it("answers the assigned profile by its listed fields when it exists", async () => {
@@ -100,6 +103,7 @@ describe("assignmentsController resolve operations over the real engine", () => 
     const { key: _key, ...shown } = profile;
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual({ profileId: ASSIGNED, profile: shown });
+    expect(responseViolations("aiAssignmentsResolveForAction", 200, reply.body)).toEqual([]);
   });
 
   it("answers the status of a failed profile read, not an empty slot", async () => {
@@ -112,5 +116,6 @@ describe("assignmentsController resolve operations over the real engine", () => 
 
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal Server Error" });
+    expect(responseViolations("aiAssignmentsResolveForAction", 500, reply.body)).toEqual([]);
   });
 });

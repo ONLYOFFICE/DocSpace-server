@@ -8407,7 +8407,7 @@
             }
           },
           "400": {
-            "description": "The server name is missing. A body that is not valid JSON is refused with 400 as well.",
+            "description": "The server name is missing, or `entityId` is neither a string nor null. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {

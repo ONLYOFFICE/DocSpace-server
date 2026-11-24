@@ -44,6 +44,8 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
 vi.mock("../../storage/index.js", () => ({ storage: {} }));
 
 const { promptsController } = await import("../promptsController.js");
+// After the mocks: the schema helper loads the library, whose engine class is replaced above.
+const { responseViolations } = await import("../../__tests__/helpers/schema.js");
 
 const prompt = { name: "Summary", text: "Summarize the file", folderId: null };
 
@@ -53,13 +55,16 @@ describe("promptsController.create", () => {
   });
 
   it("answers the created prompt with 200", async () => {
-    const created = { success: true as const, prompt: { id: "p1", ...prompt } };
+    // Prompt (@onlyoffice/ai-chat/core types.d.ts): a prompt at the root has no folderId.
+    const stored = { id: "p1", name: prompt.name, text: prompt.text, createdAt: 1767225600000 };
+    const created = { success: true as const, prompt: { ...stored, updatedAt: 1767225600000 } };
     engine.create.mockResolvedValue(created as never);
 
     const reply = await invoke(promptsController.create, { body: prompt });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toEqual(created);
+    expect(responseViolations("aiPromptsCreate", 200, reply.body)).toEqual([]);
     expect(engine.create).toHaveBeenCalledWith(prompt);
   });
 
@@ -76,6 +81,7 @@ describe("promptsController.create", () => {
 
     expect(reply.status).toBe(status);
     expect(reply.body).toEqual(refusal);
+    expect(responseViolations("aiPromptsCreate", status, reply.body)).toEqual([]);
   });
 
   it.each([
@@ -90,6 +96,7 @@ describe("promptsController.create", () => {
     const reply = await invoke(promptsController.create, { body });
 
     expect(reply.status).toBe(400);
+    expect(responseViolations("aiPromptsCreate", 400, reply.body)).toEqual([]);
     expect(engine.create).not.toHaveBeenCalled();
   });
 });

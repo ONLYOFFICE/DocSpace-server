@@ -71,6 +71,7 @@ import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { readStoredProfile } from "./storedProfile.js";
+import { assertAiAccess } from "./aiAccess.js";
 import { asActionType, isObject, parseInteger } from "../narrow.js";
 import {
   HttpToolsAdapter,
@@ -1030,9 +1031,12 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    // No body at all: the reads below would throw on it. Any other body goes on to the gated
-    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
+    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
+    // caller without AI access gets the 403 before a word about the body
+    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
     if (req.body === null || req.body === undefined) {
+      await assertAiAccess();
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
@@ -1077,9 +1081,12 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    // No body at all: the reads below would throw on it. Any other body goes on to the gated
-    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
+    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
+    // caller without AI access gets the 403 before a word about the body
+    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
     if (req.body === null || req.body === undefined) {
+      await assertAiAccess();
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
@@ -1115,9 +1122,12 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    // No body at all: the reads below would throw on it. Any other body goes on to the gated
-    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
+    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
+    // caller without AI access gets the 403 before a word about the body
+    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
     if (req.body === null || req.body === undefined) {
+      await assertAiAccess();
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
@@ -1156,9 +1166,12 @@ export const aiController = {
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    // No body at all: the reads below would throw on it. Any other body goes on to the gated
-    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
+    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
+    // caller without AI access gets the 403 before a word about the body
+    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
     if (req.body === null || req.body === undefined) {
+      await assertAiAccess();
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
@@ -1197,9 +1210,12 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    // No body at all: the reads below would throw on it. Any other body goes on to the gated
-    // read first, so that a caller without AI access gets the 403 before a word about the body.
+    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
+    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
+    // caller without AI access gets the 403 before a word about the body
+    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
     if (req.body === null || req.body === undefined) {
+      await assertAiAccess();
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }

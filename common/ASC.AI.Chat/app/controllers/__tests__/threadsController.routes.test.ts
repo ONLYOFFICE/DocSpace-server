@@ -56,11 +56,14 @@ const readMessage = vi.fn<(id: string) => Promise<unknown>>();
 const readProfile = vi.fn<(id: string) => Promise<unknown>>();
 // HttpStorageAdapter: the base of the resolve engine's storage in assignmentsController, which
 // the thread gate calls; the engine class itself is mocked.
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
 vi.mock("../../storage/index.js", () => ({
   storage: {
     threads: { readById: readThread },
     messages: { readById: readMessage },
     profiles: { readById: readProfile },
+    toolPrefs,
   },
   HttpStorageAdapter: class {},
 }));
@@ -1181,5 +1184,25 @@ describe("threadsController.updateMessage", () => {
 
     expect(reply.status).toBe(500);
     expect(engine.updateMessage).not.toHaveBeenCalled();
+  });
+});
+
+// ts-ai-failure-paths.md §3: the access gate comes before the body. With the AI service refusing
+// the caller (a guest, or AI switched off), a body the route would refuse with 400 answers 403.
+describe("threadsController.appendUserMessage behind the access gate", () => {
+  it.each([
+    ["no threadId", { message: userMessage }],
+    ["a profileId that is no UUID", { threadId: "t1", message: userMessage, profileId: "x" }],
+  ])("answers 403 for a body with %s, before the body is read", async (_case, body) => {
+    toolPrefs.readDisabled.mockRejectedValueOnce(
+      new AiServiceHttpError(403, "Forbidden", "", "http://ai/tool-prefs"),
+    );
+
+    const reply = await invoke(threadsController.appendUserMessage, { body });
+
+    expect(reply.status).toBe(403);
+    expect(published("aiThreadsAppendUserMessage", reply)).toEqual([]);
+    expect(readProfile).not.toHaveBeenCalled();
+    expect(engine.appendUserMessage).not.toHaveBeenCalled();
   });
 });

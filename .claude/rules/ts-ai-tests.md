@@ -159,8 +159,10 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   which behaviour moved. A test that goes red without such an intent is the deviation the suite
   exists to catch: fix the code, not the assertion.
 - Every answer of a route handler is checked against the schema the service publishes for that
-  operation and status (`responseViolations`), every request body by a table over each field
-  (missing, `null`, wrong type, empty, over a limit), every upstream DTO by a fixture whose shape
+  operation and status (`responseViolations`; `controllers/__tests__/schemaChecks.drift.test.ts`
+  fails for a controller test file that calls it nowhere, and lists the older files still to
+  move), every request body by a table over each field (missing, `null`, wrong type, empty, over a
+  limit), every upstream DTO by a fixture whose shape
   is taken from the C# class named above it, then each field missing, `null` and of the wrong type.
 - **Behaviour that is pinned although it is wrong** carries a comment directly above the test:
   `// DEFECT <area>-<n>: <what it does> — expected <what it should do> (<rule §N or source>)`.
@@ -176,7 +178,8 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   prompt), which changes only through an OpenSpec change with the .NET tests; and
   `// HANDLED DOWNSTREAM <id>: <what it does>. In production <who refuses or prevents it>.` for
   what the AI service or the engine refuses itself, so that only the stubbed test shows it.
-  `grep -rn "// DEFECT"` then lists what is open (none on 2026-11-24, after the 36 open that morning were fixed or relabelled).
+  `grep -rn "// DEFECT"` then lists what is open; it is the count, so no number of open ones is
+  written here.
 - A defect that touches security (a secret or a credential in an answer or a log, a credential
   sent to another host, a missing access check, a request to an address the caller chose) is not
   pinned and not described in the repository: it goes to the private register

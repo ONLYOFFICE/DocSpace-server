@@ -226,14 +226,22 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
  * no file is left in the folder that no message names
  * (`DELETE api/2.0/files/file/{fileId}`, FilesController.DeleteFile; it
  * starts a file operation and answers at once). The file was made by this
- * request seconds before, so it skips the trash. Best effort: a failure is
- * logged with the file's id and does not replace the error that caused it.
+ * request seconds before, so it skips the trash. `returnSingleOperation`
+ * (a query parameter of this route) makes the answer this operation only:
+ * without it the portal lists every operation of the user and drops the
+ * finished ones from its queue, so the user's own delete or move in the web
+ * client would lose its result. Best effort: a failure is logged with the
+ * file's id and does not replace the error that caused it.
  */
 async function removeOrphanImage(entryId: string): Promise<void> {
   try {
-    await filesApiRequest("DELETE", `file/${encodeURIComponent(entryId)}`, {
-      json: { deleteAfter: false, immediately: true },
-    });
+    await filesApiRequest(
+      "DELETE",
+      `file/${encodeURIComponent(entryId)}?returnSingleOperation=true`,
+      {
+        json: { deleteAfter: false, immediately: true },
+      },
+    );
     logger.warn(
       `uploadToolImage: asked to delete file ${entryId} (a file operation), its attachment record was not written`,
     );

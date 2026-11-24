@@ -658,3 +658,26 @@ describe("the published error answers", () => {
     expect(responseViolations("aiSendWithStreamOpenAI", 402, openai.body)).toEqual([]);
   });
 });
+
+// ts-ai-failure-paths.md §3: the access gate comes before the body. A body of JSON `null` is the
+// one these rounds refuse before their own gated read, so the gate is asked first: with the AI
+// service refusing the caller (a guest, or AI switched off), the answer is 403, not 400.
+describe.each([
+  ["sendWithStream", "aiSendWithStream"],
+  ["sendWithStreamOpenAI", "aiSendWithStreamOpenAI"],
+  ["regenerateStream", "aiRegenerateStream"],
+  ["approveToolCall", "aiApproveToolCall"],
+  ["denyToolCall", "aiDenyToolCall"],
+] as const)("%s behind the access gate", (name, operationId) => {
+  it("answers 403 for a null body when the caller has no AI access", async () => {
+    h.storage.toolPrefs.readDisabled.mockRejectedValueOnce(
+      new AiServiceHttpError(403, "Forbidden", "", "http://ai/tool-prefs"),
+    );
+
+    const reply = await h.call(aiController[name], null);
+
+    expect(reply.status).toBe(403);
+    expect(responseViolations(operationId, 403, reply.body)).toEqual([]);
+    expect(h.primeChatContext).not.toHaveBeenCalled();
+  });
+});

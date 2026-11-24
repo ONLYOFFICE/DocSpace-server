@@ -46,49 +46,45 @@ const catalog = { agents: [], skillSets: [], knowledgeBases: [] };
 vi.mock("../../templates/catalog.js", () => ({ getTemplateCatalog: async () => catalog }));
 
 const { templatesController } = await import("../templatesController.js");
-const { handlerSettled } = await import("../_helpers.js");
-
-type Handler = (req: never, res: never, next: never) => unknown;
+const { invoke } = await import("../../__tests__/helpers/http.js");
+// After the mocks: the schema helper loads the library.
+const { responseViolations } = await import("../../__tests__/helpers/schema.js");
 
 async function install(body: unknown) {
-  const res = {
-    statusCode: 200,
-    body: undefined as unknown,
-    headersSent: false,
-    status(code: number) {
-      this.statusCode = code;
-      return this;
-    },
-    json(payload: unknown) {
-      this.body = payload;
-      this.headersSent = true;
-      return this;
-    },
-  };
-  const req = { body, method: "POST", originalUrl: "/ai/templates/install" };
-  (templatesController.install as Handler)(req as never, res as never, vi.fn() as never);
-  await handlerSettled(res);
-  return res;
+  return invoke(templatesController.install, { body, url: "/ai/templates/install" });
 }
+
+// InstalledTemplate (templates/installTemplate.ts): an agent without skill sets or knowledge bases.
+const installed = {
+  templateId: "agents/tables/formula-helper",
+  id: "103",
+  title: "Formula helper",
+  kind: "agent",
+  skillSets: [],
+  knowledgeBases: [],
+  warnings: [],
+};
 
 describe("templatesController.install", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mayCreateAiRooms.mockResolvedValue(true);
-    installTemplate.mockResolvedValue({ id: "103", kind: "agent" });
+    installTemplate.mockResolvedValue(installed);
   });
 
   it("installs the template for a caller who may create agents", async () => {
     const res = await install({ id: "agents/tables/formula-helper" });
     expect(installTemplate).toHaveBeenCalledWith(catalog, "agents/tables/formula-helper");
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ id: "103", kind: "agent" });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(installed);
+    expect(responseViolations("aiTemplatesInstall", 200, res.body)).toEqual([]);
   });
 
   it("refuses a caller who may not create agents before any room is made", async () => {
     mayCreateAiRooms.mockResolvedValue(false);
     const res = await install({ id: "agents/tables/formula-helper" });
-    expect(res.statusCode).toBe(403);
+    expect(res.status).toBe(403);
+    expect(responseViolations("aiTemplatesInstall", 403, res.body)).toEqual([]);
     expect(installTemplate).not.toHaveBeenCalled();
   });
 });

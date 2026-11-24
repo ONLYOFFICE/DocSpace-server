@@ -58,7 +58,9 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ToolsEngine: engineClass(() => engine),
 }));
 const mcpServers = vi.hoisted(() => ({ readByName: vi.fn(), readAll: vi.fn() }));
-vi.mock("../../storage/index.js", () => ({ storage: { mcpServers } }));
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
+vi.mock("../../storage/index.js", () => ({ storage: { mcpServers, toolPrefs } }));
 const system = vi.hoisted(() => ({ getServerTypes: vi.fn(), getSystemServerConfig: vi.fn() }));
 vi.mock("../../tools/systemTools.js", () => ({
   systemToolsSource: { getServerTypes: system.getServerTypes },
@@ -460,13 +462,19 @@ describe("toolsController.removeCustomServer", () => {
     expect(engine.removeCustomServer).toHaveBeenCalledWith("crm", undefined);
   });
 
-  it("drops an entityId that is not a string", async () => {
-    engine.removeCustomServer.mockResolvedValue(undefined);
+  // An entityId of another type used to fold to the portal-wide scope, so the delete removed the
+  // portal's server of that name; the five other writes refuse it since 060dc6f22e.
+  it.each([
+    ["a number", 42],
+    ["an object", { id: 42 }],
+  ])("answers 400 for an entityId that is %s, before the entity check", async (_w, entityId) => {
+    const reply = await send(handler, { name: "crm", entityId }, { method: "DELETE" });
 
-    await send(handler, { name: "crm", entityId: 42 }, { method: "DELETE" });
-
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "entityId must be a string" });
     expect(upstream.seen).toEqual([]);
-    expect(engine.removeCustomServer).toHaveBeenCalledWith("crm", undefined);
+    expect(engine.removeCustomServer).not.toHaveBeenCalled();
+    expect(responseViolations(operationId, 400, reply.body)).toEqual([]);
   });
 
   // The remove route does not check the name like add/update do; it forwards it as given.
@@ -1355,5 +1363,30 @@ describe("toolsController.getAllowAlways", () => {
     expect(reply.status).toBe(500);
     expect(reply.body).toEqual({ error: "Internal Server Error" });
     expect(responseViolations(operationId, 500, reply.body)).toEqual([]);
+  });
+});
+
+// ts-ai-failure-paths.md §3: the access gate comes before the body. With the AI service refusing
+// the caller (a guest, or AI switched off), a body each route would refuse with 400 answers 403,
+// and neither the Files API nor the engine is asked.
+describe.each([
+  ["addCustomServer", "aiToolsAddCustomServer", { name: "a/b", entityId: 42 }],
+  ["updateCustomServer", "aiToolsUpdateCustomServer", { name: "a/b", entityId: 42 }],
+  ["removeCustomServer", "aiToolsRemoveCustomServer", { name: "crm", entityId: 42 }],
+  ["replaceAllCustomServers", "aiToolsReplaceAllCustomServers", { map: "x", entityId: 42 }],
+  ["setDisabled", "aiToolsSetDisabled", { serverType: 5, entityId: 42 }],
+  ["setAllowAlways", "aiToolsSetAllowAlways", { serverType: "", entityId: 42 }],
+] as const)("toolsController.%s behind the access gate", (route, operationId, body) => {
+  it("answers 403 for a body it would refuse, before the body is read", async () => {
+    toolPrefs.readDisabled.mockRejectedValueOnce(
+      new AiServiceHttpError(403, "Forbidden", "", "http://ai/tool-prefs"),
+    );
+
+    const reply = await send(toolsController[route], body);
+
+    expect(reply.status).toBe(403);
+    expect(responseViolations(operationId, 403, reply.body)).toEqual([]);
+    expect(upstream.seen).toEqual([]);
+    expect(engine[route]).not.toHaveBeenCalled();
   });
 });

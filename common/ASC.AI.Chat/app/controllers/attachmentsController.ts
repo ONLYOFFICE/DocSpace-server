@@ -38,6 +38,7 @@ import { asNumber, isObject, parseInteger } from "../narrow.js";
 import { setAnalyzeEntryIds } from "../requestContext.js";
 import { getSuggestedQuestions } from "../forms/suggestedQuestions.js";
 import { nonEmptyStrings, optionalString } from "./requestFields.js";
+import { assertAiAccess } from "./aiAccess.js";
 
 const engine = new AttachmentsEngine({ storage });
 
@@ -138,6 +139,9 @@ function parseFileInput(raw: unknown): ParseResult<FileInput> {
 // that cannot be read attaches the file itself and fails nothing.
 export const attachmentsController = {
   saveFile: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["input", "entityId"] as const);
     // Validate the required `input` shape up front: without it, an undefined or
     // malformed `input` reaches the engine and throws a TypeError that collapses
@@ -153,6 +157,9 @@ export const attachmentsController = {
   }),
 
   saveFilesMany: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["inputs", "entityId"] as const);
     // Validate each element with the same rules as save-file; a bad element
     // must fail with a clean 400 rather than crash the engine (Bug 82754).

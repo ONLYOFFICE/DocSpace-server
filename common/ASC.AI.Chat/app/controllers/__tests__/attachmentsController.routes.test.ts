@@ -51,10 +51,13 @@ const store = vi.hoisted(() => ({
   findMissingIds: vi.fn(),
   getSuggestedQuestions: vi.fn(),
 }));
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
 vi.mock("../../storage/index.js", () => ({
   storage: {
     messages: { readThreadId: store.readThreadId },
     attachments: { findMissingIds: store.findMissingIds },
+    toolPrefs,
   },
 }));
 vi.mock("../../forms/suggestedQuestions.js", () => ({
@@ -872,5 +875,24 @@ describe("attachmentsController.linkToMessage", () => {
     expect(reply.body).toEqual({ error: "ids must hold non-empty strings only" });
     expect(store.findMissingIds).not.toHaveBeenCalled();
     expect(engine.linkToMessage).not.toHaveBeenCalled();
+  });
+});
+
+// ts-ai-failure-paths.md §3: the access gate comes before the body. With the AI service refusing
+// the caller (a guest, or AI switched off), a body the route would refuse with 400 answers 403.
+describe.each([
+  ["saveFile", "aiAttachmentsSaveFile", { input: null, entityId: 42 }],
+  ["saveFilesMany", "aiAttachmentsSaveFilesMany", { inputs: "x", entityId: 42 }],
+] as const)("attachmentsController.%s behind the access gate", (route, operationId, body) => {
+  it("answers 403 for a body it would refuse, before the body is read", async () => {
+    toolPrefs.readDisabled.mockRejectedValueOnce(
+      new AiServiceHttpError(403, "Forbidden", "", "http://ai/tool-prefs"),
+    );
+
+    const reply = await invoke(attachmentsController[route], { body });
+
+    expect(reply.status).toBe(403);
+    expect(responseViolations(operationId, 403, reply.body)).toEqual([]);
+    expect(engine[route]).not.toHaveBeenCalled();
   });
 });

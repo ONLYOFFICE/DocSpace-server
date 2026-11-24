@@ -1041,7 +1041,10 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "The server name is missing or is not routable.",
     "404": true,
   },
-  aiToolsRemoveCustomServer: { "400": "The server name is missing.", "404": true },
+  aiToolsRemoveCustomServer: {
+    "400": "The server name is missing, or `entityId` is neither a string nor null.",
+    "404": true,
+  },
   aiToolsGetCustomServer: { "400": "The server name is missing." },
   aiToolsReplaceAllCustomServers: {
     "400": "The body is not a map of server name to configuration, or a name is not routable.",

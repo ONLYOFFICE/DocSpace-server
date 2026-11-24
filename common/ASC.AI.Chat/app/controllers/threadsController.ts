@@ -54,6 +54,7 @@ import { getSourceMeta } from "../requestContext.js";
 import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 import { readStoredProfile, resolveStoredProfile } from "./storedProfile.js";
 import { clientFault } from "../httpErrors.js";
+import { assertAiAccess } from "./aiAccess.js";
 
 // A profile id as the AI service binds it: `TouchThreadRequestDto.ProfileId` is a `Guid?` read by
 // System.Text.Json, which takes the hyphenated 36-character form alone. Braces, parentheses and
@@ -263,6 +264,9 @@ export const threadsController = {
   }),
 
   appendUserMessage: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["threadId", "message", "profileId"] as const);
     if (typeof args.threadId !== "string" || args.threadId.length === 0) {
       res.status(400).json({ error: "threadId required" });

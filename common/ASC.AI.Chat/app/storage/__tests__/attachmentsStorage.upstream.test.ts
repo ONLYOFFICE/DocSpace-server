@@ -877,10 +877,14 @@ describe("createMany of a generated image", () => {
 
   // FilesController.DeleteFile: `DELETE api/2.0/files/file/{fileId}`, answering the started operations.
   const removals = (answer: () => Response = () => HttpResponse.json({ response: [] })) => {
-    const removed: { id: string; body: unknown }[] = [];
+    const removed: { id: string; single: string | null; body: unknown }[] = [];
     upstream.use(
       http.delete(`${FILES}/file/:id`, async ({ request, params }) => {
-        removed.push({ id: String(params["id"]), body: await request.json() });
+        removed.push({
+          id: String(params["id"]),
+          single: new URL(request.url).searchParams.get("returnSingleOperation"),
+          body: await request.json(),
+        });
         return answer();
       }),
     );
@@ -1214,7 +1218,10 @@ describe("createMany of a generated image", () => {
 
     expectPlaceholder(result, "attachment-record");
     expect(inserts).toHaveLength(1);
-    expect(removed).toEqual([{ id: "90", body: { deleteAfter: false, immediately: true } }]);
+    // returnSingleOperation: without it the portal would dequeue every finished operation of the user.
+    expect(removed).toEqual([
+      { id: "90", single: "true", body: { deleteAfter: false, immediately: true } },
+    ]);
     expect(logged("warn")).toContain(
       "uploadToolImage: asked to delete file 90 (a file operation), its attachment record was not written",
     );

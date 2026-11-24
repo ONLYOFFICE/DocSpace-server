@@ -68,6 +68,8 @@ export const storage = {
   threads: { readById: vi.fn() },
   messages: { readByThread: vi.fn() },
   profiles: { readById: vi.fn() },
+  /** Read by the access gate (aiAccess.ts) before a body is refused. */
+  toolPrefs: { readDisabled: vi.fn() },
 };
 
 /** What the next `primeChatContext` puts on the request context, when anything. */
@@ -90,6 +92,7 @@ export function resetHarness(): void {
   chat.snapshot = undefined;
   storage.threads.readById.mockReset().mockResolvedValue(null);
   storage.messages.readByThread.mockReset().mockResolvedValue([]);
+  storage.toolPrefs.readDisabled.mockReset().mockResolvedValue({});
   storage.profiles.readById.mockReset().mockResolvedValue({ id: "p1", providerType: "openai" });
   primeChatContext.mockReset().mockImplementation(async () => {
     if (chat.snapshot) {

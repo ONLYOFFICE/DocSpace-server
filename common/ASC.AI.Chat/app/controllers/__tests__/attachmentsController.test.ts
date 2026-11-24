@@ -56,7 +56,11 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
 const readThreadId = vi.fn();
 const findMissingIds = vi.fn();
 vi.mock("../../storage/index.js", () => ({
-  storage: { messages: { readThreadId }, attachments: { findMissingIds } },
+  storage: {
+    messages: { readThreadId },
+    attachments: { findMissingIds },
+    toolPrefs: { readDisabled: vi.fn() },
+  },
 }));
 vi.mock("../../requestContext.js", () => ({ setAnalyzeEntryIds: vi.fn() }));
 vi.mock("../../forms/suggestedQuestions.js", () => ({ getSuggestedQuestions: vi.fn() }));

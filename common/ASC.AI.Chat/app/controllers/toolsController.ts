@@ -49,6 +49,7 @@ import { asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 import { clientFault } from "../httpErrors.js";
 import { optionalString } from "./requestFields.js";
+import { assertAiAccess } from "./aiAccess.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
 
@@ -198,6 +199,9 @@ function readToolNames(value: unknown): string[] | string {
 
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body, and no Files API read is made on their behalf.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
     // A supplied entityId must at least be REACHABLE: a nonexistent or
@@ -217,6 +221,9 @@ export const toolsController = {
   }),
 
   updateCustomServer: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body, and no Files API read is made on their behalf.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
     // Same accessibility gate as addCustomServer (Bug 82975).
@@ -231,14 +238,18 @@ export const toolsController = {
   }),
 
   removeCustomServer: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body, and no Files API read is made on their behalf.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["name", "entityId"] as const);
     const name = typeof args.name === "string" ? args.name : asString(req.query["name"]);
     if (!name) {
       res.status(400).json({ error: "name required" });
       return;
     }
-    const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
-    // Same accessibility gate as addCustomServer (Bug 82975).
+    // Same accessibility gate as addCustomServer (Bug 82975); an entityId of another type is a
+    // 400, not the portal-wide scope, where the delete would remove the portal's server of that name.
+    const entityId = optionalString(args.entityId, "entityId");
     await assertEntityAccessible(entityId);
     await engine.removeCustomServer(name, entityId);
     res.json({ success: true });
@@ -318,6 +329,9 @@ export const toolsController = {
   }),
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body, and no Files API read is made on their behalf.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["map", "entityId"] as const);
     // `map` is required. Without it the loop below yields an empty map and
     // replaceAll wipes every registered MCP server for the scope, silently
@@ -343,6 +357,9 @@ export const toolsController = {
   }),
 
   setDisabled: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body, and no Files API read is made on their behalf.
+    await assertAiAccess();
     const args = unpackPositional(req.body, [
       "serverType",
       "toolNames",
@@ -417,6 +434,9 @@ export const toolsController = {
   }),
 
   setAllowAlways: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body, and no Files API read is made on their behalf.
+    await assertAiAccess();
     const args = unpackPositional(req.body, [
       "serverType",
       "toolName",
