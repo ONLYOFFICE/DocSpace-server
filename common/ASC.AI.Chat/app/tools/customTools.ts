@@ -32,7 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { SystemToolsSource } from "@onlyoffice/ai-chat/core";
-import type { McpHttpServerConfig } from "@onlyoffice/ai-chat/core";
+import type { McpHttpServerConfig, McpServerConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { getSystemServerConfig } from "./systemTools.js";
@@ -70,18 +70,23 @@ export async function resolveCustomServers(
   // set, which turned a refusal (Guest, AI disabled: Bugs 84400, 84401) or a
   // passing upstream outage into a 400 "unknown serverType". Only a 404 —
   // nothing stored for the scope — still reads as an empty map.
-  const tolerate = (what: string) => (err: unknown) => {
-    if (options?.strict && !(err instanceof AiServiceHttpError && err.status === 404)) {
+  let servers: Record<string, McpServerConfig>;
+  try {
+    servers = await storage.mcpServers.readAll(undefined);
+  } catch (err) {
+    const absent = err instanceof AiServiceHttpError && err.status === 404;
+    if (options?.strict && !absent) {
       throw err;
     }
+    // In a round, custom servers are an optional part of it: without them the round runs
+    // on the system tools, and the failure is logged.
     logger.warn(
-      `customTools: ${what} read failed: ${err instanceof Error ? err.message : String(err)}`,
+      `customTools: portal-wide server map read failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
     );
-    return {};
-  };
-  const servers = await storage.mcpServers
-    .readAll(undefined)
-    .catch(tolerate("portal-wide server map"));
+    servers = {};
+  }
   const out: Record<string, McpHttpServerConfig> = {};
   for (const [name, config] of Object.entries(servers)) {
     if (name === PORTAL_MCP_SERVER_NAME) continue;

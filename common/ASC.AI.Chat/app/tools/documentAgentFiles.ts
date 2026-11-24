@@ -328,6 +328,9 @@ async function receive(req: Request, res: Response): Promise<void> {
 
 class BodyTooLargeError extends Error {}
 
+/** A failure of a file read whose message is written for the model and names the file. */
+class FileUnreadableError extends Error {}
+
 /** The whole body, at most `limit` bytes of it; more and the read stops with {@link BodyTooLargeError}. */
 async function readBody(req: IncomingMessage, limit: number): Promise<Uint8Array> {
   const chunks: Buffer[] = [];
@@ -417,7 +420,7 @@ async function readFile(uri: URL, fileId: string | undefined) {
   try {
     const info = await getFileInfo(id);
     if (!info) {
-      throw new Error(`file ${id} not found`);
+      throw new FileUnreadableError(`file ${id} not found`);
     }
     const title = info.title ?? `file-${id}`;
     const bytes = await readFileBytes(id, MAX_FILE_BYTES);
@@ -448,7 +451,7 @@ function unreadable(fileId: string, err: unknown): string {
   if (err instanceof FileTooLargeError) {
     return err.message;
   }
-  if (err instanceof Error && err.message.startsWith(`file ${fileId}`)) {
+  if (err instanceof FileUnreadableError) {
     return err.message;
   }
   return `file ${fileId} could not be read`;

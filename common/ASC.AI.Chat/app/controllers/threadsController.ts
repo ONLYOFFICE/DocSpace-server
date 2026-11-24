@@ -220,12 +220,14 @@ interface UpdateMessageBody {
 
 export const threadsController = {
   create: asyncHandler<CreateBody>(async (req, res) => {
+    await assertAiAccess();
     await assertThreadCreatable(req.body?.entityId, req.body?.profileId);
     const thread = await engine.create(req.body);
     res.json(thread);
   }),
 
   openOrCreate: asyncHandler<OpenOrCreateInput>(async (req, res) => {
+    await assertAiAccess();
     // Thread creation requires a profile and, when scoped, an accessible entity
     // (review #6, Bug 82826). openOrCreate carries the resolved `profile`
     // object directly, so a missing/non-object profile means there is no model

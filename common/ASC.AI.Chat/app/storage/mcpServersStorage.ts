@@ -33,6 +33,7 @@
 
 import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString } from "../narrow.js";
+import { listAnswer, objectOrNone } from "./upstreamShape.js";
 import type { McpServersStorage, McpServerConfig } from "@onlyoffice/ai-chat/core";
 import {
   invalidateChatContext,
@@ -79,8 +80,11 @@ export class HttpMcpServersStorage implements McpServersStorage {
     }
     reportChatContextMiss(`mcpServers.readByName(${name})`);
     try {
-      const raw = await aiService.get(`${PATH}/${encodeURIComponent(name)}`);
-      if (!isObject(raw)) {
+      const raw = objectOrNone(
+        await aiService.get(`${PATH}/${encodeURIComponent(name)}`),
+        "GET mcp-servers/{name}",
+      );
+      if (raw === null) {
         return null;
       }
       const cfg = getString(raw, "config");
@@ -102,10 +106,9 @@ export class HttpMcpServersStorage implements McpServersStorage {
       return { ...snapshot.global.mcpServers };
     }
     reportChatContextMiss("mcpServers.readAll");
-    const raw = await aiService.get(PATH);
-    if (!Array.isArray(raw)) {
-      return {};
-    }
+    // A body that is no list is unknown, not "nothing registered": read as empty, it let a
+    // replace-all keep none of the stored headers (ts-ai-failure-paths.md §1).
+    const raw = listAnswer(await aiService.get(PATH), "GET mcp-servers");
     const result: Record<string, McpServerConfig> = {};
     for (const item of raw) {
       if (!isObject(item)) {

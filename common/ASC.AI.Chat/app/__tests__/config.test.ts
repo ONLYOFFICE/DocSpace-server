@@ -789,6 +789,8 @@ describe("getCompaction beyond the existing table", () => {
     ["-1", undefined],
     ["2.5", undefined],
     ["x", undefined],
+    ["", undefined],
+    ["  ", undefined],
   ])("reads keepRecent %j", (env, expected) => {
     vi.stubEnv("AI__COMPACTION__KEEP_RECENT", env);
 
@@ -817,5 +819,13 @@ describe("getCompaction beyond the existing table", () => {
     settings({ ai: { compaction } });
 
     expect(config.getCompaction()).toEqual({ enabled: true, ...expected });
+  });
+
+  it("reads the file's knobs under environment variables exported empty", () => {
+    settings({ ai: { compaction: { threshold: 0.5, keepRecent: 4 } } });
+    vi.stubEnv("AI__COMPACTION__THRESHOLD", "");
+    vi.stubEnv("AI__COMPACTION__KEEP_RECENT", "");
+
+    expect(config.getCompaction()).toEqual({ enabled: true, threshold: 0.5, keepRecent: 4 });
   });
 });

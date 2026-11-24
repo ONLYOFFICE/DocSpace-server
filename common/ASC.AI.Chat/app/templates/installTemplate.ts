@@ -195,22 +195,18 @@ async function installAgent(
   // A template names no model, so the agent is given the one the portal
   // chats on now and keeps it when the portal's choice changes later.
   try {
-    const profileId = await portalChatProfileId().catch((err: unknown) => {
-      logger.warn(
-        `installTemplate: ${template.id}: the portal's chat model not read: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-      return null;
-    });
-    if (!profileId) {
-      throw new DocspaceApiHttpError(404, "Not Found", "the portal has no chat model");
+    const profileId = await portalChatProfileId();
+    if (profileId) {
+      await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/model`, { profileId });
+    } else {
+      logger.warn(`installTemplate: ${template.id}: model not saved (the portal has no chat model)`);
+      warnings.push("modelNotSaved");
     }
-    await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/model`, { profileId });
   } catch (err) {
-    // The rooms and the agent are made by now, so a write that fails in any
-    // way - a refusal, a timeout, a dropped connection - is told as a
-    // warning and never loses the caller the ids of what was made.
+    // The rooms and the agent are made by now, so a read of the portal's
+    // model or a write of it that fails in any way - a refusal, a timeout, a
+    // dropped connection - is told as a warning and never loses the caller
+    // the ids of what was made.
     logger.warn(
       `installTemplate: ${template.id}: model not saved (${
         err instanceof DocspaceApiHttpError
@@ -242,9 +238,12 @@ function makesKnowledgeRoom(template: Template): boolean {
 // failed read is not "off": it throws, and nothing is made either way.
 async function assertKnowledgeRoomsAllowed(template: Template): Promise<void> {
   const config = await aiService.get("/config");
+  // The settings are always an object: another shape is unknown, not "off".
+  if (!isObject(config)) {
+    throw new UpstreamShapeError("GET config");
+  }
   const enabled =
-    isObject(config) &&
-    (config["vectorizationEnabled"] === true || config["vectorizationNeedReset"] === true);
+    config["vectorizationEnabled"] === true || config["vectorizationNeedReset"] === true;
   if (!enabled) {
     logger.info(`installTemplate: ${template.id}: refused, vectorization is not set up`);
     throw clientFault(

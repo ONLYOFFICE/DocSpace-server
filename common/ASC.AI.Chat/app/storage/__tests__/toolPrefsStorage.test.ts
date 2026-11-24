@@ -116,12 +116,23 @@ describe("readDisabled", () => {
   it.each([
     ["an empty answer (204)", noContent()],
     ["null", docspace(null)],
-    ["a list", docspace([{ disabled: ["a"] }])],
-    ["a string", docspace("prefs")],
-    ["a text body", new HttpResponse("x", { headers: { "content-type": "text/plain" } })],
   ])("reads %s as nothing disabled", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/tool-prefs", () => answer));
     await expect(storage.readDisabled()).resolves.toEqual({});
+  });
+
+  // The administrator's list of switched-off tools fails closed: a body of another shape is
+  // unknown, not "nothing disabled".
+  it.each([
+    ["a list", () => docspace([{ disabled: ["a"] }])],
+    ["a string", () => docspace("prefs")],
+    ["a text body", () => new HttpResponse("x", { headers: { "content-type": "text/plain" } })],
+  ])("rejects %s as an answer of an unknown shape", async (_name, answer) => {
+    upstream.use(http.get("*/internal/ai/tool-prefs", answer));
+    await expect(storage.readDisabled()).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it.each([
@@ -241,11 +252,18 @@ describe("readAllowAlways", () => {
 
   it.each([
     ["null", docspace(null)],
-    ["a list", docspace([])],
     ["an empty answer", noContent()],
   ])("answers no token for %s", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/tool-prefs", () => answer));
     await expect(storage.readAllowAlways()).resolves.toEqual([]);
+  });
+
+  it("rejects a list as an answer of an unknown shape", async () => {
+    upstream.use(http.get("*/internal/ai/tool-prefs", () => docspace([])));
+    await expect(storage.readAllowAlways()).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it("reads a 404 as no token and rethrows a 500", async () => {

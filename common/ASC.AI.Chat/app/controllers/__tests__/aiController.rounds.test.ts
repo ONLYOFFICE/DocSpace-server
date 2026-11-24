@@ -224,8 +224,8 @@ const VALID: Record<Route, Record<string, unknown>> = {
     userMessage: text("hi"),
   },
   regenerateStream: { threadId: "t1", entityId: "7", contextEntityId: "8", messageId: "m1" },
-  approveToolCall: { threadId: "t1", entityId: "7", contextEntityId: "8", toolCallId: "c1" },
-  denyToolCall: { threadId: "t1", entityId: "7", contextEntityId: "8", toolCallId: "c1" },
+  approveToolCall: { threadId: "t1", entityId: "7", contextEntityId: "8", messageId: "m1", idx: 0 },
+  denyToolCall: { threadId: "t1", entityId: "7", contextEntityId: "8", messageId: "m1", idx: 0 },
 };
 
 describe("the prologue of every round", () => {
@@ -1254,11 +1254,20 @@ describe("approveToolCall", () => {
     expect(box.seen).toEqual([undefined, []]);
   });
 
-  it.each([
-    ["missing", undefined],
-    ["empty", ""],
-  ])("reads nothing of the thread when threadId is %s", async (_what, threadId) => {
-    await h.call(aiController.approveToolCall, { ...VALID.approveToolCall, threadId });
+  it("answers 400 and reads nothing of the thread when threadId is missing", async () => {
+    const reply = await h.call(aiController.approveToolCall, {
+      ...VALID.approveToolCall,
+      threadId: undefined,
+    });
+
+    expect(reply.status).toBe(400);
+    expect(h.storage.threads.readById).not.toHaveBeenCalled();
+    expect(h.storage.messages.readByThread).not.toHaveBeenCalled();
+    expect(h.engine.approveToolCall).not.toHaveBeenCalled();
+  });
+
+  it("reads nothing of the thread when threadId is empty, and leaves the id to the engine", async () => {
+    await h.call(aiController.approveToolCall, { ...VALID.approveToolCall, threadId: "" });
 
     expect(h.storage.threads.readById).not.toHaveBeenCalled();
     expect(h.storage.messages.readByThread).not.toHaveBeenCalled();

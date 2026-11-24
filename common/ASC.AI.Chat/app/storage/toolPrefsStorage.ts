@@ -38,6 +38,7 @@ import {
 } from "../../config/index.js";
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject } from "../narrow.js";
+import { objectOrNone } from "./upstreamShape.js";
 import type { ToolPrefsScope, ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
 import {
   invalidateChatContext,
@@ -82,7 +83,13 @@ async function fetchToolPrefs(scope?: ToolPrefsScope): Promise<unknown> {
     reportChatContextMiss("toolPrefs.read");
   }
   const query = scopeQuery(scope);
-  return aiService.get(BASE_PATH, query ? { query } : undefined);
+  // Nothing stored is no body; a body of another shape is unknown. Read as "nothing disabled",
+  // it switched back on every tool the administrator had switched off, and a write built on it
+  // cleared none of the stored keys (ts-ai-failure-paths.md §1).
+  return objectOrNone(
+    await aiService.get(BASE_PATH, query ? { query } : undefined),
+    "GET tool-prefs",
+  );
 }
 
 // Same fetch, but a missing prefs row (404) reads as "nothing stored".

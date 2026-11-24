@@ -49,9 +49,11 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
 });
 const readAllForClient = vi.fn();
 const readByIdRaw = vi.fn();
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
 vi.mock("../../storage/index.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../storage/index.js")>()),
-  storage: { profiles: { readAllForClient, readByIdRaw } },
+  storage: { profiles: { readAllForClient, readByIdRaw }, toolPrefs },
 }));
 const assertEntityAccessible = vi.fn(async () => {});
 vi.mock("../../storage/docspaceFilesApi.js", () => ({ assertEntityAccessible }));

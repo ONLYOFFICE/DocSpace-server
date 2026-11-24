@@ -94,12 +94,11 @@ if (enabled && otlpEndpoint) {
     `OpenTelemetry enabled: service=${serviceName} endpoint=${otlpEndpoint} protocol=${protocol}`,
   );
 
-  // Flush buffered telemetry, then exit as the default SIGTERM would have.
+  // Flush buffered telemetry, then exit as the default SIGTERM would have: the process goes
+  // down whether the flush worked or not.
   process.once("SIGTERM", () => {
-    sdk
-      .shutdown()
-      .catch(() => {})
-      .finally(() => process.exit(0));
+    const exit = (): never => process.exit(0);
+    sdk.shutdown().then(exit, exit);
   });
 } else {
   logger.info(

@@ -94,13 +94,21 @@ describe("assertAiAccess", () => {
     await expect(assertAiAccess()).resolves.toBeUndefined();
   });
 
-  it.each([
-    ["a body that is not an object", () => docspace("x")],
-    ["an empty answer", () => new HttpResponse(null, { status: 204 })],
-  ])("lets the caller through on %s", async (_what, answer) => {
-    prefs(answer);
+  it("lets the caller through on an empty answer", async () => {
+    prefs(() => new HttpResponse(null, { status: 204 }));
 
     await expect(assertAiAccess()).resolves.toBeUndefined();
+  });
+
+  // A check that protects access fails closed (ts-ai-failure-paths.md §1): a 200 whose body the
+  // read cannot take is unknown, not a pass.
+  it("refuses with 502 on a body that is not an object", async () => {
+    prefs(() => docspace("x"));
+
+    await expect(assertAiAccess()).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it.each([

@@ -44,16 +44,32 @@ const SWALLOWING_CATCH =
   "A .catch() that answers a constant reads a failed call as 'absent' or 'empty'. Rethrow " +
   "everything but the status that means absent (ts-ai-failure-paths.md §1).";
 
-/** `.catch(() => undefined | null | false | "" | 0 | [] | {})`, with or without a parameter. */
-const swallowingCatch = [
+const CATCH_HANDLER = "CallExpression[callee.property.name='catch'] > :function.arguments";
+const CONSTANTS = [
   "Literal",
   "ArrayExpression[elements.length=0]",
   "ObjectExpression[properties.length=0]",
   "Identifier[name='undefined']",
-].map((body) => ({
-  selector: `CallExpression[callee.property.name='catch'] > ArrowFunctionExpression.arguments > ${body}.body`,
-  message: SWALLOWING_CATCH,
-}));
+];
+
+/**
+ * A `.catch()` handler, arrow or function, that answers a constant: `() => null`, a block that
+ * returns `undefined`, `null`, `false`, `""`, `0`, `[]` or `{}` (a log line before it changes
+ * nothing), a bare `return;`, or a block that neither returns nor throws. A block that throws
+ * as well (the status that means absent answers a constant, the rest is rethrown) is left
+ * alone. A handler made by a factory (`.catch(tolerate(...))`) is not seen.
+ */
+const swallowingCatch = [
+  ...CONSTANTS.map((value) => `${CATCH_HANDLER} > ${value}.body`),
+  ...CONSTANTS.map(
+    (value) =>
+      `${CATCH_HANDLER} > BlockStatement:not(:has(ThrowStatement)) ReturnStatement > ${value}.argument`,
+  ),
+  `${CATCH_HANDLER} > BlockStatement:not(:has(ThrowStatement)) ReturnStatement[argument=null]`,
+  // A handler that neither returns nor throws, where the value of `.catch()` is read: one on a
+  // side branch (`p.catch(() => { cache = undefined; })`) only keeps the rejection handled.
+  `:not(ExpressionStatement) > ${CATCH_HANDLER} > BlockStatement.body:not(:has(ReturnStatement)):not(:has(ThrowStatement))`,
+].map((selector) => ({ selector, message: SWALLOWING_CATCH }));
 
 const processEnv = {
   selector: "MemberExpression[object.name='process'][property.name='env']",

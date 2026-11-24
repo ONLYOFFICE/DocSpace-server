@@ -137,6 +137,8 @@ describe("documentAgentController", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(envelope(SETTINGS));
     expect(state.calls).toEqual([
+      // The access gate (assertAiAccess) first.
+      { method: "GET", path: "/tool-prefs", raw: undefined },
       { method: "PUT", path: "/document-agent/settings", body: SETTINGS, raw: true },
     ]);
   });
@@ -162,6 +164,9 @@ describe("documentAgentController", () => {
       expect(res.statusCode, JSON.stringify(body)).toBe(400);
       expect(String((res.body as { error: string }).error)).toMatch(/^Invalid settings: /);
     }
-    expect(state.calls).toEqual([]);
+    // Only the access gate (assertAiAccess) was asked, once per request; nothing was written.
+    expect(state.calls).toEqual(
+      Array.from({ length: 6 }, () => ({ method: "GET", path: "/tool-prefs", raw: undefined })),
+    );
   });
 });

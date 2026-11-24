@@ -31,6 +31,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import type { JsonObject } from "../narrow.js";
+import { isObject } from "../narrow.js";
+
 /**
  * An upstream answered 200 with a body the mapper cannot read. That is neither "absent" (the
  * services answer 404 for that) nor "empty": what the upstream holds is unknown, so the caller
@@ -52,6 +55,20 @@ export function mapped<T>(value: T | null | undefined, call: string): T {
     throw new UpstreamShapeError(call);
   }
   return value;
+}
+
+/**
+ * The answer of a single-object read where nothing stored is a legal answer: an object, or `null`
+ * for a 204 or a `response: null`. Anything else (a list, a string, a number) is unknown.
+ */
+export function objectOrNone(raw: unknown, call: string): JsonObject | null {
+  if (raw === null || raw === undefined) {
+    return null;
+  }
+  if (!isObject(raw)) {
+    throw new UpstreamShapeError(call);
+  }
+  return raw;
 }
 
 /** The answer of a call that always answers a list. */

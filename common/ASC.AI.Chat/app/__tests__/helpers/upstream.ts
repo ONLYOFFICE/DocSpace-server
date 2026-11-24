@@ -143,3 +143,16 @@ export function docspace(response: JsonBodyType, status = 200): Response {
 export function docspaceError(status: number, message = "error"): Response {
   return HttpResponse.json({ error: { message }, status: 1, statusCode: status }, { status });
 }
+
+/**
+ * `GET internal/ai/tool-prefs` (ToolPreferenceStorageController), the read `assertAiAccess`
+ * borrows as the AI access gate: 200 lets the route go on, 403 is a Guest or a portal with AI
+ * switched off.
+ *
+ *   upstream.use(aiGate());     // or aiGate(403)
+ */
+export function aiGate(status = 200): ReturnType<typeof http.get> {
+  return http.get("*/internal/ai/tool-prefs", () =>
+    status === 200 ? docspace({}) : docspaceError(status),
+  );
+}

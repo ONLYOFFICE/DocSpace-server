@@ -43,6 +43,7 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import type { Response } from "express";
 import { storage } from "../storage/index.js";
+import { assertAiAccess } from "./aiAccess.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject, readProp } from "../narrow.js";
 
@@ -50,18 +51,16 @@ const engine = new PromptsEngine({ storage });
 
 // A refusal as the engine reports it: `{ success: false, error }` with the
 // field named. The engine returns these instead of throwing, so the HTTP
-// status is the controller's to pick (Bugs 84307-84311): `code` says why
-// when the library sets it, and the message wording is the fallback for a
-// library that predates the field.
+// status is the controller's to pick (Bugs 84307-84311): `code` says why.
+// Every refusal of the library the service is built on carries it; its
+// message is text for a person, never read to pick a status
+// (ts-ai-failure-paths.md §1).
 type RefusalError = ImportError["error"];
 
 function refusalStatus(error: RefusalError): number {
   const code = readProp(error, "code");
   if (code === "not_found") return 404;
   if (code === "conflict") return 409;
-  if (code !== undefined) return 400;
-  if (/not found/i.test(error.message)) return 404;
-  if (/already exists/i.test(error.message)) return 409;
   return 400;
 }
 
@@ -245,6 +244,7 @@ interface ImportBody {
 
 export const promptsController = {
   create: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const body: unknown = req.body;
     if (!isObject(body)) {
       shapeRefusal(res, "name", "the request body must be an object");
@@ -271,6 +271,7 @@ export const promptsController = {
   }),
 
   update: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id", "updates"] as const);
     if (typeof args.id !== "string" || args.id.length === 0) {
       shapeRefusal(res, "name", "id is required and must be a string");
@@ -301,6 +302,7 @@ export const promptsController = {
   }),
 
   move: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id", "folderId"] as const);
     if (typeof args.id !== "string" || args.id.length === 0) {
       shapeRefusal(res, "name", "id is required and must be a string");
@@ -315,6 +317,7 @@ export const promptsController = {
   }),
 
   delete: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const { id } = unpackPositional(req.body, ["id"] as const);
     const idStr = typeof id === "string" ? id : asString(req.query["id"]);
     if (!idStr) {
@@ -326,6 +329,7 @@ export const promptsController = {
   }),
 
   list: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     // ApiProvider's fetcher drops both `null` and `undefined` folderId
     // values from the URL, so the backend cannot distinguish them.
     // Per spec, treat key-absent as `null` (root-level prompts).
@@ -341,6 +345,7 @@ export const promptsController = {
   }),
 
   createFolder: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["name"] as const);
     if (typeof args.name !== "string") {
       shapeRefusal(res, "name", "name is required and must be a string");
@@ -350,6 +355,7 @@ export const promptsController = {
   }),
 
   renameFolder: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id", "name"] as const);
     if (typeof args.id !== "string" || args.id.length === 0) {
       shapeRefusal(res, "name", "id is required and must be a string");
@@ -363,6 +369,7 @@ export const promptsController = {
   }),
 
   deleteFolder: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const { id } = unpackPositional(req.body, ["id"] as const);
     const idStr = typeof id === "string" ? id : asString(req.query["id"]);
     if (!idStr) {
@@ -393,6 +400,7 @@ export const promptsController = {
   }),
 
   importBundle: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["bundle", "options"] as const);
     const bundle = args.bundle;
     const shapeErrors: ImportError[] = [];
@@ -436,6 +444,7 @@ export const promptsController = {
   }),
 
   getById: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const id = asString(req.query["id"]);
     if (!id) {
       res.status(400).json({ error: "id required" });
@@ -446,6 +455,7 @@ export const promptsController = {
   }),
 
   getFolderById: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const id = asString(req.query["id"]);
     if (!id) {
       res.status(400).json({ error: "id required" });

@@ -161,6 +161,7 @@ function asEntityId(value: unknown): string | undefined {
 
 export const webSearchController = {
   getActiveConfig: asyncHandler(async (req, res) => {
+    await assertWebSearchAccess();
     const entityId = asEntityId(req.query["entityId"]);
     // A room config must not be readable by someone who cannot open the
     // room (Bug 82901). Inaccessible/unknown rooms surface as 404 — the
@@ -171,6 +172,7 @@ export const webSearchController = {
   }),
 
   isConfigured: asyncHandler(async (req, res) => {
+    await assertWebSearchAccess();
     const entityId = asEntityId(req.query["entityId"]);
     await assertEntityAccessible(entityId);
     const value = await engine.isConfigured(entityId);

@@ -37,6 +37,7 @@
  */
 
 import { filesApiGet, filesApiSend } from "../storage/docspaceFilesApi.js";
+import { UpstreamShapeError } from "../storage/upstreamShape.js";
 import { getNumber, getObject, getObjectArray, getString, isObject } from "../narrow.js";
 
 export type EntryKind = "file" | "folder";
@@ -212,7 +213,17 @@ export function parseEntryMetadata(raw: unknown): EntryMetadata {
 
 /** `GET metadata/{kind}/{id}`: the entry's templates with values and its custom fields. */
 export async function getEntryMetadata(kind: EntryKind, id: string): Promise<EntryMetadata> {
-  return parseEntryMetadata(await filesApiGet(metadataPath(kind, id)));
+  const path = metadataPath(kind, id);
+  return parseEntryMetadata(metadataAnswer(await filesApiGet(path), `GET files/${path}`));
+}
+
+// The metadata of an entry is always an object, its lists empty when it has none: a body of
+// another shape is unknown, not "no fields to fill" (ts-ai-failure-paths.md §1).
+function metadataAnswer(raw: unknown, call: string): unknown {
+  if (!isObject(raw)) {
+    throw new UpstreamShapeError(call);
+  }
+  return raw;
 }
 
 /** `PUT metadata/{kind}/{id}/values`; answers the whole metadata after the write. */
@@ -221,8 +232,9 @@ export async function setValues(
   id: string,
   values: ValueRequest[],
 ): Promise<EntryMetadata> {
+  const path = metadataPath(kind, id, "/values");
   return parseEntryMetadata(
-    await filesApiSend("PUT", metadataPath(kind, id, "/values"), { values }),
+    metadataAnswer(await filesApiSend("PUT", path, { values }), `PUT files/${path}`),
   );
 }
 

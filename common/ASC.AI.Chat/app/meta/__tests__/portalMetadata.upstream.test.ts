@@ -364,13 +364,17 @@ describe("getEntryMetadata against the Files API", () => {
     );
   });
 
+  // The Files API answers an entry without metadata with empty lists: a response of another
+  // shape is unknown, and meta/fill would answer it as "no fields to fill" (422).
   it.each([
-    ["a response that is a list", envelope([METADATA_DTO])],
-    ["a response that is null", envelope(null)],
-  ])("reads %s as an entry without metadata", async (_what, answer) => {
-    upstream.use(http.get("*/api/2.0/files/metadata/:kind/:id", () => answer));
+    ["a response that is a list", () => envelope([METADATA_DTO])],
+    ["a response that is null", () => envelope(null)],
+  ])("rejects %s as an answer of an unknown shape", async (_what, answer) => {
+    upstream.use(http.get("*/api/2.0/files/metadata/:kind/:id", answer));
 
-    expect(await getEntryMetadata("file", "10")).toEqual({ templates: [], customFields: [] });
+    await expect(getEntryMetadata("file", "10")).rejects.toEqual(
+      new UpstreamShapeError("GET files/metadata/file/10"),
+    );
   });
 
   it.each([

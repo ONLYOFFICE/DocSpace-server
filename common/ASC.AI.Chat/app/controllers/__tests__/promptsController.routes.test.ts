@@ -44,8 +44,10 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   PromptsEngine: engineClass(engine),
 }));
 const readFolderById = vi.fn<(id: string) => Promise<unknown>>();
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
 vi.mock("../../storage/index.js", () => ({
-  storage: { promptFolders: { readById: readFolderById } },
+  storage: { promptFolders: { readById: readFolderById }, toolPrefs },
 }));
 
 const { promptsController } = await import("../promptsController.js");
@@ -132,11 +134,12 @@ describe("promptsController.create", () => {
     expect(published("aiPromptsCreate", reply)).toEqual([]);
   });
 
-  // A library that predates `error.code` is read by the wording of the message.
+  // The status comes from `error.code` alone: a refusal without one is a 400 whatever its
+  // message says (ts-ai-failure-paths.md §1).
   it.each([
-    ["Folder not found: f9", 404],
-    ["A prompt NOT FOUND", 404],
-    ["Prompt already exists", 409],
+    ["Folder not found: f9", 400],
+    ["A prompt NOT FOUND", 400],
+    ["Prompt already exists", 400],
     ["Name is too long", 400],
   ])("maps a refusal without a code and the message %j to %i", async (message, status) => {
     const refusal = { success: false as const, error: { field: "name" as const, message } };

@@ -41,7 +41,9 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ...(await original<typeof import("@onlyoffice/ai-chat/core")>()),
   PromptsEngine: engineClass(engine),
 }));
-vi.mock("../../storage/index.js", () => ({ storage: {} }));
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
+vi.mock("../../storage/index.js", () => ({ storage: { toolPrefs } }));
 
 const { promptsController } = await import("../promptsController.js");
 // After the mocks: the schema helper loads the library, whose engine class is replaced above.

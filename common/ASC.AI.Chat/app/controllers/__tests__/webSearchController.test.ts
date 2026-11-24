@@ -98,9 +98,30 @@ describe.each([
   const answer = method === "getActiveConfig" ? { provider: "searxng" } : true;
 
   beforeEach(() => {
+    gateAnswers(200);
     engine.getActiveConfig.mockResolvedValue({ provider: "searxng" });
     engine.isConfigured.mockResolvedValue(true);
   });
+
+  // The access gate before the query (ts-ai-failure-paths.md §3): a Guest, or a portal with AI
+  // off, gets 403 for any entityId, and the Files API is not asked on their behalf.
+  it.each([
+    ["a malformed entityId", { entityId: ["1", "2"] }],
+    ["an entityId of a room", { entityId: "17" }],
+  ])(
+    "answers 403 for %s when the caller may not use AI, before the query is read",
+    async (_what, query) => {
+      gateAnswers(403);
+
+      const reply = await call(query);
+
+      expect(reply.status).toBe(403);
+      expect(reply.body).toEqual({ error: "Forbidden" });
+      expect(responseViolations(operationId, 403, reply.body)).toEqual([]);
+      expect(engineCall()).not.toHaveBeenCalled();
+      expect(paths()).toEqual(["GET /internal/ai/web-search"]);
+    },
+  );
 
   it.each([
     ["absent", {}],
@@ -116,7 +137,7 @@ describe.each([
       expect(reply.body).toEqual(answer);
       expect(responseViolations(operationId, 200, reply.body)).toEqual([]);
       expect(engineCall()).toHaveBeenCalledWith(undefined);
-      expect(upstream.seen).toEqual([]);
+      expect(paths()).toEqual(["GET /internal/ai/web-search"]);
     },
   );
 
@@ -127,7 +148,7 @@ describe.each([
 
     expect(reply.status).toBe(200);
     expect(engineCall()).toHaveBeenCalledWith("17");
-    expect(paths()).toEqual(["GET /api/2.0/files/folder/17"]);
+    expect(paths()).toEqual(["GET /internal/ai/web-search", "GET /api/2.0/files/folder/17"]);
   });
 
   it.each([
@@ -169,6 +190,7 @@ describe.each([
 
 describe("webSearchController.getActiveConfig", () => {
   it("answers null when nothing is configured", async () => {
+    gateAnswers(200);
     engine.getActiveConfig.mockResolvedValue(null);
 
     const reply = await invoke(webSearchController.getActiveConfig, { method: "GET" });

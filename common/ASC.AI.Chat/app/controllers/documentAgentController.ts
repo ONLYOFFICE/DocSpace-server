@@ -40,6 +40,7 @@
 // route. Checked here: what the AI service does not know (the agent's own
 // ceilings on the limits) and that its answer is that envelope.
 
+import { assertAiAccess } from "./aiAccess.js";
 import { asyncHandler } from "./_helpers.js";
 import { aiService } from "../storage/httpClient.js";
 import {
@@ -73,6 +74,7 @@ export const documentAgentController = {
 
   // PUT document-agent/settings → `PUT internal/ai/document-agent/settings`.
   setSettings: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const parsed = documentAgentSettingsSchema.safeParse(req.body);
     if (!parsed.success) {
       const issues = parsed.error.issues

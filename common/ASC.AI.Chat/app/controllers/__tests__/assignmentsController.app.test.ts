@@ -36,7 +36,7 @@ import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
-import { useUpstream } from "../../__tests__/helpers/upstream.js";
+import { aiGate, useUpstream } from "../../__tests__/helpers/upstream.js";
 
 // The query fallback of the single-argument assignment routes, through the real
 // parsers: body-parser sets `req.body` to `{}` for a request without a body.
@@ -48,6 +48,10 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
 }));
 
 const upstream = useUpstream({ localApp: true });
+// The access gate of every route here (assertAiAccess) answers: the caller may use AI.
+beforeEach(() => {
+  upstream.use(aiGate());
+});
 const { createApp } = await import("../../createApp.js");
 const { API_PREFIX } = await import("../../routes.js");
 const app = createApp();
@@ -110,9 +114,11 @@ describe("assignments routes through the whole app", () => {
     expect(engine.bulkAssign).not.toHaveBeenCalled();
   });
 
-  it("calls no upstream for any of these requests", async () => {
+  it("calls no upstream but the access gate for any of these requests", async () => {
     await request(app).delete(`${API_PREFIX}/assignments/unassign?actionType=Chat`).set(AUTH);
 
-    expect(upstream.seen).toEqual([]);
+    expect(upstream.seen.map((r) => `${r.method} ${r.path}`)).toEqual([
+      "GET /internal/ai/tool-prefs",
+    ]);
   });
 });

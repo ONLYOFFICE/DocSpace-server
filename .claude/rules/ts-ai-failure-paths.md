@@ -17,11 +17,15 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
 - An upstream read turns into "none", "empty" or "no access" only for the status that means it: 404,
   or the 400 the AI service gives a malformed id. A timeout, a dropped connection, a 5xx and a body
   of the wrong shape are **unknown**: rethrow them, so the caller gets a 5xx and can retry.
-- `.catch(() => undefined)`, `null`, `[]`, `{}` or `false` on an upstream call is refused by ESLint.
-  Where an outage may degrade one optional part of an answer, write a `try/catch` that tests the
-  status and says in a comment why unknown is safe to read as absent there.
+- A `.catch()` that answers `undefined`, `null`, `[]`, `{}` or `false` is refused by ESLint, as an
+  arrow (`() => null`) or as a block that logs and returns it, returns bare, or neither returns nor
+  throws while its value is read (`app/__tests__/eslintConfig.test.ts` lists the forms). A handler
+  made by a factory (`.catch(tolerate(...))`) is not seen: do not write one. Where an outage may
+  degrade one optional part of an answer, write a `try/catch` that tests the status and says in a
+  comment why unknown is safe to read as absent there.
 - A 200 whose body the mapper cannot read is unknown too: a single-entity read passes its result
-  through `mapped(value, call)`, a list read through `listAnswer(raw, call)`, and a body that has to
+  through `mapped(value, call)`, a read where nothing stored is a legal answer through
+  `objectOrNone(raw, call)` (an object or `null`), a list read through `listAnswer(raw, call)`, and a body that has to
   be JSON is read with `jsonAnswer(res, call)` (`storage/upstreamShape.ts`). They throw
   `UpstreamShapeError`, which the error boundary answers
   as `502 { error: "Bad Gateway" }` and logs with the name of the call. Dropping one malformed
@@ -64,12 +68,19 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
 - Seen in review: `editor-tools/call` ran MCP tools with AI switched off,
   `profiles/list-provider-models` made an outbound request for a guest, and `web-search/configure`
   validated the body and probed the provider before the 403 (0dc046cacd).
-- Two routes judge the body first by contract, so they keep that order until an OpenSpec change
-  moves it: `editor-tools/call` refuses an empty or excluded tool name with 400 before the gate
-  (`EditorToolAiDisabledTests`, CONTRACT passthrough-13), and `text-to-docx/start` validates before
-  the AI switch ("400 before 403" in `openspec/specs/ai-agents/spec.md`).
-- Guard: the AI service stubbed to answer 403, an invalid body sent to the route: the answer is 403
-  and no other upstream call was made.
+- The input is the body, the query and the path parameters alike: a query check or a Files API
+  read of the `entityId` comes after the gate as well.
+- Some routes judge their input first, or have no AI gate, by contract; they keep that order until
+  an OpenSpec change moves it. `NOT_GATED_FIRST` in `app/__tests__/app.aiGate.test.ts` lists each
+  with its source: `editor-tools/call` (`EditorToolAiDisabledTests`, CONTRACT passthrough-13),
+  `text-to-docx` ("400 before 403"), the per-user settings and `aiSettingsGet` (usable while AI is
+  off), the tool permission mode writes ("validation comes first on the write"), the profile id
+  routes (`ProfileAccessGuestTests`: "id-format checks run before the role check") and the four
+  `context` reads, which go to the Files API only.
+- Guard: `app/__tests__/app.aiGate.test.ts` sends every published operation outside that list a
+  path parameter, a repeated query parameter and a body of the wrong type, with the AI service
+  answering 403: the answer is 403 and nothing but the AI service was called. A new route is in it
+  without a line of its own; a new exception goes into the list with its source.
 
 ## 4. A request body is narrowed, not cast
 

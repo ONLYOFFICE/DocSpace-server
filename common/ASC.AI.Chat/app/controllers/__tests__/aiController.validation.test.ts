@@ -522,7 +522,7 @@ describe.each([
   });
 });
 
-// These three hand the body to the engine without a check of their own.
+// The three routes that resume a round: the body, the types of its ids and the ids they need.
 describe.each([
   ["regenerateStream", "aiRegenerateStream"],
   ["approveToolCall", "aiApproveToolCall"],
@@ -571,29 +571,81 @@ describe.each([
     expect(h.engine[name]).not.toHaveBeenCalled();
   });
 
-  // HANDLED DOWNSTREAM ai-3: the route checks the types of the ids and nothing else of the body (a missing threadId, messageId, toolCallId) and runs the engine on it. In production the AI service refuses the missing ids (a Guid route parameter, 400) and the engine a tool call that is not pending (409); it shows only with the engine or the service stubbed.
   it.each([
     ["a string", "hello"],
     ["an array", ["t1", "m1"]],
-  ])("hands a body that is %s to the engine as it came", async (_what, body) => {
+    ["a number", 7],
+  ])("answers 400 for a body that is %s and runs nothing", async (_what, body) => {
     const reply = await route(body);
 
-    expect(reply.status).toBe(200);
-    expect(h.engine[name]).toHaveBeenCalledWith(body);
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "the request body must be an object" });
+    expect(responseViolations(operationId, 400, reply.body)).toEqual([]);
+    expect(h.engine[name]).not.toHaveBeenCalled();
     expect(upstream.seen).toEqual([]);
   });
 
-  // HANDLED DOWNSTREAM ai-3: the route checks the types of the ids and nothing else of the body (a missing threadId, messageId, toolCallId) and runs the engine on it. In production the AI service refuses the missing ids (a Guid route parameter, 400) and the engine a tool call that is not pending (409); it shows only with the engine or the service stubbed.
-  it("hands an empty object to the engine with only the round's own additions", async () => {
-    const reply = await route({});
+  // The ids of the round it resumes (RegenerateStreamInput, ToolCallData of the library). Left
+  // out, the engine went on with `undefined` and asked the AI service for `messages/undefined`.
+  const required: ReadonlyArray<[string, Record<string, unknown>, string]> =
+    name === "regenerateStream"
+      ? [
+          ["no body fields", {}, "threadId is required and must be a string"],
+          [
+            "a threadId that is null",
+            { threadId: null },
+            "threadId is required and must be a string",
+          ],
+        ]
+      : [
+          ["no body fields", {}, "threadId is required and must be a string"],
+          [
+            "no messageId",
+            { threadId: "t1", idx: 0 },
+            "messageId is required and must be a string",
+          ],
+          ["no idx", { threadId: "t1", messageId: "m1" }, "idx is required and must be an integer"],
+          [
+            "a fractional idx",
+            { threadId: "t1", messageId: "m1", idx: 0.5 },
+            "idx is required and must be an integer",
+          ],
+          [
+            "an idx that is a string",
+            { threadId: "t1", messageId: "m1", idx: "0" },
+            "idx is required and must be an integer",
+          ],
+        ];
+
+  // Present and of their type, the values are the engine's to judge: an unknown thread 404, an
+  // unknown message or an index out of range 409 (openspec ai-agents "Decisions on a tool call").
+  it.each(
+    name === "regenerateStream"
+      ? [["an empty threadId", { threadId: "" }]]
+      : [
+          ["an empty messageId", { threadId: "t1", messageId: "", idx: 0 }],
+          ["a negative idx", { threadId: "t1", messageId: "m1", idx: -1 }],
+        ],
+  )("hands %s to the engine", async (_what, body) => {
+    const reply = await route(body);
 
     expect(reply.status).toBe(200);
-    const input = h.engineInput(name);
-    expect(Object.keys(input)).toEqual(["actionArgs"]);
-    expect(Object.keys(input["actionArgs"] as object)).toEqual(
-      name === "regenerateStream" ? ["signal", "prompt"] : ["signal"],
-    );
+    expect(h.engine[name]).toHaveBeenCalledOnce();
   });
+
+  it.each(required)(
+    "answers 400 for %s, after the gate, and runs nothing",
+    async (_what, body, error) => {
+      const reply = await route(body);
+
+      expect(reply.status).toBe(400);
+      expect(reply.body).toEqual({ error });
+      expect(responseViolations(operationId, 400, reply.body)).toEqual([]);
+      expect(h.primeChatContext).toHaveBeenCalledOnce();
+      expect(h.storage.threads.readById).not.toHaveBeenCalled();
+      expect(h.engine[name]).not.toHaveBeenCalled();
+    },
+  );
 });
 
 // The 402 of the unpaid gateway reads /config only outside a primed round.

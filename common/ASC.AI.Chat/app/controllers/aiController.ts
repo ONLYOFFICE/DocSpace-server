@@ -241,6 +241,27 @@ function idOf(body: unknown, field: ChatIdField): string | undefined {
 // `x-ai-chat-context: off` header, failed with anything but 401/403, or an
 // unusable answer) no gated call has been made, so the gate is asked here,
 // before any refusal of the body (ts-ai-failure-paths.md §3).
+// The fields a resume of a round cannot do without (`RegenerateStreamInput` and `ToolCallData`
+// of the library), present and of their type. Left out, the engine went on with `undefined`:
+// `GET messages/undefined` to the AI service, then its status or a 409, where the document
+// promises a 400. Their values are the engine's to judge: an unknown thread is 404, an unknown
+// message or an index out of range 409 (openspec ai-agents "Decisions on a tool call").
+type ResumeField = "threadId" | "messageId" | "idx";
+
+function missingFieldError(body: unknown, fields: readonly ResumeField[]): string | null {
+  for (const field of fields) {
+    const value = isObject(body) ? body[field] : undefined;
+    if (field === "idx") {
+      if (typeof value !== "number" || !Number.isInteger(value)) {
+        return "idx is required and must be an integer";
+      }
+    } else if (typeof value !== "string") {
+      return `${field} is required and must be a string`;
+    }
+  }
+  return null;
+}
+
 async function primeRound(body: unknown, res: Response): Promise<boolean> {
   const primed = await primeChatContext({
     threadId: idOf(body, "threadId"),
@@ -1130,17 +1151,24 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
-    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
-    // caller without AI access gets the 403 before a word about the body
-    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
-    if (req.body === null || req.body === undefined) {
+    // A body that is no object (the parser runs with `strict: false`, so JSON `null`, a string
+    // or a number arrive as they are; a request without a body arrives as `{}`), or one without
+    // the ids of the round it resumes, is refused. The gate is asked first, so that a caller
+    // without AI access gets the 403 before a word about the body (ts-ai-failure-paths.md §3).
+    if (!isObject(req.body)) {
       await assertAiAccess();
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
     if (!(await primeRound(req.body, res))) {
       return;
+    }
+    {
+      const missing = missingFieldError(req.body, ["threadId"]);
+      if (missing) {
+        res.status(400).json({ error: missing });
+        return;
+      }
     }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
@@ -1174,17 +1202,24 @@ export const aiController = {
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
-    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
-    // caller without AI access gets the 403 before a word about the body
-    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
-    if (req.body === null || req.body === undefined) {
+    // A body that is no object (the parser runs with `strict: false`, so JSON `null`, a string
+    // or a number arrive as they are; a request without a body arrives as `{}`), or one without
+    // the ids of the round it resumes, is refused. The gate is asked first, so that a caller
+    // without AI access gets the 403 before a word about the body (ts-ai-failure-paths.md §3).
+    if (!isObject(req.body)) {
       await assertAiAccess();
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
     if (!(await primeRound(req.body, res))) {
       return;
+    }
+    {
+      const missing = missingFieldError(req.body, ["threadId", "messageId", "idx"]);
+      if (missing) {
+        res.status(400).json({ error: missing });
+        return;
+      }
     }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
@@ -1218,17 +1253,24 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
-    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
-    // caller without AI access gets the 403 before a word about the body
-    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
-    if (req.body === null || req.body === undefined) {
+    // A body that is no object (the parser runs with `strict: false`, so JSON `null`, a string
+    // or a number arrive as they are; a request without a body arrives as `{}`), or one without
+    // the ids of the round it resumes, is refused. The gate is asked first, so that a caller
+    // without AI access gets the 403 before a word about the body (ts-ai-failure-paths.md §3).
+    if (!isObject(req.body)) {
       await assertAiAccess();
       res.status(400).json({ error: "the request body must be an object" });
       return;
     }
     if (!(await primeRound(req.body, res))) {
       return;
+    }
+    {
+      const missing = missingFieldError(req.body, ["threadId", "messageId", "idx"]);
+      if (missing) {
+        res.status(400).json({ error: missing });
+        return;
+      }
     }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).

@@ -192,9 +192,20 @@ describe("installTemplate", () => {
     const result = await installTemplate(catalogWith({}), "agents/test/agent");
 
     expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
+    // The cause of the failed read, not a 404 made up for it.
     expect(vi.mocked(logger.warn).mock.calls.map(([line]) => line)).toEqual([
-      "installTemplate: agents/test/agent: the portal's chat model not read: AI service gone",
-      "installTemplate: agents/test/agent: model not saved (404)",
+      "installTemplate: agents/test/agent: model not saved (AI service gone)",
+    ]);
+  });
+
+  it("warns that the portal has no chat model when nothing is assigned", async () => {
+    portalChatProfileId.mockResolvedValue(null);
+
+    const result = await installTemplate(catalogWith({}), "agents/test/agent");
+
+    expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
+    expect(vi.mocked(logger.warn).mock.calls.map(([line]) => line)).toEqual([
+      "installTemplate: agents/test/agent: model not saved (the portal has no chat model)",
     ]);
   });
 
@@ -220,12 +231,12 @@ describe("installTemplate", () => {
     ["a null config", null],
     ["a config that is a string", "enabled"],
     ["a config that is a list", [{ vectorizationEnabled: true }]],
-  ])("refuses a knowledge base with 409 for %s", async (_what, config) => {
+  ])("fails with 502 for %s, as an answer of an unknown shape, not as vectorization off", async (_what, config) => {
     aiConfig.mockResolvedValue(config);
 
     await expect(installTemplate(shipped, shipped.knowledgeBases[0]!.id)).rejects.toMatchObject({
-      status: 409,
-      expose: true,
+      name: "UpstreamShapeError",
+      status: 502,
     });
     expect(aiConfig).toHaveBeenCalledWith("/config");
     expect(filesApiSend).not.toHaveBeenCalled();

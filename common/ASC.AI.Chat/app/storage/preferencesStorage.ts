@@ -32,7 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService, AiServiceHttpError } from "./httpClient.js";
-import { isObject } from "../narrow.js";
+import { objectOrNone } from "./upstreamShape.js";
 import type { PreferencesStorage, ToolPermissionMode } from "@onlyoffice/ai-chat/core";
 import {
   invalidateChatContext,
@@ -95,8 +95,8 @@ export class HttpPreferencesStorage implements PreferencesStorage {
     }
     reportChatContextMiss("preferences.readToolPermissionMode");
     try {
-      const raw = await aiService.get(TOOL_MODE_PATH);
-      return isObject(raw) ? csharpToToolPermissionMode(raw["mode"]) : null;
+      const raw = objectOrNone(await aiService.get(TOOL_MODE_PATH), "GET config/tool-mode");
+      return raw === null ? null : csharpToToolPermissionMode(raw["mode"]);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;
@@ -130,11 +130,8 @@ export class HttpPreferencesStorage implements PreferencesStorage {
     }
     reportChatContextMiss("preferences.readReasoningLevel");
     try {
-      const raw = await aiService.get(PATH);
-      if (!isObject(raw)) {
-        return null;
-      }
-      return depthToLevel(raw["depth"]);
+      const raw = objectOrNone(await aiService.get(PATH), "GET preferences");
+      return raw === null ? null : depthToLevel(raw["depth"]);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;

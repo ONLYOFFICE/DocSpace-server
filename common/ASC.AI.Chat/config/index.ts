@@ -365,9 +365,20 @@ const MAX_TOOL_CALLS_LIMIT = 10_000;
 const MAX_KEEP_RECENT = 10_000;
 const MAX_CONTEXT_WINDOW = 100_000_000;
 
+/**
+ * A number given as a number or as its text. Blank text is no number: `Number("")` is 0, so an
+ * environment variable exported empty read as a setting of 0 and hid the file's value.
+ */
+function numberOf(value: unknown): number {
+  if (typeof value === "number") {
+    return value;
+  }
+  return typeof value === "string" && value.trim() !== "" ? Number(value) : NaN;
+}
+
 /** A whole number within `[min, max]`, given as a number or as its text; anything else is not a setting. */
 function intWithin(value: unknown, min: number, max: number): number | undefined {
-  const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+  const n = numberOf(value);
   return Number.isInteger(n) && n >= min && n <= max ? n : undefined;
 }
 
@@ -417,7 +428,7 @@ function flag(value: string | undefined): boolean | undefined {
 
 /** A number in (0, 1], from a number or a numeric string. */
 function unitFraction(value: unknown): number | undefined {
-  const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+  const n = numberOf(value);
   return Number.isFinite(n) && n > 0 && n <= 1 ? n : undefined;
 }
 

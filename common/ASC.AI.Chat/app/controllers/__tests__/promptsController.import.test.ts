@@ -42,7 +42,9 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ...(await original<typeof import("@onlyoffice/ai-chat/core")>()),
   PromptsEngine: engineClass(engine),
 }));
-vi.mock("../../storage/index.js", () => ({ storage: {} }));
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
+vi.mock("../../storage/index.js", () => ({ storage: { toolPrefs } }));
 
 const { promptsController } = await import("../promptsController.js");
 // After the mocks: the schema helper loads the library through apiCatalog.ts.
@@ -125,7 +127,11 @@ describe("promptsController.importBundle with a well-formed bundle", () => {
         {
           kind: "folder" as const,
           ref: "Contracts",
-          error: { field: "name" as const, message: "Folder already exists" },
+          error: {
+            field: "name" as const,
+            message: "Folder name already exists",
+            code: "conflict" as const,
+          },
         },
       ],
     };

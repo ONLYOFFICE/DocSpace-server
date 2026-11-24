@@ -61,13 +61,22 @@ describe("readToolPermissionMode", () => {
     [{ mode: null }, null],
     [{}, null],
     [null, null],
-    ["auto", null],
-    [[1], null],
   ])("reads %j as %s", async (body, expected) => {
     upstream.use(http.get("*/internal/ai/config/tool-mode", () => docspace(body)));
     await expect(storage.readToolPermissionMode()).resolves.toBe(expected);
     expect(upstream.seen).toMatchObject([{ method: "GET", path: "/internal/ai/config/tool-mode" }]);
   });
+
+  it.each([["auto"], [[1]]])(
+    "rejects %j as an answer of an unknown shape, not as nothing stored",
+    async (body) => {
+      upstream.use(http.get("*/internal/ai/config/tool-mode", () => docspace(body)));
+      await expect(storage.readToolPermissionMode()).rejects.toMatchObject({
+        name: "UpstreamShapeError",
+        status: 502,
+      });
+    },
+  );
 
   it("reads a 404 as nothing stored and rethrows a 500", async () => {
     upstream.use(http.get("*/internal/ai/config/tool-mode", () => docspaceError(404)));
@@ -151,7 +160,6 @@ describe("readReasoningLevel and readDeepMode", () => {
     [{ depth: null }, null, null],
     [{}, null, null],
     [null, null, null],
-    [[], null, null],
   ])("reads %j as level %s and deep mode %s", async (body, level, deep) => {
     upstream.use(http.get("*/internal/ai/preferences", () => docspace(body)));
     await expect(storage.readReasoningLevel("42")).resolves.toBe(level);
@@ -161,6 +169,20 @@ describe("readReasoningLevel and readDeepMode", () => {
       "/internal/ai/preferences",
     ]);
   });
+
+  it.each([[[]], ["off"]])(
+    "rejects %j as an answer of an unknown shape, for the level and the deep mode alike",
+    async (body) => {
+      upstream.use(http.get("*/internal/ai/preferences", () => docspace(body)));
+      await expect(storage.readReasoningLevel("42")).rejects.toMatchObject({
+        name: "UpstreamShapeError",
+        status: 502,
+      });
+      await expect(storage.readDeepMode("42")).rejects.toMatchObject({
+        name: "UpstreamShapeError",
+      });
+    },
+  );
 
   it("reads nothing stored (204) as null", async () => {
     upstream.use(http.get("*/internal/ai/preferences", noContent));

@@ -47,7 +47,9 @@ const preferences: {
   readReasoningLevel?: (entityId?: string) => Promise<unknown>;
   upsertReasoningLevel?: (value: string, entityId?: string) => Promise<void>;
 } = {};
-vi.mock("../../storage/index.js", () => ({ storage: { preferences } }));
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
+vi.mock("../../storage/index.js", () => ({ storage: { preferences, toolPrefs } }));
 
 const { preferencesController } = await import("../preferencesController.js");
 // After the mocks: these modules load the library, whose engine class is replaced above.

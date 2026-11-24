@@ -91,7 +91,11 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     reportChatContextMiss(`assignments.readByType(${actionType})`);
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(actionType)}`);
-      const profileId = typeof raw === "string" ? raw : null;
+      // A profile id, or nothing assigned; any other shape is unknown (ts-ai-failure-paths.md §1).
+      if (raw !== null && raw !== undefined && typeof raw !== "string") {
+        throw new UpstreamShapeError(`GET assignments/${actionType}`);
+      }
+      const profileId = raw ?? null;
       // The action -> profile routing. `image_generation` is the one the
       // built-in `generate_image` tool resolves: no assignment here and the
       // tool answers "Image generation provider is not configured." without

@@ -35,6 +35,7 @@ import type { ActionType, Profile } from "@onlyoffice/ai-chat/core";
 import { AssignmentsEngine, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { HttpStorageAdapter, storage } from "../storage/index.js";
 import { HttpProfilesStorage } from "../storage/profilesStorage.js";
+import { assertAiAccess } from "./aiAccess.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asActionType, asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
@@ -128,6 +129,7 @@ interface BulkAssignBody {
 
 export const assignmentsController = {
   resolveForAction: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const actionType = asActionType(req.query["actionType"]);
     if (!actionType) {
       res.status(400).json({ error: "actionType required" });
@@ -153,6 +155,7 @@ export const assignmentsController = {
   }),
 
   tryResolveForAction: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const actionType = asActionType(req.query["actionType"]);
     if (!actionType) {
       res.status(400).json({ error: "actionType required" });
@@ -165,6 +168,7 @@ export const assignmentsController = {
   }),
 
   assign: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["actionType", "profileId"] as const);
     const actionType = asActionType(args.actionType);
     const profileId = typeof args.profileId === "string" ? args.profileId : undefined;
@@ -177,6 +181,7 @@ export const assignmentsController = {
   }),
 
   unassign: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["actionType"] as const);
     // A request without a body reaches here as `{}`, which is no action type: the query
     // parameter the document promises is read then.
@@ -193,6 +198,7 @@ export const assignmentsController = {
   }),
 
   bulkAssign: asyncHandler<BulkAssignBody>(async (req, res) => {
+    await assertAiAccess();
     // Validate the whole body up front: an unknown ActionType key or a
     // non-string value used to be silently dropped, so a caller that mistyped
     // an action or sent a bad profileId got a partial (or empty) assignment
@@ -225,6 +231,7 @@ export const assignmentsController = {
   }),
 
   getAssignment: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const actionType = asActionType(req.query["actionType"]);
     if (!actionType) {
       res.status(400).json({ error: "actionType required" });
@@ -235,6 +242,7 @@ export const assignmentsController = {
   }),
 
   getAllAssignments: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const entityId = asString(req.query["entityId"]);
     // Read-side gating (Bug 82832): a supplied entityId must reference a folder
     // the caller can access — a nonexistent/no-access id 404s. A valid folder
@@ -277,6 +285,7 @@ export const assignmentsController = {
   }),
 
   cascadeProfileDelete: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     // The id as the widget's ApiProvider sends a single argument (the bare
     // string as the body), as a named field, or in the query.
     const args = unpackPositional(req.body, ["profileId"] as const);

@@ -105,6 +105,9 @@ async function chunkSize(): Promise<number> {
     const size = isObject(settings) ? getNumber(settings, "chunkUploadSize") : undefined;
     return size !== undefined && size > 0 ? size : DEFAULT_CHUNK_BYTES;
   } catch {
+    // The size only tunes the upload: whatever the failure, the default chunk is one every
+    // portal accepts, and a Files API that is down fails the session calls that follow with
+    // their own status (ts-ai-failure-paths.md §1).
     return DEFAULT_CHUNK_BYTES;
   }
 }

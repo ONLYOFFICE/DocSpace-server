@@ -93,11 +93,21 @@ describe("readByName", () => {
     ["config null", { name: "jira", config: null }],
     ["config an object", { name: "jira", config: { url: "u" } }],
     ["config not JSON", { name: "jira", config: "{" }],
-    ["a list", [serverDto()]],
     ["null", null],
   ])("reads an answer with %s as none", async (_name, body) => {
     upstream.use(http.get("*/internal/ai/mcp-servers/:name", () => docspace(body)));
     await expect(storage.readByName("jira")).resolves.toBeNull();
+  });
+
+  it.each([
+    ["a list", [serverDto()]],
+    ["a string", "jira"],
+  ])("rejects an answer with %s as of an unknown shape, not as none", async (_name, body) => {
+    upstream.use(http.get("*/internal/ai/mcp-servers/:name", () => docspace(body)));
+    await expect(storage.readByName("jira")).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it("reads a 404 as none and rethrows a 500", async () => {
@@ -156,14 +166,18 @@ describe("readAll", () => {
     expect(upstream.seen).toMatchObject([{ method: "GET", path: "/internal/ai/mcp-servers" }]);
   });
 
-  // HANDLED DOWNSTREAM stor2-7: a GET mcp-servers answer that is not a list (an object, null, an empty body) is read as "no custom server". In production McpServerStorageController always answers a list; it shows only with the engine or the service stubbed.
+  // McpServerStorageController always answers a list: anything else is unknown, not "no custom
+  // server". Read as empty, it let a replace-all keep none of the stored headers.
   it.each([
     ["an object", () => docspace({ jira: '{"url":"j"}' })],
     ["null", () => docspace(null)],
     ["an empty answer", noContent],
-  ])("reads %s as no server", async (_name, answer) => {
+  ])("rejects %s as an answer of an unknown shape, not as no server", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/mcp-servers", answer));
-    await expect(storage.readAll()).resolves.toEqual({});
+    await expect(storage.readAll()).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it.each([404, 500])("rethrows a %i", async (status) => {

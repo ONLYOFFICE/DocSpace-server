@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ProfilesEngine } from "@onlyoffice/ai-chat/core";
+import { loadProvider, ProfilesEngine } from "@onlyoffice/ai-chat/core";
 import type {
   Profile,
   CreateProfileInput,
@@ -90,25 +90,15 @@ function rejectExternalProviderType(
 // letting `asyncHandler` collapse everything to a generic 500. The base URL
 // and key come from the user's profile form, so most failures are config
 // errors that should read as such in the UI.
+//
+// The library throws a plain Error for an unknown provider type and an
+// unknown profile id, and fetch a bare TypeError for a key no HTTP header
+// can carry: none of them has a class or a status to test, and their text
+// is not a contract (ts-ai-failure-paths.md §1). The routes decide those
+// before the call instead: the provider type through the library's own
+// registry (`unknownProviderType`, Bug 83117), the profile by reading it
+// (Bug 84426), the key by `headerSafeKeyError` (Bug 84428).
 function describeProviderError(err: unknown): { status: number; message: string } {
-  // An unknown providerType never reaches the network — the provider
-  // registry lookup throws before any request is made. Surface it as the
-  // input error it is instead of collapsing into a 502 "Failed to list
-  // provider models" (Bug 83117).
-  if (err instanceof Error && err.message.startsWith("Unknown provider type")) {
-    return { status: 400, message: err.message };
-  }
-  // The library's profile lookup throws a plain Error for an unknown id;
-  // the routes check existence up front, this is the belt (Bug 84426).
-  if (err instanceof Error && err.message.startsWith("Profile not found")) {
-    return { status: 404, message: "Profile not found" };
-  }
-  // A key the SDK cannot put into an HTTP header (non-ASCII, a BOM) fails
-  // inside fetch with a bare TypeError before any request leaves; the
-  // routes reject such a key up front, this is the belt (Bug 84428).
-  if (err instanceof TypeError && /ByteString|invalid header|ERR_INVALID_CHAR/i.test(err.message)) {
-    return { status: 400, message: HEADER_UNSAFE_KEY_MESSAGE };
-  }
   // OpenAI-SDK HTTP errors expose a numeric `status`.
   const rawStatus = readProp(err, "status");
   const httpStatus = typeof rawStatus === "number" ? rawStatus : undefined;
@@ -149,15 +139,6 @@ function describeProviderError(err: unknown): { status: number; message: string 
       };
     }
     cur = readProp(cur, "cause");
-  }
-
-  const msg = err instanceof Error ? err.message : String(err);
-  if (/connection error|fetch failed|timeout/i.test(msg)) {
-    return {
-      status: 502,
-      message:
-        "The AI provider is unreachable — check the base URL and that the service is running",
-    };
   }
   return { status: 502, message: "Failed to list provider models" };
 }
@@ -264,6 +245,15 @@ async function profileExists(id: string): Promise<boolean> {
   return (await storage.profiles.readByIdRaw(id)) !== undefined;
 }
 
+// The refusal for a provider type the library's registry does not know, the same lookup the
+// engine makes before it calls out: it never reaches the network (Bug 83117).
+async function unknownProviderType(type: unknown): Promise<string | null> {
+  if (typeof type === "string" && (await loadProvider(type)) !== undefined) {
+    return null;
+  }
+  return `Unknown provider type: ${String(type)}`;
+}
+
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): with AI off, or for a caller
@@ -314,6 +304,7 @@ export const profilesController = {
   }),
 
   delete: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const { id } = unpackPositional(req.body, ["id"] as const);
     const idStr = typeof id === "string" ? id : asString(req.query["id"]);
     if (!idStr) {
@@ -344,6 +335,11 @@ export const profilesController = {
     const keyError = headerSafeKeyError(apiKey);
     if (keyError) {
       res.status(400).json({ error: keyError, field: "apiKey" });
+      return;
+    }
+    const unknownType = await unknownProviderType(providerType);
+    if (unknownType) {
+      res.status(400).json({ error: unknownType });
       return;
     }
     await assertSafeBaseUrl(baseUrl);
@@ -392,8 +388,14 @@ export const profilesController = {
       res.status(400).json({ error: "profileId required" });
       return;
     }
-    if (!(await profileExists(profileId))) {
+    const profile = await storage.profiles.readByIdRaw(profileId);
+    if (profile === undefined) {
       res.status(404).json({ error: "Profile not found" });
+      return;
+    }
+    const unknownType = await unknownProviderType(profile.providerType);
+    if (unknownType) {
+      res.status(400).json({ error: unknownType });
       return;
     }
     try {

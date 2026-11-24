@@ -518,17 +518,25 @@ describe("profilesController.listProviderModels", () => {
     expect(published("aiProfilesListProviderModels", reply)).toEqual([]);
   });
 
-  // HANDLED DOWNSTREAM data-7: a providerType that is not a string (a number, an object) passes the check `!providerType` and reaches the engine. In production the engine refuses it through the real stack with 400 "Unknown provider type" (ASC.AI.Tests, ProfileProviderTypeTests); it shows only with the engine or the service stubbed.
-  it("hands a providerType that is a number to the engine", async () => {
-    engine.listProviderModels.mockResolvedValue([]);
+  // The provider type is looked up in the library's registry before anything is called: an
+  // unknown one never reaches the network (Bug 83117).
+  it.each([
+    ["a type the registry does not know", "foo", "Unknown provider type: foo"],
+    ["a number", 5, "Unknown provider type: 5"],
+  ])(
+    "answers 400 for a providerType that is %s, calling nothing",
+    async (_what, providerType, error) => {
+      const reply = await invoke(profilesController.listProviderModels, {
+        body: { ...body, providerType },
+      });
 
-    const reply = await invoke(profilesController.listProviderModels, {
-      body: { ...body, providerType: 5 },
-    });
-
-    expect(reply.status).toBe(200);
-    expect(engine.listProviderModels).toHaveBeenCalledWith({ ...body, providerType: 5 });
-  });
+      expect(reply.status).toBe(400);
+      expect(reply.body).toEqual({ error });
+      expect(engine.listProviderModels).not.toHaveBeenCalled();
+      expect(listOnlyofficeGatewayModels).not.toHaveBeenCalled();
+      expect(published("aiProfilesListProviderModels", reply)).toEqual([]);
+    },
+  );
 
   it("serves the onlyoffice provider from the gateway catalog (Bug 83113)", async () => {
     listOnlyofficeGatewayModels.mockResolvedValue([{ ...model, provider: "onlyoffice" }]);
@@ -579,25 +587,26 @@ describe("profilesController.listProviderModels", () => {
     return err;
   };
 
+  // The text of an error is not read (ts-ai-failure-paths.md §1): a plain Error of the library and
+  // a bare TypeError of fetch are a 502 whatever they say. The routes decide those cases first.
   it.each([
     [
-      "an unknown provider type",
+      "an Error that names an unknown provider type",
       new Error("Unknown provider type: foo"),
-      400,
-      "Unknown provider type: foo",
+      502,
+      "Failed to list provider models",
     ],
-    ["a profile that does not exist", new Error("Profile not found: x"), 404, "Profile not found"],
     [
-      "a key fetch cannot put into a header",
+      "an Error that names a missing profile",
+      new Error("Profile not found: x"),
+      502,
+      "Failed to list provider models",
+    ],
+    [
+      "a TypeError of a header value",
       new TypeError("Cannot convert argument to a ByteString"),
-      400,
-      "the API key contains characters that cannot be sent in an HTTP header",
-    ],
-    [
-      "an invalid header value",
-      new TypeError("Invalid header value ERR_INVALID_CHAR"),
-      400,
-      "the API key contains characters that cannot be sent in an HTTP header",
+      502,
+      "Failed to list provider models",
     ],
     ["a 401 of the provider", withStatus(401), 400, "Invalid API key for the AI provider"],
     ["a 403 of the provider", withStatus(403), 400, "Invalid API key for the AI provider"],
@@ -627,9 +636,13 @@ describe("profilesController.listProviderModels", () => {
       502,
       "Failed to list provider models",
     ],
-    ["a connection error message", new Error("Connection error."), 502, unreachable],
-    ["a fetch failure message", new Error("fetch failed"), 502, unreachable],
-    ["a timeout message", new Error("Request timeout"), 502, unreachable],
+    [
+      "a connection error message",
+      new Error("Connection error."),
+      502,
+      "Failed to list provider models",
+    ],
+    ["a fetch failure message", new Error("fetch failed"), 502, "Failed to list provider models"],
     ["a thrown string", "weird", 502, "Failed to list provider models"],
     ["a thrown null", null, 502, "Failed to list provider models"],
   ])("answers %s as %i", async (_what, failure, status, error) => {
@@ -679,6 +692,17 @@ describe("profilesController.listModels", () => {
       expect(published("aiProfilesListModels", reply)).toEqual([]);
     },
   );
+
+  it("answers 400 for a stored profile whose provider type the registry does not know, calling nothing", async () => {
+    readByIdRaw.mockResolvedValue({ ...stored, providerType: "retired" as never });
+
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
+
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "Unknown provider type: retired" });
+    expect(engine.listModels).not.toHaveBeenCalled();
+    expect(published("aiProfilesListModels", reply)).toEqual([]);
+  });
 
   it("answers 404 for a profile the store does not have (Bug 84426)", async () => {
     readByIdRaw.mockResolvedValue(undefined);

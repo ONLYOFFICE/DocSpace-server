@@ -31,16 +31,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { invoke } from "../../__tests__/helpers/http.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
-import { docspace, docspaceError, http, useUpstream } from "../../__tests__/helpers/upstream.js";
+import {
+  docspace,
+  docspaceError,
+  http,
+  aiGate,
+  useUpstream,
+} from "../../__tests__/helpers/upstream.js";
 import { assignmentsController } from "../assignmentsController.js";
 
 // The resolve operations with the real AssignmentsEngine and the real storage: only the AI
 // service is stubbed. GET internal/ai/assignments/{actionType} (AssignmentsStorageController.cs),
 // GET internal/ai/profiles/{id} (ProfileStorageController.cs).
 const upstream = useUpstream();
+// The access gate of every route here (assertAiAccess) answers: the caller may use AI.
+beforeEach(() => {
+  upstream.use(aiGate());
+});
 
 const ASSIGNED = "6f1c2a3b-0000-4000-8000-000000000009";
 
@@ -64,6 +74,7 @@ describe("assignmentsController resolve operations over the real engine", () => 
     expect(reply.body).toEqual({ error: "no AI profile is available for ActionType.Chat" });
     expect(responseViolations("aiAssignmentsResolveForAction", 404, reply.body)).toEqual([]);
     expect(upstream.seen.map((r) => r.path)).toEqual([
+      "/internal/ai/tool-prefs",
       "/internal/ai/assignments/Chat",
       `/internal/ai/profiles/${ASSIGNED}`,
     ]);

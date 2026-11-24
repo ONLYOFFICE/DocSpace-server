@@ -680,20 +680,20 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
   aiRegenerateStream: {
     "400":
-      "The request has no body, or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
+      "The body is not an object, `threadId` is missing or not a string (`threadId is required and must be a string`), or `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
     "404": "The thread does not exist or is not the caller's.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiApproveToolCall: {
     "400":
-      "The request has no body, `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`), or `allowAlways` is not a boolean.",
+      "The body is not an object, `threadId` or `messageId` is missing or not a string, `idx` is missing or not an integer, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`), or `allowAlways` is not a boolean.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiDenyToolCall: {
     "400":
-      "The request has no body, or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
+      "The body is not an object, `threadId` or `messageId` is missing or not a string, `idx` is missing or not an integer, or `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },

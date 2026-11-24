@@ -55,9 +55,11 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
 }));
 const profiles = vi.hoisted(() => ({ readByIdRaw: vi.fn(), readAllForClient: vi.fn() }));
 // The adapter class stays real: the resolve operations build their own storage from it.
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
 vi.mock("../../storage/index.js", async (original) => ({
   ...(await original<typeof import("../../storage/index.js")>()),
-  storage: { profiles },
+  storage: { profiles, toolPrefs },
 }));
 
 const { assignmentsController, AssignedProfileGoneError } =

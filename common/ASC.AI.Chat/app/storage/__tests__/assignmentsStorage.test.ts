@@ -77,14 +77,23 @@ describe("readByType", () => {
   it.each([
     ["null (no assignment)", () => docspace(null)],
     ["an empty answer", noContent],
-    ["a number", () => docspace(5)],
-    ["an object", () => docspace({ profileId: PROFILE_ID })],
   ])("reads %s as no assignment", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/assignments/:type", answer));
     await expect(storage.readByType(ActionType.Chat)).resolves.toBeNull();
     expect(vi.mocked(logger.info).mock.calls).toEqual([
       ["HttpAssignmentsStorage.readByType(Chat) -> profileId=NONE"],
     ]);
+  });
+
+  it.each([
+    ["a number", () => docspace(5)],
+    ["an object", () => docspace({ profileId: PROFILE_ID })],
+  ])("rejects %s as an answer of an unknown shape, not as no assignment", async (_name, answer) => {
+    upstream.use(http.get("*/internal/ai/assignments/:type", answer));
+    await expect(storage.readByType(ActionType.Chat)).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+    });
   });
 
   it("reads a 404 as no assignment with its own log line", async () => {

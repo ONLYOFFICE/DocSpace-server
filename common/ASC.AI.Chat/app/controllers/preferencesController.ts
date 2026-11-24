@@ -37,6 +37,7 @@ import {
   TOOL_PERMISSION_MODES,
 } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
+import { assertAiAccess } from "./aiAccess.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 import { isReasoningLevel, REASONING_LEVELS } from "../storage/reasoningDepth.js";
@@ -68,12 +69,14 @@ function scopeOf(value: unknown): string | undefined {
 
 export const preferencesController = {
   getDeepMode: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const entityId = scopeOf(req.query["entityId"]);
     const value = await engine.getDeepMode(entityId);
     res.json(value);
   }),
 
   setDeepMode: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["value", "entityId"] as const);
     // Require a real boolean. `Boolean(args.value)` mis-handled non-booleans:
     // the string "false" coerced to `true` (Bug 82813), and an absent value
@@ -89,12 +92,14 @@ export const preferencesController = {
   }),
 
   clearDeepMode: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const { entityId } = unpackPositional(req.body, ["entityId"] as const);
     await engine.clearDeepMode(scopeOf(entityId));
     res.json({ success: true });
   }),
 
   isDeepModeSet: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const entityId = scopeOf(req.query["entityId"]);
     const value = await engine.isDeepModeSet(entityId);
     res.json(value);
@@ -110,12 +115,14 @@ export const preferencesController = {
   // the storage answers both in one call with identical semantics: a
   // missing row is `off` (the configured deep-mode default is off).
   getReasoningLevel: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const entityId = scopeOf(req.query["entityId"]);
     const value = (await storage.preferences.readReasoningLevel?.(entityId)) ?? "off";
     res.json(value);
   }),
 
   setReasoningLevel: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["value", "entityId"] as const);
     // Same discipline as `setDeepMode`: only a real level is accepted, so an
     // absent or mistyped value can never overwrite the stored depth.
@@ -137,6 +144,7 @@ export const preferencesController = {
   // own (`DEFAULT_TOOL_PERMISSION_MODE`), so a failed read and a fresh user
   // look alike to the composer.
   getToolPermissionMode: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const entityId = scopeOf(req.query["entityId"]);
     const value = await engine.getToolPermissionMode(entityId);
     res.json(value);

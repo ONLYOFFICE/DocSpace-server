@@ -747,7 +747,7 @@
             }
           },
           "400": {
-            "description": "The request has no body, or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`). A body that is not valid JSON is refused with 400 as well.",
+            "description": "The body is not an object, `threadId` is missing or not a string (`threadId is required and must be a string`), or `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`). A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -897,7 +897,7 @@
             }
           },
           "400": {
-            "description": "The request has no body, `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`), or `allowAlways` is not a boolean. A body that is not valid JSON is refused with 400 as well.",
+            "description": "The body is not an object, `threadId` or `messageId` is missing or not a string, `idx` is missing or not an integer, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`), or `allowAlways` is not a boolean. A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1037,7 +1037,7 @@
             }
           },
           "400": {
-            "description": "The request has no body, or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`). A body that is not valid JSON is refused with 400 as well.",
+            "description": "The body is not an object, `threadId` or `messageId` is missing or not a string, `idx` is missing or not an integer, or `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`). A body that is not valid JSON is refused with 400 as well.",
             "content": {
               "application/json": {
                 "schema": {

@@ -36,13 +36,14 @@
 // products/ASC.AI/ASC.AI/Api, which keeps the tenant settings and decides who may read and
 // write them).
 
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { invoke, inRequestContext } from "../../__tests__/helpers/http.js";
 import {
   docspace,
   docspaceError,
   http,
   HttpResponse,
+  aiGate,
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
@@ -50,6 +51,10 @@ import { responseViolations } from "../../__tests__/helpers/schema.js";
 const { documentAgentController } = await import("../documentAgentController.js");
 
 const upstream = useUpstream();
+// The access gate of every route here (assertAiAccess) answers: the caller may use AI.
+beforeEach(() => {
+  upstream.use(aiGate());
+});
 const ROUTE = "*/internal/ai/document-agent/settings";
 
 // What the AI service stores and answers, in the portal envelope.

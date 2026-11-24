@@ -38,6 +38,7 @@ none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it di
   | call one handler, read status, body and headers | `invoke(handler, { body, query, headers })` in `http.ts` | node-mocks-http |
   | run code inside the real request context | `inRequestContext(headers, fn)` in `http.ts` | node-mocks-http |
   | answer the AI, Files or People service, a provider | `useUpstream()`, `http`, `docspace`, `docspaceError` in `upstream.ts` | msw |
+  | the AI access gate (`assertAiAccess`) letting the caller through, or refusing | `aiGate(status)` in `upstream.ts` | msw |
   | stand in for an engine class | `engineMock<Engine>()`, `engineClass(engine)` in `engine.ts` | vitest-mock-extended |
   | an answer or a body against the published OpenAPI schema | `responseViolations(operationId, status, body)`, `requestViolations` in `schema.ts` | ajv |
   | the frames of an NDJSON or SSE answer, a value against a named schema | `ndjsonFrames`, `sseFrames` in `frames.ts`, `schemaViolations(name, value)` in `schema.ts` | ajv |

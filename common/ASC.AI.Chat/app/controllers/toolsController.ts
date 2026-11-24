@@ -257,6 +257,7 @@ export const toolsController = {
   }),
 
   getCustomServer: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const name = asString(req.query["name"]);
     if (!name) {
       res.status(400).json({ error: "name required" });
@@ -288,6 +289,7 @@ export const toolsController = {
   }),
 
   listSystemTools: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const entityId = asString(req.query["entityId"]);
     // The catalog is the system groups plus the registered custom MCP
     // servers' live tools — before this merge no listing route could show a
@@ -414,6 +416,7 @@ export const toolsController = {
   }),
 
   getDisabled: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const entityId = asString(req.query["entityId"]);
     const scope = parseToolPrefsScope(req.query["scope"]);
     if (scope === INVALID_SCOPE) {
@@ -425,6 +428,7 @@ export const toolsController = {
   }),
 
   isToolDisabled: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const serverType = asString(req.query["serverType"]);
     const toolName = asString(req.query["toolName"]);
     if (!serverType || !toolName) {
@@ -472,6 +476,7 @@ export const toolsController = {
   }),
 
   isAllowAlways: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const serverType = asString(req.query["serverType"]);
     const toolName = asString(req.query["toolName"]);
     if (!serverType || !toolName) {
