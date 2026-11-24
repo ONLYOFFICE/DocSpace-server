@@ -134,7 +134,6 @@ beforeEach(() => {
   otel.shutdown = { calls: 0, fail: false };
   onceSpy = spyOnce();
   exitSpy = spyExit();
-  vi.stubEnv("OTEL_SERVICE_NAME", undefined);
   vi.stubEnv("OTEL_METRIC_EXPORT_INTERVAL", undefined);
 });
 
@@ -237,16 +236,21 @@ describe("telemetry switched on", () => {
     },
   );
 
-  it.each<[string, unknown, string | undefined, string]>([
+  // OTEL_SERVICE_NAME is read through nconf like the other OTEL_* settings: the environment
+  // first, then the settings files.
+  it.each<[string, unknown, unknown, string]>([
     ["the configured name", "DocSpace.AI.Chat", "FromEnv", "DocSpace.AI.Chat"],
     ["the environment for an empty configured name", "", "FromEnv", "FromEnv"],
     ["the environment for a non-string configured name", 5, "FromEnv", "FromEnv"],
     ["the default without either", undefined, undefined, "ASC.AI.Chat"],
     ["the default for an empty environment value", undefined, "", "ASC.AI.Chat"],
+    ["the default for a non-string environment value", undefined, 5, "ASC.AI.Chat"],
   ])("names the service with %s", async (_name, configured, env, expected) => {
-    vi.stubEnv("OTEL_SERVICE_NAME", env);
-
-    await load({ ...ENABLED, "openTelemetry:ServiceName": configured });
+    await load({
+      ...ENABLED,
+      "openTelemetry:ServiceName": configured,
+      OTEL_SERVICE_NAME: env,
+    });
 
     expect(sdkOptions().serviceName).toBe(expected);
   });

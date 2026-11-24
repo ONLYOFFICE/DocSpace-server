@@ -62,8 +62,9 @@ export interface Reply {
  * Calls one Express handler (a controller method, a middleware) with a request and a response
  * made by node-mocks-http, waits for it, and answers what a client would have received.
  * Whatever sits in front of the handler in the real app (parsers, the auth gate, the request
- * context) is not run: for those, hand `createApp()` to supertest. It answers when the handler
- * returns, so a stream the client closes half-way needs a response of the test's own.
+ * context) is not run: for those, hand `createApp()` to supertest. It answers when the work the
+ * handler started is done, so a stream the client closes half-way needs a response of the
+ * test's own.
  */
 export async function invoke(handler: unknown, init: CallInit = {}): Promise<Reply> {
   const req = createRequest({
@@ -81,9 +82,17 @@ export async function invoke(handler: unknown, init: CallInit = {}): Promise<Rep
   }
   const res = createResponse({ eventEmitter: EventEmitter, req });
   let nextError: unknown;
-  await (handler as RequestHandler)(req, res, (err?: unknown) => {
+  // A handler wrapped by `asyncHandler` returns nothing and its work is awaited through
+  // `handlerSettled`; any other handler (a middleware written as an async function) is awaited
+  // by what it returns.
+  const returned: unknown = (handler as RequestHandler)(req, res, (err?: unknown) => {
     nextError = err;
   });
+  await returned;
+  // Loaded here, not at the top: `_helpers` loads the chat library, and a test file that
+  // replaces an engine class of it with `vi.mock` must have built its mock before that.
+  const { handlerSettled } = await import("../../controllers/_helpers.js");
+  await handlerSettled(res);
   return {
     status: res.statusCode,
     body: res._isJSON() ? res._getJSONData() : res._getData(),

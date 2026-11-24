@@ -149,9 +149,9 @@ describe("unpackPositional", () => {
   describe("with one argument", () => {
     const names = ["threadId"] as const;
 
-    it("reads a named object as it came", () => {
+    it("reads a named object as it came, other keys included", () => {
       const body = { threadId: "t1", other: 2 };
-      expect(unpackPositional(body, names)).toBe(body);
+      expect(unpackPositional(body, names)).toEqual(body);
     });
 
     it.each([
@@ -190,7 +190,17 @@ describe("unpackPositional", () => {
 
     it("reads a named object as it came, other keys included", () => {
       const body = { actionType: "Chat", stray: true };
-      expect(unpackPositional(body, names)).toBe(body);
+      expect(unpackPositional(body, names)).toEqual(body);
+    });
+
+    it("keeps a __proto__ key of a parsed body as a field, not as the prototype", () => {
+      const body: unknown = JSON.parse('{"actionType":"Chat","__proto__":{"profileId":"p9"}}');
+
+      const out = unpackPositional(body, names);
+
+      expect(out.profileId).toBeUndefined();
+      expect(Object.getPrototypeOf(out)).toBe(Object.prototype);
+      expect(Object.keys(out)).toEqual(["actionType", "__proto__"]);
     });
 
     it.each([

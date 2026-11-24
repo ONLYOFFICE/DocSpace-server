@@ -88,6 +88,7 @@ const fillMeta = vi.fn();
 vi.mock("../../meta/fillMeta.js", () => ({ fillMeta }));
 
 const { metaController } = await import("../metaController.js");
+const { handlerSettled } = await import("../_helpers.js");
 const { ModelCallError, NoContentError, NoProfileError } =
   await import("../../meta/generateMeta.js");
 
@@ -112,9 +113,8 @@ function run(handler: unknown, body: unknown) {
     },
   };
   const req = { body, method: "POST", originalUrl: "/ai/meta/x" };
-  return Promise.resolve((handler as Handler)(req as never, res as never, vi.fn() as never)).then(
-    () => res,
-  );
+  (handler as Handler)(req as never, res as never, vi.fn() as never);
+  return handlerSettled(res).then(() => res);
 }
 
 describe("metaController.generate", () => {

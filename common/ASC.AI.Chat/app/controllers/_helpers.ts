@@ -220,7 +220,7 @@ export function unpackPositional<T extends string>(
   // `{name: value}` are detected via the `name in body` check.
   if (rest.length === 0) {
     if (isObject(body) && first in body) {
-      return body as Partial<Record<T, unknown>>;
+      return namedFields(body);
     }
     if (body === undefined || body === null) {
       return {};
@@ -239,9 +239,26 @@ export function unpackPositional<T extends string>(
     return out;
   }
   if (isObject(body)) {
-    return body as Partial<Record<T, unknown>>;
+    return namedFields(body);
   }
   return {};
+}
+
+// A shallow copy of a named body, every key kept: a caller may read a second name for a field
+// (`config` beside `body` in the web search routes). Each key is defined, not assigned, so a
+// `__proto__` key that JSON.parse made an own property stays one instead of replacing the
+// copy's prototype.
+function namedFields<T extends string>(body: Record<string, unknown>): Partial<Record<T, unknown>> {
+  const out: Partial<Record<T, unknown>> = {};
+  for (const [key, value] of Object.entries(body)) {
+    Object.defineProperty(out, key, {
+      value,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  }
+  return out;
 }
 
 function errorDetails(err: unknown): string {
@@ -285,30 +302,84 @@ export const errorHandler: ErrorRequestHandler = (err: unknown, req, res, next) 
     res.status(413).type("text/plain").send("Payload Too Large");
     return;
   }
+  sendError(req, res, err);
+};
+
+/**
+ * Answers `err` as the error boundary of every handler does: the status and the text
+ * `clientError` lets through, a 5xx logged with its details. `fields` are added to the
+ * `{ error }` body, for a refusal that has to say more than its text (what a failed install
+ * already made). The headers must not have been sent yet.
+ */
+export function sendError(
+  req: Pick<Request, "method" | "originalUrl">,
+  res: Response,
+  err: unknown,
+  fields: Readonly<Record<string, unknown>> = {},
+): void {
   const { status, message } = clientError(err);
+  logServerError(req, err, status);
+  res.status(status).json({ ...fields, error: message });
+}
+
+function logServerError(
+  req: Pick<Request, "method" | "originalUrl">,
+  err: unknown,
+  status: number,
+): void {
   if (status >= 500) {
     logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
   }
-  res.status(status).json({ error: message });
-};
+}
 
+// The work each wrapped handler started, by its response. Express 4 ignores what a handler
+// returns, so the work is not returned; a test that calls a handler without a server waits
+// for it through `handlerSettled`. A WeakMap keeps no response alive after its request.
+const handlerWork = new WeakMap<object, Promise<void>>();
+
+/**
+ * Settles when the work a handler wrapped by `asyncHandler` started for this response is done,
+ * its error answered or passed on included; at once for a response no such handler was given.
+ */
+export function handlerSettled(res: object): Promise<void> {
+  return handlerWork.get(res) ?? Promise.resolve();
+}
+
+async function runHandler<ReqBody, ReqQuery>(
+  handler: AsyncHandler<ReqBody, ReqQuery>,
+  req: TypedRequest<ReqBody, ReqQuery>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    await handler(req, res, next);
+  } catch (err) {
+    if (!res.headersSent) {
+      sendError(req, res, err);
+      return;
+    }
+    logServerError(req, err, clientError(err).status);
+    // A status can no longer say that the answer failed. Ending the response here would make
+    // a cut answer look complete, so the error goes on to Express, which drops the connection
+    // and the client sees a failed transfer. An answer already ended (a stream that wrote its
+    // own error frame) is left as it is: dropping the connection then could cut bytes that
+    // are still on their way.
+    if (!res.writableEnded) {
+      next(err);
+    }
+  }
+}
+
+/**
+ * Wraps a handler for Express 4, which neither awaits a handler nor passes a rejected promise
+ * to `next`: the returned handler starts the work and returns nothing, and an error of the
+ * work is answered here (`sendError`) or, after the headers are sent, passed to `next`.
+ */
 export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknown>>(
   handler: AsyncHandler<ReqBody, ReqQuery>,
 ): RequestHandler<Record<string, string>, unknown, ReqBody, ReqQuery> {
-  return async (req, res, next) => {
-    try {
-      await handler(req, res, next);
-    } catch (err) {
-      const { status, message } = clientError(err);
-      if (status >= 500) {
-        logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
-      }
-      if (!res.headersSent) {
-        res.status(status).json({ error: message });
-      } else {
-        res.end();
-      }
-    }
+  return (req, res, next) => {
+    handlerWork.set(res, runHandler(handler, req, res, next));
   };
 }
 

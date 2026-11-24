@@ -142,11 +142,14 @@ export function start(
   let nextError: unknown;
   let run: Promise<unknown> = Promise.resolve();
   requestContextMiddleware(req, res, () => {
-    run = Promise.resolve(
-      (handler as RequestHandler)(req, res, (err?: unknown) => {
-        nextError = err;
-      }),
-    );
+    const returned: unknown = (handler as RequestHandler)(req, res, (err?: unknown) => {
+      nextError = err;
+    });
+    // `_helpers` is loaded late: it loads the chat library, whose engine classes the test
+    // files replace with `vi.mock`.
+    run = Promise.resolve(returned)
+      .then(() => import("../_helpers.js"))
+      .then(({ handlerSettled }) => handlerSettled(res));
   });
   const done = run.then(() => ({
     status: res.statusCode,

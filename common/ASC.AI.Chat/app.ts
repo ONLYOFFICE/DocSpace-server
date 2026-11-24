@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-process.env["NODE_ENV"] = process.env["NODE_ENV"] ?? "development";
-
 // Must stay the first import — patches node:http before anything uses it.
 import "./app/telemetry/sdk.js";
 import http from "http";

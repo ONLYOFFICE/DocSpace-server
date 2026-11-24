@@ -62,7 +62,7 @@ vi.mock("../../requestContext.js", () => ({ setAnalyzeEntryIds: vi.fn() }));
 vi.mock("../../forms/suggestedQuestions.js", () => ({ getSuggestedQuestions: vi.fn() }));
 
 const { attachmentsController } = await import("../attachmentsController.js");
-const { MAX_ATTACHMENTS_PER_REQUEST } = await import("../_helpers.js");
+const { MAX_ATTACHMENTS_PER_REQUEST, handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
@@ -70,7 +70,8 @@ const run = async (name: keyof typeof attachmentsController, body: unknown) => {
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (attachmentsController[name] as unknown as Handler)({ body, query: {} }, res, next);
+  (attachmentsController[name] as unknown as Handler)({ body, query: {} }, res, next);
+  await handlerSettled(res);
   const failure = next.mock.calls[0];
   if (failure) throw failure[0];
   return {

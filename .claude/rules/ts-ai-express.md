@@ -124,7 +124,6 @@ Read from `app.ts`, `app/createApp.ts`, `app/routes.ts`, `controllers/_helpers.t
 
 | Guidance | Now |
 |---|---|
-| §1 `next(err)` after the headers are sent | `asyncHandler` calls `res.end()` |
 | §2 no parser without a reader | `bodyParser.urlencoded` runs on every parsed route (not on the raw ones); a handler reads `req.body` whatever parser made it, so a form posted to a JSON route is served |
 | §4 `trust proxy`, `helmet` | not set |
 | §5 graceful shutdown | `SIGTERM` flushes telemetry and exits; with telemetry off there is no handler |

@@ -262,13 +262,10 @@ describe("sanitizeInstruction (Bug 82726)", () => {
     expect(sanitizeInstruction(input)).toBe(expected);
   });
 
-  // DEFECT app-12: the text after a bare `<` is taken for a tag and dropped, up to a later `>`
-  // or to the end, so an instruction comparing values ("x < 2 and y > 3") loses its middle — expected only real
-  // markup removed and the comparison kept as inert text (the comment above sanitizeInstruction:
-  // "strip every tag ... leaving only inert text").
-  it("drops the text after a bare <", () => {
-    expect(sanitizeInstruction("1 < 2 and 3 > 2")).toBe("1  2");
-    expect(sanitizeInstruction("a < b")).toBe("a ");
+  it("keeps a bare < as inert text instead of dropping what follows it", () => {
+    expect(sanitizeInstruction("1 < 2 and 3 > 2")).toBe("1 &lt; 2 and 3 &gt; 2");
+    expect(sanitizeInstruction("a < b")).toBe("a &lt; b");
+    expect(sanitizeInstruction("a <b>bold</b> < c")).toBe("a bold &lt; c");
   });
 
   it("answers an empty string for a falsy value that slipped past the type", () => {

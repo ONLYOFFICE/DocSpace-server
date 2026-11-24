@@ -287,8 +287,6 @@ describe("an unknown path", () => {
 describe("the body parsers", () => {
   const big = (bytes: number): string => JSON.stringify({ text: "x".repeat(bytes) });
 
-  // DEFECT app-2: the 400 of a body that does not parse is a status the operation does not
-  // publish — expected it documented for every operation that takes a body (ts-ai-express.md §1).
   it("answers a broken JSON body with 400 as JSON, without the parser's text, before the gate", async () => {
     const reply = await request(app)
       .post(`${API_PREFIX}/threads/create`)
@@ -299,9 +297,7 @@ describe("the body parsers", () => {
     expect(reply.headers["content-type"]).toBe("application/json; charset=utf-8");
     expect(reply.body).toEqual({ error: "The request body is not valid JSON" });
     expect(reply.text).not.toContain("SyntaxError");
-    expect(responseViolations("aiThreadsCreate", 400, reply.body)).toEqual([
-      "aiThreadsCreate publishes no JSON schema for status 400",
-    ]);
+    expect(responseViolations("aiThreadsCreate", 400, reply.body)).toEqual([]);
     expect(calledOut()).toEqual([]);
   });
 

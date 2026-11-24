@@ -36,10 +36,11 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import logger from "../../log.js";
+import { createRequest, createResponse } from "node-mocks-http";
 import { invoke } from "../../__tests__/helpers/http.js";
 import { AiServiceHttpError } from "../../storage/httpClient.js";
 import { DocspaceApiHttpError } from "../../storage/docspaceFilesApi.js";
-import { asyncHandler } from "../_helpers.js";
+import { asyncHandler, handlerSettled } from "../_helpers.js";
 
 const throwing = (error: unknown) =>
   asyncHandler(() => {
@@ -65,6 +66,31 @@ describe("asyncHandler", () => {
     expect(reply.body).toEqual({ ok: true });
     expect(reply.nextError).toBeUndefined();
     expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
+  });
+
+  it("returns nothing to Express and settles its work through handlerSettled", async () => {
+    let release = (): void => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const handler = asyncHandler(async (_req, res) => {
+      await gate;
+      throw Object.assign(new Error("late refusal"), { status: 409, expose: true });
+    });
+    const res = createResponse();
+
+    const returned: unknown = handler(createRequest(), res, () => {});
+    const settled = handlerSettled(res);
+    release();
+    await settled;
+
+    expect(returned).toBeUndefined();
+    expect(res.statusCode).toBe(409);
+    expect(res._getJSONData()).toEqual({ error: "late refusal" });
+  });
+
+  it("settles at once for a response no wrapped handler was given", async () => {
+    await expect(handlerSettled(createResponse())).resolves.toBeUndefined();
   });
 
   it("passes the request, the response and next to the handler", async () => {
@@ -269,18 +295,34 @@ describe("asyncHandler", () => {
     expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
   });
 
-  // DEFECT ai-13: after the headers are sent, an error ends the response cleanly with res.end(), so a cut answer looks complete — expected next(err), so Express drops the connection (ts-ai-express.md §1)
-  it("ends a response whose headers are already sent and passes nothing to next", async () => {
+  it("passes an error after the headers are sent on to next, so the transfer fails", async () => {
+    const error = new Error("later step failed");
     const handler = asyncHandler(async (_req, res) => {
       res.status(200).setHeader("Content-Type", "text/plain");
       res.write("partial");
-      throw new Error("later step failed");
+      throw error;
     });
 
     const reply = await invoke(handler, { method: "GET", url: "/a" });
 
     expect(reply.status).toBe(200);
     expect(reply.body).toBe("partial");
+    expect(reply.ended).toBe(false);
+    expect(reply.nextError).toBe(error);
+    expect(vi.mocked(logger.error)).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves an answer that has already ended as it is", async () => {
+    const handler = asyncHandler(async (_req, res) => {
+      res.status(200).setHeader("Content-Type", "application/x-ndjson");
+      res.write('{"type":"error","message":"stream error"}\n');
+      res.end();
+      throw new Error("a step after the stream failed");
+    });
+
+    const reply = await invoke(handler, { method: "GET", url: "/a" });
+
+    expect(reply.body).toBe('{"type":"error","message":"stream error"}\n');
     expect(reply.ended).toBe(true);
     expect(reply.nextError).toBeUndefined();
     expect(vi.mocked(logger.error)).toHaveBeenCalledTimes(1);

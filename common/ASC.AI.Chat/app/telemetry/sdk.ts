@@ -54,7 +54,7 @@ function resolveServiceName(): string {
     return fromConfig;
   }
   // Matches the .NET services' fallback style (assembly-like name).
-  return process.env["OTEL_SERVICE_NAME"] || "ASC.AI.Chat";
+  return resolveOtelSetting("OTEL_SERVICE_NAME") ?? "ASC.AI.Chat";
 }
 
 // The endpoint may come from appsettings rather than env, so it is passed
