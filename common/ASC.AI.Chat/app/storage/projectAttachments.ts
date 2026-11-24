@@ -43,14 +43,17 @@
 // refuses (a format no text is read from), one over the size held in memory
 // here, a third-party file, or any failure on the way.
 
-import { proxyBaseUrl, withTimeout, AiServiceHttpError } from "./httpClient.js";
-import { DocspaceApiHttpError, filesApiGet } from "./docspaceFilesApi.js";
+import {
+  DocspaceApiHttpError,
+  envelopeResponse,
+  filesApiGet,
+  filesApiRequest,
+} from "./docspaceFilesApi.js";
+import type { FilesApiBody } from "./docspaceFilesApi.js";
 import { mediaTypeOf } from "./docspaceFileTransfer.js";
 import { FileTooLargeError, readFileBytes } from "./roomSkills.js";
-import { getForwardedHeaders } from "../requestContext.js";
 import { getEntityId, getNumber, getObject, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
-import { errorBodyText } from "./errorBody.js";
 
 /** The largest file copied: its bytes are held in memory on the way. */
 export const MAX_COPY_BYTES = 50 * 1024 * 1024;
@@ -91,31 +94,8 @@ async function inTurn<T>(copy: () => Promise<T>): Promise<T> {
   }
 }
 
-async function postFiles(
-  path: string,
-  init: { json?: unknown; form?: FormData },
-): Promise<unknown> {
-  const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
-  const { signal, cancel } = withTimeout(undefined);
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers:
-        init.json === undefined
-          ? getForwardedHeaders()
-          : { ...getForwardedHeaders(), "Content-Type": "application/json" },
-      body: init.json === undefined ? init.form : JSON.stringify(init.json),
-      signal,
-    });
-    if (!res.ok) {
-      const text = await errorBodyText(res);
-      throw new AiServiceHttpError(res.status, res.statusText, text, url);
-    }
-    const raw: unknown = await res.json();
-    return isObject(raw) && "response" in raw ? raw["response"] : raw;
-  } finally {
-    cancel();
-  }
+async function postFiles(path: string, body: FilesApiBody): Promise<unknown> {
+  return envelopeResponse(await filesApiRequest("POST", path, body));
 }
 
 async function chunkSize(): Promise<number> {
@@ -205,10 +185,7 @@ export async function copyIntoProject(projectId: string, entryId: string): Promi
     // A refusal is the ordinary case; anything else (a timeout, a dropped
     // connection, an answer that cannot be read) is worth a warning, and
     // still no reason to fail the attachment.
-    const refused =
-      err instanceof FileTooLargeError ||
-      err instanceof AiServiceHttpError ||
-      err instanceof DocspaceApiHttpError;
+    const refused = err instanceof FileTooLargeError || err instanceof DocspaceApiHttpError;
     logger[refused ? "info" : "warn"](
       `copyIntoProject: file ${entryId} not copied into project ${projectId}, attached where it is: ${
         err instanceof Error ? err.message : String(err)

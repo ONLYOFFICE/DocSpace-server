@@ -31,15 +31,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { aiService, AiServiceHttpError, aiServiceBaseUrl, withTimeout } from "./httpClient.js";
+import { aiService, AiServiceHttpError, aiServiceBaseUrl, aiServiceRootGet } from "./httpClient.js";
 import { isObject, getString, getNumber, getBoolean, getArray } from "../narrow.js";
 import logger from "../log.js";
-import {
-  countUpstreamCall,
-  countUpstreamRead,
-  getForwardedHeaders,
-  shouldForwardHeadersToProvider,
-} from "../requestContext.js";
+import { getForwardedHeaders, shouldForwardHeadersToProvider } from "../requestContext.js";
 import { CapabilitiesUI, getReasoningSupport } from "@onlyoffice/ai-chat/core";
 import type { Model, ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
 import {
@@ -53,7 +48,6 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
-import { errorBodyText } from "./errorBody.js";
 import { listAnswer, mapped, namesNoEntity } from "./upstreamShape.js";
 
 const PATH = "/profiles";
@@ -511,26 +505,13 @@ function mapGatewayReasoning(
  * catalog keeps the two methods consistent (Bug 83113).
  */
 export async function listOnlyofficeGatewayModels(signal?: AbortSignal): Promise<Model[]> {
-  const url = `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}/models`;
-  countUpstreamRead();
-  countUpstreamCall("GET");
-  const { signal: reqSignal, cancel } = withTimeout(signal);
-  try {
-    const res = await fetch(url, {
-      headers: { ...getForwardedHeaders() },
-      signal: reqSignal,
-    });
-    if (!res.ok) {
-      const text = await errorBodyText(res);
-      throw new AiServiceHttpError(res.status, res.statusText, text, url);
-    }
-    const json: unknown = await res.json();
-    const data = isObject(json) ? getArray(json, "data") : undefined;
-    if (!data) {
-      throw new Error(`gateway models listing returned no data array (${url})`);
-    }
-    return data.map(mapGatewayModel).filter((m): m is Model => m !== undefined);
-  } finally {
-    cancel();
+  // `raw`: the catalogue is OpenRouter's `{ data }`, never the DocSpace envelope.
+  const json = await aiServiceRootGet(`${ONLYOFFICE_GATEWAY_PATH}/models`, { signal, raw: true });
+  const data = isObject(json) ? getArray(json, "data") : undefined;
+  if (!data) {
+    throw new Error(
+      `gateway models listing returned no data array (${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}/models)`,
+    );
   }
+  return data.map(mapGatewayModel).filter((m): m is Model => m !== undefined);
 }

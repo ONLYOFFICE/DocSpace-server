@@ -34,8 +34,12 @@
 import { randomUUID } from "node:crypto";
 
 import date from "date-and-time";
-import { aiService, AiServiceHttpError, proxyBaseUrl, withTimeout } from "./httpClient.js";
+import { aiService, AiServiceHttpError, proxyBaseUrl } from "./httpClient.js";
 import {
+  DocspaceApiHttpError,
+  envelopeResponse,
+  filesApiDownload,
+  filesApiRequest,
   getFolderInfo,
   getMyDocumentsFolderId,
   canTakeUpload,
@@ -51,7 +55,6 @@ import logger from "../log.js";
 import { uploadThreadArtifact } from "./threadFiles.js";
 import { copyManyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
-import { errorBodyText } from "./errorBody.js";
 import { clientFault } from "../httpErrors.js";
 import { listAnswer, mapped, namesNoEntity } from "./upstreamShape.js";
 
@@ -171,9 +174,8 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
   form.append("createNewIfExist", "true");
   form.append("file", new Blob([bytes], { type: mime }), fileName);
 
-  const url = `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(folderId)}/insert`;
-  // Don't set Content-Type — `fetch` derives the multipart boundary from the
-  // FormData body, and `getForwardedHeaders` strips content-type anyway.
+  const path = `${encodeURIComponent(folderId)}/insert`;
+  const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
   const headers = getForwardedHeaders();
   // Diagnostics for a failing generated-image upload: the request as it
   // actually goes out. Header NAMES only (a value would leak the session
@@ -188,42 +190,57 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
       }] ` +
       `forwarded=[${Object.keys(headers).sort().join(",")}]`,
   );
-  const { signal, cancel } = withTimeout(undefined);
+  let json: unknown;
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers,
-      body: form,
-      signal,
-    });
-    if (!res.ok) {
-      const text = await errorBodyText(res);
-      logger.error(`insertGeneratedImage: POST ${url} -> ${res.status} ${res.statusText}`);
-      throw new AiServiceHttpError(res.status, res.statusText, text, url);
+    json = await filesApiRequest("POST", path, { form });
+  } catch (err) {
+    if (err instanceof DocspaceApiHttpError) {
+      logger.error(`insertGeneratedImage: POST ${url} -> ${err.status} ${err.statusText}`);
     }
-    const json: unknown = await res.json();
-    const file = isObject(json) && "response" in json ? json.response : json;
-    if (!isObject(file)) {
-      logger.error(
-        `insertGeneratedImage: POST ${url} -> 200 but unexpected payload=${JSON.stringify(json).slice(0, 1000)}`,
-      );
-      throw new Error("DocSpace insert returned an unexpected payload");
-    }
-    const numId = getNumber(file, "id");
-    const id = numId !== undefined ? String(numId) : getString(file, "id");
-    if (id === undefined) {
-      logger.error(
-        `insertGeneratedImage: POST ${url} -> 200 but no file id in payload=${JSON.stringify(file).slice(0, 1000)}`,
-      );
-      throw new Error("DocSpace insert returned a file without an id");
-    }
-    logger.info(
-      `insertGeneratedImage: POST ${url} -> 200 entryId=${id} title=${getString(file, "title") ?? "?"} ` +
-        `folderId=${String(getNumber(file, "folderId") ?? getString(file, "folderId") ?? "?")}`,
+    throw err;
+  }
+  const file = envelopeResponse(json);
+  if (!isObject(file)) {
+    logger.error(
+      `insertGeneratedImage: POST ${url} -> 200 but unexpected payload=${JSON.stringify(json).slice(0, 1000)}`,
     );
-    return id;
-  } finally {
-    cancel();
+    throw new Error("DocSpace insert returned an unexpected payload");
+  }
+  const numId = getNumber(file, "id");
+  const id = numId !== undefined ? String(numId) : getString(file, "id");
+  if (id === undefined) {
+    logger.error(
+      `insertGeneratedImage: POST ${url} -> 200 but no file id in payload=${JSON.stringify(file).slice(0, 1000)}`,
+    );
+    throw new Error("DocSpace insert returned a file without an id");
+  }
+  logger.info(
+    `insertGeneratedImage: POST ${url} -> 200 entryId=${id} title=${getString(file, "title") ?? "?"} ` +
+      `folderId=${String(getNumber(file, "folderId") ?? getString(file, "folderId") ?? "?")}`,
+  );
+  return id;
+}
+
+/**
+ * Removes a generated image whose attachment record could not be written, so
+ * no file is left in the folder that no message names
+ * (`DELETE api/2.0/files/file/{fileId}`, FilesController.DeleteFile; it
+ * starts a file operation and answers at once). The file was made by this
+ * request seconds before, so it skips the trash. Best effort: a failure is
+ * logged with the file's id and does not replace the error that caused it.
+ */
+async function removeOrphanImage(entryId: string): Promise<void> {
+  try {
+    await filesApiRequest("DELETE", `file/${encodeURIComponent(entryId)}`, {
+      json: { deleteAfter: false, immediately: true },
+    });
+    logger.warn(`uploadToolImage: removed file ${entryId}, its attachment record was not written`);
+  } catch (err) {
+    logger.error(
+      `uploadToolImage: file ${entryId} is left without an attachment record, its removal failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
   }
 }
 
@@ -231,36 +248,36 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   // Named in the log without its query: the signature there downloads the
   // file until it expires.
   let where = "the image";
-  const { signal, cancel } = withTimeout(undefined);
+  const limit = getMaxImageSize();
   try {
     const target = imageTarget(url);
     where = target.href.split("?", 1)[0] ?? where;
-    const res = await fetch(target.href, {
-      headers: target.portal ? downloadHeaders() : {},
-      signal,
-    });
-    if (!res.ok) {
-      logger.warn(`fetchImageAsDataUrl: ${where} → ${res.status} ${res.statusText}`);
-      return null;
-    }
-    // Read here, inside the timeout, and no further than the size a chat
-    // takes an image up to: the bytes are held whole and again as base64.
-    const limit = getMaxImageSize();
-    const buf = await readBodyCapped(res, limit);
-    if (buf === null) {
+    // Read inside the timeout, and no further than the size a chat takes an
+    // image up to: the bytes are held whole and again as base64.
+    const image = await filesApiDownload(
+      target.href,
+      target.portal ? downloadHeaders() : {},
+      async (res) => ({
+        bytes: await readBodyCapped(res, limit),
+        contentType: res.headers.get("content-type"),
+      }),
+    );
+    if (image.bytes === null) {
       logger.warn(`fetchImageAsDataUrl: ${where} is over ${limit} bytes, not inlined`);
       return null;
     }
-    const mime = detectImageMime(buf, res.headers.get("content-type"));
-    const b64 = Buffer.from(buf).toString("base64");
+    const mime = detectImageMime(image.bytes, image.contentType);
+    const b64 = Buffer.from(image.bytes).toString("base64");
     return `data:${mime};base64,${b64}`;
   } catch (err) {
+    if (err instanceof DocspaceApiHttpError) {
+      logger.warn(`fetchImageAsDataUrl: ${where} → ${err.status} ${err.statusText}`);
+      return null;
+    }
     logger.error(
       `fetchImageAsDataUrl: ${where} failed: ${err instanceof Error ? err.message : String(err)}`,
     );
     return null;
-  } finally {
-    cancel();
   }
 }
 
@@ -589,6 +606,9 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // logger, so without this the file log shows nothing when an upload dies,
     // and a 404 from the folder read reads exactly like a 404 from the insert.
     let stage = "thread-artifact";
+    // The file once it is stored: a failure after that point removes it
+    // again, so the placeholder below leaves nothing behind.
+    let stored: string | undefined;
     try {
       // A conversation of an AI project keeps what its replies produce in
       // its own folder of artifacts; any other conversation has none, and
@@ -598,6 +618,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         : undefined;
       if (artifact !== undefined) {
         stage = "attachment-record";
+        stored = artifact;
         const [record] = await this.createMany([
           { kind: "image", title: input.title, path: artifact },
         ]);
@@ -655,7 +676,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         // `FileUploader` re-checks the right server-side, so the preflight
         // above can pass on a target the upload still refuses. Give the image
         // the same second chance a refused scope gets.
-        if (!(err instanceof AiServiceHttpError) || err.status !== 403) {
+        if (!(err instanceof DocspaceApiHttpError) || err.status !== 403) {
           throw err;
         }
         stage = "my-documents";
@@ -672,6 +693,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         targetFolderId = myDocumentsId;
       }
       stage = "attachment-record";
+      stored = entryId;
 
       // Reuse the entry-based path: `path` routes this back through the
       // DocSpace branch of `createMany` (no `source`, so it won't recurse
@@ -694,6 +716,9 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       );
       return attachment;
     } catch (err) {
+      if (stored !== undefined) {
+        await removeOrphanImage(stored);
+      }
       logger.error(
         `uploadToolImage: entityId=${input.entityId ?? "-"} FAILED at stage=${stage}: ${
           err instanceof Error ? `${err.message}${err.stack ? `\n${err.stack}` : ""}` : String(err)

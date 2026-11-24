@@ -31,28 +31,31 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const forwarded = { cookie: "asc_auth_key=1", authorization: "Bearer t", "if-none-match": "x" };
 vi.mock("../../requestContext.js", () => ({
   getForwardedHeaders: () => forwarded,
   getAnalyzeEntryIds: () => undefined,
 }));
-vi.mock("../../../config/index.js", () => ({ getMaxImageSize: () => 8 }));
-const cancel = vi.fn();
+vi.mock("../../../config/index.js", async (original) => ({
+  ...(await original<typeof import("../../../config/index.js")>()),
+  getMaxImageSize: () => 8,
+}));
 const aiGet = vi.fn();
 const aiPost = vi.fn();
-vi.mock("../httpClient.js", () => {
+vi.mock("../httpClient.js", async (original) => {
   class AiServiceHttpError extends Error {
     constructor(public readonly status: number) {
       super(`HTTP ${status}`);
     }
   }
   return {
+    // The real capped body reader: the bytes of the image go through it.
+    ...(await original<typeof import("../httpClient.js")>()),
     AiServiceHttpError,
     aiService: { get: aiGet, post: aiPost },
     proxyBaseUrl: "http://portal:8092",
-    withTimeout: () => ({ signal: new AbortController().signal, cancel }),
   };
 });
 vi.mock("../docspaceFilesApi.js", () => {
@@ -64,6 +67,12 @@ vi.mock("../docspaceFilesApi.js", () => {
   return {
     DocspaceApiHttpError,
     filesApiGet: vi.fn(),
+    // The download client: its timeout and its refusals are tested with it, the bytes here.
+    filesApiDownload: async <T>(
+      href: string,
+      headers: Record<string, string>,
+      read: (res: Response) => Promise<T>,
+    ): Promise<T> => read((await fetchMock(href, { headers })) as Response),
     getFolderInfo: vi.fn(),
     getMyDocumentsFolderId: vi.fn(),
     canTakeUpload: vi.fn(),
@@ -92,13 +101,9 @@ const dto = (id: string, dataUrl: string) => ({
 beforeEach(() => {
   aiGet.mockReset();
   aiPost.mockReset();
-  cancel.mockReset();
   vi.mocked(copyManyIntoProject).mockReset();
   fetchMock.mockReset().mockImplementation(async () => image(PNG));
-  vi.stubGlobal("fetch", fetchMock);
 });
-
-afterEach(() => vi.unstubAllGlobals());
 
 const headersOf = (call: number) =>
   (fetchMock.mock.calls[call]?.[1] as { headers: Record<string, string> }).headers;
@@ -114,7 +119,6 @@ describe("an image attachment is inlined", () => {
     );
     expect(headersOf(0)).toEqual({ cookie: "asc_auth_key=1", authorization: "Bearer t" });
     expect(read?.base64).toBe(`data:image/png;base64,${Buffer.from(PNG).toString("base64")}`);
-    expect(cancel).toHaveBeenCalled();
   });
 
   // S3, a CDN: the address is signed in its query, and the host is not ours.

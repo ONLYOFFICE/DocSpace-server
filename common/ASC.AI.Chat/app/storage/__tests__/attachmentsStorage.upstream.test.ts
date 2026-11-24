@@ -876,6 +876,18 @@ describe("createMany of a generated image", () => {
     return inserts;
   }
 
+  // FilesController.DeleteFile: `DELETE api/2.0/files/file/{fileId}`, answering the started operations.
+  const removals = (answer: () => Response = () => HttpResponse.json({ response: [] })) => {
+    const removed: { id: string; body: unknown }[] = [];
+    upstream.use(
+      http.delete(`${FILES}/file/:id`, async ({ request, params }) => {
+        removed.push({ id: String(params["id"]), body: await request.json() });
+        return answer();
+      }),
+    );
+    return removed;
+  };
+
   const saveRecords = () => {
     const bodies: unknown[] = [];
     upstream.use(
@@ -1092,12 +1104,11 @@ describe("createMany of a generated image", () => {
     expectPlaceholder(result, "my-documents");
     expect(inserts.map((i) => i.folder)).toEqual(["4"]);
     expect(logged("error")[1]).toMatch(
-      /^uploadToolImage: entityId=- FAILED at stage=my-documents: AI service 403 /,
+      /^uploadToolImage: entityId=- FAILED at stage=my-documents: DocSpace API 403 /,
     );
   });
 
-  // DEFECT stor1-9: a refusal of the Files API insert is an AiServiceHttpError (the 403 retry depends on that class) — expected a DocspaceApiHttpError (ts-ai-style.md, Upstream calls)
-  it("logs the status of a refused insert, not its body, and does not retry another status", async () => {
+  it("logs a refused insert as a Files API error with its status, not its body, and does not retry another status", async () => {
     const inserts = filesApi({
       insert: () => HttpResponse.text("upstream body", { status: 500, statusText: "Boom" }),
     });
@@ -1109,7 +1120,7 @@ describe("createMany of a generated image", () => {
     expect(logged("error")[0]).toBe(`insertGeneratedImage: POST ${FILES}/4/insert -> 500 Boom`);
     expect(result[0]?.source).toBe("tool");
     expect(logged("error")[1]).toMatch(
-      /^uploadToolImage: entityId=- FAILED at stage=insert: AI service 500 Boom/,
+      /^uploadToolImage: entityId=- FAILED at stage=insert: DocSpace API 500 Boom for /,
     );
   });
 
@@ -1184,15 +1195,43 @@ describe("createMany of a generated image", () => {
     expectPlaceholder(result, "folder-info", "12");
   });
 
-  // DEFECT stor1-18: when the image is stored but its attachment record cannot be written, the file stays in the folder and the chat gets a placeholder that names nothing — expected the stored file to be removed, or its id named in the answer (ts-ai-failure-paths.md §6)
-  it("answers a placeholder and leaves the inserted file when the record is refused", async () => {
+  it("answers a placeholder and removes the inserted file when the record is refused", async () => {
     const inserts = filesApi({});
+    const removed = removals();
     upstream.use(http.post(`${AI}/attachments`, () => HttpResponse.json({}, { status: 500 })));
 
     const result = await new HttpAttachmentsStorage().createMany([tool()]);
 
     expectPlaceholder(result, "attachment-record");
     expect(inserts).toHaveLength(1);
+    expect(removed).toEqual([{ id: "90", body: { deleteAfter: false, immediately: true } }]);
+    expect(logged("warn")).toContain(
+      "uploadToolImage: removed file 90, its attachment record was not written",
+    );
+  });
+
+  it.each([
+    ["is refused", () => HttpResponse.json({}, { status: 403, statusText: "Forbidden" })],
+    ["drops the connection", () => HttpResponse.error()],
+  ])("answers a placeholder and logs the file's id when its removal %s", async (_case, answer) => {
+    filesApi({});
+    const removed = removals(answer);
+    upstream.use(http.post(`${AI}/attachments`, () => HttpResponse.json({}, { status: 500 })));
+
+    const result = await new HttpAttachmentsStorage().createMany([tool()]);
+
+    expectPlaceholder(result, "attachment-record");
+    expect(removed.map((r) => r.id)).toEqual(["90"]);
+    expect(logged("error")[0]).toMatch(
+      /^uploadToolImage: file 90 is left without an attachment record, its removal failed: /,
+    );
+  });
+
+  it("removes nothing when the image was never stored", async () => {
+    filesApi({ insert: () => HttpResponse.json({}, { status: 500 }) });
+
+    await new HttpAttachmentsStorage().createMany([tool()]);
+
     expect(upstream.seen.some((r) => r.method === "DELETE")).toBe(false);
   });
 
@@ -1291,6 +1330,7 @@ describe("createMany of a generated image", () => {
 
     it("answers a placeholder when the artifact's record is refused", async () => {
       artifacts(() => HttpResponse.json({ response: { id: 55 }, status: 0 }));
+      const removed = removals();
       upstream.use(
         http.post(`${AI}/attachments`, () => HttpResponse.json({ response: [], status: 0 })),
       );
@@ -1298,6 +1338,7 @@ describe("createMany of a generated image", () => {
       const result = await new HttpAttachmentsStorage().createMany([tool({ threadId: "t-1" })]);
 
       expectPlaceholder(result, "attachment-record");
+      expect(removed.map((r) => r.id)).toEqual(["55"]);
       expect(logged("error")[1]).toMatch(
         /^uploadToolImage: entityId=- FAILED at stage=attachment-record: attachment entry not found or inaccessible: 55/,
       );

@@ -151,7 +151,9 @@ describe("uploadThreadArtifact over the network", () => {
   it("refuses an answer that is not JSON", async () => {
     upstream.use(http.post(ARTIFACTS, () => HttpResponse.text("ok")));
 
-    expect(await failure(upload())).toBeInstanceOf(SyntaxError);
+    expect(await failure(upload())).toMatchObject({
+      message: "the AI service returned an artifact without an id",
+    });
   });
 
   it.each([400, 403, 404])(

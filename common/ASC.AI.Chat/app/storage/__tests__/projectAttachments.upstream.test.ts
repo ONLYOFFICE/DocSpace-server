@@ -35,7 +35,8 @@ import type { JsonBodyType } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
 import logger from "../../log.js";
-import { AiServiceHttpError, proxyBaseUrl } from "../httpClient.js";
+import { proxyBaseUrl } from "../httpClient.js";
+import { DocspaceApiHttpError } from "../docspaceFilesApi.js";
 import {
   copyIntoProject,
   copyManyIntoProject,
@@ -329,11 +330,10 @@ describe("uploadInChunks over the network", () => {
     ).toMatchObject({ message: "DocSpace finished an upload session without a file" });
   });
 
-  // DEFECT stor1-10: a refusal of the Files API's upload session is thrown as an AiServiceHttpError carrying the upstream body — expected a DocspaceApiHttpError (ts-ai-style.md, Upstream calls)
   it.each([
     ["the session", `${FILES}/:folderId/session`],
     ["a chunk", `${FILES}/:folderId/session/:sessionId`],
-  ])("rejects a refusal of %s with an AiServiceHttpError", async (_case, route) => {
+  ])("rejects a refusal of %s with a DocspaceApiHttpError", async (_case, route) => {
     session();
     upstream.use(
       http.post(route, () => HttpResponse.text("quota", { status: 402, statusText: "Payment" })),
@@ -341,8 +341,9 @@ describe("uploadInChunks over the network", () => {
 
     const error = await failure(uploadInChunks("12", "x", new Uint8Array([1]), "text/plain"));
 
-    expect(error).toBeInstanceOf(AiServiceHttpError);
-    expect(error).toMatchObject({ status: 402, statusText: "Payment", body: "quota" });
+    expect(error).toBeInstanceOf(DocspaceApiHttpError);
+    expect(error).toMatchObject({ status: 402, statusText: "Payment" });
+    expect((error as Error).message).not.toContain("quota");
   });
 });
 
