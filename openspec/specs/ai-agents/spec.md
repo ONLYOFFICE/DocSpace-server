@@ -1021,10 +1021,11 @@ SHALL cancel the generation and leave the thread usable.
 
 ### Requirement: Regenerating a reply
 
-`aiRegenerateStream` SHALL delete the last assistant reply, keep the question and every earlier turn, and
-stream a new reply on the thread's own model (the project's inside a project); a tool chain of the old reply
-SHALL be replaced whole. A thread with nothing to regenerate SHALL answer 200 generating nothing, an unknown
-thread 404 before any stream, another user's thread 403 keeping the reply, AI off 403.
+`aiRegenerateStream` SHALL replace the last assistant reply, keep the question and every earlier turn, and
+stream a new reply on the thread's own model (the project's inside a project). The old tool chain SHALL leave
+the reply's content and the model's history; a finished old reply SHALL stay in `metadata.custom.replyVersions`.
+Nothing to regenerate SHALL answer 200 generating nothing, an unknown thread 404 before any stream, another
+user's thread 403 keeping the reply, AI off 403.
 
 #### Scenario: Multi-turn thread
 
@@ -1035,6 +1036,11 @@ thread 404 before any stream, another user's thread 403 keeping the reply, AI of
 
 - **WHEN** the client hangs up mid-reply and the owner then regenerates
 - **THEN** the abandoned reply is replaced by a whole one
+
+#### Scenario: Earlier version kept
+
+- **WHEN** the owner regenerates a reply whose approved tool call finished it
+- **THEN** the new reply and every model request of the regenerate carry neither the old call nor its result, and the new reply's `replyVersions.others` holds the old reply with both
 
 ### Requirement: Tool calls and the approval pause
 

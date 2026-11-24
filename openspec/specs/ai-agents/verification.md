@@ -273,7 +273,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Regenerating a reply** | | |
 | Last reply replaced; multi-turn (scenario) | `T/MessageStorageTests/MessageRegenerateTests.cs:48,117,160` | TEST-CONFIRMED [run: PASS] |
 | Thread's model, project's model | `T/MessageStorageTests/MessageRegenerateModelTests.cs:50`; `MessageRegenerateProjectTests.cs:47` | TEST-CONFIRMED [run: PASS] |
-| Tool chain whole; abandoned (scenario) | `T/McpTests/McpToolCallRegenerateTests.cs:71,107,139`; `T/MessageStorageTests/MessageStopTests.cs:130` | TEST-CONFIRMED [run: PASS-ON-RERUN] |
+| Tool chain whole; earlier version kept (scenario); abandoned (scenario) | `T/McpTests/McpToolCallRegenerateTests.cs:101,149,189`; `T/MessageStorageTests/MessageStopTests.cs:130` | TEST-CONFIRMED [run: PASS-ON-RERUN] |
 | Nothing to regenerate, unknown, foreign, AI off | `T/MessageStorageTests/MessageRegenerateTests.cs:87,104`; `MessageRegenerateAccessTests.cs:55,107` | TEST-CONFIRMED [run: PASS] |
 | **Tool calls and the approval pause** | | |
 | Pause, approve string / structured, deny (scenario "Deny") | `T/McpTests/McpToolCallPauseTests.cs:54,89,123,140` | TEST-CONFIRMED [run: FAIL-BUG] |
