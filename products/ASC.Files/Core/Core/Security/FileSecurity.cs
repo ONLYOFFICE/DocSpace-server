@@ -1355,6 +1355,12 @@ public class FileSecurity(
             return false;
         }
 
+        if (file != null && room is { FolderType: FolderType.InstructionsRoom } &&
+            action is FilesSecurityActions.Lock or FilesSecurityActions.Duplicate)
+        {
+            return false;
+        }
+
         if (folder is { FolderType: FolderType.DefaultTemplates } &&
             action is FilesSecurityActions.Create or
                 FilesSecurityActions.Copy or
