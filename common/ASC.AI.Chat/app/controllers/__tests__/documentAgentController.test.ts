@@ -39,10 +39,6 @@ const state = vi.hoisted(() => ({
   failure: undefined as Error | undefined,
 }));
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-  logDir: "/nowhere",
-}));
 vi.mock("../../../config/index.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../config/index.js")>()),
   default: { get: () => undefined },

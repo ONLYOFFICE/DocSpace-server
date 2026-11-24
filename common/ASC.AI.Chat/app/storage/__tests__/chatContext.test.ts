@@ -471,7 +471,8 @@ describe("primeChatContext", () => {
     upstream.use(http.get("*/internal/ai/chat-context", () => docspace(chatContextDto())));
 
     const snapshot = await inRequestContext({ cookie: "asc_auth_key=abc" }, async () => {
-      await primeChatContext(full);
+      // `true`: the read passed the AI service's access gate, the round asks no other one.
+      await expect(primeChatContext(full)).resolves.toBe(true);
       return getChatContextSnapshot();
     });
 
@@ -540,7 +541,8 @@ describe("primeChatContext", () => {
       );
 
       const snapshot = await inRequestContext({}, async () => {
-        await expect(primeChatContext(full)).resolves.toBeUndefined();
+        // `false`: no gated call was made, so the round asks the access gate itself.
+        await expect(primeChatContext(full)).resolves.toBe(false);
         return getChatContextSnapshot();
       });
 
@@ -682,7 +684,7 @@ describe("the switches", () => {
     const m = await freshModules();
 
     const snapshot = await m.inRequestContext({}, async () => {
-      await m.primeChatContext(full);
+      await expect(m.primeChatContext(full)).resolves.toBe(false);
       return m.getChatContextSnapshot();
     });
 

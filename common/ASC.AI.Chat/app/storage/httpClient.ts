@@ -34,7 +34,9 @@
 import { getAiServiceUrl, getProxyUrl, getUpstreamTimeoutMs } from "../../config/index.js";
 import { countUpstreamCall, countUpstreamRead, getForwardedHeaders } from "../requestContext.js";
 import { isObject } from "../narrow.js";
-import { errorBodyText } from "./errorBody.js";
+import { cancelReader, errorBodyText, readTextCapped } from "./errorBody.js";
+
+export { readTextCapped };
 import { jsonAnswer } from "./upstreamShape.js";
 
 // Hard ceiling for a single upstream round-trip so a hung AI service / MCP
@@ -329,46 +331,4 @@ export async function readBodyCapped(res: Response, limit: number): Promise<Uint
     await cancelReader(reader);
   }
   return Buffer.concat(chunks, received);
-}
-
-/**
- * The body decoded as UTF-8, at most `limit` bytes of it. The stream is
- * cancelled once the limit is reached, so a body far larger than the limit
- * costs neither the download nor the memory beyond that point.
- */
-export async function readTextCapped(res: Response, limit: number): Promise<string> {
-  if (!res.body) {
-    return "";
-  }
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-  let text = "";
-  let received = 0;
-  try {
-    while (received < limit) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      const room = limit - received;
-      const chunk = value.length > room ? value.subarray(0, room) : value;
-      received += chunk.length;
-      text += decoder.decode(chunk, { stream: true });
-    }
-  } finally {
-    // Past the limit, or on an error: drop the rest of the download.
-    await cancelReader(reader);
-  }
-  return text + decoder.decode();
-}
-
-// The read is over either way: a stream that refuses to be cancelled changes nothing for the
-// caller, which already has its answer or its error.
-async function cancelReader(reader: { cancel(): Promise<void> }): Promise<void> {
-  const pending = reader.cancel();
-  try {
-    await pending;
-  } catch {
-    // nothing to do: see above
-  }
 }

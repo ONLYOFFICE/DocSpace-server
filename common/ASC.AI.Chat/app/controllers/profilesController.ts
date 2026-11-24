@@ -266,6 +266,9 @@ async function profileExists(id: string): Promise<boolean> {
 
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): with AI off, or for a caller
+    // without AI access, 403 for any body, and no outbound request to the sent baseUrl.
+    await assertAiAccess();
     await assertProfilesWritable();
     // The engine compares the name with the stored ones before anything else: a body without a
     // string name made it throw, which answered 500.
@@ -287,6 +290,9 @@ export const profilesController = {
   }),
 
   update: asyncHandler<Profile>(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): with AI off, or for a caller
+    // without AI access, 403 for any body, and no outbound request to the sent baseUrl.
+    await assertAiAccess();
     await assertProfilesWritable();
     // The engine compares the name with the stored ones before anything else: a body without a
     // string name made it throw, which answered 500.

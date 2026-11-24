@@ -104,6 +104,28 @@ beforeEach(() => {
 });
 
 describe("editorToolsController.list", () => {
+  beforeEach(() => {
+    gateAnswers(200);
+  });
+
+  // ts-ai-failure-paths.md §3: the listing asks the system MCP servers with the caller's
+  // credentials, so the access gate comes first.
+  it("answers 403 for a caller the access gate refuses, without asking a tool source", async () => {
+    gateAnswers(403);
+
+    const reply = await invoke(inContext(editorToolsController.list), {
+      method: "GET",
+      query: { entityId: "17" },
+    });
+
+    expect(reply.status).toBe(403);
+    expect(responseViolations("aiEditorToolsList", 403, reply.body)).toEqual([]);
+    expect(adapter.getTools).not.toHaveBeenCalled();
+    expect(upstream.seen.map((r) => `${r.method} ${r.path}`)).toEqual([
+      "GET /internal/ai/tool-prefs",
+    ]);
+  });
+
   it("answers four fields per tool, approval by the server type, without the web-search pair", async () => {
     let forwarded: boolean | undefined;
     adapter.getTools.mockImplementation(() => {

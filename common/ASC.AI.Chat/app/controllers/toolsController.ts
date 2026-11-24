@@ -247,8 +247,9 @@ export const toolsController = {
       res.status(400).json({ error: "name required" });
       return;
     }
-    // Same accessibility gate as addCustomServer (Bug 82975); an entityId of another type is a
-    // 400, not the portal-wide scope, where the delete would remove the portal's server of that name.
+    // Same accessibility gate as addCustomServer (Bug 82975), and an entityId of another type is a
+    // 400. The registry is one per portal (mcpServersStorage.delete ignores the scope): whatever
+    // entityId is sent, the delete removes the portal's server of that name.
     const entityId = optionalString(args.entityId, "entityId");
     await assertEntityAccessible(entityId);
     await engine.removeCustomServer(name, entityId);
@@ -308,8 +309,10 @@ export const toolsController = {
     // it is always enabled with all tools and cannot be configured. The
     // chat engine's tool context does not go through this listing, so the
     // tools themselves stay available everywhere.
-    // A listing that is not a map is a source that failed, not "no system
-    // tools": the boundary answers it 500.
+    // A listing that is not a map is refused with 500. A system source that
+    // fails does not come here: systemToolsSource.getTools logs the failure
+    // and answers an empty map (DEFECT tools-10), so the route answers 200
+    // with no system groups for it.
     if (!isObject(listed)) {
       throw new Error("the system tool listing is not an object");
     }
@@ -341,8 +344,8 @@ export const toolsController = {
       res.status(400).json({ error: "map is required and must be an object" });
       return;
     }
-    // Critical here: an unreachable entityId used to fold to the portal-wide
-    // scope and WIPE its whole server map (Bug 82975).
+    // An unreachable entityId is refused (Bug 82975). The map replaced is the
+    // portal's one registry whatever entityId names.
     const entityId = optionalString(args.entityId, "entityId");
     await assertEntityAccessible(entityId);
     const map = args.map;

@@ -32,11 +32,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // Shared test doubles for the metadata modules. The real modules pull in the
-// config loader, the file logger and the storage aggregate; none of that is
-// under test here, so each test file registers these with `vi.mock` before
-// importing the module under test.
+// config loader and the storage aggregate; none of that is under test here, so
+// each test file registers these with `vi.mock` before importing the module
+// under test. The logger is the stub of app/__tests__/setup.ts, re-exported so
+// that a test reads its spies (ts-ai-tests.md §2).
 
 import { vi } from "vitest";
+import logger from "../../log.js";
+
+export { logger };
 
 export class FakeDocspaceApiHttpError extends Error {
   constructor(
@@ -47,8 +51,6 @@ export class FakeDocspaceApiHttpError extends Error {
     super(`DocSpace API ${status} ${statusText} for ${url}`);
   }
 }
-
-export const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() };
 
 export const PROXY = "http://portal";
 

@@ -34,7 +34,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { assistantText, FakeDocspaceApiHttpError, logger, PROXY, withTimeout } from "./mocks.js";
 
-vi.mock("../../log.js", () => ({ default: logger }));
 vi.mock("../../storage/httpClient.js", () => ({ withTimeout, proxyBaseUrl: PROXY }));
 vi.mock("../../requestContext.js", () => ({
   markForwardHeadersToProvider: vi.fn(),

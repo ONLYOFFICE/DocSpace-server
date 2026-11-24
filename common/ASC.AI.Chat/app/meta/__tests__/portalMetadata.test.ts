@@ -39,7 +39,6 @@ const { filesApiGet, filesApiSend } = vi.hoisted(() => ({
   filesApiSend: vi.fn(),
 }));
 
-vi.mock("../../log.js", () => ({ default: logger }));
 vi.mock("../../storage/docspaceFilesApi.js", () => ({
   DocspaceApiHttpError: FakeDocspaceApiHttpError,
   filesApiGet,

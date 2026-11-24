@@ -225,10 +225,7 @@ function idTypeError(body: unknown, fields: readonly ChatIdField[]): string | nu
 
 // An id of the body as the aggregate read takes it: a string as sent, else
 // absent. A round whose ids are of a wrong type is refused right after that
-// read (see idTypeError). The read is the access gate of the route while it
-// runs: with the aggregate switched off (`AI_CHAT_CONTEXT`, or the
-// `x-ai-chat-context: off` header outside production) it makes no call, and
-// the first gated call is a later read of the round.
+// read (see idTypeError).
 function idOf(body: unknown, field: ChatIdField): string | undefined {
   if (!isObject(body)) {
     return undefined;
@@ -239,12 +236,20 @@ function idOf(body: unknown, field: ChatIdField): string | undefined {
 
 // The aggregate read of a round that takes its ids from the body, then the
 // refusal of an id of a wrong type. Answers `false` when it has responded.
+// The aggregate read is the round's access gate when it installs a snapshot.
+// When it installs none (switched off by `AI_CHAT_CONTEXT` or the
+// `x-ai-chat-context: off` header, failed with anything but 401/403, or an
+// unusable answer) no gated call has been made, so the gate is asked here,
+// before any refusal of the body (ts-ai-failure-paths.md §3).
 async function primeRound(body: unknown, res: Response): Promise<boolean> {
-  await primeChatContext({
+  const primed = await primeChatContext({
     threadId: idOf(body, "threadId"),
     entityId: idOf(body, "entityId"),
     contextEntityId: idOf(body, "contextEntityId"),
   });
+  if (!primed) {
+    await assertAiAccess();
+  }
   const error = idTypeError(body, STREAM_ID_FIELDS);
   if (error) {
     res.status(400).json({ error });
@@ -881,6 +886,9 @@ async function aiToolsUnpaidError(providerType: string | undefined): Promise<str
 
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body.
+    await assertAiAccess();
     // The body used to reach the engine unchecked: an unknown or missing
     // actionType died in the assignment resolver and a missing userMessage
     // in the attachment resolver, both as 500 (Bug 84294). Checked before
@@ -916,8 +924,7 @@ export const aiController = {
       entityId: idOf(req.body, "entityId"),
       contextEntityId: idOf(req.body, "contextEntityId"),
     });
-    // After the gated read, as in the stream rounds: a caller without AI access gets the 403
-    // of that read, not a word about the ids.
+    // The ids are checked after the access gate at the top of the handler.
     {
       const idError = idTypeError(req.body, ["entityId", "contextEntityId"]);
       if (idError) {
@@ -947,7 +954,8 @@ export const aiController = {
     // message and came back as a 500 (Bug 84299); a string `isStream` such
     // as "false" counted as true and switched the answer to a stream
     // (Bug 84300). Both are the caller's mistake, so 400, before anything
-    // is primed.
+    // is primed, and after the access gate (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     if (!isObject(req.body)) {
       res.status(400).json({ error: "the request body must be an object" });
       return;
@@ -978,7 +986,7 @@ export const aiController = {
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
     await primeChatContext({ entityId: customScopeOf(req.body) });
-    // After the gated read, as in the stream rounds.
+    // The ids are checked after the access gate at the top of the handler.
     {
       const idError = idTypeError(req.body, ["profileId"]);
       if (idError) {

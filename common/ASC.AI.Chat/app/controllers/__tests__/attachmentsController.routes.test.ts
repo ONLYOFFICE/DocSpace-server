@@ -896,3 +896,34 @@ describe.each([
     expect(engine[route]).not.toHaveBeenCalled();
   });
 });
+
+// The same gate for the reads, the deletes and the link: each refused a bad body with 400 before
+// its first gated call.
+describe.each([
+  ["get", "aiAttachmentsGet", {}, () => engine.get],
+  ["getMany", "aiAttachmentsGetMany", { ids: "x" }, () => engine.getMany],
+  [
+    "getSuggestedQuestions",
+    "aiAttachmentsGetSuggestedQuestions",
+    {},
+    () => store.getSuggestedQuestions,
+  ],
+  ["delete", "aiAttachmentsDelete", { id: 5 }, () => engine.delete],
+  ["deleteMany", "aiAttachmentsDeleteMany", { ids: "x" }, () => engine.deleteMany],
+  ["linkToMessage", "aiAttachmentsLinkToMessage", {}, () => engine.linkToMessage],
+] as const)(
+  "attachmentsController.%s behind the access gate",
+  (route, operationId, body, callee) => {
+    it("answers 403 for a body it would refuse, before the body is read", async () => {
+      toolPrefs.readDisabled.mockRejectedValueOnce(
+        new AiServiceHttpError(403, "Forbidden", "", "http://ai/tool-prefs"),
+      );
+
+      const reply = await invoke(attachmentsController[route], { body });
+
+      expect(reply.status).toBe(403);
+      expect(responseViolations(operationId, 403, reply.body)).toEqual([]);
+      expect(callee()).not.toHaveBeenCalled();
+    });
+  },
+);

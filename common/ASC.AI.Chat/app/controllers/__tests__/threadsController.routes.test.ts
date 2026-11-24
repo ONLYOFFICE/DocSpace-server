@@ -1206,3 +1206,43 @@ describe("threadsController.appendUserMessage behind the access gate", () => {
     expect(engine.appendUserMessage).not.toHaveBeenCalled();
   });
 });
+
+// The same gate for every other handler that refused a bad body with 400 before its first gated
+// call; regenerateTitle also read the entry's metadata from the Files API before it.
+describe.each([
+  ["touch", "aiThreadsTouch", { body: {} }, () => engine.touch],
+  ["rename", "aiThreadsRename", { body: { threadId: "t1" } }, () => engine.rename],
+  ["delete", "aiThreadsDelete", { body: {} }, () => engine.delete],
+  ["clearMessages", "aiThreadsClearMessages", { body: {} }, () => engine.clearMessages],
+  [
+    "regenerateTitle",
+    "aiThreadsRegenerateTitle",
+    { body: { threadId: "t1" } },
+    () => engine.regenerateTitle,
+  ],
+  ["readMessages", "aiThreadsReadMessages", { query: {} }, () => engine.readMessages],
+  ["getById", "aiThreadsGetById", { query: {} }, () => engine.getById],
+  ["getMessageById", "aiThreadsGetMessageById", { query: {} }, () => engine.getMessageById],
+  [
+    "updateMessage",
+    "aiThreadsUpdateMessage",
+    { body: { messageId: "m1" } },
+    () => engine.updateMessage,
+  ],
+  ["deleteMessage", "aiThreadsDeleteMessage", { body: {} }, () => engine.deleteMessage],
+] as const)(
+  "threadsController.%s behind the access gate",
+  (route, operationId, request, callee) => {
+    it("answers 403 for a request it would refuse, before the request is read", async () => {
+      toolPrefs.readDisabled.mockRejectedValueOnce(
+        new AiServiceHttpError(403, "Forbidden", "", "http://ai/tool-prefs"),
+      );
+
+      const reply = await invoke(threadsController[route], request);
+
+      expect(reply.status).toBe(403);
+      expect(published(operationId, reply)).toEqual([]);
+      expect(callee()).not.toHaveBeenCalled();
+    });
+  },
+);

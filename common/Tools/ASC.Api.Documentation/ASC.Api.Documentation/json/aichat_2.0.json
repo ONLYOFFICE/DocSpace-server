@@ -8394,7 +8394,7 @@
         ],
         "operationId": "aiToolsRemoveCustomServer",
         "summary": "Remove custom server",
-        "description": "Unregisters a custom MCP server from the scope, so the model is no longer offered its tools. The name is required and may be sent in the body or as a query parameter, and `entityId` has to name a room the caller can open. A name that is not registered is not reported: the call answers success without removing anything. The server itself is untouched - only this portal's registration is dropped.",
+        "description": "Unregisters a custom MCP server from the portal's registry, so the model is no longer offered its tools. The name is required and may be sent in the body or as a query parameter. `entityId` has to name a room the caller can open, but the registry is one per portal: the server of that name is removed for the whole portal whatever `entityId` names. A name that is not registered is not reported: the call answers success without removing anything. The server itself is untouched - only this portal's registration is dropped.",
         "responses": {
           "200": {
             "description": "Confirms the request was accepted, whether or not a registration was removed.",

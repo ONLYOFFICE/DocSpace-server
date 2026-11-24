@@ -208,6 +208,8 @@ export const attachmentsController = {
   // persist a raw base64 draft — see the comment there.
 
   get: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id"] as const);
     // An empty/absent id reaches the DocSpace storage as a bare route and
     // comes back as a 405; validate it here so the caller gets a clean 400
@@ -221,6 +223,8 @@ export const attachmentsController = {
   }),
 
   getMany: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["ids"] as const);
     // An empty body leaves `ids` unset and the engine batch-scan throws,
     // collapsing to a 500; require a present, non-empty array (Bug 82763).
@@ -244,6 +248,8 @@ export const attachmentsController = {
   // Long-poll for a form's starter questions by the attachment id it was attached under; the client polls
   // on `status` ("ready" | "pending" | "unavailable"). The model call runs here — see forms/suggestedQuestions.
   getSuggestedQuestions: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id"] as const);
     if (typeof args.id !== "string" || args.id.length === 0) {
       res.status(400).json({ error: "id is required" });
@@ -254,6 +260,8 @@ export const attachmentsController = {
   }),
 
   delete: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id"] as const);
     // Without an id the storage would ask the backend to delete
     // `/attachments/undefined`.
@@ -266,6 +274,8 @@ export const attachmentsController = {
   }),
 
   deleteMany: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["ids"] as const);
     // No body and an empty list delete nothing and succeed; anything else is a list of ids.
     const list: unknown = args.ids ?? [];
@@ -284,6 +294,8 @@ export const attachmentsController = {
   }),
 
   linkToMessage: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["ids", "messageId", "threadId"] as const);
     // Require every param up front: an empty body would otherwise reach storage
     // as undefined ids/messageId/threadId and fail late (Bug 82771).

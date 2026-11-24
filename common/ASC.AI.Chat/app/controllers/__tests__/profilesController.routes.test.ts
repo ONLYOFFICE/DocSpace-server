@@ -114,6 +114,24 @@ describe.each([
   const body = method === "create" ? input : { ...stored, key: "sk-test" };
   const engineCall = () => (method === "create" ? engine.create : engine.update);
 
+  // ts-ai-failure-paths.md §3 and "Managing profiles" (AI off 403 before the body is read): the
+  // access gate comes first, so no body check, DNS lookup or write runs for a refused caller.
+  it.each([
+    ["a body without a name", {}],
+    ["a body that is no object", "x"],
+    ["a usable body", body],
+  ])("answers 403 for %s when the access gate refuses the caller", async (_case, sent) => {
+    readDisabled.mockRejectedValue(new AiServiceHttpError(403, "Forbidden", "", "u"));
+
+    const reply = await invoke(profilesController[method], { body: sent });
+
+    expect(reply.status).toBe(403);
+    expect(published(operationId, reply)).toEqual([]);
+    expect(upstream.seen).toEqual([]);
+    expect(lookup).not.toHaveBeenCalled();
+    expect(engineCall()).not.toHaveBeenCalled();
+  });
+
   it("asks the AI service whether profiles are writable, then hands the body to the engine", async () => {
     portalConfig(false);
     engineCall().mockResolvedValue({ success: true, profile: stored });

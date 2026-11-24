@@ -269,12 +269,16 @@ export function parseChatContext(
  * have. Anything else (network, 5xx, an unparseable payload) leaves the
  * request without a snapshot and the round degrades to the per-entity
  * reads, with a warning.
+ *
+ * Answers whether a snapshot was installed: only then did the read pass the
+ * AI service's access gate. Without one (switched off, failed, unusable) no
+ * gated call has been made yet.
  */
-export async function primeChatContext(request: ChatContextRequest): Promise<void> {
+export async function primeChatContext(request: ChatContextRequest): Promise<boolean> {
   // Kill switch for A/B measurement and rollback: every round then runs
   // on the per-entity reads exactly as before the aggregate existed.
   if (CHAT_CONTEXT_DISABLED || requestOptsOut()) {
-    return;
+    return false;
   }
   const query: Record<string, QueryValue> = {
     threadId: request.threadId,
@@ -299,7 +303,7 @@ export async function primeChatContext(request: ChatContextRequest): Promise<voi
             : String(err)
       }`,
     );
-    return;
+    return false;
   }
   const snapshot = parseChatContext(raw, request);
   if (!snapshot) {
@@ -309,7 +313,7 @@ export async function primeChatContext(request: ChatContextRequest): Promise<voi
         isObject(raw) ? `an object with ${Object.keys(raw).sort().join(",")}` : typeof raw
       }`,
     );
-    return;
+    return false;
   }
   setChatContextSnapshot(snapshot);
   logger.info(
@@ -319,6 +323,7 @@ export async function primeChatContext(request: ChatContextRequest): Promise<voi
       `thread=${snapshot.thread ? "yes" : "no"} messages=${snapshot.messages?.length ?? "-"} ` +
       `webSearch=${snapshot.webSearch ? "yes" : "no"}`,
   );
+  return true;
 }
 
 /**

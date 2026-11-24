@@ -34,7 +34,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { assistantText, FakeDocspaceApiHttpError, logger } from "./mocks.js";
 
-vi.mock("../../log.js", () => ({ default: logger }));
 vi.mock("../../requestContext.js", () => ({ markForwardHeadersToProvider: vi.fn() }));
 vi.mock("../../storage/docspaceFilesApi.js", () => ({
   DocspaceApiHttpError: FakeDocspaceApiHttpError,

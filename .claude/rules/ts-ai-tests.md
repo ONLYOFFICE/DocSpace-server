@@ -10,8 +10,9 @@ Unit tests of the Node service live next to the code, in `app/**/__tests__/*.tes
 (`vitest.config.ts` includes nothing else). `yarn test` runs them all, `yarn vitest run <file>` one
 file, `-t "<name>"` one test, `yarn test:coverage` writes the coverage report to `coverage/`. They
 are not part of `dotnet test ASC.Tests.slnx`. The service came without tests until October 2026:
-none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it did. Style rules (`ts-ai-style.md`) apply to tests too; ESLint leaves them `any`, `!`
-and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
+none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it did. Style rules
+(`ts-ai-style.md`) apply to tests too; ESLint leaves them `any`, `!`, `fetch`, `process.env` and a
+`.catch()` that answers a constant (`no-restricted-syntax` is off there). Cite this file as `[ts-ai-tests.md §N]`.
 
 ## 1. Which suite proves what
 
@@ -166,8 +167,8 @@ and `fetch`. Cite this file as `[ts-ai-tests.md §N]`.
   is taken from the C# class named above it, then each field missing, `null` and of the wrong type.
 - **Behaviour that is pinned although it is wrong** carries a comment directly above the test:
   `// DEFECT <area>-<n>: <what it does> — expected <what it should do> (<rule §N or source>)`.
-  `grep -rn "// DEFECT" common/ASC.AI.Chat/app` lists them (138 when the suite was written). The
-  fix of one changes its test to the expected behaviour and removes the comment; a new one found
+  `grep -rn "// DEFECT" common/ASC.AI.Chat/app` lists them (138 ids in 148 lines when the suite
+  was written). The fix of one changes its test to the expected behaviour and removes the comment; a new one found
   while writing a test gets the next number of its area.
 - A DEFECT comment is a claim about the whole system, and a vitest test sees one service with the
   rest stubbed. Before writing one, and before fixing one, read the route in

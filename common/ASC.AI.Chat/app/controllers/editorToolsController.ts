@@ -78,6 +78,9 @@ export const editorToolsController = {
   list: asyncHandler(async (req, res) => {
     markForwardHeadersToProvider();
     const entityId = asString(req.query["entityId"]);
+    // The listing asks the system MCP servers with the caller's credentials: the access gate
+    // comes first (ts-ai-failure-paths.md §3).
+    await assertAiAccess(entityId);
 
     const grouped = await adapter.getTools(entityId, { attachmentId: [] });
     const approval = approvalServerTypes();
@@ -120,6 +123,8 @@ export const editorToolsController = {
     // The system tools run against the MCP server with the caller's own
     // credentials and never pass through the AI service, so with AI switched
     // off a folder still got created and a file deleted (Bugs 84390, 84391).
+    // The name is judged before the gate: that order is contract, pinned by
+    // EditorToolAiDisabledTests (CONTRACT passthrough-13 in the route test).
     await assertAiAccess(entityId);
 
     // A name no adapter owns fell through to the last one, whose "tool not

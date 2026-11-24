@@ -45,7 +45,6 @@ import {
 
 // The Files API clients are the real ones, over the `fetch` each test stubs: only the proxy
 // address, the timeout and the caller's headers are the test's.
-vi.mock("../../log.js", () => ({ default: logger }));
 vi.mock("../../storage/httpClient.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../storage/httpClient.js")>()),
   withTimeout,

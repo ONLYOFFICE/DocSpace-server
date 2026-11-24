@@ -64,6 +64,10 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
 - Seen in review: `editor-tools/call` ran MCP tools with AI switched off,
   `profiles/list-provider-models` made an outbound request for a guest, and `web-search/configure`
   validated the body and probed the provider before the 403 (0dc046cacd).
+- Two routes judge the body first by contract, so they keep that order until an OpenSpec change
+  moves it: `editor-tools/call` refuses an empty or excluded tool name with 400 before the gate
+  (`EditorToolAiDisabledTests`, CONTRACT passthrough-13), and `text-to-docx/start` validates before
+  the AI switch ("400 before 403" in `openspec/specs/ai-agents/spec.md`).
 - Guard: the AI service stubbed to answer 403, an invalid body sent to the route: the answer is 403
   and no other upstream call was made.
 

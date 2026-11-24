@@ -64,7 +64,7 @@ import { UpstreamShapeError } from "../storage/upstreamShape.js";
 // verbatim — the wire format is owned by the plugin's SDK on one end and
 // the provider on the other, so no translation happens here.
 //
-// The request body is intentionally NOT parsed: `app.ts` skips the JSON
+// The request body is intentionally NOT parsed: `app/createApp.ts` runs no
 // body parser for this path so the raw bytes (which can be megabytes for
 // vision/OCR data URLs) pass through untouched.
 

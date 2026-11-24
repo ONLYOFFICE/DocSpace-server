@@ -94,10 +94,13 @@ export function resetHarness(): void {
   storage.messages.readByThread.mockReset().mockResolvedValue([]);
   storage.toolPrefs.readDisabled.mockReset().mockResolvedValue({});
   storage.profiles.readById.mockReset().mockResolvedValue({ id: "p1", providerType: "openai" });
+  // As the real read: `true` only when it installed a snapshot, i.e. passed the access gate.
   primeChatContext.mockReset().mockImplementation(async () => {
     if (chat.snapshot) {
       setChatContextSnapshot(chat.snapshot as ChatContextSnapshot);
+      return true;
     }
+    return false;
   });
   describeChatContextUsage.mockReset().mockReturnValue("chatContext=hit");
   applyAiProjectChatContext.mockReset().mockResolvedValue(null);

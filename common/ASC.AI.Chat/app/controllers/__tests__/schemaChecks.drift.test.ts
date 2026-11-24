@@ -39,9 +39,10 @@ import { describe, expect, it } from "vitest";
 // publishes for it. A test file of a controller that never calls `responseViolations` checks none,
 // so a new one fails here. The files below predate the rule and drive their handlers through a
 // hand-made response double (§2); each leaves this list when it moves to `invoke` and checks its
-// answers. Not tests of one route: the helpers, the error boundary and the access gate.
+// answers. Not tests of one route: the helpers, the error boundary and the access gates (the
+// thread creation gate of threadsController.upstream).
 const NOT_ROUTE_TESTS =
-  /^(helpers\.|errorHandler\.|aiAccess\.|cacheBreakpoints\.|storedProfile\.|schemaChecks\.)/;
+  /^(helpers\.|errorHandler\.|aiAccess\.|cacheBreakpoints\.|storedProfile\.|schemaChecks\.|threadsController\.upstream\.)/;
 const PENDING = new Set([
   "aiController.engine.test.ts",
   "aiRoundPreflight.test.ts",
@@ -50,7 +51,6 @@ const PENDING = new Set([
   "documentAgentController.test.ts",
   "metaController.test.ts",
   "threadsController.test.ts",
-  "threadsController.upstream.test.ts",
   "toolsController.test.ts",
 ]);
 

@@ -36,7 +36,8 @@ import type { RequestHandler } from "express";
 import type { IncomingMessage } from "node:http";
 import { logStream } from "./log.js";
 
-// The caller's address, read when the request arrives. morgan writes its line when the answer
+// The address of the peer, read when the request arrives: `trust proxy` is not set
+// (ts-ai-express.md §8), so behind the portal's nginx it is the proxy's address. morgan writes its line when the answer
 // is finished, and by then the socket of a request that was answered before its body was read
 // is gone: reading `req.ip` at that moment throws outside any handler.
 const addresses = new WeakMap<IncomingMessage, string | undefined>();

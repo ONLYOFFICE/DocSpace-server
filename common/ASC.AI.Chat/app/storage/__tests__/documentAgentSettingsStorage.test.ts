@@ -31,6 +31,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import logger from "../../log.js";
+
+// The logger is the stub of app/__tests__/setup.ts.
+const warn = vi.mocked(logger.warn);
 
 const state = vi.hoisted(() => ({
   gets: [] as string[],
@@ -39,12 +43,6 @@ const state = vi.hoisted(() => ({
   snapshot: undefined as { documentAgentEnabled: boolean | undefined } | undefined,
 }));
 
-const warn = vi.hoisted(() => vi.fn());
-
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn, error: vi.fn(), debug: vi.fn() },
-  logDir: "/nowhere",
-}));
 vi.mock("../../requestContext.js", () => ({
   getChatContextSnapshot: () => state.snapshot,
 }));

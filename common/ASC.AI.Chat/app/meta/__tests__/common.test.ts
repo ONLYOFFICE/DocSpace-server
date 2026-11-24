@@ -34,7 +34,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeDocspaceApiHttpError, logger } from "./mocks.js";
 
-vi.mock("../../log.js", () => ({ default: logger }));
 vi.mock("../../storage/docspaceFilesApi.js", () => ({
   DocspaceApiHttpError: FakeDocspaceApiHttpError,
 }));

@@ -317,6 +317,8 @@ export const threadsController = {
   }),
 
   touch: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["threadId", "profileId"] as const);
     // Without a thread id the storage would touch `/threads/undefined`.
     if (typeof args.threadId !== "string" || args.threadId.length === 0) {
@@ -328,6 +330,8 @@ export const threadsController = {
   }),
 
   rename: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["threadId", "title"] as const);
     // Same title rules as threads/create: a missing/null/empty/whitespace
     // title is a 400, never a silent success — rename used to accept all of
@@ -348,6 +352,8 @@ export const threadsController = {
   }),
 
   delete: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const { threadId } = unpackPositional(req.body, ["threadId"] as const);
     const idStr = typeof threadId === "string" ? threadId : asString(req.query["threadId"]);
     if (!idStr) {
@@ -367,6 +373,8 @@ export const threadsController = {
   }),
 
   clearMessages: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const { threadId } = unpackPositional(req.body, ["threadId"] as const);
     const idStr = typeof threadId === "string" ? threadId : asString(req.query["threadId"]);
     if (!idStr) {
@@ -378,6 +386,8 @@ export const threadsController = {
   }),
 
   regenerateTitle: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["threadId", "profile", "entityMeta"] as const);
     // The engine dereferences `profile` (and needs a real threadId); a missing
     // profile makes it throw a TypeError → 500 (Bug 82828). Validate both up
@@ -420,6 +430,8 @@ export const threadsController = {
   }),
 
   readMessages: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const threadId = asString(req.query["threadId"]);
     // Used to answer 200 with an empty list, which hid a forgotten ID
     // behind "no messages yet" (Bug 84408).
@@ -436,6 +448,8 @@ export const threadsController = {
   }),
 
   getById: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const threadId = asString(req.query["threadId"]);
     if (!threadId) {
       res.status(400).json({ error: "threadId required" });
@@ -452,6 +466,8 @@ export const threadsController = {
   }),
 
   getMessageById: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const messageId = asString(req.query["messageId"]);
     if (!messageId) {
       res.status(400).json({ error: "messageId required" });
@@ -468,6 +484,8 @@ export const threadsController = {
   }),
 
   updateMessage: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["messageId", "message"] as const);
     if (typeof args.messageId !== "string" || args.messageId.length === 0) {
       res.status(400).json({ error: "messageId required" });
@@ -496,6 +514,8 @@ export const threadsController = {
   }),
 
   deleteMessage: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const { messageId } = unpackPositional(req.body, ["messageId"] as const);
     const idStr = typeof messageId === "string" ? messageId : asString(req.query["messageId"]);
     if (!idStr) {

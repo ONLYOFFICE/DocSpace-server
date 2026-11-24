@@ -680,4 +680,51 @@ describe.each([
     expect(responseViolations(operationId, 403, reply.body)).toEqual([]);
     expect(h.primeChatContext).not.toHaveBeenCalled();
   });
+
+  // The aggregate read is the gate only when it installs a snapshot; switched off, failed or
+  // unusable, it made no gated call, and the round asks the gate before any refusal of the body.
+  it("answers 403 for an id of a wrong type when the aggregate read installed no snapshot", async () => {
+    h.primeChatContext.mockResolvedValue(false);
+    h.storage.toolPrefs.readDisabled.mockRejectedValueOnce(
+      new AiServiceHttpError(403, "Forbidden", "", "http://ai/tool-prefs"),
+    );
+
+    const reply = await h.call(aiController[name], { threadId: "t1", entityId: 12 });
+
+    expect(reply.status).toBe(403);
+    expect(responseViolations(operationId, 403, reply.body)).toEqual([]);
+    expect(h.engine[name]).not.toHaveBeenCalled();
+  });
+
+  it("asks no second gate when the aggregate read installed a snapshot", async () => {
+    h.primeChatContext.mockResolvedValue(true);
+
+    const reply = await h.call(aiController[name], { threadId: "t1", entityId: 12 });
+
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({ error: "entityId must be a string" });
+    expect(h.storage.toolPrefs.readDisabled).not.toHaveBeenCalled();
+  });
+});
+
+// The two plain sends check their body before anything is primed, so the gate is asked first.
+describe.each([
+  ["send", "aiSend"],
+  ["sendCustom", "aiSendCustom"],
+] as const)("%s behind the access gate", (name, operationId) => {
+  it.each([
+    ["null", null],
+    ["an empty object", {}],
+  ])("answers 403 for a body that is %s when the caller has no AI access", async (_what, body) => {
+    h.storage.toolPrefs.readDisabled.mockRejectedValueOnce(
+      new AiServiceHttpError(403, "Forbidden", "", "http://ai/tool-prefs"),
+    );
+
+    const reply = await h.call(aiController[name], body);
+
+    expect(reply.status).toBe(403);
+    expect(responseViolations(operationId, 403, reply.body)).toEqual([]);
+    expect(h.primeChatContext).not.toHaveBeenCalled();
+    expect(h.engine[name]).not.toHaveBeenCalled();
+  });
 });

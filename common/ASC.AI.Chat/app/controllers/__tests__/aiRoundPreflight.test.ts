@@ -86,8 +86,15 @@ vi.mock("../../tools/customTools.js", () => ({
 }));
 const readThread = vi.fn();
 const readHistory = vi.fn();
+// The access gate (aiAccess.ts) reads the tool prefs: `send` and `sendCustom` ask it first, and
+// a round whose aggregate read installed no snapshot (the mock above installs none) asks it after.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn(async () => ({})) }));
 vi.mock("../../storage/index.js", () => ({
-  storage: { threads: { readById: readThread }, messages: { readByThread: readHistory } },
+  storage: {
+    threads: { readById: readThread },
+    messages: { readByThread: readHistory },
+    toolPrefs,
+  },
 }));
 vi.mock("../../storage/httpClient.js", () => ({
   AiServiceHttpError: class extends Error {},

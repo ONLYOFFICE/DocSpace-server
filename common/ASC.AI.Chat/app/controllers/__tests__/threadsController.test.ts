@@ -50,8 +50,10 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
 const readById = vi.fn();
 // HttpStorageAdapter: the base of the resolve engine's storage in assignmentsController, which
 // the thread gate calls; the engine class itself is the mock above.
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn(async () => ({})) }));
 vi.mock("../../storage/index.js", () => ({
-  storage: { profiles: { readById } },
+  storage: { profiles: { readById }, toolPrefs },
   HttpStorageAdapter: class {},
 }));
 const assertEntityAccessible = vi.fn(async () => {});

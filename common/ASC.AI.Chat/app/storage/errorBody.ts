@@ -31,16 +31,62 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+// How much of a refused answer is read: enough for any error envelope and the log line built
+// from it, while a body of a gigabyte from a provider or a gateway is cut off at the start.
+const MAX_ERROR_BODY_BYTES = 64 * 1024;
+
 /**
- * The body of an answer that was refused, for the error object and the log. The status has
- * already decided the outcome, so a body that cannot be read is an empty text, not a second
- * failure that would hide the first.
+ * The body of an answer that was refused, for the error object and the log, read up to
+ * `MAX_ERROR_BODY_BYTES` (ts-ai-failure-paths.md §7). The status has already decided the outcome,
+ * so a body that cannot be read is an empty text, not a second failure that would hide the first.
  */
-export async function errorBodyText(res: { text(): Promise<string> }): Promise<string> {
-  const pending = res.text();
+export async function errorBodyText(res: Response): Promise<string> {
+  const pending = readTextCapped(res, MAX_ERROR_BODY_BYTES);
   try {
     return await pending;
   } catch {
     return "";
+  }
+}
+
+/**
+ * The body decoded as UTF-8, at most `limit` bytes of it. The stream is
+ * cancelled once the limit is reached, so a body far larger than the limit
+ * costs neither the download nor the memory beyond that point.
+ */
+export async function readTextCapped(res: Response, limit: number): Promise<string> {
+  if (!res.body) {
+    return "";
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let text = "";
+  let received = 0;
+  try {
+    while (received < limit) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      const room = limit - received;
+      const chunk = value.length > room ? value.subarray(0, room) : value;
+      received += chunk.length;
+      text += decoder.decode(chunk, { stream: true });
+    }
+  } finally {
+    // Past the limit, or on an error: drop the rest of the download.
+    await cancelReader(reader);
+  }
+  return text + decoder.decode();
+}
+
+// The read is over either way: a stream that refuses to be cancelled changes nothing for the
+// caller, which already has its answer or its error.
+export async function cancelReader(reader: { cancel(): Promise<void> }): Promise<void> {
+  const pending = reader.cancel();
+  try {
+    await pending;
+  } catch {
+    // nothing to do: see above
   }
 }
