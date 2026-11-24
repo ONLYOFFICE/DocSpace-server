@@ -639,7 +639,7 @@ public class SecurityController(
 
     /// <remarks>
     /// Replaces the list of external domains that the Content Security Policy of the portal trusts. It returns the
-    /// stored list and the policy header that browsers now get. Send the complete list in `domains`. An empty or
+    /// stored list and the policy header of the portal. Send the complete list in `domains`. An empty or
     /// omitted list restores the built-in policy of the portal. Every domain becomes an allowed source for scripts,
     /// styles, images, fonts, frames, media, and connections. Requires the EditPortalSettings permission, which the
     /// portal owner and DocSpace admins have. Other callers get 403. The call changes data for the whole portal, and
@@ -684,11 +684,13 @@ public class SecurityController(
     /// value. Anyone can call it without signing in, from any origin. The call is read-only. To skip an unchanged
     /// policy, send the `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value exactly as
     /// you got it. If the policy has not changed since then, the call returns 304 with an empty body. A signed-in
-    /// member may have enabled personal web plugins with domains that no portal plugin shadows. If the request also
-    /// carries the `asc_personal_csp` cookie, the header allows those domains too. Such a request never gets 304. The
-    /// `domains` field stays the portal's list. The plugin list sets or clears the cookie when called without
-    /// `personal`. The personal uploads, updates and deletions of `api/2.0/settings/webplugins` do the same. To change
-    /// the allowed domains, use `POST api/2.0/security/csp`, which requires the EditPortalSettings permission.
+    /// member may have enabled personal web plugins with domains. The domains of a plugin that a portal or
+    /// installation-wide plugin shadows do not count. If the request also carries the `asc_personal_csp` cookie, the
+    /// header allows those domains too. A header that would grow too large keeps the portal's domains only. Such a
+    /// request never gets 304. The `domains` field stays the portal's list. The list call
+    /// `GET api/2.0/settings/webplugins` sets or clears the cookie when called without `personal`. The calls `POST`,
+    /// `PUT` and `DELETE` on `api/2.0/settings/webplugins` with `personal` do the same. To change the allowed domains,
+    /// use `POST api/2.0/security/csp`, which requires the EditPortalSettings permission.
     /// </remarks>
     /// <summary>
     /// Get CSP settings

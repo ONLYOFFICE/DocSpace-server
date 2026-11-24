@@ -63,9 +63,8 @@ public class PluginsDto
     public bool Upload { get; set; }
 
     /// <summary>
-    /// Whether a portal plugin may be removed again through `DELETE api/2.0/settings/webplugins/{name}`. A plugin
-    /// installed for the whole installation can be removed on a standalone installation only, and a member removes
-    /// their own personal plugins whatever this flag says.
+    /// Whether a portal plugin may be removed again through `DELETE api/2.0/settings/webplugins/{name}`. A member
+    /// removes their own personal plugins whatever this flag says.
     /// </summary>
     /// <example>true</example>
     public bool Delete { get; set; }
@@ -74,8 +73,15 @@ public class PluginsDto
     /// Whether a portal member other than a guest may install plugins for themselves alone through
     /// `POST api/2.0/settings/webplugins?personal=true`. It is `true` unless the installation switched personal
     /// plugins off in its configuration, and it is of no use while `enabled` is `false`; uploading one still needs
-    /// `upload`.
+    /// `upload`. While it is `false`, the personal plugins installed before are neither listed nor loaded, and the
+    /// calls with `personal=true` are refused.
     /// </summary>
     /// <example>true</example>
     public bool Personal { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class PluginsDtoMapper
+{
+    public static partial PluginsDto Map(this WebPluginConfigSettings source);
 }

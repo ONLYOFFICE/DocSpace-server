@@ -51,22 +51,25 @@ public class WebPluginsController(
     /// portal. With `personal` set to true, it serves the caller alone. Send a `.zip` archive with `config.json` and
     /// `plugin.js` as `multipart/form-data`. Requires the EditPortalSettings permission, which the portal owner and
     /// DocSpace admins have. Other callers get 403. With `personal` set to true, any signed-in user can call it, except
-    /// a guest. A guest gets 403. The call also returns 403 while the installation turns off web plugins, their upload
-    /// or personal plugins. With `system` set to true, a standalone installation installs a portal plugin for every
-    /// portal. Elsewhere `system` returns 403, and with `personal` 400. The call changes data and can be repeated. A
-    /// package with an installed name replaces its files and keeps its settings. A portal plugin's domains go into the
-    /// portal Content Security Policy. A personal plugin's domains apply to the caller's pages only. If the header gets
-    /// too large, the call returns 403 but keeps the plugin. A bad package or manifest returns 400. A `pluginName` that
-    /// another plugin uses also returns 400. A personal plugin with the `name` of a portal plugin returns 400 too. A
-    /// new plugin returns 400 at 100 portal plugins or 10 personal ones by default. A request signed in by the session
-    /// cookie or Basic credentials must come from a portal page. A script uses a Bearer token or an API key.
+    /// a guest. A guest gets 403. The call also returns 403 while the installation turns off web plugins or their
+    /// upload. With `personal`, it also returns 403 while personal plugins are off. With `system` set to true, a
+    /// standalone installation installs an installation-wide plugin. Elsewhere `system` returns 403. With both `system`
+    /// and `personal`, the call returns 400. The call changes data and can be repeated. A package with an installed
+    /// name replaces its files and keeps its settings. A portal plugin's domains go into the portal Content Security
+    /// Policy. A personal plugin's domains apply to the caller's pages only. If the header gets too large, the call
+    /// returns 403 but keeps the plugin. A personal plugin whose `cspDomains` lists an invalid address or is too long
+    /// returns 400. A bad package or manifest returns 400. A `pluginName` that another plugin uses also returns 400. A
+    /// personal plugin with the `name` of a portal plugin returns 400 too. A new plugin returns 400 at 100 portal
+    /// plugins or 10 personal ones by default. A request that carries the session cookie or Basic credentials must come
+    /// from a portal page. Otherwise the call returns 403. A script uses a Bearer token or an API key without the
+    /// session cookie.
     /// </remarks>
     /// <summary>Add a web plugin</summary>
     /// <path>api/2.0/settings/webplugins</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The installed web plugin, enabled, with the `url` its script is served from", typeof(WebPluginDto))]
-    [SwaggerResponse(400, "The uploaded package is missing, more than one file was sent, the package is of the wrong type, empty or too large, the archive or its manifest is rejected, another plugin uses its `pluginName`, a personal plugin takes the `name` or `pluginName` of a portal or installation-wide plugin, `personal` is combined with `system`, or the portal or the caller already holds the maximum number of plugins")]
-    [SwaggerResponse(403, "The caller has no portal-settings right, or for a personal plugin is a guest or personal plugins are switched off; the request is not a form, the request is signed in by the session cookie or Basic credentials and carries a `Sec-Fetch-Site` other than `same-origin` or `none`, or, without that header, an `Origin` that is not the portal's, web plugins or plugin uploads are switched off for the installation, `system` was requested outside a standalone installation, or the domains the plugin declares would push the Content Security Policy header over its size limit")]
+    [SwaggerResponse(400, "The uploaded package is missing, more than one file was sent, the package is of the wrong type, empty or too large, the archive or its manifest is rejected, another plugin uses its `pluginName`, a personal plugin takes the `name` or `pluginName` of a portal or installation-wide plugin or its `cspDomains` lists an invalid address or is too long, `personal` is combined with `system`, or the portal or the caller already holds the maximum number of plugins")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or for a personal plugin is a guest or personal plugins are switched off; the request is not a form, the request carries the session cookie or Basic credentials and a `Sec-Fetch-Site` other than `same-origin` or `none`, or, without that header, an `Origin` that is not the portal's, web plugins or plugin uploads are switched off for the installation, `system` was requested outside a standalone installation, or the domains the plugin declares would push the Content Security Policy header over its size limit")]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
@@ -118,13 +121,15 @@ public class WebPluginsController(
     /// plugins, then the caller's personal plugins. The list leaves out a portal plugin with the name of an
     /// installation-wide plugin. It also leaves out a personal plugin whose `name` or `pluginName` a plugin above uses.
     /// With `personal` set to true, the call returns only the caller's personal plugins, the hidden ones included. Any
-    /// signed-in user can call it. With `personal`, a guest gets 403, and so does everyone while personal plugins are
-    /// off. If the installation turns off web plugins, the call returns 403. The call is read-only. Without `personal`,
-    /// it also sets or clears the `asc_personal_csp` cookie that `GET api/2.0/security/csp` reads. Each entry includes
-    /// the `enabled` state and the `settings` stored for the plugin. The `personal` field marks the caller's own. With
-    /// `enabled` set, the call returns only the plugins in that state. An empty list means that there are no plugins of
-    /// this kind. The list has no paging. A portal holds at most 100 plugins and a member 10 personal ones by default.
-    /// To get one plugin, use `GET api/2.0/settings/webplugins/{name}`.
+    /// signed-in user can call it. With `personal`, a guest gets 403. With `personal`, every caller also gets 403 while
+    /// personal plugins are off. If the installation turns off web plugins, the call returns 403. The call is read-only, except that it
+    /// switches off a plugin whose stored settings cannot be decrypted. Without `personal`, it refreshes the caller's
+    /// personal Content Security Policy. It also sets or clears the `asc_personal_csp` cookie that
+    /// `GET api/2.0/security/csp` reads. Each entry includes the `enabled` state and the `settings` stored for the
+    /// plugin. The `personal` field marks the caller's own. With `enabled` set, the call returns only the plugins in
+    /// that state. An empty list means that there are no plugins of this kind. The list has no paging. A portal holds
+    /// at most 100 plugins and a member 10 personal ones by default. To get one plugin, use
+    /// `GET api/2.0/settings/webplugins/{name}`.
     /// </remarks>
     /// <summary>Get web plugins</summary>
     /// <path>api/2.0/settings/webplugins</path>
@@ -164,9 +169,9 @@ public class WebPluginsController(
     /// Returns one web plugin by its manifest name. Without `personal`, the call searches the portal plugins,
     /// including the installation-wide ones. With `personal` set to true, it searches only the caller's personal
     /// plugins. Take the name from the `name` field of `GET api/2.0/settings/webplugins`. The call ignores the case of
-    /// the name. Any signed-in user can call it, but with `personal` a guest gets 403, and so does everyone while the
-    /// installation turns off personal plugins. If the installation turns off web plugins, the call returns 403. The
-    /// call is read-only. The response includes the `enabled` state and the `settings` stored for the plugin. If no
+    /// the name. Any signed-in user can call it. With `personal`, a guest gets 403. With `personal`, every caller also gets
+    /// 403 while personal plugins are off. If the installation turns off web plugins, the call returns 403. The call is
+    /// read-only. The response includes the `enabled` state and the `settings` stored for the plugin. If no
     /// plugin has this name, the call returns 404. To change the state of the plugin, use
     /// `PUT api/2.0/settings/webplugins/{name}`.
     /// </remarks>
@@ -196,13 +201,13 @@ public class WebPluginsController(
     /// any case, from the `name` field of `GET api/2.0/settings/webplugins`. Requires the EditPortalSettings
     /// permission, which the portal owner and DocSpace admins have. Other callers get 403. With `personal` set to true,
     /// any signed-in user can call it, except a guest. A guest gets 403. The call also returns 403 while the
-    /// installation turns off web plugins or personal plugins. The call changes data. The body replaces the stored
-    /// state and settings, so you can repeat the call with the same body. Switching a portal plugin on adds its
-    /// manifest domains to the portal Content Security Policy. Switching it off removes them. If the domains make the
-    /// policy header too large, the call returns 403, but saves the new state. A personal plugin keeps its state for
-    /// the caller alone. The caller's other open pages see the change after a reload. The call returns 400 if the body
-    /// has no `settings` or `settings` is longer than 4096 characters. If no plugin has this name, the call returns
-    /// 404. To install a plugin, use `POST api/2.0/settings/webplugins`.
+    /// installation turns off web plugins. With `personal`, it also returns 403 while personal plugins are off. The
+    /// call changes data. The body replaces the stored state and settings, so you can repeat the call with the same
+    /// body. Switching a portal plugin on adds its manifest domains to the portal Content Security Policy. Switching it
+    /// off removes them. If switching a plugin on makes a policy header too large, the call returns 403 but saves the new
+    /// state. A personal plugin keeps its state for the caller alone. The call returns 400 if the body has no `settings` or `settings` is
+    /// too long. If no plugin has this name, the call returns 404. To install a plugin, use
+    /// `POST api/2.0/settings/webplugins`.
     /// </remarks>
     /// <summary>Update a web plugin</summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
@@ -243,9 +248,8 @@ public class WebPluginsController(
     /// off web plugins, the call also returns 403. The call compares the version it serves with the `version` of the
     /// manifest in storage. The server reloads the plugin list if they differ or the plugin appeared or disappeared.
     /// For an installation-wide plugin, it reloads the list of every portal. The call changes data only then, so you
-    /// can repeat it. It does not change the stored state, the settings, or the Content Security Policy, and it does
-    /// not reach personal plugins, which change only through an upload. The call returns the plugin as the portal
-    /// serves it after the check. If no plugin has this name after the check, the call returns 404. To install a new
+    /// can repeat it. It does not change the stored state, the settings, or the Content Security Policy. Personal
+    /// plugins change only through an upload. The call returns the plugin as the portal serves it after the check. If no plugin has this name after the check, the call returns 404. To install a new
     /// version, use `POST api/2.0/settings/webplugins`.
     /// </remarks>
     /// <summary>Refresh a web plugin</summary>
@@ -274,8 +278,8 @@ public class WebPluginsController(
     /// stays installed. Take the name, in any case, from the `name` field of `GET api/2.0/settings/webplugins`.
     /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get
     /// 403. With `personal` set to true, any signed-in user can call it, except a guest. A guest gets 403. The call
-    /// also returns 403 while the installation turns off web plugins or personal plugins. A portal plugin also needs
-    /// plugin deletion on. A plugin with `system` set to true is installation-wide. Only a standalone installation can
+    /// also returns 403 while the installation turns off web plugins. With `personal`, it also returns 403 while
+    /// personal plugins are off. A portal plugin also needs plugin deletion on. A plugin with `system` set to true is installation-wide. Only a standalone installation can
     /// delete it, from every portal. Elsewhere the call returns 403. The call cannot be undone. It deletes the stored
     /// state and settings of the plugin. For a portal plugin, it also removes its domains from the portal Content
     /// Security Policy. Uploading the package again with `POST api/2.0/settings/webplugins` restores the plugin without

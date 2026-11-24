@@ -118,9 +118,9 @@ public class WebPluginNameRequestDto
 public class WebPluginFromFileRequestDto
 {
     /// <summary>
-    /// Whether the plugin is installed for every portal of the installation rather than only this one. It is
-    /// accepted on a self-hosted installation alone and refused with 403 elsewhere; an installation-wide plugin also
-    /// hides a portal plugin that carries the same name.
+    /// Whether the plugin is installed for every portal of the installation rather than only this one. Without
+    /// `personal`, it is accepted on a self-hosted installation alone and refused with 403 elsewhere; an
+    /// installation-wide plugin also hides a portal plugin that carries the same name.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "system")]
@@ -140,9 +140,8 @@ public class WebPluginFromFileRequestDto
 public class RefreshWebPluginRequestDto
 {
     /// <summary>
-    /// The plugin to check, by the manifest name `GET api/2.0/settings/webplugins` publishes as `name`, matched
-    /// without regard to case. It is neither the localized display name nor the JavaScript object name in
-    /// `pluginName`.
+    /// The plugin to check, by the manifest name `GET api/2.0/settings/webplugins` publishes as `name`. It is neither
+    /// the localized display name nor the JavaScript object name in `pluginName`.
     /// </summary>
     /// <example>example-plugin</example>
     [FromRoute(Name = "name")]

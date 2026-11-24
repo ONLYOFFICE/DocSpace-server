@@ -179,13 +179,7 @@ public partial class SettingsController(
                 settings.DebugInfo = debugInfo;
             }
 
-            settings.Plugins = new PluginsDto
-            {
-                Enabled = webPluginConfigSettings.Enabled,
-                Upload = webPluginConfigSettings.Upload,
-                Delete = webPluginConfigSettings.Delete,
-                Personal = webPluginConfigSettings.Personal
-            };
+            settings.Plugins = webPluginConfigSettings.Map();
 
             var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = formGallerySettings.Map();

@@ -130,9 +130,7 @@ public class WebPluginDto
     public required bool Enabled { get; set; }
 
     /// <summary>
-    /// Whether the plugin ships with the installation rather than having been uploaded here. Only a standalone
-    /// installation can delete it through `DELETE api/2.0/settings/webplugins/{name}`; elsewhere it can only be
-    /// switched off.
+    /// Whether the plugin ships with the installation rather than having been uploaded here.
     /// </summary>
     /// <example>false</example>
     public required bool System { get; set; }
@@ -142,7 +140,7 @@ public class WebPluginDto
     /// plugin is addressed with `personal=true`.
     /// </summary>
     /// <example>false</example>
-    public bool Personal { get; set; }
+    public required bool Personal { get; set; }
 
     /// <summary>
     /// The address of the plugin's script, which a client loads to run it. It ends in a `hash` query taken from
