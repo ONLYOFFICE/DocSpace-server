@@ -1,28 +1,18 @@
 # Spec Delta
 
-## MODIFIED Requirements
+## ADDED Requirements
 
-### Requirement: Reading the Content Security Policy
+### Requirement: Personal domains in the policy header
 
-`getCspSettings` SHALL answer 200 with `domains` and a non-empty `header` to every caller, an anonymous one
-included, and SHALL answer 304 with an empty body when the settings did not change since `If-Modified-Since`.
-A portal with no stored domains SHALL answer an empty `domains`. A signed-in member with enabled personal plugins
-that declare domains, none shadowed, whose request carries the `asc_personal_csp` cookie SHALL get those domains
-in `header`, not in `domains`, and never 304.
-
-#### Scenario: Every role reads what was configured
-
-- **WHEN** the owner configured a domain and the owner, a DocSpace admin, a Room admin, a User or a Guest reads the policy
-- **THEN** the system answers 200 with that domain and a non-empty `header`
-
-#### Scenario: Anonymous caller
-
-- **WHEN** the owner configured a domain and a caller without a session reads the policy
-- **THEN** the system answers 200 with that domain and a non-empty `header`
+A signed-in member other than a guest whose request to `getCspSettings` carries the `asc_personal_csp` cookie,
+and who has personal domains (of enabled personal plugins that no portal or installation-wide plugin shadows,
+while plugins and personal plugins are on), SHALL never get 304 and SHALL find those domains in `header`,
+unless that would pass the header size limit, and never in `domains`. A failed read of the personal domains
+SHALL count as none.
 
 #### Scenario: Owner of a personal plugin with domains
 
-- **WHEN** a User has an enabled personal plugin declaring `cspDomains` `https://a.example` and reads the policy with the `asc_personal_csp` cookie and `If-Modified-Since`
+- **WHEN** a User has an enabled personal plugin that no portal or installation-wide plugin shadows, declaring `cspDomains` `https://a.example`, and reads the policy with the `asc_personal_csp` cookie and an `If-Modified-Since` the policy has not changed since
 - **THEN** the system answers 200 with `https://a.example` in `header` and not in `domains`
 
 #### Scenario: Another member with the cookie
@@ -34,3 +24,27 @@ in `header`, not in `domains`, and never 304.
 
 - **WHEN** a User without enabled personal plugins reads the policy with the `asc_personal_csp` cookie and an `If-Modified-Since` the policy has not changed since
 - **THEN** the system answers 304 with an empty body
+
+#### Scenario: Personal domains over the size limit
+
+- **WHEN** a User whose enabled, unshadowed personal plugins declare domains that would push `header` over its size limit reads the policy with the `asc_personal_csp` cookie and an `If-Modified-Since` the policy has not changed since
+- **THEN** the system answers 200 with the portal's `header`, which holds none of those domains
+
+## MODIFIED Requirements
+
+### Requirement: Reading the Content Security Policy
+
+`getCspSettings` SHALL answer 200 with `domains` and a non-empty `header` to every caller, an anonymous one
+included, and, unless the request gets personal domains (requirement "Personal domains in the policy header"),
+SHALL answer 304 with an empty body when the settings did not change since `If-Modified-Since`. A portal with no
+stored domains SHALL answer an empty `domains`.
+
+#### Scenario: Every role reads what was configured
+
+- **WHEN** the owner configured a domain and the owner, a DocSpace admin, a Room admin, a User or a Guest reads the policy
+- **THEN** the system answers 200 with that domain and a non-empty `header`
+
+#### Scenario: Anonymous caller
+
+- **WHEN** the owner configured a domain and a caller without a session reads the policy
+- **THEN** the system answers 200 with that domain and a non-empty `header`

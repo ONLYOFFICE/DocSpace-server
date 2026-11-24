@@ -104,10 +104,10 @@ public class WebPluginReuploadTests(
         plugins.Single(p => p.Name == $"limit-{MaxCount - 1:000}").Version.Should().Be("2.0.0");
     }
 
-    // P9 of the plugins spec: the limit check looks the new name up with GetWebPluginByNameAsync, which throws
-    // "Plugin not found" instead of returning null, so the caller reads "Wrong plugin archive. Plugin not found"
-    // and the "number of plugins exceeds the limit" text is never sent.
-    [Trait("Category", "Bug")]
+    // P9 of the plugins spec: the limit check looked the new name up with GetWebPluginByNameAsync, which threw
+    // "Plugin not found" instead of returning null, so the caller read "Wrong plugin archive. Plugin not found"
+    // and the "number of plugins exceeds the limit" text was never sent. 410d6a20f6 compares the new name with the
+    // names of the installed plugins instead.
     [Fact]
     public async Task Upload_PortalAtThePluginLimit_SaysTheLimitIsReached()
     {

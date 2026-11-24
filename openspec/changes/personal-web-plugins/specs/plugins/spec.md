@@ -4,33 +4,35 @@
 
 ### Requirement: Switch for personal plugins
 
-`getSettings` SHALL report to a signed-in caller `plugins.personal`, true unless the installation switched
-personal plugins off. While it is off, and for a guest, every `settings/webplugins` operation sent with
-`personal=true` SHALL answer 403 "Personal plugins disabled", and `getWebPlugins` without it SHALL list no
-personal plugin.
+`getPortalSettings` SHALL report to a signed-in caller `plugins.personal`, true unless the installation switched
+personal plugins off. While plugins are on, a guest, and any member while that switch is off, SHALL get 403
+"Access denied" from `getWebPlugins`, `getWebPlugin`, `updateWebPlugin` (with a valid body),
+`deleteWebPlugin` and, while uploads are on, `addWebPluginFromFile` sent with `personal=true`, and no personal
+plugin from `getWebPlugins` without it.
 
 #### Scenario: Default installation
 
-- **WHEN** a signed-in member calls `getSettings` on an installation that did not configure personal plugins
+- **WHEN** a signed-in member calls `getPortalSettings` on an installation that did not configure personal plugins
 - **THEN** the answer carries `plugins.personal` true
 
 #### Scenario: Guest asks for personal plugins
 
-- **WHEN** a Guest uploads a package with `personal=true`
-- **THEN** the system answers 403 "Personal plugins disabled"
+- **WHEN** plugins and their upload are on and a Guest uploads a package, lists, reads, updates with a valid body or deletes with `personal=true`
+- **THEN** the system answers 403 "Access denied"
 
 #### Scenario: Personal plugins switched off
 
-- **WHEN** the installation switched personal plugins off and a User lists, reads, uploads, updates or deletes with `personal=true`
-- **THEN** the system answers 403 "Personal plugins disabled"
+- **WHEN** plugins and their upload are on, the installation switched personal plugins off, and a User uploads a package, lists, reads, updates with a valid body or deletes with `personal=true`
+- **THEN** the system answers 403 "Access denied"
+- **AND** the User's `getWebPlugins` without `personal` lists none of their personal plugins
 
 ### Requirement: Personal plugins
 
 With `personal=true`, a signed-in member other than a guest SHALL upload, list, read, switch and delete
 plugins of their own (`addWebPluginFromFile`, `getWebPlugins`, `getWebPlugin`, `updateWebPlugin`,
-`deleteWebPlugin`) without the portal-settings right. A personal plugin SHALL carry `personal` true, be listed
-for its owner only, and keep its state and `settings` for its owner only. `system=true` with `personal=true`
-SHALL answer 400 "Changes to system plugins are prohibited".
+`deleteWebPlugin`) without the portal-settings right. A personal plugin SHALL carry `personal` true and be
+listed, with its state and `settings`, for its owner only. With `system=true` too, an upload SHALL answer 400
+"Changes to system plugins are prohibited" once the personal checks pass.
 
 #### Scenario: User installs a plugin for themselves
 
@@ -41,8 +43,13 @@ SHALL answer 400 "Changes to system plugins are prohibited".
 
 #### Scenario: Personal and installation-wide together
 
-- **WHEN** a member uploads a package with `personal=true` and `system=true`
+- **WHEN** plugins, their upload and personal plugins are on and a User uploads a package with `personal=true` and `system=true`
 - **THEN** the system answers 400 "Changes to system plugins are prohibited" and stores nothing
+
+#### Scenario: Guest asks for a personal installation-wide plugin
+
+- **WHEN** plugins and their upload are on and a Guest uploads a package with `personal=true` and `system=true`
+- **THEN** the system answers 403 "Access denied" and stores nothing
 
 #### Scenario: Personal plugin switched off
 
@@ -51,21 +58,31 @@ SHALL answer 400 "Changes to system plugins are prohibited".
 
 #### Scenario: Unknown personal name
 
-- **WHEN** a User reads, switches or deletes with `personal=true` a name none of their personal plugins carries
+- **WHEN** a User reads, switches or deletes with `personal=true` a name none of their own personal plugins carries, the name of another User's personal plugin included
 - **THEN** the system answers 404 "Plugin not found"
 
 ### Requirement: A plugin name belongs to the higher level
 
 A personal upload SHALL answer 400 "Wrong plugin archive. A plugin with the same name or pluginName is already
-installed for the whole portal" when a portal or installation-wide plugin has its `name` (any case) or `pluginName`, and 400
-"Wrong plugin archive. Plugin already exist" when another personal plugin of the same member has its
-`pluginName`. A portal upload SHALL NOT be refused for a personal plugin; that plugin SHALL be left out of its
-owner's list until the portal plugin is deleted.
+installed for the whole portal" when a portal or installation-wide plugin has its `name` (any case) or
+`pluginName`, and 400 "Wrong plugin archive. Plugin already exist" when another personal plugin of the same
+member has its `pluginName`. A portal upload SHALL NOT be refused for a personal plugin; that plugin SHALL be
+left out of its owner's list until the portal plugin is deleted.
 
 #### Scenario: Name of a portal plugin
 
 - **WHEN** the owner installed a portal plugin and a User uploads a package with the same `name` and `personal=true`
 - **THEN** the system answers 400 "Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal"
+
+#### Scenario: JavaScript object of a portal plugin
+
+- **WHEN** the owner installed a portal plugin and a User uploads with `personal=true` a package with another `name` and the same `pluginName`
+- **THEN** the system answers 400 "Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal"
+
+#### Scenario: JavaScript object of another personal plugin
+
+- **WHEN** a User holds a personal plugin and uploads with `personal=true` a package with another `name` and the same `pluginName`
+- **THEN** the system answers 400 "Wrong plugin archive. Plugin already exist"
 
 #### Scenario: Portal plugin shadows a personal one
 
@@ -81,10 +98,11 @@ owner's list until the portal plugin is deleted.
 
 ### Requirement: Personal plugin count limit
 
-A member SHALL hold at most 10 personal plugins: an upload of a new name beyond that SHALL answer 400 "Wrong
-plugin archive. The number of plugins exceeds the limit", while a re-upload of a name the member holds is
-accepted. Personal plugins SHALL NOT count toward the portal limit. Uploads of the same member that run at the
-same time can together pass the limit.
+A member SHALL hold at most 10 personal plugins by default: an upload of a new name beyond that SHALL answer
+400 "Wrong plugin archive. The number of plugins exceeds the limit", while a re-upload of a name the member
+holds is accepted unless a portal or installation-wide plugin has taken its `name` or `pluginName`. Personal
+plugins SHALL NOT count toward the portal limit. Uploads of the same member that run at the same time can
+together pass the limit.
 
 #### Scenario: Limit reached
 
@@ -112,43 +130,156 @@ point to `plugin.js` in a folder of its owner, with the same `hash` query as a p
 - **WHEN** the User who installed the personal plugin requests its `url`
 - **THEN** the system answers 200 with the script
 
+### Requirement: Content Security Policy domains of a personal plugin
+
+A personal upload SHALL answer 400 "Wrong plugin archive. The cspDomains value lists an invalid address or is
+too long" when the manifest's `cspDomains` is longer than 15360 characters, or when one of its comma-separated
+entries, trimmed, is an address `configureCsp` would refuse or holds whitespace, `;`, `'` or `"`. An empty
+value SHALL declare no domain. The domains SHALL reach only their owner's policy header, never the portal's
+domains.
+
+#### Scenario: Invalid entry
+
+- **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` is `https://a.example,https://b.example; script-src *`
+- **THEN** the system answers 400 "Wrong plugin archive. The cspDomains value lists an invalid address or is too long" and stores nothing
+
+#### Scenario: Value at the length limit
+
+- **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` lists valid addresses in exactly 15360 characters
+- **THEN** the system answers 200
+
+#### Scenario: Value over the length limit
+
+- **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` lists valid addresses in 15361 characters
+- **THEN** the system answers 400 "Wrong plugin archive. The cspDomains value lists an invalid address or is too long"
+
+#### Scenario: Empty value
+
+- **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` is empty
+- **THEN** the system answers 200 and the plugin adds no domain to any policy
+
+### Requirement: Size limit of a member's policy header
+
+A personal upload, or a personal update with `enabled` true, after which the caller's personal header (the
+portal's domains plus the caller's personal domains) would pass the size limit, 15 KB by default, SHALL keep its
+change and answer 403 "CSP header size exceeds maximum allowed size of 15360 bytes." instead of 200. A personal
+deletion or switch-off, and `getWebPlugins` without `personal`, SHALL still answer 200, and `getCspSettings`
+SHALL fall back to the portal's header.
+
+#### Scenario: Personal upload over the limit
+
+- **WHEN** a User uploads with `personal=true` a plugin whose `cspDomains`, together with the portal's domains and the User's other enabled, unshadowed personal domains, push the policy header over its size limit
+- **THEN** the system answers 403 "CSP header size exceeds maximum allowed size of 15360 bytes."
+- **AND** the User's `getWebPlugins` with `personal=true` lists the plugin with `enabled` true
+
+#### Scenario: Plugin list over the limit
+
+- **WHEN** the enabled personal plugins of a User that no higher-level plugin shadows declare domains that push the policy header over its size limit, and the User calls `getWebPlugins` without `personal`
+- **THEN** the system answers 200 and sets the cookie, no header is cached for the User, and `getCspSettings` with the cookie answers the portal's `header`
+
+#### Scenario: Personal deletion over the limit
+
+- **WHEN** a User whose personal header is over the size limit deletes one of their personal plugins with `personal=true`, and the rest still push the header over the limit
+- **THEN** the system answers 200, the plugin is deleted and no header is cached for the User
+
+### Requirement: Cookie of the personal Content Security Policy
+
+`getWebPlugins` without `personal`, and an upload, update or deletion with `personal=true` that answers 200,
+SHALL set the HttpOnly cookie `asc_personal_csp` while the caller has personal domains (of their enabled
+personal plugins that no higher-level plugin shadows), and otherwise delete it from a request that carries it,
+unless reading the caller's plugins fails. A response that clears the session cookie, `logout` among others,
+SHALL delete it too when the request carries it.
+
+#### Scenario: Cookie set by the plugin list
+
+- **WHEN** a User with an enabled personal plugin that no higher-level plugin shadows, declaring `cspDomains` `https://a.example`, calls `getWebPlugins` without `personal`
+- **THEN** the answer sets `asc_personal_csp` to 64 hexadecimal characters
+
+#### Scenario: Cookie deleted after switching off
+
+- **WHEN** that User switches the plugin off with `personal=true` and `settings` `{}` on a request that carries the cookie
+- **THEN** the answer deletes `asc_personal_csp`
+
+#### Scenario: Sign-out
+
+- **WHEN** the User calls `logout` on a request that carries the cookie
+- **THEN** the answer deletes `asc_personal_csp`
+
+#### Scenario: Session no longer valid
+
+- **WHEN** a request that carries the cookie and an expired or invalid session cookie calls an operation that needs a session
+- **THEN** the answer deletes `asc_personal_csp` together with the session cookie
+
+#### Scenario: Another device
+
+- **WHEN** the User opens the portal in a browser that has no `asc_personal_csp` cookie
+- **THEN** its pages carry no personal domain in their policy until a page loaded after that browser's first `getWebPlugins`
+
+### Requirement: Policy header cached for a member
+
+The calls that set `asc_personal_csp` SHALL cache for the proxy, under its value and for a day from its last
+write, the header `getCspSettings` gives the caller, or drop that copy when the header is over the size limit.
+A personal upload, update or deletion that leaves no personal domains, and a list call that deletes the
+cookie, SHALL drop it too. A save of the portal's policy SHALL drop the copies the portal lists, and an address
+change or `deletePortal` those under the old address.
+
+#### Scenario: Unchanged header
+
+- **WHEN** a member whose copy the portal lists calls `getWebPlugins` again and the header to cache did not change
+- **THEN** the copy is not written again and still expires a day after its last write
+
+#### Scenario: Portal policy saved
+
+- **WHEN** an administrator saves the portal's domains with `configureCsp`
+- **THEN** every member header the portal lists is dropped, and the proxy takes those members' policy from `getCspSettings` until a call that sets their cookie caches a header again
+
+#### Scenario: Portal removed by the retention job
+
+- **WHEN** the retention job removes a portal
+- **THEN** the headers cached for its members are not dropped and expire a day after their last write
+
+#### Scenario: Plugins switched off for the installation
+
+- **WHEN** plugins are switched off for the installation
+- **THEN** the plugin calls answer 403 and drop no cached member header, which expires a day after its last write unless a save of the portal's policy drops it first
+
 ## MODIFIED Requirements
 
 ### Requirement: Installation-wide plugin switches
 
-The installation SHALL carry three switches — plugins enabled, upload allowed, delete allowed — that
-`getSettings` SHALL report to a signed-in caller as `plugins.enabled`, `plugins.upload` and
-`plugins.delete` (false when not configured). While plugins are not enabled every `settings/webplugins`
-operation SHALL answer 403 "Plugins disabled"; an upload while upload is off and a portal plugin deletion
-while delete is off SHALL answer 403 "Forbidden action". No tariff or edition gates plugins.
+`getPortalSettings` SHALL report to a signed-in caller the four installation switches `plugins.enabled`,
+`plugins.upload`, `plugins.delete` (false unless set) and `plugins.personal` (true unless set). While plugins
+are off, every `settings/webplugins` operation SHALL refuse with 403 "Access denied" a request it would
+otherwise serve, and so SHALL an upload while upload is off, and a portal plugin deletion while delete is off.
+No tariff or edition gates plugins.
 
 #### Scenario: Signed-in member reads the switches
 
-- **WHEN** any signed-in member calls `getSettings`
-- **THEN** the answer carries `plugins` with `enabled`, `upload` and `delete` as the installation configured them
+- **WHEN** any signed-in member calls `getPortalSettings`
+- **THEN** the answer carries `plugins` with `enabled`, `upload`, `delete` and `personal` as the installation configured them
 
 #### Scenario: Plugins switched off for the installation
 
-- **WHEN** plugins are not enabled and a member lists, reads, uploads, updates, refreshes or deletes a plugin
-- **THEN** the system answers 403 "Plugins disabled"
+- **WHEN** plugins are not enabled and the owner lists, reads, uploads a package, updates with a valid body, refreshes or deletes a plugin, with or without `personal=true` where the operation takes it
+- **THEN** the system answers 403 "Access denied"
 
 #### Scenario: Upload or delete switched off
 
-- **WHEN** upload is off and the owner uploads a package, or delete is off and the owner deletes a plugin
-- **THEN** the system answers 403 "Forbidden action"
+- **WHEN** plugins are on and upload is off and the owner uploads a package, with or without `personal=true`, or delete is off and the owner deletes a portal plugin
+- **THEN** the system answers 403 "Access denied"
 
 #### Scenario: Delete switched off for a personal plugin
 
-- **WHEN** delete is off and a User deletes their personal plugin with `personal=true`
+- **WHEN** plugins and personal plugins are on, delete is off and a User deletes their personal plugin with `personal=true`
 - **THEN** the system answers 200
 
 ### Requirement: Listing the plugins of a portal
 
 `getWebPlugins` SHALL return, to any signed-in member without a settings right, the installation-wide
-plugins first, then the portal's own, dropping a portal plugin whose name an installation-wide plugin already
-uses (100 at most), then the caller's personal ones; no paging. A set `enabled` SHALL keep only the plugins
-in that state. Each entry SHALL carry the manifest data, `createBy`, `createOn`, the state
-(`enabled`, `settings`), `system`, `personal`, `url` and `cssUrl`. Anonymous: 401.
+plugins, then the portal's own that none of them shadows (100 at most in all), then the caller's personal ones
+that no plugin above shadows; no paging. A set `enabled` SHALL keep only the plugins in that state. Each entry
+SHALL carry the manifest data, `createBy`, `createOn`, the state (`enabled`, `settings`), `system`, `personal`,
+`url` and `cssUrl`. Anonymous: 401.
 
 #### Scenario: Member lists an empty portal
 
@@ -199,11 +330,11 @@ that is not installed there. Any signed-in member may read it; anonymous 401.
 
 ### Requirement: Uploading a plugin package
 
-`addWebPluginFromFile` SHALL require the portal-settings right unless `personal=true` (owner or DocSpace admin;
-others 403 "Access denied", anonymous 401) and a form with exactly one non-empty `.zip` file of at most 5 MB
-(400 "No input file", "Too many input files", "Wrong file extension" or "File size exceeds limit"; 403 when
-the body is not a form). It SHALL store the package, switch the plugin on, audit the upload and answer 200 with
-the plugin as `getWebPlugin` returns it.
+`addWebPluginFromFile` SHALL require the portal-settings right unless `personal=true` (owner, DocSpace admin;
+others 403 "Access denied", anonymous 401) and a form with one non-empty `.zip` of at most 5 MB (400 "No
+input file", "Too many input files", "Wrong file extension" or "File size exceeds limit"; 403 when the body is
+not a form). It SHALL store the package, without the manifest's `enabled`, `settings` and `cssUrl` unless
+`system=true`, switch it on and answer 200 with it.
 
 #### Scenario: Owner uploads a valid package
 
@@ -219,6 +350,84 @@ the plugin as `getWebPlugin` returns it.
 
 - **WHEN** the form carries two files
 - **THEN** the system answers 400 "Too many input files"
+
+#### Scenario: Manifest declares a stylesheet address
+
+- **WHEN** the owner uploads a package without `plugin.css` whose manifest declares a `cssUrl`, without `system=true`
+- **THEN** the system answers 200 with no `cssUrl`
+
+#### Scenario: Personal upload over the header size limit
+
+- **WHEN** a User uploads with `personal=true` a plugin whose domains push the User's policy header over its size limit
+- **THEN** the system answers 403 "CSP header size exceeds maximum allowed size of 15360 bytes." and the plugin stays installed and on
+
+### Requirement: Re-uploading a plugin under the same name
+
+A package whose `name` is already installed in the same scope SHALL replace the stored files of that plugin,
+keep the `settings` string stored for the name (a personal plugin's in its owner's settings), switch the plugin
+on, and answer the new manifest; `url` SHALL change with the `version` through its `hash` query. The
+replacement SHALL be accepted even at the plugin limit, but a personal one SHALL answer 400 once a portal or
+installation-wide plugin has its `name` or `pluginName`.
+
+#### Scenario: New version uploaded
+
+- **WHEN** the owner uploads `example-plugin` version 1.0.0, saves settings for it, and uploads version 1.1.0 under the same name
+- **THEN** the second answer carries version 1.1.0, `enabled` true, the saved `settings` and a `url` ending in `?hash=1.1.0`
+
+#### Scenario: Same version uploaded again
+
+- **WHEN** the same version is uploaded twice
+- **THEN** the files are replaced and the `url` is unchanged, so a browser may keep serving the cached script
+
+#### Scenario: Personal plugin re-uploaded after a portal plugin took its name
+
+- **WHEN** a User holds a personal plugin `x`, the owner then installs a portal plugin `x`, and the User uploads `x` again with `personal=true`
+- **THEN** the system answers 400 "Wrong plugin archive. A plugin with the same name or pluginName is already installed for the whole portal"
+
+### Requirement: Portal plugin count limit
+
+A portal SHALL hold at most 100 plugins, the installation-wide ones counted in: an upload that would add
+a new name beyond that SHALL answer 400 "Wrong plugin archive. The number of plugins exceeds the limit",
+while a re-upload of an installed name is accepted. The portal and installation-wide part of the list SHALL
+never return more than that number; the caller's personal plugins come on top.
+
+#### Scenario: Limit reached
+
+- **WHEN** 100 plugins are available to the portal and the owner uploads a package with a new name
+- **THEN** the system answers 400 "Wrong plugin archive. The number of plugins exceeds the limit"
+
+#### Scenario: Personal plugins on top of a full portal
+
+- **WHEN** 100 plugins are available to the portal and a User with a personal plugin calls `getWebPlugins`
+- **THEN** the list holds the 100 portal and installation-wide plugins and the User's personal plugin
+
+### Requirement: Installation-wide plugins
+
+An installation-wide plugin SHALL be available to every portal with `system` true, an empty `createBy` and
+a zero `createOn`, and SHALL win its `name` over a portal plugin; its state and `settings` SHALL be stored per
+portal. `addWebPluginFromFile` with `system=true`, unless `personal=true`, SHALL store the package
+installation-wide on a self-hosted installation only, else 403 "Changes to system plugins are prohibited", and
+SHALL refuse a `name` or `pluginName` the uploading portal has (400).
+
+#### Scenario: Installation-wide plugin on two portals
+
+- **WHEN** portal A switches an installation-wide plugin off and portal B does not
+- **THEN** `getWebPlugin` answers `enabled` false on A and the plugin's own state on B
+
+#### Scenario: Hosted portal asks for an installation-wide install
+
+- **WHEN** the owner of a hosted portal uploads with `system=true`
+- **THEN** the system answers 403 "Changes to system plugins are prohibited" and stores nothing
+
+#### Scenario: Self-hosted installation-wide install
+
+- **WHEN** the owner of a self-hosted portal uploads with `system=true`
+- **THEN** the system answers 200 with `system` true and the plugin appears on every portal of the installation
+
+#### Scenario: Installation-wide install asked for with personal
+
+- **WHEN** plugins, their upload and personal plugins are on and the owner of a self-hosted or a hosted portal uploads a package with `system=true` and `personal=true`
+- **THEN** the system answers 400 "Changes to system plugins are prohibited" and stores nothing
 
 ### Requirement: Switching a plugin on or off and storing its settings
 
@@ -247,6 +456,34 @@ SHALL answer 200 with no body and record the change in the audit trail.
 
 - **WHEN** a Room admin, a User or a Guest calls `updateWebPlugin` without `personal=true`
 - **THEN** the system answers 403 "Access denied"
+
+#### Scenario: Personal plugin switched on over the header size limit
+
+- **WHEN** a User switches on with `personal=true` a personal plugin whose domains push the User's policy header over its size limit
+- **THEN** the system answers 403 "CSP header size exceeds maximum allowed size of 15360 bytes." and the User's `getWebPlugin` with `personal=true` reports `enabled` true
+
+### Requirement: Stored state of a plugin
+
+The portal, and for a personal plugin its owner's own settings row, SHALL keep one state per plugin name only
+while the plugin is on or has settings; a plugin switched off with no settings SHALL have its state removed. A
+plugin with no stored state SHALL be reported with the `enabled` and `settings` of its manifest, which a
+portal or personal upload SHALL NOT store. A stored `settings` value that cannot be decrypted SHALL make the
+read report the plugin as off with empty settings.
+
+#### Scenario: Installation-wide plugin never touched
+
+- **WHEN** a portal reads an installation-wide plugin it never switched
+- **THEN** `enabled` and `settings` are whatever the plugin's manifest declares, off and empty for a manifest that declares nothing
+
+#### Scenario: Undecryptable settings
+
+- **WHEN** the stored settings of a plugin were encrypted by another installation key
+- **THEN** the plugin is listed with `enabled` false and empty `settings`
+
+#### Scenario: Uploaded manifest declares the plugin on
+
+- **WHEN** the owner uploads, without `system=true`, a package whose manifest declares `"enabled": true` and switches the plugin off with empty `settings`
+- **THEN** `getWebPlugin` reports `enabled` false
 
 ### Requirement: Content Security Policy domains of a plugin
 
@@ -305,29 +542,36 @@ remove the plugin's CSP domains, write the audit event and answer 200.
 - **WHEN** a User deletes with `personal=true` their personal plugin that a portal plugin of the same name shadows
 - **THEN** the system answers 200 and the portal plugin stays installed with its state
 
-### Requirement: Portal plugin count limit
+### Requirement: Refreshing a plugin replaced in storage
 
-A portal SHALL hold at most 100 plugins, the installation-wide ones counted in: an upload that would add
-a new name beyond that SHALL answer 400 "Wrong plugin archive. The number of plugins exceeds the limit",
-while a re-upload of an installed name is accepted. The portal and installation-wide part of the list SHALL
-never return more than that number; the caller's personal plugins come on top.
+`refreshWebPlugin` SHALL require the portal-settings right and compare, in the installation-wide and the
+portal scope, the served plugin with the manifest in storage: when the versions differ or the plugin appeared
+or vanished, it SHALL re-read that scope's list on every server and notify the portal's clients. It SHALL
+answer 200 with the plugin as served afterwards, or 404 "Plugin not found". Without it, each server SHALL show
+files replaced in storage within an hour, when its cache expires.
 
-#### Scenario: Limit reached
+#### Scenario: Files replaced during a deployment
 
-- **WHEN** 100 plugins are available to the portal and the owner uploads a package with a new name
-- **THEN** the system answers 400 "Wrong plugin archive. The number of plugins exceeds the limit"
+- **WHEN** a new version of an installation-wide plugin is put into storage and the owner calls `refreshWebPlugin`
+- **THEN** the system answers 200 with the new `version` and `url`, and every portal lists the new version
+- **AND** the plugin's stored state, settings and CSP domains are untouched
 
-#### Scenario: Personal plugins on top of a full portal
+#### Scenario: Nothing changed
 
-- **WHEN** 100 plugins are available to the portal and a User with a personal plugin calls `getWebPlugins`
-- **THEN** the list holds the 100 portal and installation-wide plugins and the User's personal plugin
+- **WHEN** the owner calls `refreshWebPlugin` while the stored manifest matches the served one
+- **THEN** the system answers 200 with the plugin unchanged and no client is notified
+
+#### Scenario: Files replaced without a refresh
+
+- **WHEN** a new version of a plugin is put into storage and nobody calls `refreshWebPlugin`
+- **THEN** `getWebPlugins` lists the new version within an hour, and no client is notified
 
 ### Requirement: Clients are told when a plugin changes
 
-After a portal or installation-wide plugin is uploaded, switched, deleted or found changed by a refresh, the
-system SHALL send the portal's connected clients a real-time event naming the plugin and whether it is enabled,
-so an open interface reloads or unloads the plugin without a page reload. A failure to send SHALL NOT fail the
-call. A personal plugin change SHALL send no event; the owner's other pages see it after a reload.
+After a plugin is uploaded, switched, deleted or found changed by a refresh, the system SHALL send a real-time
+event naming the plugin and whether it is enabled, so an open interface can reload or unload it without a page
+reload: for a portal or installation-wide plugin to the portal's connected clients, for a personal plugin
+`s:change-personal-web-plugin` to its owner's connected clients only. A failure to send SHALL NOT fail the call.
 
 #### Scenario: Plugin switched off
 
@@ -337,4 +581,40 @@ call. A personal plugin change SHALL send no event; the owner's other pages see 
 #### Scenario: Personal plugin switched off
 
 - **WHEN** a User switches their personal plugin off with `personal=true`
-- **THEN** no connected client of the portal receives an event for it
+- **THEN** the User's connected clients receive `s:change-personal-web-plugin` with the plugin's `name` as `webPluginName` and `enabled` false
+- **AND** no other client of the portal receives an event for it
+
+### Requirement: Audit trail of plugin changes
+
+An upload, an update and a deletion SHALL each write one audit event — "Webplugin uploaded", "Webplugin
+updated", "Webplugin deleted" — naming the plugin and carrying its `pluginName` and `version` as the
+target; a personal plugin's write the same events, with no mark that the plugin is personal. Reads and the
+refresh SHALL write none.
+
+#### Scenario: Upload audited
+
+- **WHEN** the owner uploads a plugin
+- **THEN** the audit trail of `history-and-audit` shows "Webplugin uploaded" by the owner with the plugin's name
+
+#### Scenario: Personal upload audited
+
+- **WHEN** a User uploads a plugin with `personal=true`
+- **THEN** the audit trail shows "Webplugin uploaded" by that User with the plugin's name, as for a portal plugin
+
+### Requirement: Plugins in backup and restore
+
+A portal backup SHALL include the uploaded plugin files, personal ones included, and the plugin states, so a
+restore brings the plugins back with their state. A restore SHALL put a member's personal files under the
+member's new user id and skip those of a member it does not restore, unless it restores a dump.
+Installation-wide plugin files SHALL NOT be in a portal backup or a storage migration; restored elsewhere, the
+portal's states for them apply to whatever that installation ships.
+
+#### Scenario: Restore on the same installation
+
+- **WHEN** a portal with an uploaded, enabled plugin is backed up and restored
+- **THEN** `getWebPlugins` lists the plugin with `enabled` true and its settings
+
+#### Scenario: Restore that gives a member a new id
+
+- **WHEN** a portal whose User holds an enabled personal plugin is backed up and restored on the same installation, and the restore gives the User a new user id
+- **THEN** that User's `getWebPlugins` with `personal=true` lists the plugin with `enabled` true and its settings
