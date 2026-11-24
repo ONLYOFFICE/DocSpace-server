@@ -45,9 +45,4 @@ public static class DbFunctionsExtension
         //not using
         return column + path;
     }
-
-    public static string JsonValue(string jsonDoc, [NotParameterized] string path)
-    {
-        throw new NotImplementedException();
-    }
 }

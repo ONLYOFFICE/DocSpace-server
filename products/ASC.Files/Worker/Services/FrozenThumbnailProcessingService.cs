@@ -49,7 +49,9 @@ public class FrozenThumbnailProcessingService(
         {
             await using var filesDbContext = await dbContextFactory.CreateDbContextAsync(stoppingToken);
 
-            var files = await Queries.DbFilesAsync(filesDbContext, ExecuteTaskPeriod.Minutes).ToListAsync(cancellationToken: stoppingToken);
+            // MySQL's TIMESTAMPDIFF(MINUTE, modified_on, now) > m, which the query used to ask: changed m + 1 minutes ago or earlier
+            var modifiedBefore = DateTime.UtcNow.AddMinutes(-(ExecuteTaskPeriod.Minutes + 1));
+            var files = await filesDbContext.FrozenThumbnailFilesAsync(modifiedBefore).ToListAsync(cancellationToken: stoppingToken);
             if (files.Count == 0)
             {
                 return;
@@ -87,17 +89,4 @@ public class FrozenThumbnailProcessingService(
     }
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:frozenThumbProcess:period") ?? "0:10:0");
-}
-
-static file class Queries
-{
-    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<DbFile>> DbFilesAsync =
-        EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int minutesThreshold) =>
-                ctx.Files
-                    .Join(ctx.Tenants, f => f.TenantId, t => t.Id, (file, tenant) => new { file, tenant })
-                    .Where(r => r.tenant.Status == TenantStatus.Active)
-                    .Where(r => r.file.CurrentVersion && r.file.ThumbnailStatus == ASC.Files.Core.Thumbnail.Creating &&
-                                EF.Functions.DateDiffMinute(r.file.ModifiedOn, DateTime.UtcNow) > minutesThreshold)
-                    .Select(r => r.file));
 }

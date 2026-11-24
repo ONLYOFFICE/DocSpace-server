@@ -179,45 +179,5 @@ public class ModelBuilderWrapper
             default:
                 throw new InvalidOperationException();
         }
-
-        ModelBuilder.HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.JsonValue))!)
-            .HasTranslation(expressions =>
-            {
-                var result = new List<SqlExpression>();
-
-                var jsonDoc = expressions[0];
-                switch (jsonDoc)
-                {
-                    case SqlConstantExpression key:
-                        result.Add(new SqlFragmentExpression($"`{key.Value}`"));
-                        break;
-                    case SqlFunctionExpression function:
-                        result.Add(function);
-                        break;
-                    default:
-                        throw new InvalidOperationException();
-                }
-
-                var path = expressions[1];
-                if (path is SqlConstantExpression value)
-                {
-                    var strValue = value.Value?.ToString();
-
-                    if (strValue != null && strValue.StartsWith('[') && strValue.EndsWith(']'))
-                    {
-                        result.Add(new SqlConstantExpression($"${strValue}", value.TypeMapping));
-                    }
-                    else
-                    {
-                        result.Add(new SqlConstantExpression($"$.{strValue}", value.TypeMapping));
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException();
-                }
-
-                return new SqlFunctionExpression("JSON_VALUE", result, true, result.Select(_ => false), typeof(string), null);
-            });
     }
 }

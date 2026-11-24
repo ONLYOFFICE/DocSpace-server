@@ -476,6 +476,15 @@ public partial class FilesDbContext
         return FileQueries.UpdateVectorizationsDeletedOnAsync(this, tenantId, fileIds, deletedOn);
     }
 
+    /// <summary>
+    /// The current versions of files of active portals whose thumbnail is still being created and that were last changed
+    /// at or before <paramref name="modifiedBefore"/>: the files a thumbnail build left behind.
+    /// </summary>
+    [PreCompileQuery]
+    public IAsyncEnumerable<DbFile> FrozenThumbnailFilesAsync(DateTime modifiedBefore)
+    {
+        return FileQueries.FrozenThumbnailFilesAsync(this, modifiedBefore);
+    }
 }
 
 static file class FileQueries
@@ -1319,4 +1328,14 @@ static file class FileQueries
                 .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
                 .ExecuteUpdateAsync(f => f.SetProperty(x => x.DeletedOn, deletedOn));
 
+    // The cut-off is a parameter rather than a date difference in SQL (EF.Functions.DateDiffMinute is a MySQL function
+    // that Npgsql cannot translate), which keeps the query the same on both databases.
+    public static readonly Func<FilesDbContext, DateTime, IAsyncEnumerable<DbFile>> FrozenThumbnailFilesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, DateTime modifiedBefore) =>
+                ctx.Files
+                    .Join(ctx.Tenants, f => f.TenantId, t => t.Id, (file, tenant) => new { file, tenant })
+                    .Where(r => r.tenant.Status == TenantStatus.Active)
+                    .Where(r => r.file.CurrentVersion && r.file.ThumbnailStatus == Thumbnail.Creating && r.file.ModifiedOn <= modifiedBefore)
+                    .Select(r => r.file));
 }
