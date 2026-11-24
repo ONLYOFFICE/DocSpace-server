@@ -84,7 +84,7 @@ public class TariffDto
 
     /// <summary>
     /// How the subscription stands: on trial, paid, inside the grace period that follows the due date, or unpaid.
-    /// It is the one field every caller gets, whatever their role, so a client can warn about payment without
+    /// Every caller gets it and `restricted`, whatever their role, so a client can warn about payment without
     /// needing administrator rights.
     /// </summary>
     /// <example>Paid</example>
@@ -92,10 +92,12 @@ public class TariffDto
 
     /// <summary>
     /// Whether the subscription limits the portal now. While it is true, the portal cannot add admins, room admins,
-    /// guests, rooms or AI agents, or buy paid services. It is true when the subscription is unpaid. Inside
-    /// the grace period it is false only for a customer whose payment method settles days after the charge. That
-    /// needs an answer from billing in the last grace days plus one. A client shows the grace period by `state`
-    /// and limits its controls by this flag.
+    /// guests, rooms or AI agents, buy add-ons to the plan, start the Docs Connect trial, price or make the move to
+    /// Docs Connect Dev Pack, or read or move the subscription balance to the wallet. Scheduled backups and add-on
+    /// renewals stop. Paying for the plan itself stays open. It is true when the subscription is unpaid. Inside the
+    /// grace period it is false only for a customer whose payment method settles days after the charge. That needs
+    /// an answer from billing in the last grace days plus one. A client shows the grace period by `state` and limits
+    /// its controls by this flag.
     /// </summary>
     /// <example>false</example>
     public bool Restricted { get; set; }

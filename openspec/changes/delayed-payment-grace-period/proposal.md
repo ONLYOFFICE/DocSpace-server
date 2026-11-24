@@ -62,8 +62,8 @@ None.
   `createRoom`, `createRoomFromTemplate`, `createRoomThirdParty`, the room copy and restore operations, AI agent
   creation, `addMember`, the invitation links of a paid role, the type changes and re-enabling of members.
   The paid-seat and room limits still apply. Portals without a delayed method see nothing new.
-- **Buying wallet services**: `updateWalletPayment` with `Add` of an add-on answers 200 instead of 402 for
-  such a portal.
+- **Buying wallet services**: `updateWalletPayment` of an add-on, with `Add` or `Set`, answers 200 instead of
+  402 for such a portal.
 - **Moving the subscription balance to the wallet**: `getSubscriptionBalanceInfo` and
   `moveSubscriptionToWallet` answer as on a paid plan instead of 402 "Tariff is not paid".
 - **Automatic renewal of a wallet subscription**: an additional wallet service of such a portal is renewed in

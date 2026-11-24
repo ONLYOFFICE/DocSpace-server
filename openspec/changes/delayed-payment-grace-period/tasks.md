@@ -6,7 +6,7 @@
   instance) and the computed
   `IsRestricted` and lane state to the tariff (`common/ASC.Core.Common/Billing/Tariff.cs`); verified by the unit test of 4.1.
 - [x] 1.2 Write the last known `isDelayedPaymentMethod` on every answer of billing to the customer request (false
-  for "cannot find", a portal that is not a customer) to its own key of the distributed cache, kept for the grace days plus one; write nothing on a failure;
+  for "cannot find" not under a 5xx, a portal that is not a customer) to its own key of the distributed cache, kept for the grace days plus one; write nothing on a failure;
   keep the key out of the tariff cache clearing. Verified by the unit test of 4.2 and the integration test of 4.6.
 - [x] 1.3 When the written answer differs from the stored one (absent counts as false), send `change-tariff` to the
   portal's quota room after the write, best effort in its own `try/catch` with a `[LoggerMessage]` warning, without
@@ -86,9 +86,11 @@
 - [x] 4.12 Unit tests of 1.5 and of the last answer: a read of a cached tariff asks no billing and uses the cached
   customer; billing not configured takes no lock; an unreadable answer or a dropped connection after a delayed
   answer keeps it; the answer is cached for the grace days plus one (`RecordingProxy` over the cache). Billing suite:
-  `getPortalTariff` with `refresh=true` after a switch to a delayed method reports `restricted` false. Not proven: that
-  the reads of a cached tariff pass no `askBilling` (the unit tests call the customer decision directly, and no API
-  drops the customer entry while the tariff stays cached).
+  `getPortalTariff` with `refresh=true` after a switch to a delayed method reports `restricted` false.
+- [x] 4.13 Review round: "cannot find" under a 5xx is an unknown outcome (`BillingClient`; unit tests of
+  the client and of the last answer); a refresh whose tariff enters the grace period only after the payments are
+  read again reads the customer from billing, as saving the tariff drops the cached customer (billing suite); a read of a cached tariff, before the tariff lock or after waiting for
+  it, asks no billing and takes no customer lock (unit test through `GetTariffAsync`).
 
 ## 5. Checks
 

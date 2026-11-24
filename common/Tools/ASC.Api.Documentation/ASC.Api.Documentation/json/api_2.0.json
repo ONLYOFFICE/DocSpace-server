@@ -9040,7 +9040,7 @@
           "Portal / Quota"
         ],
         "summary": "Get the portal tariff",
-        "description": "Returns the tariff of the portal, with its state, the end of the current period, and its quotas. Any signed-in\r\nuser can call it, including a guest. Every caller gets `state` and `restricted`. A room admin or a DocSpace\r\nadmin also gets `dueDate` and `delayDueDate`. Only a caller with the EditPortalSettings permission gets the\r\nother fields. The portal owner and DocSpace admins have this permission. The call is read-only and also works\r\nwhile the portal is unpaid. With `refresh` set to `true`, the call reads the tariff from the billing system\r\ninstead of the cache. To see what the next period costs, use `GET api/2.0/portal/tariff/upcoming`.",
+        "description": "Returns the tariff of the portal, with its state, the end of the current period, and its quotas. Any signed-in\r\nuser can call it, including a guest. Every caller gets `state` and `restricted`. A room admin or a DocSpace\r\nadmin also gets `dueDate` and `delayDueDate`. Only a caller with the EditPortalSettings permission gets the\r\nother fields. The portal owner and DocSpace admins have this permission. The call is read-only and also works\r\nwhile the portal is unpaid. With `refresh` set to `true`, the call reads the tariff from billing, not from the\r\ncache. If the tariff is in the grace period, the call also reads the billing customer again. Without\r\n`refresh`, a change of the payment method takes up to 15 minutes to reach `restricted`. It can take longer if\r\nbilling does not answer or a background read caches the tariff first. To see what the next period costs, use\r\n`GET api/2.0/portal/tariff/upcoming`.",
         "operationId": "getPortalTariff",
         "parameters": [
           {
@@ -10502,7 +10502,7 @@
           "Portal / Users"
         ],
         "summary": "Create an invitation link",
-        "description": "Creates the invitation link of the portal for one role and returns it with the URL to share. If inviting\r\nmembers is turned off in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can\r\ncreate a link for any role. A DocSpace admin can create the `RoomAdmin` and `User` links, and a room admin\r\nonly the `User` link. Other callers get 403. The call changes data. A role has at most one link, so a repeated\r\ncall returns 400. To change an existing link, use `PUT api/2.0/portal/users/invitationlink`. Without\r\n`expiration`, the link never expires. Without `maxUseCount`, it has no use limit. The answer has the `id` that\r\nthe update and delete calls need. The call returns 400 for another role, an `expiration` in the past, or a\r\n`maxUseCount` out of range. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if the payment is\r\noverdue or no paid seat is free.",
+        "description": "Creates the invitation link of the portal for one role and returns it with the URL to share. If inviting\r\nmembers is turned off in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can\r\ncreate a link for any role. A DocSpace admin can create the `RoomAdmin` and `User` links, and a room admin\r\nonly the `User` link. Other callers get 403. The call changes data. A role has at most one link, so a repeated\r\ncall returns 400. To change an existing link, use `PUT api/2.0/portal/users/invitationlink`. Without\r\n`expiration`, the link never expires. Without `maxUseCount`, it has no use limit. The answer has the `id` that\r\nthe update and delete calls need. The call returns 400 for another role, an `expiration` in the past, or a\r\n`maxUseCount` out of range. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if no paid seat is free.\r\nIt also returns 402 for such a link if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows.",
         "operationId": "createInvitationLink",
         "requestBody": {
           "content": {
@@ -10540,7 +10540,7 @@
             "description": "The request body cannot be read, the role is not `DocSpaceAdmin`, `RoomAdmin` or `User`, the use limit is outside 1-1000, the deadline is in the past, or the role already has a link"
           },
           "402": {
-            "description": "The link is for a paying role, and the portal payment is overdue or the portal quota has no free paid seat left"
+            "description": "The link is for a paying role, and the portal quota has no free paid seat left or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows"
           },
           "403": {
             "description": "Inviting members is disabled for the portal, the caller has no right to add users of that role, or a non-owner asks for the DocSpace administrator link"
@@ -10846,7 +10846,7 @@
           "Portal / Users"
         ],
         "summary": "Get an invitation link by role",
-        "description": "Returns the invitation link of the portal for one role, with its URL, deadline, and use count. If inviting\r\nmembers is turned off in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can\r\nread every link. A DocSpace admin can read the `RoomAdmin` and `User` links, and a room admin only the `User`\r\nlink. Other callers get 403. The call is read-only. If the role has no link yet, the call returns 200 with no\r\nlink. To create one, use `POST api/2.0/portal/users/invitationlink`. The call returns 400 for a role other\r\nthan `DocSpaceAdmin`, `RoomAdmin`, or `User`. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if the\r\npayment is overdue or no paid seat is free. It returns 402 even when the role has no link.",
+        "description": "Returns the invitation link of the portal for one role, with its URL, deadline, and use count. If inviting\r\nmembers is turned off in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can\r\nread every link. A DocSpace admin can read the `RoomAdmin` and `User` links, and a room admin only the `User`\r\nlink. Other callers get 403. The call is read-only. If the role has no link yet, the call returns 200 with no\r\nlink. To create one, use `POST api/2.0/portal/users/invitationlink`. The call returns 400 for a role other\r\nthan `DocSpaceAdmin`, `RoomAdmin`, or `User`. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if no\r\npaid seat is free. It also returns 402 for such a link if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. It returns 402 even\r\nwhen the role has no link.",
         "operationId": "getInvitationLinkByEmployeeType",
         "parameters": [
           {
@@ -10886,7 +10886,7 @@
             "description": "The role is not `DocSpaceAdmin`, `RoomAdmin` or `User`"
           },
           "402": {
-            "description": "The role is a paying one, and the portal payment is overdue or the portal quota has no free paid seat left, whether or not the role has a link"
+            "description": "The role is a paying one, and the portal quota has no free paid seat left or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows, whether or not the role has a link"
           },
           "403": {
             "description": "Inviting members is disabled for the portal, the caller has no right to add users of that role, or a non-owner asks for the DocSpace administrator link"
@@ -48049,7 +48049,7 @@
             "format": "int32"
           },
           "state": {
-            "description": "How the subscription stands: on trial, paid, inside the grace period that follows the due date, or unpaid.\r\nIt is the one field every caller gets, whatever their role, so a client can warn about payment without\r\nneeding administrator rights.",
+            "description": "How the subscription stands: on trial, paid, inside the grace period that follows the due date, or unpaid.\r\nEvery caller gets it and `restricted`, whatever their role, so a client can warn about payment without\r\nneeding administrator rights.",
             "$ref": "#/components/schemas/TariffState"
           },
           "restricted": {
@@ -48057,7 +48057,7 @@
               false
             ],
             "type": "boolean",
-            "description": "Whether the subscription limits the portal now: true while the portal cannot add members, rooms or paid\r\nservices. It is true when the subscription is unpaid, and inside the grace period unless the billing\r\ncustomer pays by SEPA direct debit, whose money arrives days after the charge. Every caller gets it, like\r\n`state`; a client shows the grace period by `state` and limits its controls by this flag."
+            "description": "Whether the subscription limits the portal now. While it is true, the portal cannot add admins, room admins,\r\nguests, rooms or AI agents, buy add-ons to the plan, start the Docs Connect trial, price or make the move to\r\nDocs Connect Dev Pack, or read or move the subscription balance to the wallet. Scheduled backups and add-on\r\nrenewals stop. Paying for the plan itself stays open. It is true when the subscription is unpaid. Inside the\r\ngrace period it is false only for a customer whose payment method settles days after the charge. That needs\r\nan answer from billing in the last grace days plus one. A client shows the grace period by `state` and limits\r\nits controls by this flag."
           },
           "dueDate": {
             "description": "When the current period ends, in the portal time zone. It is filled in for a room or DocSpace\r\nadministrator only, and set to the largest value a date can hold for a subscription that never ends.",

@@ -90,8 +90,8 @@ public class VirtualRoomsInternalController(
     /// The call returns 400 if `title` is blank, `cover` is unknown, or `share` is not empty. It also returns 400 if
     /// `private` is set together with `indexing`, a lifetime, or a watermark. A room of the AI rooms section also
     /// returns 400 with settings that do not apply to its type. The call returns 402 if the portal reached the room
-    /// limit of its plan or its payment is overdue. Rooms of the AI rooms section do not count toward this limit. A
-    /// logo that does not fit into the storage quota also returns 402. The call returns 403 if `quota` is set while
+    /// limit of its plan. It also returns 402 if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. A room of the AI rooms section passes
+    /// both checks. A logo that does not fit into the storage quota also returns 402. The call returns 403 if `quota` is set while
     /// room quotas are turned off, or is over the portal limit. It also returns 403 for a public room while the portal
     /// forbids external sharing. A private room also returns 403 if the caller has no encryption keys. A Knowledge room
     /// returns 403 while vectorization is turned off. If `logo.tmpFile` names no uploaded picture, or one already used,
@@ -104,7 +104,7 @@ public class VirtualRoomsInternalController(
     [Tags("Rooms")]
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set together with `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
-    [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
+    [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan, its tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows, or the logo does not fit into the portal storage quota")]
     [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
     [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
     [HttpPost("")]
@@ -371,7 +371,8 @@ public class VirtualRoomsThirdPartyController(
     /// becomes the room, and the call ignores `tags` and `logo`. The call ignores `indexing` and `denyDownload` in
     /// both modes. A public room and a form filling room get a primary external link. To read it, use
     /// `GET api/2.0/files/rooms/{id}/link`. The call returns 400 if the storage account is not connected. It returns
-    /// 402 if the portal reached the room limit of its plan or its payment is overdue. It returns 403 if the storage
+    /// 402 if the portal reached the room limit of its plan. It also returns 402 if the tariff is restricted, as
+    /// `restricted` of `GET api/2.0/portal/tariff` shows. It returns 403 if the storage
     /// account was not connected for rooms. It also returns 403 for a public room while the portal forbids external
     /// sharing. A room type of the AI rooms section also returns 403. With `createAsNewFolder`, a subfolder that
     /// cannot be created also returns 403. If a storage other than SharePoint is full, the call can return 400
@@ -385,7 +386,7 @@ public class VirtualRoomsThirdPartyController(
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set, which a third-party storage does not support, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected, or, with `createAsNewFolder`, the connected storage, other than SharePoint, has no free space left in its own account for the subfolder; free up space there and repeat the call")]
-    [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue")]
+    [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan, or its tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows")]
     [SwaggerResponse(403, "The caller is not the account that connected the storage or may not create rooms, the storage account was not connected for room storage or already backs a room, the room would be public while the portal forbids external sharing, or, with `createAsNewFolder`, the subfolder cannot be created, as when `title` is blank, `cover` is not a known cover, a tag name is empty or the logo cannot be applied")]
     [SwaggerResponse(404, "`id` is not a folder of a connected third-party storage: a plain number, an identifier with a storage type the portal does not know, or a folder the storage does not have")]
     [HttpPost("thirdparty/{id}")]

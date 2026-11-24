@@ -215,8 +215,8 @@ public class PortalController(
     /// call returns 400. To change an existing link, use `PUT api/2.0/portal/users/invitationlink`. Without
     /// `expiration`, the link never expires. Without `maxUseCount`, it has no use limit. The answer has the `id` that
     /// the update and delete calls need. The call returns 400 for another role, an `expiration` in the past, or a
-    /// `maxUseCount` out of range. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if the payment is
-    /// overdue or no paid seat is free.
+    /// `maxUseCount` out of range. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if no paid seat is free.
+    /// It also returns 402 for such a link if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows.
     /// </remarks>
     /// <summary>
     /// Create an invitation link
@@ -225,7 +225,7 @@ public class PortalController(
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The invitation link as it was created, with the `id` to address it later and the `url` to share", typeof(InvitationLinkDto))]
     [SwaggerResponse(400, "The request body cannot be read, the role is not `DocSpaceAdmin`, `RoomAdmin` or `User`, the use limit is outside 1-1000, the deadline is in the past, or the role already has a link")]
-    [SwaggerResponse(402, "The link is for a paying role, and the portal payment is overdue or the portal quota has no free paid seat left")]
+    [SwaggerResponse(402, "The link is for a paying role, and the portal quota has no free paid seat left or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows")]
     [SwaggerResponse(403, "Inviting members is disabled for the portal, the caller has no right to add users of that role, or a non-owner asks for the DocSpace administrator link")]
     [HttpPost("users/invitationlink")]
     public async Task<InvitationLinkDto> CreateInvitationLink(InvitationLinkCreateRequestDto inDto)
@@ -287,8 +287,9 @@ public class PortalController(
     /// read every link. A DocSpace admin can read the `RoomAdmin` and `User` links, and a room admin only the `User`
     /// link. Other callers get 403. The call is read-only. If the role has no link yet, the call returns 200 with no
     /// link. To create one, use `POST api/2.0/portal/users/invitationlink`. The call returns 400 for a role other
-    /// than `DocSpaceAdmin`, `RoomAdmin`, or `User`. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if the
-    /// payment is overdue or no paid seat is free. It returns 402 even when the role has no link.
+    /// than `DocSpaceAdmin`, `RoomAdmin`, or `User`. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if no
+    /// paid seat is free. It also returns 402 for such a link if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. It returns 402 even
+    /// when the role has no link.
     /// </remarks>
     /// <summary>
     /// Get an invitation link by role
@@ -297,7 +298,7 @@ public class PortalController(
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The invitation link of that role, or an empty body when the portal has no link for it", typeof(InvitationLinkDto))]
     [SwaggerResponse(400, "The role is not `DocSpaceAdmin`, `RoomAdmin` or `User`")]
-    [SwaggerResponse(402, "The role is a paying one, and the portal payment is overdue or the portal quota has no free paid seat left, whether or not the role has a link")]
+    [SwaggerResponse(402, "The role is a paying one, and the portal quota has no free paid seat left or the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows, whether or not the role has a link")]
     [SwaggerResponse(403, "Inviting members is disabled for the portal, the caller has no right to add users of that role, or a non-owner asks for the DocSpace administrator link")]
     [HttpGet("users/invitationlink/{employeeType}")]
     public async Task<InvitationLinkDto> GetInvitationLinkByEmployeeType(InvitationLinkRequestDto inDto)
@@ -548,9 +549,10 @@ public class PortalController(
     /// admin also gets `dueDate` and `delayDueDate`. Only a caller with the EditPortalSettings permission gets the
     /// other fields. The portal owner and DocSpace admins have this permission. The call is read-only and also works
     /// while the portal is unpaid. With `refresh` set to `true`, the call reads the tariff from billing, not from the
-    /// cache. In the grace period it also reads the billing customer. Otherwise `restricted` can lag a new payment
-    /// method by up to 15 minutes. To see
-    /// what the next period costs, use `GET api/2.0/portal/tariff/upcoming`.
+    /// cache. If the tariff is in the grace period, the call also reads the billing customer again. Without
+    /// `refresh`, a change of the payment method takes up to 15 minutes to reach `restricted`. It can take longer if
+    /// billing does not answer or a background read caches the tariff first. To see what the next period costs, use
+    /// `GET api/2.0/portal/tariff/upcoming`.
     /// </remarks>
     /// <summary>
     /// Get the portal tariff

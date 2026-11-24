@@ -12,13 +12,13 @@ restricted.
 
 #### Scenario: Grace period with a delayed payment method
 
-- **WHEN** the due date of a hosted portal's plan was two days ago and its billing customer has a delayed payment method
+- **WHEN** the due date of a hosted portal's plan was two days ago, within the portal's grace days, and its billing customer has a delayed payment method
 - **THEN** `getPortalTariff` reports `state` Delay and `restricted` false
 - **AND** the owner creates the invitation link of a Room admin with 200 and adds a Room admin, who keeps that type
 
 #### Scenario: Grace period without a delayed payment method
 
-- **WHEN** the due date of a hosted portal's plan was two days ago and its billing customer pays by card
+- **WHEN** the due date of a hosted portal's plan was two days ago, within the portal's grace days, and its billing customer pays by card
 - **THEN** `getPortalTariff` reports `state` Delay and `restricted` true
 - **AND** creating the invitation link of a Room admin answers 402 "Your pricing plan does not support this option"
 
@@ -35,9 +35,10 @@ restricted.
 ### Requirement: Delayed payment method when billing does not answer
 
 Without a customer answer, the last answer of billing for the portal SHALL decide for the grace days plus one
-after it was given, while the distributed cache answers; with none, the grace period SHALL be restricted. A
-changed answer SHALL take effect within 15 minutes, at once after `getCustomerInfo` or `getPortalTariff` with
-`refresh=true`, and SHALL send `change-tariff` to the portal's quota room.
+after it was given, while the distributed cache answers; with none, the grace period SHALL be restricted. While
+billing answers, a changed answer SHALL take effect within 15 minutes unless a read not asking billing caches
+the tariff first, at once after `getCustomerInfo` or `getPortalTariff` with `refresh=true`, and SHALL queue
+`change-tariff` to the portal's quota room once remembered.
 
 #### Scenario: Billing fails after a delayed answer
 
@@ -126,10 +127,10 @@ installation with a licence path. During the grace period no gate applies.
 ### Requirement: Buying wallet services
 
 `updateWalletPayment` SHALL require the billing service, a DocSpace admin and a customer, one wallet
-product and `productQuantityType` `Set` or `Add` (400 "Invalid product quantity type"). `Add` buys
-from the wallet (404 if known to have no sub-account and no bonus not ended in the accounting currency;
-402 for an add-on on a restricted tariff; minimums: storage 100, Dev Pack 10, the portal's
-administrators; 400 "Invalid quantity"). `Set` writes the next period's quantity, zero cancelling it.
+product and `productQuantityType` `Set` or `Add` (400 "Invalid product quantity type"), each 402 for
+an add-on on a restricted tariff. `Add` buys from the wallet (404 if known to have no sub-account and no
+bonus not ended in the accounting currency; minimums: storage 100, Dev Pack 10, the current admins; 400
+"Invalid quantity"). `Set` writes the next period's quantity, zero cancelling it.
 
 #### Scenario: Owner adds, lowers and cancels storage
 

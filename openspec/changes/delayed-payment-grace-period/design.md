@@ -13,8 +13,9 @@ See proposal.md (Why). Facts the design builds on:
   (`billing`, "Payment gate while the portal is not paid") reads another helper and is left alone.
 - `getCustomerInfo` (`billing`, "Billing account page and payment method") already reads `isDelayedPaymentMethod`
   from billing and keeps the answer in the distributed cache for 10 minutes. After a failure it keeps an empty
-  answer for 10 minutes. For a portal that is not its customer billing answers "error: cannot find", which the
-  client raises as a not-found billing error and which the cache keeps as the same empty answer.
+  answer for 10 minutes. For a portal that is not its customer billing answers "error: cannot find" with 200 OK,
+  which the client raises as a not-found billing error and which the cache keeps as the same empty answer. The
+  same body under a 5xx is an ordinary billing failure, an unknown outcome; under a 4xx it stays billing's answer.
 
 ## Goals / Non-Goals
 
@@ -56,7 +57,9 @@ See proposal.md (Why). Facts the design builds on:
    stopped answering before its grace period started can be restricted before the grace period ends. A failure
    (a timeout, another error, an unreadable body) writes nothing there. The state computation decides by the
    customer known now: the one billing gives on a read that already asks billing (a missed tariff cache with a
-   request to the payment system, refreshed or not), otherwise the one cached by `getCustomerInfo` (10 minutes).
+   request to the payment system, refreshed or not; a calculation after a saved change of the tariff reads it
+   from billing too, as the save drops the cached customer), otherwise the one cached by `getCustomerInfo`
+   (10 minutes).
    Without a customer it reads that key; an absent key means restricted. So a failure keeps the last answer, a
    portal that stopped being a customer is restricted, a read of a cached tariff never waits for billing or the
    customer lock, and the empty answer kept after a failure needs no new meaning. The
@@ -79,12 +82,17 @@ See proposal.md (Why). Facts the design builds on:
 - [A customer who pays by SEPA and does not pay keeps full functionality for the whole grace period] → it is
   what the user asked for; NotPaid ends it on the same day as for any other portal.
 - [A read that already asks billing now also asks for the customer in the grace period, under the tariff lock:
-  once per 10 minutes per portal, and on every call with `refresh`] → it adds to a billing call that read makes
-  anyway; reads of a cached tariff, the payment gate among them, never ask; paid portals never ask.
+  once per 10 minutes per portal, on every call with `refresh`, and after a saved change of the tariff] → it adds to a billing call that read makes
+  anyway, so readers waiting for the lock wait for both calls when billing is slow; reads of a cached tariff, the
+  payment gate among them, never ask; paid portals never ask.
 - [A switch of the payment method takes effect within 15 minutes: the customer cache, then the tariff cache] →
-  `getCustomerInfo` or `getPortalTariff` with `refresh=true` applies it at once; stated in the spec.
+  `getCustomerInfo` or `getPortalTariff` with `refresh=true` applies it at once; stated in the spec. The 15 minutes
+  hold while billing answers and the tariff, once its entry expires, is read by a read that asks billing: a read
+  without a request to the payment system (the audit trail cleaner) caches the tariff for 5 more minutes without
+  asking. When the last answer cannot be written, no `change-tariff` is queued, and the event itself is best-effort.
 - [The last answer expires the grace days plus one after it was given] → billing silent since before the grace
-  period started restricts the portal once it expires, as with no answer at all; stated in the spec.
+  period started restricts the portal once it expires, as with no answer at all; stated in the spec. No
+  `change-tariff` is sent for the expiry: clients see it on their next tariff read.
 - [The distributed cache does not answer] → the read of the last answer gives none, so the portal is restricted
   while it fails; stated in the spec.
 - [The web client disables controls from `state` Delay until it reads `restricted`] → the server goes first;
