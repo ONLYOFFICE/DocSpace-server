@@ -5,14 +5,14 @@
 The Business plan paid from the wallet exists only with a monthly period (`adminwallet`). A yearly plan paid
 through the hosted checkout exists (`adminyear`), but a portal that pays from the wallet cannot take a year,
 and a yearly subscription moved to the wallet becomes a monthly plan. The change adds the yearly wallet plan
-`adminwalletyear` with its own price. Its product is registered in the payment system before the branch goes
-to testing, so the plan is seeded now and behaves like `adminwallet`.
+`adminwalletyear` with its own price. Its product and its service are registered in the payment system, and
+the plan behaves like `adminwallet`.
 
 ## What Changes
 
 - A new seeded quota `adminwalletyear`: a primary wallet plan with the features of `adminyear` (the `year`
   feature included) and a price of 220 per administrator. The hosted (SaaS) catalogue gets it, a standalone
-  installation does not. Its service name is a placeholder until the payment system names the service.
+  installation does not. Its product id and service name are the ones registered in the payment system.
 - `updateWalletPayment` with `Add` sells `adminwalletyear` under the rules of `adminwallet`: the quantity is
   not below the portal's administrators unless the plan is already active.
 - `updateWalletPayment` with `Add` refuses one administrators plan with 400 "Quota is already set" while the
@@ -91,8 +91,9 @@ None.
 - `PaymentsController` (`updatewallet`, `subscription/movetowallet`), `PaymentHelper`, the wallet service
   enum, the payment request DTO texts, the tariff title resource.
 - The Web.Api OpenAPI document and the C# SDK package.
-- Release order: the product has to exist in the payment system before the branch is tested or deployed.
-  Without it the billing service refuses the purchase; in `moveSubscriptionToWallet` that refusal comes after
-  the subscription has ended and the wallet was topped up. The integration tests run against the payment stub.
-- The branch `feature/business-tools` uses the same quota id and product id for another quota and has to be
-  renumbered when the two meet.
+- The payment system: the billing product and the accounting service of the plan are registered. In an
+  environment without them the billing service refuses the purchase; in `moveSubscriptionToWallet` that
+  refusal comes after the subscription has ended and the wallet was topped up. The integration tests run
+  against the payment stub.
+- The branch `feature/business-tools` uses the same quota id for another quota and has to be renumbered when
+  the two meet.

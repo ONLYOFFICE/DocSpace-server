@@ -1722,7 +1722,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
                             Name = "adminwalletyear",
                             Price = 220m,
-                            ProductId = "1020",
+                            ProductId = "1021",
                             ServiceName = "adminyear",
                             Visible = true,
                             Wallet = true

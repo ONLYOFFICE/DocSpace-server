@@ -42,10 +42,10 @@ See proposal.md for the motivation. What shapes the approach:
 ## Decisions
 
 1. **Seed row.** Quota id -19, name `adminwalletyear`, features of `adminyear`, price 220, wallet, primary
-   (not additional), visible. Product id `1020`: the product is registered in the payment system under this
-   id before the branch goes to testing (decided by the task owner). Service name `adminyear` is a
-   placeholder; it reuses the existing description and unit texts of the wallet operations, so no new letter
-   or report text is needed. *Alternative:* an empty product id until the product exists — rejected: a wallet
+   (not additional), visible. Product id `1021` and service name `adminyear` are the ones the payment system
+   registered for the plan (the billing product and the accounting service, given by the task owner). The
+   service name has the description and unit texts of the wallet operations already, so no new letter or
+   report text is needed. *Alternative:* an empty product id until the product exists — rejected: a wallet
    quota without a product id cannot be found by name for a purchase, so nothing could be tested.
 2. **Enum member `AdminYear`.** The usage filter and the report resolve a service through the enum, so
    without a member the new plan answers 404 there. *Alternative:* relax those checks to "any wallet
@@ -78,10 +78,11 @@ See proposal.md for the motivation. What shapes the approach:
 
 ## Risks / Trade-offs
 
-- [The product is not in the payment system when the branch is deployed] → release precondition, decided by
-  the task owner: the product is registered first. Without it `updatewallet` answers 402 and moves nothing,
-  but `movetowallet` ends the subscription and tops the wallet up before the billing service refuses the
-  purchase. The order of those steps predates the change.
+- [The product is not in the payment system of an environment the branch is deployed to] → the billing
+  product and the accounting service are registered (reported by the task owner); an environment with its
+  own payment system needs them before the migration. Without the product `updatewallet` answers 402 and
+  moves nothing, but `movetowallet` ends the subscription and tops the wallet up before the billing service
+  refuses the purchase. The order of those steps predates the change.
 - [A purchase made after the other plan ended leaves both rows in the tariff] → it does not: the billing
   service does not list an ended payment among the current ones (confirmed by the task owner), and the
   tariff rows are rebuilt from that list, so the ended row goes with the first tariff read after the
@@ -89,8 +90,6 @@ See proposal.md for the motivation. What shapes the approach:
   other plan reads its end.
 - [The period of the subscription is read from the `year` feature of its quota] → only the plan `adminyear`
   carries it, so the other paid plans, the legacy ones included, move to `adminwallet` only.
-- [The service name differs from what the payment system registers] → a follow-up migration updates the row
-  and the test constants.
 - [The price shown differs from the registered one after registration] → the API reads the price through a
   cache of an hour. The renewal worker keeps its list of wallet quotas, prices included, for the life of its
   process, so a changed price, product id or service name reaches renewals after the worker restarts.
@@ -98,7 +97,7 @@ See proposal.md for the motivation. What shapes the approach:
   check reads the tariff and the purchase follows without a lock, as for the DocsCloud / Dev Pack pair.
   Whether the billing service refuses the second product is its decision. A portal that ends up with both
   rows in force gets 400 for `Add` of either plan until one of them ends.
-- [`feature/business-tools` uses quota id -19 and product id 1020 for another quota] → that branch is
+- [`feature/business-tools` uses quota id -19 for another quota] → that branch is
   renumbered (row, enum member, migration) when it meets this one; decided by the task owner.
 - [The in-flight change `wallet-bonus` modifies "Moving the subscription balance to the wallet" too] → the
   change archived second re-bases its delta on the main spec the first one left.
@@ -110,10 +109,10 @@ See proposal.md for the motivation. What shapes the approach:
 
 ## Migration Plan
 
-Deploy: register the product in the payment system, then apply the SaaS migration (and the Standalone one on
+Deploy: with the product and the service registered in the payment system, apply the SaaS migration (and the Standalone one on
 standalone). Rollback: the down migration deletes the row; a portal that bought the plan in between would
 keep a tariff row without a quota, so roll back only before the product is sold.
 
 ## Open Questions
 
-- The real service name of the plan in the payment system.
+None.

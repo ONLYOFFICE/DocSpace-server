@@ -36,10 +36,13 @@
 - [x] 4.6 Re-emit the Web.Api document and rebuild the C# SDK package; verify that the package the tests restore is the repository's one (its hash), then run `ASC.Web.Api.Billing.Tests` and the unit classes of the change
 - [x] 4.7 Style build of the touched projects (`-p:EnforceCodeStyleInBuild=true`); verify no new warnings in the changed files
 
+## 5. Registered product
+
+- [x] 5.1 Set the product id the payment system registered (`1021`) in the seed, the SaaS migration with its designer and snapshot, and the test constants; verify the seed tests and the billing classes of the change pass
+
 ## Workflow follow-up
 
-- Register product 1020 in the payment system before the branch is tested or deployed.
-- When the payment system names the service: a migration that sets the real service name, and the test constants.
+- The billing product 1021 and the accounting service `adminyear` are registered; an environment with its own payment system needs both before the migration.
 - Tell the frontend: the product name `adminwalletyear`, the enum member `AdminYear`, the `year` feature as the sign of the yearly plan, the 400 "Quota is already set", and that `movetowallet` takes the plan of the subscription's own period only.
 - Check the web client (`../client`) for the wallet service enum and the list of wallet plans.
 - Commit the regenerated SDK sources and the published contract in their submodules and move the pointers.

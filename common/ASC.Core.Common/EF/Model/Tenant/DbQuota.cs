@@ -296,7 +296,7 @@ public static class DbQuotaExtension
                     Description = null,
                     Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
                     Price = 220,
-                    ProductId = "1020", // placeholder until the payment system has the product
+                    ProductId = "1021",
                     ServiceName = "adminyear",
                     ServiceGroup = null,
                     Visible = true,
