@@ -1602,6 +1602,11 @@ public class TariffService(
         return customerInfo;
     }
 
+    private static readonly FusionCacheEntryOptions _delayedPaymentMethodReadOptions = new()
+    {
+        ReThrowDistributedCacheExceptions = true
+    };
+
     internal static string GetDelayedPaymentMethodCacheKey(int tenantId)
     {
         return $"{tenantId}:billing:delayedpaymentmethod";
@@ -1649,18 +1654,33 @@ public class TariffService(
     /// is not in the grace period; it is only a nudge to read again. An answer older than that no longer decides: a
     /// portal whose billing stopped answering before its grace period started is restricted once the answer expires.
     /// The tariff is not read here, as the call may run inside the tariff computation under the lock of the tariff
-    /// read, so the event goes to the queue of portals that are not paid.
+    /// read, so the event goes to the queue of portals that are not paid. When the earlier answer cannot be read, the
+    /// clients are told once the new answer is kept: an extra nudge costs one tariff read, a missed one leaves them
+    /// with a stale tariff. The read asks the distributed level to report its failure, which FusionCache otherwise
+    /// takes for a missing value, that is for a card.
     /// </summary>
     private async Task RememberDelayedPaymentMethodAsync(int tenantId, bool delayed)
     {
         var key = GetDelayedPaymentMethodCacheKey(tenantId);
+        bool? known = null;
+        var knownRead = false;
 
         try
         {
-            var known = await GetFromCache<bool?>(key);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            known = await hybridCache.GetOrDefaultAsync<bool?>(key, options: _delayedPaymentMethodReadOptions, token: cts.Token);
+            knownRead = true;
+        }
+        catch (Exception ex)
+        {
+            logger.WarningDelayedPaymentMethodKnownRead(tenantId, ex);
+        }
+
+        try
+        {
             await hybridCache.SetAsync(key, delayed, GetDelayedPaymentMethodCacheDuration(PaymentDelay));
 
-            if (!DelayedPaymentMethodChanged(known, delayed))
+            if (knownRead && !DelayedPaymentMethodChanged(known, delayed))
             {
                 return;
             }

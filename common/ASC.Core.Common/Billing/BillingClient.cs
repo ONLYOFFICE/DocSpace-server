@@ -675,11 +675,11 @@ public static class BillingHttpClientExtension
         }
 
         // Callers take "cannot find" as an answer (no customer, no payments, no invoice). Billing gives it with 200 OK;
-        // a 4xx is still billing's answer about the request, but under a 5xx the outcome is unknown, so the same body
-        // is an ordinary billing failure there.
+        // a 4xx is still billing's answer about the request, but under a 5xx, a timeout (408) or a rate limit (429) the
+        // outcome is unknown, so the same body is an ordinary billing failure there.
         if (content.StartsWith(ErrorMarker, StringComparison.OrdinalIgnoreCase))
         {
-            return (int)response.StatusCode < 500 && content.Contains(NotFoundMarker)
+            return IsAnswerStatus(response.StatusCode) && content.Contains(NotFoundMarker)
                 ? new BillingNotFoundException(content)
                 : new BillingException(content);
         }
@@ -690,6 +690,12 @@ public static class BillingHttpClientExtension
         }
 
         return null;
+    }
+
+    // Whether a status carries billing's answer about the request rather than an unknown outcome.
+    internal static bool IsAnswerStatus(HttpStatusCode status)
+    {
+        return (int)status < 500 && status is not (HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests);
     }
 
     // A refused promo code is answered as {"Message":"error: promo_not_found"}, possibly with the reason in "Code" as well.

@@ -271,12 +271,15 @@ public class BillingClientTests
     [Theory]
     [InlineData(HttpStatusCode.OK, true)]
     [InlineData(HttpStatusCode.NotFound, true)]
+    [InlineData(HttpStatusCode.RequestTimeout, false)]
+    [InlineData(HttpStatusCode.TooManyRequests, false)]
     [InlineData(HttpStatusCode.InternalServerError, false)]
     [InlineData(HttpStatusCode.BadGateway, false)]
-    public async Task CannotFindErrorBody_IsAnAnswerUnlessTheStatusIsAServerError(HttpStatusCode status, bool answer)
+    public async Task CannotFindErrorBody_IsAnAnswerUnlessTheOutcomeIsUnknown(HttpStatusCode status, bool answer)
     {
         // The callers take "cannot find" as "no customer, no payments, no invoice" and act on it. Billing gives it with
-        // 200 OK, and a 4xx is billing's answer too; under a 5xx the body says nothing certain about the portal.
+        // 200 OK, and a 4xx is billing's answer too; under a 5xx, a timeout or a rate limit the body says nothing
+        // certain about the portal.
         var (client, _) = CreateBillingClient(_ => Reply(status, """{"Message":"error: cannot find portal"}"""));
 
         var act = async () => await client.GetCustomerInfoAsync("portal-1");

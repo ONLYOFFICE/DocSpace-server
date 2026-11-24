@@ -76,6 +76,9 @@ internal static partial class TariffServiceLogger
     [LoggerMessage(LogLevel.Warning, "The answer of billing about a delayed payment method of tenant {tenantId} could not be kept; the earlier one keeps deciding its grace period")]
     public static partial void WarningDelayedPaymentMethodRemember(this ILogger<TariffService> logger, int tenantId, Exception exception);
 
+    [LoggerMessage(LogLevel.Warning, "The last answer about a delayed payment method of tenant {tenantId} could not be read; its clients are told to read the tariff again once the new answer is kept")]
+    public static partial void WarningDelayedPaymentMethodKnownRead(this ILogger<TariffService> logger, int tenantId, Exception exception);
+
     [LoggerMessage(LogLevel.Warning, "The quota values of the tariff of tenant {tenantId} could not be read for its clients; only the tariff change is sent")]
     public static partial void WarningTariffQuotaValues(this ILogger<TariffService> logger, int tenantId, Exception exception);
 

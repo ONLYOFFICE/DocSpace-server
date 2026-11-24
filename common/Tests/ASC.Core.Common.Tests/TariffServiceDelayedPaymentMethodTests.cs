@@ -245,6 +245,44 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
     }
 
     [Fact]
+    public async Task GetCustomerInfoAsync_EarlierAnswerCannotBeRead_KeepsTheNewAnswerAndTellsTheClients()
+    {
+        // A card is remembered and billing answers card again, so only a failed read of the earlier answer can tell the
+        // clients: whether the answer changed is unknown, and they read the tariff again rather than keep a stale one
+        var key = TariffService.GetDelayedPaymentMethodCacheKey(TenantId);
+        await _hybridCache.SetAsync(key, false, TimeSpan.FromDays(GraceDays + 1), token: TestContext.Current.CancellationToken);
+        var (cache, _) = RecordingProxy<IFusionCache>.Create(_hybridCache, (method, args) =>
+        {
+            if (method.Name == nameof(IFusionCache.GetOrDefaultAsync) && Equals(args[0], key))
+            {
+                throw new InvalidOperationException("The distributed cache does not answer");
+            }
+        });
+        var service = CreateService(cache, CreateBillingClient(_billing).client, new InMemoryLockProvider());
+        _billingAnswer = () => Customer(delayed: false);
+
+        await service.GetCustomerInfoAsync(TenantId, refresh: true);
+
+        (await RememberedAsync()).Should().BeFalse("the new answer is still kept");
+        await ShouldHaveSentChangeTariffAsync();
+    }
+
+    [Fact]
+    public async Task GetCustomerInfoAsync_DistributedCacheFailsOnTheRead_TellsTheClients()
+    {
+        // FusionCache takes a failing distributed level for a missing value unless asked to report it: a missing value
+        // would read as a card, and a portal whose card answer is repeated would not tell its clients
+        using var cache = new FusionCache(new FusionCacheOptions());
+        cache.SetupDistributedCache(new FailingDistributedCache(), new FusionCacheSystemTextJsonSerializer());
+        var service = CreateService(cache, CreateBillingClient(_billing).client, new InMemoryLockProvider());
+        _billingAnswer = () => Customer(delayed: false);
+
+        await service.GetCustomerInfoAsync(TenantId, refresh: true);
+
+        await ShouldHaveSentChangeTariffAsync();
+    }
+
+    [Fact]
     public async Task IsDelayedPaymentMethodAsync_ReadOfACachedTariff_UsesTheCachedCustomerWithoutAskingBilling()
     {
         // A customer cached with no answer remembered: the previous version cached it, or the answer has expired
@@ -362,6 +400,19 @@ public sealed class TariffServiceDelayedPaymentMethodTests : IDisposable
             IsDelayedPaymentMethod = delayed,
             Email = "owner@example.com"
         };
+    }
+
+    // A distributed level that is out of reach: every call fails at once, as with a refused connection.
+    private sealed class FailingDistributedCache : IDistributedCache
+    {
+        public byte[]? Get(string key) => throw new InvalidOperationException("The distributed cache does not answer");
+        public Task<byte[]?> GetAsync(string key, CancellationToken token = default) => throw new InvalidOperationException("The distributed cache does not answer");
+        public void Set(string key, byte[] value, DistributedCacheEntryOptions options) => throw new InvalidOperationException("The distributed cache does not answer");
+        public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default) => throw new InvalidOperationException("The distributed cache does not answer");
+        public void Refresh(string key) => throw new InvalidOperationException("The distributed cache does not answer");
+        public Task RefreshAsync(string key, CancellationToken token = default) => throw new InvalidOperationException("The distributed cache does not answer");
+        public void Remove(string key) => throw new InvalidOperationException("The distributed cache does not answer");
+        public Task RemoveAsync(string key, CancellationToken token = default) => throw new InvalidOperationException("The distributed cache does not answer");
     }
 
     // A plan with a quota of its own that lapsed two days ago: inside the grace days, and computed without a database.
