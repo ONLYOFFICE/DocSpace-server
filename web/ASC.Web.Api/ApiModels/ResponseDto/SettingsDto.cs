@@ -332,11 +332,11 @@ public class SettingsDto
     public required DeepLinkDto DeepLink { get; set; }
 
     /// <summary>
-    /// Where the ready-made form templates are served from and which extension they carry. Filled in for a
+    /// Where the template gallery serves its ready-made templates from. Filled in for a
     /// signed-in caller only.
     /// </summary>
     /// <example>{ "path": "/forms/templates", "domain": "https://forms.example.com" }</example>
-    public FormGalleryDto FormGallery { get; set; }
+    public TemplateGalleryDto TemplateGallery { get; set; }
 
     /// <summary>
     /// The largest image the portal accepts as a logo or an avatar, in bytes. Filled in for a signed-in caller

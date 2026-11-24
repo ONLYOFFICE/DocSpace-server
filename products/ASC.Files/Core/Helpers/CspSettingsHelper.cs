@@ -272,12 +272,12 @@ public class CspSettingsHelper(
             }
         }
 
-        if (!string.IsNullOrEmpty(configuration["files:oform:domain"]))
+        if (!string.IsNullOrEmpty(configuration["files:template-gallery:domain"]))
         {
-            var oformOptions = configuration.GetSection("csp:oform").Get<CspOptions>();
-            if (oformOptions != null)
+            var templateGalleryOptions = configuration.GetSection("csp:template-gallery").Get<CspOptions>();
+            if (templateGalleryOptions != null)
             {
-                options.Add(oformOptions);
+                options.Add(templateGalleryOptions);
             }
         }
 
@@ -298,10 +298,10 @@ public class CspSettingsHelper(
 
         if (!string.IsNullOrEmpty(configuration["web:recaptcha:public-key"]) || !string.IsNullOrEmpty(configuration["web:hcaptcha:public-key"]))
         {
-            var oformOptions = configuration.GetSection("csp:captcha").Get<CspOptions>();
-            if (oformOptions != null)
+            var captchaOptions = configuration.GetSection("csp:captcha").Get<CspOptions>();
+            if (captchaOptions != null)
             {
-                options.Add(oformOptions);
+                options.Add(captchaOptions);
             }
         }
 

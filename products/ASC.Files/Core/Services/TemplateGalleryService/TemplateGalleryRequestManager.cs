@@ -39,7 +39,7 @@ public class TemplateGalleryRequestManager(
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory)
 {
-    private readonly TemplateGallerySettings _configuration = configuration.GetSection("files:oform").Get<TemplateGallerySettings>();
+    private readonly TemplateGallerySettings _configuration = configuration.GetSection("files:template-gallery").Get<TemplateGallerySettings>();
 
     private readonly JsonSerializerOptions _options = new()
     {

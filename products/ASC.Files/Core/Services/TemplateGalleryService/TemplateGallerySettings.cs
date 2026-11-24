@@ -54,11 +54,6 @@ public class TemplateGallerySettings
     public string Dashboard { get; set; }
 
     /// <summary>
-    /// The extension of the template gallery files.
-    /// </summary>
-    public string Ext { get; set; }
-
-    /// <summary>
     /// The form signature.
     /// </summary>
     public string Signature { get; set; }

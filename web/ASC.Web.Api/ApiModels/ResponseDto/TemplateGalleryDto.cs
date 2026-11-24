@@ -34,9 +34,9 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
-/// Where the ready-made form templates are served from, for browsing them and for submitting new ones.
+/// Where the template gallery serves its ready-made templates from, for browsing them and for submitting new forms.
 /// </summary>
-public class FormGalleryDto
+public class TemplateGalleryDto
 {
     /// <summary>
     /// The path under `domain` that the gallery's own listing API is reached at. It is joined to `domain` by the
@@ -54,15 +54,8 @@ public class FormGalleryDto
     public required string Domain { get; set; }
 
     /// <summary>
-    /// The file extension to ask the gallery for, which decides which rendition of a template is downloaded when
-    /// several are published.
-    /// </summary>
-    /// <example>.docxf</example>
-    public required string Ext { get; set; }
-
-    /// <summary>
     /// The path used for submitting a form of one's own to the gallery, the counterpart of `path` for the upload
-    /// side. The four `upload` fields are empty when the installation allows browsing but not submitting.
+    /// side. The three `upload` fields are empty when the installation allows browsing but not submitting.
     /// </summary>
     /// <example>/forms/upload</example>
     public required string UploadPath { get; set; }
@@ -74,12 +67,6 @@ public class FormGalleryDto
     public required string UploadDomain { get; set; }
 
     /// <summary>
-    /// The file extension a submitted form has to carry.
-    /// </summary>
-    /// <example>.docxf</example>
-    public required string UploadExt { get; set; }
-
-    /// <summary>
     /// The page a person is sent to in order to follow up on a submission, joined to `uploadDomain` the same way
     /// as `uploadPath`.
     /// </summary>
@@ -88,7 +75,7 @@ public class FormGalleryDto
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class FormGalleryDtoMapper
+public static partial class TemplateGalleryDtoMapper
 {
-    public static partial FormGalleryDto Map(this TemplateGallerySettings source);
+    public static partial TemplateGalleryDto Map(this TemplateGallerySettings source);
 }
