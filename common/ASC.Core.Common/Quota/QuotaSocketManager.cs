@@ -90,6 +90,13 @@ public class QuotaSocketManager(
         await MakeRequest("change-web-plugin", new { room, webPluginName, enabled });
     }
 
+    public async Task ChangePersonalWebPluginAsync(Guid userId, string webPluginName, bool enabled)
+    {
+        var room = $"{_tenantManager.GetCurrentTenantId()}-private-{userId}";
+
+        await MakeRequest("change-personal-web-plugin", new { room, webPluginName, enabled });
+    }
+
     /// <summary>
     /// Tells the clients of a portal that its tariff changed (its end, its quotas), so they read it again. The event
     /// carries no data. The tenant is passed explicitly, because a background job that writes the tariff has none.

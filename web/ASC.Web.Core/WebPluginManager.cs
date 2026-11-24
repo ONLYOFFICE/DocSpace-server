@@ -699,9 +699,20 @@ public class WebPluginManager(
         webPlugin.Enabled = enabled;
         webPlugin.Settings = settings;
 
-        if (!webPlugin.Personal)
+        try
         {
-            await quotaSocketManager.ChangeWebPlugin(webPlugin.Name, enabled);
+            if (webPlugin.Personal)
+            {
+                await quotaSocketManager.ChangePersonalWebPluginAsync(authContext.CurrentAccount.ID, webPlugin.Name, enabled);
+            }
+            else
+            {
+                await quotaSocketManager.ChangeWebPlugin(webPlugin.Name, enabled);
+            }
+        }
+        catch (Exception e)
+        {
+            log.WarningWebPluginChangeNotSent(webPlugin.Name, e);
         }
 
         return webPlugin;
