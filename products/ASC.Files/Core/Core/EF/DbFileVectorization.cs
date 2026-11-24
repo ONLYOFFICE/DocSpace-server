@@ -70,7 +70,9 @@ public static class DbFileVectorizationExtension
     {
         modelBuilder.Entity<DbFileVectorization>().Navigation(e => e.Tenant).AutoInclude(false);
         
-        return modelBuilder.Add(MySqlAddDbFileVectorization, Provider.MySql);
+        return modelBuilder
+            .Add(MySqlAddDbFileVectorization, Provider.MySql)
+            .Add(PgSqlAddDbFileVectorization, Provider.PostgreSql);
     }
 
     private static void MySqlAddDbFileVectorization(this ModelBuilder modelBuilder)
@@ -106,6 +108,40 @@ public static class DbFileVectorizationExtension
 
             entity.HasIndex(e => e.DeletedOn)
                 .HasDatabaseName("IX_deleted_on");
+        });
+    }
+
+    private static void PgSqlAddDbFileVectorization(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbFileVectorization>(entity =>
+        {
+            entity.ToTable("files_file_vectorization");
+
+            entity.HasKey(e => new { e.TenantId, e.FileId })
+                .HasName("pk_files_file_vectorization");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.FileId)
+                .HasColumnName("file_id");
+
+            entity.Property(e => e.Status)
+                .HasColumnName("status");
+
+            entity.Property(e => e.UpdatedOn)
+                .HasColumnName("updated_on")
+                .HasColumnType("timestamptz");
+
+            entity.Property(e => e.DeletedOn)
+                .HasColumnName("deleted_on")
+                .HasColumnType("timestamptz");
+
+            entity.HasIndex(e => new { e.FileId })
+                .HasDatabaseName("ix_files_file_vectorization_file_id");
+
+            entity.HasIndex(e => e.DeletedOn)
+                .HasDatabaseName("ix_files_file_vectorization_deleted_on");
         });
     }
 }

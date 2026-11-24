@@ -60,7 +60,7 @@ internal sealed class CleanerHost : IAsyncDisposable
         _app = app;
     }
 
-    public static async Task<CleanerHost> BuildAsync(string connectionString, bool substituteTariffs = true)
+    public static async Task<CleanerHost> BuildAsync(string connectionString, string providerName, bool substituteTariffs = true)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { Args = [] });
 
@@ -73,6 +73,8 @@ internal sealed class CleanerHost : IAsyncDisposable
                              .AddInMemoryCollection(new Dictionary<string, string?>
                              {
                                  ["ConnectionStrings:default:connectionString"] = connectionString,
+                                 // buildtools/config names the MySQL provider; a PostgreSQL stack needs the other one.
+                                 ["ConnectionStrings:default:providerName"] = providerName,
                                  ["mysqlServerVersion"] = MySqlServerVersion,
 
                                  // What the AppHost injects into every service process, and what makes the

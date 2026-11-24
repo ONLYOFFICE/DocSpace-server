@@ -92,6 +92,14 @@ public static class Constants
     public const int FormsPostgresPort = 35432;
     public const string FormsDatabase = "forms";
     public const string FormsAdminUser = "forms_admin";
+
+    // The main database (ConnectionStrings:default) on PostgreSQL instead of MySQL: DB_PROVIDER=postgresql, read by the
+    // AppHost and by the test fixtures (AspireHostFixture passes the value of the test process on). Empty or "mysql" keeps MySQL.
+    public const string DbProviderKey = "DB_PROVIDER";
+    public const string MySqlDbProvider = "mysql";
+    public const string PostgreSqlDbProvider = "postgresql";
+    public const string MainPostgresContainer = "postgres";
+    public const int MainPostgresPort = 35433;
     public const string SocketIoContainer = "onlyoffice-socketIO";
     public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
     public const string DocumentAgentContainer = "onlyoffice-document-agent";

@@ -266,111 +266,143 @@ public static class IdentityExtension
 
         public void PgSqlAddIdentity()
         {
+            // Same table, key, columns and indexes as the MySQL section, for symmetry (the indexes without MySQL's prefix
+            // lengths, the dates as timestamptz), except purge_at and its index, which only the MySQL purge event reads
+            // (PurgeAt is ignored below): the identity service has no
+            // PostgreSQL schema and is left out of a PostgreSQL stack, so nothing writes these rows there today. The text
+            // columns stay text, not jsonb, which would refuse a value that is not JSON. principal_id,
+            // registered_client_id and id get the varchar(255) MySQL gives a string key or index column. Index names
+            // carry the table name, since PostgreSQL scopes them to the schema.
             modelBuilder.Entity<IdentityAuthorization>(entity =>
             {
-                // Define table name and schema if needed (PostgreSQL supports schemas).
+                entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId, e.AuthorizationGrantType })
+                    .HasName("pk_identity_authorizations");
+
                 entity.ToTable("identity_authorizations");
 
-                // Define primary key.
-                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Id, "uk_identity_authorizations_id").IsUnique();
 
-                // Configure properties with explicit column types and settings (if necessary).
-                entity.Property(e => e.Id)
-                    .HasColumnType("text"); // PostgreSQL-specific for string IDs.
+                entity.HasIndex(e => e.Id, "idx_identity_authorizations_id");
 
-                entity.Property(e => e.RegisteredClientId)
-                    .IsRequired()
-                    .HasColumnType("text");
+                entity.HasIndex(e => e.AccessTokenHash, "idx_identity_authorizations_access_token_hash");
 
-                entity.Property(e => e.PrincipalId)
-                    .IsRequired()
-                    .HasColumnType("text");
+                entity.HasIndex(e => e.RefreshTokenHash, "idx_identity_authorizations_refresh_token_hash");
 
-                entity.Property(e => e.TenantId)
-                    .IsRequired()
-                    .HasColumnType("integer");
+                entity.HasIndex(e => e.State, "idx_identity_authorizations_state");
 
-                entity.Property(e => e.OwnerTenantId)
-                    .HasColumnType("bigint");
+                entity.HasIndex(e => e.AuthorizationCodeValue, "idx_identity_authorizations_authorization_code_value");
 
-                entity.Property(e => e.OwnerUserId)
-                    .HasMaxLength(255);
+                entity.HasIndex(e => e.RegisteredClientId, "idx_identity_authorizations_registered_client_id");
+
+                entity.HasIndex(e => e.TenantId, "idx_identity_authorizations_tenant_id");
 
                 entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_authorizations_owner");
 
-                entity.Property(e => e.State)
-                    .HasColumnType("text");
-
-                entity.Property(e => e.Attributes)
-                    .HasColumnType("jsonb"); // PostgreSQL supports JSONB for efficient querying.
-
-                entity.Property(e => e.AuthorizationGrantType)
-                    .HasColumnType("text");
-
-                entity.Property(e => e.AuthorizedScopes)
-                    .HasColumnType("text");
-
-                entity.Property(e => e.AuthorizationCodeValue)
-                    .HasColumnType("text");
-
-                entity.Property(e => e.AuthorizationCodeMetadata)
-                    .HasColumnType("jsonb");
-
-                entity.Property(e => e.AuthorizationCodeIssuedAt)
-                    .HasColumnType("timestamptz");
-
-                entity.Property(e => e.AuthorizationCodeExpiresAt)
-                    .HasColumnType("timestamptz");
-
-                entity.Property(e => e.AccessTokenType)
-                    .HasColumnType("text");
-
-                entity.Property(e => e.AccessTokenValue)
-                    .HasColumnType("text");
-
-                entity.Property(e => e.AccessTokenHash)
-                    .HasColumnType("text");
-
-                entity.Property(e => e.AccessTokenScopes)
-                    .HasColumnType("text");
-
-                entity.Property(e => e.AccessTokenMetadata)
-                    .HasColumnType("jsonb");
-
-                entity.Property(e => e.AccessTokenIssuedAt)
-                    .HasColumnType("timestamptz");
-
+                entity.Property(e => e.PrincipalId)
+                    .HasMaxLength(255)
+                    .HasColumnName("principal_id");
+                entity.Property(e => e.RegisteredClientId)
+                    .HasMaxLength(255)
+                    .HasColumnName("registered_client_id");
                 entity.Property(e => e.AccessTokenExpiresAt)
+                    .HasColumnName("access_token_expires_at")
                     .HasColumnType("timestamptz");
-
-                entity.Property(e => e.RefreshTokenValue)
+                entity.Property(e => e.AccessTokenHash)
+                    .HasColumnName("access_token_hash")
                     .HasColumnType("text");
-
-                entity.Property(e => e.RefreshTokenHash)
+                entity.Property(e => e.AccessTokenIssuedAt)
+                    .HasColumnName("access_token_issued_at")
+                    .HasColumnType("timestamptz");
+                entity.Property(e => e.AccessTokenMetadata)
+                    .HasColumnName("access_token_metadata")
                     .HasColumnType("text");
-
-                entity.Property(e => e.RefreshTokenMetadata)
-                    .HasColumnType("jsonb");
-
-                entity.Property(e => e.RefreshTokenIssuedAt)
+                entity.Property(e => e.AccessTokenScopes)
+                    .HasColumnName("access_token_scopes")
+                    .HasColumnType("text");
+                entity.Property(e => e.AccessTokenType)
+                    .HasMaxLength(255)
+                    .HasColumnName("access_token_type");
+                entity.Property(e => e.AccessTokenValue)
+                    .HasColumnName("access_token_value")
+                    .HasColumnType("text");
+                entity.Property(e => e.Attributes)
+                    .HasColumnName("attributes")
+                    .HasColumnType("text");
+                entity.Property(e => e.AuthorizationCodeExpiresAt)
+                    .HasColumnName("authorization_code_expires_at")
                     .HasColumnType("timestamptz");
-
-                entity.Property(e => e.RefreshTokenExpiresAt)
+                entity.Property(e => e.AuthorizationCodeIssuedAt)
+                    .HasColumnName("authorization_code_issued_at")
                     .HasColumnType("timestamptz");
-
+                entity.Property(e => e.AuthorizationCodeMetadata)
+                    .HasMaxLength(255)
+                    .HasColumnName("authorization_code_metadata");
+                entity.Property(e => e.AuthorizationCodeValue)
+                    .HasColumnName("authorization_code_value")
+                    .HasColumnType("text");
+                entity.Property(e => e.AuthorizationGrantType)
+                    .HasMaxLength(255)
+                    .HasColumnName("authorization_grant_type");
+                entity.Property(e => e.AuthorizedScopes)
+                    .HasColumnName("authorized_scopes")
+                    .HasColumnType("text");
+                entity.Property(e => e.Id)
+                    .HasMaxLength(255)
+                    .HasColumnName("id");
                 entity.Property(e => e.IsInvalidated)
-                    .HasColumnType("boolean");
-
+                    .HasColumnName("is_invalidated")
+                    .HasDefaultValueSql("false");
                 entity.Property(e => e.ModifiedAt)
+                    .HasColumnName("modified_at")
+                    .HasColumnType("timestamptz");
+                entity.Property(e => e.RefreshTokenExpiresAt)
+                    .HasColumnName("refresh_token_expires_at")
+                    .HasColumnType("timestamptz");
+                entity.Property(e => e.RefreshTokenHash)
+                    .HasColumnName("refresh_token_hash")
+                    .HasColumnType("text");
+                entity.Property(e => e.RefreshTokenIssuedAt)
+                    .HasColumnName("refresh_token_issued_at")
+                    .HasColumnType("timestamptz");
+                entity.Property(e => e.RefreshTokenMetadata)
+                    .HasColumnName("refresh_token_metadata")
+                    .HasColumnType("text");
+                entity.Property(e => e.RefreshTokenValue)
+                    .HasColumnName("refresh_token_value")
+                    .HasColumnType("text");
+                entity.Property(e => e.State)
+                    .HasMaxLength(500)
+                    .HasColumnName("state");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .IsRequired();
+                entity.Property(e => e.OwnerTenantId).HasColumnName("owner_tenant_id");
+                entity.Property(e => e.OwnerUserId)
+                    .HasMaxLength(255)
+                    .HasColumnName("owner_user_id");
+                entity.Property(e => e.IdTokenValue)
+                    .HasColumnName("id_token_value")
+                    .HasColumnType("text");
+                entity.Property(e => e.IdTokenClaims)
+                    .HasColumnName("id_token_claims")
+                    .HasColumnType("text");
+                entity.Property(e => e.IdTokenMetadata)
+                    .HasColumnName("id_token_metadata")
+                    .HasColumnType("text");
+                entity.Property(e => e.IdTokenIssuedAt)
+                    .HasColumnName("id_token_issued_at")
+                    .HasColumnType("timestamptz");
+                entity.Property(e => e.IdTokenExpiresAt)
+                    .HasColumnName("id_token_expires_at")
                     .HasColumnType("timestamptz");
 
-                // Only the MySQL purge event reads this column.
+                // Only the MySQL purge event reads this column; PostgreSQL has no such event.
                 entity.Ignore(e => e.PurgeAt);
 
                 entity.HasOne(e => e.Tenant)
                     .WithMany()
                     .HasForeignKey(e => e.TenantId)
-                    .OnDelete(DeleteBehavior.Cascade); // Example setting, adjust as per requirements.
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

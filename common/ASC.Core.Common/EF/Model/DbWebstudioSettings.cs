@@ -123,14 +123,16 @@ public static class WebstudioSettingsExtension
                 entity.HasIndex(e => e.Id)
                     .HasDatabaseName("IX_webstudio_settings_Id");
 
-                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                // The MySQL names (TenantID, ID, UserID, Data) in lower case, so unquoted SQL names the same columns on both; the types
+                // still differ (ID and UserID are uuid here, varchar(64) on MySQL; Data is jsonb here, mediumtext there).
+                entity.Property(e => e.TenantId).HasColumnName("tenantid");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
                     .HasColumnType("uuid");
 
                 entity.Property(e => e.UserId)
-                    .HasColumnName("user_id")
+                    .HasColumnName("userid")
                     .HasColumnType("uuid");
 
                 entity.Property(e => e.Data)

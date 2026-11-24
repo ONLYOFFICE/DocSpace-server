@@ -122,10 +122,39 @@ public class ModelBuilderWrapper
                     });
                 break;
             case Provider.PostgreSql:
+                // split_part takes the part SUBSTRING_INDEX gives for 1 (before the first delimiter) and for -1 (after the
+                // last one), the only counts the code passes. HasName("SPLIT_PART") did not work: Npgsql quotes the name of
+                // a mapped function, and the server has no "SPLIT_PART". For 1 the part goes on to Convert.ToInt32 (the AZ
+                // order of FileDao and FolderDao), where MySQL casts a name that is not a number to 0 and PostgreSQL fails
+                // the query; so for 1 the translation keeps the leading digits only, '0' when there are none. Two orders
+                // still differ from MySQL's cast: at most 9 digits are kept (more would overflow the int cast, so
+                // "1234567890" sorts as 123456789), and a name that starts with a space sorts as 0 where MySQL skips it.
                 ModelBuilder
                     .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex),
                         [typeof(string), typeof(char), typeof(int)])!)
-                    .HasName("SPLIT_PART");
+                    .HasTranslation(arguments =>
+                    {
+                        var source = arguments[0];
+                        var delimiter = arguments[1] is SqlConstantExpression { Value: char character }
+                            ? new SqlFragmentExpression("'" + character.ToString().Replace("'", "''") + "'")
+                            : arguments[1];
+
+                        SqlExpression part = new SqlFunctionExpression("split_part", [source, delimiter, arguments[2]],
+                            true, [true, true, true], typeof(string), source.TypeMapping);
+
+                        if (arguments[2] is SqlConstantExpression { Value: 1 })
+                        {
+                            // null when the part has no leading digits, whatever the nullability of the column: EF would
+                            // otherwise drop the COALESCE around it
+                            var digits = new SqlFunctionExpression("substring", [part, new SqlFragmentExpression("'^[+-]?[0-9]{1,9}'")],
+                                true, [false, false], typeof(string), source.TypeMapping);
+
+                            part = new SqlFunctionExpression("COALESCE", [digits, new SqlConstantExpression("0", source.TypeMapping)],
+                                false, [false, false], typeof(string), source.TypeMapping);
+                        }
+
+                        return part;
+                    });
                 ModelBuilder
                     .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.JsonExtract))!)
                     .HasTranslation(e =>

@@ -71,7 +71,9 @@ public static class DbMcpToolsSettingsExtensions
         modelBuilder.Entity<DbMcpServerSettings>().Navigation(e => e.Room).AutoInclude(false);
         modelBuilder.Entity<DbMcpServerSettings>().Navigation(e => e.User).AutoInclude(false);
         
-        return modelBuilder.Add(MySqlAddMcpToolsSettings, Provider.MySql);
+        return modelBuilder
+            .Add(MySqlAddMcpToolsSettings, Provider.MySql)
+            .Add(PgSqlAddMcpToolsSettings, Provider.PostgreSql);
     }
 
     private static void MySqlAddMcpToolsSettings(this ModelBuilder modelBuilder)
@@ -113,6 +115,39 @@ public static class DbMcpToolsSettingsExtensions
                 .HasColumnType("json")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+        });
+    }
+
+    private static void PgSqlAddMcpToolsSettings(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbMcpServerSettings>(entity =>
+        {
+            entity.ToTable("ai_mcp_server_settings");
+
+            entity.HasKey(e => new { e.TenantId, e.RoomId, e.UserId, e.ServerId })
+                .HasName("pk_ai_mcp_server_settings");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.RoomId)
+                .HasColumnName("room_id");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.ServerId)
+                .HasColumnName("server_id")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.OauthCredentials)
+                .HasColumnName("oauth_credentials")
+                .HasColumnType("text");
+
+            entity.Property(e => e.ToolsConfiguration)
+                .HasColumnName("tool_config")
+                .HasColumnType("jsonb");
         });
     }
 }

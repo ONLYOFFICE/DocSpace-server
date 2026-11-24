@@ -65,7 +65,9 @@ public static class DbMcpServerOptionsExtensions
     public static ModelBuilderWrapper AddDbMcpServers(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbMcpServer>().Navigation(e => e.Tenant).AutoInclude(false);
-        return modelBuilder.Add(MySqlAddMcpServerOptions, ASC.Core.Common.EF.Provider.MySql);
+        return modelBuilder
+            .Add(MySqlAddMcpServerOptions, ASC.Core.Common.EF.Provider.MySql)
+            .Add(PgSqlAddMcpServerOptions, ASC.Core.Common.EF.Provider.PostgreSql);
     }
 
     private static void MySqlAddMcpServerOptions(this ModelBuilder modelBuilder)
@@ -128,6 +130,58 @@ public static class DbMcpServerOptionsExtensions
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
                 .HasColumnType("datetime")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+    }
+
+    private static void PgSqlAddMcpServerOptions(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbMcpServer>(entity =>
+        {
+            entity.ToTable("ai_mcp_servers");
+
+            entity.HasKey(e => e.Id)
+                .HasName("pk_ai_mcp_servers");
+
+            entity.HasIndex(e => new { e.TenantId, e.Id })
+                .HasDatabaseName("ix_ai_mcp_servers_tenant_id_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.Name })
+                .HasDatabaseName("ix_ai_mcp_servers_tenant_id_name")
+                .IsUnique();
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.Name)
+                .HasColumnName("name")
+                .HasColumnType("varchar(128)");
+
+            entity.Property(e => e.Endpoint)
+                .HasColumnName("endpoint")
+                .HasColumnType("text");
+
+            entity.Property(e => e.Headers)
+                .HasColumnName("headers")
+                .HasColumnType("text");
+
+            entity.Property(e => e.Description)
+                .HasColumnName("description")
+                .HasColumnType("varchar(255)");
+
+            entity.Property(e => e.ConnectionType)
+                .HasColumnName("connection_type");
+
+            entity.Property(e => e.HasIcon)
+                .HasColumnName("has_icon");
+
+            entity.Property(e => e.ModifiedOn)
+                .HasColumnName("modified_on")
+                .HasColumnType("timestamptz")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
     }

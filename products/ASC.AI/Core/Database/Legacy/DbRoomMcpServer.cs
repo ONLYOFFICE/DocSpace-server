@@ -57,7 +57,9 @@ public static class DbMcpRoomMapExtensions
     {
         modelBuilder.Entity<DbRoomMcpServer>().Navigation(e => e.Tenant).AutoInclude(false);
         modelBuilder.Entity<DbRoomMcpServer>().Navigation(e => e.Room).AutoInclude(false);
-        return modelBuilder.Add(MySqlAddMcpRoomMap, ASC.Core.Common.EF.Provider.MySql);
+        return modelBuilder
+            .Add(MySqlAddMcpRoomMap, ASC.Core.Common.EF.Provider.MySql)
+            .Add(PgSqlAddMcpRoomMap, ASC.Core.Common.EF.Provider.PostgreSql);
     }
 
     private static void MySqlAddMcpRoomMap(ModelBuilder builder)
@@ -82,6 +84,27 @@ public static class DbMcpRoomMapExtensions
                 .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+        });
+    }
+
+    private static void PgSqlAddMcpRoomMap(ModelBuilder builder)
+    {
+        builder.Entity<DbRoomMcpServer>(entity =>
+        {
+            entity.ToTable("ai_mcp_room_servers");
+
+            entity.HasKey(e => new { e.TenantId, e.RoomId, e.ServerId })
+                .HasName("pk_ai_mcp_room_servers");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.RoomId)
+                .HasColumnName("room_id");
+
+            entity.Property(e => e.ServerId)
+                .HasColumnName("server_id")
+                .HasColumnType("uuid");
         });
     }
 }

@@ -300,110 +300,128 @@ public static class DbUserExtension
 
         private void PgSqlAddUser()
         {
+            // Same columns and indexes as the MySQL section, so unquoted SQL names the same core_user columns on both;
+            // string lengths come from the [MaxLength] attributes. Index names carry the table name, since
+            // PostgreSQL scopes them to the schema.
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("core_user");
 
-                // Setting the primary key
-                entity.HasKey(e => e.Id);
+                entity.HasKey(e => e.Id)
+                    .HasName("pk_core_user");
 
-                // Configuring properties with specific column mappings for PostgreSQL
+                entity.HasIndex(e => e.Email)
+                    .HasDatabaseName("core_user_email");
+
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("core_user_last_modified");
+
+                entity.HasIndex(e => new { e.TenantId, e.UserName })
+                    .HasDatabaseName("core_user_username");
+
+                entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.FirstName })
+                    .HasDatabaseName("core_user_tenant_activation_status_firstname");
+
+                entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.LastName })
+                    .HasDatabaseName("core_user_tenant_activation_status_lastname");
+
+                entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.Email })
+                    .HasDatabaseName("core_user_tenant_activation_status_email");
+
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
-                    .HasColumnType("uuid")
-                    .IsRequired();
-
-                entity.Property(e => e.TenantId)
-                    .HasColumnName("tenant_id")
-                    .HasColumnType("integer")
-                    .IsRequired();
-
-                entity.Property(e => e.UserName)
-                    .HasColumnName("username")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(255)
-                    .IsRequired();
-
-                entity.Property(e => e.FirstName)
-                    .HasColumnName("first_name")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(64);
-
-                entity.Property(e => e.LastName)
-                    .HasColumnName("last_name")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(64);
-
-                entity.Property(e => e.Email)
-                    .HasColumnName("email")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.Status)
-                    .HasColumnName("status")
-                    .HasColumnType("integer");
+                    .HasColumnType("uuid");
 
                 entity.Property(e => e.ActivationStatus)
                     .HasColumnName("activation_status")
-                    .HasColumnType("integer");
+                    .HasDefaultValueSql("0");
+
+                entity.Property(e => e.BirthDate)
+                    .HasColumnName("bithdate")
+                    .HasColumnType("timestamptz");
+
+                entity.Property(e => e.Contacts)
+                    .HasColumnName("contacts");
 
                 entity.Property(e => e.CreateDate)
-                    .HasColumnName("create_date")
+                    .HasColumnName("create_on")
                     .HasColumnType("timestamptz");
+
+                entity.Property(e => e.CultureName)
+                    .HasColumnName("culture");
+
+                entity.Property(e => e.Email)
+                    .HasColumnName("email");
+
+                entity.Property(e => e.FirstName)
+                    .IsRequired()
+                    .HasColumnName("firstname");
 
                 entity.Property(e => e.LastModified)
                     .HasColumnName("last_modified")
                     .HasColumnType("timestamptz");
 
-                entity.Property(e => e.Removed)
-                    .HasColumnName("removed")
-                    .HasColumnType("boolean")
-                    .IsRequired();
-
-                // Optional property configuration as shown in the provided `User` class
-                entity.Property(e => e.Sex)
-                    .HasColumnName("sex")
-                    .HasColumnType("boolean");
-
-                entity.Property(e => e.BirthDate)
-                    .HasColumnName("birth_date")
-                    .HasColumnType("timestamptz");
-
-                entity.Property(e => e.Notes)
-                    .HasColumnName("notes")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(512);
-
-                entity.Property(e => e.Title)
-                    .HasColumnName("title")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(64);
-
-                entity.Property(e => e.CultureName)
-                    .HasColumnName("culture_name")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(20);
-
-                entity.Property(e => e.Contacts)
-                    .HasColumnName("contacts")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(1024);
-
-                entity.Property(e => e.MobilePhone)
-                    .HasColumnName("mobile_phone")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.MobilePhoneActivation)
-                    .HasColumnName("mobile_phone_activation")
-                    .HasColumnType("integer");
+                entity.Property(e => e.LastName)
+                    .IsRequired()
+                    .HasColumnName("lastname");
 
                 entity.Property(e => e.Location)
-                    .HasColumnName("location")
-                    .HasColumnType("character varying")
-                    .HasMaxLength(255);
+                    .HasColumnName("location");
 
-                // Tenancy system mapping (foreign key)
+                entity.Property(e => e.Notes)
+                    .HasColumnName("notes");
+
+                entity.Property(e => e.MobilePhone)
+                    .HasColumnName("phone");
+
+                entity.Property(e => e.MobilePhoneActivation)
+                    .HasColumnName("phone_activation")
+                    .HasDefaultValueSql("0");
+
+                entity.Property(e => e.Removed)
+                    .HasColumnName("removed")
+                    .HasDefaultValueSql("false");
+
+                entity.Property(e => e.Sex)
+                    .HasColumnName("sex");
+
+                entity.Property(e => e.Sid)
+                    .HasColumnName("sid");
+
+                entity.Property(e => e.SsoNameId)
+                    .HasColumnName("sso_name_id");
+
+                entity.Property(e => e.SsoSessionId)
+                    .HasColumnName("sso_session_id");
+
+                entity.Property(e => e.Status)
+                    .HasColumnName("status")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
+
+                entity.Property(e => e.TerminatedDate)
+                    .HasColumnName("terminateddate")
+                    .HasColumnType("timestamptz");
+
+                entity.Property(e => e.Title)
+                    .HasColumnName("title");
+
+                entity.Property(e => e.UserName)
+                    .IsRequired()
+                    .HasColumnName("username");
+
+                entity.Property(e => e.WorkFromDate)
+                    .HasColumnName("workfromdate")
+                    .HasColumnType("timestamptz");
+
+                entity.Property(e => e.CreatedBy)
+                    .HasColumnName("created_by")
+                    .HasColumnType("uuid");
+
+                entity.Property(e => e.Spam)
+                    .HasColumnName("spam");
+
                 entity.HasOne(e => e.Tenant)
                     .WithMany()
                     .HasForeignKey(e => e.TenantId)

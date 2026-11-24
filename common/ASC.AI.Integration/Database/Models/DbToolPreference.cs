@@ -60,6 +60,18 @@ public class DbToolPreference : BaseEntity
 
 public static class DbToolPrefsExtension
 {
+    // Npgsql maps a primitive collection to a PostgreSQL array, which a HashSet cannot be ("not an array and does not
+    // implement IList"): every write of the tool preferences failed. On PostgreSQL the sets are stored as JSON text in
+    // the jsonb columns instead, the way UseMicrosoftJson stores them on MySQL.
+    private static readonly ValueConverter<HashSet<string>?, string?> _setAsJson = new(
+        set => set == null ? null : JsonSerializer.Serialize(set, (JsonSerializerOptions?)null),
+        json => json == null ? null : JsonSerializer.Deserialize<HashSet<string>>(json, (JsonSerializerOptions?)null));
+
+    private static readonly ValueComparer<HashSet<string>?> _setComparer = new(
+        (left, right) => left == null ? right == null : right != null && left.SetEquals(right),
+        set => set == null ? 0 : set.Aggregate(0, (hash, item) => hash ^ set.Comparer.GetHashCode(item)),
+        set => set == null ? null : new HashSet<string>(set, set.Comparer));
+
     public static ModelBuilderWrapper AddDbToolPrefs(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbToolPreference>().Navigation(e => e.Tenant).AutoInclude(false);
@@ -153,13 +165,15 @@ public static class DbToolPrefsExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("integer");
 
-            entity.PrimitiveCollection(e => e.Disabled)
+            entity.Property(e => e.Disabled)
                 .HasColumnName("disabled")
-                .HasColumnType("jsonb");
+                .HasColumnType("jsonb")
+                .HasConversion(_setAsJson, _setComparer);
 
-            entity.PrimitiveCollection(e => e.AllowAlways)
+            entity.Property(e => e.AllowAlways)
                 .HasColumnName("allow_always")
-                .HasColumnType("jsonb");
+                .HasColumnType("jsonb")
+                .HasConversion(_setAsJson, _setComparer);
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")

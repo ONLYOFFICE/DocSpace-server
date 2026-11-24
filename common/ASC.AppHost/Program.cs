@@ -55,6 +55,9 @@ if (otelFileLogging)
     connectionManager.AddOpenTelemetryCollector();
 }
 
+// DB_PROVIDER=postgresql puts the main database on PostgreSQL in every profile; see ConnectionStringManager.AddMainPostgres.
+var mainDbOnPostgres = ConnectionStringManager.IsMainDatabaseOnPostgreSql(builder.Configuration[Constants.DbProviderKey]);
+
 var isIntegrationTest = launchProfile is "integration-test" or "notify-test" or "integration-test-billing";
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker, isIntegrationTest);
 
@@ -62,7 +65,7 @@ switch (launchProfile)
 {
     case "integration-test":
         connectionManager
-            .AddMySql(withDataVolume: false, withTmpfs: true)
+            .AddMainDatabase(mainDbOnPostgres, withDataVolume: false, withTmpfs: true)
             // a short limit for the read-only roles, so a long query of one is ended within seconds on the test stack
             .AddFormsPostgres(withDataVolume: false, withTmpfs: true, roQueryTimeoutSeconds: 10)
             .AddRabbitMq(withManagementPlugin: false)
@@ -97,9 +100,10 @@ switch (launchProfile)
             .AddProject<ASC_Data_Backup>(Constants.BackupPort)
             .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
             .AddSocketIO()
-            .AddIdentity()
             // The chat surface (/api/2.0/ai) for the AI chat tests, which stand in for the model with a WireMock.
             .AddAiChat();
+
+        AddIdentity();
 
         break;
     case "integration-test-billing":
@@ -117,7 +121,7 @@ switch (launchProfile)
         }
 
         connectionManager
-            .AddMySql(withDataVolume: false, withTmpfs: true)
+            .AddMainDatabase(mainDbOnPostgres, withDataVolume: false, withTmpfs: true)
             .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()
             .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
@@ -138,7 +142,7 @@ switch (launchProfile)
         // password salt (Web.Api) are needed, plus the MailPit the previews are delivered to. The
         // containers are the same as integration-test: the two services expect all of them.
         connectionManager
-            .AddMySql(withDataVolume: false, withTmpfs: true)
+            .AddMainDatabase(mainDbOnPostgres, withDataVolume: false, withTmpfs: true)
             .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()
             // no data volume, like MySQL: the tenant and entry ids start over with every run, so documents
@@ -155,7 +159,7 @@ switch (launchProfile)
         break;
     case "preview":
         connectionManager
-            .AddMySql()
+            .AddMainDatabase(mainDbOnPostgres)
             .AddMcpServer()
             .AddOpensearch(withDashboard: false);
 
@@ -165,7 +169,7 @@ switch (launchProfile)
 
         break;
     case "frontend-dev":
-        connectionManager.AddMySql(withDbGate: true)
+        connectionManager.AddMainDatabase(mainDbOnPostgres, withDbGate: true)
             .AddRabbitMq()
             .AddRedis()
             .AddMailPit()
@@ -193,7 +197,7 @@ switch (launchProfile)
         break;
     default:
         connectionManager
-            .AddMySql(withDbGate: true)
+            .AddMainDatabase(mainDbOnPostgres, withDbGate: true)
             .AddFormsPostgres(withDbGate: true)
             .AddRabbitMq()
             .AddRedis(withRedisInsight: true)
@@ -227,8 +231,9 @@ switch (launchProfile)
             .AddSsoAuth()
             .AddDocumentAgent()
             .AddAiChat()
-            .AddWebDav()
-            .AddIdentity();
+            .AddWebDav();
+
+        AddIdentity();
 
         break;
 }
@@ -269,3 +274,12 @@ if (launchProfile is not ("notify-test" or "integration-test-billing"))
 }
 
 await builder.Build().RunAsync();
+
+// ASC.Identity (Java, Flyway) has schemas for MySQL and DynamoDB only, and reads the MySQL settings of the stack.
+void AddIdentity()
+{
+    if (!mainDbOnPostgres)
+    {
+        configurator.AddIdentity();
+    }
+}

@@ -65,6 +65,7 @@ public static class DbUserChatSettingsExtensions
         modelBuilder.Entity<DbUserChatSettings>().Navigation(e => e.Room).AutoInclude(false);
         
         modelBuilder.Add(MySqlAddDbUserChatSettings, Provider.MySql);
+        modelBuilder.Add(PgSqlAddDbUserChatSettings, Provider.PostgreSql);
         
         return modelBuilder;
     }
@@ -98,6 +99,35 @@ public static class DbUserChatSettingsExtensions
             entity.Property(e => e.ReasoningEffort)
                 .HasColumnName("reasoning_effort")
                 .HasColumnType("tinyint");
+        });
+    }
+
+    private static void PgSqlAddDbUserChatSettings(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbUserChatSettings>(entity =>
+        {
+            entity.ToTable("ai_user_chat_settings");
+
+            entity.HasKey(e => new { e.TenantId, e.RoomId, e.UserId })
+                .HasName("pk_ai_user_chat_settings");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.RoomId)
+                .HasColumnName("room_id");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.WebSearchEnabled)
+                .HasColumnName("web_search_enabled")
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.ReasoningEffort)
+                .HasColumnName("reasoning_effort")
+                .HasColumnType("integer");
         });
     }
 }

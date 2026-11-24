@@ -102,6 +102,15 @@ public abstract class PortalClientsBase : IDisposable
         return client;
     }
 
+    /// <summary>
+    /// Whether the fixture resolved an address for the resource: it does for its Resources and LazyResources, which a
+    /// suite may shorten for a stack that leaves a resource out (a PostgreSQL one has no identity containers).
+    /// </summary>
+    protected bool HasResource(string resourceName)
+    {
+        return _context.BaseAddresses.ContainsKey(resourceName);
+    }
+
     /// <summary>The base address of a service, in the form the generated SDK's <c>BasePath</c> expects.</summary>
     protected string BasePathOf(string resourceName)
     {

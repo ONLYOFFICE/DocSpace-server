@@ -123,7 +123,8 @@ public static class DbFilesPropertiesExtension
                 entity.Property(e => e.StartFilling)
                     .HasColumnName("start_filling")
                     .HasComputedColumnSql(
-                        "CASE WHEN data->'FormFilling'->>'StartFilling' IS NULL THEN NULL ELSE (data->'FormFilling'->>'StartFilling')::boolean END",
+                        // data is text, as mediumtext in MySQL: the JSON operators need it as jsonb
+                        "CASE WHEN (data::jsonb)->'FormFilling'->>'StartFilling' IS NULL THEN NULL ELSE ((data::jsonb)->'FormFilling'->>'StartFilling')::boolean END",
                         stored: true);
 
                 entity.HasIndex(e => new { e.TenantId, e.StartFilling, e.EntryId })

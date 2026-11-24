@@ -97,7 +97,7 @@ public static class UserRelationExtension
                 .HasName("PK_CoreUserRelations");
 
             builder.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                .HasColumnName("tenant");
 
             builder.Property(e => e.SourceUserId)
                 .HasColumnName("source_user_id")

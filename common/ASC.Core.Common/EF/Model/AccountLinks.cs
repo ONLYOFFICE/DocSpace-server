@@ -140,7 +140,9 @@ public static class AccountLinksExtension
 
                 entity.Property(e => e.Provider)
                     .HasColumnName("provider")
-                    .HasColumnType("char")
+                    // varchar, not char: PostgreSQL pads a char(n) value with spaces and hands them back, where MySQL
+                    // strips them.
+                    .HasColumnType("varchar(60)")
                     .HasMaxLength(60);
             });
 

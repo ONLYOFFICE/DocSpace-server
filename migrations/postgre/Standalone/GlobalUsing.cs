@@ -32,3 +32,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using ASC.Migrations.Core;
+
+global using Microsoft.EntityFrameworkCore.Migrations;

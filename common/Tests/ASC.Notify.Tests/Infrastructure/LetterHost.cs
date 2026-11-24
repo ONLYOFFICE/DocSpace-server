@@ -65,7 +65,7 @@ internal sealed class LetterHost : IAsyncDisposable
     /// that the images a letter carries sit on the same host as its links. <paramref name="webApi"/> is where
     /// Web.Api answers, which stands in for the identity service the stack does not run.
     /// </summary>
-    public static async Task<LetterHost> BuildAsync(string connectionString, string portalUrl, Uri webApi)
+    public static async Task<LetterHost> BuildAsync(string connectionString, string providerName, string portalUrl, Uri webApi)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { Args = [] });
 
@@ -74,7 +74,7 @@ internal sealed class LetterHost : IAsyncDisposable
 
         builder.Configuration.AddDefaultConfiguration(builder.Environment)
                              .AddStudioNotifyConfiguration(builder.Environment)
-                             .AddInMemoryCollection(BuildOverrides(connectionString, portalUrl, webApi));
+                             .AddInMemoryCollection(BuildOverrides(connectionString, providerName, portalUrl, webApi));
 
         // Autofac and NLog. Autofac is not optional: IUrlShortener resolves to BaseUrlShortener, whose
         // ConsumerFactory only has constructors taking IContainer / ILifetimeScope.
@@ -106,11 +106,13 @@ internal sealed class LetterHost : IAsyncDisposable
         await _app.DisposeAsync();
     }
 
-    private static Dictionary<string, string?> BuildOverrides(string connectionString, string portalUrl, Uri webApi)
+    private static Dictionary<string, string?> BuildOverrides(string connectionString, string providerName, string portalUrl, Uri webApi)
     {
         return new Dictionary<string, string?>
         {
             ["ConnectionStrings:default:connectionString"] = connectionString,
+            // buildtools/config names the MySQL provider; a PostgreSQL stack needs the other one.
+            ["ConnectionStrings:default:providerName"] = providerName,
             ["mysqlServerVersion"] = MySqlServerVersion,
 
             // What the AppHost injects into every service process (ProjectConfigurator) and what the

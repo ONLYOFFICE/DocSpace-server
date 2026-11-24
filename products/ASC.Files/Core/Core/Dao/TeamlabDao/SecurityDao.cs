@@ -1361,7 +1361,7 @@ internal abstract class SecurityBaseDao<T>(
 
         if (filterType is ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup)
         {
-            var q1 = filesDbContext.Security
+            var candidates = filesDbContext.Security
                 .Where(s => s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && s.EntryId == entryId && s.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType) ||
                             !filesDbContext.Security.Any(f => f.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && f.EntryId == entryId && f.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType) && f.Subject == s.Subject) &&
                             s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) &&
@@ -1375,11 +1375,28 @@ internal abstract class SecurityBaseDao<T>(
                                     filesDbContext.Security.Any(b => b.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && b.InternalEntryId == r.ParentId && b.EntryType == FileEntryType.Folder))
                                 .OrderBy(r => r.Level)
                                 .Select(r => r.ParentId)
-                                .Contains(s.InternalEntryId))
-                .GroupBy(s => s.Subject)
-                .Select(s => s.OrderBy(r=> r.InternalEntryId).LastOrDefault());
+                                .Contains(s.InternalEntryId));
 
-            q = filesDbContext.Security.FromSqlRaw(q1.ToQueryString());
+            // Not precompiled on purpose: the shape depends on filterType, and on MySQL the query goes through
+            // FromSqlRaw. One record per subject: the entry's own one, or that of the ancestor with the highest
+            // InternalEntryId (a subject with a record of its own on the entry has no other candidate).
+            if (filesDbContext.Database.IsNpgsql())
+            {
+                // The FromSqlRaw round trip does not work on PostgreSQL: ToQueryString leaves the parameters as
+                // comments, and @entryId reached the server unbound ("column entryid does not exist"). Nor can the
+                // GroupBy below be composed further there ("EmptyProjectionMember"), so the same record is picked by
+                // NOT EXISTS. It evaluates the candidates once more per candidate, so its cost grows with the square of
+                // the entry's shares (not measured).
+                q = candidates.Where(s => !candidates.Any(o => o.Subject == s.Subject && o.InternalEntryId > s.InternalEntryId));
+            }
+            else
+            {
+                var q1 = candidates
+                    .GroupBy(s => s.Subject)
+                    .Select(s => s.OrderBy(r=> r.InternalEntryId).LastOrDefault());
+
+                q = filesDbContext.Security.FromSqlRaw(q1.ToQueryString());
+            }
         }
 
         q = filterType switch

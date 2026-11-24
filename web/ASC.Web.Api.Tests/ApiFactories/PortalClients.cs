@@ -128,21 +128,33 @@ public sealed class PortalClients : PortalClientsBase
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
         OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
 
-        IdentityHttpClient = CreateClient(ResourceNames.IdentityRegistration);
+        // A PostgreSQL stack has no identity containers: the identity clients stay unset there, and the classes that
+        // use them (BaseTest.NeedsIdentity) skip before they read them.
+        if (HasResource(ResourceNames.IdentityRegistration))
+        {
+            IdentityHttpClient = CreateClient(ResourceNames.IdentityRegistration);
 
-        // The identity (Spring) side closes idle keep-alive connections aggressively; reusing them
-        // from the shared pool races with that and dies with "response ended prematurely" under
-        // parallel load. One connection per request costs little here and removes the race.
-        IdentityHttpClient.DefaultRequestHeaders.ConnectionClose = true;
+            // The identity (Spring) side closes idle keep-alive connections aggressively; reusing them
+            // from the shared pool races with that and dies with "response ended prematurely" under
+            // parallel load. One connection per request costs little here and removes the race.
+            IdentityHttpClient.DefaultRequestHeaders.ConnectionClose = true;
 
-        // Identity's audit path (HttpUtils.getClientBrowser) NPEs into a 500 on a request without
-        // a User-Agent — every real client sends one, so these tests do too.
-        IdentityHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "ASC.Web.Api.Tests/1.0");
+            // Identity's audit path (HttpUtils.getClientBrowser) NPEs into a 500 on a request without
+            // a User-Agent — every real client sends one, so these tests do too.
+            IdentityHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "ASC.Web.Api.Tests/1.0");
 
-        var identityConfig = new Configuration { BasePath = BasePathOf(ResourceNames.IdentityRegistration) };
-        ClientManagementApi = new ClientManagementApi(IdentityHttpClient, identityConfig);
-        ClientQueryingApi = new ClientQueryingApi(IdentityHttpClient, identityConfig);
-        ScopeManagementApi = new ScopeManagementApi(IdentityHttpClient, identityConfig);
+            var identityConfig = new Configuration { BasePath = BasePathOf(ResourceNames.IdentityRegistration) };
+            ClientManagementApi = new ClientManagementApi(IdentityHttpClient, identityConfig);
+            ClientQueryingApi = new ClientQueryingApi(IdentityHttpClient, identityConfig);
+            ScopeManagementApi = new ScopeManagementApi(IdentityHttpClient, identityConfig);
+        }
+        else
+        {
+            IdentityHttpClient = null!;
+            ClientManagementApi = null!;
+            ClientQueryingApi = null!;
+            ScopeManagementApi = null!;
+        }
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         AuthenticationApi = new AuthenticationApi(WebApiHttpClient, webApiConfig);

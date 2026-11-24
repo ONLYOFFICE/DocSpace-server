@@ -55,7 +55,9 @@ public static class DbMcpServerStateExtensions
     public static ModelBuilderWrapper AddDbMcpServerStates(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbMcpServerState>().Navigation(e => e.Tenant).AutoInclude(false);
-        return modelBuilder.Add(MySqlAddMcpServerStates, ASC.Core.Common.EF.Provider.MySql);
+        return modelBuilder
+            .Add(MySqlAddMcpServerStates, ASC.Core.Common.EF.Provider.MySql)
+            .Add(PgSqlAddMcpServerStates, ASC.Core.Common.EF.Provider.PostgreSql);
     }
 
     private static void MySqlAddMcpServerStates(ModelBuilder modelBuilder)
@@ -78,6 +80,27 @@ public static class DbMcpServerStateExtensions
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
             
+            entity.Property(e => e.Enabled)
+                .HasColumnName("enabled");
+        });
+    }
+
+    private static void PgSqlAddMcpServerStates(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbMcpServerState>(entity =>
+        {
+            entity.ToTable("ai_mcp_server_states");
+
+            entity.HasKey(e => new { e.TenantId, e.ServerId })
+                .HasName("pk_ai_mcp_server_states");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.ServerId)
+                .HasColumnName("id")
+                .HasColumnType("uuid");
+
             entity.Property(e => e.Enabled)
                 .HasColumnName("enabled");
         });

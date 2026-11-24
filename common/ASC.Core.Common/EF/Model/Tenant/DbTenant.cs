@@ -428,10 +428,12 @@ public static class DbTenantExtension
                     .IsRequired()
                     .HasDefaultValueSql("0");
 
+                // varchar, not char: PostgreSQL pads a char(n) value with spaces and hands them back ("en-us      "
+                // is no culture), where MySQL strips them on read.
                 entity.Property(e => e.Language)
                     .IsRequired()
                     .HasColumnName("language")
-                    .HasColumnType("char")
+                    .HasColumnType("varchar(10)")
                     .HasDefaultValueSql("'en-US'");
 
                 entity.Property(e => e.LastModified)

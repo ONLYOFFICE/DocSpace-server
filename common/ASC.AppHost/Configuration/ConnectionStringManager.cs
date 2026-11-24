@@ -48,11 +48,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     // test databases are created by the migration runner and keep the server default.
     private const string MySqlPoolOptions = "Pooling=true;AutoEnlist=false;SSL Mode=none;AllowPublicKeyRetrieval=True;Connection Timeout=30;Maximum Pool Size=300;ConnectionReset=false";
 
+    // The pool size and the connect timeout of MySqlPoolOptions; Npgsql keeps its own defaults otherwise.
+    private const string PostgresPoolOptions = "Pooling=true;Maximum Pool Size=300;Timeout=30";
+
     private MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; set; }
     public Uri? RabbitMqUri { get; private set; }
     public RedisConfig? Redis { get; private set; }
 
     private IResourceBuilder<MySqlDatabaseResource>? MySqlDatabaseResource { get; set; }
+    private IResourceBuilder<PostgresDatabaseResource>? MainPostgresDatabaseResource { get; set; }
     private IResourceBuilder<PostgresServerResource>? FormsPostgresResource { get; set; }
     private ReferenceExpression? FormsAdminConnectionString { get; set; }
     private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
@@ -74,6 +78,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private Dictionary<string, string>? _parameters;
 
     public bool HasOtelCollector => OtelCollectorResource != null;
+
+    /// <summary>Whether the main database was added on PostgreSQL (AddMainPostgres), which leaves Identity out of the graph.</summary>
+    public bool MainDatabaseOnPostgreSql => MainPostgresDatabaseResource != null;
 
     /// <summary>
     /// DbGate, RedisInsight, the OpenSearch dashboard and the RabbitMQ management UI together cost
@@ -136,17 +143,99 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             }
         });
 
-        MigrateResource = builder
-            .AddProject<ASC_Migration_Runner>("migrate")
-            .WithReference(MySqlDatabaseResource)
-            .WaitFor(MySqlDatabaseResource);
-
-        var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
-
-        MigrateResource.WithEnvironment("standalone", isStandalone ? "true" : "");
-
+        AddMigrate(MySqlDatabaseResource, "MySql");
 
         return this;
+    }
+
+    /// <summary>
+    /// Whether the main database runs on PostgreSQL: <see cref="Constants.DbProviderKey"/> set to
+    /// <see cref="Constants.PostgreSqlDbProvider"/>. Empty or <see cref="Constants.MySqlDbProvider"/> keeps MySQL; any
+    /// other value stops the AppHost, since a typo would otherwise run the whole stack on the database not asked for.
+    /// </summary>
+    public static bool IsMainDatabaseOnPostgreSql(string? dbProvider)
+    {
+        if (string.IsNullOrWhiteSpace(dbProvider) || string.Equals(dbProvider, Constants.MySqlDbProvider, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (string.Equals(dbProvider, Constants.PostgreSqlDbProvider, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        throw new InvalidOperationException(
+            $"{Constants.DbProviderKey}='{dbProvider}' is not a known database: use '{Constants.MySqlDbProvider}' (the default) or '{Constants.PostgreSqlDbProvider}'.");
+    }
+
+    /// <summary>The main database (ConnectionStrings:default) on MySQL or, with <paramref name="onPostgreSql"/>, on PostgreSQL.</summary>
+    public ConnectionStringManager AddMainDatabase(bool onPostgreSql, bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false)
+    {
+        return onPostgreSql
+            ? AddMainPostgres(withDbGate, withDataVolume, withTmpfs)
+            : AddMySql(withDbGate, withDataVolume, withTmpfs);
+    }
+
+    /// <summary>
+    /// The main database on PostgreSQL, a server of its own next to the forms one: the forms server is set up for the
+    /// read-only roles of the portals (AddFormsPostgres), and the main schema would share its limits. The migration
+    /// runner applies migrations/postgre; the services get the provider name with the connection string, over the
+    /// MySQL entry of buildtools/config. The editors keep their bundled database and Identity is left out of the graph
+    /// (both read only MySQL settings from here); IdentityClient is pointed elsewhere in ProjectConfigurator. Code of the
+    /// services that is written for MySQL only fails on this stack (CLAUDE.md, Testing, lists what is known).
+    /// </summary>
+    public ConnectionStringManager AddMainPostgres(bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false)
+    {
+        var password = builder.AddParameter("postgres-password", "postgres", secret: true);
+
+        // Every service keeps pools of its own, so the server default of 100 connections is raised. 500 is a guess: no
+        // connection peak has been measured on PostgreSQL, and the pools (up to 300 each) could still reach past it.
+        var postgresResourceBuilder = builder.AddPostgres(Constants.MainPostgresContainer, password: password, port: Constants.MainPostgresPort)
+            .WithImageTag(Constants.PostgresVersion)
+            .WithArgs("-c", "max_connections=500");
+
+        // As for MySQL: a data volume when asked for, otherwise tmpfs when asked for, the cap only off tmpfs.
+        var datadirOnTmpfs = !withDataVolume && withTmpfs;
+
+        if (withDataVolume)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithDataVolume("docspace-postgres-data");
+        }
+        else if (datadirOnTmpfs)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithContainerRuntimeArgs("--tmpfs", "/var/lib/postgresql/data");
+        }
+
+        if (!datadirOnTmpfs)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithMemoryLimit(ContainerMemoryExtensions.PostgresLimit);
+        }
+
+        if (withDbGate && DevTools)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithDbGate();
+        }
+
+        // The same name as the MySQL database: the test fixtures ask for the connection string of "docspace".
+        MainPostgresDatabaseResource = postgresResourceBuilder.AddDatabase("docspace");
+
+        AddMigrate(MainPostgresDatabaseResource, "PostgreSql");
+
+        return this;
+    }
+
+    // The runner applies the SaaS migrations of the provider, and the Standalone ones after them on a standalone stack.
+    private void AddMigrate(IResourceBuilder<IResourceWithConnectionString> database, string provider)
+    {
+        var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        MigrateResource = builder
+            .AddProject<ASC_Migration_Runner>("migrate")
+            .WithReference(database)
+            .WaitFor(database)
+            .WithEnvironment("provider", provider)
+            .WithEnvironment("standalone", isStandalone ? "true" : "");
     }
 
     /// <summary>
@@ -747,6 +836,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             // Same env var WithReference would set, so the services read it from the same config key.
             resourceBuilder.WithEnvironment("ConnectionStrings__default:connectionString",
                 ReferenceExpression.Create($"{MySqlDatabaseResource.Resource};{MySqlPoolOptions}"));
+        }
+
+        if (MainPostgresDatabaseResource != null)
+        {
+            // buildtools/config names the MySQL provider for this entry: the provider decides which EF provider and
+            // which model sections the services take (InstallerOptionsAction).
+            resourceBuilder
+                .WithEnvironment("ConnectionStrings__default:connectionString",
+                    ReferenceExpression.Create($"{MainPostgresDatabaseResource.Resource};{PostgresPoolOptions}"))
+                .WithEnvironment("ConnectionStrings__default:providerName", "Npgsql");
         }
 
         if (FormsAdminConnectionString != null)

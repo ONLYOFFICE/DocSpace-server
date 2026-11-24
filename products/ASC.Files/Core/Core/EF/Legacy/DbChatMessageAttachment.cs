@@ -58,7 +58,9 @@ public static class DbChatMessageAttachmentExtension
     {
         modelBuilder.Entity<DbChatMessageAttachment>().Navigation(e => e.Tenant).AutoInclude(false);
 
-        return modelBuilder.Add(MySqlAddDbChatMessageAttachment, Provider.MySql);
+        return modelBuilder
+            .Add(MySqlAddDbChatMessageAttachment, Provider.MySql)
+            .Add(PgSqlAddDbChatMessageAttachment, Provider.PostgreSql);
     }
 
     private static void MySqlAddDbChatMessageAttachment(this ModelBuilder modelBuilder)
@@ -98,6 +100,42 @@ public static class DbChatMessageAttachmentExtension
 
             entity.HasIndex(e => e.FileId)
                 .HasDatabaseName("IX_file_id");
+        });
+    }
+
+    private static void PgSqlAddDbChatMessageAttachment(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbChatMessageAttachment>(entity =>
+        {
+            entity.ToTable("files_chat_message_attachment");
+
+            entity.HasKey(e => new { e.TenantId, e.ChatId, e.FileId })
+                .HasName("pk_files_chat_message_attachment");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.ChatId)
+                .HasColumnName("chat_id")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.MessageId)
+                .HasColumnName("message_id")
+                .HasColumnType("bigint")
+                .IsRequired(false);
+
+            entity.Property(e => e.FileId)
+                .HasColumnName("file_id");
+
+            entity.Property(e => e.ModifiedOn)
+                .HasColumnName("modified_on")
+                .HasColumnType("timestamptz");
+
+            entity.HasIndex(e => e.ChatId)
+                .HasDatabaseName("ix_files_chat_message_attachment_chat_id");
+
+            entity.HasIndex(e => e.FileId)
+                .HasDatabaseName("ix_files_chat_message_attachment_file_id");
         });
     }
 }

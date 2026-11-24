@@ -205,9 +205,11 @@ public static class DbRoomSettingsExtension
                     .HasColumnName("watermark")
                     .HasColumnType("jsonb");
 
+                // varchar, not char: PostgreSQL keeps the padding of a char(n) value (a reset color read back as six
+                // spaces), MySQL strips it
                 entity.Property(e => e.Color)
                     .HasColumnName("color")
-                    .HasColumnType("char(6)");
+                    .HasColumnType("varchar(6)");
 
                 entity.Property(e => e.Cover)
                     .HasColumnName("cover")
@@ -249,6 +251,20 @@ public static class DbRoomSettingsExtension
 
                 entity.Property(e => e.TenantId)
                     .HasColumnName("tenant_id");
+
+                // The table is shared with DbRoomSettings, and EF leaves this column out of the insert of a room whose
+                // chat settings are not set. MySQL fills it with the default 0 MigrationContext_Upgrade64 gave the column;
+                // without one here every room creation failed on the not-null constraint.
+                entity.Property(e => e.ChatProviderId)
+                    .HasColumnName("chat_provider_id")
+                    .HasDefaultValue(0);
+
+                entity.HasIndex(e => e.ChatProviderId)
+                    .HasDatabaseName("ix_files_room_settings_chat_provider_id");
+
+                entity.Property(e => e.ChatParameters)
+                    .HasColumnName("chat_settings")
+                    .HasColumnType("jsonb");
             });
         }
     }

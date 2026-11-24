@@ -158,7 +158,15 @@ public class ProjectConfigurator(
                 // localhost and the call reached the calling service itself, whose 404 was ignored, so the
                 // identity service never saw it. The router sends /api/2.0/oauth2/clients to identity. 127.0.0.1, not
                 // localhost: the router's port listens on IPv4 only and Windows would try ::1 first, ~2 s per call.
-                .WithEnvironment("core:oidc:authority", new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), Constants.RestyPort, "api/2.0/oauth2").Uri.ToString());
+                // A PostgreSQL stack has no identity service, and the router answers 502 for it, which fails the user
+                // deletion; there the call goes to Web.Api, whose 404 IdentityClient.DeleteClientsAsync ignores, as it
+                // did before the tests had a base domain. A manual portal removal still fails on that 404
+                // (DeleteTenantClientsAsync passes only a success then). The bearer authentication of the services reads
+                // the same key as its OpenID authority, so it asks Web.Api too; without an identity service it fails
+                // either way.
+                .WithEnvironment("core:oidc:authority", connectionManager.MainDatabaseOnPostgreSql
+                    ? new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), Constants.WebApiPort, "api/2.0/oauth2").Uri.ToString()
+                    : new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), Constants.RestyPort, "api/2.0/oauth2").Uri.ToString());
 
             // A queue runs as many of its tasks at once as its registration says, one unless stated. Fine for an
             // installation, but here every test class starts its own reports and operations in parallel, so a test

@@ -62,7 +62,7 @@ public sealed class AspireAppFixture : AspireHostFixture<PortalClients>
 
         lock (_realTariffCleanerLock)
         {
-            return _realTariffCleaner ??= CleanerHost.BuildAsync(connectionString, substituteTariffs: false);
+            return _realTariffCleaner ??= CleanerHost.BuildAsync(connectionString, MainDatabaseProviderName, substituteTariffs: false);
         }
     }
 
@@ -78,7 +78,7 @@ public sealed class AspireAppFixture : AspireHostFixture<PortalClients>
         var connectionString = await GetConnectionStringAsync(ResourceNames.Database, TestContext.Current.CancellationToken);
 
         _connectionString = connectionString;
-        _cleaner = await Timing.Measure("cleanerhost.build", () => CleanerHost.BuildAsync(connectionString));
+        _cleaner = await Timing.Measure("cleanerhost.build", () => CleanerHost.BuildAsync(connectionString, MainDatabaseProviderName));
     }
 
     protected override async ValueTask OnDisposingAsync()

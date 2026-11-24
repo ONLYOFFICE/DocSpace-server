@@ -66,6 +66,7 @@ public static class DbChatSessionExtensions
         modelBuilder.Entity<DbChat>().Navigation(e => e.Tenant).AutoInclude(false);
         
         modelBuilder.Add(MySqlAddDbChatSession, Provider.MySql);
+        modelBuilder.Add(PgSqlAddDbChatSession, Provider.PostgreSql);
         
         return modelBuilder;
     }
@@ -124,6 +125,56 @@ public static class DbChatSessionExtensions
             
             entity.HasIndex(e => new { e.TenantId, e.RoomId, e.UserId, e.ModifiedOn })
                 .HasDatabaseName("IX_tenant_id_room_id_user_id_modified_on");
+        });
+    }
+
+    private static void PgSqlAddDbChatSession(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbChat>(entity =>
+        {
+            entity.ToTable("ai_chats");
+
+            entity.HasKey(e => e.Id)
+                .HasName("pk_ai_chats");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.RoomId)
+                .HasColumnName("room_id");
+
+            entity.Property(e => e.Title)
+                .HasColumnName("title")
+                .HasColumnType("varchar(255)");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.CreatedOn)
+                .HasColumnName("created_on")
+                .HasColumnType("timestamptz");
+
+            entity.Property(e => e.ModifiedOn)
+                .HasColumnName("modified_on")
+                .HasColumnType("timestamptz");
+
+            entity.Property(e => e.DeletedOn)
+                .HasColumnName("deleted_on")
+                .HasColumnType("timestamptz");
+
+            entity.HasIndex(e => new { e.TenantId, e.Id })
+                .HasDatabaseName("ix_ai_chats_tenant_id_id");
+
+            entity.HasIndex(e => e.DeletedOn)
+                .HasDatabaseName("ix_ai_chats_deleted_on");
+
+            entity.HasIndex(e => new { e.TenantId, e.RoomId, e.UserId, e.ModifiedOn })
+                .HasDatabaseName("ix_ai_chats_tenant_id_room_id_user_id_modified_on");
         });
     }
 }

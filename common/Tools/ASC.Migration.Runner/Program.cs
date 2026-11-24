@@ -50,6 +50,18 @@ builder.Services.AddBaseDbContext<TeamlabSiteContext>();
 
 var connectionString = builder.Configuration.GetConnectionString("docspace");
 
+// The provider of ConnectionStrings:docspace (the database the AppHost hands over): MySql by default, PostgreSql for a
+// stack whose main database runs on PostgreSQL, in any letter case. An unknown value stops the run instead of migrating
+// the wrong schema.
+var providerName = builder.Configuration["provider"];
+var docspaceProvider = providerName?.ToLowerInvariant() switch
+{
+    null or "" or "mysql" => new ProviderInfo { Provider = Provider.MySql, ProviderFullName = "MySql.Data.MySqlClient" },
+    "postgresql" => new ProviderInfo { Provider = Provider.PostgreSql, ProviderFullName = "Npgsql" },
+    _ => throw new InvalidOperationException($"provider='{providerName}' is not a known database provider: use MySql or PostgreSql.")
+};
+
+docspaceProvider.ConnectionString = connectionString;
 
 var app = builder.Build();
 
@@ -66,12 +78,7 @@ if (generateScript)
     if (!string.IsNullOrEmpty(connectionString))
     {
         var runner = new MigrationRunner(app.Services);
-        scripts.Add(runner.RunGenerateScript(new ProviderInfo
-        {
-            Provider = Provider.MySql,
-            ConnectionString = connectionString,
-            ProviderFullName = "MySql.Data.MySqlClient"
-        }, configurationInfo, typeof(MigrationContext), targetMigration));
+        scripts.Add(runner.RunGenerateScript(docspaceProvider, configurationInfo, typeof(MigrationContext), targetMigration));
     }
     else
     {
@@ -105,12 +112,7 @@ else
     if (!string.IsNullOrEmpty(connectionString))
     {
         var migrationCreator = new MigrationRunner(app.Services);
-        migrationCreator.RunApplyMigrations(new ProviderInfo
-        {
-            Provider = Provider.MySql,
-            ConnectionString = connectionString,
-            ProviderFullName = "MySql.Data.MySqlClient"
-        }, configurationInfo, typeof(MigrationContext), targetMigration);
+        migrationCreator.RunApplyMigrations(docspaceProvider, configurationInfo, typeof(MigrationContext), targetMigration);
     }
     else
     {

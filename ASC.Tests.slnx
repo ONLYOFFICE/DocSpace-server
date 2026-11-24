@@ -5,6 +5,7 @@
     <Project Path="migrations/mysql/SaaS/ASC.Migrations.MySql.SaaS.csproj" />
     <Project Path="migrations/mysql/Standalone/ASC.Migrations.MySql.Standalone.csproj" />
     <Project Path="migrations/postgre/SaaS/ASC.Migrations.PostgreSql.SaaS.csproj" />
+    <Project Path="migrations/postgre/Standalone/ASC.Migrations.PostgreSql.Standalone.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

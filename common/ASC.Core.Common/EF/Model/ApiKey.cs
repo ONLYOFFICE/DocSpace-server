@@ -183,13 +183,16 @@ public static class DbApiKeyExtension
                         v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
                         v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null));
 
+                // timestamptz, like the other dates of the PostgreSQL model: the key checks compare these columns with
+                // DateTime.UtcNow, which Npgsql translates to now(), a timestamptz, and it refuses to compare that with
+                // a timestamp column, so every request authenticated by a key failed.
                 entity.Property(e => e.LastUsed)
                     .HasColumnName("last_used")
-                    .HasColumnType("timestamp");
+                    .HasColumnType("timestamptz");
 
                 entity.Property(e => e.CreateOn)
                     .HasColumnName("create_on")
-                    .HasColumnType("timestamp")
+                    .HasColumnType("timestamptz")
                     .IsRequired();
 
                 entity.Property(e => e.CreateBy)
@@ -199,7 +202,7 @@ public static class DbApiKeyExtension
 
                 entity.Property(e => e.ExpiresAt)
                     .HasColumnName("expires_at")
-                    .HasColumnType("timestamp");
+                    .HasColumnType("timestamptz");
 
                 entity.Property(e => e.TenantId)
                     .HasColumnName("tenant_id")

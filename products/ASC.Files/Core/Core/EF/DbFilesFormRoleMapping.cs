@@ -132,7 +132,7 @@ public static class DbFilesFormRoleMappingExtension
                 entity.HasKey(e => new { e.TenantId, e.FormId, e.RoleName, e.UserId })
                     .HasName("files_form_role_mapping_pkey");
 
-                entity.ToTable("files_form_role_mapping", "onlyoffice");
+                entity.ToTable("files_form_role_mapping");
 
                 entity.HasIndex(e => new { e.TenantId, e.FormId })
                     .HasDatabaseName("tenant_id_form_id");
@@ -149,7 +149,8 @@ public static class DbFilesFormRoleMappingExtension
                     .HasMaxLength(38);
 
                 entity.Property(e => e.RoleName).HasColumnName("role_name").HasColumnType("varchar(255)");
-                entity.Property(e => e.RoleColor).HasColumnName("role_color").HasColumnType("char(6)");
+                // varchar, not char: PostgreSQL keeps the padding of a char(n) value, MySQL strips it
+                entity.Property(e => e.RoleColor).HasColumnName("role_color").HasColumnType("varchar(6)");
                 entity.Property(e => e.Sequence).HasColumnName("sequence");
 
                 entity.Property(e => e.OpenedAt)

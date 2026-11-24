@@ -118,7 +118,7 @@ public static class DbFilesGroupExtension
 
 
             entity.Property(e => e.TenantId)
-                .HasColumnName("tenant")
+                .HasColumnName("tenant_id")
                 .HasColumnType("integer");
 
             entity.Property(e => e.UserId)

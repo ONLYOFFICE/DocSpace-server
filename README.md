@@ -332,6 +332,7 @@ $c = docker ps -a --format '{{.Names}}' | Where-Object { $_ -match 'mysql|redis|
 | SSO Auth | 9834 | SSO authentication |
 | WebDAV | 1900 | WebDAV protocol |
 | MySQL | 3306 | Database server |
+| PostgreSQL (main) | 35433 | The main database (`ConnectionStrings:default`) when the AppHost runs with `DB_PROVIDER=postgresql`; MySQL otherwise |
 | PostgreSQL (forms) | 35432 | Built-in forms database (`ConnectionStrings:formsAdmin`): the read-only portal roles cannot load the server |
 | Redis | 6379 | Cache server |
 | RabbitMQ | 5672, 15672 | Message broker + Management UI |

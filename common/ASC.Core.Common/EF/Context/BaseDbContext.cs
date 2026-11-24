@@ -92,7 +92,20 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
                     {
                         providerOptions.MigrationsAssembly(migrateAssembly);
                     }
+
+                    // As for MySQL above. Besides the retries, a retrying strategy makes EF buffer every result: code
+                    // written against MySQL runs a query while it still iterates another on the same context (the folder
+                    // counts after a move), which Npgsql refuses on a streamed result ("A command is already in
+                    // progress").
+                    providerOptions.EnableRetryOnFailure(maxRetryCount: 15, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
+
+                    // The counterpart of UseMicrosoftJson above: the models map classes to jsonb columns with
+                    // HasColumnType("jsonb") only, and Npgsql serializes such a class only with dynamic JSON on.
+                    providerOptions.ConfigureDataSource(dataSource => dataSource.EnableDynamicJson());
                 });
+
+                // Npgsql takes only Kind Utc for timestamptz and only a non-Utc Kind for timestamp; see PostgreSqlModelCustomizer.
+                optionsBuilder.ReplaceService<IModelCustomizer, PostgreSqlModelCustomizer>();
                 break;
         }
     }

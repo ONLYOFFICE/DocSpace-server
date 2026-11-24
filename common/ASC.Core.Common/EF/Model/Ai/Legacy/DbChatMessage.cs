@@ -68,6 +68,7 @@ public static class DbChatMessageExtensions
     {
         modelBuilder.Entity<DbChatMessage>().Navigation(e => e.Chat).AutoInclude(false);
         modelBuilder.Add(MySqlAddDbChatMessage, Provider.MySql);
+        modelBuilder.Add(PgSqlAddDbChatMessage, Provider.PostgreSql);
         
         return modelBuilder;
     }
@@ -104,6 +105,36 @@ public static class DbChatMessageExtensions
             entity.Property(e => e.CreatedOn)
                 .HasColumnName("created_on")
                 .HasColumnType("datetime");
+        });
+    }
+
+    public static void PgSqlAddDbChatMessage(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbChatMessage>(entity =>
+        {
+            entity.ToTable("ai_chats_messages");
+
+            entity.HasKey(e => new { e.Id })
+                .HasName("pk_ai_chats_messages");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.ChatId)
+                .HasColumnName("chat_id")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.Role)
+                .HasColumnName("role");
+
+            entity.Property(e => e.Content)
+                .HasColumnName("content")
+                .HasColumnType("jsonb");
+
+            entity.Property(e => e.CreatedOn)
+                .HasColumnName("created_on")
+                .HasColumnType("timestamptz");
         });
     }
 }

@@ -136,6 +136,21 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// </summary>
     protected virtual bool Standalone => true;
 
+    /// <summary>
+    /// Whether the stack's main database runs on PostgreSQL: <c>DB_PROVIDER=postgresql</c> in the environment of the
+    /// test run, which the fixture passes on to the AppHost (<c>ConnectionStringManager.AddMainPostgres</c>). Unset, the
+    /// stack runs on MySQL.
+    /// </summary>
+    public bool MainDatabaseOnPostgreSql { get; } =
+        ConnectionStringManager.IsMainDatabaseOnPostgreSql(Environment.GetEnvironmentVariable(AppHostConstants.DbProviderKey));
+
+    /// <summary>
+    /// The provider name of the stack's main database, for a service host a suite builds in the test process over the
+    /// stack's connection string: buildtools/config names the MySQL one, which would run the MySQL EF provider against
+    /// a PostgreSQL server.
+    /// </summary>
+    public string MainDatabaseProviderName => MainDatabaseOnPostgreSql ? "Npgsql" : "MySql.Data.MySqlClient";
+
     /// <summary>Builds the suite's own client bundle for a freshly registered portal.</summary>
     protected abstract TClients CreateClients(PortalContext context);
 
@@ -193,7 +208,12 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // Origin header first (see TenantManager.SetCurrentTenantAsync), which is how every test
         // is scoped to its own freshly registered portal; see Standalone for the SaaS stack.
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            [$"DOTNET_LAUNCH_PROFILE={LaunchProfile}", "SKIP_CLIENT=true", $"APP_HOSTING_STANDALONE={(Standalone ? "true" : "false")}"]);
+            [
+                $"DOTNET_LAUNCH_PROFILE={LaunchProfile}",
+                "SKIP_CLIENT=true",
+                $"APP_HOSTING_STANDALONE={(Standalone ? "true" : "false")}",
+                $"{AppHostConstants.DbProviderKey}={(MainDatabaseOnPostgreSql ? AppHostConstants.PostgreSqlDbProvider : AppHostConstants.MySqlDbProvider)}"
+            ]);
 
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
@@ -342,7 +362,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     private async Task DisableStartDocsAsync()
     {
-        // AdditionalWhiteLabelSettings.ID, as EF stores it in the varchar(64) key column.
+        // AdditionalWhiteLabelSettings.ID: a varchar(64) key on MySQL, a uuid on PostgreSQL.
         const string settingsId = "0108422f-c05d-488e-b271-30c4032494da";
         const string settingsData =
             """
@@ -357,6 +377,31 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
             {
                 var connectionString = await _app.GetConnectionStringAsync(ResourceNames.Database, cancellationToken)
                     ?? throw new InvalidOperationException($"No connection string for the '{ResourceNames.Database}' resource.");
+
+                if (MainDatabaseOnPostgreSql)
+                {
+                    await using var pgConnection = new NpgsqlConnection(connectionString);
+                    await pgConnection.OpenAsync(cancellationToken);
+
+                    await using var pgCommand = pgConnection.CreateCommand();
+
+                    // The PostgreSQL model keeps the ids as uuid and the data as jsonb.
+                    pgCommand.CommandText =
+                        """
+                        INSERT INTO webstudio_settings (tenantid, id, userid, data, last_modified)
+                        VALUES (@tenantId, @id, @userId, @data::jsonb, now())
+                        ON CONFLICT (tenantid, id, userid) DO UPDATE SET data = excluded.data, last_modified = now();
+                        """;
+
+                    pgCommand.Parameters.AddWithValue("tenantId", DefaultTenantId);
+                    pgCommand.Parameters.AddWithValue("id", Guid.Parse(settingsId));
+                    pgCommand.Parameters.AddWithValue("userId", Guid.Empty);
+                    pgCommand.Parameters.AddWithValue("data", settingsData);
+
+                    await pgCommand.ExecuteNonQueryAsync(cancellationToken);
+
+                    return;
+                }
 
                 await using var connection = new MySqlConnection(connectionString);
                 await connection.OpenAsync(cancellationToken);
@@ -518,9 +563,18 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// An open connection to the stack's database, for a test that has to plant a row no API call
     /// writes any more — data left behind by an older release that the current code must still read —
     /// or to set or read a value the API does not expose; such a test says why next to the query.
+    /// The queries of those tests are MySQL ones, so on a PostgreSQL stack (<see cref="MainDatabaseOnPostgreSql"/>) the
+    /// call skips the test instead of failing it on the SQL.
     /// </summary>
     public async Task<MySqlConnection> OpenDatabaseAsync(CancellationToken cancellationToken = default)
     {
+        if (MainDatabaseOnPostgreSql)
+        {
+            // xUnit reports an exception whose message starts with this token as a skip with the rest as the reason.
+            throw new InvalidOperationException(
+                Xunit.v3.DynamicSkipToken.Value + "The test reads or writes the database with MySQL queries; the stack runs on PostgreSQL.");
+        }
+
         var connection = new MySqlConnection(await GetConnectionStringAsync(ResourceNames.Database, cancellationToken));
         await connection.OpenAsync(cancellationToken);
 

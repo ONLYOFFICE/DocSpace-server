@@ -120,7 +120,7 @@ public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
         var connectionString = await GetConnectionStringAsync(
             ResourceNames.Database, TestContext.Current.CancellationToken);
 
-        _host = await Timing.Measure("letterhost.build", () => LetterHost.BuildAsync(connectionString, PortalUrl, GetEndpoint(ResourceNames.WebApi, "http")));
+        _host = await Timing.Measure("letterhost.build", () => LetterHost.BuildAsync(connectionString, MainDatabaseProviderName, PortalUrl, GetEndpoint(ResourceNames.WebApi, "http")));
     }
 
     protected override async ValueTask OnDisposingAsync()

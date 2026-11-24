@@ -126,7 +126,7 @@ public static class TelegramUsersExtension
 
                 entity.Property(e => e.TelegramUsername)
                     .HasColumnName("telegram_username")
-                    .HasColumnType("char(35)");
+                    .HasColumnType("varchar(35)"); // not char(35): PostgreSQL keeps the padding, MySQL strips it
             });
 
         }

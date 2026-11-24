@@ -101,6 +101,7 @@ public static class ModelsProviderExtension
     {
         modelBuilder.Entity<DbAiProvider>().Navigation(e => e.Tenant).AutoInclude(false);
         modelBuilder.Add(AddMySqlModelsProviders, Provider.MySql);
+        modelBuilder.Add(AddPgSqlModelsProviders, Provider.PostgreSql);
 
         return modelBuilder;
     }
@@ -157,6 +158,54 @@ public static class ModelsProviderExtension
 
             entity.HasIndex(e => new { e.TenantId, e.Id })
                 .HasDatabaseName("IX_tenant_id_id");
+        });
+    }
+
+    public static void AddPgSqlModelsProviders(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbAiProvider>(entity =>
+        {
+            entity.ToTable("ai_providers");
+
+            entity.HasKey(e => e.Id)
+                .HasName("pk_ai_providers");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.Type)
+                .HasColumnName("type");
+
+            entity.Property(e => e.Title)
+                .HasColumnName("title")
+                .HasColumnType("varchar(255)");
+
+            entity.Property(e => e.Url)
+                .HasColumnName("url")
+                .HasColumnType("text");
+
+            entity.Property(e => e.Key)
+                .HasColumnName("key")
+                .HasColumnType("text");
+
+            entity.Property(e => e.CreatedOn)
+                .HasColumnName("created_on")
+                .HasColumnType("timestamptz");
+
+            entity.Property(e => e.ModifiedOn)
+                .HasColumnName("modified_on")
+                .HasColumnType("timestamptz");
+
+            entity.Property(e => e.HasModelSettings)
+                .HasColumnName("has_model_settings")
+                .HasDefaultValueSql("false");
+
+            entity.HasIndex(e => new { e.TenantId, e.Id })
+                .HasDatabaseName("ix_ai_providers_tenant_id_id");
         });
     }
 }

@@ -119,7 +119,7 @@ public static class ShortLinksExtension
 
                 entity.Property(e => e.Short)
                     .HasColumnName("short")
-                    .HasColumnType("char(15)")
+                    .HasColumnType("varchar(15)") // not char(15): PostgreSQL keeps the padding, MySQL strips it
                     .IsRequired(false);
 
                 entity.Property(e => e.TenantId)
