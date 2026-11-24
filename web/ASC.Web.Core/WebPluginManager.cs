@@ -88,6 +88,7 @@ public class WebPluginManager(
 
     public const string PersonalCspCookieName = "asc_personal_csp";
     private const string ConfigFileName = "config.json";
+    private const string PersonalConfigFileName = "personal.json";
     private const string PluginFileName = "plugin.js";
     private const string PluginCssFileName = "plugin.css";
     private const string AssetsFolderName = "assets";
@@ -523,7 +524,7 @@ public class WebPluginManager(
 
         var urlTemplate = await GetPluginUrlTemplateAsync(storage, basePath);
 
-        var configFiles = await storage.ListFilesRelativeAsync(string.Empty, basePath, ConfigFileName, true).ToArrayAsync();
+        var configFiles = await storage.ListFilesRelativeAsync(string.Empty, basePath, owner.HasValue ? PersonalConfigFileName : ConfigFileName, true).ToArrayAsync();
 
         foreach (var path in configFiles.Where(IsPluginConfigPath))
         {
@@ -859,7 +860,21 @@ public class WebPluginManager(
             webPlugin.CreateBy = authContext.CurrentAccount.ID;
             webPlugin.CreateOn = DateTime.UtcNow;
 
+            if (!system)
+            {
+                webPlugin.Enabled = false;
+                webPlugin.Settings = null;
+                webPlugin.CssUrl = null;
+            }
+
             configFileContent = JsonSerializer.Serialize(webPlugin, options);
+
+            if (owner.HasValue)
+            {
+                File.Delete(configFilePath);
+
+                configFilePath = Path.Combine(tempDir, PersonalConfigFileName);
+            }
 
             await File.WriteAllTextAsync(configFilePath, configFileContent);
 
