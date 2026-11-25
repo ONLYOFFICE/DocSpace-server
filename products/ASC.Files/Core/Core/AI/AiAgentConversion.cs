@@ -45,7 +45,7 @@ public static class AiAgentMigrationAccess
     {
         return agentRole switch
         {
-            FileShare.RoomManager => FileShare.RoomManager,
+            FileShare.RoomManager => FileShare.ContentCreator,
             FileShare.ContentCreator => FileShare.ContentCreator,
             FileShare.Read => FileShare.ContentCreator,
             _ => null
