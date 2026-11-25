@@ -1154,9 +1154,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.70.tgz::locator=asc-ai-chat%40workspace%3A.":
-  version: 1.0.2-progress.70
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.70.tgz#onlyoffice-ai-chat-1.0.2-progress.70.tgz::hash=22a0e8&locator=asc-ai-chat%40workspace%3A."
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.75.tgz::locator=asc-ai-chat%40workspace%3A.":
+  version: 1.0.2-progress.75
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.75.tgz#onlyoffice-ai-chat-1.0.2-progress.75.tgz::hash=af7a7e&locator=asc-ai-chat%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -1166,7 +1166,7 @@ __metadata:
     "@codemirror/lang-json": ^6.0.2
     "@codemirror/state": ^6.7.6
     "@codemirror/view": ^6.43.15
-    "@google/genai": ^3.6.1
+    "@google/genai": ^1.30.0 || ^2.0.0 || ^3.6.1
     "@mistralai/mistralai": ^3.5.0
     "@radix-ui/react-dialog": ^1.3.1
     "@radix-ui/react-dropdown-menu": ^2.2.1
@@ -1179,19 +1179,20 @@ __metadata:
     class-variance-authority: ^0.7.1
     clsx: ^2.1.1
     codemirror: ~6.0.2
-    framer-motion: ^14.14.0
-    i18next: ^27.2.2
+    framer-motion: ^12.23.12 || ^13.0.0 || ^14.14.0
+    i18next: ^25.5.2 || ^26.0.0 || ^27.2.2
     katex: ^0.17.0
     openai: ^5.22.0 || ^6.0.0 || ^7.0.0
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
-    react-i18next: ^18.0.3
-    react-shiki: ^0.11.3
-    react-svg: ^19.2.7
+    react-i18next: ^15.7.3 || ^16.0.0 || ^17.0.0 || ^18.0.3
+    react-markdown: ^10.1.0
+    react-shiki: ^0.8.0 || ^0.9.0 || ^0.11.3
+    react-svg: ^16.3.0 || ^17.0.0 || ^18.0.0 || ^19.2.7
     rehype-katex: ^7.0.1
     remark-gfm: ^4.0.1
     remark-math: ^6.0.0
-    shiki: ^4.6.0
+    shiki: ^3.11.0 || ^4.6.0
     tailwind-merge: ^3.7.1
     zustand: ^5.1.0
   peerDependenciesMeta:
@@ -1239,6 +1240,8 @@ __metadata:
       optional: true
     react-i18next:
       optional: true
+    react-markdown:
+      optional: true
     react-shiki:
       optional: true
     react-svg:
@@ -1255,7 +1258,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/90f8d48a33ed0dcec4c111f237648f5f26d83bd4473732d75f8ff46f84a64e1789c2b4b49d181097258d9f05092b660a758b3c4e5a8022c5433a3e9d3fa75c0d
+  checksum: 10/ee27d9304829c7083ed3a55e7237ee3318cb01478d1430fc2995ad0a6e20102e7f5f85eea4fdfd5ffd667cf25068f70d0b9c7ca5def067c683fe061c91b7c8eb
   languageName: node
   linkType: hard
 
@@ -2727,7 +2730,7 @@ __metadata:
     "@google/genai": "npm:^3.6.1"
     "@mistralai/mistralai": "npm:^3.5.0"
     "@modelcontextprotocol/sdk": "npm:^1.32.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-1.0.2-progress.70.tgz"
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-1.0.2-progress.75.tgz"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.222.0"
     "@opentelemetry/exporter-metrics-otlp-proto": "npm:^0.222.0"

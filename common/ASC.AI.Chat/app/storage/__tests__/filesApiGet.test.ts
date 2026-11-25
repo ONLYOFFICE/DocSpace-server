@@ -44,7 +44,8 @@ vi.mock("../../requestContext.js", () => ({
 }));
 vi.mock("../chatContextSnapshot.js", () => ({ lookupChatContextFolder: () => ({ hit: false }) }));
 
-const { filesApiGet, DocspaceApiHttpError, folderSourceType } = await import("../docspaceFilesApi.js");
+const { filesApiGet, DocspaceApiHttpError, folderSourceType } =
+  await import("../docspaceFilesApi.js");
 
 const fetchMock = vi.fn();
 

@@ -472,7 +472,7 @@ describe("send", () => {
       ...VALID.send,
       actionArgs: { signal: expect.any(AbortSignal) },
     });
-    expect(h.primeSourceMeta).toHaveBeenCalledExactlyOnceWith("8");
+    expect(h.primeSourceMeta).toHaveBeenCalledExactlyOnceWith("7");
     expect(upstream.seen).toEqual([]);
   });
 
@@ -497,8 +497,14 @@ describe("the source a round is attributed to", () => {
       { actionArgs: { folderContexts: [{ id: 31 }, { id: 32 }] } },
       "31",
     ],
-    ["the location", { contextEntityId: "8", entityId: "7" }, "8"],
+    ["the project, over the location", { contextEntityId: "8", entityId: "7" }, "7"],
     ["the project", { entityId: "7" }, "7"],
+    ["the location, without a project", { contextEntityId: "8" }, "8"],
+    [
+      "the location, over a context folder",
+      { contextEntityId: "8", actionArgs: { folderContexts: [{ id: 31 }] } },
+      "8",
+    ],
     ["an empty location falls to the project", { contextEntityId: "", entityId: "7" }, "7"],
     ["nothing", {}, undefined],
   ])("is %s", async (_what, ids, scope) => {
@@ -1196,7 +1202,7 @@ describe("regenerateStream", () => {
       mode: "append",
       text: `TOOLS\n\n${[...HEAD, ...buildLocationLines({ id: "8" }), ...TAIL].join("\n")}`,
     });
-    expect(h.primeSourceMeta).toHaveBeenCalledExactlyOnceWith("8");
+    expect(h.primeSourceMeta).toHaveBeenCalledExactlyOnceWith("7");
     expect(vi.mocked(logger.info)).toHaveBeenCalledWith(
       "ai/regenerate-stream: stream completed after 2 event(s); toolCalls=<none>; chatContext=hit",
     );
@@ -1233,7 +1239,7 @@ describe("approveToolCall", () => {
       actionArgs: { signal: expect.any(AbortSignal) },
     });
     expect(h.safeGetToolsPrompt).not.toHaveBeenCalled();
-    expect(h.primeSourceMeta).toHaveBeenCalledExactlyOnceWith("8");
+    expect(h.primeSourceMeta).toHaveBeenCalledExactlyOnceWith("7");
   });
 
   it("prefers the profile the body names to the thread's", async () => {

@@ -140,7 +140,7 @@ describe("resolveContextFolders over the Files API", () => {
       entity: scopeOf({ entityId: "42", folder: { title: "Launch plan", folderType: 40 } }),
     });
     await expect(inRound(snapshot, () => resolveContextFolders(["42"]))).resolves.toEqual([
-      { id: "42", title: "Launch plan", kind: "folder" },
+      { id: "42", title: "Launch plan", kind: "room" },
     ]);
     expect(upstream.seen).toEqual([]);
   });
