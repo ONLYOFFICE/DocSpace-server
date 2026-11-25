@@ -49,6 +49,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/create-thread-file", (req, res) => {
+    files.createThreadFile(req.body);
+    res.end();
+  });
+
   router.post("/create-form", (req, res) => {
     files.createForm(req.body);
     res.end();

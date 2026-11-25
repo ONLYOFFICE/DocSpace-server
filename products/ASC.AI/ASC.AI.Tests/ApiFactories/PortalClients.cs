@@ -75,6 +75,7 @@ public sealed class PortalClients : PortalClientsBase
     public SharingApi SharingApi { get; }
     public FilesQuotaApi FilesQuotaApi { get; }
     public DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi ThirdPartyIntegrationApi { get; }
+    public DocSpace.API.SDK.Api.Files.SettingsApi FilesSettingsApi { get; }
 
     /// <summary>The project routes of a room (<c>files/rooms/{id}/model</c>), on the Files service.</summary>
     public DocSpace.API.SDK.Api.Rooms.AIApi RoomsAiApi { get; }
@@ -128,6 +129,7 @@ public sealed class PortalClients : PortalClientsBase
         SharingApi = new SharingApi(FilesHttpClient, filesConfig);
         FilesQuotaApi = new FilesQuotaApi(FilesHttpClient, filesConfig);
         ThirdPartyIntegrationApi = new DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
+        FilesSettingsApi = new DocSpace.API.SDK.Api.Files.SettingsApi(FilesHttpClient, filesConfig);
         RoomsAiApi = new DocSpace.API.SDK.Api.Rooms.AIApi(FilesHttpClient, filesConfig);
 
         var peopleConfig = new Configuration { BasePath = BasePathOf(ResourceNames.People) };

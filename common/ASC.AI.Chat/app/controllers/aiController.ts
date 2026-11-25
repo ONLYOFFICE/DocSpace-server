@@ -214,10 +214,18 @@ function locationOf(body: unknown): string | undefined {
   return contextFolderIdsOfBody(body)[0] ?? stringField(body, "contextEntityId");
 }
 
-// The entry the round is attributed to for usage accounting: the location
-// when there is one, else the project the chat runs in.
+// The entry the round is attributed to for usage accounting: where the user
+// chats. Inside an AI project that is the project itself - never the folder
+// `applyAiProjectChatContext` set as the round's `contextEntityId` (the
+// picked folder, else My documents), which only scopes the file tools.
+// Elsewhere it is the folder or room the user is in; only a round with no
+// location falls back to a context folder picked in the composer.
 function sourceScopeOf(body: unknown): string | undefined {
-  return locationOf(body) ?? stringField(body, "entityId");
+  return (
+    stringField(body, "entityId") ??
+    stringField(body, "contextEntityId") ??
+    contextFolderIdsOfBody(body)[0]
+  );
 }
 
 // The round's profile and attachments for a request that resumes a round
@@ -359,8 +367,9 @@ async function withContextPrompt<T>(body: T): Promise<T> {
   return appendActionPrompt(body, buildContextFragment(location, contextFolders));
 }
 
-// Attribute the round to the DocSpace entry it runs for — the folder the
-// user works in, or else the project the chat runs in. The resolved source lands
+// Attribute the round to the DocSpace entry it runs for — the project the
+// chat runs in, or else the folder or room the user works in (see
+// `sourceScopeOf`). The resolved source lands
 // on the request context; the engine reads it through its `resolveSource`
 // dep and the library's ONLYOFFICE provider turns it into the request's
 // `metadata` object (`source_id` / `source_type` / `source_title`) on every

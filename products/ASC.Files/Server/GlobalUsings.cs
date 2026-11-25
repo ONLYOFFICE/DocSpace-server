@@ -131,6 +131,8 @@ global using Swashbuckle.AspNetCore.Annotations;
 
 global using ZiggyCreatures.Caching.Fusion;
 
+global using AiAccessibility = ASC.Files.Core.Utils.AiAccessibility;
 global using FileShare = ASC.Files.Core.Security.FileShare;
 global using Profile = ASC.AI.Integration.Profiles.Profile;
 global using SecurityContext = ASC.Core.SecurityContext;
+global using ThreadFolderKind = ASC.AI.Integration.Threads.ThreadFolderKind;
