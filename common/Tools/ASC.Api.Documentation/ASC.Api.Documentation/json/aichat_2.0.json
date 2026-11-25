@@ -926,6 +926,16 @@
               }
             }
           },
+          "404": {
+            "description": "The thread does not exist or is not the caller's.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "409": {
             "description": "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
             "content": {
@@ -1058,6 +1068,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The thread does not exist or is not the caller's.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2082,6 +2102,16 @@
               }
             }
           },
+          "404": {
+            "description": "`input.path` names an entry that does not exist or that the caller cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -2180,6 +2210,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One of the entries does not exist or the caller cannot read it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6945,6 +6985,16 @@
               }
             }
           },
+          "404": {
+            "description": "The thread does not exist or is not the caller's.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -7040,6 +7090,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The thread does not exist or is not the caller's.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7269,6 +7329,16 @@
               }
             }
           },
+          "404": {
+            "description": "The thread does not exist or is not the caller's.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -7476,6 +7546,16 @@
               }
             }
           },
+          "400": {
+            "description": "`count` is outside 1 to 1000; relayed from the DocSpace AI service.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
             "content": {
@@ -7623,6 +7703,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The thread does not exist or is not the caller's.",
             "content": {
               "application/json": {
                 "schema": {

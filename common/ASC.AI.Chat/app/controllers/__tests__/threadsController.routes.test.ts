@@ -1207,6 +1207,58 @@ describe("threadsController.appendUserMessage behind the access gate", () => {
   });
 });
 
+// A refusal of the AI service is relayed with its status, and the document publishes it: 404 for
+// a thread that is gone or not the caller's (ThreadStorageService: ItemNotFoundException), 400
+// for a `count` outside ReadAllThreadsRequestDto's Range(1, 1000).
+describe.each([
+  ["touch", "aiThreadsTouch", { body: { threadId: "t1" } }, () => engine.touch, 404, "Not Found"],
+  [
+    "rename",
+    "aiThreadsRename",
+    { body: { threadId: "t1", title: "New" } },
+    () => engine.rename,
+    404,
+    "Not Found",
+  ],
+  [
+    "clearMessages",
+    "aiThreadsClearMessages",
+    { body: { threadId: "t1" } },
+    () => engine.clearMessages,
+    404,
+    "Not Found",
+  ],
+  [
+    "readMessages",
+    "aiThreadsReadMessages",
+    { method: "GET", query: { threadId: "t1" } },
+    () => engine.readMessages,
+    404,
+    "Not Found",
+  ],
+  [
+    "list",
+    "aiThreadsList",
+    { method: "GET", query: { count: "0" } },
+    () => engine.list,
+    400,
+    "Bad Request",
+  ],
+] as const)(
+  "threadsController.%s relaying a refusal of the AI service",
+  (route, operationId, request, callee, status, reason) => {
+    it(`answers the ${status} and it is a published answer`, async () => {
+      callee().mockRejectedValue(new AiServiceHttpError(status, reason, "", "u"));
+
+      const reply = await invoke(threadsController[route], request);
+
+      expect(reply.status).toBe(status);
+      expect(reply.body).toEqual({ error: reason });
+      expect(published(operationId, reply)).toEqual([]);
+    });
+  },
+);
+
 // The same gate for every other handler that refused a bad body with 400 before its first gated
 // call; regenerateTitle also read the entry's metadata from the Files API before it.
 describe.each([

@@ -616,8 +616,9 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // logger, so without this the file log shows nothing when an upload dies,
     // and a 404 from the folder read reads exactly like a 404 from the insert.
     let stage = "thread-artifact";
-    // The file once it is stored: a failure after that point removes it
-    // again, so the placeholder below leaves nothing behind.
+    // The file once it is stored: a failure after that point asks the Files
+    // API to delete it again (`removeOrphanImage`, best effort: a delete that
+    // fails is logged with the file id and the file stays).
     let stored: string | undefined;
     try {
       // A conversation of an AI project keeps what its replies produce in

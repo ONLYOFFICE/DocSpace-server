@@ -473,7 +473,7 @@ describe("systemToolsSource.getTools", () => {
     );
   });
 
-  // DEFECT tools-10: one tool of one MCP server that cannot be read (null) makes withReadOnlyAutoAllow (tools/systemTools.ts) throw, and the catch of systemToolsSource.getTools answers {}, dropping the tools of every server — expected the malformed tool dropped and the other tools kept (ts-ai-failure-paths.md §1: dropping one malformed element of a list is fine, reading the whole answer as none is not).
+  // DEFECT tools-11: one tool of one MCP server that cannot be read (null) makes withReadOnlyAutoAllow (tools/systemTools.ts) throw, and the catch of systemToolsSource.getTools answers {}, dropping the tools of every server — expected the malformed tool dropped and the other tools kept (ts-ai-failure-paths.md §1: dropping one malformed element of a list is fine, reading the whole answer as none is not).
   it("answers an empty map and logs when a listed tool cannot be read", async () => {
     mcpServer(upstream, DOCSPACE_URL, { tools: [null] });
     mcpServer(upstream, OTHER_URL, { tools: [PLAIN_TOOL] });
@@ -674,6 +674,33 @@ describe("systemToolsSource.callTool", () => {
       `systemTools.callTool name=get_room returned an error result: ${expected}`,
     );
     expect(logger.info).not.toHaveBeenCalledWith("systemTools.callTool name=get_room ok");
+  });
+
+  it("warns with the method and the status of a refused call, without the server's body", async () => {
+    mcpServer(upstream, DOCSPACE_URL, { tools: [READ_TOOL] });
+    mcpServer(upstream, OTHER_URL);
+    // The server refuses `tools/call` alone; its body quotes the request.
+    upstream.use(
+      http.post(DOCSPACE_URL, async ({ request }) => {
+        const message = (await request.clone().json()) as { method: string };
+        return message.method === "tools/call"
+          ? HttpResponse.text("BODY-MARKER\nsecond line of the body", {
+              status: 500,
+              statusText: "Internal Server Error",
+            })
+          : undefined;
+      }),
+    );
+
+    await systemToolsSource.callTool("get_room", {});
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      "systemTools.callTool name=get_room returned an error result: tools/call: HTTP 500 Internal Server Error",
+    );
+    const logged = [logger.warn, logger.info, logger.error]
+      .flatMap((spy) => vi.mocked(spy).mock.calls)
+      .map((call) => String(call[0]));
+    expect(logged.filter((line) => /BODY-MARKER|second line of the body/.test(line))).toEqual([]);
   });
 
   it("logs ok for a result that carries an error field next to isError false", async () => {

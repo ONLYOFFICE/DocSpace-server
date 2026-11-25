@@ -293,12 +293,6 @@ function toolsScopeOf(body: unknown): string | undefined {
   return stringField(body, "contextEntityId") ?? stringField(body, "entityId");
 }
 
-// The folder the round is attributed to: the first of the context folders
-// the user selected, else the folder or room they are in.
-function locationOf(body: unknown): string | undefined {
-  return contextFolderIdsOfBody(body)[0] ?? stringField(body, "contextEntityId");
-}
-
 // The entry the round is attributed to for usage accounting: where the user
 // chats. Inside an AI project that is the project itself - never the folder
 // `applyAiProjectChatContext` set as the round's `contextEntityId` (the

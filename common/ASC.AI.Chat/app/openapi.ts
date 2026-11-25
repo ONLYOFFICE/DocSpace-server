@@ -688,12 +688,14 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiApproveToolCall: {
     "400":
       "The body is not an object, `threadId` or `messageId` is missing or not a string, `idx` is missing or not an integer, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`), or `allowAlways` is not a boolean.",
+    "404": "The thread does not exist or is not the caller's.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiDenyToolCall: {
     "400":
       "The body is not an object, `threadId` or `messageId` is missing or not a string, `idx` is missing or not an integer, or `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
+    "404": "The thread does not exist or is not the caller's.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
@@ -736,10 +738,12 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // Attachments - `linkToMessage` is the only one that resolves a message.
   aiAttachmentsSaveFile: {
     "400": "The attachment payload is malformed, or `input.path` is missing or empty.",
+    "404": "`input.path` names an entry that does not exist or that the caller cannot read.",
   },
   aiAttachmentsSaveFilesMany: {
     "400":
       "`inputs` is not an array, names more than 100 files, or one of its entries is malformed.",
+    "404": "One of the entries does not exist or the caller cannot read it.",
   },
   aiAttachmentsGet: { "400": "The attachment ID is missing." },
   aiAttachmentsGetSuggestedQuestions: { "400": "The attachment ID is missing." },
@@ -999,19 +1003,33 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "409":
       "No `threadId` was sent and `entityId` names an AI project whose model is gone or cannot chat.",
   },
-  aiThreadsTouch: { "400": "`threadId` is missing." },
+  aiThreadsTouch: {
+    "400": "`threadId` is missing.",
+    "404": "The thread does not exist or is not the caller's.",
+  },
   aiThreadsAppendUserMessage: {
     "400":
       "`threadId` is missing, the message is empty or does not carry `role: user`, it carries more attachments than the limit allows, or `profileId` is not a hyphenated UUID.",
     "404": "`profileId` names no profile; the message is not stored.",
   },
-  aiThreadsReadMessages: { "400": "`threadId` is missing." },
-  aiThreadsRename: { "400": "`threadId` or the new title is missing." },
+  aiThreadsReadMessages: {
+    "400": "`threadId` is missing.",
+    "404": "The thread does not exist or is not the caller's.",
+  },
+  aiThreadsRename: {
+    "400": "`threadId` or the new title is missing.",
+    "404": "The thread does not exist or is not the caller's.",
+  },
+  // `count` is bounded by the AI service alone (ReadAllThreadsRequestDto: Range(1, 1000)).
+  aiThreadsList: { "400": "`count` is outside 1 to 1000; relayed from the DocSpace AI service." },
   aiThreadsDelete: {
     "400": "`threadId` is missing.",
     "404": "No thread has this ID.",
   },
-  aiThreadsClearMessages: { "400": "`threadId` is missing." },
+  aiThreadsClearMessages: {
+    "400": "`threadId` is missing.",
+    "404": "The thread does not exist or is not the caller's.",
+  },
   aiThreadsRegenerateTitle: {
     "400": "`threadId` is missing.",
     "404": "The `profile` carries no `id`, or no stored profile has it.",

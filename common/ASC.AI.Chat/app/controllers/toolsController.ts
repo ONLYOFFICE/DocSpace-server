@@ -313,7 +313,7 @@ export const toolsController = {
     // tools themselves stay available everywhere.
     // A listing that is not a map is refused with 500. A system source that
     // fails does not come here: systemToolsSource.getTools logs the failure
-    // and answers an empty map (DEFECT tools-10), so the route answers 200
+    // and answers an empty map (DEFECT tools-11), so the route answers 200
     // with no system groups for it.
     if (!isObject(listed)) {
       throw new Error("the system tool listing is not an object");

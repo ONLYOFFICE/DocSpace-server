@@ -536,6 +536,18 @@ describe("the served document", () => {
     expect(responseViolations("aiTemplatesInstall", 409, incomplete)).not.toEqual([]);
   });
 
+  // 404s these operations relay or raise and no route test reaches with the real storage: the
+  // pending tool call is read by its thread (`messages.readByThread`, 404 for a thread that is
+  // gone or foreign), and `attachments.createMany` raises 404 for an entry the AI service left out.
+  it.each([
+    ["aiApproveToolCall"],
+    ["aiDenyToolCall"],
+    ["aiAttachmentsSaveFile"],
+    ["aiAttachmentsSaveFilesMany"],
+  ])("publishes the 404 of %s", (operationId) => {
+    expect(responseViolations(operationId, 404, { error: "Not Found" })).toEqual([]);
+  });
+
   it("answers text-to-docx with 202", () => {
     const responses = pathsOf(openApiDocument)["/api/2.0/ai/text-to-docx"]?.["post"]?.["responses"];
 
