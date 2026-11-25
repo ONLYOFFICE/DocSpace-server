@@ -45,6 +45,9 @@ internal static partial class OFormRequestManagerLogger
     [LoggerMessage(LogLevel.Warning, "The file from the template gallery lacks the expected format signature: {uri}")]
     public static partial void WarningOFormGalleryNotForm(this ILogger<OFormRequestManager> logger, Uri uri);
 
+    [LoggerMessage(LogLevel.Warning, "The file from the template gallery is larger than {maxSize} bytes: {uri}")]
+    public static partial void WarningOFormGalleryFileTooLarge(this ILogger<OFormRequestManager> logger, Uri uri, long maxSize);
+
     [LoggerMessage(LogLevel.Warning, "The template gallery gave a file address that cannot be read: {url}")]
     public static partial void WarningOFormGalleryFileAddress(this ILogger<OFormRequestManager> logger, string url);
 

@@ -481,9 +481,14 @@ public static class ServiceCollectionExtension
         /// replayed one Nextcloud account's session cookie on requests made for another account (bug 83399).
         /// <c>RequestHelper</c> also sent OAuth token refreshes with cookies, the worker side of the defect that
         /// bug 81139 fixed for the API hosts.
+        /// The registry of resilience pipelines comes with them: shared code takes the deadlines of its requests from it
+        /// by name (<c>OFormRequestManager</c> of Files.Core, which every host that creates <c>FileStorageService</c>
+        /// needs), and adds its own defaults when the host registered none. Without this call the registry was there
+        /// only because other registrations happened to add a pipeline.
         /// </remarks>
         public IServiceCollection AddStandardHttpClients()
         {
+            services.AddResiliencePipelineRegistry<string>();
             services.AddHttpClient();
             services.AddHttpClient("customHttpClient", _ => { })
                 .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler

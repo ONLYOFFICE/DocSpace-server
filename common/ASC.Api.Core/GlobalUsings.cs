@@ -174,6 +174,8 @@ global using NLog.AWS.Logger;
 global using NLog.Config;
 global using NLog.Web;
 
+global using Polly;
+
 global using RedisRateLimiting;
 global using RedisRateLimiting.AspNetCore;
 

@@ -101,6 +101,7 @@ global using Microsoft.Extensions.Options;
 global using Polly;
 global using Polly.Registry;
 global using Polly.Retry;
+global using Polly.Telemetry;
 
 global using WireMock;
 global using WireMock.Matchers;

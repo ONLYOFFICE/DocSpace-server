@@ -270,6 +270,7 @@ global using Polly;
 global using Polly.Contrib.WaitAndRetry;
 global using Polly.Registry;
 global using Polly.Retry;
+global using Polly.Telemetry;
 global using Polly.Timeout;
 
 global using ProtoBuf;
@@ -319,6 +320,7 @@ global using SecurityContext = ASC.Core.SecurityContext;
 global using SocketManager = ASC.Web.Files.Utils.SocketManager;
 global using SortOrder = ASC.Api.Core.Core.SortOrder;
 global using Tag = ASC.Files.Core.Tag;
+global using TelemetryOptionsAccessor = Microsoft.Extensions.Options.IOptions<Polly.Telemetry.TelemetryOptions>;
 global using ThreadFolderKind = ASC.AI.Integration.Threads.ThreadFolderKind;
 global using ThreadsStorage = ASC.AI.Integration.Threads.ThreadsStorage;
 global using Thumbnail = ASC.Files.Core.Thumbnail;

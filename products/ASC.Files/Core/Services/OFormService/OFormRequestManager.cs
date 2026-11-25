@@ -39,7 +39,8 @@ public class OFormRequestManager(
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory,
     IFusionCache cache,
-    ResiliencePipelineRegistry<string> resiliencePipelineRegistry)
+    ResiliencePipelineRegistry<string> resiliencePipelineRegistry,
+    TelemetryOptionsAccessor telemetryOptions)
 {
     public const string DownloadPipelineName = "oform-gallery-download";
     public const string ProbePipelineName = "oform-gallery-probe";
@@ -56,6 +57,18 @@ public class OFormRequestManager(
     /// so the readers of this process that arrive meanwhile wait for this check instead of starting their own.
     /// </summary>
     public static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(4);
+
+    /// <summary>
+    /// The largest template file the download accepts: the file is held in memory, so a proxy that answers with a large
+    /// or endless body fails the download instead of filling the memory for the whole deadline.
+    /// </summary>
+    public const long MaxTemplateSize = 50L * 1024 * 1024;
+
+    // A PDF reader looks for the PDF header in the first 1024 bytes of the file
+    private const int SignatureLength = 1024;
+
+    // The event the timeout strategy of Polly reports; the manager logs the failure itself
+    private const string TimeoutEventName = "OnTimeout";
 
     private static readonly TimeSpan _availableDuration = TimeSpan.FromMinutes(10);
 
@@ -84,10 +97,13 @@ public class OFormRequestManager(
     /// <summary>
     /// Downloads the file of a gallery template in the format <paramref name="ext"/>.
     /// </summary>
-    /// <exception cref="ItemNotFoundException">The gallery has no such template, or no file of this format for it.</exception>
+    /// <exception cref="ItemNotFoundException">
+    /// No gallery is configured, or the gallery has no such template, or no file of this format for it.
+    /// </exception>
     /// <exception cref="CustomHttpException">
-    /// 502: the gallery did not answer in time, answered with an error status or with a body that is not the template
-    /// list, named a file at an address that cannot be requested, or returned a PDF without a PDF header or a DOCX, XLSX
+    /// 502: the gallery cannot be reached, dropped the connection, did not answer in time, answered with an error status
+    /// or with a body that is not the template list, named a file at an address that cannot be requested, or returned a
+    /// file larger than <see cref="MaxTemplateSize"/>, a PDF without a PDF header in its first 1024 bytes or a DOCX, XLSX
     /// or PPTX file without a ZIP signature.
     /// </exception>
     public async Task<Stream> Get(int id, string ext)
@@ -152,21 +168,41 @@ public class OFormRequestManager(
             throw GalleryUnavailable();
         }
 
-        var stream = new MemoryStream();
+        var length = streamResponse.Content.Headers.ContentLength;
+        if (length > MaxTemplateSize)
+        {
+            logger.WarningOFormGalleryFileTooLarge(fileUri, MaxTemplateSize);
+
+            throw GalleryUnavailable();
+        }
+
+        await using var body = await streamResponse.Content.ReadAsStreamAsync(cancellationToken);
+        var head = new byte[SignatureLength];
+        var read = await body.ReadAtLeastAsync(head, head.Length, throwOnEndOfStream: false, cancellationToken);
+
+        // A proxy of a closed network answers 200 with a page of its own: such a page saved as the template opens as
+        // a blank editor. The rest of the file is not read when its start is not the format's
+        if (!HasFormatSignature(head.AsSpan(0, read), ext))
+        {
+            logger.WarningOFormGalleryNotForm(fileUri);
+
+            throw GalleryUnavailable();
+        }
+
+        var stream = new MemoryStream(length is { } size ? (int)size : read);
 
         try
         {
-            await streamResponse.Content.CopyToAsync(stream, cancellationToken);
-            stream.Position = 0;
+            stream.Write(head, 0, read);
 
-            // A proxy of a closed network answers 200 with a page of its own: such a page saved as the template opens as
-            // a blank editor
-            if (!await HasFormatSignatureAsync(stream, ext))
+            if (!await CopyAtMostAsync(body, stream, MaxTemplateSize - read, cancellationToken))
             {
-                logger.WarningOFormGalleryNotForm(fileUri);
+                logger.WarningOFormGalleryFileTooLarge(fileUri, MaxTemplateSize);
 
                 throw GalleryUnavailable();
             }
+
+            stream.Position = 0;
         }
         catch
         {
@@ -176,6 +212,30 @@ public class OFormRequestManager(
         }
 
         return stream;
+    }
+
+    /// <summary>
+    /// Copies the rest of <paramref name="source"/> unless it is longer than <paramref name="limit"/> bytes.
+    /// </summary>
+    /// <returns><c>false</c> when the source has more bytes than the limit; the copy then stops.</returns>
+    private static async Task<bool> CopyAtMostAsync(Stream source, Stream destination, long limit, CancellationToken cancellationToken)
+    {
+        var buffer = new byte[81920];
+        var copied = 0L;
+        int read;
+
+        while ((read = await source.ReadAsync(buffer, cancellationToken)) > 0)
+        {
+            copied += read;
+            if (copied > limit)
+            {
+                return false;
+            }
+
+            await destination.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -203,7 +263,7 @@ public class OFormRequestManager(
 
         try
         {
-            return await cache.GetOrSetAsync<bool>(GetAvailabilityCacheKey(GetListUrl()),async (context, cancellationToken) =>
+            return await cache.GetOrSetAsync<bool>(GetAvailabilityCacheKey(GetListUrl()), async (context, cancellationToken) =>
             {
                 if (await ProbeAsync(cancellationToken))
                 {
@@ -213,7 +273,7 @@ public class OFormRequestManager(
                 // A failed check is no answer: the fail-safe keeps a known "available" and asks again after a minute
                 if (context.HasStaleValue && context.StaleValue.Value)
                 {
-                    throw new InvalidOperationException("The template gallery did not answer its check");
+                    return context.Fail("The template gallery did not answer its check");
                 }
 
                 // "Unavailable" stays in this process: it never replaces the answer other processes got
@@ -297,25 +357,43 @@ public class OFormRequestManager(
 
     /// <summary>
     /// The pipeline registered under <paramref name="name"/> (<see cref="OFormRequestManagerExtension.AddTemplateGalleryPipelines"/>),
-    /// or, in a host that registers none, one with the default <paramref name="timeout"/>. GetOrAddPipeline alone would
-    /// not do: it never looks at the registered pipelines.
+    /// or, in a host that registers none, one with the default <paramref name="timeout"/> configured the same way.
+    /// GetOrAddPipeline alone would not do: it never looks at the registered pipelines. The registry itself comes with
+    /// the standard HTTP clients every host registers (AddStandardHttpClients).
     /// </summary>
     private ResiliencePipeline GetPipeline(string name, TimeSpan timeout)
     {
         return resiliencePipelineRegistry.TryGetPipeline(name, out var pipeline)
             ? pipeline
-            : resiliencePipelineRegistry.GetOrAddPipeline(name, builder => builder.AddTimeout(timeout));
+            : resiliencePipelineRegistry.GetOrAddPipeline(name, builder => ConfigurePipeline(builder, telemetryOptions.Value, timeout));
     }
 
     /// <summary>
-    /// Whether the exception is a failure of the gallery or of the way to it rather than of this code. No token of a
-    /// caller reaches the requests: a TimeoutRejectedException is the deadline of the pipeline, and a cancellation is the
-    /// timeout of the client. A connection dropped
-    /// while the body is read comes as an HttpRequestException from HttpContent; IOException covers a read the runtime
-    /// does not wrap (HttpIOException). An InvalidOperationException is a charset of the
-    /// answer the runtime cannot decode, or a gallery address without a scheme. UriFormatException and
-    /// NotSupportedException cover malformed addresses and unsupported schemes, in the configuration or in the file
-    /// address the gallery gave.
+    /// A deadline of <paramref name="timeout"/>. Its timeout is reported to the telemetry of Polly at the Debug level,
+    /// not at Error: the manager logs the failure of the gallery itself, as a warning.
+    /// </summary>
+    internal static void ConfigurePipeline(ResiliencePipelineBuilder builder, TelemetryOptions telemetry, TimeSpan timeout)
+    {
+        var severityProvider = telemetry.SeverityProvider;
+
+        builder.ConfigureTelemetry(new TelemetryOptions(telemetry)
+        {
+            SeverityProvider = args => args.Event.EventName == TimeoutEventName
+                ? ResilienceEventSeverity.Debug
+                : severityProvider?.Invoke(args) ?? args.Event.Severity
+        });
+        builder.AddTimeout(timeout);
+    }
+
+    /// <summary>
+    /// Whether the exception is a failure of the gallery or of the way to it rather than of this code. The requests get
+    /// no token of an HTTP request: the download passes none, and the check passes the token of the cache factory, which
+    /// <see cref="IsAvailableAsync"/> starts without one. So a TimeoutRejectedException is the deadline of the pipeline,
+    /// and a cancellation is the timeout of the client. A connection dropped while the body is read comes as an
+    /// HttpRequestException from HttpContent; IOException covers a read the runtime does not wrap (HttpIOException). An
+    /// InvalidOperationException is a charset of the answer the runtime cannot decode, or a gallery address without a
+    /// scheme. UriFormatException and NotSupportedException cover malformed addresses and unsupported schemes, in the
+    /// configuration or in the file address the gallery gave.
     /// </summary>
     private static bool IsGalleryFailure(Exception e)
     {
@@ -337,13 +415,8 @@ public class OFormRequestManager(
     /// Whether the file starts as a file of its format does: a PDF has its header in the first 1024 bytes, where readers
     /// look for it, and a DOCX, XLSX or PPTX starts with the ZIP signature. Other formats are not checked.
     /// </summary>
-    private static async Task<bool> HasFormatSignatureAsync(Stream stream, string ext)
+    private static bool HasFormatSignature(ReadOnlySpan<byte> head, string ext)
     {
-        var buffer = new byte[1024];
-        var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false);
-        stream.Position = 0;
-        var head = buffer.AsSpan(0, read);
-
         return ext.ToLowerInvariant() switch
         {
             ".pdf" => head.IndexOf(_pdfSignature) >= 0,
@@ -373,15 +446,21 @@ public static class OFormRequestManagerExtension
     /// <summary>
     /// Registers the deadlines of the template gallery: the download of a template and the availability check. A host
     /// that does not call this gets the same deadlines, <see cref="OFormRequestManager.DownloadTimeout"/> and
-    /// <see cref="OFormRequestManager.ProbeTimeout"/>; the parameters are for tests, which cannot wait that long.
+    /// <see cref="OFormRequestManager.ProbeTimeout"/>, as long as it has the pipeline registry, which every host gets
+    /// from AddStandardHttpClients; the parameters are for tests, which cannot wait that long.
     /// </summary>
     public static IServiceCollection AddTemplateGalleryPipelines(this IServiceCollection services, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null)
     {
-        services.AddResiliencePipeline(OFormRequestManager.DownloadPipelineName,
-            builder => builder.AddTimeout(downloadTimeout ?? OFormRequestManager.DownloadTimeout));
-        services.AddResiliencePipeline(OFormRequestManager.ProbePipelineName,
-            builder => builder.AddTimeout(probeTimeout ?? OFormRequestManager.ProbeTimeout));
+        services.AddResiliencePipeline(OFormRequestManager.DownloadPipelineName, (builder, context) =>
+            OFormRequestManager.ConfigurePipeline(builder, GetTelemetryOptions(context.ServiceProvider), downloadTimeout ?? OFormRequestManager.DownloadTimeout));
+        services.AddResiliencePipeline(OFormRequestManager.ProbePipelineName, (builder, context) =>
+            OFormRequestManager.ConfigurePipeline(builder, GetTelemetryOptions(context.ServiceProvider), probeTimeout ?? OFormRequestManager.ProbeTimeout));
 
         return services;
+    }
+
+    private static TelemetryOptions GetTelemetryOptions(IServiceProvider serviceProvider)
+    {
+        return serviceProvider.GetRequiredService<TelemetryOptionsAccessor>().Value;
     }
 }

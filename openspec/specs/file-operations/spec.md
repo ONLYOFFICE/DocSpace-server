@@ -31,8 +31,8 @@ also where a bug is open, as the full test run of 365d87fe60 showed it.
 `createFile` (`POST api/2.0/files/{folderId}/file`) and `createFileInMyDocuments` (`POST
 api/2.0/files/@my/file`) SHALL create a file from the portal's blank template, normalising the requested title
 to a format the portal can create. A title longer than 170 characters SHALL be rejected (400); a section root
-or a folder id the caller cannot resolve SHALL be refused (403). A nonzero `formId` SHALL copy that template
-from the template gallery (bug 78009); `templateId` is not specified here.
+or a folder id the caller cannot resolve SHALL be refused (403). A nonzero `formId` without a `templateId`
+SHALL copy that template from the gallery (502 if the gallery fails; bug 78009).
 
 #### Scenario: Title normalisation
 
@@ -64,10 +64,10 @@ from the template gallery (bug 78009); `templateId` is not specified here.
 
 #### Scenario: Template from the template gallery
 
-- **WHEN** a file is created with a `formId` and no `templateId`, and the gallery answers its template list with a file of the title's format, a PDF with a PDF header or a DOCX, XLSX or PPTX with a ZIP signature, at a full address or at a path on the gallery's host
+- **WHEN** a file is created with a `formId` and no `templateId`, and the gallery answers its template list with a file of the title's format, a PDF with a PDF header in its first 1024 bytes or a DOCX, XLSX or PPTX with a ZIP signature, of at most 50 MB, at a full address or at a path on the gallery's host
 - **THEN** the gallery file is the content of the new file
 - **AND** the call answers 404 when no gallery is configured, when the list has no such template, or when the template has no file of that format
-- **AND** the call answers 502 when the gallery cannot be reached, does not answer before the download deadline, drops the connection while answering, answers the list or the file with an error status, answers the list without its template list (a page of a proxy), names a file at an address that cannot be requested, or returns a PDF without a PDF header or a DOCX, XLSX or PPTX without a ZIP signature
+- **AND** the call answers 502 when the gallery cannot be reached, does not answer before the download deadline, drops the connection while answering, answers the list or the file with an error status, answers the list without its template list (a page of a proxy), names a file at an address that cannot be requested, or returns a file over 50 MB (announced or read), a PDF without a PDF header in its first 1024 bytes or a DOCX, XLSX or PPTX without a ZIP signature
 
 #### Scenario: Non-PDF file in a Form filling room
 
@@ -88,11 +88,17 @@ answer while the cache holds it (bug 78009).
 - **WHEN** the gallery answers its template list
 - **THEN** the call returns `true`, and a second call within the cache time does not ask the gallery again
 
+#### Scenario: No gallery configured
+
+- **WHEN** no gallery is configured
+- **THEN** the call returns `false` without a check, and nothing is cached
+
 #### Scenario: Check fails with nothing known
 
-- **WHEN** no gallery is configured, or the gallery answers with an error status, with a page that is not the list, not in time, drops the connection, cannot be reached, or the check fails for a reason other than the gallery
+- **WHEN** the gallery answers with an error status, with a page that is not the list, not in time, drops the connection, cannot be reached, the check fails for a reason other than the gallery, or the check runs past the hard timeout of the cache
 - **THEN** the call returns `false`
 - **AND** that `false` stays with the process that checked, for up to a minute: another process of the installation asks the gallery itself
+- **AND** after that minute, while a new check takes longer than 200 ms, the call returns the expired `false`
 
 #### Scenario: Check fails with available known
 

@@ -57,7 +57,7 @@ public sealed class OFormRequestManagerTests : IDisposable
 
     private readonly List<ServiceProvider> _services = [];
     private readonly List<HttpStub> _stubs = [];
-    private readonly List<TruncatingServer> _truncating = [];
+    private readonly List<RawServer> _rawServers = [];
     private readonly FusionCache _cache = new(new FusionCacheOptions
     {
         DefaultEntryOptions = new FusionCacheEntryOptions
@@ -78,7 +78,7 @@ public sealed class OFormRequestManagerTests : IDisposable
             stub.Dispose();
         }
 
-        foreach (var server in _truncating)
+        foreach (var server in _rawServers)
         {
             server.Dispose();
         }
@@ -248,6 +248,47 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task Get_FileAnnouncedLargerThanTheLimit_Returns502WithoutReadingIt()
+    {
+        // The headers announce a file over the limit and the body never comes: the download refuses it by the headers
+        // instead of waiting for the body until the deadline
+        var file = RawFile(head: "", contentLength: OFormRequestManager.MaxTemplateSize + 1, padding: 0, stall: true);
+        var manager = CreateManager(GalleryWithFileAt(file.Url), clientTimeout: Timeout.InfiniteTimeSpan,
+            downloadTimeout: TimeSpan.FromSeconds(10));
+
+        var watch = Stopwatch.StartNew();
+        await AssertGalleryUnavailableAsync(manager);
+
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(3));
+        file.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Get_FileLargerThanTheLimitWithoutItsLength_Returns502()
+    {
+        // A PDF with no Content-Length that goes past the limit: the copy stops at the limit
+        var file = RawFile(head: Pdf, contentLength: null, padding: OFormRequestManager.MaxTemplateSize, stall: false);
+
+        await AssertGalleryUnavailableAsync(CreateManager(GalleryWithFileAt(file.Url), downloadTimeout: TimeSpan.FromSeconds(20)));
+
+        file.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Get_FileIsAnEndlessPageOfAProxy_Returns502WithoutWaitingForItsEnd()
+    {
+        // The start of the file is not a PDF and the rest never comes: the signature is checked before the rest is read
+        var file = RawFile(head: "<html>" + new string(' ', 2048), contentLength: null, padding: 0, stall: true);
+        var manager = CreateManager(GalleryWithFileAt(file.Url), clientTimeout: Timeout.InfiniteTimeSpan,
+            downloadTimeout: TimeSpan.FromSeconds(10));
+
+        var watch = Stopwatch.StartNew();
+        await AssertGalleryUnavailableAsync(manager);
+
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(3));
+    }
+
+    [Fact]
     public async Task Get_TemplateHasNoFileOfTheFormat_Returns404()
     {
         // The gallery filters the files of the template by the extension, so a template without that format comes
@@ -387,6 +428,49 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task IsAvailableAsync_CheckOutlastsTheHardTimeoutOfTheCacheWithNothingKnown_IsFalse()
+    {
+        // The deadline of the check is longer than the hard timeout of the cache: the cache gives up first, and the
+        // reader still gets "unavailable", not an exception that the endpoint would turn into a 500
+        using var cache = new FusionCache(new FusionCacheOptions
+        {
+            DefaultEntryOptions = new FusionCacheEntryOptions
+            {
+                Duration = TimeSpan.MaxValue,
+                LockTimeout = TimeSpan.FromSeconds(5),
+                FactoryHardTimeout = TimeSpan.FromMilliseconds(300)
+            }
+        });
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List).After(TimeSpan.FromSeconds(5)));
+        var manager = CreateManager(gallery.Url, clientTimeout: Timeout.InfiniteTimeSpan, cache: cache, probeTimeout: TimeSpan.FromSeconds(10));
+
+        var watch = Stopwatch.StartNew();
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(3));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task IsAvailableAsync_DeadlineOfTheCheck_IsNotLoggedAsAnErrorByPolly(bool registered)
+    {
+        // The manager logs a gallery that does not answer as a warning of its own; the timeout event of Polly goes to the
+        // Debug level, both through the registered pipeline and through the one the manager adds in a host without it
+        // (its 4-second deadline, under the 5-second hard timeout of the cache)
+        var logs = new RecordingLoggerProvider();
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List).After(TimeSpan.FromSeconds(10)));
+        var manager = CreateManager(gallery.Url, clientTimeout: Timeout.InfiniteTimeSpan,
+            probeTimeout: TimeSpan.FromMilliseconds(500), loggerProvider: logs, registerPipelines: registered);
+
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+
+        var timeouts = logs.Entries.Where(entry => entry.Message.Contains("OnTimeout", StringComparison.Ordinal)).ToList();
+        timeouts.Should().NotBeEmpty();
+        timeouts.Should().OnlyContain(entry => entry.Level == LogLevel.Debug);
+    }
+
+    [Fact]
     public async Task IsAvailableAsync_GalleryIsUnreachable_IsFalse()
     {
         (await CreateManager(Unreachable().Url).IsAvailableAsync()).Should().BeFalse();
@@ -459,7 +543,7 @@ public sealed class OFormRequestManagerTests : IDisposable
         await refreshFailed.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
         gallery.CallCount.Should().Be(2);
 
-        // The failed check is not repeated within the minute the fail-safe throttles it
+        // The fail-safe throttles the failed check: the next call does not ask the gallery again
         (await manager.IsAvailableAsync()).Should().BeTrue();
         gallery.CallCount.Should().Be(2);
     }
@@ -654,9 +738,26 @@ public sealed class OFormRequestManagerTests : IDisposable
     private TruncatingServer Truncating(bool stall = false)
     {
         var server = new TruncatingServer(stall);
-        _truncating.Add(server);
+        _rawServers.Add(server);
 
         return server;
+    }
+
+    private RawFileServer RawFile(string head, long? contentLength, long padding, bool stall)
+    {
+        var server = new RawFileServer(head, contentLength, padding, stall);
+        _rawServers.Add(server);
+
+        return server;
+    }
+
+    /// <summary>
+    /// A gallery whose list names the PDF file of template 1 at <paramref name="fileHost"/>.
+    /// </summary>
+    private string GalleryWithFileAt(string fileHost)
+    {
+        return Gallery(_ => StubResponse.Json(HttpStatusCode.OK,
+            $$"""{"data":[{"id":1,"file_oform":[{"url":"{{fileHost}}/file.pdf","name":"form","ext":".pdf"}]}]}""")).Url;
     }
 
     private HttpStub Unreachable()
@@ -672,11 +773,31 @@ public sealed class OFormRequestManagerTests : IDisposable
     /// <param name="primaryHandler">A handler in place of the network, for a fault the stubs cannot produce.</param>
     /// <param name="downloadTimeout">The download deadline in place of the manager's 30 seconds.</param>
     /// <param name="probeTimeout">The deadline of the availability check in place of the manager's 4 seconds.</param>
+    /// <param name="loggerProvider">Where the logs of the services (Polly's among them) go; none by default.</param>
+    /// <param name="registerPipelines">
+    /// <c>false</c> registers the registry without the pipelines of the gallery, as a host that does not call
+    /// AddTemplateGalleryPipelines has it: the deadlines are then the manager's own.
+    /// </param>
     private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null,
-        Func<HttpMessageHandler>? primaryHandler = null, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null)
+        Func<HttpMessageHandler>? primaryHandler = null, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null,
+        ILoggerProvider? loggerProvider = null, bool registerPipelines = true)
     {
         var services = new ServiceCollection();
-        services.AddTemplateGalleryPipelines(downloadTimeout, probeTimeout);
+
+        if (registerPipelines)
+        {
+            services.AddTemplateGalleryPipelines(downloadTimeout, probeTimeout);
+        }
+        else
+        {
+            services.AddResiliencePipelineRegistry<string>();
+        }
+
+        if (loggerProvider is not null)
+        {
+            services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(loggerProvider));
+        }
+
         var builder = services.AddHttpClient(Options.DefaultName, client =>
         {
             if (clientTimeout is { } timeout)
@@ -702,7 +823,7 @@ public sealed class OFormRequestManagerTests : IDisposable
             .Build();
 
         return new OFormRequestManager(NullLogger<OFormRequestManager>.Instance, configuration, provider.GetRequiredService<IHttpClientFactory>(), cache ?? _cache,
-            provider.GetRequiredService<ResiliencePipelineRegistry<string>>());
+            provider.GetRequiredService<ResiliencePipelineRegistry<string>>(), provider.GetRequiredService<IOptions<TelemetryOptions>>());
     }
 
     private static bool IsFile(StubRequest request)
@@ -723,6 +844,37 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     /// <summary>
+    /// A logger provider that keeps every entry of every category with its level.
+    /// </summary>
+    private sealed class RecordingLoggerProvider : ILoggerProvider
+    {
+        private readonly ConcurrentQueue<(LogLevel Level, string Message)> _entries = new();
+
+        public IReadOnlyCollection<(LogLevel Level, string Message)> Entries => _entries.ToArray();
+
+        public ILogger CreateLogger(string categoryName)
+        {
+            return new Logger(_entries);
+        }
+
+        public void Dispose()
+        {
+        }
+
+        private sealed class Logger(ConcurrentQueue<(LogLevel Level, string Message)> entries) : ILogger
+        {
+            public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+            public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
+
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+            {
+                entries.Enqueue((logLevel, formatter(state, exception)));
+            }
+        }
+    }
+
+    /// <summary>
     /// A handler that throws the given exception on every request.
     /// </summary>
     private sealed class ThrowingHandler(Exception exception) : HttpMessageHandler
@@ -734,21 +886,20 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     /// <summary>
-    /// A server that answers 200 with a Content-Length longer than the body it writes, then closes the connection: the
-    /// gallery, or a proxy of a closed network, dropping the connection while the body is read. With <c>stall</c> it
-    /// keeps the connection open instead and writes nothing more, a body that never ends. WireMock cannot do either,
-    /// its faults either answer in full or fail before the headers.
+    /// A server that writes its answers to the socket itself, for answers WireMock cannot give: its faults either answer
+    /// in full or fail before the headers, and it always sends the length of the body.
     /// </summary>
-    private sealed class TruncatingServer : IDisposable
+    private abstract class RawServer : IDisposable
     {
         private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
         private readonly CancellationTokenSource _stopped = new();
-        private readonly bool _stall;
+        private readonly CancellationToken _stoppedToken;
         private int _callCount;
 
-        public TruncatingServer(bool stall)
+        protected RawServer()
         {
-            _stall = stall;
+            // The token is taken before the source can be disposed: a connection may still be served after that
+            _stoppedToken = _stopped.Token;
             _listener.Start();
             _ = Task.Run(AcceptAsync);
         }
@@ -763,6 +914,11 @@ public sealed class OFormRequestManagerTests : IDisposable
             _listener.Stop();
             _stopped.Dispose();
         }
+
+        /// <summary>
+        /// Writes the answer to a request whose headers have been read; <paramref name="stopped"/> ends with the test.
+        /// </summary>
+        protected abstract Task AnswerAsync(Socket connection, CancellationToken stopped);
 
         private async Task AcceptAsync()
         {
@@ -780,11 +936,11 @@ public sealed class OFormRequestManagerTests : IDisposable
                     return;
                 }
 
-                _ = Task.Run(() => AnswerAsync(connection));
+                _ = Task.Run(() => ServeAsync(connection));
             }
         }
 
-        private async Task AnswerAsync(Socket connection)
+        private async Task ServeAsync(Socket connection)
         {
             using (connection)
             {
@@ -806,13 +962,7 @@ public sealed class OFormRequestManagerTests : IDisposable
 
                     Interlocked.Increment(ref _callCount);
 
-                    await connection.SendAsync(Encoding.ASCII.GetBytes(
-                        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 4096\r\n\r\n{\"data\":[{\"id\":1"));
-
-                    if (_stall)
-                    {
-                        await Task.Delay(Timeout.Infinite, _stopped.Token);
-                    }
+                    await AnswerAsync(connection, _stoppedToken);
 
                     connection.Shutdown(SocketShutdown.Both);
                 }
@@ -824,6 +974,51 @@ public sealed class OFormRequestManagerTests : IDisposable
                 {
                     // The test is over: the stalled connection closes with the server
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// A server that answers 200 with a Content-Length longer than the body it writes, then closes the connection: the
+    /// gallery, or a proxy of a closed network, dropping the connection while the body is read. With <c>stall</c> it
+    /// keeps the connection open instead and writes nothing more, a body that never ends.
+    /// </summary>
+    private sealed class TruncatingServer(bool stall) : RawServer
+    {
+        protected override async Task AnswerAsync(Socket connection, CancellationToken stopped)
+        {
+            await connection.SendAsync(Encoding.ASCII.GetBytes(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 4096\r\n\r\n{\"data\":[{\"id\":1"));
+
+            if (stall)
+            {
+                await Task.Delay(Timeout.Infinite, stopped);
+            }
+        }
+    }
+
+    /// <summary>
+    /// A server that answers 200 with <paramref name="head"/> and then <paramref name="padding"/> zero bytes. With a
+    /// <paramref name="contentLength"/> it announces that length whatever it writes; without one the body ends when the
+    /// connection closes. With <paramref name="stall"/> it keeps the connection open after that and writes nothing more.
+    /// </summary>
+    private sealed class RawFileServer(string head, long? contentLength, long padding, bool stall) : RawServer
+    {
+        protected override async Task AnswerAsync(Socket connection, CancellationToken stopped)
+        {
+            var length = contentLength is { } value ? $"Content-Length: {value}\r\n" : "Connection: close\r\n";
+            await connection.SendAsync(Encoding.ASCII.GetBytes(
+                $"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n{length}\r\n{head}"));
+
+            var zeros = new byte[64 * 1024];
+            for (var left = padding; left > 0; left -= zeros.Length)
+            {
+                await connection.SendAsync(zeros.AsMemory(0, (int)Math.Min(left, zeros.Length)), stopped);
+            }
+
+            if (stall)
+            {
+                await Task.Delay(Timeout.Infinite, stopped);
             }
         }
     }

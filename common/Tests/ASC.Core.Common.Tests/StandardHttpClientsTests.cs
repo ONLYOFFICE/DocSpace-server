@@ -97,6 +97,28 @@ public sealed class StandardHttpClientsTests : IDisposable
         client.Timeout.Should().Be(TimeSpan.FromSeconds(10));
     }
 
+    [Fact]
+    [Trait("Bug", "78009")]
+    public async Task TemplateGallery_GetsItsDeadlinesWithoutARegistrationOfItsOwn()
+    {
+        // The request manager of the template gallery takes its deadlines from the registry of resilience pipelines in
+        // every host that creates FileStorageService, also in one that registers neither its pipelines nor any other
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["files:oform:domain"] = "http://127.0.0.1:1",
+                ["files:oform:path"] = "/api/oforms"
+            })
+            .Build();
+        using var cache = new FusionCache(new FusionCacheOptions());
+        var manager = ActivatorUtilities.CreateInstance<OFormRequestManager>(_provider,
+            NullLogger<OFormRequestManager>.Instance, configuration, cache);
+
+        var exception = await Assert.ThrowsAsync<CustomHttpException>(() => manager.Get(1, ".pdf"));
+
+        exception.StatusCode.Should().Be((int)HttpStatusCode.BadGateway);
+    }
+
     public void Dispose()
     {
         _provider.Dispose();

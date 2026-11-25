@@ -57,7 +57,7 @@ public class TemplateGalleryController(OFormRequestManager oFormRequestManager) 
     /// </summary>
     /// <path>api/2.0/files/templateGallery/available</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "`true` when the gallery answered with its template list, `false` when no gallery is configured or the server has failed to get the list and knows no earlier answer", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the gallery answered with its template list, `false` when no gallery is configured or the server has failed to get the list and knows no earlier `true`", typeof(bool))]
     [SwaggerResponse(401, "The caller is not signed in")]
     [HttpGet("templateGallery/available")]
     public async Task<bool> GetTemplateGalleryAvailable()
