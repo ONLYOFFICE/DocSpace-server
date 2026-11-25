@@ -234,7 +234,10 @@ public class PaymentController(
     /// of admins the portal already has. With `Add`, the call checks the minimum only while the portal does not have
     /// the service yet. With `Add`, an empty or zero quantity also returns 400. The admins plan has two products,
     /// the monthly `adminwallet` and the yearly `adminwalletyear`. With `Add`, a request for one returns 400 while
-    /// the portal has the other. A plan whose period has ended does not count. While Docs Connect is active, a
+    /// the portal has the other. A plan whose period has ended does not count. For this check, the call asks the
+    /// billing service for the current plans. If that request fails, the call returns 402 and buys nothing. If
+    /// another purchase of an admins plan is still running for the portal, the call returns 409. It buys nothing
+    /// then, so you can repeat it. While Docs Connect is active, a
     /// request for Docs Connect Dev Pack returns 400. To move to Docs Connect Dev Pack, use
     /// `POST api/2.0/settings/docscloud/switchtodevpack`. While Docs Connect Dev Pack is active, `Set` with Docs
     /// Connect schedules the return to it. The return happens at the next period and needs a quantity above zero. In
@@ -250,9 +253,10 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the units were bought or the change was scheduled; `false` only in the `Set` form, when the portal does not have the service or the change could not be saved", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, that service is already set, or in the `Add` form the portal has the other administrators plan and its period has not ended")]
-    [SwaggerResponse(402, "The payment for the plan of the portal is overdue and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
+    [SwaggerResponse(402, "The payment for the plan of the portal is overdue and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached, also when it is asked for the current plans before an administrators plan is bought")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or in the `Add` form the wallet balance cannot be read or the portal is known to have neither a wallet sub-account nor a bonus that has not ended in the accounting currency")]
+    [SwaggerResponse(409, "In the `Add` form, another purchase of an administrators plan is still running for this portal; nothing was bought")]
     [HttpPut("updatewallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
@@ -346,12 +350,29 @@ public class PaymentController(
         // Two requests for the two administrators plans must not both pass the check of the other plan. So the check
         // and the purchase are one step per portal, on a tariff read anew: a request that waited sees what the
         // request before it bought.
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"wallet_admin_plan_{tenantId}"))
+        IDistributedLockHandle planLock;
+
+        try
         {
+            planLock = await distributedLockProvider.TryAcquireFairLockAsync($"wallet_admin_plan_{tenantId}");
+        }
+        catch (DistributedLockException)
+        {
+            // the request before this one is still buying: nothing was checked or bought here, the caller may repeat
+            throw new CustomHttpException(HttpStatusCode.Conflict, "Another purchase of an administrators plan is in progress");
+        }
+
+        await using (planLock)
+        {
+            // The payments are asked from the billing service itself, and a failure of that request ends the call:
+            // the tariff read below falls back on the stored copy, where "no answer" would read as "no other plan".
+            var currentQuotas = await tariffService.GetCurrentPaymentQuotasAsync(tenantId);
+
             tariff = await tariffService.GetTariffAsync(tenantId, refresh: true);
 
             // the monthly and the yearly administrators plan are not bought side by side; a plan that has ended does not count
-            if (TenantWalletPlans.HoldsOtherAdminPlan(tariff.Quotas, quota.TenantId))
+            if (TenantWalletPlans.HoldsOtherAdminPlan(currentQuotas, quota.TenantId) ||
+                TenantWalletPlans.HoldsOtherAdminPlan(tariff.Quotas, quota.TenantId))
             {
                 throw new ArgumentException("Quota is already set");
             }
@@ -481,10 +502,9 @@ public class PaymentController(
     /// returns 403 if the installation has no billing service or the customer has no payment method. It returns 404 if
     /// the portal has no billing customer or its paid plan has no subscription. The call returns 400 if `quantity`
     /// names a product other than `adminwallet` or `adminwalletyear`. These are the monthly and the yearly admins
-    /// plan. The plan must have the period of the subscription. A monthly subscription moves to `adminwallet`
-    /// only, and a yearly one to `adminwalletyear` only. The other plan returns 400.
-    /// It also returns 400 for zero admins or fewer than the
-    /// portal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan
+    /// plans. A monthly subscription moves to `adminwallet` only, and a yearly one to `adminwalletyear` only. If
+    /// the plan does not have the period of the subscription, the call returns 400. The call also returns 400 for
+    /// zero admins or fewer than the portal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan
     /// is not paid or the balance cannot be moved. Two errors come after the subscription has ended. If the wallet and
     /// the bonus still fall short after the top-up, the call returns 402. If the wallet balance cannot be read, the
     /// call returns 404.

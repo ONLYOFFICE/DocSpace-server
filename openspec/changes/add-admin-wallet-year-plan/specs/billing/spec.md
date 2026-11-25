@@ -50,6 +50,23 @@ administrators plan while the tariff holds the other with its period not ended (
 - **WHEN** the owner calls `getPaymentQuotas` with `wallet=true` on a hosted portal
 - **THEN** the list holds the yearly plan with the `year` feature, at the catalogue price of 220 when the accounting service gives no price for `adminyear`
 
+#### Scenario: Seats of the yearly plan
+
+- **WHEN** the tariff holds 3 units of `adminwalletyear` next to a storage add-on
+- **THEN** the merged quota of the portal carries 3 paid seats (`manager`), the price of 660 and the `year` feature, as `Admin` units give the seats of "Paid seats and tariff limits"
+
+### Requirement: An administrators plan is bought on the billing service's own answer
+
+Before `updateWalletPayment` with `Add` buys `adminwallet` or `adminwalletyear`, it SHALL ask the billing
+service for the portal's current payments and check the other plan on that answer. If the billing service
+does not answer, the call answers 402 and buys nothing. If another such purchase holds the portal's lock
+until the wait for it ends, the call answers 409 and buys nothing.
+
+#### Scenario: Billing service does not list the payments
+
+- **WHEN** the owner calls `updateWalletPayment` with `Add` for `adminwallet` or `adminwalletyear` and the billing service answers 500 to the request for the current payments
+- **THEN** the system answers 402, and neither a purchase nor a deposit is sent to the billing service
+
 ### Requirement: Moving a subscription keeps its period
 
 `moveSubscriptionToWallet` SHALL move a subscription to the administrators plan of its own period only:
@@ -63,7 +80,7 @@ The plan of the other period answers 400 "Invalid product" before the balance is
 
 #### Scenario: Yearly subscription to the yearly plan
 
-- **WHEN** the payer of a portal on a paid yearly subscription calls `moveSubscriptionToWallet` with `adminwalletyear` for 2 administrators, with an empty wallet and no bonus
+- **WHEN** the payer of a portal on a paid yearly subscription calls `moveSubscriptionToWallet` with `adminwalletyear` for 2 administrators, with an empty wallet, no bonus and nothing left of the period to move
 - **THEN** the wallet is topped up by 440 USD and the billing service is asked for 2 of the yearly product
 
 ### Requirement: Yearly administrators plan as a wallet service

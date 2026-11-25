@@ -17,8 +17,10 @@ the plan behaves like `adminwallet`.
   not below the portal's administrators unless the plan is already active.
 - `updateWalletPayment` with `Add` refuses one administrators plan with 400 "Quota is already set" while the
   tariff holds the other with its period not ended. A plan that has ended does not count. The check and the
-  purchase are one step per portal, so two requests sent together do not buy both. Switching between the two
-  while one is in force is not part of this change.
+  purchase are one step per portal, so two requests sent together do not buy both. For the check the billing
+  service is asked for the portal's current payments: when it does not answer, the call answers 402 and
+  buys nothing, and a request that waits for the step of another until the wait ends answers 409. Switching
+  between the two while one is in force is not part of this change.
 - `moveSubscriptionToWallet` accepts `adminwalletyear` as well as `adminwallet`, and the move keeps the
   period: a yearly subscription moves to `adminwalletyear` only, a monthly one to `adminwallet` only. The plan
   of the other period answers 400 "Invalid product".
@@ -45,10 +47,15 @@ None.
     delta also rewords two phrases of that requirement, with the same meaning, to keep its text under the
     length limit: "403 otherwise and without billing" as "else 403, also without billing", and
     "400 otherwise" as "else 400".
-  - Three requirements are added: the yearly wallet plan with the rule for the other plan, the move that
-    keeps the period of the subscription, and the yearly plan in the operations that take a service.
+  - Four requirements are added: the yearly wallet plan with the rule for the other plan, the purchase of an
+    administrators plan on the billing service's own answer, the move that keeps the period of the
+    subscription, and the yearly plan in the operations that take a service.
   - "Buying wallet services" keeps its text: its minimum "the portal's administrators" now applies to both
     plans.
+  - "Paid seats and tariff limits" keeps its text ("Buying `Admin` units from the wallet SHALL raise the
+    seats"): `AdminYear` units raise them the same way, through the `manager` count of the row. The text
+    is 8 characters short of the length limit, so the yearly plan is stated as a scenario of the new
+    requirement instead of a modified one.
 
 ## Breaks current behaviour
 
@@ -59,7 +66,10 @@ None.
   moves nothing. A monthly subscription with `adminwallet` behaves as before.
 - **"Buying wallet services"** (text unchanged): `updateWalletPayment` with `Add` for `adminwallet` on a portal
   whose `adminwalletyear` is in force now answers 400 "Quota is already set". No existing portal holds that
-  plan, so no existing caller sees a difference.
+  plan, so no existing caller sees a difference. `Add` for `adminwallet` now answers 402 when the billing
+  service does not answer the request for the current payments; it used to go on to the purchase on the
+  stored tariff. It answers 409 when another purchase of an administrators plan holds the portal's lock for
+  the whole wait.
 - **"Wallet services switched on per portal"**: `changeTenantWalletServiceState` with `service` `AdminYear`
   answered 400 (not a member of the enum); it now answers 200 and stores it, as it does for `Admin`.
 - **"Purchasable quotas and wallet services"** (text unchanged): `getWalletService` with `service`

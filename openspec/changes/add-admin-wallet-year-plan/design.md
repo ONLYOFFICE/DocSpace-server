@@ -62,13 +62,21 @@ See proposal.md for the motivation. What shapes the approach:
    ends, so counting it would block the other plan for good. The decision is a function of the tariff rows,
    next to the predicate, with a unit test for an end later, in a minute and in the past. `Set` cannot bring
    the other plan in: the next quantity is stored only for a quota the tariff holds. The check and the
-   purchase of an administrators plan run under one lock per portal, on a tariff read anew from the billing
-   service, so of two `Add` requests sent together the second sees what the first bought; the DocsCloud
-   switch to the Dev Pack is guarded the same way. The lock is released when the request ends, also on a
-   failure, and a request that cannot get it fails instead of buying. `movetowallet` has no
-   check of its own: it answers 400 "Invalid product" when the first primary row of the tariff is a wallet
-   product, and a tariff with a provider subscription and a wallet administrators plan side by side is not a
-   state the purchase paths produce.
+   purchase of an administrators plan run under one lock per portal, so of two `Add` requests sent together
+   the second sees what the first bought; the DocsCloud switch to the Dev Pack is guarded the same way.
+   Under the lock the current payments are asked from the billing service itself, and the other plan is
+   looked for in that answer and in the tariff read anew. The tariff read alone is not enough: it falls
+   back on the stored tariff when the billing service does not answer, so "no answer" would read as "no
+   other plan" right after a purchase whose outcome is unknown. A failure of the request for the payments
+   ends the call with the status of a billing failure (402) before anything is paid; an answer that the
+   portal has no payments is a known answer. The lock is released when the request ends, also on a
+   failure. A request that does not get the lock within the provider's wait answers 409 and buys nothing,
+   so the caller may repeat it (the status chosen by the task owner). The wait is the lock provider's own:
+   30 seconds in the in-memory provider, the configured value with Redis. `movetowallet` has no check of
+   its own and takes no lock: it answers 400 "Invalid product" when the first primary row of the tariff is
+   a wallet product, and the billing service refuses a wallet plan while the portal has an active provider
+   subscription (confirmed by the task owner), so a subscription with a wallet administrators plan beside
+   it does not come to be. `updatewallet` has no check of its own for that case: it relies on the refusal.
 5. **The move keeps the period.** `movetowallet` reads the quota of the current subscription before anything
    is moved and answers 400 "Invalid product" when the `year` feature of that quota and of the requested
    plan differ: a yearly subscription moves to the yearly plan only, a monthly one to the monthly plan only
@@ -98,8 +106,17 @@ See proposal.md for the motivation. What shapes the approach:
   cache of an hour. The renewal worker keeps its list of wallet quotas, prices included, for the life of its
   process, so a changed price, product id or service name reaches renewals after the worker restarts.
 - [An `Add` of an administrators plan and `movetowallet` at the same moment] → not under the lock:
-  `movetowallet` is refused for a portal whose plan is a wallet product, and a provider subscription with a
-  wallet administrators plan beside it is not a state the purchase paths produce.
+  `movetowallet` is refused for a portal whose plan is a wallet product, and the billing service refuses
+  the `Add` of a wallet plan while the provider subscription is active (confirmed by the task owner). No
+  test pins that refusal: the payment stub sells what it is asked for.
+- [A renewal of the ended plan that the worker left pending after an unknown answer] → the billing service
+  may still carry it out after the due date, when the other plan is already bought, and the portal then
+  pays for both. Accepted as a known limitation by the task owner: closing it would mean reading the
+  renewal records before the other plan is sold.
+- [The enum members `Admin` and `AdminYear` are published with their names as descriptions] → kept: the
+  `[Description]` of a member is also what the generated enum extensions print and parse (the audit record
+  of a switched service, the wallet flag names of the quota features), so a sentence there would change
+  both. The two members carry a code comment instead.
 - [`feature/business-tools` uses quota id -19 for another quota] → that branch is
   renumbered (row, enum member, migration) when it meets this one; decided by the task owner.
 - [The in-flight change `wallet-bonus` modifies "Moving the subscription balance to the wallet" too] → the

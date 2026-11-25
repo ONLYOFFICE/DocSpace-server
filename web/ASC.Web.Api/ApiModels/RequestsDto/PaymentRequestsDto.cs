@@ -140,14 +140,10 @@ public class QuotasRequestDto
 public class QuantityRequestDto
 {
     /// <summary>
-    /// The plan and the number of units it is to cover, as a single pair; exactly one pair is accepted. In
-    /// `PUT api/2.0/portal/payment/update`, while the portal is on a priced plan the key has to be the `name` of
-    /// that same plan, which `GET api/2.0/portal/payment/quota` reports, because the subscription is resized
-    /// rather than swapped; the value is the total the subscription is to have afterwards, not the difference,
-    /// and a value that is already in effect is refused with 400. In
-    /// `POST api/2.0/portal/payment/subscription/movetowallet` the key is `adminwallet` for a monthly
-    /// subscription or `adminwalletyear` for a yearly one, and the value is the number of administrators to buy
-    /// from the wallet.
+    /// The plan and the number of units it is to cover, as a single pair. The key is the `name` of a plan from
+    /// `GET api/2.0/portal/payment/quotas`: a subscription plan such as `admin`, or one of the administrators
+    /// plans paid from the wallet, the monthly `adminwallet` and the yearly `adminwalletyear`. The value is the
+    /// total number of units the plan is to cover, not a difference; for these plans a unit is an administrator.
     /// </summary>
     /// <example>{ "admin": 1 }</example>
     [Length(1, 1)]
@@ -165,8 +161,7 @@ public class WalletQuantityRequestDto
     /// `docscloud`, `docsclouddevpack`, `adminwallet` or `adminwalletyear`. The value is read according to
     /// `productQuantityType`: the units to add, or the total the service is to have in the next period. Minimum
     /// quantities apply per service - disk storage starts at 100 units, the Docs Connect Dev Pack at 10, and the
-    /// administrators may not be fewer than the portal already has. Exactly one pair is accepted, and a null or zero
-    /// value cancels a change scheduled earlier rather than buying nothing.
+    /// administrators may not be fewer than the portal already has.
     /// </summary>
     /// <example>{ "storage": 100 }</example>
     [Length(1, 1)]

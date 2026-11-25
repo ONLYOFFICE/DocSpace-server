@@ -42,6 +42,7 @@ public class AdminWalletYearPlanTests(AspireAppFixture fixture) : BaseTest(fixtu
 {
     private const string ChangeRoute = "/billing/ChangeSubscription";
     private const string DepositRoute = "/billing/Deposit";
+    private const string ActiveResourcesRoute = "/billing/GetActiveResources";
 
     [Fact]
     public async Task UpdateWalletPayment_AddYearlyPlan_BuysTheYearlyProduct()
@@ -160,6 +161,31 @@ public class AdminWalletYearPlanTests(AspireAppFixture fixture) : BaseTest(fixtu
         // Assert
         statuses.Should().BeEquivalentTo([200, 400]);
         PaymentCalls.Where(c => c.Route == ChangeRoute).Should().ContainSingle("one of the two plans is bought");
+    }
+
+    // The check of the other plan asks billing for the payments. When billing does not answer, nothing says that the
+    // portal holds no other plan: the stored tariff may lack what a request before this one bought.
+    [Theory]
+    [InlineData(Plans.AdminWalletPlanName)]
+    [InlineData(Plans.AdminWalletYearPlanName)]
+    public async Task UpdateWalletPayment_AddPlanWhileBillingDoesNotListThePayments_ThrowsPaymentRequired(string requestedPlan)
+    {
+        // Arrange: billing would sell the plan, but fails when asked what the portal has paid for
+        Payments.Customer(Owner.Email)
+            .Balance(1000m)
+            .On(PaymentService.Billing, "POST", ChangeRoute, "true")
+            .On(PaymentService.Billing, "POST", ActiveResourcesRoute, "\"billing is down\"", HttpStatusCode.InternalServerError);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _paymentApi.UpdateWalletPaymentAsync(
+            new WalletQuantityRequestDto(new Dictionary<string, int?> { [requestedPlan] = 1 }, ProductQuantityType.Add),
+            TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(402);
+        PaymentCalls.Should().Contain(c => c.Route == ActiveResourcesRoute, "billing was asked for the payments");
+        PaymentCalls.Should().NotContain(c => c.Route == ChangeRoute, "nothing is bought");
+        PaymentCalls.Should().NotContain(c => c.Route == DepositRoute, "nothing is paid");
     }
 
     private async Task<int> AddStatusAsync(string plan)

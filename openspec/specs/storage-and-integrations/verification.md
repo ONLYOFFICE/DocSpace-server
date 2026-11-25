@@ -153,7 +153,7 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | 256 characters 400 naming the field (bug 83327) | `DC/DocsCloudTenantConfigValidationTests.cs:53,70,87,104` | TEST-CONFIRMED [run: PASS] |
 | 9999999999 gives 400 (bug 83326) | `DC/DocsCloudTenantConfigValidationTests.cs:127` | TEST-CONFIRMED [run: PASS] |
 | Valid update answered with the stored configuration; the next read sees it | `BT/DocsCloudTenantTests.cs:118-145` | TEST-CONFIRMED [run: PASS] |
-| Audit entry | `PH:653-660`; not done: the billing suite has no audit reader | CODE-ONLY |
+| Audit entry | `PH:664-671`; not done: the billing suite has no audit reader | CODE-ONLY |
 | **Quota report** | | |
 | Start, owner and admin | `DC/DocsCloudQuotaReportCreateTests.cs:48,67` | TEST-CONFIRMED [run: PASS] |
 | Cancel, owner and admin | `DC/DocsCloudQuotaReportTerminateTests.cs:47,58` | TEST-CONFIRMED [run: PASS] |

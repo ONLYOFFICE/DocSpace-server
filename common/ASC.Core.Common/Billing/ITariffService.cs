@@ -119,4 +119,5 @@ public interface ITariffService
     Task<ServiceLimit> DeleteServiceLimitAsync(int tenantId, string groupName, int id);
 
     Task<bool> IsFreeTariffAsync(Tariff tariff);
+    Task<List<Quota>> GetCurrentPaymentQuotasAsync(int tenantId);
 }

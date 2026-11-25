@@ -42,6 +42,15 @@
 
 - [x] 5.2 Make the check of the other administrators plan and the purchase one step per portal: a distributed lock in `updatewallet` with `Add` and a tariff read anew under it; verify with an integration test of two `Add` requests sent together (`prove-red.sh`)
 
+## 6. After the review of 536589bc7c
+
+- [x] 6.1 Ask the billing service itself for the current payments under the lock of an administrators plan purchase and end the call when it does not answer, instead of deciding on the stored tariff; verify with an integration test where billing answers 500 to that request (`prove-red.sh`)
+- [x] 6.2 Answer 409 when the lock of an administrators plan purchase is not got within the provider's wait, with its `[SwaggerResponse]` and remarks; verify that `ASC.Web.Api` builds with no new warnings. The wait itself is not reproduced by a test: it needs a billing answer slower than the lock wait
+- [x] 6.3 Keep only the meaning of the key and the value in the two `quantity` texts of the payment request DTO, drop the sentence about a null or zero value, and correct the wording of the `movetowallet` remarks; verify with `check_texts.py` on the two operations
+- [x] 6.4 State the seats of the yearly plan as a scenario, the purchase on the billing service's own answer as a requirement, and "nothing left of the period to move" in the 440 USD scenario; verify with `openspec validate --specs --no-interactive`
+- [x] 6.5 Shift every citation of `PaymentRequestsDto.cs` and `PaymentHelper.cs` since the merge-base and of `PaymentsController.cs` and the yearly plan tests for this round, in the three `verification.md` files that cite them, the bare ranges that continue a citation included; verify the cited lines of the rows the round touches
+- [x] 6.6 Re-emit the Web.Api document and rebuild the C# SDK package for the changed texts and the 409; verify the diff of the document, then run `ASC.Web.Api.Billing.Tests` and the unit classes of the change on the repository's package
+
 ## Workflow follow-up
 
 - The billing product 1021 and the accounting service `adminyear` are registered; an environment with its own payment system needs both before the migration.
