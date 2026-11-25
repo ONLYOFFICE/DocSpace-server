@@ -67,7 +67,7 @@ None of those specs was edited.
 | **Document Server address is changed with verification** | | |
 | 403 "Access denied", 401 anonymous/terminated | `T/07_Settings/Editor/CheckDocServiceUrlTests.cs:61-112` | TEST-CONFIRMED [run: PASS] |
 | Validation: query string and secret without header 400, nothing changed | `T/07_Settings/Editor/CheckDocServiceUrlTests.cs:123` | TEST-CONFIRMED [run: PASS] |
-| Mixed content, rollback, 500 on failed verification | `E:636-673`, yaml `checkDocServiceUrl` | CODE-ONLY (unreachable: the stand is served over http, so mixed content cannot arise; on standalone the addresses are stored for the default tenant (`FilesLinkUtility.cs:503`), so a call past validation changes them for every portal of the run) |
+| Mixed content, rollback, 500 on failed verification | `E:634-668`, yaml `checkDocServiceUrl` | CODE-ONLY (unreachable: the stand is served over http, so mixed content cannot arise; on standalone the addresses are stored for the default tenant (`FilesLinkUtility.cs:503`), so a call past validation changes them for every portal of the run) |
 | **Default templates are read with the settings permission** | `T/07_Settings/SharingDefaults/DefaultTemplateReadResetTests.cs:51` (owner, administrator: every extension, `selectedFile` null), 72 (room admin, user, guest 403) | TEST-CONFIRMED [run: PASS] |
 | **Default template from an existing file** | | |
 | Missing `selectedFile` 400 | `T/07_Settings/SharingDefaults/DefaultTemplateTests.cs:45-55` | TEST-CONFIRMED [run: PASS] |
@@ -82,15 +82,15 @@ None of those specs was edited.
 | **Default template reset** | `T/07_Settings/SharingDefaults/DefaultTemplateReadResetTests.cs:167` (entry null, stored copy 404, original kept), 184 (repeated), 198 (room admin 403); extension outside the set by `DT:91-94` only | TEST-CONFIRMED [run: PASS] |
 | **Editing a file alone** | | |
 | Owner and invited manager get a key | `T/01_Files/Editing/EditingStartTests.cs:52-62`, 73 by name | TEST-CONFIRMED [run: PASS] |
-| Second claim 403 | same file 116-136 | TEST-CONFIRMED [run: NO-LINK] |
+| Second claim 403 | same file 116-136; the refusal keeps the first claim: `EditingStartTests.StartEditFile_RefusedSecondClaim_KeepsTheOwnersMark`, `EditingSessionOwnershipTests.StartEditFile_HolderRepeatsTheClaim_KeepsTheirSession` (both added after that run) | TEST-CONFIRMED [run: NO-LINK] |
 | 401 anonymous, 403 guest and read-only, 404 unknown | `T/01_Files/Editing/EditingStartPermissionsTests.cs:46-59,63-80`, 84 by name; `EditingStartTests.cs:92` by name | TEST-CONFIRMED [run: PASS] |
 | **Starting a shared editing session** | | |
 | `{}` or false: 403 "File editing start error" | `T/01_Files/Editing/EditingStartCoAuthoringTests.cs:47-59,65-80` (integration host has no Document Server tracking) | TEST-CONFIRMED [run: PASS] |
-| Key on success | `FSS:2369-2385` | CODE-ONLY (unreachable: needs the Document Server to accept `StartTrackAsync`; the integration host does not) |
+| Key on success | `FSS:2400-2417` | CODE-ONLY (unreachable: needs the Document Server to accept `StartTrackAsync`; the integration host does not) |
 | **Tracking an editing session** | | |
 | `key` true, empty `value` | `T/01_Files/Editing/EditingTrackTests.cs:126-140`; 51,81 | TEST-CONFIRMED [run: PASS] |
 | 401, 403 guest/read, 404, administrator allowed | `T/01_Files/Editing/EditingTrackPermissionsTests.cs:46-117`, 85 by name; `EditingTrackTests.cs:112-122` | TEST-CONFIRMED [run: PASS] |
-| Stale `docKeyForTrack` 403; `isFinish` drops the tab | `T/01_Files/Editing/EditingTrackSessionTests.cs:45` (a key the file never had; a key of a real older revision not built), 60 (claimed tab finished, editing mark gone), 76 (other tab, mark kept) | TEST-CONFIRMED [run: PASS] |
+| Stale `docKeyForTrack` 403; `isFinish` drops the tab | `T/01_Files/Editing/EditingTrackSessionTests.cs:45` (a key the file never had; a key of a real older revision not built), 60 (claimed tab finished, editing mark gone), 76 (other tab, mark kept); `EditingSessionOwnershipTests.TrackEditFile_FinishOfAnotherAccountsTab_KeepsThatSession` (a tab of another account stays; added after that run) | TEST-CONFIRMED [run: PASS] |
 | **Users offered for document protection** | | |
 | Guest 403 "Access denied" | `T/01_Files/Editing/ProtectUsersPermissionsTests.cs:47-67` | TEST-CONFIRMED [run: PASS] |
 | List content, unknown id 403 | `T/01_Files/Editing/ProtectUsersTests.cs:45,66,82` (room members without the caller; group expansion, deleted accounts and the order not asserted) | TEST-CONFIRMED [run: PASS] |
@@ -105,7 +105,7 @@ None of those specs was edited.
 | Entry fields, count | `T/01_Files/Order/FilesBulkOrderTests.cs:49-65,298-315` | TEST-CONFIRMED [run: PASS] |
 | Reflected in content, equal values | same file 92,122,243 by name | TEST-CONFIRMED [run: NO-LINK] |
 | Empty list, 0 is 400, maximum accepted, 404 unknown and wrong type | same file 172-181,192-205,226-239,264-294 | TEST-CONFIRMED [run: NO-LINK] |
-| Guest and read 403, anonymous 401, room manager allowed | `T/01_Files/Order/FilesBulkOrderPermissionsTests.cs:67-84,117-134`; 47,97 by name; `FSS:2836` | TEST-CONFIRMED [run: PASS] |
+| Guest and read 403, anonymous 401, room manager allowed | `T/01_Files/Order/FilesBulkOrderPermissionsTests.cs:67-84,117-134`; 47,97 by name; `FSS:2861` | TEST-CONFIRMED [run: PASS] |
 | **Saving a file as PDF** | | |
 | Title ends with `.pdf` | `T/01_Files/Forms/IsFormPdfTests.cs:182-191` | TEST-CONFIRMED [run: PASS] |
 | 404, archived 403, nothing created | `T/01_Files/CopySave/SaveFileAsPdfTests.cs:53-107` | TEST-CONFIRMED [run: PASS] |
@@ -118,19 +118,19 @@ None of those specs was edited.
 | Keys returned | `T/08_Private/PrivacyRoomTest.cs:149-159` | TEST-CONFIRMED [run: PASS] |
 | Read access required | `T/08_Private/EncryptionInfoAccessTests.cs:44` (no access 403), 59 (room reader 200, no file keys), 77 (unknown id 403) | TEST-CONFIRMED [run: PASS] |
 | **Primary external link of a file** | | |
-| Shape, lazily created | `T/01_Files/Links/FileLinkPrimaryTests.cs:47-67`; `FSS:4495-4546` | TEST-CONFIRMED [run: PASS] |
+| Shape, lazily created | `T/01_Files/Links/FileLinkPrimaryTests.cs:47-67`; `FSS:4522-4575` | TEST-CONFIRMED [run: PASS] |
 | Same id, roles | same file 89,104-151 by name | TEST-CONFIRMED [run: NO-LINK] |
-| Anonymous 401, no access 403 | same file 174-186,195-209 (the "currently 200" comment at 190 is stale by `FSS:4527`) | TEST-CONFIRMED [run: NO-LINK] |
+| Anonymous 401, no access 403 | same file 174-186,195-209 (the "currently 200" comment at 190 is stale by `FSS:4554`) | TEST-CONFIRMED [run: NO-LINK] |
 | **Primary external link of a folder or room** | | |
 | Shape, `count` 0, `startIndex` | `T/02_Folders/LinksPrimary/FolderLinkPrimaryGetTests.cs:46-66,146-172` | TEST-CONFIRMED [run: PASS] |
 | Same link | `T/02_Folders/Links/FolderLinkCreateTests.cs:255-268` | TEST-CONFIRMED [run: PASS] |
 | No `access`: 200, count 0 | same file 158-170 | TEST-CONFIRMED [run: NO-LINK] |
-| Refusals, 404s | same file 189-200,277-290,339-355,382-398; 361,404,423 by name; `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:260-297`; `FolderLinkPrimaryGetTests.cs:104-114`, 118,132 by name | TEST-CONFIRMED [run: PASS] |
+| Refusals, 404s | same file 189-200,277-290,339-355,382-398; 361,404,423 by name; `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:288-326`; `FolderLinkPrimaryGetTests.cs:104-114`, 118,132 by name | TEST-CONFIRMED [run: PASS] |
 | **Revoked primary link stays revoked on read** | | |
 | Folder: 404 after revoke | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:195-214` | TEST-CONFIRMED [run: PASS] |
 | Create after revocation: new primary link with a new id, read answers it (file and folder, 62419af921) | `T/01_Files/Links/FileLinkPrimaryTests.cs:238-242`; `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:242-246` | TEST-CONFIRMED [run: PASS] |
 | File: same path; `primary` true clears the state; replaced in Public rooms | `T/01_Files/Links/FileLinkPrimaryRevocationTests.cs:46,62,81` | TEST-CONFIRMED [run: PASS] |
-| File: replaced in Form filling rooms | `FSS:6655-6664` | CODE-ONLY (reachable, not done: needs a PDF form in a form-filling room, whose read goes through the room-link path `FSS:4491-4504`) |
+| File: replaced in Form filling rooms | `FSS:6753-6773` | CODE-ONLY (reachable, not done: needs a PDF form in a form-filling room, whose read goes through the room-link path `FSS:4505-4520`) |
 | **Setting an external link of a file** | | |
 | Structure and fields | `T/01_Files/Links/FileLinkSetTests.cs:46-197` by name | TEST-CONFIRMED [run: PASS] |
 | ReadWrite 403, unknown id creates, 404, 401, 403 | same file 214-228,237-251,255-268,343-379; 383 by name | TEST-CONFIRMED [run: NO-LINK] |
@@ -138,7 +138,8 @@ None of those specs was edited.
 | **Setting an external link of a folder or room** | | |
 | Revoke answer, past expiration, ReadWrite 403, unknown id | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:170-184,295-306,366-382,386-398` | TEST-CONFIRMED [run: PASS] |
 | Fields, same id | same file 46-150,278,370,387 by name | TEST-CONFIRMED [run: NO-LINK] |
-| Roles, 401, 404 | `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:50-178` by name; `FolderLinkPrimarySetTests.cs:250-280` by name | TEST-CONFIRMED [run: PASS] |
+| Roles, 401, 404 | `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:50-178` by name; `FolderLinkPrimarySetTests.cs:250-280` by name; a user outside a public room 403, no link added: `FolderLinkPrimaryPermissionsTests.SetPrimaryLink_UserOutsidePublicRoom_Returns403AndNoLinkIsAdded` (added after that run) | TEST-CONFIRMED [run: PASS] |
+| First primary link in a public room: a content creator who can read the folder creates its first primary Read link; with the id of an existing link, primary or not, 403 and the link stays | `T/02_Folders/LinksPrimary/FolderLinkPrimaryReaderTests.cs` (`SetPrimaryLink_ContentCreatorCreatesTheFirstPrimaryLinkOfAFolderInAPublicRoom_Returns200`, `SetPrimaryLink_ContentCreatorChangesTheExistingPrimaryLinkOfAPublicRoom_Returns403AndTheLinkStaysAsItWas`, `SetPrimaryLink_ContentCreatorSendsTheIdOfAnotherLinkOfAPublicRoom_Returns403AndTheLinkStaysAsItWas`); `products/ASC.Files/Core/Utils/FileSharing.cs:88-114` | TEST-CONFIRMED |
 | **Listing the links of a file** | | |
 | Empty, 401, 403 | `T/01_Files/Links/FileLinkListTests.cs:45-56,206-243` | TEST-CONFIRMED [run: PASS] |
 | Paging, created link, roles | same file 76-190 by name | TEST-CONFIRMED [run: NO-LINK] |
@@ -200,16 +201,16 @@ owned by this capability. `setDefaultTemplate` on third-party string ids was not
 | # | Where | What the server does | Evidence | Evidence kind |
 |---|---|---|---|---|
 | FX2 | `startEditFile` | A second person refused a claim is told "This document is being edited by you in another tab" | `T/01_Files/Editing/EditingStartTests.cs:116-136` asserts that text for another account | pinned by a test; wording judged by reading |
-| FX3 | `createFilePrimaryExternalLink` (and the folder one, same path) | After a revocation the POST answers 404, because create shares the read path; the UI button cannot share the file again. `setFileExternalLink` with `primary` true still works | `T/01_Files/Links/FileLinkPrimaryTests.cs:212-239` (Bug 84872), `FSS:4500-4507` | FIXED (62419af921): the create request skips the revocation mark, asserted at `FileLinkPrimaryTests.cs:238-242` and `FolderLinkPrimarySetTests.cs:242-246` — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
-| FX4 | `get*PrimaryExternalLink`, `create*PrimaryExternalLink` | The revocation check runs before the sharing right check, so a caller with no access to a revoked entry gets 404 rather than 403, while an unrevoked entry gives 403 | `FSS:4500-4507` before `FSS:4527` | STILL OPEN for `get*`; for `create*` REFUTED since 62419af921 (the create skips the revocation check, so the sharing right check answers 403) |
-| FX6 | `setFilesOrder` | Items are applied one at a time with no transaction, so a later item's 403 or 404 leaves earlier items reordered while the caller sees an error | `FSS:2828-2874` | red by code reading |
+| FX3 | `createFilePrimaryExternalLink` (and the folder one, same path) | After a revocation the POST answers 404, because create shares the read path; the UI button cannot share the file again. `setFileExternalLink` with `primary` true still works | `T/01_Files/Links/FileLinkPrimaryTests.cs:212-239` (Bug 84872), `FSS:4528-4535` | FIXED (62419af921): the create request skips the revocation mark, asserted at `FileLinkPrimaryTests.cs:238-242` and `FolderLinkPrimarySetTests.cs:242-246` — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| FX4 | `get*PrimaryExternalLink`, `create*PrimaryExternalLink` | The revocation check runs before the sharing right check, so a caller with no access to a revoked entry gets 404 rather than 403, while an unrevoked entry gives 403 | `FSS:4528-4535` before `FSS:4554` | STILL OPEN for `get*`; for `create*` REFUTED since 62419af921 (the create skips the revocation check, so the sharing right check answers 403) |
+| FX6 | `setFilesOrder` | Items are applied one at a time with no transaction, so a later item's 403 or 404 leaves earlier items reordered while the caller sees an error | `FSS:2840-2900` | red by code reading |
 | FX7 | `createRoomTag` | A name with a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design | `T/03_Rooms/Tags/RoomTagCreateTests.cs:85-109` | per test comment — per test comment; `CreateRoomTag_NameOutsideBmp_Rejected` passes in run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) but asserts only that the name is refused, not the status code |
 | FX8 | `setDefaultTemplate` | A numeric `selectedFile` that is not a 32-bit integer answers 500 (`GetInt32` in `DefaultTemplateSettings.cs:102`); STILL OPEN after 09d4de0768..6fb6dfb17a, which only removed the documented 500, so the 500 is now undeclared | `DT:103`, yaml `setDefaultTemplate` | red by code reading |
 | FX9 | `getGroupsMembersWithFolderSecurity`, `getGroupsMembersWithFileSecurity` | `filterValue` with an uppercase letter matches nothing, per the yaml text | yaml `getGroupsMembersWithFolderSecurity`; not read in code | yaml text only |
 
 Stale test comments seen (assertions cited above are unaffected): `DefaultTemplateTests.cs:90-95,156-162,178-181,197-200`
 say the mismatches answer 403, `DT:129-134,218-221` raise the 400 exception; `FileLinkPrimaryTests.cs:189-192` and
-`FolderLinkCreateTests.cs:271-274` say "currently answers 200", while `FSS:4527` refuses and commits `021004d5bd` and
+`FolderLinkCreateTests.cs:271-274` say "currently answers 200", while `FSS:4554` refuses and commits `021004d5bd` and
 `cdddfed875` are titled as fixing bug 81575. Those tests pass (run 2026-11-18): the fix is `021004d5bd`, R4 of `room-role-permissions`.
 
 ## Revision 2026-11-14 (`09d4de0768..6fb6dfb17a`)

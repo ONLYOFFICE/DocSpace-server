@@ -2571,7 +2571,7 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "The state of the queued user type change", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The requested type is neither Guest nor User, the account is a system account, disabled or the caller, the recipient is the same account or is not an active admin, or a non-owner tried to convert a DocSpace admin")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(403, "The caller may not change account types, or cannot see the account")]
     [HttpPost("type")]
     public async Task<TaskProgressResponseDto> StartUserTypeUpdate(StartUpdateUserTypeDto inDto)
     {

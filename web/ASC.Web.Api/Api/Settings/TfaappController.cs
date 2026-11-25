@@ -309,7 +309,7 @@ public class TfaappController(
                 break;
 
             default:
-                // a number outside the enum binds as is; taken as None, it used to switch TFA off for the whole portal
+                // a number outside the enum binds as is and is refused: it is no request to switch TFA off
                 throw new ArgumentException($"Unknown TFA type {(int)inDto.Type}", nameof(inDto.Type));
         }
 

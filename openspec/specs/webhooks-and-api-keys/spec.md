@@ -654,7 +654,7 @@ answered 400.
 
 `PUT /api/2.0/keys/{keyId}` (`updateApiKey`) SHALL change `name`, `permissions` and/or `isActive` of the key;
 fields left out keep their values, `name` when sent MUST be 1–30 characters and not whitespace only,
-`permissions` when sent MUST be a non-empty list of catalogue values (`["*"]` makes the key unrestricted). The
+`permissions` when sent MUST be a non-empty list of catalogue values (one with `*` makes the key unrestricted). The
 caller may update their own keys and a DocSpace admin any key; an unknown or already deleted `keyId` answers
 404. The change is recorded in the audit trail.
 
@@ -665,8 +665,8 @@ caller may update their own keys and a DocSpace admin any key; an unknown or alr
 
 #### Scenario: Expired key is left untouched
 
-- **WHEN** a key whose `expiresAt` has passed is updated
-- **THEN** the call answers `false` and nothing is changed; a changed key answers `true`
+- **WHEN** the owner of a key whose `expiresAt` has passed updates it
+- **THEN** the call answers `false` and nothing is changed; a changed key answers `true`; another member who may not update the key gets 403 whether the key has expired or not
 
 #### Scenario: Every type updates own key
 

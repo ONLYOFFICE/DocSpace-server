@@ -96,9 +96,15 @@ public class FileSharingAceHelper(
                     roomType = entryRoom?.FolderType;
                 }
 
-                // any reader of a public room may get its primary read link, which is created on the first request; one who
-                // cannot read the entry used to create it on a folder hidden from them
-                return roomType == FolderType.PublicRoom && r.SubjectType == SubjectType.PrimaryExternalLink && r.Access == FileShare.Read
+                if (roomType != FolderType.PublicRoom || r.SubjectType != SubjectType.PrimaryExternalLink || r.Access != FileShare.Read)
+                {
+                    return false;
+                }
+
+                // a reader of an entry in a public room may create its first primary read link, as the portal does for a
+                // file created there; changing a link that exists takes the right to manage the links
+                return !await fileSecurity.GetPureSharesAsync(entry, [r.Id]).AnyAsync(_)
+                       && !await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).AnyAsync(_)
                        && await fileSecurity.CanReadAsync(entry);
             }) &&
             !beforeOwnerChange &&

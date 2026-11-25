@@ -488,10 +488,8 @@ public partial class FileUploader(
         return uploadSession;
     }
 
-    // The session routes used to find a session by its id alone: any signed-in caller who knew the id could write
-    // parts into somebody else's upload, finalize it, or abort it, whatever access they had to the folder it was
-    // going into. A session belongs to whoever opened it (set in CreateUploadSessionAsync); the upload handler
-    // already authorized only that user.
+    // A session belongs to whoever opened it (set in CreateUploadSessionAsync), and only that account writes parts
+    // into it, finalizes it or aborts it, as the upload handler does; knowing the id of a session is not enough.
     private void DemandSessionOwner<T>(ChunkedUploadSession<T> uploadSession)
     {
         if (uploadSession.UserId != authContext.CurrentAccount.ID)

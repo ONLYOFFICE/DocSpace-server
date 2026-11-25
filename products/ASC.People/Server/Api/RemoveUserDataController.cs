@@ -50,7 +50,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <remarks>
     /// Returns the progress of the job that deletes the data of a user.
     /// To start the job, use `POST api/2.0/people/remove/start`. Requires a DocSpace admin. Other callers get 403.
-    /// Only the portal owner can read the job of a DocSpace admin. Other DocSpace admins get 403 for it.
+    /// Only the portal owner can read the job of a DocSpace admin, until the job deletes the profile. Other DocSpace
+    /// admins get 403 for it.
     /// The call is read-only. This is the call to poll. Repeat it until `isCompleted` is true.
     /// If no job exists for the user, the response has no progress object. If the job fails, `error` holds the reason.
     /// To cancel a running job, use `PUT api/2.0/people/remove/terminate`.
@@ -59,7 +60,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/remove/progress/{userId}</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued deletion, or an empty body when nothing is queued for the user", typeof(TaskProgressResponseDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(403, "The caller is not a DocSpace admin, or the account is a DocSpace admin and the caller is not the portal owner")]
     [HttpGet("remove/progress/{userId:guid}")]
     public async Task<TaskProgressResponseDto> GetRemoveProgress(UserIdRequestDto inDto)
     {
@@ -171,7 +172,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <remarks>
     /// Cancels the job that deletes the data of a user.
     /// Requires a DocSpace admin. Other callers get 403.
-    /// Only the portal owner can cancel the job of a DocSpace admin. Other DocSpace admins get 403 for it.
+    /// Only the portal owner can cancel the job of a DocSpace admin, until the job deletes the profile. Other DocSpace
+    /// admins get 403 for it.
     /// The call changes data. It removes the job from the queue and returns no body.
     /// It does not restore the data that the job already deleted. You cannot resume the job.
     /// To start again, use `POST api/2.0/people/remove/start`.
@@ -184,7 +186,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [Tags("People / User data")]
     [SwaggerResponse(200, "The queued deletion is cancelled, or there was nothing to cancel. No content is returned")]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(403, "The caller is not a DocSpace admin, or the account is a DocSpace admin and the caller is not the portal owner")]
     [HttpPut("remove/terminate")]
     public async Task TerminateRemove(TerminateRequestDto inDto)
     {
@@ -197,7 +199,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     // Only the portal owner may delete the data of a DocSpace admin (StartRemove), so only the owner may read or
-    // cancel such a job, as for the reassignment.
+    // cancel such a job, as for the reassignment. The rule follows the account's type, so it holds until the job
+    // deletes the profile.
     private async Task DemandOwnerForDocSpaceAdminAsync(Tenant tenant, Guid userId)
     {
         if (await userManager.GetUserTypeAsync(userId) is EmployeeType.DocSpaceAdmin && !securityContext.CurrentAccount.ID.Equals(tenant.OwnerId))

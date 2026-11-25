@@ -505,15 +505,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task<bool> CanStayInEditorAsync<T>(File<T> file, Guid uid)
     {
-        // A security check keeps the share record it found on the entry and reuses it for whoever is asked about next,
-        // so each user gets an instance of their own or the answer for the previous one comes back.
-        var entry = await daoFactory.GetFileDao<T>().GetFileAsync(file.Id);
-
-        return await fileSecurity.CanEditAsync(entry, uid)
-            || await fileSecurity.CanCustomFilterEditAsync(entry, uid)
-            || await fileSecurity.CanReviewAsync(entry, uid)
-            || await fileSecurity.CanFillFormsAsync(entry, uid)
-            || await fileSecurity.CanCommentAsync(entry, uid);
+        return await fileSecurity.CanEditAsync(file, uid)
+            || await fileSecurity.CanCustomFilterEditAsync(file, uid)
+            || await fileSecurity.CanReviewAsync(file, uid)
+            || await fileSecurity.CanFillFormsAsync(file, uid)
+            || await fileSecurity.CanCommentAsync(file, uid);
     }
 
     /// <summary>

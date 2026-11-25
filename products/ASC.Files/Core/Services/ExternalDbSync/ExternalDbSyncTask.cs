@@ -155,7 +155,8 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
                 catch (Exception ex)
                 {
                     logger.ErrorSyncFormFailed(ex, form.OriginalFormId, _roomId);
-                    _forms.Add(new ExternalDbSyncFormResultDto { Id = form.OriginalFormId, Title = title, Success = false, Error = ex.Message });
+                    // every editor of the room reads the result: see TaskErrorText
+                    _forms.Add(new ExternalDbSyncFormResultDto { Id = form.OriginalFormId, Title = title, Success = false, Error = TaskErrorText.ForReaders(ex, FilesCommonResource.ErrorMessage_ExternalDbSyncFailed).Message });
                 }
 
                 processed++;
@@ -200,7 +201,7 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
         catch (Exception e)
         {
             logger.ErrorWithException(e);
-            Exception = e;
+            Exception = TaskErrorText.ForReaders(e, FilesCommonResource.ErrorMessage_ExternalDbSyncFailed);
             Status = DistributedTaskStatus.Failted; // TODO: rename to Failed when the enum typo is fixed
         }
         finally

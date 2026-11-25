@@ -110,6 +110,12 @@ public partial class TenantDbContext
     {
         return Queries.TakenMappedDomainsAsync(this, tenantId, prefix);
     }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<string> ForbiddenAddressesAsync(string prefix)
+    {
+        return Queries.ForbiddenAddressesAsync(this, prefix);
+    }
 }
 
 static file class Queries
@@ -188,6 +194,13 @@ static file class Queries
                               r.MappedDomain == domain && !(r.Status == TenantStatus.RemovePending ||
                                                            r.Status == TenantStatus.Restoring))
                                                        && r.Id != tenantId));
+
+    public static readonly Func<TenantDbContext, string, IAsyncEnumerable<string>> ForbiddenAddressesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (TenantDbContext ctx, string prefix) =>
+                ctx.TenantForbiden
+                    .Where(r => r.Address.StartsWith(prefix))
+                    .Select(r => r.Address));
 
     public static readonly Func<TenantDbContext, int, string, IAsyncEnumerable<string>> TakenAliasesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -593,7 +593,7 @@ The accounts-and-groups searches SHALL return an empty list with a zero total wh
 
 ### Requirement: Watching and cancelling a data removal
 
-`getRemoveProgress` SHALL report the removal job and `terminateRemove` SHALL cancel it, both for the Owner and DocSpace admins. A Room admin, User or Guest SHALL get 403.
+`getRemoveProgress` SHALL report the removal job and `terminateRemove` SHALL cancel it, both for the Owner and DocSpace admins. A Room admin, User or Guest SHALL get 403, and so SHALL a DocSpace admin on the job of another DocSpace admin while the job has not deleted that profile.
 
 #### Scenario: Reading the job
 
@@ -608,6 +608,11 @@ The accounts-and-groups searches SHALL return an empty list with a zero total wh
 #### Scenario: Non-administrator
 
 - **WHEN** a Room admin, User or Guest calls either operation
+- **THEN** the answer is 403 "Access denied"
+
+#### Scenario: Peer administrator's removal
+
+- **WHEN** a DocSpace admin calls either operation for a disabled DocSpace admin
 - **THEN** the answer is 403 "Access denied"
 
 ### Requirement: Asking to delete one's own profile

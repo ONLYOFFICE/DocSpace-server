@@ -111,6 +111,13 @@ public class WebPluginManager(
         return storage;
     }
 
+    private static readonly TimeSpan _decryptFailureLogInterval = TimeSpan.FromHours(1);
+
+    private static string GetDecryptFailureLoggedKey(int tenantId, string pluginName)
+    {
+        return $"{StorageModuleName}:{tenantId}:decrypt-failure-logged:{pluginName}";
+    }
+
     private static string GetCacheKey(int tenantId)
     {
         return $"{StorageModuleName}:{tenantId}";
@@ -303,11 +310,16 @@ public class WebPluginManager(
                     }
                     catch (CryptographicException e)
                     {
-                        log.ErrorWithException(webPlugin.Name, e);
+                        // every page load of every member reads the plugins, so the failure is logged once an hour
+                        // per plugin, until an admin stores new settings
+                        if (!(await _cache.TryGetAsync<bool>(GetDecryptFailureLoggedKey(tenantId, webPlugin.Name))).HasValue)
+                        {
+                            log.ErrorWithException(webPlugin.Name, e);
+                            await _cache.SetAsync(GetDecryptFailureLoggedKey(tenantId, webPlugin.Name), true, _decryptFailureLogInterval);
+                        }
 
-                        // the plugin is shown as disabled in this answer only: a read, open to any member including a
-                        // guest, used to save the portal's plugin settings and push a socket event. An admin who
-                        // enables the plugin again stores new settings.
+                        // a read changes nothing: the plugin is shown as disabled in this answer only, and an admin who
+                        // enables it again stores new settings
                         webPlugin.Enabled = false;
                         webPlugin.Settings = null;
                     }

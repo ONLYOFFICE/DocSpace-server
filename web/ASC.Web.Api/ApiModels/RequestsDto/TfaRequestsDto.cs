@@ -49,7 +49,7 @@ public class TfaRequestsDto
 {
     /// <summary>
     /// The second factor the portal demands. The two methods are mutually exclusive, so switching one on switches
-    /// the other off, and any value outside the defined set is read as switching TFA off rather than refused.
+    /// the other off, and None switches the second factor off.
     /// </summary>
     /// <example>None</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]

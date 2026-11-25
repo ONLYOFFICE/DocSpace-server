@@ -84,6 +84,7 @@ and from the method body where a row needed the request; test line numbers point
 | Malformed `mandatoryUsers` 400 | `S/Tfa/TfaSettingsUpdateTests.cs:134` | TEST-CONFIRMED [run: PASS] |
 | Malformed `trustedIps` 400, sign-in keeps working (bug 82994) | `S/Tfa/TfaSettingsUpdateTests.cs:155` | TEST-CONFIRMED [run: PASS] |
 | Nonexistent user and group ids accepted | `S/Tfa/TfaSettingsUpdateTests.cs:110,121` | TEST-CONFIRMED [run: PASS] |
+| `type` outside the enum 400, the policy kept | `S/Tfa/TfaSettingsUpdateTests.cs:91` `UpdateTfaSettings_OutOfRangeType_Returns400AndKeepsThePolicy` | TEST-CONFIRMED |
 | Owner named while `id` is not the caller's: 403 | `S/Tfa/TfaOwnerGuardTests.cs:55,71,89,101` (the owner listing themselves without `id` is refused too, AC-8) | TEST-CONFIRMED [run: PASS] |
 | **Switching a two-factor method on ends sessions** | `S/Tfa/TfaSettingsUpdateTests.cs:221,238`; `Tfa:316-319` | TEST-CONFIRMED [run: PASS] |
 | **Who must pass the second factor** | `S/Tfa/TfaSettingsUpdateTests.cs:174`; `S/Tfa/TfaTrustedIpsOverrideTests.cs:70,98`; `web/ASC.Web.Core/Sms/TfaSettingsBase.cs:64-105` | TEST-CONFIRMED [run: PASS] |
@@ -142,7 +143,7 @@ and from the method body where a row needed the request; test line numbers point
 | **Password reminder from the sign-in page** | | |
 | Conditional message | `P/PasswordReminderTests.cs:76` | TEST-CONFIRMED [run: PASS] |
 | Same form whether or not the account exists | `P/PasswordReminderRulesTests.cs:61` | TEST-CONFIRMED [run: PASS] |
-| CAPTCHA 403 | `User:1993-2017`. Unreachable: the stand configures no CAPTCHA keys | CODE-ONLY |
+| CAPTCHA 403 | `User:1995-2006`. Unreachable: the stand configures no CAPTCHA keys | CODE-ONLY |
 | **Changing a password through a confirmation link** | `User:585-653`; yaml `changeUserPassword`. Unreachable: the `PasswordChange` key exists only in the letter, which the suite cannot read | CODE-ONLY |
 
 ## Differences between the yaml and the server

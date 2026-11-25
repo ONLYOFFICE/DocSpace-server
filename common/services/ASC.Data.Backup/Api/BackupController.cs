@@ -624,7 +624,7 @@ public class BackupController(
 
     /// <remarks>
     /// Returns a path to the temporary folder with the stored backup. Requires the right to manage backups, as the
-    /// other backup calls do; it used to answer any signed-in member with the absolute path on the server.
+    /// other backup calls do. Other callers get 403.
     /// </remarks>
     /// <summary>Get the temporary backup folder</summary>
     /// <path>api/2.0/backup/backuptmp</path>

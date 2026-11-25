@@ -137,34 +137,27 @@ public class FileEntryWebhookDtoHelper(
     /// </summary>
     private async Task<bool> CanEditRoomAsync<T>(FileEntry<T> room, Guid subscriberId)
     {
+        // the payloads of all the subscribers of the event are cut from this entry, so its access stays as it was even
+        // when the subscriber is the current account, whose check would write it
         var access = room.Access;
-        var shareRecord = room.ShareRecord;
 
         try
         {
-            room.ShareRecord = null;
-
             return await fileSecurity.CanEditRoomAsync(room, subscriberId);
         }
         finally
         {
             room.Access = access;
-            room.ShareRecord = shareRecord;
         }
     }
 
     private async Task<bool> CanSeeRoomQuotaAsync<T>(FileEntry<T> room, Guid subscriberId)
     {
-        // each check stores the checked user's share in the entry, which the payloads of all the subscribers of the
-        // event are cut from: it is put back as it was
+        // see CanEditRoomAsync
         var access = room.Access;
-        var shareRecord = room.ShareRecord;
 
         try
         {
-            // a check answers with the share it finds on the entry, which belongs to whoever was checked before
-            room.ShareRecord = null;
-
             if (await fileSecurity.CanEditRoomAsync(room, subscriberId) || await fileSecurity.CanCreateAsync(room, subscriberId))
             {
                 return true;
@@ -176,15 +169,12 @@ public class FileEntryWebhookDtoHelper(
             }
 
             // the reader's own share, the folder.Access of the REST predicate: the read check reaches the share in
-            // every section, the archive included, and a check that ends before it leaves None behind
-            room.Access = FileShare.None;
-
-            return await fileSecurity.CanReadAsync(room, subscriberId) && room.Access == FileShare.Editing;
+            // every section, the archive included
+            return await fileSecurity.GetReadAccessAsync(room, subscriberId) == FileShare.Editing;
         }
         finally
         {
             room.Access = access;
-            room.ShareRecord = shareRecord;
         }
     }
 
@@ -238,12 +228,6 @@ public class FileEntryWebhookDtoHelper(
         }
 
         var folder = await GetOriginFolderAsync(folderId);
-
-        if (folder != null)
-        {
-            // the folder is shared between the subscribers, and a check answers with the share it finds on it
-            folder.ShareRecord = null;
-        }
 
         canRead = folder != null && await fileSecurity.CanReadAsync(folder, subscriberId);
         _canReadOriginFolder[key] = canRead;

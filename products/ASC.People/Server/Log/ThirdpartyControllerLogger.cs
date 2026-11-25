@@ -37,4 +37,7 @@ internal static partial class ThirdpartyControllerLogger
 {
     [LoggerMessage(LogLevel.Warning, "The avatar of the third-party profile of user {userId} is not saved: {reason}")]
     public static partial void WarningAvatarNotSaved(this ILogger<ThirdpartyController> logger, Guid userId, string reason);
+
+    [LoggerMessage(LogLevel.Warning, "The avatar of the third-party profile of user {userId} is not saved")]
+    public static partial void WarningAvatarNotSavedWithException(this ILogger<ThirdpartyController> logger, Guid userId, Exception exception);
 }

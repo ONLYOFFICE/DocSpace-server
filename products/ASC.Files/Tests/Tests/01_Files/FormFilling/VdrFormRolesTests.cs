@@ -164,6 +164,35 @@ public class VdrFormRolesTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// In a Virtual Data Room, <c>Resume</c> takes the right to act on a stopped form: the first resume after a stop
+    /// goes through, and a repeated one finds no stopped form and returns 403.
+    /// </summary>
+    [Fact]
+    public async Task ResumeFormFilling_VdrRepeatedResume_Returns403()
+    {
+        // Arrange
+        var (room, participant) = await CreateVdrWithMember(FileShare.FillForms);
+
+        await _filesClient.Authenticate(Owner);
+        var form = await CreateFormInRoom(room.Id, "Autotest VDR Resume Twice.pdf");
+        await SaveRoleMapping(room.Id, form.Id, participant);
+        await StopFormFilling(form.Id);
+        await ManageFormFilling(form.Id, FormFillingManageAction.Resume);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await ManageFormFilling(form.Id, FormFillingManageAction.Resume));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    private async Task ManageFormFilling(int formId, FormFillingManageAction action)
+    {
+        await _filesApi.ManageFormFillingAsync(formId.ToString(), new ManageFormFillingDto(formId, action), TestContext.Current.CancellationToken);
+    }
+
     private async Task SaveRoleMapping(int roomId, int formId, User participant)
     {
         var roles = new List<FormRoleRequest>

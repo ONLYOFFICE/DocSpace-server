@@ -324,8 +324,9 @@ store a part under `chunkNumber` (from 1), in any order, answering the session; 
 
 ### Requirement: Isolation of upload sessions
 
-Opening a session SHALL check the right to create in the folder; aborting one SHALL check the folder of the
-route and that the session belongs to the caller. An anonymous caller SHALL get 401 on every session route.
+Opening a session SHALL check the right to create in the folder. Writing a part into a session, finalizing it
+and aborting it SHALL check that the session belongs to the caller; aborting SHALL also check the folder of the
+route. An anonymous caller SHALL get 401 on every session route.
 Two accounts uploading at the same time SHALL each get their own file in their own folder, and a refused call
 SHALL leave the other account's session untouched.
 
@@ -1112,8 +1113,8 @@ server is reached; one builder script runs at a time per caller.
 `createThumbnails` (`POST api/2.0/files/thumbnails`) SHALL queue thumbnail generation for the listed file ids
 and echo those ids back; `folderIds` are accepted and ignored, a body without `fileIds` answers an empty
 list, and an id that names no file is echoed like any other. The thumbnails themselves are built in the
-background in the configured sizes and are read through `thumbnailStatus` / `thumbnailUrl` of the file. Any
-signed-in account with read access may queue them.
+background in the configured sizes and are read through `thumbnailStatus` / `thumbnailUrl` of the file. Only
+files the caller can read are queued, the rest are echoed.
 
 #### Scenario: Ids echoed
 

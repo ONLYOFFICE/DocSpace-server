@@ -447,54 +447,85 @@ public class ThirdpartyController(
         return (user, quotaLimit);
     }
 
+    // The address of an avatar comes from the profile a provider returns, and some providers (Weixin, older Twitter
+    // profiles) still give plain-HTTP addresses. The validation that matters here is the target: no loopback,
+    // link-local or private address is ever requested, on the first address or on any redirect.
+    private static readonly UrlValidationOptions _avatarValidation = new() { RequireHttps = false };
+
+    // a provider sends its avatar from a CDN behind one or two redirects (Facebook's picture address answers 302)
+    private const int MaxAvatarRedirects = 3;
+
     /// <summary>
-    /// Saves the avatar of the provider profile as the photo of the new account. The address comes from the profile,
-    /// so it is checked like an address a member sends to the photo endpoints (bug 81491): a loopback, link-local or
-    /// private target, or a plain-HTTP address, is never requested. An avatar that cannot be saved leaves the account
-    /// without a photo; the sign-up goes on.
+    /// Saves the avatar of the provider profile as the photo of the new account. Each address, the first one and each
+    /// redirect, is checked like an address a member sends to the photo endpoints (bug 81491) before it is requested,
+    /// and the body is read up to the image size limit. An avatar that cannot be saved leaves the account without a
+    /// photo; the sign-up goes on.
     /// </summary>
     private async Task SaveContactImage(Guid userID, string url)
     {
-        var validation = await urlValidator.ValidateAsync(url);
-        if (!validation.IsValid)
-        {
-            logger.WarningAvatarNotSaved(userID, validation.ErrorMessage);
-            return;
-        }
-
         try
         {
+            var bytes = await DownloadAvatarAsync(userID, url);
+
+            if (bytes != null)
+            {
+                await userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
+            }
+        }
+        catch (Exception ex)
+        {
+            // best effort: a failed download must not end the sign-up halfway, without the provider link and the sign-in
+            logger.WarningAvatarNotSavedWithException(userID, ex);
+        }
+    }
+
+    private async Task<byte[]> DownloadAvatarAsync(Guid userID, string url)
+    {
+        var address = url;
+
+        for (var redirects = 0; redirects <= MaxAvatarRedirects; redirects++)
+        {
+            var validation = await urlValidator.ValidateAsync(address, _avatarValidation);
+            if (!validation.IsValid)
+            {
+                logger.WarningAvatarNotSaved(userID, validation.ErrorMessage);
+                return null;
+            }
+
             var httpClient = httpClientFactory.CreateClient(UrlValidator.PinnedHttpClient);
             using var request = new HttpRequestMessage(HttpMethod.Get, validation.ParsedUri);
             request.Options.Set(UrlValidator.PinnedIpKey, validation.ResolvedAddresses[0]);
-            using var response = await httpClient.SendAsync(request);
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+            if (IsRedirect(response.StatusCode) && response.Headers.Location != null)
+            {
+                address = new Uri(validation.ParsedUri, response.Headers.Location).ToString();
+                continue;
+            }
 
             if (!response.IsSuccessStatusCode)
             {
                 logger.WarningAvatarNotSaved(userID, $"the provider answered {(int)response.StatusCode}");
-                return;
+                return null;
             }
 
-            if (response.Content.Headers.ContentLength > setupInfo.MaxImageUploadSize)
+            var bytes = await LimitedImageReader.ReadAsync(response.Content, setupInfo.MaxImageUploadSize);
+            if (bytes == null)
             {
                 logger.WarningAvatarNotSaved(userID, "the image is over the size limit");
-                return;
             }
 
-            var bytes = await response.Content.ReadAsByteArrayAsync();
-            if (bytes.Length > setupInfo.MaxImageUploadSize)
-            {
-                logger.WarningAvatarNotSaved(userID, "the image is over the size limit");
-                return;
-            }
+            return bytes;
+        }
 
-            await userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
-        }
-        catch (Exception ex)
-        {
-            // best effort: before, a failed download ended the sign-up halfway, without the provider link and the sign-in
-            logger.WarningAvatarNotSaved(userID, ex.Message);
-        }
+        logger.WarningAvatarNotSaved(userID, $"more than {MaxAvatarRedirects} redirects");
+        return null;
+    }
+
+    private static bool IsRedirect(HttpStatusCode statusCode)
+    {
+        return statusCode is HttpStatusCode.MovedPermanently or HttpStatusCode.Found or HttpStatusCode.SeeOther
+            or HttpStatusCode.TemporaryRedirect or HttpStatusCode.PermanentRedirect;
     }
 
     private static string GetMeaningfulProviderName(string providerName)

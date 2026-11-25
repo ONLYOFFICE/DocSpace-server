@@ -91,7 +91,7 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
             EMail = jProfile.Value<string>("email"),
             Id = jProfile.Value<string>("id"),
             Provider = ProviderConstants.Facebook,
-            Avatar = "http://graph.facebook.com/" + jProfile.Value<string>("id") + "/picture?type=large"
+            Avatar = "https://graph.facebook.com/" + jProfile.Value<string>("id") + "/picture?type=large"
         };
 
         return profile;

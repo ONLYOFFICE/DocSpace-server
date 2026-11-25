@@ -2236,7 +2236,8 @@ public class FileStorageService //: IFileStorageService
 
         if (isFinish)
         {
-            await fileTracker.RemoveAsync(fileId, tabId);
+            // a key of the document opens no right to end another account's tab
+            await fileTracker.RemoveOwnTabAsync(fileId, tabId, authContext.CurrentAccount.ID);
             await socketManager.StopEditAsync(fileId);
         }
         else
@@ -2251,13 +2252,12 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            // Only the caller's own editing session is closed here. Another user's session used to be dropped as
-            // well, so the check in EntryManager passed and the content of a file open in someone else's editor
-            // was replaced; now that check refuses such a save, unless it is a forcesave, which by design saves a file
+            // Only the caller's own editing session is closed here, so the check in EntryManager refuses a save into a
+            // file that is open in another account's editor. A forcesave skips that check by design: it saves a file
             // that stays open for editing.
             if (!forceSave && await fileTracker.IsEditingAloneAsync(fileId) && await IsEditedByCurrentUserAsync(fileId))
             {
-                await fileTracker.RemoveAsync(fileId);
+                await fileTracker.RemoveAsync(fileId, userId: authContext.CurrentAccount.ID);
                 await socketManager.StopEditAsync(fileId);
             }
 
@@ -2287,11 +2287,11 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            // The same rule as in SaveEditingAsync: a caller who is not editing the file cannot close the sessions
-            // of those who are.
+            // The same rule as in SaveEditingAsync: the caller closes only their own sessions, so a file that a
+            // co-editor still has open is refused.
             if (!forcesave && await fileTracker.IsEditingAsync(fileId) && await IsEditedByCurrentUserAsync(fileId))
             {
-                await fileTracker.RemoveAsync(fileId);
+                await fileTracker.RemoveAsync(fileId, userId: authContext.CurrentAccount.ID);
                 await socketManager.StopEditAsync(fileId);
             }
 
@@ -2370,47 +2370,51 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false)
     {
-        try
+        if (editingAlone)
         {
-            if (editingAlone)
+            if (await fileTracker.IsEditingAsync(fileId))
             {
-                if (await fileTracker.IsEditingAsync(fileId))
-                {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFileTwice);
-                }
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFileTwice);
+            }
 
-                await entryManager.TrackEditingAsync(fileId, Guid.Empty, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant(), true);
+            // the tab of an alone session; a refusal before this point leaves the tracker as it was
+            var tabId = Guid.Empty;
+            var userId = authContext.CurrentAccount.ID;
+
+            try
+            {
+                await entryManager.TrackEditingAsync(fileId, tabId, userId, tenantManager.GetCurrentTenant(), true);
 
                 //without StartTrack, track via old scheme
                 return await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue);
             }
-
-            var fileOptions = await documentServiceHelper.GetParamsAsync(fileId, -1, true, true, false, true);
-
-            var configuration = fileOptions.Configuration;
-            if (!configuration.EditorConfig.ModeWrite || !(configuration.Document.Permissions.Edit || configuration.Document.Permissions.ModifyFilter || configuration.Document.Permissions.Review
-                                                           || configuration.Document.Permissions.FillForms || configuration.Document.Permissions.Comment))
+            catch (Exception)
             {
-                throw new InvalidOperationException(!string.IsNullOrEmpty(configuration.Error) ? configuration.Error : FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                // only the tab this call may have added is undone, and only while it is the caller's
+                await fileTracker.RemoveOwnTabAsync(fileId, tabId, userId);
+
+                throw;
             }
-
-            var key = configuration.Document.Key;
-
-            if (!await documentServiceTrackerHelper.StartTrackAsync(fileId.ToString(), key))
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_StartEditing);
-            }
-
-            return key;
         }
-        catch (Exception)
+
+        // this path adds no editing mark: the document server reports the sessions it opens
+        var fileOptions = await documentServiceHelper.GetParamsAsync(fileId, -1, true, true, false, true);
+
+        var configuration = fileOptions.Configuration;
+        if (!configuration.EditorConfig.ModeWrite || !(configuration.Document.Permissions.Edit || configuration.Document.Permissions.ModifyFilter || configuration.Document.Permissions.Review
+                                                       || configuration.Document.Permissions.FillForms || configuration.Document.Permissions.Comment))
         {
-            // only the caller's own mark is undone: removing the whole tracker let a refused start, such as a second
-            // claim of a file edited alone or a reader's start, end the editing mark of the person editing the file
-            await fileTracker.RemoveAsync(fileId, userId: authContext.CurrentAccount.ID);
-
-            throw;
+            throw new InvalidOperationException(!string.IsNullOrEmpty(configuration.Error) ? configuration.Error : FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
+
+        var key = configuration.Document.Key;
+
+        if (!await documentServiceTrackerHelper.StartTrackAsync(fileId.ToString(), key))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_StartEditing);
+        }
+
+        return key;
     }
 
     public async Task<File<T>> FileRenameAsync<T>(T fileId, string title)
@@ -5509,9 +5513,7 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var k in keys)
         {
-            // A security check keeps the share record it found on the entry and reuses it for whoever is asked about
-            // next, so each recipient gets an instance of their own or they would pass on the previous one's access.
-            if (await fileSecurity.CanReadAsync(await fileDao.GetFileAsync(fileId), k.UserId))
+            if (await fileSecurity.CanReadAsync(file, k.UserId))
             {
                 accepted.Add(k);
             }
@@ -5719,7 +5721,16 @@ public class FileStorageService //: IFileStorageService
         {
             var (fileIntIds, _) = FileOperationsManager.GetIds(fileIds);
 
-            await eventBus.PublishAsync(new ThumbnailRequestedIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()) { BaseUrl = baseCommonLinkUtility.GetFullAbsolutePath(""), FileIds = fileIntIds });
+            // the worker builds the thumbnails in the name of the caller (of the portal owner for a visitor with a
+            // link), so only the files the caller may read are queued
+            var readable = await fileSecurity.FilterReadAsync(daoFactory.GetFileDao<int>().GetFilesAsync(fileIntIds))
+                .Select(f => f.Id)
+                .ToListAsync();
+
+            if (readable.Count > 0)
+            {
+                await eventBus.PublishAsync(new ThumbnailRequestedIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()) { BaseUrl = baseCommonLinkUtility.GetFullAbsolutePath(""), FileIds = readable });
+            }
         }
         catch (Exception e)
         {
@@ -6045,9 +6056,8 @@ public class FileStorageService //: IFileStorageService
                 break;
 
             case FormFillingManageAction.Resume:
-                // Resume had no check: any member, or anyone who could open the room, resumed a stopped form. In a
-                // Virtual Data Room the right to stop ends with the stop, so a resume takes the right to act on a
-                // stopped form, held by the same people; elsewhere it takes the right to stop.
+                // A resume takes the right to stop the filling. In a Virtual Data Room that right ends with the stop,
+                // so there a resume takes the right to act on a stopped form, held by the same people.
                 var canResume = room?.FolderType == FolderType.VirtualDataRoom
                     ? await fileSecurity.CanResetFillingAsync(form, authContext.CurrentAccount.ID)
                     : await fileSecurity.CanStopFillingAsync(form, authContext.CurrentAccount.ID);
@@ -6104,13 +6114,14 @@ public class FileStorageService //: IFileStorageService
                 break;
 
             case FormFillingManageAction.Edit:
+                // in any room: the action saves the properties of the form and announces it to the room
+                if (!await fileSecurity.CanEditAsync(form, authContext.CurrentAccount.ID))
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                }
+
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
-                    if (!await fileSecurity.CanEditAsync(form, authContext.CurrentAccount.ID))
-                    {
-                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-                    }
-
                     var wasFilling = properties.FormFilling.StartFilling;
 
                     properties.FormFilling.StartFilling = false;

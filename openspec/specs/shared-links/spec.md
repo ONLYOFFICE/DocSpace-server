@@ -214,14 +214,19 @@ not restricted.
 
 The system SHALL allow only the Room Owner and Room managers to create, edit and delete shared links —
 both links to the room and links to files and folders inside it. No other role SHALL create, edit or
-delete a shared link, not even on files they created. Reading a primary link follows the rules in the
-scenarios: a DocSpace admin who is not a member MAY read the primary link of a Public room but SHALL NOT
+delete a shared link, not even on files they created, except as the scenarios say. Reading a primary link follows the
+rules in the scenarios: a DocSpace admin who is not a member MAY read the primary link of a Public room but SHALL NOT
 create, edit or delete links there.
 
 #### Scenario: Room manager creates a link
 
 - **WHEN** a Room manager creates, edits or deletes a link to the room or to a file or folder inside it
 - **THEN** the operation succeeds
+
+#### Scenario: First primary link in a Public room
+
+- **WHEN** a member who can read an entry of a Public room creates its primary read link and the entry has none
+- **THEN** the link is created; a link that exists stays as it was, and changing it returns 403
 
 #### Scenario: Content creator cannot create a file link
 
@@ -237,7 +242,7 @@ create, edit or delete links there.
 
 - **WHEN** a Room manager or a Content creator requests the primary link of a Custom room
 - **THEN** the link is returned
-- **AND** a member with a lower role (Editor, Reviewer, Commentator, Viewer) is refused (403); reading the primary link of a file requires the right to manage links
+- **AND** a member with a lower role (Editor, Reviewer, Commentator, Viewer) is refused (403) while the room has no primary link, because the read would create it; a primary link that exists is returned to any member who can read the room or the folder, its password included; reading the primary link of a file requires the right to manage links
 
 #### Scenario: Non-member admin cannot create a link
 

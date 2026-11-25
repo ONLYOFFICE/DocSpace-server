@@ -85,9 +85,9 @@ public class RemoveProgressTests(AspireAppFixture fixture) : UserDataTestBase(fi
     }
 
     /// <summary>
-    /// The deletion of a DocSpace admin's data is the owner's alone, and so is its progress: another DocSpace admin
-    /// was shown it. The rule is decided by the account's type, so it holds while the job has not yet deleted the
-    /// profile: the other admin asks right after the start.
+    /// The deletion of a DocSpace admin's data is the owner's alone, and so is its progress. The refusal is decided by
+    /// the account's type before the job is looked up, so no job is started here: a started job could delete the
+    /// profile before the question, and the account would then no longer be a DocSpace admin.
     /// </summary>
     [Fact]
     public async Task GetRemoveProgress_AsDocSpaceAdminForAnotherDocSpaceAdminsRemoval_ThrowsAccessDenied()
@@ -95,9 +95,6 @@ public class RemoveProgressTests(AspireAppFixture fixture) : UserDataTestBase(fi
         var (target, _) = await CreateActorWithRoomAndFileAsync(EmployeeType.DocSpaceAdmin, "Autotest Remove Room", "Autotest Remove File");
         await TerminateUser(target);
         var otherAdmin = await InviteContact(EmployeeType.DocSpaceAdmin);
-
-        await _peopleClient.Authenticate(Owner);
-        await _userDataApi.StartRemoveAsync(new TerminateRequestDto(target.Id), TestContext.Current.CancellationToken);
 
         await _peopleClient.Authenticate(otherAdmin);
 

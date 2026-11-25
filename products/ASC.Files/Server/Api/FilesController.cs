@@ -897,8 +897,9 @@ public abstract class FilesController<T>(
     /// <remarks>
     /// Returns the primary external link of a file, and creates it on the first call if the file has none. The new
     /// link has read rights, no password, and no expiration date. For a PDF form in a form-filling room, the call
-    /// returns the link of the room. Requires the right to share the file, which its author and a room manager have.
-    /// Other callers get 403. An anonymous caller gets 401. The call changes data only on the first call, and later
+    /// returns the link of the room. Creating the link requires the right to share the file, which its author and a
+    /// room manager have. Other callers get 403. In an active room, any reader of the file gets its existing link,
+    /// password included. An anonymous caller gets 401. The call changes data only on the first call, and later
     /// calls return the same link. If the primary link was revoked, the call returns 404 and does not create it
     /// again. The address is in `sharedTo.shareLink`. If `count` is outside its allowed range, the call returns 400.
     /// To list all links of the file, use `GET api/2.0/files/file/{id}/links`.
@@ -1153,7 +1154,8 @@ public abstract class FilesController<T>(
     /// a PDF in a room. The action `Start` requires the right to start the filling, which a room manager and a
     /// content creator have. Other callers get 403. Only a room manager can stop a filling that another user started.
     /// A content creator gets 403 there. `Resume` requires the same right as `Stop`. In a virtual data room, it
-    /// applies to a stopped form. In a form-filling room, `Edit` requires editing access to the form. The call
+    /// applies to a stopped form, and a content creator may resume only a form they created. `Edit` requires
+    /// editing access to the form. The call
     /// changes data. You can repeat `Edit` with the same body. A repeated `Stop` or `Resume` returns 403 in a
     /// virtual data room. A repeated `Stop` changes nothing in a form-filling room. Do not repeat `Start` there. A
     /// repeat can delete the drafts that users started after the first call. If the body has no `formId`, the call
@@ -1436,8 +1438,8 @@ public class FilesControllerCommon(
     /// Starts building preview thumbnails for the files in `fileIds`. The call reads only `fileIds` from the body. It
     /// returns these ids unchanged, and an empty list without them. This answer does not confirm that the portal
     /// queued anything. The portal writes a failure to queue the work to its log and does not report it. The portal
-    /// does not build thumbnails for files of a third-party storage. The call does not check access to the files. Any
-    /// signed-in user can call it. Anyone with an external share link can call it without signing in. Other callers
+    /// does not build thumbnails for files of a third-party storage. It queues only the files the caller can read, and
+    /// skips the others without an error. Any signed-in user can call it. Anyone with an external share link can call it without signing in. Other callers
     /// get 401. The call queues work. You can repeat it. The response has no thumbnails. To get one, poll
     /// `GET api/2.0/files/file/{fileId}` until `thumbnailStatus` shows that the thumbnail is created. Then read
     /// `thumbnailUrl`.

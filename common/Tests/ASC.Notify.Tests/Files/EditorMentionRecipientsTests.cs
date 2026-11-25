@@ -71,6 +71,40 @@ public class EditorMentionRecipientsTests
             .Should().BeEquivalentTo([reader.Id.ToString()], "only the reader may read the entry");
     }
 
+    /// <summary>
+    /// The author opened the entry through its external link: the link of the request is the author's, and a check of
+    /// a mentioned account takes only that account's own records, so an account without access gets no letter.
+    /// </summary>
+    [Fact]
+    public async Task EditorMention_AuthorThroughAnExternalLink_ReachesOnlyTheMentionedAccountsThatMayReadTheEntry()
+    {
+        using var scope = await OpenScopeAsync();
+
+        // Arrange: an entry in the owner's My documents with an external link and one reader; the author reaches it
+        // through the link only, and a third account has no access to it
+        var author = await CreateMemberAsync(scope);
+        var reader = await CreateMemberAsync(scope);
+        var outsider = await CreateMemberAsync(scope);
+
+        var entryId = await CreateSharedEntryAsync(scope, reader.Id);
+        var linkId = Guid.NewGuid();
+        await scope.Services.GetRequiredService<FileSecurity>().ShareAsync(
+            entryId, FileEntryType.Folder, linkId, FileShare.Read, SubjectType.ExternalLink, new FileShareOptions { Title = "Autotest Mention Link" });
+
+        await scope.Services.GetRequiredService<SecurityContext>().AuthenticateMeWithoutCookieAsync(scope.Tenant.Id, author.Id);
+        scope.Services.GetRequiredService<ExternalShare>().Initialize(new ExternalSessionSnapshot(linkId, Guid.NewGuid(), null));
+
+        var entry = await scope.Services.GetRequiredService<IDaoFactory>().GetFolderDao<int>().GetFolderAsync(entryId);
+        (await scope.Services.GetRequiredService<FileSecurity>().CanReadAsync(entry)).Should().BeTrue("the author may read the entry through the link");
+
+        // Act
+        await Client(scope).SendEditorMentions(entry, $"{scope.PortalUrl}/doc", [reader.Id, outsider.Id], "Please have a look");
+
+        // Assert
+        (await DeliveredAsync(scope, entry.UniqID)).Select(r => r.Recipient.ID)
+            .Should().BeEquivalentTo([reader.Id.ToString()], "the link of the request is no record of the outsider");
+    }
+
     private static async Task<int> CreateSharedEntryAsync(LetterScope scope, params Guid[] readers)
     {
         var services = scope.Services;

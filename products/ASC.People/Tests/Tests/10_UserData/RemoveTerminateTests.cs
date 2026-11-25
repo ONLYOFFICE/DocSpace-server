@@ -87,19 +87,15 @@ public class RemoveTerminateTests(AspireAppFixture fixture) : UserDataTestBase(f
 
     /// <summary>
     /// Only the portal owner may delete the data of a DocSpace admin, so only the owner may cancel that deletion.
-    /// Another DocSpace admin was let through, as it was for the reassignment before bug 79320.
+    /// Another DocSpace admin was let through, as it was for the reassignment before bug 79320. The refusal is decided
+    /// by the account's type before the job is looked up, so no job is started: one could delete the profile first.
     /// </summary>
     [Fact]
     public async Task TerminateRemove_AsDocSpaceAdminForAnotherDocSpaceAdminsRemoval_ThrowsAccessDenied()
     {
         var (target, _) = await CreateActorWithRoomAndFileAsync(EmployeeType.DocSpaceAdmin, "Autotest Remove Room", "Autotest Remove File");
         await TerminateUser(target);
-        // Invited before the start: the rule is decided by the account's type, so the refusal is asked for while the
-        // job has not yet deleted the profile.
         var otherAdmin = await InviteContact(EmployeeType.DocSpaceAdmin);
-
-        await _peopleClient.Authenticate(Owner);
-        await _userDataApi.StartRemoveAsync(new TerminateRequestDto(target.Id), TestContext.Current.CancellationToken);
 
         await _peopleClient.Authenticate(otherAdmin);
 

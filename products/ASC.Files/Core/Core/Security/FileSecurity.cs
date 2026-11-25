@@ -1184,11 +1184,53 @@ public class FileSecurity(
             return result;
         }
 
+        var accessSnapshot = entry.Access;
+        var (allowed, _) = await CheckAsync(entry, userId, action, shares);
+
+        if (!setEntryAccess)
+        {
+            entry.Access = accessSnapshot;
+            entry.ShareRecord = null;
+        }
+
+        return allowed;
+    }
+
+    /// <summary>
+    /// The access a user has to an entry when the user may read it, or null when the user may not. The entry keeps the
+    /// access it had: a webhook payload cut from one entry for several subscribers reads it afterwards.
+    /// </summary>
+    public async Task<FileShare?> GetReadAccessAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        if (entry == null)
+        {
+            return null;
+        }
+
+        var accessSnapshot = entry.Access;
+
+        try
+        {
+            // a check that decides before it reaches the share leaves None, not the access the entry had before
+            entry.Access = FileShare.None;
+
+            var (allowed, access) = await CheckAsync(entry, userId, FilesSecurityActions.Read);
+
+            return allowed ? access : null;
+        }
+        finally
+        {
+            entry.Access = accessSnapshot;
+        }
+    }
+
+    private async Task<(bool Allowed, FileShare Access)> CheckAsync<T>(FileEntry<T> entry, Guid userId, FilesSecurityActions action, IEnumerable<FileShareRecord<T>> shares = null)
+    {
         var isOutsider = await userManager.IsOutsiderAsync(userId);
 
         if (isOutsider && action != FilesSecurityActions.Read)
         {
-            return false;
+            return (false, FileShare.None);
         }
 
         var userType = await userManager.GetUserTypeAsync(userId);
@@ -1201,15 +1243,16 @@ public class FileSecurity(
         var parentFolders = await GetFileParentFolders(entry.ParentId);
         var cachedFileDao = daoFactory.GetCacheFileDao<T>();
 
-        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+        var allowed = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+        var access = entry.Access;
 
-        if (!setEntryAccess)
+        // the access on the entry is the current account's, which the response is built from
+        if (userId != authContext.CurrentAccount.ID)
         {
             entry.Access = accessSnapshot;
-            entry.ShareRecord = null;
         }
 
-        return haveAccess;
+        return (allowed, access);
     }
 
 
@@ -1222,11 +1265,20 @@ public class FileSecurity(
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
         var cachedFileDao = daoFactory.GetCacheFileDao<T>();
+        var forCurrentAccount = userId == authContext.CurrentAccount.ID;
 
         await foreach (var entry in entries)
         {
             var parentFolders = await GetFileParentFolders(entry.ParentId);
-            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao));
+            var accessSnapshot = entry.Access;
+            var allowed = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+
+            if (!forCurrentAccount)
+            {
+                entry.Access = accessSnapshot;
+            }
+
+            yield return new Tuple<FileEntry<T>, bool>(entry, allowed);
         }
     }
 
@@ -1246,6 +1298,10 @@ public class FileSecurity(
         var file = e as File<T>;
         var folder = e as Folder<T>;
         var isRoom = folder is { IsRoom: true };
+
+        // What the entry carries (its share record, its access) and what the request carries (the link it was opened
+        // with) belong to the current account; a check of another account takes none of them.
+        var forCurrentAccount = userId == authContext.CurrentAccount.ID;
 
         if ((e.RootFolderType == FolderType.AiHub || folder is { FolderType: FolderType.AiHub }) && !await aiAccessibility.IsAccessEnabledAsync())
         {
@@ -1929,7 +1985,7 @@ public class FileSecurity(
                                 (!isFillingStoped && myRoles.Count != 0 && role != null && role.Sequence == currentStep) || (formShareRecord is { Share: FileShare.FillForms } && myRoles.Count == 0),
 
                             FilesSecurityActions.Edit =>
-                                (currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing)) || formShareRecord is { Share: FileShare.Editing },
+                                (currentStep == -1 && (hasFullAccessToForm || (forCurrentAccount && e.Access is FileShare.Editing))) || formShareRecord is { Share: FileShare.Editing },
 
                             FilesSecurityActions.FillingStatus =>
                                 formFilling?.StartFilling == true,
@@ -2159,9 +2215,7 @@ public class FileSecurity(
                 break;
         }
 
-        // the record on the entry is the current account's (a listing sets it, and so does a check of that account); a
-        // check of another account used to answer from it, and then left its own record there for the next check
-        var forCurrentAccount = userId == authContext.CurrentAccount.ID;
+        // the record on the entry is the current account's: a listing sets it, and so does a check of that account
         var ace = forCurrentAccount ? e.ShareRecord : null;
 
         if (ace == null)
@@ -2169,7 +2223,7 @@ public class FileSecurity(
             var cachedRecords = GetCachedRecords<T>();
             if (((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
                  cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
-                cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value)) &&
+                (forCurrentAccount && cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))) &&
                 value != null)
             {
                 ace = value.Clone();
@@ -2177,7 +2231,7 @@ public class FileSecurity(
             }
             else
             {
-                var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+                var userType = await userManager.GetUserTypeAsync(userId);
                 if (e.RootFolderType != FolderType.RoomTemplates || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
                 {
                     ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, shares);
@@ -2372,7 +2426,7 @@ public class FileSecurity(
                         break;
                     default:
                         if (e.Access == FileShare.RoomManager ||
-                            (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
+                            (e.Access == FileShare.ContentCreator && e.CreateBy == userId))
                         {
                             if (file is { RootFolderType: FolderType.VirtualRooms or FolderType.AiHub })
                             {
@@ -2397,7 +2451,7 @@ public class FileSecurity(
                             if (formFillingProps != null && !Equals(formFillingProps.OriginalFormId, default(T)))
                             {
                                 var originalForm = await cacheFileDao.GetFileAsync(formFillingProps.OriginalFormId);
-                                if (originalForm?.CreateBy == authContext.CurrentAccount.ID)
+                                if (originalForm?.CreateBy == userId)
                                 {
                                     return true;
                                 }
@@ -2461,7 +2515,7 @@ public class FileSecurity(
                         return e.Access == FileShare.ReadWrite;
                     default:
                         if (e.Access == FileShare.RoomManager ||
-                            (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
+                            (e.Access == FileShare.ContentCreator && e.CreateBy == userId))
                         {
                             return true;
                         }
@@ -2511,7 +2565,7 @@ public class FileSecurity(
                             var tagDao = daoFactory.GetTagDao<T>();
                             var tagLocked = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
 
-                            return tagLocked == null || tagLocked.Owner == authContext.CurrentAccount.ID;
+                            return tagLocked == null || tagLocked.Owner == userId;
                         }
 
                         break;
@@ -2598,7 +2652,7 @@ public class FileSecurity(
                         return false;
                     default:
                         if (e.Access == FileShare.RoomManager ||
-                            (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
+                            (e.Access == FileShare.ContentCreator && e.CreateBy == userId))
                         {
                             return true;
                         }
@@ -2647,7 +2701,7 @@ public class FileSecurity(
                         break;
                     default:
                         if ((e.Access == FileShare.RoomManager ||
-                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
+                             (e.Access == FileShare.ContentCreator && e.CreateBy == userId))
                             && !isRoom)
                         {
                             return true;
@@ -3999,7 +4053,9 @@ public class FileSecurity(
             result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
         }
 
-        var linkId = await externalShare.GetLinkIdAsync();
+        // the link the request was opened with is the current account's; another account checked during the request
+        // has only its own links
+        var linkId = userId == authContext.CurrentAccount.ID ? await externalShare.GetLinkIdAsync() : Guid.Empty;
         if (linkId != Guid.Empty)
         {
             result.Add(new(linkId, SubjectOrderType.CurrentLink));

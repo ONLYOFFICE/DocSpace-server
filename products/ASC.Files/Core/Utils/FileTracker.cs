@@ -114,6 +114,31 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         await RemoveTrackerAsync(fileId);
     }
 
+    /// <summary>
+    /// Removes one editing tab of a file, and only when that tab belongs to the given account: a tab id that comes
+    /// from a request must not end the session of somebody else.
+    /// </summary>
+    public async Task RemoveOwnTabAsync<T>(T fileId, Guid tabId, Guid userId)
+    {
+        var tracker = await GetTrackerAsync(fileId);
+
+        if (tracker == null || !tracker.EditingBy.TryGetValue(tabId, out var trackInfo) || trackInfo.UserId != userId)
+        {
+            return;
+        }
+
+        tracker.EditingBy.TryRemove(tabId, out _);
+
+        if (tracker.EditingBy.IsEmpty)
+        {
+            await RemoveTrackerAsync(fileId);
+
+            return;
+        }
+
+        await SetTrackerAsync(fileId, tracker);
+    }
+
     public async Task SetAnonymousSessionsAsync<T>(T fileId, List<string> anonymousSessions)
     {
         var tracker = await GetTrackerAsync(fileId);

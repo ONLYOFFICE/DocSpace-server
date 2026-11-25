@@ -16,7 +16,7 @@ and count as CODE-ONLY: the role check is the same `FileSecurity` path for every
 only selects the role set (`products/ASC.Files/Core/Core/Security/FileSecurity.cs:220-228`, VDR entry of
 `AvailableRoomAccesses`: Room manager, Content creator, Editor, Viewer, Form Filler). The theory data
 `03_Rooms/RoomAccessData.cs:57-72, 150-152` (VDR access sets) exists but has no consumer. The message
-"The role is not available for this user type" (`FilesCommonResource.resx:331`) is never asserted. Where
+"The role is not available for this user type" (`FilesCommonResource.resx:340`) is never asserted. Where
 the Custom-room test is cited, its line range is given for the reader who wants the assertion.
 
 Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row.
@@ -41,7 +41,7 @@ Line references below were refreshed; the spec text is unchanged.
 | **VDR room management by role** | | |
 | Edit the room: owner changes indexing, deny-download, watermark, lifetime | `03_Rooms/Update/RoomUpdateVdrFieldsTests.cs:46-168` (owner only) | TEST-CONFIRMED [run: PASS] (owner) |
 | Edit the room by role (Room manager yes, others 403) | `03_Rooms/Permissions/VdrRoomManagementRolesTests.cs:59-90` (rename: Room manager 200; Content creator, Editor, Form Filler, Viewer 403, title unchanged) | TEST-CONFIRMED [run: PASS] |
-| Invite / assign / change roles / remove: Room manager yes, lower roles 403 | `03_Rooms/Permissions/VdrRoomManagementRolesTests.cs:94-141` (Room manager invites with a role, changes a role, removes; every lower role 403 for all three, members unchanged); `FileSharing.cs:88-108` | TEST-CONFIRMED [run: PASS] |
+| Invite / assign / change roles / remove: Room manager yes, lower roles 403 | `03_Rooms/Permissions/VdrRoomManagementRolesTests.cs:94-141` (Room manager invites with a role, changes a role, removes; every lower role 403 for all three, members unchanged); `FileSharing.cs:88-114` | TEST-CONFIRMED [run: PASS] |
 | View member list / history / info by every role | `03_Rooms/Permissions/VdrRoomReadArchiveRolesTests.cs:57-74` (room info, `rooms/{id}/share`, `folder/{id}/log` for all five roles) | TEST-CONFIRMED [run: PASS] |
 | Archive / delete: owner only | `03_Rooms/Permissions/VdrRoomReadArchiveRolesTests.cs:78-121` (all five member roles incl. Room manager 403 for archive and delete, room stays active; the owner archives, then deletes) | TEST-CONFIRMED [run: PASS] |
 | **VDR files and folders by role** | | |
@@ -65,12 +65,12 @@ Line references below were refreshed; the spec text is unchanged.
 | Form Filler does not see a not-configured form | `RoomShareTests.cs:1058-1066` | TEST-CONFIRMED [run: PASS] |
 | Viewer / Editor see not-configured forms; Editor edits them | `01_Files/FormFilling/VdrFormRolesTests.cs:54-68` (listing); `04_Security/RoomRoleFileSecurityFlagsTests.cs:86-100` (VDR PDF: Editor gets Edit, Viewer neither Edit nor FillForms) | TEST-CONFIRMED [run: PASS] (visibility, edit right) / CODE-ONLY (saving the edit through the document server) |
 | Configure filling (assign participants): owner saves the role mapping | `RoomShareTests.cs:1068-1086` (`saveFormRoleMapping`, yaml 12847; `getAllFormRoles` 12930) | TEST-CONFIRMED [run: PASS] (owner) |
-| Content creator configures the owner's form; Editor / Viewer / Form Filler cannot configure or stop | `01_Files/FormFilling/VdrFormRolesTests.cs:90-163` (`saveFormRoleMapping` by a Content creator on the owner's form saved; Editor, Viewer, Form Filler 403 for configure, form stays unconfigured, and 403 for `manageFormFilling` Stop) | TEST-CONFIRMED [run: PASS] |
+| Content creator configures the owner's form; Editor / Viewer / Form Filler cannot configure or stop | `01_Files/FormFilling/VdrFormRolesTests.cs:91-165` (`saveFormRoleMapping` by a Content creator on the owner's form saved; Editor, Viewer, Form Filler 403 for configure, form stays unconfigured, and 403 for `manageFormFilling` Stop) | TEST-CONFIRMED [run: PASS] |
 | Stop filling of own forms: Content creator; cannot stop the owner's form even if they configured it | `deviations.md` matrix row "A Content creator stops filling of own forms and forms they organized / Only forms they created"; FFR analogue `01_Files/FormFilling/ManageFormFillingPermissionsTests.cs:88-145` | LIVE-CONFIRMED |
 | Form Filler sees a configured form they take part in | `RoomShareTests.cs:1088-1096` | TEST-CONFIRMED [run: PASS] |
 | Form Filler does not see a configured form they do not take part in; sees only own complete forms | `FileSecurity` PDF branch; `deviations.md` matrix row "A Form Filler sees a configured form only when their turn has come / Visible as soon as assigned" | LIVE-CONFIRMED |
 | Form Filler before their turn: visible, filling not available | `deviations.md` matrix row above | LIVE-CONFIRMED |
-| Viewer sees configured forms regardless of participation | `01_Files/FormFilling/VdrFormRolesTests.cs:70-88` | TEST-CONFIRMED [run: PASS] |
+| Viewer sees configured forms regardless of participation | `01_Files/FormFilling/VdrFormRolesTests.cs:71-88` | TEST-CONFIRMED [run: PASS] |
 | Complete form is immutable (no role edits) | `form-filling-workflow` ("Completed forms") | CODE-ONLY (cross-reference) |
 | Fill when the turn has come: ordered participants | `form-filling-workflow` ("Roles and the filling order") | CODE-ONLY (cross-reference) |
 

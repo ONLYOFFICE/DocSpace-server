@@ -448,7 +448,7 @@ public class DbTenantService(
                 }
             }
 
-            var existsTenants = await tenantDbContext.TenantForbiden.Where(r => r.Address.StartsWith(domain)).Select(r => r.Address).ToListAsync();
+            var existsTenants = await tenantDbContext.ForbiddenAddressesAsync(domain).ToListAsync();
             existsTenants.AddRange(await tenantDbContext.TakenAliasesAsync(tenantId, domain).ToListAsync());
             existsTenants.AddRange(await tenantDbContext.TakenMappedDomainsAsync(tenantId, domain).ToListAsync());
 
