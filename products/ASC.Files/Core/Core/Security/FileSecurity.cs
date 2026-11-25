@@ -256,8 +256,7 @@ public class FileSecurity(
                 FolderType.AiProjectRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomManager, FileShare.None] }
+                        { SubjectType.User, [FileShare.ContentCreator, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -1351,6 +1350,12 @@ public class FileSecurity(
                 FilesSecurityActions.MoveTo or
                 FilesSecurityActions.Duplicate
             )
+        {
+            return false;
+        }
+
+        if (file != null && room is { FolderType: FolderType.InstructionsRoom } &&
+            action is FilesSecurityActions.Lock or FilesSecurityActions.Duplicate)
         {
             return false;
         }

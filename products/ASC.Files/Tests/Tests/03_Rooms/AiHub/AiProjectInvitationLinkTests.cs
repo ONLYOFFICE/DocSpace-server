@@ -35,35 +35,30 @@
 namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
-/// Joining an AI project through its invitation link, which carries only the room manager role.
+/// An AI project has no invitation link: users join a project only by a direct invitation.
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AiHub")]
 public class AiProjectInvitationLinkTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
-    [Fact]
-    public async Task InvitationLink_ExistingUser_JoinsAsContentCreator()
+    [Theory]
+    [InlineData(FileShare.RoomManager)]
+    [InlineData(FileShare.ContentCreator)]
+    public async Task SetRoomLink_Invitation_Returns403AndNoLinkIsCreated(FileShare access)
     {
         // Arrange
         var projectId = await CreateProjectAsync();
-        var link = (await _roomsApi.SetRoomLinkAsync(
-            projectId,
-            new RoomLinkRequest(access: FileShare.RoomManager, title: "Project link", linkType: LinkType.Invitation),
-            TestContext.Current.CancellationToken)).Response;
-        var user = await InviteContact(EmployeeType.User);
 
         // Act
-        await _webApiClient.Authenticate(user);
-        var fullLink = await _webApiClient.GetAsync(new Uri(link.SharedLink.ShareLink).PathAndQuery, TestContext.Current.CancellationToken);
-        var key = HttpUtility.ParseQueryString(fullLink.RequestMessage?.RequestUri?.Query!)["key"];
-        var confirm = (await _authenticationApi.CheckConfirmAsync(
-            new CheckConfirmRequestDto(key!, uiD: Owner.Id, type: ConfirmType.LinkInvite),
-            TestContext.Current.CancellationToken)).Response;
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.SetRoomLinkAsync(
+            projectId,
+            new RoomLinkRequest(access: access, title: "Project link", linkType: LinkType.Invitation),
+            TestContext.Current.CancellationToken));
 
         // Assert
-        confirm.Result.Should().Be(ValidationResult.UserExisted);
-        var shares = (await _roomsApi.GetRoomSecurityInfoAsync(projectId, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        shares.Should().ContainSingle(s => s.SubjectType == SubjectType.User && s.SharedToUser.Id == user.Id)
-            .Which.Access.Should().Be(FileShare.ContentCreator);
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("The role is not available for this user type");
+        var links = (await _roomsApi.GetRoomLinksAsync(projectId, LinkType.Invitation, TestContext.Current.CancellationToken)).Response;
+        (links ?? []).Should().BeEmpty();
     }
 }

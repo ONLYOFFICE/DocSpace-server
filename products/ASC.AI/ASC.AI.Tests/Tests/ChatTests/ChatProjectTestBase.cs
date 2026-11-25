@@ -41,8 +41,8 @@ namespace ASC.AI.Tests.Tests.ChatTests;
 /// </summary>
 /// <remarks>
 /// Unlike the agent, a project holds no instructions (the Files API refuses chat settings on it) and has no Chat
-/// outputs folder. Its members are the owner, Project managers (<c>RoomManager</c>, RoomAdmin and above) and members
-/// invited at <c>ContentCreator</c>; those three may chat, anyone else is refused.
+/// outputs folder. Its members are the owner and members invited at <c>ContentCreator</c>, the only role a project
+/// offers; both may chat, anyone else is refused.
 /// </remarks>
 public abstract class ChatProjectTestBase(AspireAppFixture fixture) : ChatPart3TestBase(fixture)
 {

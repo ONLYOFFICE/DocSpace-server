@@ -63,13 +63,13 @@ public class AgentMigrationAccessTests(AspireAppFixture fixture) : AgentMigratio
         // Assert
         var shares = await RoomSharesAsync((await ProjectOfAsync(title)).Id);
 
-        AccessOf(shares, manager.Id).Should().Be(FileShare.RoomManager);
+        AccessOf(shares, manager.Id).Should().Be(FileShare.ContentCreator, "a project has no Room manager role");
         AccessOf(shares, creator.Id).Should().Be(FileShare.ContentCreator);
         AccessOf(shares, viewer.Id).Should().Be(FileShare.ContentCreator, "a Viewer of the agent becomes a Content creator of the project");
     }
 
     [Fact]
-    public async Task Convert_GroupInvitedAsViewer_MakesItsMembersContentCreatorsUnlessTheyHoldARole()
+    public async Task Convert_GroupInvitedAsViewer_MakesItsMembersContentCreators()
     {
         // Arrange - the member with a role of their own is a Room admin: nobody below may be a Room manager
         var title = NewTitle("Group agent");
@@ -91,7 +91,7 @@ public class AgentMigrationAccessTests(AspireAppFixture fixture) : AgentMigratio
 
         shares.Should().NotContain(share => share.SharedToGroup != null, "a project has users only");
         AccessOf(shares, plain.Id).Should().Be(FileShare.ContentCreator);
-        AccessOf(shares, manager.Id).Should().Be(FileShare.RoomManager, "the role of the user wins over the one that comes through the group");
+        AccessOf(shares, manager.Id).Should().Be(FileShare.ContentCreator, "a Room manager of the agent is a Content creator of the project");
     }
 
     [Fact]
