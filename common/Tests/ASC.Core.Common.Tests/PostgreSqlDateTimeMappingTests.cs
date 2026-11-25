@@ -50,36 +50,10 @@ public class PostgreSqlDateTimeMappingTests
         new DateTime(2026, 11, 22, 15, 30, 0, DateTimeKind.Utc).AddTicks(1_234_567)
     ];
 
-    private static ASC.Migrations.Core.MigrationContext CreateContext(string providerName)
-    {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:default:name"] = "default",
-                ["ConnectionStrings:default:connectionString"] = providerName == "Npgsql"
-                    ? "Host=localhost;Database=docspace"
-                    : "Server=localhost;Database=docspace",
-                ["ConnectionStrings:default:providerName"] = providerName,
-                ["mysqlServerVersion"] = "8.4.0"
-            })
-            .Build();
-
-        var services = new ServiceCollection()
-            .AddSingleton<IConfiguration>(configuration)
-            .AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance)
-            .AddSingleton<ASC.Common.Logging.EFLoggerFactory>()
-            .BuildServiceProvider();
-
-        var optionsBuilder = new DbContextOptionsBuilder<ASC.Migrations.Core.MigrationContext>();
-        new ASC.Core.Common.EF.InstallerOptionsAction("current", "default").OptionsAction(services, optionsBuilder);
-
-        return new ASC.Migrations.Core.MigrationContext(optionsBuilder.Options);
-    }
-
     [Fact]
     public void PostgreSql_EveryDateTimeProperty_StoresTheValueInTheKindItsColumnTakes_InAWholeSecondColumnAsOnMySql()
     {
-        using var context = CreateContext("Npgsql");
+        using var context = ServiceDbContexts.Create<ASC.Migrations.Core.MigrationContext>(ServiceDbContexts.PostgreSql);
 
         var dateTimeProperties = context.Model.GetEntityTypes()
             .SelectMany(entityType => entityType.GetProperties())
@@ -131,7 +105,7 @@ public class PostgreSqlDateTimeMappingTests
     [Fact]
     public void KeepsFraction_IsExactlyTheColumnsWithAFractionOnMySql()
     {
-        using var context = CreateContext("MySql.Data.MySqlClient");
+        using var context = ServiceDbContexts.Create<ASC.Migrations.Core.MigrationContext>(ServiceDbContexts.MySql);
 
         var withFraction = context.Model.GetEntityTypes()
             .Where(entityType => entityType.GetTableName() is not null)
@@ -165,14 +139,25 @@ public class PostgreSqlDateTimeMappingTests
         ASC.Core.Common.EF.PostgreSqlModelCustomizer.IsWithoutTimeZone(columnType).Should().Be(expected);
     }
 
+    /// <summary>The customizer is PostgreSQL's only: no DateTime property of the MySQL model gets its converters.</summary>
     [Fact]
-    public void MySql_DateTimeProperties_KeepNoConverter()
+    public void MySql_DateTimeProperties_GetNoneOfThePostgreSqlConverters()
     {
-        using var context = CreateContext("MySql.Data.MySqlClient");
+        using var context = ServiceDbContexts.Create<ASC.Migrations.Core.MigrationContext>(ServiceDbContexts.MySql);
 
-        var workFromDate = context.Model.FindEntityType(typeof(ASC.Core.Common.EF.User))!
-            .FindProperty(nameof(ASC.Core.Common.EF.User.WorkFromDate))!;
+        var dateTimeProperties = context.Model.GetEntityTypes()
+            .SelectMany(entityType => entityType.GetProperties())
+            .Where(property => property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+            .ToList();
 
-        workFromDate.GetValueConverter().Should().BeNull();
+        dateTimeProperties.Should().NotBeEmpty();
+
+        var converted = dateTimeProperties
+            .Where(property => property.GetValueConverter() == ASC.Core.Common.EF.PostgreSqlModelCustomizer.ToTimestamp
+                || property.GetValueConverter() == ASC.Core.Common.EF.PostgreSqlModelCustomizer.ToTimestampTz)
+            .Select(property => $"{property.DeclaringType.DisplayName()}.{property.Name}")
+            .ToList();
+
+        converted.Should().BeEmpty(string.Join("; ", converted));
     }
 }

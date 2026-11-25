@@ -485,6 +485,16 @@ public partial class FilesDbContext
     {
         return FileQueries.FrozenThumbnailFilesAsync(this, modifiedBefore);
     }
+
+    /// <summary>
+    /// The <c>modifiedBefore</c> of <see cref="FrozenThumbnailFilesAsync"/> for a pass that runs every
+    /// <paramref name="period"/>: the files changed more than the period's whole minutes ago, what MySQL's
+    /// TIMESTAMPDIFF(MINUTE, modified_on, now) > m selected, so changed m + 1 minutes ago or earlier.
+    /// </summary>
+    public static DateTime FrozenThumbnailCutoff(DateTime now, TimeSpan period)
+    {
+        return now.AddMinutes(-(Math.Floor(period.TotalMinutes) + 1));
+    }
 }
 
 static file class FileQueries

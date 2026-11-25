@@ -241,7 +241,8 @@ public static class DbFilesThirdpartyAccountExtension
                 entity.Property(e => e.HasLogo).HasColumnName("has_logo");
 
                 // varchar, not char: PostgreSQL keeps the padding of a char(n) value, MySQL strips it; a cover name
-                // takes up to 50 characters ([MaxLength(50)]), more than char(6) held
+                // takes up to 50 characters ([MaxLength(50)]), more than char(6) held. PostgreSqlModelCustomizer then stores the
+                // column as citext, which has no length
                 entity.Property(e => e.Color)
                     .HasColumnName("color")
                     .HasColumnType("varchar(6)");

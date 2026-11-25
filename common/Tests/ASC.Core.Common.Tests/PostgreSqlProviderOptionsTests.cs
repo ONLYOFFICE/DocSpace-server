@@ -48,25 +48,7 @@ public class PostgreSqlProviderOptionsTests
     [Fact]
     public void ExecutionStrategy_RetriesOnFailure()
     {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:default:name"] = "default",
-                ["ConnectionStrings:default:connectionString"] = "Host=localhost;Database=docspace",
-                ["ConnectionStrings:default:providerName"] = "Npgsql"
-            })
-            .Build();
-
-        var services = new ServiceCollection()
-            .AddSingleton<IConfiguration>(configuration)
-            .AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance)
-            .AddSingleton<ASC.Common.Logging.EFLoggerFactory>()
-            .BuildServiceProvider();
-
-        var optionsBuilder = new DbContextOptionsBuilder<ASC.Core.Common.EF.Context.WebstudioDbContext>();
-        new ASC.Core.Common.EF.InstallerOptionsAction("current", "default").OptionsAction(services, optionsBuilder);
-
-        using var context = new ASC.Core.Common.EF.Context.WebstudioDbContext(optionsBuilder.Options);
+        using var context = ServiceDbContexts.Create<ASC.Core.Common.EF.Context.WebstudioDbContext>(ServiceDbContexts.PostgreSql);
 
         context.Database.CreateExecutionStrategy().RetriesOnFailure.Should().BeTrue();
     }

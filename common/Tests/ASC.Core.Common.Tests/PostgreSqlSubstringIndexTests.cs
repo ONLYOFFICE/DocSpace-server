@@ -41,33 +41,10 @@ namespace ASC.Core.Common.Tests;
 /// </summary>
 public class PostgreSqlSubstringIndexTests
 {
-    private static ASC.Core.Common.EF.Context.WebstudioDbContext CreateContext()
-    {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:default:name"] = "default",
-                ["ConnectionStrings:default:connectionString"] = "Host=localhost;Database=docspace",
-                ["ConnectionStrings:default:providerName"] = "Npgsql"
-            })
-            .Build();
-
-        var services = new ServiceCollection()
-            .AddSingleton<IConfiguration>(configuration)
-            .AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance)
-            .AddSingleton<ASC.Common.Logging.EFLoggerFactory>()
-            .BuildServiceProvider();
-
-        var optionsBuilder = new DbContextOptionsBuilder<ASC.Core.Common.EF.Context.WebstudioDbContext>();
-        new ASC.Core.Common.EF.InstallerOptionsAction("current", "default").OptionsAction(services, optionsBuilder);
-
-        return new ASC.Core.Common.EF.Context.WebstudioDbContext(optionsBuilder.Options);
-    }
-
     [Fact]
     public void FirstPart_CastToNumber_KeepsTheLeadingDigitsOrZero()
     {
-        using var context = CreateContext();
+        using var context = ServiceDbContexts.Create<ASC.Core.Common.EF.Context.WebstudioDbContext>(ServiceDbContexts.PostgreSql);
 
         var sql = context.WebstudioSettings
             .OrderBy(r => Convert.ToInt32(ASC.Core.Common.EF.DbFunctionsExtension.SubstringIndex(r.Data, '.', 1)))
@@ -80,7 +57,7 @@ public class PostgreSqlSubstringIndexTests
     [Fact]
     public void LastPart_IsTheFieldAfterTheLastDelimiter()
     {
-        using var context = CreateContext();
+        using var context = ServiceDbContexts.Create<ASC.Core.Common.EF.Context.WebstudioDbContext>(ServiceDbContexts.PostgreSql);
 
         var sql = context.WebstudioSettings
             .OrderBy(r => ASC.Core.Common.EF.DbFunctionsExtension.SubstringIndex(r.Data, '.', -1))

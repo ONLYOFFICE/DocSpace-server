@@ -207,8 +207,9 @@ public class BaseTest(
 
     public ValueTask DisposeAsync()
     {
-        // Each test owns its portal and clients; nothing is shared, so just dispose the clients.
-        _clients.Dispose();
+        // Each test owns its portal and clients; nothing is shared, so just dispose the clients. A class skipped in
+        // InitializeAsync (the identity classes on a PostgreSQL stack) has none.
+        _clients?.Dispose();
         return ValueTask.CompletedTask;
     }
 

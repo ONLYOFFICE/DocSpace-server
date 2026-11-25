@@ -141,7 +141,7 @@ public static class AccountLinksExtension
                 entity.Property(e => e.Provider)
                     .HasColumnName("provider")
                     // varchar, not char: PostgreSQL pads a char(n) value with spaces and hands them back, where MySQL
-                    // strips them.
+                    // strips them. PostgreSqlModelCustomizer then stores the column as citext.
                     .HasColumnType("varchar(60)")
                     .HasMaxLength(60);
             });

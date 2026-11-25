@@ -422,8 +422,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     private async Task DisableStartDocsAsync()
     {
-        // AdditionalWhiteLabelSettings.ID: a varchar(64) key on MySQL, a uuid on PostgreSQL.
-        const string settingsId = "0108422f-c05d-488e-b271-30c4032494da";
+        // AdditionalWhiteLabelSettings.ID
+        var settingsId = new Guid("0108422f-c05d-488e-b271-30c4032494da");
         const string settingsData =
             """
             {"StartDocsEnabled":false,"HelpCenterEnabled":true,"FeedbackAndSupportEnabled":true,"UserForumEnabled":true,"VideoGuidesEnabled":true,"LicenseAgreementsEnabled":true}
@@ -435,52 +435,44 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         {
             await Timing.Measure("startdocs.disable", async () =>
             {
-                var connectionString = await _app.GetConnectionStringAsync(ResourceNames.Database, cancellationToken)
-                    ?? throw new InvalidOperationException($"No connection string for the '{ResourceNames.Database}' resource.");
+                await using var db = await CreateDbContextAsync<ASC.Core.Common.EF.Context.WebstudioDbContext>(cancellationToken);
 
-                if (MainDatabaseOnPostgreSql)
+                var now = DateTime.UtcNow;
+
+                // The portal-wide row of the default tenant: changed in place when it is there, added otherwise.
+                Task<int> UpdateAsync() => db.WebstudioSettings
+                    .Where(row => row.TenantId == DefaultTenantId && row.Id == settingsId && row.UserId == Guid.Empty)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(row => row.Data, settingsData)
+                        .SetProperty(row => row.LastModified, now), cancellationToken);
+
+                if (await UpdateAsync() > 0)
                 {
-                    await using var pgConnection = new NpgsqlConnection(connectionString);
-                    await pgConnection.OpenAsync(cancellationToken);
-
-                    await using var pgCommand = pgConnection.CreateCommand();
-
-                    // The PostgreSQL model keeps the ids as uuid and the data as jsonb.
-                    pgCommand.CommandText =
-                        """
-                        INSERT INTO webstudio_settings (tenantid, id, userid, data, last_modified)
-                        VALUES (@tenantId, @id, @userId, @data::jsonb, now())
-                        ON CONFLICT (tenantid, id, userid) DO UPDATE SET data = excluded.data, last_modified = now();
-                        """;
-
-                    pgCommand.Parameters.AddWithValue("tenantId", DefaultTenantId);
-                    pgCommand.Parameters.AddWithValue("id", Guid.Parse(settingsId));
-                    pgCommand.Parameters.AddWithValue("userId", Guid.Empty);
-                    pgCommand.Parameters.AddWithValue("data", settingsData);
-
-                    await pgCommand.ExecuteNonQueryAsync(cancellationToken);
-
                     return;
                 }
 
-                await using var connection = new MySqlConnection(connectionString);
-                await connection.OpenAsync(cancellationToken);
+                db.WebstudioSettings.Add(new ASC.Core.Common.EF.Model.DbWebstudioSettings
+                {
+                    TenantId = DefaultTenantId,
+                    Id = settingsId,
+                    UserId = Guid.Empty,
+                    Data = settingsData,
+                    LastModified = now
+                });
 
-                await using var command = connection.CreateCommand();
-
-                command.CommandText =
-                    """
-                    INSERT INTO webstudio_settings (TenantID, ID, UserID, Data, last_modified)
-                    VALUES (@tenantId, @id, @userId, @data, UTC_TIMESTAMP())
-                    ON DUPLICATE KEY UPDATE Data = @data, last_modified = UTC_TIMESTAMP();
-                    """;
-
-                command.Parameters.AddWithValue("@tenantId", DefaultTenantId);
-                command.Parameters.AddWithValue("@id", settingsId);
-                command.Parameters.AddWithValue("@userId", Guid.Empty.ToString());
-                command.Parameters.AddWithValue("@data", settingsData);
-
-                await command.ExecuteNonQueryAsync(cancellationToken);
+                try
+                {
+                    await db.SaveChangesAsync(cancellationToken);
+                }
+                catch (DbUpdateException)
+                {
+                    // A service wrote the row between the update and the insert: the insert failed on the key, so
+                    // the row is there now and the update changes it.
+                    if (await UpdateAsync() == 0)
+                    {
+                        throw;
+                    }
+                }
             });
         }
         catch (Exception e)
@@ -624,36 +616,58 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// provider the stack runs on), for a test that has to plant a row no API call writes any more - data left behind by
     /// an older release that the current code must still read - or to set or read a value the API does not expose; such
     /// a test says why next to the query. The model is the services' own, PostgreSqlModelCustomizer included, so the same
-    /// LINQ runs on MySQL and on PostgreSQL. Queries do not track (as in the services); write with ExecuteUpdateAsync or
-    /// ExecuteDeleteAsync. The caller disposes the context.
+    /// LINQ runs on MySQL and on PostgreSQL. Queries do not track, as in the services: change an existing row with
+    /// ExecuteUpdateAsync or ExecuteDeleteAsync; Add + SaveChangesAsync inserts, and an entity read here and added is
+    /// inserted as a new row. The caller disposes the context.
     /// </summary>
     public async Task<TContext> CreateDbContextAsync<TContext>(CancellationToken cancellationToken = default) where TContext : DbContext
     {
-        if (_dbContextServices is null)
-        {
-            var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["ConnectionStrings:default:name"] = "default",
-                    ["ConnectionStrings:default:connectionString"] = await GetConnectionStringAsync(ResourceNames.Database, cancellationToken),
-                    ["ConnectionStrings:default:providerName"] = MainDatabaseProviderName
-                })
-                .Build();
-
-            // Kept for the run: the options of every context hold its EFLoggerFactory.
-            _dbContextServices = new ServiceCollection()
-                .AddSingleton<IConfiguration>(configuration)
-                .AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance)
-                .AddSingleton<ASC.Common.Logging.EFLoggerFactory>()
-                .BuildServiceProvider();
-        }
+        var services = await GetDbContextServicesAsync(cancellationToken);
 
         var optionsBuilder = new DbContextOptionsBuilder<TContext>();
-        new ASC.Core.Common.EF.InstallerOptionsAction("current", "default").OptionsAction(_dbContextServices, optionsBuilder);
+        new ASC.Core.Common.EF.InstallerOptionsAction("current", "default").OptionsAction(services, optionsBuilder);
 
         return (TContext)Activator.CreateInstance(typeof(TContext), optionsBuilder.Options)!;
     }
 
+    /// <summary>
+    /// The services the contexts of <see cref="CreateDbContextAsync{TContext}"/> are built from, one set for the run: the
+    /// options of every context hold its EFLoggerFactory, and a second set would make EF build a second model. Disposed
+    /// with the fixture.
+    /// </summary>
+    private async Task<ServiceProvider> GetDbContextServicesAsync(CancellationToken cancellationToken)
+    {
+        await _dbContextServicesLock.WaitAsync(cancellationToken);
+
+        try
+        {
+            if (_dbContextServices is null)
+            {
+                var configuration = new ConfigurationBuilder()
+                    .AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["ConnectionStrings:default:name"] = "default",
+                        ["ConnectionStrings:default:connectionString"] = await GetConnectionStringAsync(ResourceNames.Database, cancellationToken),
+                        ["ConnectionStrings:default:providerName"] = MainDatabaseProviderName
+                    })
+                    .Build();
+
+                _dbContextServices = new ServiceCollection()
+                    .AddSingleton<IConfiguration>(configuration)
+                    .AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance)
+                    .AddSingleton<ASC.Common.Logging.EFLoggerFactory>()
+                    .BuildServiceProvider();
+            }
+
+            return _dbContextServices;
+        }
+        finally
+        {
+            _dbContextServicesLock.Release();
+        }
+    }
+
+    private readonly SemaphoreSlim _dbContextServicesLock = new(1, 1);
     private ServiceProvider? _dbContextServices;
 
     /// <summary>
@@ -941,6 +955,13 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         }
 
         _apiSystemClient.Dispose();
+
+        if (_dbContextServices is not null)
+        {
+            await _dbContextServices.DisposeAsync();
+        }
+
+        _dbContextServicesLock.Dispose();
 
         // Teardown is a large, easily-overlooked share of a run's wall clock — it is Aspire/DCP
         // stopping every project process, and one service that ignores its shutdown token holds up

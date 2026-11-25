@@ -136,7 +136,8 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
     {
         await using var db = await Fixture.CreateDbContextAsync<FilesDbContext>(TestContext.Current.CancellationToken);
 
-        await db.Files.Where(file => file.Id == fileId).ExecuteUpdateAsync(setters => setters.SetProperty(file => file.Encrypted, false), TestContext.Current.CancellationToken);
+        (await db.Files.Where(file => file.Id == fileId).ExecuteUpdateAsync(setters => setters.SetProperty(file => file.Encrypted, false), TestContext.Current.CancellationToken))
+            .Should().BePositive("the file {0} must be in the database to be made open", fileId);
     }
 
     /// <summary>

@@ -42,9 +42,9 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Refusals: ordinary 400, Trash and unknown 404 | T/RoomAccessKeysTests.cs:184-231 | TEST-CONFIRMED [run: PASS] |
 | Candidates: public half only, left-outs, duplicates | T/RoomCandidateKeysTests.cs:74-156 | TEST-CONFIRMED [run: PASS] |
 | Candidates: who may ask, refusals | T/RoomCandidateKeysTests.cs:160-250 | TEST-CONFIRMED [run: PASS] |
-| Missing keys: answer shape | T/PrivateRoomFileKeysTests.cs:261-305 | TEST-CONFIRMED [run: PASS] |
-| Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:309-375 | TEST-CONFIRMED [run: PASS] |
-| Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:381-422 | TEST-CONFIRMED [run: PASS] |
+| Missing keys: answer shape | T/PrivateRoomFileKeysTests.cs:256-300 | TEST-CONFIRMED [run: PASS] |
+| Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:304-370 | TEST-CONFIRMED [run: PASS] |
+| Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:376-417 | TEST-CONFIRMED [run: PASS] |
 | File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:279-291 | TEST-CONFIRMED [run: PASS] |
 | New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5533-5541 | TEST-CONFIRMED [run: PASS] |
 | Reassign of a deleted user | T/PrivateRoomFileKeysTests.cs:127-153 | TEST-CONFIRMED [run: PASS] |
@@ -52,7 +52,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Revocation does not depend on a client being online: the removal is a server-side API call with no client connected, and the next read already reports the key missing, also in a subfolder (run 2026-11-11) | T/PrivateRoomFileKeysTests.cs:171-204; Sharing:RevokeFileKeysAsync; commit cc60512acd | TEST-CONFIRMED [run: PASS] |
 | Clearing access: member and owner | T/PrivateRoomLeaveTests.cs:58-98 | TEST-CONFIRMED [run: PASS] |
 | Owner keeps the room and keys | T/PrivateRoomLeaveTests.cs:102-160 | TEST-CONFIRMED [run: PASS] |
-| Non-member admin cannot clear; ordinary room can | T/PrivateRoomLeaveTests.cs:176-194 | TEST-CONFIRMED [run: PASS] |
+| Non-member admin cannot clear; ordinary room can | T/PrivateRoomLeaveTests.cs:173-205 | TEST-CONFIRMED [run: PASS] |
 | Deleting a user deletes file keys | T/PrivateRoomFileKeysTests.cs:220-234 | TEST-CONFIRMED [run: PASS] |
 | Keys and file keys not backed up | common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:68, :101 | TEST-CONFIRMED [run: NOT-IN-RUN] |
 | Room types that can be private; 403 otherwise | T/PrivateRoomCreateTests.cs:47-60, :67-102 | TEST-CONFIRMED [run: PASS] |

@@ -126,7 +126,7 @@ and from the method body where a row needed the request; test line numbers point
 | Rejected keys cleared and 400; 403 not settable | `Set:1242-1287`; yaml. Rejected keys unreachable: every key-validating provider asks its outside service. Not settable: not attempted, it needs a consumer with preset keys in the installation config | CODE-ONLY |
 | **Testing an external database connection** | | |
 | Failure answer; roles | `S/Authorization/TestExternalDatabaseConnectionTests.cs:48,63`; `S/Authorization/TestExternalDatabaseConnectionPermissionsTests.cs:47,66` | TEST-CONFIRMED [run: PASS] |
-| SQLite refused on hosted; success path | `B/Settings/FreePlanSettingsTests.cs:115`; `S/Authorization/AuthServiceRulesTests.cs:89` (the stack's MySQL), `:125` (standalone tries SQLite) | TEST-CONFIRMED [run: PASS] |
+| SQLite refused on hosted; success path | `B/Settings/FreePlanSettingsTests.cs:115`; `S/Authorization/AuthServiceRulesTests.cs:89` (the stack's own database, MySQL or PostgreSQL), `:130` (standalone tries SQLite) | TEST-CONFIRMED [run: PASS] |
 | **Sign-in with a second-factor code** | `A/AuthenticateWithCodeTests.cs:49,68,84,101,116,137`; every exception becomes 401 at `Auth:222-228` | TEST-CONFIRMED [run: PASS] |
 | **Registering a mobile phone** | | |
 | Anonymous 401; ordinary token 403, phone unchanged | `A/SaveMobilePhonePermissionsTests.cs:49,67` | TEST-CONFIRMED [run: PASS] |

@@ -149,7 +149,8 @@ public static class DbFilesFormRoleMappingExtension
                     .HasMaxLength(38);
 
                 entity.Property(e => e.RoleName).HasColumnName("role_name").HasColumnType("varchar(255)");
-                // varchar, not char: PostgreSQL keeps the padding of a char(n) value, MySQL strips it
+                // varchar, not char: PostgreSQL keeps the padding of a char(n) value, MySQL strips it. PostgreSqlModelCustomizer
+                // then stores the column as citext
                 entity.Property(e => e.RoleColor).HasColumnName("role_color").HasColumnType("varchar(6)");
                 entity.Property(e => e.Sequence).HasColumnName("sequence");
 

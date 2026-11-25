@@ -429,7 +429,7 @@ public static class DbTenantExtension
                     .HasDefaultValueSql("0");
 
                 // varchar, not char: PostgreSQL pads a char(n) value with spaces and hands them back ("en-us      "
-                // is no culture), where MySQL strips them on read.
+                // is no culture), where MySQL strips them on read. PostgreSqlModelCustomizer then stores the column as citext.
                 entity.Property(e => e.Language)
                     .IsRequired()
                     .HasColumnName("language")

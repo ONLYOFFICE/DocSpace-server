@@ -68,3 +68,23 @@ public class PostgreSqlFrozenThumbnailQueryTests
         chain.Should().Contain(exception => exception is Npgsql.NpgsqlException, "the query translates and only the connection to a server that is not there fails: {0}", string.Join(" / ", chain.Select(exception => exception.Message)));
     }
 }
+
+/// <summary>
+/// The cut-off of the frozen-thumbnail pass: a file changed more than the period's whole minutes ago is taken. The pass
+/// once used the minutes component of the period, so a period of an hour took every file older than one minute.
+/// </summary>
+public class FrozenThumbnailCutoffTests
+{
+    private static readonly DateTime _now = new(2026, 11, 25, 12, 0, 0, DateTimeKind.Utc);
+
+    [Theory]
+    [InlineData("00:10:00", 11)]
+    [InlineData("00:10:30", 11)]
+    [InlineData("01:00:00", 61)]
+    [InlineData("1.00:00:00", 1441)]
+    public void Cutoff_IsThePeriodsWholeMinutesPlusOneAgo(string period, int minutesAgo)
+    {
+        ASC.Files.Core.EF.FilesDbContext.FrozenThumbnailCutoff(_now, TimeSpan.Parse(period, CultureInfo.InvariantCulture))
+            .Should().Be(_now.AddMinutes(-minutesAgo));
+    }
+}

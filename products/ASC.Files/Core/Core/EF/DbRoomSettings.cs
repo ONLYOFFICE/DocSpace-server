@@ -206,7 +206,7 @@ public static class DbRoomSettingsExtension
                     .HasColumnType("jsonb");
 
                 // varchar, not char: PostgreSQL keeps the padding of a char(n) value (a reset color read back as six
-                // spaces), MySQL strips it
+                // spaces), MySQL strips it. PostgreSqlModelCustomizer then stores the column as citext
                 entity.Property(e => e.Color)
                     .HasColumnName("color")
                     .HasColumnType("varchar(6)");

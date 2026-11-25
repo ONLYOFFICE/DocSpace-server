@@ -1393,8 +1393,8 @@ internal abstract class SecurityBaseDao<T>(
                 // The FromSqlRaw round trip does not work on PostgreSQL: ToQueryString leaves the parameters as
                 // comments, and @entryId reached the server unbound ("column entryid does not exist"). Nor can the
                 // GroupBy below be composed further there ("EmptyProjectionMember"), so the same record is picked by
-                // NOT EXISTS. It evaluates the candidates once more per candidate, so its cost grows with the square of
-                // the entry's shares (not measured).
+                // NOT EXISTS. The candidates appear twice in that SQL, once inside the NOT EXISTS; how PostgreSQL plans
+                // it for an entry with many shares has not been measured.
                 q = candidates.Where(s => !candidates.Any(o => o.Subject == s.Subject && o.InternalEntryId > s.InternalEntryId));
             }
             else

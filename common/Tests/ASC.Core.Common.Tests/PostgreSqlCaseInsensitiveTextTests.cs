@@ -41,32 +41,6 @@ namespace ASC.Core.Common.Tests;
 /// </summary>
 public class PostgreSqlCaseInsensitiveTextTests
 {
-    private static ASC.Migrations.Core.MigrationContext CreateContext(string providerName)
-    {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:default:name"] = "default",
-                ["ConnectionStrings:default:connectionString"] = providerName == "Npgsql"
-                    ? "Host=localhost;Database=docspace"
-                    : "Server=localhost;Database=docspace",
-                ["ConnectionStrings:default:providerName"] = providerName,
-                ["mysqlServerVersion"] = "8.4.0"
-            })
-            .Build();
-
-        var services = new ServiceCollection()
-            .AddSingleton<IConfiguration>(configuration)
-            .AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance)
-            .AddSingleton<ASC.Common.Logging.EFLoggerFactory>()
-            .BuildServiceProvider();
-
-        var optionsBuilder = new DbContextOptionsBuilder<ASC.Migrations.Core.MigrationContext>();
-        new ASC.Core.Common.EF.InstallerOptionsAction("current", "default").OptionsAction(services, optionsBuilder);
-
-        return new ASC.Migrations.Core.MigrationContext(optionsBuilder.Options);
-    }
-
     /// <summary>The model with its design-time annotations (collations, extensions), which the runtime model drops.</summary>
     private static IModel DesignTimeModel(DbContext context)
     {
@@ -103,7 +77,7 @@ public class PostgreSqlCaseInsensitiveTextTests
     [Fact]
     public void PostgreSql_ATextColumn_IsCitextUnlessItTellsTheCaseApartOnMySql_AndTheExtensionIsCreated()
     {
-        using var context = CreateContext("Npgsql");
+        using var context = ServiceDbContexts.Create<ASC.Migrations.Core.MigrationContext>(ServiceDbContexts.PostgreSql);
 
         DesignTimeModel(context).GetPostgresExtensions().Select(extension => extension.Name).Should().Contain(ASC.Core.Common.EF.PostgreSqlModelCustomizer.CaseInsensitiveText);
 
@@ -132,8 +106,8 @@ public class PostgreSqlCaseInsensitiveTextTests
     [Fact]
     public void Citext_IsExactlyTheColumnsThatIgnoreTheCaseOnMySql()
     {
-        using var mySql = CreateContext("MySql.Data.MySqlClient");
-        using var postgreSql = CreateContext("Npgsql");
+        using var mySql = ServiceDbContexts.Create<ASC.Migrations.Core.MigrationContext>(ServiceDbContexts.MySql);
+        using var postgreSql = ServiceDbContexts.Create<ASC.Migrations.Core.MigrationContext>(ServiceDbContexts.PostgreSql);
 
         var mismatches = new List<string>();
 

@@ -49,8 +49,7 @@ public class FrozenThumbnailProcessingService(
         {
             await using var filesDbContext = await dbContextFactory.CreateDbContextAsync(stoppingToken);
 
-            // MySQL's TIMESTAMPDIFF(MINUTE, modified_on, now) > m, which the query used to ask: changed m + 1 minutes ago or earlier
-            var modifiedBefore = DateTime.UtcNow.AddMinutes(-(ExecuteTaskPeriod.Minutes + 1));
+            var modifiedBefore = FilesDbContext.FrozenThumbnailCutoff(DateTime.UtcNow, ExecuteTaskPeriod);
             var files = await filesDbContext.FrozenThumbnailFilesAsync(modifiedBefore).ToListAsync(cancellationToken: stoppingToken);
             if (files.Count == 0)
             {
