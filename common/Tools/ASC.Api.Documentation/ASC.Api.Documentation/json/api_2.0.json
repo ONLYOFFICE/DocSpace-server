@@ -45585,17 +45585,6 @@
             "description": "The resulting service price.",
             "format": "double"
           },
-          "quota": {
-            "examples": [
-              100
-            ],
-            "type": [
-              "null",
-              "number"
-            ],
-            "description": "The quota the price is set for.",
-            "format": "double"
-          },
           "timeBound": {
             "description": "The period the price is effective in.",
             "$ref": "#/components/schemas/TimeBoundDto"
