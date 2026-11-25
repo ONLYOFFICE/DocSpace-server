@@ -4,27 +4,82 @@
 
 ### Requirement: Switch for personal plugins
 
-`getPortalSettings` SHALL report to a signed-in caller `plugins.personal`, true unless the installation switched
-personal plugins off. While plugins are on, a guest, and any member while that switch is off, SHALL get 403
-"Access denied" from `getWebPlugins`, `getWebPlugin`, `updateWebPlugin` (with a valid body),
-`deleteWebPlugin` and, while uploads are on, `addWebPluginFromFile` sent with `personal=true`, and no personal
-plugin from `getWebPlugins` without it.
+`getPortalSettings` SHALL report `plugins.personalAvailable`, true unless the installation switched personal
+plugins off, and `plugins.personal`, true only while they are available and an administrator switched them on
+for the portal, which a new portal has not. While plugins are on and `personal` is false, a guest's or member's
+call with `personal=true` SHALL answer 403 "Access denied", and `getWebPlugins` SHALL list no personal plugin.
 
-#### Scenario: Default installation
+#### Scenario: New portal
 
-- **WHEN** a signed-in member calls `getPortalSettings` on an installation that did not configure personal plugins
-- **THEN** the answer carries `plugins.personal` true
+- **WHEN** a signed-in member calls `getPortalSettings` on a new portal of an installation that did not configure personal plugins
+- **THEN** the answer carries `plugins.personalAvailable` true and `plugins.personal` false
 
 #### Scenario: Guest asks for personal plugins
 
-- **WHEN** plugins and their upload are on and a Guest uploads a package, lists, reads, updates with a valid body or deletes with `personal=true`
+- **WHEN** plugins, their upload and personal plugins are on and a Guest uploads a package, lists, reads, updates with a valid body or deletes with `personal=true`
 - **THEN** the system answers 403 "Access denied"
 
-#### Scenario: Personal plugins switched off
+#### Scenario: Personal plugins switched off for the portal
 
-- **WHEN** plugins and their upload are on, the installation switched personal plugins off, and a User uploads a package, lists, reads, updates with a valid body or deletes with `personal=true`
+- **WHEN** plugins and their upload are on, an administrator switched personal plugins off, and a User uploads a package, lists, reads, updates with a valid body or deletes with `personal=true`
 - **THEN** the system answers 403 "Access denied"
 - **AND** the User's `getWebPlugins` without `personal` lists none of their personal plugins
+
+#### Scenario: Personal plugins switched off for the installation
+
+- **WHEN** the installation switched personal plugins off
+- **THEN** `getPortalSettings` carries `plugins.personalAvailable` false and `plugins.personal` false, and `setPersonalWebPlugins` answers 403 "Access denied"
+
+### Requirement: Switching personal plugins for a portal
+
+`setPersonalWebPlugins` SHALL need the portal-settings right, and answer 403 "Access denied" without it, while
+plugins are off or while the installation switched personal plugins off. It SHALL store `enabled` for the portal
+and answer the plugin switches as `getPortalSettings` reports them. Switching off SHALL keep the files and states
+of personal plugins, so switching on again brings them back.
+
+#### Scenario: Member asks to switch
+
+- **WHEN** a User calls `setPersonalWebPlugins`
+- **THEN** the system answers 403 "Access denied"
+
+#### Scenario: Off and on again
+
+- **WHEN** a User holds an enabled personal plugin and the owner switches personal plugins off and then on again
+- **THEN** while they are off the User's `getWebPlugins` lists none of the User's personal plugins
+- **AND** afterwards it lists the plugin with `enabled` true
+
+### Requirement: Personal plugins of members for an administrator
+
+`getMembersWebPlugins`, `setMemberWebPlugin` and `deleteMemberWebPlugin` SHALL need the portal-settings right
+(403 "Access denied" otherwise, and while plugins are off). The list SHALL return the personal plugins of all
+members, each with its member in `createBy`, `createByType` and `createByIsOwner`, and with empty `settings`.
+Switching SHALL keep the member's settings, deleting SHALL drop the files and the state, and both SHALL answer
+404 "Plugin not found" for a name the member lacks.
+
+#### Scenario: Owner lists the plugins of members
+
+- **WHEN** a User holds a personal plugin with saved settings and the owner calls `getMembersWebPlugins`
+- **THEN** the list holds the plugin with `createBy` the User, `createByType` User, `createByIsOwner` false, `enabled` true and empty `settings`
+
+#### Scenario: Owner lists a plugin of their own
+
+- **WHEN** the owner holds a personal plugin and calls `getMembersWebPlugins`
+- **THEN** the list holds the plugin with `createBy` the owner, `createByType` DocSpace admin and `createByIsOwner` true
+
+#### Scenario: Owner switches a member's plugin off
+
+- **WHEN** the owner calls `setMemberWebPlugin` with `enabled` false for that plugin
+- **THEN** the system answers 200 and the User's `getWebPlugin` with `personal=true` reports `enabled` false with the settings the User saved
+
+#### Scenario: Owner deletes a member's plugin
+
+- **WHEN** the owner calls `deleteMemberWebPlugin` for that plugin twice
+- **THEN** the first call answers 200, the second 404 "Plugin not found", and the User's `getWebPlugins` with `personal=true` no longer lists the plugin
+
+#### Scenario: Member asks for the plugins of members
+
+- **WHEN** a User calls `getMembersWebPlugins`, `setMemberWebPlugin` or `deleteMemberWebPlugin`
+- **THEN** the system answers 403 "Access denied"
 
 ### Requirement: Personal plugins
 
@@ -116,9 +171,10 @@ together pass the limit.
 
 ### Requirement: Personal plugin files served to their owner
 
-The files of a personal plugin SHALL be served to its owner only: its `url`, `cssUrl` and assets SHALL answer
-403 to any other caller, an administrator or an anonymous one included. The `url` of a personal plugin SHALL
-point to `plugin.js` in a folder of its owner, with the same `hash` query as a portal plugin.
+The files of a personal plugin SHALL be stored in its owner's folder of the `personalwebplugins` storage module,
+private in a cloud storage, and served to the owner only: its `url`, `cssUrl` and assets SHALL answer 403 to any
+other caller, an administrator or an anonymous one included. The `url` SHALL point to `plugin.js` in that
+folder, with the same `hash` query as a portal plugin.
 
 #### Scenario: Another member requests the script
 
@@ -132,16 +188,26 @@ point to `plugin.js` in a folder of its owner, with the same `hash` query as a p
 
 ### Requirement: Content Security Policy domains of a personal plugin
 
-A personal upload SHALL answer 400 "The cspDomains value lists an invalid address or is
-too long" when the manifest's `cspDomains` is longer than 15360 characters, or when one of its comma-separated
-entries, trimmed, is an address `configureCsp` would refuse or holds whitespace, `;`, `'` or `"`. An empty
-value SHALL declare no domain. The domains SHALL reach only their owner's policy header, never the portal's
-domains.
+A personal upload SHALL answer 400 "The cspDomains value lists an invalid address or is too long" when the
+manifest's `cspDomains` is longer than 15360 characters, or one of its comma-separated entries, trimmed, is not an
+http, https, ws or wss host, optionally with a `*.` wildcard below a name of two labels or more. An empty value
+SHALL declare no domain. The domains SHALL reach only their owner's policy header, outside its
+`frame-ancestors`, and never the portal's domains.
 
 #### Scenario: Invalid entry
 
 - **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` is `https://a.example,https://b.example; script-src *`
 - **THEN** the system answers 400 "The cspDomains value lists an invalid address or is too long" and stores nothing
+
+#### Scenario: Bare scheme or wildcard over a top-level domain
+
+- **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` is `https:`, `*` or `*.com`
+- **THEN** the system answers 400 "The cspDomains value lists an invalid address or is too long" and stores nothing
+
+#### Scenario: Domains kept out of frame-ancestors
+
+- **WHEN** a User's enabled personal plugin declares `https://a.example` and the User calls `getCspSettings` with `asc_personal_csp`
+- **THEN** the `header` allows `https://a.example` in `frame-src` and does not list it in `frame-ancestors`
 
 #### Scenario: Value at the length limit
 
@@ -162,38 +228,38 @@ domains.
 
 A personal upload, or a personal update with `enabled` true, after which the caller's personal header (the
 portal's domains plus the caller's personal domains) would pass the size limit, 15 KB by default, SHALL keep its
-change and answer 403 "CSP header size exceeds maximum allowed size of 15360 bytes." instead of 200. A personal
-deletion or switch-off, and `getWebPlugins` without `personal`, SHALL still answer 200, and `getCspSettings`
-SHALL fall back to the portal's header.
+change, answer 403 "CSP header size exceeds maximum allowed size of 15360 bytes." and set no
+`asc_personal_csp`. A personal deletion or switch-off, and `getWebPlugins` without `personal`, SHALL still answer
+200, and `getCspSettings` SHALL fall back to the portal's header.
 
 #### Scenario: Personal upload over the limit
 
 - **WHEN** a User uploads with `personal=true` a plugin whose `cspDomains`, together with the portal's domains and the User's other enabled, unshadowed personal domains, push the policy header over its size limit
-- **THEN** the system answers 403 "CSP header size exceeds maximum allowed size of 15360 bytes."
+- **THEN** the system answers 403 "CSP header size exceeds maximum allowed size of 15360 bytes." and sets no `asc_personal_csp`
 - **AND** the User's `getWebPlugins` with `personal=true` lists the plugin with `enabled` true
 
 #### Scenario: Plugin list over the limit
 
 - **WHEN** the enabled personal plugins of a User that no higher-level plugin shadows declare domains that push the policy header over its size limit, and the User calls `getWebPlugins` without `personal`
-- **THEN** the system answers 200 and sets the cookie, no header is cached for the User, and `getCspSettings` with the cookie answers the portal's `header`
+- **THEN** the system answers 200 and sets no `asc_personal_csp`, deleting one the request carries, and `getCspSettings` with the cookie answers the portal's `header`
 
 #### Scenario: Personal deletion over the limit
 
 - **WHEN** a User whose personal header is over the size limit deletes one of their personal plugins with `personal=true`, and the rest still push the header over the limit
-- **THEN** the system answers 200, the plugin is deleted and no header is cached for the User
+- **THEN** the system answers 200, the plugin is deleted and the answer sets no `asc_personal_csp`
 
 ### Requirement: Cookie of the personal Content Security Policy
 
 `getWebPlugins` without `personal`, and an upload, update or deletion with `personal=true` that answers 200,
-SHALL set the HttpOnly cookie `asc_personal_csp` while the caller has personal domains (of their enabled
-personal plugins that no higher-level plugin shadows), and otherwise delete it from a request that carries it,
-unless reading the caller's plugins fails. A response that clears the session cookie, `logout` among others,
-SHALL delete it too when the request carries it.
+SHALL set the HttpOnly cookie `asc_personal_csp` to `1` while the caller has personal domains (of their enabled
+personal plugins that no higher-level plugin shadows) within the size limit, and otherwise delete it from a
+request that carries it, unless reading the caller's plugins fails. A response that clears the session cookie,
+`logout` among others, SHALL delete it too.
 
 #### Scenario: Cookie set by the plugin list
 
 - **WHEN** a User with an enabled personal plugin that no higher-level plugin shadows, declaring `cspDomains` `https://a.example`, calls `getWebPlugins` without `personal`
-- **THEN** the answer sets `asc_personal_csp` to 64 hexadecimal characters
+- **THEN** the answer sets `asc_personal_csp` to `1`
 
 #### Scenario: Cookie deleted after switching off
 
@@ -217,46 +283,50 @@ SHALL delete it too when the request carries it.
 
 ### Requirement: Policy header cached for a member
 
-The calls that set `asc_personal_csp` SHALL cache for the proxy, under its value and for a day from its last
-write, the header `getCspSettings` gives the caller, or drop that copy when the header is over the size limit.
-A personal upload, update or deletion that leaves no personal domains, and a list call that deletes the
-cookie, SHALL drop it too. A save of the portal's policy SHALL drop the copies the portal lists, and an address
-change or `deletePortal` those under the old address.
+The calls that set `asc_personal_csp`, and `getCspSettings` for a caller signed in by the session cookie and
+carrying `asc_personal_csp`, SHALL cache for the proxy, for a day, the header `getCspSettings` gives the caller,
+under a key derived from the session cookie and the portal's generation of member headers. A change that can
+alter the personal domains of a member, and a save of the portal's policy, SHALL start a new generation.
 
 #### Scenario: Unchanged header
 
-- **WHEN** a member whose copy the portal lists calls `getWebPlugins` again and the header to cache did not change
+- **WHEN** a member calls `getWebPlugins` again and the header to cache did not change
 - **THEN** the copy is not written again and still expires a day after its last write
 
-#### Scenario: Portal policy saved
+#### Scenario: Cookie set for another session
 
-- **WHEN** an administrator saves the portal's domains with `configureCsp`
-- **THEN** every member header the portal lists is dropped, and the proxy takes those members' policy from `getCspSettings` until a call that sets their cookie caches a header again
+- **WHEN** a request carries `asc_personal_csp` and the session cookie of one member
+- **THEN** the proxy serves the header cached for that session or asks `getCspSettings`, whatever the value of `asc_personal_csp`
+
+#### Scenario: New generation
+
+- **WHEN** a member uploads, switches or deletes a personal plugin, the owner uploads or deletes a portal plugin, switches personal plugins or a member's personal plugin, or saves the portal's domains with `configureCsp`
+- **THEN** the proxy finds no member header cached before, and takes each member's policy from `getCspSettings`, which caches it under the new generation
 
 #### Scenario: Portal removed by the retention job
 
 - **WHEN** the retention job removes a portal
-- **THEN** the headers cached for its members are not dropped and expire a day after their last write
+- **THEN** the headers cached for its members expire a day after their last write
 
 #### Scenario: Plugins switched off for the installation
 
 - **WHEN** plugins are switched off for the installation
-- **THEN** the plugin calls answer 403 and drop no cached member header, which expires a day after its last write unless a save of the portal's policy drops it first
+- **THEN** the plugin calls answer 403 and start no new generation, so a cached member header expires a day after its last write unless a new generation starts first
 
 ## MODIFIED Requirements
 
 ### Requirement: Installation-wide plugin switches
 
-`getPortalSettings` SHALL report to a signed-in caller the four installation switches `plugins.enabled`,
-`plugins.upload`, `plugins.delete` (false unless set) and `plugins.personal` (true unless set). While plugins
-are off, every `settings/webplugins` operation SHALL refuse with 403 "Access denied" a request it would
-otherwise serve, and so SHALL an upload while upload is off, and a portal plugin deletion while delete is off.
+`getPortalSettings` SHALL report the installation switches `plugins.enabled`, `plugins.upload`,
+`plugins.delete` (false unless set) and `plugins.personalAvailable` (true unless set), and `plugins.personal`.
+While plugins are off, every `settings/webplugins` and `settings/personalwebplugins` operation SHALL answer 403
+"Access denied", and so SHALL an upload while upload is off and a portal plugin deletion while delete is off.
 No tariff or edition gates plugins.
 
 #### Scenario: Signed-in member reads the switches
 
 - **WHEN** any signed-in member calls `getPortalSettings`
-- **THEN** the answer carries `plugins` with `enabled`, `upload`, `delete` and `personal` as the installation configured them
+- **THEN** the answer carries `plugins` with `enabled`, `upload`, `delete` and `personalAvailable` as the installation configured them, and `personal` as the portal set it
 
 #### Scenario: Plugins switched off for the installation
 
@@ -487,11 +557,11 @@ SHALL answer 200 with no body and record the change in the audit trail.
 
 ### Requirement: Stored state of a plugin
 
-The portal, and for a personal plugin its owner's own settings row, SHALL keep one state per plugin name only
-while the plugin is on or has settings; a plugin switched off with no settings SHALL have its state removed. A
-plugin with no stored state SHALL be reported with the `enabled` and `settings` of its manifest, which a
-portal or personal upload SHALL NOT store. A stored `settings` value that cannot be decrypted SHALL make the
-read report the plugin as off with empty settings.
+The portal, and for a personal plugin its owner's settings row, SHALL keep one state per plugin name only while
+the plugin is on or has settings; switching it off with no settings SHALL remove the state. With no stored state,
+an installation-wide plugin SHALL be reported with its manifest's `enabled` and `settings`, a portal or personal
+one off with no settings. Settings that cannot be decrypted SHALL make the read report the plugin off with empty
+settings.
 
 #### Scenario: Installation-wide plugin never touched
 
@@ -592,9 +662,10 @@ files replaced in storage within an hour, when its cache expires.
 ### Requirement: Clients are told when a plugin changes
 
 After a plugin is uploaded, switched, deleted or found changed by a refresh, the system SHALL send a real-time
-event naming the plugin and whether it is enabled, so an open interface can reload or unload it without a page
-reload: for a portal or installation-wide plugin to the portal's connected clients, for a personal plugin
-`s:change-personal-web-plugin` to its owner's connected clients only. A failure to send SHALL NOT fail the call.
+event naming the plugin and whether it is enabled: for a portal or installation-wide plugin to the portal's
+connected clients, for a personal plugin `s:change-personal-web-plugin` to its owner's connected clients only.
+`setPersonalWebPlugins` SHALL send `s:change-personal-web-plugins` with `enabled` to the portal's connected
+clients. A failure to send SHALL NOT fail the call.
 
 #### Scenario: Plugin switched off
 
@@ -607,12 +678,18 @@ reload: for a portal or installation-wide plugin to the portal's connected clien
 - **THEN** the User's connected clients receive `s:change-personal-web-plugin` with the plugin's `name` as `webPluginName` and `enabled` false
 - **AND** no other client of the portal receives an event for it
 
+#### Scenario: Personal plugins switched off for the portal
+
+- **WHEN** the owner switches personal plugins off with `setPersonalWebPlugins`
+- **THEN** every connected client of the portal receives `s:change-personal-web-plugins` with `enabled` false
+
 ### Requirement: Audit trail of plugin changes
 
-An upload, an update and a deletion SHALL each write one audit event — "Webplugin uploaded", "Webplugin
-updated", "Webplugin deleted" — naming the plugin and carrying its `pluginName` and `version` as the
-target; a personal plugin's write the same events, with no mark that the plugin is personal. Reads and the
-refresh SHALL write none.
+An upload, an update and a deletion, personal ones included, SHALL each write "Webplugin uploaded", "Webplugin
+updated" or "Webplugin deleted", naming the plugin, with its `pluginName` and `version` as the target.
+`setPersonalWebPlugins` SHALL write "Personal web plugins enabled" or "disabled", and `setMemberWebPlugin` and
+`deleteMemberWebPlugin` "Personal web plugin of a user updated" or "deleted", with the member as the target.
+Reads and the refresh SHALL write none.
 
 #### Scenario: Upload audited
 
@@ -627,8 +704,8 @@ refresh SHALL write none.
 ### Requirement: Plugins in backup and restore
 
 A portal backup SHALL include the uploaded plugin files, personal ones included, and the plugin states, so a
-restore brings the plugins back with their state. A restore SHALL put a member's personal files under the
-member's new user id and skip those of a member it does not restore, unless it restores a dump.
+restore brings them back. A restore or transfer SHALL keep a member's personal files private under the member's
+new user id, and skip those of a member it does not restore unless it restores a dump.
 Installation-wide plugin files SHALL NOT be in a portal backup or a storage migration; restored elsewhere, the
 portal's states for them apply to whatever that installation ships.
 

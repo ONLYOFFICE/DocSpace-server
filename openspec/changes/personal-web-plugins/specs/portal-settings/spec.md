@@ -7,8 +7,8 @@
 A signed-in member other than a guest whose request to `getCspSettings` carries the `asc_personal_csp` cookie,
 and who has personal domains (of enabled personal plugins that no portal or installation-wide plugin shadows,
 while plugins and personal plugins are on), SHALL never get 304 and SHALL find those domains in `header`,
-unless that would pass the header size limit, and never in `domains`. A failed read of the personal domains
-SHALL count as none.
+outside its `frame-ancestors`, unless that would pass the header size limit, and never in `domains`. A failed
+read of the personal domains SHALL count as none.
 
 #### Scenario: Owner of a personal plugin with domains
 
