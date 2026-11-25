@@ -299,36 +299,6 @@ describe("PortalTextReader", () => {
     expect(calls.filter((c) => c.url.endsWith("/fileops/bulkdownload"))).toHaveLength(4);
   }, 15_000);
 
-  it("starts the next queued conversion after one the portal refused", async () => {
-    const { fetchMock } = fakeFetch([
-      settingsRoute,
-      {
-        match: (url, init) =>
-          url.endsWith("/fileops/bulkdownload") && String(init?.body).includes('"key":1'),
-        answer: () => new Response("", { status: 500, statusText: "Server Error" }),
-      },
-      {
-        match: (url) => url.endsWith("/fileops/bulkdownload"),
-        answer: () =>
-          portalJson([
-            operation("op-2", { finished: true, url: "https://x/filehandler.ashx?b=2" }),
-          ]),
-      },
-      {
-        match: (url) => url.includes("filehandler.ashx"),
-        answer: () => textResponse("text of b"),
-      },
-    ]);
-    vi.stubGlobal("fetch", fetchMock);
-    const reader = new PortalTextReader(new AbortController().signal);
-    const [a, b] = await Promise.allSettled([
-      reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" }),
-      reader.readFileAsText({ id: "2", title: "b.docx", ext: ".docx" }),
-    ]);
-    expect(a).toMatchObject({ status: "rejected", reason: { status: 500 } });
-    expect(b).toEqual({ status: "fulfilled", value: "text of b" });
-  });
-
   it("survives a failed poll and reads the result on the next one", async () => {
     let polls = 0;
     const { fetchMock } = fakeFetch([

@@ -1042,7 +1042,7 @@ user's thread 403 keeping the reply, AI off 403.
 #### Scenario: Earlier version kept
 
 - **WHEN** the owner regenerates a reply whose approved tool call finished it
-- **THEN** the new reply and every model request of the regenerate carry neither the old call nor its result, and the new reply's `replyVersions.others` holds the old reply with both
+- **THEN** the new reply and every streamed model request of the regenerate carry neither the old call nor its result, and the new reply's `replyVersions.others` holds the old reply with both
 
 ### Requirement: Tool calls and the approval pause
 

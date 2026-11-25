@@ -455,10 +455,15 @@ export async function runDocumentTask(
       throw abortError(input.signal);
     }
     if (taskId === undefined) {
-      throw new DocumentAgentError(
-        `document agent request failed: ${err instanceof Error ? err.message : String(err)}`,
-        { cause: err },
+      // The SDK words a refused request with the status and the whole body of the answer (a
+      // proxy's error page, an internal host). That stays in the log: the error's message is
+      // read by the model, its provider and the stored history.
+      logger.warn(
+        `documentAgent: the request failed before a task was made: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
       );
+      throw new DocumentAgentError("the document agent request failed", { cause: err });
     }
     // The task was accepted and the stream broke under it: re-attached below.
     logger.warn(

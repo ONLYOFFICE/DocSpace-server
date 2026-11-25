@@ -41,14 +41,13 @@ vi.mock("../../storage/docspaceFileTransfer.js", () => ({
   uploadFile: vi.fn(),
   mediaTypeOf: () => "text/markdown",
 }));
-vi.mock("../../storage/docspaceFilesApi.js", () => {
-  class DocspaceApiHttpError extends Error {
-    constructor(public readonly status: number) {
-      super(`DocSpace API ${status}`);
-    }
-  }
-  return { DocspaceApiHttpError, filesApiSend: vi.fn() };
-});
+// The error class is the real one: installTemplate tells a refusal of the Files API from any
+// other failure by it.
+vi.mock("../../storage/docspaceFilesApi.js", async (importOriginal) => ({
+  DocspaceApiHttpError: (await importOriginal<typeof import("../../storage/docspaceFilesApi.js")>())
+    .DocspaceApiHttpError,
+  filesApiSend: vi.fn(),
+}));
 const aiConfig = vi.hoisted(() => vi.fn());
 vi.mock("../../storage/httpClient.js", () => ({ aiService: { get: aiConfig } }));
 const portalChatProfileId = vi.hoisted(() => vi.fn());

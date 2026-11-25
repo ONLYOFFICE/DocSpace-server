@@ -66,10 +66,12 @@ public class EditorToolPermissionTests(AspireAppFixture fixture) : EditorToolTes
         (await ListAsync()).Status.Should().Be(200);
         await ActAsAsync(EmployeeType.Guest);
 
-        var reply = await ListAsync();
+        // Through the generated client, as a caller reads it: the refusal is the 403 the document publishes.
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await SdkEditorTools.AiEditorToolsListAsync(TestContext.Current.CancellationToken));
 
-        reply.Error.Should().Be(Forbidden, "the refusal body");
-        reply.Status.Should().Be(403, reply.ToString());
+        exception.ErrorCode.Should().Be(403, exception.Message);
+        exception.ErrorContent!.ToString().Should().Contain(Forbidden, "the refusal body");
     }
 
     /// <summary>The tool runs as the caller: the generated file lands in the member's own My documents, not the owner's.</summary>

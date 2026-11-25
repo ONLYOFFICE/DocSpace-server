@@ -201,13 +201,22 @@ describe.each([
     },
   );
 
-  it("treats a settings answer that is not an object as writable", async () => {
-    upstream.use(http.get("*/internal/ai/config", () => docspace("text")));
-    engineCall().mockResolvedValue({ success: true, profile: stored });
+  // The flag that makes profiles read-only cannot be read from such an answer, and unknown is
+  // not "writable": nothing is dialed or stored (ts-ai-failure-paths.md §1).
+  it.each([
+    ["a text", "text"],
+    ["a list", []],
+    ["null", null],
+  ])("answers 502 to a settings answer that is %s and creates nothing", async (_what, answer) => {
+    upstream.use(http.get("*/internal/ai/config", () => docspace(answer)));
 
     const reply = await invoke(profilesController[method], { body });
 
-    expect(reply.status).toBe(200);
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
+    expect(lookup).not.toHaveBeenCalled();
+    expect(engineCall()).not.toHaveBeenCalled();
+    expect(published(operationId, reply)).toEqual([]);
   });
 
   it("refuses the external provider type with 400 (Bug 83114)", async () => {

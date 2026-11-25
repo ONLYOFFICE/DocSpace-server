@@ -201,17 +201,13 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
   }
   const file = envelopeResponse(json);
   if (!isObject(file)) {
-    logger.error(
-      `insertGeneratedImage: POST ${url} -> 200 but unexpected payload=${JSON.stringify(json).slice(0, 1000)}`,
-    );
+    logger.error(`insertGeneratedImage: POST ${url} -> 200 but its answer carries no file object`);
     throw new UpstreamShapeError("POST files/{folderId}/insert");
   }
   const numId = getNumber(file, "id");
   const id = numId !== undefined ? String(numId) : getString(file, "id");
   if (id === undefined) {
-    logger.error(
-      `insertGeneratedImage: POST ${url} -> 200 but no file id in payload=${JSON.stringify(file).slice(0, 1000)}`,
-    );
+    logger.error(`insertGeneratedImage: POST ${url} -> 200 but the file object carries no id`);
     throw new UpstreamShapeError("POST files/{folderId}/insert");
   }
   logger.info(
@@ -222,10 +218,13 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
 }
 
 /**
- * Removes a generated image whose attachment record could not be written, so
+ * Removes a generated image whose attachment record was not confirmed, so
  * no file is left in the folder that no message names
  * (`DELETE api/2.0/files/file/{fileId}`, FilesController.DeleteFile; it
- * starts a file operation and answers at once). The file was made by this
+ * starts a file operation and answers at once). "Not confirmed" is a write
+ * that was refused, one that got no answer (a timeout, a failure after the
+ * row was stored) and one whose answer cannot be read: a row that was stored
+ * after all then names a file that is gone. The file was made by this
  * request seconds before, so it skips the trash. `returnSingleOperation`
  * (a query parameter of this route) makes the answer this operation only:
  * without it the portal lists every operation of the user and drops the
@@ -243,7 +242,7 @@ async function removeOrphanImage(entryId: string): Promise<void> {
       },
     );
     logger.warn(
-      `uploadToolImage: asked to delete file ${entryId} (a file operation), its attachment record was not written`,
+      `uploadToolImage: asked to delete file ${entryId} (a file operation), its attachment record was not confirmed`,
     );
   } catch (err) {
     logger.error(
@@ -508,14 +507,18 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     const copies = new Map(sourceIds.map((id, i) => [id, entryIds[i] ?? id]));
     const analyzeEntryIds = getAnalyzeEntryIds()?.map((id) => copies.get(String(id)) ?? id);
     const raw = await aiService.post(PATH, { entryIds, analyzeEntryIds });
+    // The answer is attachment DTOs: `content` is the text read from the user's file and
+    // `dataUrl` an address whose signature downloads it. The log names ids and counts only.
     logger.debug(
       `HttpAttachmentsStorage.createMany: POST ${PATH} entryIds=${JSON.stringify(entryIds)} ` +
-        `analyzeEntryIds=${JSON.stringify(analyzeEntryIds)} raw response=${JSON.stringify(raw)}`,
+        `analyzeEntryIds=${JSON.stringify(analyzeEntryIds)} answered ${
+          Array.isArray(raw) ? `${raw.length} item(s)` : "no list"
+        }`,
     );
     if (!Array.isArray(raw)) {
       logger.error(
         `HttpAttachmentsStorage.createMany: backend returned non-array payload ` +
-          `(type=${raw === null ? "null" : typeof raw}); raw=${JSON.stringify(raw)}`,
+          `(type=${raw === null ? "null" : typeof raw})`,
       );
       throw new UpstreamShapeError("POST attachments");
     }
@@ -524,20 +527,20 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // `dtoToAttachment` composes `path = "${entryId}/${title}"`; split on the
     // first slash to get the original entry id for the order-aware match.
     const byEntryId = new Map<string, Attachment>();
-    const skipped: unknown[] = [];
+    let skipped = 0;
     for (const item of raw) {
       const a = dtoToAttachment(item);
       if (!a || !a.path) {
-        skipped.push(item);
+        skipped += 1;
         continue;
       }
       const entryIdKey = a.path.split("/", 1)[0] ?? "";
       byEntryId.set(entryIdKey, a);
     }
-    if (skipped.length > 0) {
+    if (skipped > 0) {
       logger.warn(
-        `HttpAttachmentsStorage.createMany: ${skipped.length} item(s) skipped ` +
-          `(missing id/title/kind/entryId); skipped=${JSON.stringify(skipped)}`,
+        `HttpAttachmentsStorage.createMany: ${skipped} of ${raw.length} item(s) skipped ` +
+          `(missing id/title/kind/entryId)`,
       );
     }
     docspace.forEach(({ index, input }, docspaceIdx) => {
@@ -547,8 +550,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         logger.error(
           `HttpAttachmentsStorage.createMany: no match for entryId=${entryId}. ` +
             `requested=${JSON.stringify(entryIds)} ` +
-            `backend entryIds=${JSON.stringify([...byEntryId.keys()])} ` +
-            `raw=${JSON.stringify(raw)}`,
+            `backend entryIds=${JSON.stringify([...byEntryId.keys()])}`,
         );
         // The C# side silently drops entry ids it cannot resolve (an id that
         // does not exist, or one the caller cannot read), so a missing match
@@ -751,8 +753,8 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       };
       logger.error(
         `uploadToolImage: returning an UNRESOLVABLE placeholder ref=${placeholder.id} — ` +
-          "nothing was persisted, so the stream carries a ref the chat can never hydrate " +
-          "(broken image in the message, no file in DocSpace)",
+          "no attachment record was confirmed, so the stream carries a ref the chat can never " +
+          "hydrate (broken image in the message; a stored file and its removal are in the lines above)",
       );
       return placeholder;
     }

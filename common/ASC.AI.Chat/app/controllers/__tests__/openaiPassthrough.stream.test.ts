@@ -293,8 +293,10 @@ describe("the grace window of a streaming round", () => {
     expect(reply.status).toBe(200);
     expect(reply.body).toBe(`${SSE_PING}data: ${JSON.stringify(providerError)}\n\n`);
     expect(vi.mocked(logger.warn).mock.calls[0]?.[0]).toBe(
-      `openai passthrough chat/completions: provider answered 429 application/json after the keep-alive was committed: ${JSON.stringify(providerError, null, 2)}`,
+      `openai passthrough chat/completions: provider answered 429 application/json, ${JSON.stringify(providerError, null, 2).length} characters, after the keep-alive was committed`,
     );
+    // The provider's body goes to the caller, which sent the request, and stays out of the log.
+    expect(String(vi.mocked(logger.warn).mock.calls[0]?.[0])).not.toContain("Rate limit");
   });
 
   it.each([
@@ -334,7 +336,7 @@ describe("the grace window of a streaming round", () => {
     await exchange.done;
 
     expect(vi.mocked(logger.warn).mock.calls[0]?.[0]).toBe(
-      "openai passthrough chat/completions: provider answered 500 no content-type after the keep-alive was committed: x",
+      "openai passthrough chat/completions: provider answered 500 no content-type, 1 characters, after the keep-alive was committed",
     );
   });
 
@@ -470,7 +472,7 @@ describe("the padded JSON of images/generations", () => {
     expect(reply.body).toBe(` ${JSON.stringify(imageResult)}`);
   });
 
-  it("writes the generic envelope after the padding when the provider answers 5xx, and logs its body", async () => {
+  it("writes the generic envelope after the padding when the provider answers 5xx, and logs its status without the body", async () => {
     const { exchange, held } = await padCommitted();
 
     held.release(new HttpResponse("at Gateway.Stack()", { status: 500 }));
@@ -482,8 +484,9 @@ describe("the padded JSON of images/generations", () => {
     });
     expect(reply.body).not.toContain("Gateway.Stack");
     expect(logger.error).toHaveBeenCalledWith(
-      "openai passthrough images/generations: upstream answered 500: at Gateway.Stack()",
+      "openai passthrough images/generations: upstream answered 500 text/plain;charset=UTF-8, 18 characters of body",
     );
+    expect(vi.mocked(logger.error).mock.calls.flat().join("\n")).not.toContain("Gateway.Stack");
   });
 
   it("relays a provider 4xx inside the 200 and logs the downgrade", async () => {

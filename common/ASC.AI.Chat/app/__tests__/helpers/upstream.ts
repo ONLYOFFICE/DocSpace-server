@@ -32,7 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { DefaultBodyType, JsonBodyType, StrictRequest } from "msw";
-import { http, HttpResponse, passthrough } from "msw";
+import { delay, http, HttpResponse, passthrough } from "msw";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll } from "vitest";
 
@@ -66,9 +66,11 @@ const LOCAL_APP = /^http:\/\/127\.0\.0\.1(:\d+)?\//;
  * with msw. Unlike a `vi.mock` of `httpClient.js` or a stubbed `fetch`, the real client code
  * runs: its URL, headers, timeout and status mapping are part of what the test sees.
  *
- * Call once at the top of a test file. A request no handler answers fails the test, so a test
- * never reaches the network. `seen` lists the requests of the current test, in the order they
- * were made.
+ * Call once at the top of a test file. A request no handler answers never reaches the network:
+ * msw rejects it as a network error, which a test of a failure path would take for the failure
+ * it stubbed, so the requests left unanswered are collected and fail the test when it ends.
+ * `seen` lists the requests of the current test, in the order they were made. A test that leaves
+ * a request unanswered on purpose takes it off that list with `takeUnanswered()` and asserts on it.
  *
  *   const upstream = useUpstream();
  *   upstream.use(http.get("*\/internal\/ai\/profiles", () => docspace([])));
@@ -81,11 +83,16 @@ const LOCAL_APP = /^http:\/\/127\.0\.0\.1(:\d+)?\//;
 export function useUpstream(options: UpstreamOptions = {}): {
   use: ReturnType<typeof setupServer>["use"];
   seen: SeenRequest[];
+  /** The requests no handler answered so far, as `METHOD url`; taking them clears the list. */
+  takeUnanswered: () => string[];
 } {
   const server = setupServer(
     ...(options.localApp ? [http.all(LOCAL_APP, () => passthrough())] : []),
   );
   const seen: SeenRequest[] = [];
+  const unanswered: string[] = [];
+
+  const takeUnanswered = (): string[] => unanswered.splice(0);
 
   const record = (request: StrictRequest<DefaultBodyType>): void => {
     if (options.localApp && LOCAL_APP.test(request.url)) {
@@ -122,16 +129,23 @@ export function useUpstream(options: UpstreamOptions = {}): {
     server.events.on("request:start", ({ request }) => {
       record(request as StrictRequest<DefaultBodyType>);
     });
+    server.events.on("request:unhandled", ({ request }) => {
+      unanswered.push(`${request.method} ${request.url}`);
+    });
   });
   afterEach(() => {
     server.resetHandlers();
     seen.length = 0;
+    const missed = takeUnanswered();
+    if (missed.length > 0) {
+      throw new Error(`useUpstream: no handler answered ${missed.join(", ")}`);
+    }
   });
   afterAll(() => {
     server.close();
   });
 
-  return { use: server.use.bind(server), seen };
+  return { use: server.use.bind(server), seen, takeUnanswered };
 }
 
 /** An answer in the envelope the .NET services wrap a result in. */
@@ -155,4 +169,15 @@ export function aiGate(status = 200): ReturnType<typeof http.get> {
   return http.get("*/internal/ai/tool-prefs", () =>
     status === 200 ? docspace({}) : docspaceError(status),
   );
+}
+
+/**
+ * The resolver of an upstream that takes the request and never answers it; with
+ * `afterUpstreamTimeout` of `time.ts`, the timeout of the call under test.
+ *
+ *   upstream.use(http.all("*", stalled));
+ */
+export async function stalled(): Promise<Response> {
+  await delay("infinite");
+  return new Response(null);
 }

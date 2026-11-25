@@ -41,6 +41,7 @@ import type {
 import { storage } from "../storage/index.js";
 import { listOnlyofficeGatewayModels } from "../storage/profilesStorage.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
+import { mapped } from "../storage/upstreamShape.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { assertAiAccess } from "./aiAccess.js";
 import { asString, isObject, readProp } from "../narrow.js";
@@ -58,10 +59,13 @@ const engine = new ProfilesEngine({ storage });
 // made for an operation that cannot succeed anyway (Bug 83112).
 // `systemAiEnabled` mirrors `AiStatus.GatewayEnabled`
 // (AiSettingsService.GetAiSettingsAsync), the same state
-// AssertGatewayNotConfigured trips on.
+// AssertGatewayNotConfigured trips on. An answer that is not the settings
+// object leaves the flag unknown, and unknown is not "writable": the write
+// fails with 502 before anything is dialed (ts-ai-failure-paths.md §1).
 async function assertProfilesWritable(): Promise<void> {
-  const config = await aiService.get("/config");
-  if (isObject(config) && config["systemAiEnabled"] === true) {
+  const raw = await aiService.get("/config");
+  const config = mapped(isObject(raw) ? raw : undefined, "GET config");
+  if (config["systemAiEnabled"] === true) {
     throw clientFault(403, "AI profiles are read-only on this portal (managed by the AI gateway)");
   }
 }

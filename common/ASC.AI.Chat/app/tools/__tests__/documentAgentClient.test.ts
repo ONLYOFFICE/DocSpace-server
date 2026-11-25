@@ -498,11 +498,16 @@ describe("runDocumentTask", () => {
 
       const run = mod.runDocumentTask(config, input());
 
+      // The SDK's text carries the status and the whole body of a refused request: it is logged
+      // and kept as the cause, and stays out of the message, which the model reads.
       await expect(run).rejects.toBeInstanceOf(mod.DocumentAgentError);
       await expect(run).rejects.toMatchObject({
-        message: `document agent request failed: ${text}`,
+        message: "the document agent request failed",
         cause: err,
       });
+      expect(logger.warn).toHaveBeenCalledWith(
+        `documentAgent: the request failed before a task was made: ${text}`,
+      );
       expect(client.cancelTask).not.toHaveBeenCalled();
     },
   );

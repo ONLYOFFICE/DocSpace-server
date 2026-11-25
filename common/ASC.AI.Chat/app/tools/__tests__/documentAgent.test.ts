@@ -35,12 +35,14 @@ import type { ProgressCallback } from "@onlyoffice/ai-chat/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DocumentAgentConfig, getMcpServers } from "../../../config/index.js";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
+import { afterUpstreamTimeout } from "../../__tests__/helpers/time.js";
 import {
   HttpResponse,
   docspace,
   docspaceError,
   http,
   useUpstream,
+  stalled,
 } from "../../__tests__/helpers/upstream.js";
 import type { ChatContextSnapshot } from "../../storage/chatContextSnapshot.js";
 import type { DocspaceProfile } from "../../storage/profilesStorage.js";
@@ -1112,6 +1114,23 @@ describe("the task's log", () => {
       "http://chat:5157/document-agent/files/outputs?folder=500",
     );
     expect(warnings()).toContain(
+      "document_agent: log folder 61 is not writable for the user, logging next to the results",
+    );
+  });
+
+  // Only a 403 says the log folder is not the user's to write: a read that got no answer is not.
+  it("fails the tool call when the log folder read gets no answer, without calling the agent", async () => {
+    arrange({ settings: { ...tenantSettings, taskLog: true, taskLogFolderId: "61" } });
+    upstream.use(http.get("*/api/2.0/files/folder/61", stalled));
+    completes();
+
+    const outcome = await afterUpstreamTimeout(() => call({ task: "Do" }));
+
+    expect(outcome).toEqual({
+      value: "The document task could not be completed due to an internal error.",
+    });
+    expect(client.sendMessageStream).not.toHaveBeenCalled();
+    expect(warnings()).not.toContain(
       "document_agent: log folder 61 is not writable for the user, logging next to the results",
     );
   });

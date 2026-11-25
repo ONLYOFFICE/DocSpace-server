@@ -40,6 +40,7 @@ import { providerFetch } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
 import logger from "../log.js";
 import { getArray, getString, isObject, readProp } from "../narrow.js";
+import { lastLine, toolErrorForLog } from "./toolErrorLog.js";
 
 // docspace-mcp resolves the target portal from the `Referer` header — it
 // mirrors the C# `HttpClientTransport`, which sends `Referer` = portal root
@@ -301,9 +302,10 @@ function withReadOnlyAutoAllow(grouped: Record<string, TMCPItem[]>): Record<stri
 // the error text (the MCP server's own step trace ends with the actual
 // failure, e.g. "GET …/files/rooms: 401 Unauthorized"; never user content).
 // The library itself answers a call it could not make (an unknown tool, a
-// JSON-RPC error of the server) with `{"error": "<text>"}` instead of
-// throwing: that text is the library's own wording, logged the same way -
-// except a refused HTTP answer, see `withoutHttpBody`.
+// JSON-RPC error of the server, a refused HTTP answer) with
+// `{"error": "<text>"}` instead of throwing. Part of that text can be the
+// server's own, so it is logged through `toolErrorForLog`: the status or the
+// JSON-RPC code, or the library's own wording.
 // Returns undefined for successful or unrecognized results.
 function describeToolErrorResult(result: unknown): string | undefined {
   let payload: unknown = result;
@@ -319,7 +321,7 @@ function describeToolErrorResult(result: unknown): string | undefined {
   }
   const libraryError = getString(payload, "error");
   if (libraryError !== undefined && payload["isError"] === undefined) {
-    return withoutHttpBody(libraryError) ?? lastLine(libraryError);
+    return toolErrorForLog(libraryError);
   }
   if (payload["isError"] !== true) {
     return undefined;
@@ -328,23 +330,6 @@ function describeToolErrorResult(result: unknown): string | undefined {
     ?.map((part) => readProp(part, "text"))
     .find((text): text is string => typeof text === "string");
   return lastLine(first ?? "");
-}
-
-// The library words a refused HTTP answer of an MCP server as
-// `<method>: HTTP <status> <reason>: <up to 500 characters of the body>`. The
-// body is that server's to word and may quote the request, so the log gets the
-// method and the status only, as the fetch line above does.
-function withoutHttpBody(text: string): string | undefined {
-  return /^(?:[^\n:]+: )?HTTP \d{3}[^\n:]*/.exec(text)?.[0].trimEnd();
-}
-
-function lastLine(text: string): string {
-  const lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-  const last = lines[lines.length - 1] ?? "<no error text>";
-  return last.slice(0, 300);
 }
 
 // Diagnostic wrapper around the source: logs enumeration and invocation so

@@ -36,7 +36,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { engineClass, engineMock, mockReset } from "../../__tests__/helpers/engine.js";
 import { invoke } from "../../__tests__/helpers/http.js";
 import type { Reply } from "../../__tests__/helpers/http.js";
-import { docspace, docspaceError, http, useUpstream } from "../../__tests__/helpers/upstream.js";
+import {
+  docspace,
+  docspaceError,
+  http,
+  useUpstream,
+  HttpResponse,
+} from "../../__tests__/helpers/upstream.js";
+import { folderDto } from "../../__tests__/fixtures/filesApi.js";
 
 // The web-search settings routes. The engine of the library is the boundary (engineMock);
 // the access gate (a read of `internal/ai/web-search`), the entry check (the Files API) and
@@ -77,7 +84,7 @@ function folderAnswers(id: string, status: number): void {
   upstream.use(
     http.get(`${proxyBaseUrl}/api/2.0/files/folder/${id}`, () =>
       status === 200
-        ? docspace({ id: Number(id), title: "Room", roomType: 5 })
+        ? HttpResponse.json(folderDto({ id: Number(id), title: "Room", roomType: 5 }))
         : docspaceError(status),
     ),
   );

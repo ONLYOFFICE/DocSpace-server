@@ -704,9 +704,7 @@ describe("createMany of portal files", () => {
       expose: true,
     });
     expect(logged("error")).toEqual([
-      expect.stringMatching(
-        /^HttpAttachmentsStorage\.createMany: no match for entryId=41\. requested=\["40","41"\] backend entryIds=\["40"\] /,
-      ),
+      'HttpAttachmentsStorage.createMany: no match for entryId=41. requested=["40","41"] backend entryIds=["40"]',
     ]);
   });
 
@@ -719,9 +717,7 @@ describe("createMany of portal files", () => {
 
     expect(error).toMatchObject({ status: 404 });
     expect(logged("warn")).toEqual([
-      expect.stringMatching(
-        /^HttpAttachmentsStorage\.createMany: 3 item\(s\) skipped \(missing id\/title\/kind\/entryId\); skipped=/,
-      ),
+      "HttpAttachmentsStorage.createMany: 3 of 3 item(s) skipped (missing id/title/kind/entryId)",
     ]);
   });
 
@@ -920,7 +916,7 @@ describe("createMany of a generated image", () => {
       expect.stringMatching(
         new RegExp(`^uploadToolImage: entityId=${entityId} FAILED at stage=${stage}: `),
       ),
-      `uploadToolImage: returning an UNRESOLVABLE placeholder ref=${result[0]?.id} — nothing was persisted, so the stream carries a ref the chat can never hydrate (broken image in the message, no file in DocSpace)`,
+      `uploadToolImage: returning an UNRESOLVABLE placeholder ref=${result[0]?.id} — no attachment record was confirmed, so the stream carries a ref the chat can never hydrate (broken image in the message; a stored file and its removal are in the lines above)`,
     ]);
   };
 
@@ -1223,7 +1219,7 @@ describe("createMany of a generated image", () => {
       { id: "90", single: "true", body: { deleteAfter: false, immediately: true } },
     ]);
     expect(logged("warn")).toContain(
-      "uploadToolImage: asked to delete file 90 (a file operation), its attachment record was not written",
+      "uploadToolImage: asked to delete file 90 (a file operation), its attachment record was not confirmed",
     );
   });
 

@@ -96,6 +96,46 @@ describe("the AI access gate", () => {
     },
   );
 
+  // The parsers of createApp run in front of the authentication gate and of the AI access gate
+  // (ts-ai-express.md §2): what they refuse is answered for every caller, and no route is reached.
+  describe("behind the body parser", () => {
+    const op = gated.find((candidate) => candidate.method === "post");
+    const path = op?.path.replace(/\{[^}]+\}/g, "x") ?? "";
+
+    it("answers 400 to a body that does not parse, although the AI service would refuse the caller", async () => {
+      upstream.use(http.all("*/internal/ai/*", () => docspaceError(403)));
+
+      const reply = await request(app).post(path).set(AUTH).set(JSON_TYPE).send("{");
+
+      expect(reply.status).toBe(400);
+      expect(upstream.seen).toEqual([]);
+    });
+
+    it("answers 400 to a body that does not parse from a caller without credentials, not 401", async () => {
+      const reply = await request(app).post(path).set(JSON_TYPE).send("{");
+
+      expect(reply.status).toBe(400);
+      expect(upstream.seen).toEqual([]);
+    });
+
+    it("answers 413 to a body over the parser's limit, although the AI service would refuse the caller", async () => {
+      upstream.use(http.all("*/internal/ai/*", () => docspaceError(403)));
+      const body = JSON.stringify({ text: "a".repeat(101 * 1024) });
+
+      const reply = await request(app).post(path).set(AUTH).set(JSON_TYPE).send(body);
+
+      expect(reply.status).toBe(413);
+      expect(upstream.seen).toEqual([]);
+    });
+
+    it("answers 401 to a body that parses from a caller without credentials", async () => {
+      const reply = await request(app).post(path).set(JSON_TYPE).send("{}");
+
+      expect(reply.status).toBe(401);
+      expect(upstream.seen).toEqual([]);
+    });
+  });
+
   it("leaves out only the routes the spec or the .NET suite lets judge their input first", () => {
     const published = new Set(publishedOperations().map((op) => op.operationId));
     expect(Object.keys(NOT_GATED_FIRST).filter((id) => !published.has(id))).toEqual([]);

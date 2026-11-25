@@ -35,7 +35,14 @@ import { customSync } from "@onlyoffice/ai-chat/core";
 import type { Profile } from "@onlyoffice/ai-chat/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
-import { docspace, docspaceError, http, useUpstream } from "../../__tests__/helpers/upstream.js";
+import { afterUpstreamTimeout } from "../../__tests__/helpers/time.js";
+import {
+  docspace,
+  docspaceError,
+  http,
+  useUpstream,
+  stalled,
+} from "../../__tests__/helpers/upstream.js";
 import logger from "../../log.js";
 import { shouldForwardHeadersToProvider } from "../../requestContext.js";
 import { AiServiceHttpError } from "../../storage/httpClient.js";
@@ -254,6 +261,15 @@ describe("getSuggestedQuestions", () => {
 
     expect(error).toBeInstanceOf(AiServiceHttpError);
     expect((error as AiServiceHttpError).status).toBe(status);
+    expect(customSync).not.toHaveBeenCalled();
+  });
+
+  it("rejects with the timeout when the read gets no answer", async () => {
+    upstream.use(http.get("*/internal/ai/form-analysis/:id", stalled));
+
+    const outcome = await afterUpstreamTimeout(() => getSuggestedQuestions("a1"));
+
+    expect(String("error" in outcome && outcome.error)).toContain("upstream timeout after");
     expect(customSync).not.toHaveBeenCalled();
   });
 

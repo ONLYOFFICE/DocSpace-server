@@ -359,7 +359,7 @@ function envOrSetting(name: string, setting: unknown): string {
 }
 
 // The upper bounds of the numbers below: a value above one is a slip of the keyboard, and the
-// default serves better than a day-long timeout or a context window no model has.
+// default serves better than a timeout of more than a day or a context window no model has.
 const MAX_TASK_TIMEOUT_SECONDS = 24 * 60 * 60;
 const MAX_TOOL_CALLS_LIMIT = 10_000;
 const MAX_KEEP_RECENT = 10_000;

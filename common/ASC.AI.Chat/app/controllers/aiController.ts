@@ -80,6 +80,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
+import { toolErrorForLog } from "../tools/toolErrorLog.js";
 import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
 import { documentAgentTools } from "../tools/documentAgent.js";
 import { DOCUMENT_AGENT_TYPE, getCompaction, getPersistIntervalMs } from "../../config/index.js";
@@ -234,13 +235,6 @@ function idOf(body: unknown, field: ChatIdField): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-// The aggregate read of a round that takes its ids from the body, then the
-// refusal of an id of a wrong type. Answers `false` when it has responded.
-// The aggregate read is the round's access gate when it installs a snapshot.
-// When it installs none (switched off by `AI_CHAT_CONTEXT` or the
-// `x-ai-chat-context: off` header, failed with anything but 401/403, or an
-// unusable answer) no gated call has been made, so the gate is asked here,
-// before any refusal of the body (ts-ai-failure-paths.md §3).
 // The fields a resume of a round cannot do without (`RegenerateStreamInput` and `ToolCallData`
 // of the library), present and of their type. Left out, the engine went on with `undefined`:
 // `GET messages/undefined` to the AI service, then its status or a 409, where the document
@@ -262,6 +256,13 @@ function missingFieldError(body: unknown, fields: readonly ResumeField[]): strin
   return null;
 }
 
+// The aggregate read of a round that takes its ids from the body, then the
+// refusal of an id of a wrong type. Answers `false` when it has responded.
+// The aggregate read is the round's access gate when it installs a snapshot.
+// When it installs none (switched off by `AI_CHAT_CONTEXT` or the
+// `x-ai-chat-context: off` header, failed with anything but 401/403, or an
+// unusable answer) no gated call has been made, so the gate is asked here,
+// before any refusal of the body (ts-ai-failure-paths.md §3).
 async function primeRound(body: unknown, res: Response): Promise<boolean> {
   const primed = await primeChatContext({
     threadId: idOf(body, "threadId"),
@@ -505,9 +506,10 @@ function customScopeOf(body: unknown): string | undefined {
 // is an HTTP hop, so pace them to a few seconds. The first create and the
 // terminal write are unconditional; this only paces the intermediate ones,
 // and the library salvages the staged text if the stream dies early.
-// Override with `AI_CHAT_PERSIST_INTERVAL_MS`; anything that is not a
-// positive integer keeps the default here rather than falling through to
-// the library's 150 ms fallback.
+// Override with `AI_CHAT_PERSIST_INTERVAL_MS`, a whole number of
+// milliseconds from 50 to ten minutes (`getPersistIntervalMs`); anything
+// else keeps the default here rather than falling through to the library's
+// 150 ms fallback.
 const PERSIST_INTERVAL_MS = getPersistIntervalMs();
 
 const toolsAdapter = new HttpToolsAdapter();
@@ -606,20 +608,27 @@ function describeToolCallPending(event: Record<string, unknown>): string {
 }
 
 // Describe an in-engine tool result for the log without dumping it: an image
-// result carries megabytes of base64, and the interesting part is never the
-// payload — it is whether the tool answered with data, with a persisted ref,
-// or with an error (an unconfigured image profile, a provider/gateway refusal
-// such as a 402 from the paid route). Those errors are returned by the engine
-// as an ordinary tool result and are otherwise invisible server-side: the
-// library logs them only to its own console logger.
+// result carries megabytes of base64, any other one what the tool read (a
+// file's text, a search answer, another server's words), and the interesting
+// part is never the payload — it is whether the tool answered with data,
+// with a persisted ref, or with an error (an unconfigured image profile, a
+// provider/gateway refusal such as a 402 from the paid route). Those errors
+// are returned by the engine as an ordinary tool result and are otherwise
+// invisible server-side: the library logs them only to its own console
+// logger. An error is named by `toolErrorForLog`, anything else by its shape
+// and size.
 function describeToolResult(result: unknown): string {
   const text = typeof result === "string" ? result : JSON.stringify(result);
   if (text === undefined) {
-    return String(result);
+    return `a ${typeof result}`;
   }
+  let shape = "text";
   try {
     const parsed: unknown = JSON.parse(text);
-    if (isObject(parsed)) {
+    if (Array.isArray(parsed)) {
+      shape = `a list of ${parsed.length}`;
+    } else if (isObject(parsed)) {
+      shape = `{${Object.keys(parsed).slice(0, 10).join(",")}}`;
       const data = isObject(parsed["data"]) ? parsed["data"] : null;
       if (data && typeof data["base64"] === "string") {
         return `{data.base64=${data["base64"].length}B} (not persisted — no ref)`;
@@ -628,13 +637,15 @@ function describeToolResult(result: unknown): string {
         return `{data.ref=${data["ref"]}}`;
       }
       if (parsed["error"] !== undefined) {
-        return `ERROR ${JSON.stringify(parsed["error"]).slice(0, 700)}`;
+        return `ERROR ${toolErrorForLog(parsed["error"])}`;
       }
+    } else {
+      shape = `a ${parsed === null ? "null" : typeof parsed}`;
     }
   } catch {
-    // Not JSON — fall through to the truncated raw form.
+    // Not JSON: a text.
   }
-  return `${text.slice(0, 500)}${text.length > 500 ? `… (${text.length}B)` : ""}`;
+  return `${shape} (${text.length}B)`;
 }
 
 // Scan an event's streamed message for tool-call content parts and record

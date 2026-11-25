@@ -46,6 +46,7 @@ import {
   HttpResponse,
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
+import { folderDto } from "../../__tests__/fixtures/filesApi.js";
 
 // Characterization of every route of toolsController. The engine class and the MCP server
 // registry (`storage.mcpServers`) are stubbed, the system tool source is stubbed (it connects to
@@ -85,7 +86,7 @@ function folderAnswers(response: Response | (() => Response)): void {
     ),
   );
 }
-const folderOk = () => docspace({ id: 42, title: "Room", type: 6, roomType: 2 });
+const folderOk = () => HttpResponse.json(folderDto({ id: 42, title: "Room", roomType: 2 }));
 
 async function send(handler: unknown, body: unknown, init: CallInit = {}) {
   return invoke(handler, { ...init, body });
@@ -462,8 +463,9 @@ describe("toolsController.removeCustomServer", () => {
     expect(engine.removeCustomServer).toHaveBeenCalledWith("crm", undefined);
   });
 
-  // An entityId of another type used to fold to the portal-wide scope, so the delete removed the
-  // portal's server of that name; the five other writes refuse it since 060dc6f22e.
+  // An entityId of another type is a 400, as on the five other writes since 060dc6f22e. The
+  // registry is one per portal: for any entityId that passes, the delete removes the portal's
+  // server of that name.
   it.each([
     ["a number", 42],
     ["an object", { id: 42 }],

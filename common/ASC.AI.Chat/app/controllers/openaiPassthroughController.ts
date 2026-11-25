@@ -49,7 +49,7 @@ import {
 } from "./_helpers.js";
 import { hasCacheBreakpoints, markCacheBreakpoints } from "./cacheBreakpoints.js";
 import { isObject } from "../narrow.js";
-import { errorBodyText } from "../storage/errorBody.js";
+import { errorBodyText, refusalForLog } from "../storage/errorBody.js";
 import { AiServiceHttpError, providerFetch } from "../storage/httpClient.js";
 import { UpstreamShapeError } from "../storage/upstreamShape.js";
 
@@ -485,13 +485,13 @@ function imageRequestError(body: Record<string, unknown>): string | undefined {
 // Everything the provider or the hop in front of it answers with a 5xx is
 // kept out of the reply: the AI service's error envelope carries the
 // exception's stack trace and the gateway's host, and the gateway's own 500
-// names its Go types. The detail goes to the log; the client gets a fixed
+// names its Go types. The log names the status and the size of that body,
+// not the body (it can quote the request and its key); the client gets a fixed
 // 502 envelope (Bugs 84414, 84415, 84433, 84434). 4xx answers keep passing
 // through — the plugin's SDK raises them as APIErrors with the provider's
 // own message.
 async function logUpstreamFailure(route: string, upstream: globalThis.Response): Promise<void> {
-  const detail = await errorBodyText(upstream);
-  logger.error(`${route}: upstream answered ${upstream.status}: ${detail.slice(0, 1000)}`);
+  logger.error(`${route}: upstream answered ${await refusalForLog(upstream)}`);
 }
 
 function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = false) {
@@ -728,7 +728,7 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
       logger.warn(
         `openai passthrough ${subPath}: provider answered ${upstream.status} ${
           contentType ?? "no content-type"
-        } after the keep-alive was committed: ${detail.slice(0, 500)}`,
+        }, ${detail.length} characters, after the keep-alive was committed`,
       );
       writeSseError(res, detail, upstream.status);
       res.end();

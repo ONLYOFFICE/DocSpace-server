@@ -39,8 +39,10 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
 ## Modules
 
 - ESM only. **Relative imports carry `.js`** although the source is `.ts` (`"../log.js"`).
-- **`import type`** for type-only imports, in a statement of its own; `verbatimModuleSyntax` makes
-  the compiler refuse anything else.
+- **`import type`** for type-only imports, in a statement of its own. `verbatimModuleSyntax` makes
+  the compiler refuse a type imported without `type`, and ESLint (`consistent-type-imports`) a type
+  import written as a value import. Neither refuses an inline `type` specifier
+  (`import { type X }`), which some older files carry: new code does not add one.
 
 ## Types
 
@@ -91,15 +93,17 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
 - Data of one request lives in `AsyncLocalStorage` (`requestContext.ts`). A module-level `Map`,
   cache or memoized promise is shared by every portal the process serves: see
   `ts-ai-failure-paths.md` §8.
-- Log through `winston` (`log.js`), never `console.*`. The one exception is `config/index.ts`, which
-  runs before the logger exists (`log.ts` imports the config).
+- Log through `winston` (`log.js`), never `console.*`. The exception in the service is `config/`,
+  which runs before the logger exists (`log.ts` imports the config); the tools under `scripts/`
+  and `app/__tests__/setup.ts` are outside the rule as well (`eslint.config.js`).
 - A log line names the field or the status that was wrong, not the payload: upstream bodies carry
   keys and headers.
 
 ## Config
 
 - The environment and the settings files are read in `config/index.ts` only; ESLint refuses
-  `process.env` anywhere else. Env variables are read in bracket notation
+  `process.env` in the rest of `app/` (`scripts/` and the tests are exempt, `ts-ai-tests.md`).
+  Env variables are read in bracket notation
   (`process.env["AI_SERVICE_URL"]`) and override the file.
 - A value goes through a reader that knows its bounds and falls back to a default in the code when
   the value is absent, malformed or out of range: `intWithin(value, min, max)`, `unitFraction`,

@@ -43,6 +43,7 @@ import {
   HttpResponse,
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
+import { folderDto } from "../../__tests__/fixtures/filesApi.js";
 
 // Characterization of every route of assignmentsController: the engine class
 // and the profile storage are stubbed, the entity gate (`assertEntityAccessible`)
@@ -104,7 +105,7 @@ function folderAnswers(response: Response | (() => Response)): void {
     ),
   );
 }
-const folderOk = () => docspace({ id: 42, title: "Room", type: 6, roomType: 2 });
+const folderOk = () => HttpResponse.json(folderDto({ id: 42, title: "Room", roomType: 2 }));
 
 beforeEach(() => {
   mockReset(engine);

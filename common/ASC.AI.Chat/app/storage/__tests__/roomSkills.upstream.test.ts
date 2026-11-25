@@ -34,7 +34,8 @@
 import { UpstreamShapeError } from "../upstreamShape.js";
 import { describe, expect, it, vi } from "vitest";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
-import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
+import { afterUpstreamTimeout } from "../../__tests__/helpers/time.js";
+import { http, HttpResponse, useUpstream, stalled } from "../../__tests__/helpers/upstream.js";
 import logger from "../../log.js";
 import { getFilesApiReadCount } from "../../requestContext.js";
 import { DocspaceApiHttpError } from "../docspaceFilesApi.js";
@@ -182,6 +183,15 @@ describe("getRoomsSkills", () => {
     const error = await getRoomsSkills(["1"]).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(DocspaceApiHttpError);
     expect((error as DocspaceApiHttpError).status).toBe(403);
+  });
+
+  // A room the caller cannot read is left out of the map; a catalog that does not answer is not.
+  it("rejects when the catalog does not answer", async () => {
+    upstream.use(http.get("*/api/2.0/files/rooms/skills", stalled));
+
+    const outcome = await afterUpstreamTimeout(() => getRoomsSkills(["1"]));
+
+    expect(outcome).toEqual({ error: expect.any(Error) });
   });
 });
 

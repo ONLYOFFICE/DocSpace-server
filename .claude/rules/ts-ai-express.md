@@ -51,6 +51,9 @@ meet it yet. Cite this file as `[ts-ai-express.md §N]`.
 - CORS comes before the gate: a preflight carries no credentials. The gate comes before every route
   that does work: it answers 401 for a request with neither the session cookie nor an
   `Authorization` header.
+- The body parsers run in front of both gates, so a body that does not parse (400) or is over its
+  parser's limit (413) is refused before the 401 and before the AI access gate, whoever sent it
+  (`app/__tests__/app.aiGate.test.ts`).
 - A body parser is chosen for the route, and its limit is stated where it is chosen. The default
   limit (100 kB) is the rule; a route that needs more says why in a comment, as `text-to-docx` does,
   and a route that relays raw bytes is left unparsed. Do not raise the default, and do not add a

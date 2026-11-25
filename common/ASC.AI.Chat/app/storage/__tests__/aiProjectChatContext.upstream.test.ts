@@ -33,12 +33,14 @@
 
 import { UpstreamShapeError } from "../upstreamShape.js";
 import { describe, expect, it, vi } from "vitest";
+import { afterUpstreamTimeout } from "../../__tests__/helpers/time.js";
 import {
   docspace,
   docspaceError,
   http,
   HttpResponse,
   useUpstream,
+  stalled,
 } from "../../__tests__/helpers/upstream.js";
 import {
   applyAiProjectChatContext,
@@ -96,7 +98,7 @@ interface Arrange {
   model?: unknown;
   chat?: unknown;
   fallback?: unknown;
-  profile?: () => Response;
+  profile?: () => Response | Promise<Response>;
 }
 
 function project(arrange: Arrange = {}) {
@@ -262,6 +264,21 @@ describe("readAiProjectChatContext", () => {
       effectiveProfileId: PROFILE,
       profileAvailable: false,
     });
+  });
+
+  // Only a 404 says the profile is removed: a failed read is not "unavailable".
+  it("rejects when the profile read answers 500", async () => {
+    project({ profile: () => docspaceError(500) });
+
+    await expect(readAiProjectChatContext("42")).rejects.toMatchObject({ status: 500 });
+  });
+
+  it("rejects with the timeout when the profile read gets no answer", async () => {
+    project({ profile: stalled });
+
+    const outcome = await afterUpstreamTimeout(() => readAiProjectChatContext("42"));
+
+    expect(String("error" in outcome && outcome.error)).toContain("upstream timeout after");
   });
 
   it("answers no model and no profile read when the portal has neither a Chat nor a Default model", async () => {

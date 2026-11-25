@@ -33,7 +33,8 @@
 
 import { UpstreamShapeError } from "../upstreamShape.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
+import { afterUpstreamTimeout } from "../../__tests__/helpers/time.js";
+import { http, HttpResponse, useUpstream, stalled } from "../../__tests__/helpers/upstream.js";
 import logger from "../../log.js";
 import { AiServiceHttpError, aiServiceBaseUrl } from "../httpClient.js";
 import { uploadThreadArtifact } from "../threadFiles.js";
@@ -190,5 +191,14 @@ describe("uploadThreadArtifact over the network", () => {
     upstream.use(http.post(ARTIFACTS, () => HttpResponse.error()));
 
     expect(await failure(upload())).toBeInstanceOf(TypeError);
+  });
+
+  // Not "a thread that takes no artifacts": the caller would put the file somewhere else.
+  it("rejects with the timeout when the AI service does not answer", async () => {
+    upstream.use(http.post(ARTIFACTS, stalled));
+
+    const outcome = await afterUpstreamTimeout(upload);
+
+    expect(String("error" in outcome && outcome.error)).toContain("upstream timeout after");
   });
 });

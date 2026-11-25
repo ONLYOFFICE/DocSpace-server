@@ -678,13 +678,22 @@ describe.each([
   it.each([
     ["aiReady true", () => HttpResponse.json({ ...settings, aiReady: true })],
     ["no aiReady", () => HttpResponse.json({ embeddingModel: "m" })],
-    ["a body that is not an object", () => HttpResponse.json(["x"])],
   ])("runs when /config answers %s", async (_what, answer) => {
     config(answer);
 
     const reply = await h.call(aiController[name], body);
 
     expect(reply.status).toBe(200);
+  });
+
+  // HANDLED DOWNSTREAM ai-15: a /config answer that is not the settings object leaves the wallet unknown and counts as "paid", so the round opens its stream. In production the gateway refuses an unpaid portal itself (AiGatewayProxyController.cs, 403), so nothing is billed: the caller gets an error frame instead of the 402; it shows only with the engine or the service stubbed.
+  it("runs when /config answers a body that is not an object", async () => {
+    config(() => HttpResponse.json(["x"]));
+
+    const reply = await h.call(aiController[name], body);
+
+    expect(reply.status).toBe(200);
+    expect(h.engine[name]).toHaveBeenCalledTimes(1);
   });
 
   // HANDLED DOWNSTREAM ai-8: a /config read that fails without a refusal of the caller's own counts as "paid" and the round opens its stream. In production the gateway refuses an unpaid portal itself (AiGatewayProxyController.cs, 403), so nothing is billed: the caller gets an error frame instead of the 402; it shows only with the engine or the service stubbed.
@@ -1440,7 +1449,7 @@ describe("the log of a stream", () => {
       "ai/deny-tool-call: stream completed after 7 event(s); toolCalls=web_search(executed=true), generate_image(executed=false), ?(executed=false); chatContext=hit",
     );
     expect(vi.mocked(logger.info)).toHaveBeenCalledWith(
-      "ai/deny-tool-call: tool result web_search (callId=c1) -> found",
+      "ai/deny-tool-call: tool result web_search (callId=c1) -> text (5B)",
     );
     expect(
       vi.mocked(logger.info).mock.calls.filter(([line]) => String(line).includes("tool result")),
@@ -1456,14 +1465,23 @@ describe("the log of a stream", () => {
     ],
     ["a stored image", JSON.stringify({ data: { ref: "att-1" } }), "info", "{data.ref=att-1}"],
     [
-      "an error",
+      "an error object",
       { error: { code: "insufficient_funds", message: "402 from gateway" } },
       "error",
-      'ERROR {"code":"insufficient_funds","message":"402 from gateway"}',
+      "ERROR code=insufficient_funds 402 from gateway",
     ],
-    ["a plain object", { data: { rows: 3 } }, "info", '{"data":{"rows":3}}'],
-    ["a JSON array", [1, 2], "info", "[1,2]"],
-    ["a number", 42, "info", "42"],
+    [
+      "an error text of the engine",
+      { error: "no image profile" },
+      "error",
+      "ERROR no image profile",
+    ],
+    ["an error that is neither", { error: 7 }, "error", "ERROR an error of type number"],
+    ["an error object without a code", { error: { detail: 1 } }, "error", "ERROR an error object"],
+    ["a plain object", { data: { rows: 3 } }, "info", "{data} (19B)"],
+    ["a JSON array", [1, 2], "info", "a list of 2 (5B)"],
+    ["a number", 42, "info", "a number (2B)"],
+    ["null as a text", "null", "info", "a null (4B)"],
   ])("describes a tool result that is %s", async (_what, result, level, described) => {
     await run(toolCall({ toolName: "t", toolCallId: "c9", result }));
 
@@ -1473,7 +1491,7 @@ describe("the log of a stream", () => {
     );
   });
 
-  it("cuts a long result at 500 characters and an error at 700", async () => {
+  it("names a result by its size and cuts the text of an error at 300 characters", async () => {
     const long = "y".repeat(600);
     const longError = { error: "e".repeat(800) };
     await run(
@@ -1482,10 +1500,60 @@ describe("the log of a stream", () => {
     );
 
     expect(vi.mocked(logger.info)).toHaveBeenCalledWith(
-      `ai/deny-tool-call: tool result t (callId=a) -> ${"y".repeat(500)}… (600B)`,
+      "ai/deny-tool-call: tool result t (callId=a) -> text (600B)",
     );
     expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
-      `ai/deny-tool-call: tool result t (callId=b) -> ERROR ${JSON.stringify(longError.error).slice(0, 700)}`,
+      `ai/deny-tool-call: tool result t (callId=b) -> ERROR ${"e".repeat(300)}`,
+    );
+  });
+
+  // What a tool read (a file, a search answer) and what another server said in a refusal stay
+  // out of the log (ts-ai-style.md, "State and logging"); the library's wordings are those of
+  // its MCP client.
+  it.each([
+    ["the text a tool read", "SECRET-MARKER in a file"],
+    ["an object a tool answered", { rows: [{ text: "SECRET-MARKER" }] }],
+    [
+      "a refused HTTP answer of an MCP server",
+      { error: "tools/call: HTTP 500 Internal Server Error: SECRET-MARKER" },
+    ],
+    ["a JSON-RPC error of an MCP server", { error: "MCP tool error (-32602): SECRET-MARKER" }],
+    ["a refused initialize", { error: "initialize refused (-32000): SECRET-MARKER" }],
+    [
+      "an error object with a refused answer in its message",
+      { error: { code: "mcp", message: "tools/list: HTTP 401: SECRET-MARKER" } },
+    ],
+  ])("keeps %s out of the log", async (_what, result) => {
+    await run(toolCall({ toolName: "t", toolCallId: "m", result }));
+
+    const lines = [...vi.mocked(logger.info).mock.calls, ...vi.mocked(logger.error).mock.calls]
+      .map(([line]) => String(line))
+      .filter((line) => line.includes("tool result"));
+    expect(lines).toHaveLength(1);
+    expect(lines.join("\n")).not.toContain("SECRET-MARKER");
+  });
+
+  it.each([
+    [
+      "a refused HTTP answer by its method and status",
+      "tools/call: HTTP 500 Internal Server Error: body",
+      "ERROR tools/call: HTTP 500 Internal Server Error",
+    ],
+    [
+      "a JSON-RPC error by its code",
+      "MCP tool error (-32602): words",
+      "ERROR MCP tool error (-32602)",
+    ],
+    [
+      "a refused initialize by its code",
+      "initialize refused (7): words",
+      "ERROR initialize refused (7)",
+    ],
+  ])("names %s", async (_what, error, described) => {
+    await run(toolCall({ toolName: "t", toolCallId: "k", result: { error } }));
+
+    expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
+      `ai/deny-tool-call: tool result t (callId=k) -> ${described}`,
     );
   });
 
@@ -1495,10 +1563,10 @@ describe("the log of a stream", () => {
 
     expect(
       vi.mocked(logger.info).mock.calls.filter(([line]) => String(line).includes("tool result")),
-    ).toEqual([["ai/deny-tool-call: tool result ocr (callId=ocr) -> text"]]);
+    ).toEqual([["ai/deny-tool-call: tool result ocr (callId=ocr) -> text (4B)"]]);
   });
 
-  it("describes a result that JSON cannot write by its string form", async () => {
+  it("describes a result that JSON cannot write by its type", async () => {
     // A tool result is JSON on the wire; an in-process value that is not (a function) still logs.
     const result = (): void => {};
     h.engine.denyToolCall.mockReturnValue(
@@ -1508,7 +1576,7 @@ describe("the log of a stream", () => {
     await h.call(aiController.denyToolCall, VALID.denyToolCall);
 
     expect(vi.mocked(logger.info)).toHaveBeenCalledWith(
-      `ai/deny-tool-call: tool result f (callId=cf) -> ${String(result)}`,
+      "ai/deny-tool-call: tool result f (callId=cf) -> a function",
     );
   });
 });

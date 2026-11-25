@@ -44,6 +44,7 @@ import {
   HttpResponse,
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
+import { fileDto } from "../../__tests__/fixtures/filesApi.js";
 import { responseViolations } from "../../__tests__/helpers/schema.js";
 
 const mocks = vi.hoisted(() => ({ readDisabled: vi.fn(), readByType: vi.fn() }));
@@ -156,7 +157,7 @@ function answerAll(): void {
       return step(
         `upload ${String(params["folderId"])}/${title}`,
         file instanceof File ? file.type : undefined,
-        () => docspace({ id: 900 + calls.length, title }),
+        () => HttpResponse.json(fileDto({ id: 900 + calls.length, title })),
       );
     }),
   );

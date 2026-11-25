@@ -75,6 +75,7 @@ vi.mock("../portalMetadata.js", async (importOriginal) => ({
 }));
 
 const { storage } = await import("../../storage/index.js");
+const { UpstreamShapeError } = await import("../../storage/upstreamShape.js");
 const portalMetadata = await import("../portalMetadata.js");
 const { FieldType } = portalMetadata;
 const { buildUserMessage, fillMeta, resolveValue } = await import("../fillMeta.js");
@@ -248,7 +249,7 @@ describe("fillMeta", () => {
   it.each([
     ["a timeout", new Error("upstream timeout after 300000 ms: http://files.internal/x")],
     ["a dropped connection", new TypeError("fetch failed")],
-    ["an answer that cannot be read", new Error("DocSpace API: unparseable response")],
+    ["an answer that cannot be read", new UpstreamShapeError("GET files/file/{id}/metadata")],
   ])(
     "answers what was written when the read after the write ends in %s",
     async (_what, failure) => {

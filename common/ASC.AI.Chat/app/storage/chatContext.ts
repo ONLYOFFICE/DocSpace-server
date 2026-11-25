@@ -104,7 +104,11 @@ function parseFolder(raw: unknown): DocspaceFolderInfo | undefined {
 // no snapshot, so the round reads each entity on its own. A snapshot of
 // empties would answer "no profiles", "no assignment" or "no thread" for what
 // is only unknown (`ts-ai-failure-paths.md` §1). One malformed element of a
-// list or a map is dropped, the rest kept.
+// list or a map is dropped, the rest kept. Two fields are read where they
+// are used instead: a missing or unreadable `config` leaves `aiReady` unset
+// (the round then reads `/config` itself) and the tool permission mode
+// `null`, which the preferences storage answers as "nothing stored"; a
+// missing `documentAgentEnabled` makes the document agent read its settings.
 
 function parseAssignments(raw: unknown): Record<string, string> | undefined {
   if (!isObject(raw)) {

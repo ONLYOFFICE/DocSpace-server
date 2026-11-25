@@ -50,6 +50,18 @@ export async function errorBodyText(res: Response): Promise<string> {
 }
 
 /**
+ * A refused answer as a log line names it: the status, the content type and how much body came
+ * with it. The body itself is another party's text and may carry a key, a header or the request
+ * it answers, so it is read (which frees the connection) and left out
+ * (ts-ai-style.md, "State and logging").
+ */
+export async function refusalForLog(res: Response): Promise<string> {
+  const body = await errorBodyText(res);
+  const type = res.headers.get("content-type") ?? "no content-type";
+  return `${res.status} ${type}, ${body.length} characters of body`;
+}
+
+/**
  * The body decoded as UTF-8, at most `limit` bytes of it. The stream is
  * cancelled once the limit is reached, so a body far larger than the limit
  * costs neither the download nor the memory beyond that point.

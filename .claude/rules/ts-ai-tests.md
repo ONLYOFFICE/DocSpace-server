@@ -50,6 +50,7 @@ none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it di
   | `ProfileDto` and a stubbed model provider | `fixtures/providers.ts` (`profileDto`, `useProfile`, `useProvider`) | |
   | the whole app: parsers, gate, routes, 404 | `request(createApp())` | supertest |
   | waits between polls and retries | `useFastTimers()` in `time.ts` | vitest fake timers |
+  | an upstream that never answers, and what the call comes to at its timeout | `stalled` in `upstream.ts`, `afterUpstreamTimeout(run)` in `time.ts` | msw, vitest fake timers |
 
   `promptsController.test.ts`, `storage/__tests__/httpClient.test.ts` and `app/__tests__/app.test.ts`
   show one of each.
@@ -69,7 +70,11 @@ none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it di
 - A file that mocks an engine class with `vi.mock` and also imports `helpers/schema.js` passes a
   function, `engineClass(() => engine)`: the schema helper loads `@onlyoffice/ai-chat/core`, and
   with it the mock's factory, before `engine` is initialized.
-- `useUpstream()` runs the real `httpClient.js` and fails the test on a request no handler answers.
+- `useUpstream()` runs the real `httpClient.js`. A request no handler answers is rejected by msw
+  like a failed connection, which the code under test may catch and answer as the failure the test
+  expects; the helper collects such requests and fails the test in its `afterEach`
+  (`app/__tests__/upstream.test.ts`). A test that leaves one unanswered on purpose takes it with
+  `takeUnanswered()`.
   Prefer it to `vi.mock("../httpClient.js")` and to `vi.stubGlobal("fetch")`: most older tests mock
   `requestContext.js` and `storage/httpClient.js`, so they show nothing about which headers are
   forwarded, what a timeout does or how a status is mapped.
@@ -106,8 +111,8 @@ none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it di
 
 ## 5. Time and the network
 
-- No test reaches the network or DNS: `useUpstream()` fails on a request nobody answers,
-  `dns/promises` is mocked.
+- No test reaches the network or DNS: `useUpstream()` fails the test that made a request nobody
+  answers, `dns/promises` is mocked.
 - Anything that waits (a timeout, a poll, a retry, the stream heartbeat) runs on fake timers:
   `useFastTimers()` when only the outcome matters, `vi.useFakeTimers()` with
   `vi.advanceTimersByTimeAsync()` when the test asserts the moment. One file waiting on real
@@ -120,7 +125,9 @@ none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it di
 
 - A route: a table of bad bodies answering 400 (`ts-ai-failure-paths.md` §4), and the access gate
   answering 403 before any other upstream call (§3).
-- A read with an "absent" branch: the upstream answering 500 and timing out (§1).
+- A read with an "absent" branch: the upstream answering 500 and timing out (§1). A new call of
+  the AI service that reads a 404 as "not there" gets its timeout row in
+  `storage/__tests__/absentRead.upstream.test.ts`.
 - An answer that carries a profile, an MCP config or an upstream error: no secret in it (§5).
 - A multi-step write: step N failing, for each N (§6).
 - A config value: absent, empty, non-numeric, zero, negative, too large

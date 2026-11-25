@@ -33,6 +33,8 @@
 
 import { afterEach, beforeEach, vi } from "vitest";
 
+import { getUpstreamTimeoutMs } from "../../../config/index.js";
+
 /**
  * Fake `setTimeout` for the tests of the enclosing `describe`, moved forward by itself: code
  * that waits between polls or retries runs without the test waiting for the wall clock, and
@@ -56,4 +58,26 @@ export function useFastTimers(stepMs = 500): void {
     clearInterval(pump);
     vi.useRealTimers();
   });
+}
+
+/**
+ * What `run` comes to when the upstream it calls never answers (`stalled` in `upstream.ts`):
+ * `{ value }` when it resolved, `{ error }` when it rejected. The clock is moved past the
+ * upstream timeout on fake timers, so a read that would take a silent upstream for "absent"
+ * shows as a value here (ts-ai-failure-paths.md §1).
+ */
+export async function afterUpstreamTimeout(
+  run: () => Promise<unknown>,
+): Promise<{ value: unknown } | { error: unknown }> {
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  try {
+    const outcome = run().then(
+      (value) => ({ value }),
+      (error: unknown) => ({ error }),
+    );
+    await vi.advanceTimersByTimeAsync(getUpstreamTimeoutMs());
+    return await outcome;
+  } finally {
+    vi.useRealTimers();
+  }
 }

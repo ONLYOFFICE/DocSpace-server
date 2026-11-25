@@ -64,7 +64,11 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
 
 - A route reaches the AI access gate (`assertAiAccess`, or a first call to a gated AI endpoint)
   before it validates the body, calls out, runs a tool or writes. A guest, or a portal with AI
-  switched off, gets 403 for any body, never 400 and never an outbound request made on their behalf.
+  switched off, gets 403 for any body the parser accepted, never the 400 of a route's own check and
+  never an outbound request made on their behalf.
+- The body parser of `createApp` runs in front of both gates (`ts-ai-express.md` §2): a body that
+  does not parse is 400 and one over the parser's limit 413 for every caller, with or without
+  credentials or AI access. Neither answer says anything about the route or the caller.
 - Seen in review: `editor-tools/call` ran MCP tools with AI switched off,
   `profiles/list-provider-models` made an outbound request for a guest, and `web-search/configure`
   validated the body and probed the provider before the 403 (0dc046cacd).
@@ -80,7 +84,8 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
 - Guard: `app/__tests__/app.aiGate.test.ts` sends every published operation outside that list a
   path parameter, a repeated query parameter and a body of the wrong type, with the AI service
   answering 403: the answer is 403 and nothing but the AI service was called. A new route is in it
-  without a line of its own; a new exception goes into the list with its source.
+  without a line of its own; a new exception goes into the list with its source. The same file pins
+  the parser's 400 and 413 in front of the gates.
 
 ## 4. A request body is narrowed, not cast
 

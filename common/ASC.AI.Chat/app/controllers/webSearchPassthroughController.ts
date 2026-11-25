@@ -40,7 +40,7 @@ import { safeResolveSource } from "../storage/docspaceFilesApi.js";
 import type { SourceMeta } from "../storage/docspaceFilesApi.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, ENTITY_ID_PARAM, ENTITY_KIND_PARAM, sourceKindOf } from "./_helpers.js";
-import { errorBodyText } from "../storage/errorBody.js";
+import { refusalForLog } from "../storage/errorBody.js";
 import { providerFetch, readBodyCapped, withTimeout } from "../storage/httpClient.js";
 
 // Web-search passthrough for the document editor's AI plugin.
@@ -250,12 +250,12 @@ function passthrough(subPath: "search" | "contents") {
 
       // A 5xx from the gateway, or from the AI service in front of it, is not
       // relayed: its body carries internals (a stack trace, Go type names). The
-      // detail goes to the log and the client gets a fixed 502; 4xx answers
-      // still pass through for the plugin's `formatResponse`.
+      // log names the status and the size of that body, not the body, and the
+      // client gets a fixed 502; 4xx answers still pass through for the
+      // plugin's `formatResponse`.
       if (response.status >= 500) {
-        const detail = await errorBodyText(response);
         logger.error(
-          `web-search passthrough ${subPath}: upstream answered ${response.status}: ${detail.slice(0, 1000)}`,
+          `web-search passthrough ${subPath}: upstream answered ${await refusalForLog(response)}`,
         );
         res.status(502).json({ error: "Upstream request failed" });
         return;

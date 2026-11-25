@@ -321,7 +321,7 @@ describe("chat/completions to a third-party provider", () => {
     expect(reply.body).toBe("");
   });
 
-  it("answers a provider 5xx with a fixed 502 and keeps the provider's body in the log", async () => {
+  it("answers a provider 5xx with a fixed 502 and keeps the provider's body out of the answer and the log", async () => {
     useProfile();
     useProvider(
       `${PROVIDER}/chat/completions`,
@@ -335,8 +335,9 @@ describe("chat/completions to a third-party provider", () => {
     expect(reply.body).not.toContain("internal.cs");
     expect(responseViolations("aiOpenaiChatCompletions", 502, json(reply))).toEqual([]);
     expect(logger.error).toHaveBeenCalledWith(
-      "openai passthrough chat/completions: upstream answered 503: at Gateway.Proxy() in /src/internal.cs",
+      "openai passthrough chat/completions: upstream answered 503 text/plain;charset=UTF-8, 38 characters of body",
     );
+    expect(vi.mocked(logger.error).mock.calls.flat().join("\n")).not.toContain("internal.cs");
   });
 
   it("answers 502 when the provider cannot be reached, and keeps the URL out of the answer", async () => {

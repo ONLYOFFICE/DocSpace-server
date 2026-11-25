@@ -378,9 +378,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
-    "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
+    "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - the server log names its status, not its body, and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
   aiOpenaiImagesGenerations:
-    "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - a body sent as JSON has to be a JSON object, `prompt` a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with the detail kept in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
+    "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - a body sent as JSON has to be a JSON object, `prompt` a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with only its status named in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
 
   // Preferences - per-scope extended-thinking settings. One value is stored
   // per scope (the depth); deep mode is its on/off view.
@@ -543,9 +543,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiWebSearchClear:
     "Removes the portal's web-search configuration, after which web search is unavailable everywhere it was not configured separately. This is not scoped: it takes no `entityId` and any body sent with it is ignored, so it cannot be used to clear one room's configuration. Clearing an already-unconfigured portal is not an error and the call answers success either way. The stored provider key is destroyed with the configuration and has to be entered again.",
   aiWebSearchPassthroughSearch:
-    "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. `query` has to be a non-empty string and `numResults`, when sent, a positive integer; a body failing that answers 400 naming the field, before anything is sent on. The provider's own 4xx status, body and content type are relayed as they stand, so a provider that rate-limits answers 429; a 5xx from the provider or from the hop in front of it is not relayed, its detail stays in the server log and the call answers a fixed 502, which is also what an unreachable provider answers. Closing the connection aborts the upstream request.",
+    "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. `query` has to be a non-empty string and `numResults`, when sent, a positive integer; a body failing that answers 400 naming the field, before anything is sent on. The provider's own 4xx status, body and content type are relayed as they stand, so a provider that rate-limits answers 429; a 5xx from the provider or from the hop in front of it is not relayed, the server log names its status, not its body, and the call answers a fixed 502, which is also what an unreachable provider answers. Closing the connection aborts the upstream request.",
   aiWebSearchPassthroughContents:
-    "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. `urls` has to be a non-empty array of strings, or the call answers 400 naming the field. The provider's 4xx status, body and content type are relayed, so its 429 surfaces unchanged, while a 5xx is replaced by a fixed 502 with the detail kept in the server log. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
+    "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. `urls` has to be a non-empty array of strings, or the call answers 400 naming the field. The provider's 4xx status, body and content type are relayed, so its 429 surfaces unchanged, while a 5xx is replaced by a fixed 502 with only its status named in the server log. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
 };
 
 // Resolve the prose for one operation, or `undefined` when the table does not
@@ -866,7 +866,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "413": "The request body is larger than this route accepts.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx; the failure, or the status of that answer without its body, is in the server log.",
   },
   aiOpenaiImagesGenerations: {
     "400":
@@ -879,7 +879,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "413": "The request body is larger than this route accepts.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx; the failure, or the status of that answer without its body, is in the server log.",
   },
 
   // Preferences.
@@ -1111,14 +1111,14 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404": "Web search is not configured for this portal.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx, or the AI service answered a web-search configuration that cannot be read; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx, or the AI service answered a web-search configuration that cannot be read; the failure, or the status of the provider's answer without its body, is in the server log.",
   },
   aiWebSearchPassthroughContents: {
     "400": "`urls` is missing or not a non-empty array of strings; `field` names the input.",
     "404": "Web search is not configured for this portal.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx, or the AI service answered a web-search configuration that cannot be read; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx, or the AI service answered a web-search configuration that cannot be read; the failure, or the status of the provider's answer without its body, is in the server log.",
   },
 
   // Relays of the DocSpace AI service: its refusals keep their status.

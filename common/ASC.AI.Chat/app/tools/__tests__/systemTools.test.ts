@@ -652,29 +652,42 @@ describe("systemToolsSource.callTool", () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it.each<[string, (string | undefined)[], () => Record<string, unknown>, string]>([
-    ["an unknown tool", [], () => ({ result: {} }), "Unknown system tool: get_room"],
+  // The words of a JSON-RPC error are the server's and may quote the call: the model gets them,
+  // the log the code alone.
+  it.each<[string, (string | undefined)[], () => Record<string, unknown>, string, string]>([
+    [
+      "an unknown tool",
+      [],
+      () => ({ result: {} }),
+      "Unknown system tool: get_room",
+      "Unknown system tool: get_room",
+    ],
     [
       "a JSON-RPC error",
       ["get_room"],
-      () => ({ error: { code: -32000, message: "bad" } }),
-      "MCP tool error (-32000): bad",
+      () => ({ error: { code: -32000, message: "bad SECRET-MARKER" } }),
+      "MCP tool error (-32000): bad SECRET-MARKER",
+      "MCP tool error (-32000)",
     ],
-  ])("answers %s as an error text and warns with it", async (_name, names, call, expected) => {
-    mcpServer(upstream, DOCSPACE_URL, {
-      tools: names.map((name) => ({ name, inputSchema: {} })),
-      call,
-    });
-    mcpServer(upstream, OTHER_URL);
+  ])(
+    "answers %s as an error text and warns with it",
+    async (_name, names, call, expected, logged) => {
+      mcpServer(upstream, DOCSPACE_URL, {
+        tools: names.map((name) => ({ name, inputSchema: {} })),
+        call,
+      });
+      mcpServer(upstream, OTHER_URL);
 
-    await expect(systemToolsSource.callTool("get_room", {})).resolves.toBe(
-      JSON.stringify({ error: expected }),
-    );
-    expect(logger.warn).toHaveBeenCalledWith(
-      `systemTools.callTool name=get_room returned an error result: ${expected}`,
-    );
-    expect(logger.info).not.toHaveBeenCalledWith("systemTools.callTool name=get_room ok");
-  });
+      await expect(systemToolsSource.callTool("get_room", {})).resolves.toBe(
+        JSON.stringify({ error: expected }),
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `systemTools.callTool name=get_room returned an error result: ${logged}`,
+      );
+      expect(vi.mocked(logger.warn).mock.calls.flat().join("\n")).not.toContain("SECRET-MARKER");
+      expect(logger.info).not.toHaveBeenCalledWith("systemTools.callTool name=get_room ok");
+    },
+  );
 
   it("warns with the method and the status of a refused call, without the server's body", async () => {
     mcpServer(upstream, DOCSPACE_URL, { tools: [READ_TOOL] });

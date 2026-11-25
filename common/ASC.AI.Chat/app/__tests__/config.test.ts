@@ -786,6 +786,8 @@ describe("getCompaction beyond the existing table", () => {
   it.each([
     ["0", 0],
     ["12", 12],
+    ["10000", 10_000],
+    ["10001", undefined],
     ["-1", undefined],
     ["2.5", undefined],
     ["x", undefined],

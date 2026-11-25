@@ -618,7 +618,7 @@ describe("the provider's answer", () => {
     );
   });
 
-  it("answers a provider 5xx with a fixed 502 and keeps its body in the log", async () => {
+  it("answers a provider 5xx with a fixed 502 and keeps its body out of the answer and the log", async () => {
     useConfig();
     useSearch(
       `${EXA}/search`,
@@ -630,9 +630,11 @@ describe("the provider's answer", () => {
     expect(reply.status).toBe(502);
     expect(json(reply)).toEqual({ error: "Upstream request failed" });
     expect(responseViolations("aiWebSearchPassthroughSearch", 502, json(reply))).toEqual([]);
+    expect(reply.body).not.toContain("main.Request");
     expect(logger.error).toHaveBeenCalledWith(
-      "web-search passthrough search: upstream answered 500: panic: main.Request{Query:...}",
+      "web-search passthrough search: upstream answered 500 text/plain;charset=UTF-8, 30 characters of body",
     );
+    expect(vi.mocked(logger.error).mock.calls.flat().join("\n")).not.toContain("main.Request");
   });
 
   it("answers 502 when the provider cannot be reached, and keeps the URL out of the answer", async () => {

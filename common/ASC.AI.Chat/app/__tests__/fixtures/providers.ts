@@ -31,8 +31,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { docspace, http } from "../helpers/upstream.js";
+import { docspace, http, HttpResponse } from "../helpers/upstream.js";
 import type { useUpstream } from "../helpers/upstream.js";
+import { fileDto, folderDto } from "./filesApi.js";
 import { aiServiceBaseUrl, proxyBaseUrl } from "../../storage/httpClient.js";
 
 // Fixtures of the OpenAI passthrough tests (openaiPassthrough*.test.ts).
@@ -80,7 +81,9 @@ export function useProfile(upstream: Upstream, dto: unknown = profileDto()): voi
 export function useFolder(upstream: Upstream, id: string, title: string): void {
   upstream.use(
     http.get(`${proxyBaseUrl}/api/2.0/files/folder/${id}`, () =>
-      docspace({ id: Number(id), title, roomType: 5, parentId: 1, rootFolderType: 14 }),
+      HttpResponse.json(
+        folderDto({ id: Number(id), title, roomType: 5, parentId: 1, rootFolderType: 14 }),
+      ),
     ),
   );
 }
@@ -90,7 +93,7 @@ export function useFolder(upstream: Upstream, id: string, title: string): void {
 export function useFile(upstream: Upstream, id: string, title: string): void {
   upstream.use(
     http.get(`${proxyBaseUrl}/api/2.0/files/file/${id}`, () =>
-      docspace({ id: Number(id), title, folderId: 3, fileExst: ".docx" }),
+      HttpResponse.json(fileDto({ id: Number(id), title, folderId: 3, fileExst: ".docx" })),
     ),
   );
 }

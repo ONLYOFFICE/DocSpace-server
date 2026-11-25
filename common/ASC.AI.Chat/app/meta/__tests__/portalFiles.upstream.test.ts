@@ -566,6 +566,34 @@ describe("PortalTextReader against the Files API", () => {
     expect(upstream.seen.filter((r) => r.method === "PUT")).toHaveLength(1);
   });
 
+  it("starts the next queued conversion after one the portal refused", async () => {
+    const { PortalTextReader } = await fresh();
+    upstream.use(
+      settings(),
+      http.put("*/api/2.0/files/fileops/bulkdownload", async ({ request }) => {
+        const body = (await request.json()) as { fileConvertIds: { key: number }[] };
+        return body.fileConvertIds[0]?.key === 1
+          ? HttpResponse.json({}, { status: 500, statusText: "Server Error" })
+          : envelope([
+              operationDto("op-2", {
+                finished: true,
+                url: "https://public.example.com/filehandler.ashx?b=2",
+              }),
+            ]);
+      }),
+      http.get("*/filehandler.ashx", () => HttpResponse.text("text of b")),
+    );
+    const reader = new PortalTextReader(new AbortController().signal);
+
+    const [a, b] = await Promise.allSettled([
+      reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" }),
+      reader.readFileAsText({ id: "2", title: "b.docx", ext: ".docx" }),
+    ]);
+
+    expect(a).toMatchObject({ status: "rejected", reason: { status: 500 } });
+    expect(b).toEqual({ status: "fulfilled", value: "text of b" });
+  });
+
   it("fails a conversion that finished without a download URL", async () => {
     const { readFileAsText } = await fresh();
     upstream.use(
