@@ -44,14 +44,20 @@ public class PrivateRoomsGate(AppSettingsService appSettingsService, TenantManag
     public const string AppId = "e2e-rooms";
 
     // Asked for every private entry a request checks; the answer is kept for the request (this service is scoped), not
-    // across requests, so a change of the app is seen by the next request.
-    private bool? _enabled;
+    // across requests, so a change of the app is seen by the next request. It is kept with its tenant: a background
+    // scope may switch tenants.
+    private (int TenantId, bool Enabled)? _enabled;
 
     public async Task<bool> IsEnabledAsync()
     {
-        _enabled ??= await appSettingsService.GetAppAsync(tenantManager.GetCurrentTenantId(), AppId) is { Enabled: true };
+        var tenantId = tenantManager.GetCurrentTenantId();
+        if (_enabled is not { } cached || cached.TenantId != tenantId)
+        {
+            cached = (tenantId, await appSettingsService.GetAppAsync(tenantId, AppId) is { Enabled: true });
+            _enabled = cached;
+        }
 
-        return _enabled.Value;
+        return cached.Enabled;
     }
 
     /// <summary>Whether the entry is a private room or lies in one while the app is off.</summary>

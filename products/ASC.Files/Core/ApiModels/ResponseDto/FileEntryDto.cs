@@ -110,9 +110,9 @@ public abstract class FileEntryBaseDto
     public bool SharedExternal { get; set; }
 
     /// <summary>
-    /// For a private room or an item in one, read by the room owner or a room manager: how many working external links
-    /// are set on this entry itself, not counting revoked or expired ones and links of the folders around it. Null for
-    /// every other reader and entry.
+    /// For a private room or an item in one, read by the room owner or a room manager: how many external links are set
+    /// on this entry itself, not counting revoked or expired ones and links of the folders around it. A link that a gate
+    /// keeps closed (an archived room, the portal setting) still counts. Null for every other reader and entry.
     /// </summary>
     /// <example>2</example>
     public int? ExternalLinksCount { get; set; }
@@ -697,8 +697,8 @@ public class FileEntryDtoHelper(
     }
 
     /// <summary>
-    /// The number of working links set on an entry of a private room, for those who manage the room's links only: the
-    /// links belong to them, and any other member learns nothing of them.
+    /// The number of links set on an entry of a private room that are neither revoked nor expired, for those who manage
+    /// the room's links only: the links belong to them, and no other member gets this per-item count.
     /// </summary>
     private async Task<int?> GetPrivateLinksCountAsync<T>(FileEntry<T> entry)
     {
@@ -709,7 +709,7 @@ public class FileEntryDtoHelper(
 
         var room = entry is Folder<T> { IsRoom: true } itself
             ? itself
-            : entry.RootFolderType == FolderType.VirtualRooms ? await DocSpaceHelper.GetParentRoom(entry, _daoFactory.GetCacheFolderDao<T>()) : null;
+            : entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive ? await DocSpaceHelper.GetParentRoom(entry, _daoFactory.GetCacheFolderDao<T>()) : null;
 
         if (room is not { SettingsPrivate: true, Id: int roomId } ||
             !(await fileSharingHelper.GetLinkManagersAsync(room)).Contains(securityContext.CurrentAccount.ID))

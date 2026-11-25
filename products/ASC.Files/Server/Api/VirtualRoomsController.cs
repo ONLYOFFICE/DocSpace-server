@@ -863,25 +863,33 @@ public abstract class VirtualRoomsController<T>(
     /// if that link is not internal. The call also returns 403 for an invitation link of a private room, a room
     /// template, or too many links. It also returns 403 for a link type or access level the room does not take. The
     /// call returns 400 for a too long title or password, a weak password, or an invalid `maxUseCount` or
-    /// `expirationDate`. If the room does not exist, the call returns 404. On an item of a private room, a link needs
-    /// `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and takes `passwordRequired`
-    /// instead of `password`. A new link without `passwordRequired` asks for a password. A changed link keeps its
-    /// value. Only a file link with `expirationDate` may set `passwordRequired` to false. On other items, the call
-    /// ignores `passwordRequired` and the key fields. A visitor opens such a link only with its proof, through `POST api/2.0/files/share/{key}/password`. In a private room, only the room owner and room managers set and
-    /// revoke links. Other callers get 403. The call also returns 403 for such a link without key fields, with other
-    /// access, or with `denyDownload`. It also returns 403 if `passwordRequired` is false on any other link. It returns
-    /// 400 if `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc`
-    /// is empty or too long, or `password` is sent.
-    /// A wrap in `linkSecretWraps` for anybody but the room owner and room managers also returns 400. A new `linkId` that belongs to a user, a group, or another link
-    /// also returns 400. A changed link with another `linkPublicKey` also returns 400.
+    /// `expirationDate`. If the room does not exist, the call returns 404. On an item of a private room, a new link
+    /// needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. A change of a link may leave them out. It may
+    /// send only `linkSecretWraps`, to add a manager's wrap of the link's secret. A new password sends a new
+    /// `linkPrivateKeyEnc` and `linkProofHash` with the same `linkPublicKey`. Such a link reads only and takes
+    /// `passwordRequired` instead of `password`. A new link without `passwordRequired` asks for a password. A changed
+    /// link keeps its value, and only new key fields may change it. Only a file link with `expirationDate` may set
+    /// `passwordRequired` to false. On other items, the call ignores `passwordRequired`, `linkSecretWraps`, and the key
+    /// fields. A visitor opens such a link only with its proof, through `POST api/2.0/files/share/{key}/password`. In a
+    /// private room, only the room owner and room managers set and revoke links. Other callers get 403. A new such link
+    /// without key fields also returns 403. One with other access or with `denyDownload` also returns 403. It also
+    /// returns 403 if `passwordRequired` is false on any other link. Such links are closed while the portal setting for
+    /// them or the encrypted rooms app is off. An archived room and a Virtual Data Room that restricts downloading also
+    /// close them. Then setting a link returns 403. Revoking returns 403 too in an archived room and while the app is
+    /// off. It returns 400 if `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. An empty or too long
+    /// `linkPrivateKeyEnc` also returns 400. A sent `password` also returns 400. A wrap in `linkSecretWraps` for
+    /// anybody but the room owner and room managers also returns 400. A new `linkId` that belongs to a user, a group,
+    /// or another link also returns 400. A changed link with another `linkPublicKey` also returns 400. A changed
+    /// `passwordRequired` without new key fields also returns 400. A change that meets a revocation of the link under
+    /// way returns 404. A change sent after the revocation sets a new link under that id.
     /// </remarks>
     /// <summary>Set the room external or invitation link</summary>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The link as it is after the call, the new primary link that replaced a deleted one, or an empty body after any other deletion", typeof(FileShareDto))]
     [SwaggerResponse(400, "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected, a key field of a link of a private item is not of its size or not canonical base64, such a link carries `password`, `linkSecretWraps` names anybody but the room owner and room managers, or a new `linkId` belongs to a user, a group, or another link")]
-    [SwaggerResponse(403, "The caller may not manage the links of this room, the room is a room template, an invitation link is requested on a private room, the room does not take this kind of link or this access level, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change in a public or form-filling room, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
-    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(403, "The caller may not manage the links of this room, the room is a room template, an invitation link is requested on a private room, the room does not take this kind of link or this access level, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change in a public or form-filling room, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule, or links of private items are closed by the portal setting, the encrypted rooms app, an archived room, or a Virtual Data Room that restricts downloading")]
+    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type, or a revocation of the link took effect while the change was under way")]
     [HttpPut("{id}/links")]
     public async Task<FileShareDto> SetRoomLink(RoomLinkRequestDto<T> inDto)
     {
@@ -970,14 +978,15 @@ public abstract class VirtualRoomsController<T>(
     /// includes the request token that must go with the address. The call also returns 403 if the room type takes no
     /// external links. An admin rule that allows external links only in public rooms also returns 403. If the link was
     /// revoked, the call returns 404 and creates no new link. If the room does not exist, the call also returns 404. If
-    /// a string `id` points to a storage account that is not connected, the call returns 400.
+    /// a string `id` points to a storage account that is not connected, the call returns 400. A private room never gets
+    /// a primary link: there the call returns 403.
     /// </remarks>
     /// <summary>Get the room primary external link</summary>
     /// <path>api/2.0/files/rooms/{id}/link</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The primary external link of the room", typeof(FileShareDto))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(403, "The caller may not read the room, or the room has no primary link yet and the caller may not manage its links, its type takes no external links, or the admin restricts external links to public rooms")]
+    [SwaggerResponse(403, "The caller may not read the room, or the room has no primary link yet and the caller may not manage its links, its type takes no external links, or the admin restricts external links to public rooms, or the room is private, where no primary link exists")]
     [SwaggerResponse(404, "The room does not exist or its primary link was revoked, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [HttpGet("{id}/link")]
     public async Task<FileShareDto> GetRoomsPrimaryExternalLink(RoomIdRequestDto<T> inDto)
@@ -1334,11 +1343,11 @@ public class VirtualRoomsCommonController(
 {
     /// <remarks>
     /// Returns one page of the rooms of a portal section. The `searchArea` parameter picks the section, by default the
-    /// active rooms. The other parameters filter the rooms by type, title, tags, member, owner, storage, quota, privacy,
-    /// and metadata. A room must match all filters. Any signed-in user can call it. If the caller cannot read the
-    /// section, the call returns 403. A caller sees only the rooms they created or were invited to. A DocSpace admin
-    /// sees all rooms, except private rooms they are not a member of. While the end-to-end encrypted rooms app is off, the list
-    /// has no private room. So an empty list means that the caller sees no matching room. The call is read-only, except
+    /// active rooms. The other parameters filter the rooms by type, title, tags, member, owner, storage, quota,
+    /// privacy, and metadata. A room must match all filters. Any signed-in user can call it. If the caller cannot read
+    /// the section, the call returns 403. A caller sees only the rooms they created or were invited to. A DocSpace
+    /// admin sees all rooms but the private rooms they are not in. While the encrypted rooms app is off, the list has
+    /// no private room. So an empty list means that the caller sees no matching room. The call is read-only, except
     /// that it stores a `sortBy` value as the default sort order of the account. Without `sortBy`, the call uses the
     /// stored order. The rooms come in `folders`, and `files` stays empty. The `current` field describes the section,
     /// and `total` counts all matching rooms before paging. To read one room, use `GET api/2.0/files/rooms/{id}`. The

@@ -105,6 +105,6 @@ public class CspStartupTask(
         }
 
         await cache.SetAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
-        await cache.SetAsync(CspSettingsHelper.GetPrivateLinkKey(HeaderKey), currentPrivateLinkValue, token: cancellationToken);
+        await cache.SetAsync(CspSettingsHelper.GetPrivateLinkKey(HeaderKey), currentPrivateLinkValue, CspSettingsHelper.PrivateLinkValueDuration, token: cancellationToken);
     }
 }

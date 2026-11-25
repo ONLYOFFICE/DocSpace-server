@@ -34,7 +34,8 @@
 namespace ASC.Files.Tests.Tests._08_Privacy.ExternalLinks;
 
 /// <summary>
-/// The proof a visitor sends, the hash a creator stores and the sealed key of a link never reach the service's logs:
+/// The proof a visitor sends, the hash a creator stores, the sealed key of a link and the sealed private key of a user's
+/// key pair never reach the service's logs:
 /// neither the main log, nor the SQL log that records the values of the parameters it binds, nor the ASP.NET log. The
 /// tests send them on the paths that write the most, a refused request included, then read the log files of the run.
 /// </summary>
@@ -60,11 +61,16 @@ public class PrivateLinkLogTests(AspireAppFixture fixture) : PrivateLinkTestBase
         new[] { value, JsonSerializer.Serialize(value).Trim('"') }.Distinct().Select(text => (name, text));
 
     [Fact]
-    public async Task TheProof_TheHash_AndTheSealedKey_NeverReachTheLogs_RefusedRequestsIncluded()
+    public async Task TheProof_TheHash_AndTheSealedKeys_NeverReachTheLogs_RefusedRequestsIncluded()
     {
         var since = DateTime.Now.AddSeconds(-1);
         var proof = Proof.New();
         var wrongProof = Proof.New();
+
+        // A user's own key pair is kept in account_links: its sealed private half is written there too.
+        var member = await InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(member);
+        var memberKeys = await SetFakeKeys(publicKeyPrefix: "member");
 
         var room = await CreateRoomAsOwner();
         var folderId = await CreateFolderIn(room.Id);
@@ -98,6 +104,7 @@ public class PrivateLinkLogTests(AspireAppFixture fixture) : PrivateLinkTestBase
             .Concat(Spellings("linkProofHash", proof.Hash))
             .Concat(Spellings("linkPrivateKeyEnc", stored.LinkPrivateKeyEnc!))
             .Concat(Spellings("linkPrivateKeyEnc of the refused request", refused.LinkPrivateKeyEnc!))
+            .Concat(Spellings("privateKeyEnc of a user's key pair", memberKeys.PrivateKeyEnc))
             .ToList();
 
         var found = await ServiceLogs.FindAfterAsync("files", since, marker, [.. secrets.Select(s => s.Text)]);

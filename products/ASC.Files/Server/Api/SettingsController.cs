@@ -179,12 +179,12 @@ public class SettingsController(
     /// <remarks>
     /// Turns external links of items in private rooms on or off for the whole portal. It returns the value that is now
     /// stored. Requires a DocSpace admin. Other callers get 403. The call changes data, and you can repeat it with the
-    /// same body. It turns off only these links: `PUT api/2.0/files/settings/external` restricts them too, with all
-    /// other links. While it is off, setting such a link returns 403 and a stored one opens as an invalid link. The
-    /// call deletes no link, so turning it on again serves the stored links as before. To read the value, use the
-    /// `privateRoomLinks` field of `GET api/2.0/files/settings`.
+    /// same body. This setting turns off only these links. `PUT api/2.0/files/settings/external` turns them off too,
+    /// with all other links. While it is off, setting such a link returns 403 and a stored one opens as an invalid
+    /// link. The call deletes no link, so turning it on again serves the stored links as before. To read the value, use
+    /// the `privateRoomLinks` field of `GET api/2.0/files/settings`.
     /// </remarks>
-    /// <summary>Change the links of private rooms</summary>
+    /// <summary>Change the private room links setting</summary>
     /// <path>api/2.0/files/settings/external/private</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "true if external links of items in private rooms may be created and opened in this portal", typeof(bool))]

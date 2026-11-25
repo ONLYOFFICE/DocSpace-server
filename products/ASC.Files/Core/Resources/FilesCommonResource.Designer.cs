@@ -772,6 +772,33 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The link was revoked while it was being changed.
+        /// </summary>
+        public static string ErrorMessage_PrivateLinkRevoked {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateLinkRevoked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} owns an archived private room. Restore it from the archive, then change the type.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomOwnedInArchive {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomOwnedInArchive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} owns private rooms ({1}). To make the account a guest, change its type with a recipient who takes the rooms.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomOwnerCannotBeGuest {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomOwnerCannotBeGuest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} owns private rooms ({1}). Before the account is disabled, each room needs another owner: its owner or a DocSpace admin who is a member of it can change the owner.
         /// </summary>
         public static string ErrorMessage_PrivateRoomOwnerCannotBeDisabled {
@@ -799,7 +826,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A Public room, a Form filling room or an AI agent cannot be private: each of them is reached without an encryption key.
+        ///   Looks up a localized string similar to A public room, a form filling room, or an AI agent cannot be private.
         /// </summary>
         public static string ErrorMessage_PrivateRoomTypeNotSupported {
             get {

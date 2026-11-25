@@ -420,19 +420,19 @@ public abstract class FoldersController<T>(
 
     /// <remarks>
     /// Returns one page of the contents of a folder. The response has the subfolders in `folders`, the files in
-    /// `files`, and the folder itself in `current`. The chain of parent folders is in `pathParts`. Requires read
-    /// access to the folder. Other callers get 403. Without signing in, a caller needs an external link to the
-    /// folder. The call changes data of the caller only. It clears the new-item marks of the folder. It also saves a
-    /// valid `sortBy` and `sortOrder` as the default order of the account. You can repeat it. With a filter, the
-    /// call searches the whole subtree by default. The AI rooms root, and the rooms root with `searchArea` AiHub,
-    /// list rooms only. An AI project lists no files or folders, with a `total` of 0. The text filter also searches
-    /// indexed document content. Indexing
-    /// runs in the background, so a new file can be missing from the results at first. Use `count` and `startIndex`
-    /// to page through the result. The `total` field counts all matching entries. To filter by metadata with a typed
-    /// body, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`
-    /// out of range, or a negative `startIndex`. An invalid metadata filter also returns 400. It also returns 400 if `roomId` is not a
-    /// number but the folder ID is. It also returns 403 for a folder in the trash. If the folder does not exist, the
-    /// call returns 404. For an anonymous caller, it returns 403 instead.
+    /// `files`, and the folder itself in `current`. The chain of parent folders is in `pathParts`. Requires read access
+    /// to the folder. Other callers get 403. Without signing in, a caller needs an external link to the folder. The
+    /// call changes data of the caller only. It clears the new-item marks of the folder. It also saves a valid `sortBy`
+    /// and `sortOrder` as the default order of the account. You can repeat it. With a filter, the call searches the
+    /// whole subtree by default. The AI rooms root, and the rooms root with `searchArea` AiHub, list rooms only. An AI
+    /// project lists no files or folders, with a `total` of 0. The text filter also searches indexed document content.
+    /// Indexing runs in the background, so a new file can be missing from the results at first. Use `count` and
+    /// `startIndex` to page through the result. The `total` field counts all matching entries. To filter by metadata
+    /// with a typed body, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type,
+    /// a `count` out of range, or a negative `startIndex`. An invalid metadata filter also returns 400. It also returns
+    /// 400 if `roomId` is not a number but the folder ID is. It also returns 403 for a folder in the trash. If the
+    /// folder does not exist, the call returns 404. For an anonymous caller, it returns 403 instead. While the
+    /// end-to-end encrypted rooms app is off, a private room and its items also return 404.
     /// </remarks>
     /// <summary>
     /// Get a folder by ID
@@ -443,7 +443,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(200, "One page of the folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the `roomId` is not a number while the folder id is one")]
     [SwaggerResponse(403, "The caller may not read this folder, the folder lies inside Trash, or an anonymous caller asks for a folder that does not exist")]
-    [SwaggerResponse(404, "The folder does not exist")]
+    [SwaggerResponse(404, "The folder does not exist, or it is a private room or lies in one while the encrypted rooms app is off")]
     [AllowAnonymous]
     [HttpGet("{folderId}")]
     public async Task<FolderContentDto<T>> GetFolderByFolderId(GetFolderRequestDto<T> inDto)
@@ -508,9 +508,10 @@ public abstract class FoldersController<T>(
     /// <remarks>
     /// Returns the properties of one folder or room, without its contents. Requires read access to the folder. Other
     /// callers get 403. Without signing in, a caller needs an external link to the folder. Without such a link, the
-    /// call returns 401. The call is read-only. It does not clear the new-item marks of the folder. If the folder
-    /// does not exist, the call returns 404. To list the contents, use `GET api/2.0/files/{folderId}`. To get the
-    /// chain of parent folders, use `GET api/2.0/files/folder/{folderId}/path`.
+    /// call returns 401. The call is read-only. It does not clear the new-item marks of the folder. If the folder does
+    /// not exist, the call returns 404. To list the contents, use `GET api/2.0/files/{folderId}`. To get the chain of
+    /// parent folders, use `GET api/2.0/files/folder/{folderId}/path`. While the end-to-end encrypted rooms app is off,
+    /// a private room and its items also return 404.
     /// </remarks>
     /// <summary>
     /// Get folder information
@@ -521,7 +522,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(200, "The folder itself - its title, its parent, the moments it was created and changed, the access the caller has to it, how many items in it are new for them, and the room settings when the folder is a room; nothing about the items it holds", typeof(FolderDto<int>))]
     [SwaggerResponse(401, "An anonymous caller has no external link that grants access to the folder")]
     [SwaggerResponse(403, "The caller may not read this folder")]
-    [SwaggerResponse(404, "The folder does not exist")]
+    [SwaggerResponse(404, "The folder does not exist, or it is a private room or lies in one while the encrypted rooms app is off")]
     [AllowAnonymous]
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfo(FolderIdRequestDto<T> inDto)
@@ -687,25 +688,28 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Returns the primary external link of a folder or a room, and creates it if it does not exist. The call uses the
-    /// body only when it creates the link. If the link exists, the call returns it unchanged. Requires the right to
-    /// manage the links of the folder. Other callers get 403. The room manager has this right, but a content creator
-    /// does not. The call changes data only when it creates the link. You can repeat it, and later calls return the
-    /// same link. To change a link, use `PUT api/2.0/files/folder/{id}/links`. If `access` grants nothing, the call
-    /// creates no link and returns an empty response. Read the address from `sharedTo.shareLink`. The call returns 400
-    /// if the title or password is too long, or the password breaks the portal policy. It also returns 400 if
-    /// `expirationDate` is more than 10 years ahead. It also returns 403 if folder links cannot have this access level.
-    /// The link limit and a ban on external links outside public rooms also return 403. If the folder does not exist,
-    /// the call returns 404. If the primary link was revoked, the call creates a new one with a new ID. Until then,
-    /// `GET api/2.0/files/folder/{id}/link` returns 404. On an item of a private room, a link needs `linkPublicKey`,
-    /// `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and takes `passwordRequired` instead of
-    /// `password`. A new link without `passwordRequired` asks for a password. Only a file link with `expirationDate`
-    /// may set `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. A visitor opens such a link only with its proof, through `POST api/2.0/files/share/{key}/password`. In
-    /// a private room, only the room owner and room managers create links. Other callers get 403. The call also returns
-    /// 403 for such a link without key fields, with other access, or with `denyDownload`. It also returns 403 if
-    /// `passwordRequired` is false on any other link. It returns 400 if `linkPublicKey` or `linkProofHash` is not
-    /// base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc` is empty or too long, or `password` is sent.
-    /// A wrap in `linkSecretWraps` for anybody but the room owner and room managers also returns 400.
+    /// Returns the primary external link of a folder or a room, and creates it if it does not exist. The call uses the body
+    /// only when it creates the link. If the link exists, the call returns it unchanged. Requires the right to manage the
+    /// links of the folder. Other callers get 403. The room manager has this right, but a content creator does not. The
+    /// call changes data only when it creates the link. You can repeat it, and later calls return the same link. To change
+    /// a link, use `PUT api/2.0/files/folder/{id}/links`. If `access` grants nothing, the call creates no link and returns
+    /// an empty response. Read the address from `sharedTo.shareLink`. The call returns 400 if the title or password is too
+    /// long, or the password breaks the portal policy. It also returns 400 if `expirationDate` is more than 10 years ahead.
+    /// It also returns 403 if folder links cannot have this access level. The link limit and a ban on external links
+    /// outside public rooms also return 403. If the folder does not exist, the call returns 404. If the primary link was
+    /// revoked, the call creates a new one with a new ID. Until then, `GET api/2.0/files/folder/{id}/link` returns 404. On
+    /// an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. It may also carry
+    /// `linkSecretWraps`, the link's secret wrapped for the room owner and room managers. Such a link reads only and takes
+    /// `passwordRequired` instead of `password`. A new link without `passwordRequired` asks for a password. Only a file
+    /// link with `expirationDate` may set `passwordRequired` to false. On other items, the call ignores `passwordRequired`,
+    /// `linkSecretWraps`, and the key fields. A visitor opens such a link only with its proof, through `POST
+    /// api/2.0/files/share/{key}/password`. In a private room, only the room owner and room managers create links. Other
+    /// callers get 403. Such a link without key fields also returns 403. One with other access or with `denyDownload` also
+    /// returns 403. It also returns 403 if `passwordRequired` is false on any other link. Such links are closed while the
+    /// portal setting for them or the encrypted rooms app is off. An archived room and a Virtual Data Room that restricts
+    /// downloading also close them. Then the call returns 403. It returns 400 if `linkPublicKey` or `linkProofHash` is not
+    /// base64 of 32 bytes. An empty or too long `linkPrivateKeyEnc` also returns 400. A sent `password` also returns 400. A
+    /// wrap in `linkSecretWraps` for anybody but the room owner and room managers also returns 400.
     /// </remarks>
     /// <summary>
     /// Create the folder primary external link
@@ -714,7 +718,7 @@ public abstract class FoldersController<T>(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
     [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item is not of its size or not canonical base64, such a link carries `password`, or `linkSecretWraps` names anybody but the room owner and room managers")]
-    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
+    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule, or links of private items are closed by the portal setting, the encrypted rooms app, an archived room, or a Virtual Data Room that restricts downloading")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{id}/link")]
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
@@ -780,16 +784,24 @@ public abstract class FoldersController<T>(
     /// breaks the portal policy. It also returns 400 if `expirationDate` is more than 10 years ahead. It also returns
     /// 403 if folder links cannot have this access level or the link limit is reached. The admin's restriction on
     /// external links can also return 403. If the folder does not exist, the call returns 404. On an item of a private
-    /// room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and takes
+    /// room, a new link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. A change of a link may leave
+    /// them out. It may send only `linkSecretWraps`, to add a manager's wrap of the link's secret. A new password sends
+    /// a new `linkPrivateKeyEnc` and `linkProofHash` with the same `linkPublicKey`. Such a link reads only and takes
     /// `passwordRequired` instead of `password`. A new link without `passwordRequired` asks for a password. A changed
-    /// link keeps its value. Only a file link with `expirationDate` may set `passwordRequired` to false. On other
-    /// items, the call ignores `passwordRequired` and the key fields. A visitor opens such a link only with its proof, through `POST api/2.0/files/share/{key}/password`. In a private room, only the room owner and room
-    /// managers set and revoke links. Other callers get 403. The call also returns 403 for such a link without key
-    /// fields, with other access, or with `denyDownload`. It also returns 403 if `passwordRequired` is false on any
-    /// other link. It returns 400 if `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. It also returns 400
-    /// if `linkPrivateKeyEnc` is empty or too long, or `password` is sent.
-    /// A wrap in `linkSecretWraps` for anybody but the room owner and room managers also returns 400. A new `linkId` that belongs to a user, a
-    /// group, or another link also returns 400. A changed link with another `linkPublicKey` also returns 400.
+    /// link keeps its value, and only new key fields may change it. Only a file link with `expirationDate` may set
+    /// `passwordRequired` to false. On other items, the call ignores `passwordRequired`, `linkSecretWraps`, and the key
+    /// fields. A visitor opens such a link only with its proof, through `POST api/2.0/files/share/{key}/password`. In a
+    /// private room, only the room owner and room managers set and revoke links. Other callers get 403. A new such link
+    /// without key fields also returns 403. One with other access or with `denyDownload` also returns 403. It also
+    /// returns 403 if `passwordRequired` is false on any other link. Such links are closed while the portal setting for
+    /// them or the encrypted rooms app is off. An archived room and a Virtual Data Room that restricts downloading also
+    /// close them. Then setting a link returns 403. Revoking returns 403 too in an archived room and while the app is
+    /// off. It returns 400 if `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. An empty or too long
+    /// `linkPrivateKeyEnc` also returns 400. A sent `password` also returns 400. A wrap in `linkSecretWraps` for
+    /// anybody but the room owner and room managers also returns 400. A new `linkId` that belongs to a user, a group,
+    /// or another link also returns 400. A changed link with another `linkPublicKey` also returns 400. A changed
+    /// `passwordRequired` without new key fields also returns 400. A change that meets a revocation of the link under
+    /// way returns 404. A change sent after the revocation sets a new link under that id.
     /// </remarks>
     /// <summary>
     /// Set the folder external link
@@ -797,9 +809,9 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/links</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The link as it now stands, or nothing when it was revoked", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item is not of its size or not canonical base64, such a link carries `password`, or a new `linkId` belongs to a user, a group, or another link")]
-    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin's restriction on external links forbids the change, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
-    [SwaggerResponse(404, "The folder does not exist")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item is not of its size or not canonical base64, such a link carries `password`, a new `linkId` belongs to a user, a group, or another link, `linkSecretWraps` names anybody but the room owner and room managers, a changed link carries another `linkPublicKey`, or a changed `passwordRequired` comes without new key fields")]
+    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin's restriction on external links forbids the change, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule, or links of private items are closed by the portal setting, the encrypted rooms app, an archived room, or a Virtual Data Room that restricts downloading")]
+    [SwaggerResponse(404, "The folder does not exist, or a revocation of the link took effect while the change was under way")]
     [HttpPut("folder/{id}/links")]
     public async Task<FileShareDto> SetFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {

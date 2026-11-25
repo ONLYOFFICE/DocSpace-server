@@ -261,7 +261,8 @@ public class FilesSettingsHelper(
     MessageService messageService,
     SettingsManager settingsManager,
     QuotaSocketManager quotaSocketManager,
-    AuthContext authContext)
+    AuthContext authContext,
+    ILogger<FilesSettingsHelper> logger)
 {
     private static readonly FilesSettings _emptySettings = new();
 
@@ -355,7 +356,18 @@ public class FilesSettingsHelper(
 
         messageService.SendHeadersMessage(MessageAction.DocumentsExternalShareSettingsUpdated);
 
-        return await GetPrivateRoomLinks();
+        var enabled = await GetPrivateRoomLinks();
+
+        try
+        {
+            await quotaSocketManager.ChangePrivateRoomLinksSettingsAsync(enabled);
+        }
+        catch (Exception exception)
+        {
+            logger.WarningPrivateRoomLinksSocketFailed(exception);
+        }
+
+        return enabled;
     }
 
     public async Task<bool> ChangeExternalShareSocialMediaSettingsAsync(bool enable)

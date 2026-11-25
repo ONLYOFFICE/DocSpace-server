@@ -289,6 +289,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-private-room-links-settings", (req, res) => {
+    files.changePrivateRoomLinksSettings(req.body);
+    res.end();
+  });
+
   router.post("/change-external-sharing-settings", (req, res) => {
     files.changeExternalSharingSettings(req.body);
     res.end();

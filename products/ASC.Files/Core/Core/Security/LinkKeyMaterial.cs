@@ -168,3 +168,12 @@ public record LinkKeyMaterial(string PublicKey, string PrivateKeyEnc, string Pro
 /// <param name="PublicKeyId">The id of that user's public key the secret was wrapped for.</param>
 /// <param name="Wrap">The wrapped secret, which only that user's private key opens.</param>
 public record LinkSecretWrap(Guid UserId, Guid PublicKeyId, string Wrap);
+
+/// <summary>The stored key material and secret wraps of a link, read back as the values the sharing code works with.</summary>
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class LinkKeyMaterialMapper
+{
+    public static partial LinkKeyMaterial ToKeyMaterial(this DbFilesShareLinkKey source);
+
+    public static partial LinkSecretWrap ToSecretWrap(this DbFilesShareLinkSecretWrap source);
+}

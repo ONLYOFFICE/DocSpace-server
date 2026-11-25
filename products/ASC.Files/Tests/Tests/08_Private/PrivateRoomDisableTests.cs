@@ -149,16 +149,7 @@ public class PrivateRoomDisableTests(AspireAppFixture fixture) : PrivacyRoomTest
         return (await _profilesApi.GetProfileByUserIdAsync(user.Id.ToString(), TestContext.Current.CancellationToken)).Response.Status!.Value;
     }
 
-    private async Task<long> RevocationRecords(Guid userId)
-    {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
-
-        command.CommandText = "SELECT COUNT(*) FROM audit_events WHERE action = 5165 AND description LIKE @user;";
-        command.Parameters.AddWithValue("@user", $"%{userId}%");
-
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
-    }
+    private Task<long> RevocationRecords(Guid userId) => AuditRecords(5165, userId);
 
     [Theory]
     [InlineData(ThroughStatus)]
@@ -221,23 +212,52 @@ public class PrivateRoomDisableTests(AspireAppFixture fixture) : PrivacyRoomTest
     }
 
     [Fact]
-    public async Task TheAnnouncement_DeletesTheFileKeys_InTheFilesWorker()
+    public async Task TheAnnouncement_DeletesTheFileKeysOfATerminatedOrRemovedAccount_AndNotOfOneActiveAgain()
     {
         // The second half: the Files worker deletes the keys of the account it is told about, with no People action
-        // involved, as for an account a directory synchronization disabled. The member stays active here; the keys go
-        // all the same, as they would for an account re-enabled before the worker got to it.
-        var member = await InviteWithKeys(EmployeeType.User);
+        // involved, as for an account a directory synchronization disabled. The worker reads the account first: one
+        // enabled again before the worker got to it keeps its keys; one deleted meanwhile loses them. The terminated and
+        // the removed accounts are written straight to the database, so no People action deletes their keys first; their
+        // announcements go after the first one and mark when the worker has handled it.
+        var active = await InviteWithKeys(EmployeeType.User);
+        var terminated = await InviteWithKeys(EmployeeType.User);
+        var removed = await InviteWithKeys(EmployeeType.User);
         var (room, fileId) = await CreateRoomWithEncryptedFile();
-        await InviteToRoom(room.Id, member, FileShare.Read);
-        await WriteKeys(fileId, member.Id);
-        (await GetMissing(room.Id, member.Id)).Should().BeEmpty();
+        await InviteToRoom(room.Id, active, FileShare.Read);
+        await InviteToRoom(room.Id, terminated, FileShare.Read);
+        await InviteToRoom(room.Id, removed, FileShare.Read);
+        await WriteKeys(fileId, active.Id, terminated.Id, removed.Id);
+        (await GetMissing(room.Id, active.Id)).Should().BeEmpty();
 
-        await Fixture.PublishToEventBusAsync(new UserDisabledIntegrationEvent(Owner.Id, TenantId) { UserId = member.Id }, TestContext.Current.CancellationToken);
+        await using (var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken))
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "UPDATE core_user SET status = @status WHERE tenant = @tenant AND id = @id;";
+            command.Parameters.AddWithValue("@status", (int)EmployeeStatus.Terminated);
+            command.Parameters.AddWithValue("@tenant", TenantId);
+            command.Parameters.AddWithValue("@id", terminated.Id.ToString());
+            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+        }
+
+        await using (var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken))
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "UPDATE core_user SET removed = 1 WHERE tenant = @tenant AND id = @id;";
+            command.Parameters.AddWithValue("@tenant", TenantId);
+            command.Parameters.AddWithValue("@id", removed.Id.ToString());
+            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+        }
+
+        await Fixture.PublishToEventBusAsync(new UserDisabledIntegrationEvent(Owner.Id, TenantId) { UserId = active.Id }, TestContext.Current.CancellationToken);
+        await Fixture.PublishToEventBusAsync(new UserDisabledIntegrationEvent(Owner.Id, TenantId) { UserId = terminated.Id }, TestContext.Current.CancellationToken);
+        await Fixture.PublishToEventBusAsync(new UserDisabledIntegrationEvent(Owner.Id, TenantId) { UserId = removed.Id }, TestContext.Current.CancellationToken);
 
         await _filesClient.Authenticate(Owner);
-        var missing = await PollUntil(() => GetMissing(room.Id, member.Id), m => m.Count > 0, TimeSpan.FromSeconds(30));
-        missing.Select(m => m.UserId).Should().BeEquivalentTo([member.Id]);
-        (await PollUntil(() => RevocationRecords(member.Id), count => count > 0)).Should().BeGreaterThan(0);
+        (await PollUntil(() => RevocationRecords(terminated.Id), count => count > 0, TimeSpan.FromSeconds(30))).Should().BeGreaterThan(0);
+        (await PollUntil(() => RevocationRecords(removed.Id), count => count > 0, TimeSpan.FromSeconds(30))).Should().BeGreaterThan(0);
+
+        (await GetMissing(room.Id, active.Id)).Should().BeEmpty("the account was active when the worker read it");
+        (await RevocationRecords(active.Id)).Should().Be(0);
     }
 
     [Fact]

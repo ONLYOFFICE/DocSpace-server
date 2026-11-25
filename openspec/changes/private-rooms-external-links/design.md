@@ -92,8 +92,9 @@ section follows the app".
    a session is refused as an unencrypted save is.
 7. **The wraps of a link's secret follow the manager role.** `linkSecretWraps` is accepted on the link-setting operations
    for the owner and current room managers only. The place where a member's access is removed or lowered, which already
-   revokes file keys (`FileSharingAceHelper.RevokeFileKeysAsync`), also deletes that user's secret wraps, in the same
-   transaction as the access change. `getRoomLinks` returns, per link, the caller's own wrap and the ids of managers
+   revokes file keys (`FileSharingAceHelper.RevokeFileKeysAsync`), also deletes that user's secret wraps, right before
+   the access change and in a write of its own: a failure between the two leaves the role without a wrap, which a manager
+   writes again. A disabled user and a user made a guest lose their wraps in every room. `getRoomLinks` returns, per link, the caller's own wrap and the ids of managers
    without one (`linkSecretWrap`, `managersWithoutLinkSecretWrap`).
 8. **A separate portal setting, next to the external sharing switch.** Stored with the files settings of the tenant,
    default on, written by a new admin-only operation beside `PUT files/settings/external`
@@ -167,7 +168,9 @@ section follows the app".
   repeating the revocation removes it (decision 5).
 - [Key material of an item stays after the item is deleted] → `FileDao.DeleteFilesAsync` and
   `FolderDao.DeleteFolderAsync` delete the key material and the secret wraps of the links of the removed entries right
-  before their share records, in the same transaction, since the share records are what names those links. Moving an
+  before their share records, since the share records are what names those links. `FileDao` does it in the
+  transaction of the deletion; `FolderDao` on the context of the block, outside that transaction, as its neighbours
+  there do, so a failure between them can leave key rows that no share record names and that open nothing. Moving an
   item to Trash keeps both: the item and its links come back with a restore.
 - [The proof is guessed] → 256 random bits plus the counter of wrong attempts; the hash comparison is constant-time.
 - [A script on the visitor's page reads the secret from the address] → The restricted policy of decision 11; the

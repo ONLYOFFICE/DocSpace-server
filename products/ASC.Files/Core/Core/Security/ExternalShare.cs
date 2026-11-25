@@ -268,7 +268,7 @@ public class ExternalShare(
             return Status.Invalid;
         }
 
-        var sessionKey = await CreatePasswordKeyAsync(keyMaterial.ProofHash);
+        var sessionKey = await CreatePrivateLinkSessionKeyAsync(keyMaterial.ProofHash);
 
         if (string.IsNullOrEmpty(proof))
         {
@@ -278,7 +278,10 @@ public class ExternalShare(
                 passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, linkId.ToString(), true);
             }
 
-            return passwordKey == sessionKey ? Status.Ok : Status.RequiredPassword;
+            return !string.IsNullOrEmpty(passwordKey) &&
+                   CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(passwordKey), Encoding.UTF8.GetBytes(sessionKey))
+                ? Status.Ok
+                : Status.RequiredPassword;
         }
 
         if (LinkKeyMaterial.ProofMatches(proof, keyMaterial.ProofHash))
@@ -290,6 +293,33 @@ public class ExternalShare(
         cookiesManager.ClearCookies(CookiesType.ShareLink, linkId.ToString());
 
         return Status.InvalidPassword;
+    }
+
+    /// <summary>
+    /// The key material of a link as this request validated it: the proof was compared with this record, so the sealed
+    /// key answered and the audit record come from it too, not from a second read a concurrent change could alter.
+    /// </summary>
+    public async Task<DbFilesShareLinkKey> GetValidatedLinkKeyAsync(Guid linkId)
+    {
+        if (!_linkKeys.TryGetValue(linkId, out var keyMaterial))
+        {
+            keyMaterial = await shareLinkKeyDao.GetAsync(linkId);
+            _linkKeys[linkId] = keyMaterial;
+        }
+
+        return keyMaterial;
+    }
+
+    /// <summary>
+    /// The value of the session cookie of a link of a private item: an HMAC of the stored proof hash under the portal's
+    /// key. Unlike a signature, it carries nothing readable, so a cookie gives no hash to guess the link's password
+    /// against offline; a new hash (a new password, a revocation) gives another value.
+    /// </summary>
+    private async Task<string> CreatePrivateLinkSessionKeyAsync(string proofHash)
+    {
+        var mac = HMACSHA256.HashData(Encoding.UTF8.GetBytes(await GetDbKeyAsync()), Encoding.UTF8.GetBytes(proofHash));
+
+        return WebEncoders.Base64UrlEncode(mac);
     }
 
     public async Task<string> CreatePasswordKeyAsync(string password)

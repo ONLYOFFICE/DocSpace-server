@@ -9,7 +9,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
     /// guests group, its access records on private rooms and on the folders and files inside them, its wrapped file keys
     /// and its key pair (the <c>e2e</c> row of <c>account_links</c>). No audit record, revocation record or socket event
     /// is written: private rooms were not released, so the data is small (design decision 19 of
-    /// private-rooms-server-followups). A guest owns no room, so no room changes owner. Running it again deletes nothing.
+    /// private-rooms-server-followups). No room changes owner: a guest made through updateMember before it refused owners
+    /// may still own a private room, which stays theirs while its file keys and their key pair go. Running it again
+    /// deletes nothing.
     /// </summary>
     public partial class MigrationContext_Upgrade113 : Migration
     {

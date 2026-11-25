@@ -153,7 +153,7 @@ public class ExternalShareDto
     /// The private key of the link, sealed under the link's secret, as the creator's browser stored it. It is present
     /// only in the answer to the request whose proof opened the link; the server cannot open it.
     /// </summary>
-    /// <example>BASE64SEALEDKEY</example>
+    /// <example>AgEAAAAgAAAAyQ0bP8m1rKx3Zt2pS0mQx0J6r8u3aT1oV1cE9lK4n2w=</example>
     public string LinkPrivateKeyEnc { get; set; }
 }
 

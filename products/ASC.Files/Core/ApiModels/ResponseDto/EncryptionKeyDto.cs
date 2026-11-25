@@ -100,7 +100,7 @@ public class EncryptionKeyDto
     /// a visitor of a link gets for a file. Null means that no member has wrapped the key for the link yet, so the file
     /// cannot be opened through the link for now.
     /// </summary>
-    /// <example>BASE64WRAPPEDFILEKEY</example>
+    /// <example>BHkq3mT9yVb2pX8cN1rQ6wZ0sLfJ4uEaG7dKoP5iHn3MvY2tRxC8gWj1eS6zUa9b</example>
     public string FileKeyEnc { get; set; }
 }
 
@@ -108,4 +108,10 @@ public class EncryptionKeyDto
 public static partial class EncryptionKeyMapper
 {
     public static partial EncryptionKeyDto Map(this EncryptionKeyRequestDto source);
+
+    /// <summary>The entry of a link among the keys of a room: the link is the recipient, under its own id.</summary>
+    [MapProperty(nameof(ShareLinkInRoom.LinkId), nameof(EncryptionKeyDto.Id))]
+    [MapProperty(nameof(ShareLinkInRoom.LinkId), nameof(EncryptionKeyDto.UserId))]
+    [MapValue(nameof(EncryptionKeyDto.IsLink), true)]
+    public static partial EncryptionKeyDto ToLinkKey(this ShareLinkInRoom source);
 }

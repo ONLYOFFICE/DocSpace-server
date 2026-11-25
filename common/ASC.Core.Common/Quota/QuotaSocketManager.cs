@@ -140,6 +140,16 @@ public class QuotaSocketManager(
         await MakeRequest("change-ai-access-settings", new { room, enabled });
     }
 
+    /// <summary>
+    /// Tells the clients of the portal that external links of items in private rooms were switched on or off.
+    /// </summary>
+    public async Task ChangePrivateRoomLinksSettingsAsync(bool enabled)
+    {
+        var room = GetQuotaRoom();
+
+        await MakeRequest("change-private-room-links-settings", new { room, enabled });
+    }
+
     public async Task ChangeExternalSharingSettingsAsync(
         bool externalShare,
         bool defaultShareLinkInternal,

@@ -35,15 +35,18 @@ namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 
 /// <summary>
 /// Deletes the file keys of private rooms that a disabled account held. The People actions that disable an account do
-/// it themselves before they answer, and this pass then finds nothing left; it is what reaches the accounts an LDAP
-/// synchronization or a failed directory check disables in Web.Api, which hosts no Files code.
+/// it themselves before they answer; this pass may run alongside them and then finds the same keys or nothing left. It
+/// is what reaches the accounts an LDAP synchronization or a failed directory check disables in Web.Api, which hosts no
+/// Files code. The account is read again first: an event that arrives after the account was enabled again changes
+/// nothing, so keys issued since then stay.
 /// </summary>
 [Scope]
 public class UserDisabledIntegrationEventHandler(
     ILogger<UserDisabledIntegrationEventHandler> logger,
     PrivateRoomAccountHelper privateRoomAccountHelper,
     TenantManager tenantManager,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    UserManager userManager)
     : IIntegrationEventHandler<UserDisabledIntegrationEvent>
 {
     public async Task Handle(UserDisabledIntegrationEvent @event)
@@ -54,6 +57,14 @@ public class UserDisabledIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
+
+            // An account deleted before the worker got here holds nothing either: its keys go too.
+            var user = await userManager.GetUsersAsync(@event.UserId, false);
+            if (!Equals(user, ASC.Core.Users.Constants.LostUser) && !user.Removed && user.Status != EmployeeStatus.Terminated)
+            {
+                return;
+            }
+
             await privateRoomAccountHelper.RevokeFileKeysOfDisabledAsync(@event.UserId);
         }
     }

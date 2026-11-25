@@ -302,8 +302,8 @@ links of every file and folder it removes, the room itself included, together wi
 ### Requirement: Key material of a link has fixed sizes
 
 `linkPublicKey` and `linkProofHash` SHALL each be canonical base64 of exactly 32 bytes; `linkPrivateKeyEnc` SHALL be a
-non-empty string of at most 4096 characters. A missing, empty, malformed or oversized value MUST be refused with 400, storing
-nothing.
+non-empty string of at most 4096 characters. An empty, malformed or oversized value, or one left out while another
+of the three is sent, MUST be refused with 400, storing nothing. A new link with none of them gets 403.
 
 #### Scenario: Public key of another length
 
@@ -506,9 +506,10 @@ limit outside the link-setting path.
 ### Requirement: The page of a link visitor admits no third-party script
 
 The page that opens a link of a private item SHALL be served with a Content-Security-Policy whose script and connect sources
-are only the portal, its storage and its Document Server. The domains of the portal's CSP settings, of plugins, of the
-support chat and of the tag manager MUST NOT be in it. Every other page SHALL keep the portal's policy. `GET security/csp`
-SHALL return that value as `privateLinkHeader` beside `header`.
+are only the portal, its storage and its Document Server. The domains of the CSP settings, plugins, support chat and tag
+manager MUST NOT be in it. Every other page SHALL keep the portal's policy. `GET security/csp`
+SHALL return that value as `privateLinkHeader` beside `header`. Until the proxy serves the page with it, the page gets the
+portal's policy.
 
 #### Scenario: Portal with extra domains
 

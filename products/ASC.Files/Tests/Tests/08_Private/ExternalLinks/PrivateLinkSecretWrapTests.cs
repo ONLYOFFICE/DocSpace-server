@@ -173,4 +173,45 @@ public class PrivateLinkSecretWrapTests(AspireAppFixture fixture) : PrivateLinkT
         WithoutWrap(await RoomLinkAs(Owner, room.Id, linkId)).Should().BeEmpty();
         WrapOf(await RoomLinkAs(manager, room.Id, linkId)).Should().Be(managerWrap.Wrap);
     }
+
+    [Fact]
+    public async Task AManagerMadeAGuest_LosesTheirWraps_AlsoWithoutAFileKeyInTheRoom()
+    {
+        var (room, manager) = await RoomWithAManager();
+
+        await _filesClient.Authenticate(Owner);
+        await SetRoomLink(room.Id, new LinkBody { LinkSecretWraps = [SecretWrap.For(Owner.Id), SecretWrap.For(manager.Id)] });
+        (await StoredWraps(manager.Id)).Should().Be(1);
+
+        await _peopleClient.Authenticate(Owner);
+        await _profilesApi.UpdateMemberAsync(manager.Id.ToString(), new UpdateMemberRequestDto(isUser: true), TestContext.Current.CancellationToken);
+
+        (await StoredWraps(manager.Id)).Should().Be(0);
+        (await StoredWraps(Owner.Id)).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ARoomOwnerMadeAGuest_HandsTheRoomOver_AndLosesTheirWraps()
+    {
+        var roomOwner = await InviteWithKeys(EmployeeType.RoomAdmin);
+        var room = await CreatePrivateRoom($"Autotest Private {Guid.NewGuid():N}", RoomType.CustomRoom);
+        await SetRoomLink(room.Id, new LinkBody { LinkSecretWraps = [SecretWrap.For(roomOwner.Id)] });
+        (await StoredWraps(roomOwner.Id)).Should().Be(1);
+
+        // Only a change to a guest hands a private room over: the previous owner gets a lower role for the moment before
+        // leaving. A change to a user keeps the room theirs, so they keep managing its links. The recipient needs a key.
+        await _filesClient.Authenticate(Owner);
+        await SetFakeKeys(publicKeyPrefix: "owner");
+        await _peopleClient.Authenticate(Owner);
+        await _userTypeApi.StartUserTypeUpdateAsync(new StartUpdateUserTypeDto(EmployeeType.Guest, roomOwner.Id, Owner.Id), TestContext.Current.CancellationToken);
+        var progress = await PollUntil(
+            async () => (await _userTypeApi.GetUserTypeUpdateProgressAsync(roomOwner.Id, TestContext.Current.CancellationToken)).Response,
+            progress => progress is { IsCompleted: true },
+            TimeSpan.FromSeconds(60));
+
+        progress.Error.Should().BeNullOrEmpty();
+        (await StoredWraps(roomOwner.Id)).Should().Be(0);
+        await _filesClient.Authenticate(Owner);
+        (await _roomsApi.GetRoomInfoAsync(room.Id, TestContext.Current.CancellationToken)).Response.CreatedBy.Id.Should().Be(Owner.Id);
+    }
 }

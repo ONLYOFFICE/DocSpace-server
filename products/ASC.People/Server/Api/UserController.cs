@@ -2144,15 +2144,16 @@ public class UserController(
     /// callers get 403. Only the portal owner can edit another DocSpace admin, and nobody else can edit the portal
     /// owner. The call changes groups only if the caller can edit groups. For an LDAP or SSO account, it keeps the
     /// names and location. If the names are not valid, the call returns 400. With `disable` set to true, the account
-    /// gets the `Terminated` status and its sessions end. The portal also deletes its file keys of private rooms. If the
-    /// account owns a private room, the call returns 403 and saves nothing. Deletion with
-    /// `DELETE api/2.0/people/{userId}` requires this status. With `isUser` set to true, the account becomes a guest,
-    /// and false makes it a user again. If the tariff
-    /// or quota has no free seat for this, the call returns 402. The call ignores a request to make the portal owner, a
-    /// DocSpace admin, or a module admin a guest. If the portal refuses the `files` URL or its server returns an error,
-    /// the call returns 403. If no account has the ID, the call returns 404. The call changes data. You can repeat it
-    /// with the same body. It returns the profile after the update. To change the language, use
-    /// `PUT api/2.0/people/{userId}/culture`. To change the type, use `PUT api/2.0/people/type/{type}`.
+    /// gets the `Terminated` status and its sessions end. The portal also deletes its file keys of private rooms. If
+    /// the account owns a private room, the call returns 403 and saves nothing. Deletion with `DELETE
+    /// api/2.0/people/{userId}` requires this status. With `isUser` set to true, the account becomes a guest, and false
+    /// makes it a user again. A new guest leaves every private room and loses its file keys and key pair. If the
+    /// account owns a private room, `isUser` returns 403. To make such an owner a guest, use `POST api/2.0/people/type`
+    /// with a recipient. If the tariff or quota has no free seat for this, the call returns 402. The call ignores a
+    /// request to make the portal owner, a DocSpace admin, or a module admin a guest. If the portal refuses the `files`
+    /// URL or its server returns an error, the call returns 403. If no account has the ID, the call returns 404. The
+    /// call changes data. You can repeat it with the same body. It returns the profile after the update. To change the
+    /// language, use `PUT api/2.0/people/{userId}/culture`. To change the type, use `PUT api/2.0/people/type/{type}`.
     /// </remarks>
     /// <summary>
     /// Update a user
@@ -2164,7 +2165,7 @@ public class UserController(
     [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The first and last name pair is not a valid user name")]
     [SwaggerResponse(402, "The tariff or the user quota does not allow the requested guest or member seat")]
-    [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status, or `disable` is true for the owner of a private room")]
+    [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status, or `disable` is true, or `isUser` is true, for the owner of a private room")]
     [SwaggerResponse(404, "No user has the specified ID")]
     [HttpPut("{userId}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(UpdateMemberByIdRequestDto inDto)
@@ -2290,6 +2291,10 @@ public class UserController(
                                  (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0;
                 if (canBeGuest)
                 {
+                    // A guest holds nothing of a private room. An owner of one needs a recipient, which only the type
+                    // change job (POST people/type) takes; anybody else leaves the rooms as that job makes them leave.
+                    await privateRoomAccountHelper.DemandNoPrivateRoomOwnedAsync([user.Id], toGuest: true);
+
                     await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
                     {
                         await activeUsersChecker.CheckAppend();
@@ -2297,7 +2302,15 @@ public class UserController(
                         await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                         changed = true;
                     }
+
+                    await privateRoomAccountHelper.LeavePrivateRoomsAsync(user.Id);
                 }
+            }
+            else if (setGuest && isGuest && !userIsOwner)
+            {
+                // The exit commits after the guest group: a repeat of a call whose exit failed finishes it. Leaving again
+                // finds nothing to do.
+                await privateRoomAccountHelper.LeavePrivateRoomsAsync(user.Id);
             }
             else if (!setGuest && isGuest)
             {
@@ -2595,19 +2608,18 @@ public class UserController(
     /// Starts a job that changes an account to `Guest` or `User`. The same job moves the rooms and shared files of the
     /// account to another admin. Changing an account to `Guest` also removes it from every AI project. The job deletes
     /// its chat threads there, with their files. For other types, use `PUT api/2.0/people/type/{type}`. Any other type
-    /// returns 400.
-    /// Requires a room admin or a DocSpace admin. Other callers get 403. The `Guest` type also returns 403 if the
-    /// portal does not allow inviting guests. Only the portal owner can change a DocSpace admin. Otherwise the call
-    /// returns 400. The call also returns 400 for a system or disabled account, or for the account of the caller. The
-    /// recipient is `reassignUserId`, or the caller if it is empty. It must be an active room admin or DocSpace admin,
-    /// other than the account. Otherwise the call returns 400. A new guest leaves every private room. Its own private
-    /// rooms go to the recipient, its file keys and key pair are deleted, and a later type change restores none of it.
-    /// If the recipient lacks an encryption key or a key of an encrypted file there, the call returns 403. The call
-    /// queues work. While the job runs, a repeated
-    /// call returns its state and starts nothing. After the job ends, a repeat starts a new job, which emails the
-    /// caller again. Poll `GET api/2.0/people/type/progress/{userId}` until `isCompleted` is true. To cancel the job,
-    /// use `PUT api/2.0/people/type/terminate`. A failure inside the job shows in `error` of the progress, not as a
-    /// status code.
+    /// returns 400. Requires a room admin or a DocSpace admin. Other callers get 403. The `Guest` type also returns 403
+    /// if the portal does not allow inviting guests. Only the portal owner can change a DocSpace admin. Otherwise the
+    /// call returns 400. The call also returns 400 for a system or disabled account, or for the account of the caller.
+    /// The recipient is `reassignUserId`, or the caller if it is empty. It must be an active room admin or DocSpace
+    /// admin, other than the account. Otherwise the call returns 400. A new guest leaves every private room. The
+    /// recipient gets its own private rooms. Its file keys and key pair are deleted, and a later type change restores
+    /// none of it. If the recipient lacks an encryption key or a key of an encrypted file there, the call returns 403.
+    /// The call queues work. While the job runs, a repeated call returns its state and starts nothing. After the job
+    /// ends, a repeat starts a new job, which emails the caller again. Poll `GET api/2.0/people/type/progress/{userId}`
+    /// until `isCompleted` is true. To cancel the job, use `PUT api/2.0/people/type/terminate`. A failure inside the
+    /// job shows in `error` of the progress, not as a status code. Terminating the job after it took a user out of
+    /// private rooms brings back no room, key, or key pair.
     /// </remarks>
     /// <summary>Start updating user type</summary>
     /// <path>api/2.0/people/type</path>

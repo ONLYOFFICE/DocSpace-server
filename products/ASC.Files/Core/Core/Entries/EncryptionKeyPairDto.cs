@@ -201,6 +201,15 @@ public class EncryptionKeyPairDtoHelper(
 
     public async Task<List<EncryptionKeyDto>> GetKeyPairAsync<T>(T fileId)
     {
+        // Without signing in, the keys are reached only through a link, and only in a session of a link of a private item.
+        // A caller with no link token, or with the string id of a third-party file, is refused before the file is looked
+        // up, so no cache of a third-party storage is touched. A caller with the token of another link still reaches the
+        // lookup and the checks after it.
+        if (!authContext.IsAuthenticated && (fileId is not int || await externalShare.GetLinkIdAsync() == Guid.Empty))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
 
@@ -352,13 +361,7 @@ public class EncryptionKeyPairDtoHelper(
         // file it uploads for the links that cover the file, so it needs their public keys.
         if (room is Folder<int> internalRoom)
         {
-            keys.AddRange((await shareLinkKeyDao.GetWorkingLinksInRoomAsync(internalRoom.Id)).Select(l => new EncryptionKeyDto
-            {
-                Id = l.LinkId,
-                UserId = l.LinkId,
-                PublicKey = l.PublicKey,
-                IsLink = true
-            }));
+            keys.AddRange((await shareLinkKeyDao.GetWorkingLinksInRoomAsync(internalRoom.Id)).Select(l => l.ToLinkKey()));
         }
 
         return keys;
@@ -477,17 +480,6 @@ public class EncryptionKeyPairDtoHelper(
     }
 
     /// <summary>
-    /// Prepares somebody else's keys for the current user: an entry without a public key is of no
-    /// use to the caller and must not be reported as access at all, and the encrypted private half
-    /// never leaves its owner — only the caller's own entry keeps it.
-    /// </summary>
-    /// <summary>
-    /// What a visitor of a link of a private item needs to open a file: one entry of the link with its public key and the
-    /// file key wrapped for it (empty while no member has wrapped it), and the public keys of the room's members, among
-    /// which the visitor finds the member who made the wrap by the id the wrap carries. The server does not record that
-    /// member. A file the link does not cover is refused.
-    /// </summary>
-    /// <summary>
     /// Whether the signed-in caller came on a link and is neither the room's owner nor holds an access record of their
     /// own in the room. A member who sends a link token keeps the member answer.
     /// </summary>
@@ -509,6 +501,12 @@ public class EncryptionKeyPairDtoHelper(
             .AnyAsync(r => r.Share is not (FileShare.Restrict or FileShare.None));
     }
 
+    /// <summary>
+    /// What a visitor of a link of a private item needs to open a file: one entry of the link with its public key and the
+    /// file key wrapped for it (empty while no member has wrapped it), and the public keys of the room's members, among
+    /// which the visitor finds the member who made the wrap by the id the wrap carries. The server does not record that
+    /// member. A file the link does not cover is refused.
+    /// </summary>
     private async Task<List<EncryptionKeyDto>> GetLinkSessionKeysAsync<T>(File<T> file, IFolderDao<T> folderDao)
     {
         var linkId = await externalShare.GetLinkIdAsync();
@@ -549,14 +547,9 @@ public class EncryptionKeyPairDtoHelper(
 
         keys.ForEach(r => r.PrivateKeyEnc = null);
 
-        keys.Add(new EncryptionKeyDto
-        {
-            Id = linkId,
-            UserId = linkId,
-            PublicKey = link.PublicKey,
-            IsLink = true,
-            FileKeyEnc = wrap?.PrivateKeyEnc
-        });
+        var linkKey = link.ToLinkKey();
+        linkKey.FileKeyEnc = wrap?.PrivateKeyEnc;
+        keys.Add(linkKey);
 
         return keys;
     }
@@ -587,6 +580,11 @@ public class EncryptionKeyPairDtoHelper(
         return [.. fileIds.Order()];
     }
 
+    /// <summary>
+    /// Prepares somebody else's keys for the current user: an entry without a public key is of no
+    /// use to the caller and must not be reported as access at all, and the encrypted private half
+    /// never leaves its owner — only the caller's own entry keeps it.
+    /// </summary>
     private List<EncryptionKeyDto> SanitizeAccessKeys(IEnumerable<EncryptionKeyDto> keyPairs)
     {
         var userId = authContext.CurrentAccount.ID;

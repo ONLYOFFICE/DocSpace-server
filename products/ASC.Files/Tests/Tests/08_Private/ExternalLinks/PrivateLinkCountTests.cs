@@ -82,4 +82,19 @@ public class PrivateLinkCountTests(AspireAppFixture fixture) : PrivateLinkTestBa
         asReader.GetProperty("id").GetInt32().Should().Be(fileId);
         CountIn(asReader).Should().BeNull();
     }
+
+    [Fact]
+    public async Task InAnArchivedRoom_AFileKeepsReportingItsLinks()
+    {
+        var room = await CreateRoomAsOwner();
+        await _filesClient.Authenticate(Owner);
+        var fileId = await UploadEncryptedFile(room.Id, "archived.docx");
+        await StoreFileLink(fileId);
+
+        await ArchiveRoom(room.Id);
+        (await _roomsApi.GetRoomInfoAsync(room.Id, TestContext.Current.CancellationToken)).Response.RootFolderType.Should().Be(FolderType.Archive);
+
+        await _filesClient.Authenticate(Owner);
+        CountIn(await FileJson(fileId)).Should().Be(1);
+    }
 }

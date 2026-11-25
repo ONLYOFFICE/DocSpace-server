@@ -36,7 +36,8 @@ namespace ASC.Files.Tests.Tests._08_Privacy.ExternalLinks;
 /// <summary>
 /// External links of items in private rooms. The generated SDK does not carry the key fields of such a link yet, so the
 /// link operations go through <see cref="RawApiClient"/> and read the answer as JSON; reads that the SDK models cover
-/// go through the SDK.
+/// go through the SDK. The requests of a link visitor go raw too: each carries the link token in its own header and the
+/// cookies of the link session, which the test client does not keep and the SDK cannot attach per call.
 /// </summary>
 public abstract class PrivateLinkTestBase(AspireAppFixture fixture) : PrivacyRoomTestBase(fixture)
 {

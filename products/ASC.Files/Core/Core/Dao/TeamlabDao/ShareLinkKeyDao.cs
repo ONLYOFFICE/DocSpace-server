@@ -142,6 +142,17 @@ public class ShareLinkKeyDao(IDbContextFactory<FilesDbContext> dbContextFactory,
     }
 
     /// <summary>
+    /// Deletes the wraps of link secrets made for one user in every private room: for an account that is disabled,
+    /// deleted or made a guest, which manages no link any more. The links themselves stay.
+    /// </summary>
+    public async Task DeleteSecretWrapsOfUserAsync(Guid userId)
+    {
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.DeleteShareLinkSecretWrapsOfUserEverywhereAsync(tenantManager.GetCurrentTenantId(), userId);
+    }
+
+    /// <summary>
     /// Deletes the key material of a link, the wraps of file keys made for it and the wraps of its secret, in one
     /// transaction.
     /// </summary>

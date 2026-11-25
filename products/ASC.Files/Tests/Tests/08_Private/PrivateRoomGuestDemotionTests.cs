@@ -179,4 +179,66 @@ public class PrivateRoomGuestDemotionTests(AspireAppFixture fixture) : PrivacyRo
         (await KeyPairRows(roomOwner.Id)).Should().Be(1);
         (await _profilesApi.GetProfileByUserIdAsync(roomOwner.Id.ToString(), TestContext.Current.CancellationToken)).Response.IsRoomAdmin.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task MemberMadeGuestThroughUpdateMember_LeavesThePrivateRoom_WithNoKeys()
+    {
+        var member = await InviteWithKeys(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        await SetFakeKeys(publicKeyPrefix: "owner");
+        var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
+        var fileId = await UploadEncryptedFile(room.Id, "Encrypted.docx");
+        await InviteToRoom(room.Id, member, FileShare.Read);
+        (await WriteKeys(fileId, member.Id)).Should().BeEmpty();
+        (await MemberIds(room.Id)).Should().Contain(member.Id);
+
+        await _peopleClient.Authenticate(Owner);
+        await _profilesApi.UpdateMemberAsync(member.Id.ToString(), new UpdateMemberRequestDto(isUser: true), TestContext.Current.CancellationToken);
+
+        (await _profilesApi.GetProfileByUserIdAsync(member.Id.ToString(), TestContext.Current.CancellationToken)).Response.IsVisitor.Should().BeTrue();
+        (await MemberIds(room.Id)).Should().NotContain(member.Id);
+        (await FileKeyRows(member.Id)).Should().Be(0);
+        (await KeyPairRows(member.Id)).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task OwnerOfAPrivateRoomMadeGuestThroughUpdateMember_IsRefused_AndKeepsEverything()
+    {
+        var roomOwner = await InviteWithKeys(EmployeeType.RoomAdmin);
+        var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
+
+        await _peopleClient.Authenticate(Owner);
+        var exception = await Assert.ThrowsAsync<ApiException>(() => _profilesApi.UpdateMemberAsync(
+            roomOwner.Id.ToString(), new UpdateMemberRequestDto(isUser: true), TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+        ErrorType(exception).Should().Be(OwnershipRefusalType);
+        (await RoomOwnedBy(roomOwner.Id, room.Id)).Should().Be(1);
+        (await KeyPairRows(roomOwner.Id)).Should().Be(1);
+        (await _profilesApi.GetProfileByUserIdAsync(roomOwner.Id.ToString(), TestContext.Current.CancellationToken)).Response.IsRoomAdmin.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task OwnerOfAnArchivedPrivateRoom_IsRefusedBeforeAnythingChanges()
+    {
+        var roomOwner = await InviteWithKeys(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomOwner);
+        var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
+        await _roomsApi.ArchiveRoomAsync(room.Id, new ArchiveRoomRequest(false), TestContext.Current.CancellationToken);
+        await PollUntil(
+            async () => (await _roomsApi.GetRoomInfoAsync(room.Id, TestContext.Current.CancellationToken)).Response.RootFolderType,
+            type => type == FolderType.Archive);
+
+        // The recipient holds a key, so the archive is the only reason to refuse.
+        await _filesClient.Authenticate(Owner);
+        await SetFakeKeys(publicKeyPrefix: "owner");
+        await _peopleClient.Authenticate(Owner);
+        var exception = await Assert.ThrowsAsync<ApiException>(() => _userTypeApi.StartUserTypeUpdateAsync(
+            new StartUpdateUserTypeDto(EmployeeType.Guest, roomOwner.Id, Owner.Id), TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+        ErrorType(exception).Should().Be(OwnershipRefusalType);
+        (await RoomOwnedBy(roomOwner.Id, room.Id)).Should().Be(1);
+        (await KeyPairRows(roomOwner.Id)).Should().Be(1);
+    }
 }

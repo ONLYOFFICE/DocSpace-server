@@ -22,6 +22,8 @@ fields, they call the operations through `RawApiClient`.
     `MigrationContext_Upgrade108`; all migrations applied to an empty MySQL 8.4 database.
   - 2026-11-23: after `release/v4.1.0` brought its own Upgrade108–111, the migration was generated again on top of
     them as `MigrationContext_Upgrade112` (same Up and Down); not applied to a database yet.
+  - 2026-11-25: Upgrade112 is applied by the `migrate` resource (`ASC.Migration.Runner`) of the integration-test stack
+    before every run; the Files suite of 2026-11-24 and 2026-11-25 wrote and read both tables on it.
 - [x] 1.2 Declare both tables skipped in the backup (`.claude/rules/backup-tables.md`) and extend
   `common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs` (`:68`, `:108`, cited by "Keys and file keys are not
   backed up") so it fails if either table is backed up; verify the test passes.
@@ -148,15 +150,17 @@ fields, they call the operations through `RawApiClient`.
   storage only), cache it beside the full one and refresh both wherever the full one is rebuilt; the route of the
   visitor's page is `share/private` and the proxy `location` comes with the client change (design decisions 11, 13).
   Tests for "The page of a link visitor admits no third-party script": with a domain set through `POST security/csp`,
-  the restricted value lacks it and the full value keeps it; through the proxy of the test stand, the answer for the
-  visitor's page carries the restricted value.
+  the restricted value lacks it and the full value keeps it. The proxy half is task 3.9.
   - 2026-11-24: `CspSettingsHelper.CreateHeaderAsync(..., privateLink: true)` drops the domains of the settings and every
     integration section; `SaveAsync` caches it under `csp:<host>:private` for every key of the full value, the rename,
     base-domain and start-up paths follow, and `ExistsInCacheAsync` asks for both. `GET` and `POST security/csp` return
     it as `privateLinkHeader`. `T/ExternalLinks/PrivateLinkCspTests.cs`: a domain set through `POST security/csp` and the
     stand's `csp:websearch` source are in `header` and not in `privateLinkHeader`, whose sources are a subset of the full
-    ones. prove-red.sh --patch: RED as expected, 2 of 2 failed without the filter. Not covered here: the proxy answer of
-    `share/private`, whose `location` comes with the client change.
+    ones. prove-red.sh --patch: RED as expected, 2 of 2 failed without the filter.
+- [ ] 3.9 Serve `share/private` with the value cached under `csp:<host>:private` in the proxy `location`, and test
+  through the proxy of the test stand that the answer for the visitor's page carries the restricted value.
+  - 2026-11-25: blocked: the `location` comes with the client change (design decisions 11, 13). Until then the proxy
+    serves the page with the portal's full policy; the requirement names that window.
 - [x] 3.8 Build `shareLink` of a link of a private item in `ExternalShare.GetLinkDataAsync` as
   `share/private?key=<key>` (`&folder=<id>` for a folder) for every file type, so that the short address redirects there
   (design decision 13); tests for "A link of a private item opens the visitor's page": a docx link and its short
@@ -275,11 +279,17 @@ fields, they call the operations through `RawApiClient`.
 - [x] 7.2 Check that the link socket events and webhooks of a private item go only to members (`.claude/rules/socket-events.md`,
   `[RaisesWebhook]` per `.claude/rules/openapi-endpoint-docs.md` §2.1); test that a non-member admin's webhook log stays empty.
   - 2026-11-24: no webhook trigger exists for links, so the link operations carry no `[RaisesWebhook]`; their socket
-    events go through `SocketManager`, whose recipients are the readers of the entry, members only in a private room.
+    events came with the hand-over fixes (next note).
     `T/ExternalLinks/PrivateLinkEventTests.cs`: a DocSpace admin outside the room, subscribed to every trigger, gets no
     delivery naming the link or the file through setting, opening, reading and revoking the link, read once the delivery
     of the admin's own later file has arrived. It guards behaviour that was already there, so there is nothing to prove
-    red. Not covered by a test: the socket events (the suite's socket tests do not follow link operations).
+    red.
+  - 2026-11-25: setting and revoking a link already sends the update of the entry: `FileStorageService.SetExternalLinkAsync`
+    calls `UpdateFileAsync` or `UpdateFolderAsync` of `SocketManager`, whose recipients are the readers of the entry,
+    members only in a private room. The portal setting now sends `s:change-private-room-links-settings` to the quota
+    room, in a catch of its own. `T/ExternalLinks/PrivateLinkSocketTests.cs`: a folder link set and revoked reaches a
+    member watching the room (behaviour that was there, nothing to prove red); the setting event, prove-red.sh --patch:
+    RED as expected.
 - [ ] 7.3 Regenerate the OpenAPI documents and the SDKs (`generate-sdk` skill); verify the build has no new warnings
   (`.claude/rules/build-warnings.md`).
   - 2026-11-24: the build part is done (no warnings, `--no-incremental`); the regeneration is left on purpose until the
@@ -313,6 +323,27 @@ fields, they call the operations through `RawApiClient`.
     (`Category=Bug`, P2 of the plugins spec, red until that defect is fixed), the audit filter fails in
     `AuditEventsRepository.cs:123` for modules the branch does not map, the socket contract on a missing
     `delete-recent-folder` route, and the primary link of an ordinary custom room.
+
+## 9. Hand-over check (2026-11-25)
+
+- [x] 9.1 Fix the union of the hand-over check's two passes in one batch (the findings and the decisions are in the
+  PR description, "Hand-over" and "Known limitations"). Guard tests, proven with prove-red.sh --patch in two runs:
+  RED as expected, 8 of 13 and then 4 of 5 failed without the batch; green with it, 13 of 13 and 5 of 5. Proven: a
+  `passwordRequired` change without key fields (400), the anonymous `publickeys` guard, the session cookie without a
+  readable proof hash, the link count of an archived room's file, the refusal for an archived owned room, the wraps of
+  a guest deleted in every room, the guest path of `updateMember`, the setting event, the status re-read of the
+  disabled event in the Files worker. Not proven on their own: the lowered-owner branch of the demotion filter in
+  `FileSharing.SetAceObjectAsync` (on the only path that reaches it, the guest exit deletes every wrap anyway); the
+  `account_links` redaction of the SQL log (the profile is stored encrypted, so no plain key reaches a parameter); the
+  re-check under the lock against a revocation that came first, the tenant key of the gate memo and the CSP key removed
+  with a portal (the stand cannot reach them).
+  - The §7 re-check of the batch: the repeat of `updateMember` with `isUser` for a guest now finishes an exit that failed
+    (not proven: the stand cannot make the exit throw); the Files worker also acts on an account removed before it got
+    there, prove-red.sh --patch: RED as expected, 1 of 1; the texts of a change that meets a revocation (404) and of one
+    sent after it were corrected.
+- [x] 9.2 Test for "Restored link": `T/ExternalLinks/PrivateLinkLifecycleTests.cs` deletes the link's key row, the state a
+  restore leaves since the backup skips the table, and the right proof gets Invalid. It guards behaviour that was
+  there, so there is nothing to prove red; a backup and restore of one portal is not run.
 
 ## Workflow follow-up
 

@@ -47,9 +47,8 @@ public class ExternalShareRequestParam
     public string Password { get; set; }
 
     /// <summary>
-    /// For a link of an item of a private room, sent instead of `password`: the base64 of the 32 bytes the visitor's
-    /// page derives from the link's secret. The portal compares SHA-256 of those bytes with the hash stored for the
-    /// link. A proof that does not decode to 32 bytes is wrong. The field is ignored for other links.
+    /// For a link of an item of a private room, in place of `password`: the ordinary base64 of the 32 bytes that the
+    /// visitor's page derives from the link's secret, and from the password when the link has one.
     /// </summary>
     /// <example>q83vEjRWeJCrze8SNFZ4kKvN7xI0VniQq83vEjRWeJA=</example>
     public string Proof { get; set; }

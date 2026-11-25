@@ -128,8 +128,10 @@ public class PrivateRoomReassignTests(AspireAppFixture fixture) : PrivacyRoomTes
         return await PollUntil(
             async () =>
             {
+                // Read raw: the SDK's TaskProgressResponseDto has no `keptPrivateRoomIds` yet.
                 await _peopleClient.Authenticate(Owner);
                 using var response = await _peopleClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, $"api/2.0/people/{route}/progress/{userId}"), TestContext.Current.CancellationToken);
+                response.EnsureSuccessStatusCode();
                 using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 
                 return body.RootElement.GetProperty("response").Clone();

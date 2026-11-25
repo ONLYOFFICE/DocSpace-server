@@ -54,7 +54,7 @@ public class LinkSecretWrapRequest
     public Guid PublicKeyId { get; set; }
 
     /// <summary>
-    /// The secret of the link wrapped for that public key by the browser; the portal stores it as received.
+    /// The secret of the link wrapped for that public key by the browser.
     /// </summary>
     /// <example>AgEAAAAgAAAAyQ0bP8m1rKx3Zt2pS0mQx0J6r8u3aT1oV1cE9lK4n2w=</example>
     [StringLength(4096)]

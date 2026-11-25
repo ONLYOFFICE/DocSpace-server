@@ -637,14 +637,14 @@ public class SecurityController(
 
     /// <remarks>
     /// Replaces the list of external domains that the Content Security Policy of the portal trusts. It returns the
-    /// stored list, the policy header that browsers now get, and the value for the page of a link of a private item.
-    /// Send the complete list in `domains`. An empty or
-    /// omitted list restores the built-in policy of the portal. Every domain becomes an allowed source for scripts,
-    /// styles, images, fonts, frames, media, and connections. Requires the EditPortalSettings permission, which the
-    /// portal owner and DocSpace admins have. Other callers get 403. The call changes data for the whole portal, and
-    /// you can repeat it with the same body. The call returns 400 for an unreadable body, an invalid address, or an
-    /// entry with non-ASCII characters. It then saves nothing. It also returns 403 if the built header is larger than
-    /// the installation allows, 15 KB by default. To read the current policy, use `GET api/2.0/security/csp`.
+    /// stored list and the policy header that browsers now get. It also returns the value for the page of a private
+    /// item's link. Send the complete list in `domains`. An empty or omitted list restores the built-in policy of the
+    /// portal. Every domain becomes an allowed source for scripts, styles, images, fonts, frames, media, and
+    /// connections. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other
+    /// callers get 403. The call changes data for the whole portal, and you can repeat it with the same body. The call
+    /// returns 400 for an unreadable body, an invalid address, or an entry with non-ASCII characters. It then saves
+    /// nothing. It also returns 403 if the built header is larger than the installation allows, 15 KB by default. To
+    /// read the current policy, use `GET api/2.0/security/csp`.
     /// </remarks>
     /// <summary>
     /// Configure CSP settings
@@ -696,11 +696,12 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the Content Security Policy of the portal, with the allowed external domains and the full header
-    /// value. It also returns `privateLinkHeader`, the narrower value of the page that opens a link of a private item.
-    /// Anyone can call it without signing in, from any origin. The call is read-only. To skip an unchanged policy,
-    /// send the `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value exactly as you got it. If the policy has not changed since then, the call returns 304 with an empty body. To change the
-    /// allowed domains, use `POST api/2.0/security/csp`, which requires the EditPortalSettings permission.
+    /// Returns the Content Security Policy of the portal, with the allowed external domains and the full header value.
+    /// It also returns `privateLinkHeader`. That narrower value is for the page of a private item's link. Anyone can
+    /// call it without signing in, from any origin. The call is read-only. To skip an unchanged policy, send the
+    /// `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value exactly as you got it. If the
+    /// policy has not changed since then, the call returns 304 with an empty body. To change the allowed domains, use
+    /// `POST api/2.0/security/csp`, which requires the EditPortalSettings permission.
     /// </remarks>
     /// <summary>
     /// Get CSP settings

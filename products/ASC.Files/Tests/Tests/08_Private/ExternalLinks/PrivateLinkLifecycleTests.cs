@@ -194,4 +194,43 @@ public class PrivateLinkLifecycleTests(AspireAppFixture fixture) : PrivateLinkTe
         (await FileKeyRows(link.Id)).Should().Be(0);
         (await StatusOf(link.Token, session)).Should().Be(ExternalShareStatus.Invalid);
     }
+
+    [Fact]
+    public async Task AChangedPasswordRequiredWithoutNewKeyFields_Returns400_AndChangesNothing()
+    {
+        var proof = Proof.New();
+        var link = await RoomLinkWithAWrappedFile(proof);
+
+        await _filesClient.Authenticate(Owner);
+        using (var refused = await PutRoomLink(link.RoomId, new LinkBody { LinkId = link.Id, PasswordRequired = false }.WithoutKeys()))
+        {
+            ((int)refused.StatusCode).Should().Be(400);
+        }
+
+        var stored = (await RoomLinksJson(link.RoomId)).Single(l => l.GetProperty("id").GetString() == link.Id.ToString());
+        stored.GetProperty("passwordRequired").GetBoolean().Should().BeTrue();
+        (await SendProof(link.Token, proof.Value)).Should().Be(ExternalShareStatus.Ok);
+    }
+
+    /// <summary>
+    /// A restore brings the link back without its key material: the backup skips the tables that hold it. Deleting the
+    /// row leaves the link in the state a restore does, which the stand cannot run on one portal.
+    /// </summary>
+    [Fact]
+    public async Task ALinkWithoutItsKeyMaterial_AsAfterARestore_AnswersTheRightProofAsInvalid()
+    {
+        var proof = Proof.New();
+        var link = await RoomLinkWithAWrappedFile(proof);
+
+        await using (var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken))
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "DELETE FROM files_share_link_keys WHERE tenant_id = @tenant AND link_id = @id;";
+            command.Parameters.AddWithValue("@tenant", TenantId);
+            command.Parameters.AddWithValue("@id", link.Id.ToString());
+            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+        }
+
+        (await SendProof(link.Token, proof.Value)).Should().Be(ExternalShareStatus.Invalid);
+    }
 }

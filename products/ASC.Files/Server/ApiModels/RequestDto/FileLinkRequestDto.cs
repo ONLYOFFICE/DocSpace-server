@@ -96,7 +96,7 @@ public class FileLinkRequest
 
     /// <summary>
     /// For an item of a private room: the public X25519 key of the link, made by the creator's browser, as base64 of
-    /// 32 bytes. An ordinary link does not use it.
+    /// 32 bytes.
     /// </summary>
     /// <example>q83vEjRWeJq8vN7wEjRWeJq8vN7wEjRWeJq8vN7wEjQ=</example>
     public string LinkPublicKey { get; set; }
@@ -116,16 +116,14 @@ public class FileLinkRequest
     public string LinkProofHash { get; set; }
 
     /// <summary>
-    /// For an item of a private room: whether a visitor has to type a password, which never reaches the server. An
-    /// ordinary link uses `password` instead.
+    /// For an item of a private room: whether a visitor has to type a password, which never reaches the server.
     /// </summary>
     /// <example>true</example>
     public bool? PasswordRequired { get; set; }
 
     /// <summary>
     /// For an item of a private room: the link's secret wrapped by the browser for the room owner and room managers,
-    /// one wrap per user, so that each of them can copy the full address later. It may come without the key fields, to
-    /// add the wrap of a manager to an existing link.
+    /// one wrap per user, so that each of them can copy the full address later.
     /// </summary>
     public List<LinkSecretWrapRequest> LinkSecretWraps { get; set; }
 }

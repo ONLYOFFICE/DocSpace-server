@@ -86,6 +86,13 @@ public partial class FilesDbContext
         return ShareLinkKeyQueries.DeleteShareLinkSecretWrapsOfUserAsync(this, tenantId, linkIds, userId);
     }
 
+    /// <summary>Deletes every wrap of a link secret made for one user, in every room.</summary>
+    [PreCompileQuery]
+    public Task<int> DeleteShareLinkSecretWrapsOfUserEverywhereAsync(int tenantId, Guid userId)
+    {
+        return ShareLinkKeyQueries.DeleteShareLinkSecretWrapsOfUserEverywhereAsync(this, tenantId, userId);
+    }
+
     /// <summary>
     /// Deletes the key material of the external links of the given entries. Call it before their share records go: the
     /// share records are what tells which links belong to the entries.
@@ -194,6 +201,13 @@ static file class ShareLinkKeyQueries
                         entryIds.Contains(s.InternalEntryId) &&
                         s.Subject == r.LinkId &&
                         (s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink)))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, Guid, Task<int>> DeleteShareLinkSecretWrapsOfUserEverywhereAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid userId) =>
+                ctx.ShareLinkSecretWraps
+                    .Where(r => r.TenantId == tenantId && r.UserId == userId)
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, Guid, Task<int>> DeleteShareLinkSecretWrapsOfUserAsync =

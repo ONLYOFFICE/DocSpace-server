@@ -49,12 +49,12 @@ public class PrivateLinkAddressTests(AspireAppFixture fixture) : PrivateLinkTest
     private async Task<Redirect> OpenShort(string shareLink)
     {
         var uri = new Uri(shareLink);
-        uri.AbsolutePath.Should().StartWith("/s/");
+        uri.AbsolutePath.Should().MatchRegex("^/s/[A-Za-z0-9_-]+$");
 
         var client = CreateClientWithoutRedirects(ResourceNames.WebApi);
         using var response = await client.GetAsync(uri.PathAndQuery, TestContext.Current.CancellationToken);
 
-        ((int)response.StatusCode).Should().BeOneOf(301, 302);
+        ((int)response.StatusCode).Should().Be(302);
 
         await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
         await using var command = connection.CreateCommand();
@@ -164,7 +164,7 @@ public class PrivateLinkAddressTests(AspireAppFixture fixture) : PrivateLinkTest
 
         using var response = await client.GetAsync("/s/zzzzzzzzzz", TestContext.Current.CancellationToken);
 
-        ((int)response.StatusCode).Should().BeOneOf(301, 302);
+        ((int)response.StatusCode).Should().Be(302);
         var location = response.Headers.Location!.OriginalString;
         location.Should().EndWith("/#");
         new Uri(location).AbsolutePath.Should().Be("/");

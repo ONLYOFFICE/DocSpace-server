@@ -166,7 +166,9 @@ removal"; `file-sharing` "The Favorites section" (`addFavorites` answers `true` 
     them, its wrapped file keys and its key pair (the `e2e` row of `account_links`). It writes no audit record, no
     revocation record and no socket event. Alternative: a one-off background job through `LeavePrivateRoomsAsync`, with
     the records of decision 17. Rejected by the product owner: private rooms have not been released, so the data is
-    small and a record of each exit is not needed. A guest owns no room, so no room changes owner.
+    small and a record of each exit is not needed. No room changes owner: the type change hands the rooms over and
+    `updateMember` refuses the owner of a private room. A guest made through `updateMember` before that refusal may
+    still own one; the migration leaves it theirs and deletes their keys, so its files no longer open for them.
 20. **Deleting the key pair of a new guest is audited.** `LeavePrivateRoomsAsync` deletes the pair through
     `EncryptionLoginProvider.DeleteAllKeysAsync`, which writes nothing, while `DELETE privacyroom/keys/{id}` writes
     `PrivacyRoomKeyDeleted`. The job writes the same action once per deleted key, after the deletion, in a catch of its

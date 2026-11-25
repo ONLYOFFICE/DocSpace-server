@@ -343,4 +343,67 @@ public class PrivateLinkProofTests(AspireAppFixture fixture) : PrivateLinkTestBa
         FileKeyEncOf(LinkEntryOf(keys)).Should().Be("wrapped", "the visitor opens the file with the wrap made for the link");
         keys.EnumerateArray().Select(HasPrivateHalf).Should().NotContain(true, "a visitor gets no private half, not even their own");
     }
+
+    /// <summary>Every text a cookie value holds in readable form: the value, and each base64 or base64url part of it decoded.</summary>
+    private static IEnumerable<string> ReadableParts(string cookie)
+    {
+        var value = Uri.UnescapeDataString(cookie[(cookie.IndexOf('=') + 1)..]);
+        yield return value;
+
+        foreach (var part in Regex.Split(value, "[^A-Za-z0-9+/_=-]+").Where(p => p.Length >= 8))
+        {
+            var base64 = part.Replace('-', '+').Replace('_', '/').TrimEnd('=');
+            base64 = base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '=');
+            byte[]? bytes = null;
+            try
+            {
+                bytes = Convert.FromBase64String(base64);
+            }
+            catch (FormatException)
+            {
+                // Not base64: the part was already checked as text above.
+            }
+
+            if (bytes != null)
+            {
+                yield return Encoding.UTF8.GetString(bytes);
+                yield return Convert.ToBase64String(bytes);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task TheSessionCookie_HoldsNoProofHash_InAnyReadableForm()
+    {
+        var (_, token, proof, _) = await FolderLinkWithProof();
+        var hashBytes = Convert.FromBase64String(proof.Hash);
+
+        var opened = await SendProof(token, proof.Value);
+
+        opened.Status.Should().Be(ExternalShareStatus.Ok);
+        opened.Cookies.Should().NotBeEmpty();
+        foreach (var cookie in opened.Cookies)
+        {
+            foreach (var part in ReadableParts(cookie))
+            {
+                part.Should().NotContain(proof.Hash, "a cookie the visitor keeps must not carry what the proof is checked against");
+                part.Should().NotContain(Convert.ToBase64String(hashBytes).TrimEnd('='));
+                part.Should().NotContain(JsonSerializer.Serialize(proof.Hash).Trim('"'), "a JSON writer escapes + in the hash");
+            }
+        }
+    }
+
+    [Fact]
+    public async Task AnAnonymousCallerWithoutALink_IsRefusedTheKeysOfAnyFile()
+    {
+        var room = await CreateRoomAsOwner();
+        var fileId = await UploadEncryptedFile(room.Id, "private.docx");
+
+        await _filesClient.Authenticate(null);
+        foreach (var id in new[] { fileId, int.MaxValue })
+        {
+            using var response = await _filesClient.GetAsync($"api/2.0/files/file/{id}/publickeys", TestContext.Current.CancellationToken);
+            ((int)response.StatusCode).Should().Be(403, $"file {id} is read with no link, so the caller has no right to ask");
+        }
+    }
 }

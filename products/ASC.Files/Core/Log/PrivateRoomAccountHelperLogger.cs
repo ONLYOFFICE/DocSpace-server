@@ -38,7 +38,7 @@ internal static partial class PrivateRoomAccountHelperLogger
     [LoggerMessage(LogLevel.Warning, "Could not revoke the file keys of disabled user {userId}; the Files worker revokes them from the disabling event")]
     public static partial void WarningRevokeFileKeysOfDisabledFailed(this ILogger<PrivateRoomAccountHelper> logger, Guid userId, Exception exception);
 
-    [LoggerMessage(LogLevel.Warning, "Could not tell user {userId} that they left private room {roomId}")]
+    [LoggerMessage(LogLevel.Warning, "Could not end the editor sessions of, or tell user {userId} about, leaving private room {roomId}")]
     public static partial void WarningLeavePrivateRoomSocketFailed(this ILogger<PrivateRoomAccountHelper> logger, Guid userId, int roomId, Exception exception);
 
     [LoggerMessage(LogLevel.Warning, "Could not record the deletion of the keys of user {userId}, made a guest")]

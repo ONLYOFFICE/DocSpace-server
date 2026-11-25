@@ -237,12 +237,12 @@ public abstract class SecurityController<T>(
     /// then someone issues their file key. Requires read access to the file. Other callers get 403. The call is
     /// read-only. Members can add or change keys at any time. So request the keys again before each use. If the file
     /// does not exist, the call returns 404. If the file is outside a private room and the encrypted section, the call
-    /// returns 415. A visitor of an external link who is not a room member first opens the link with
-    /// `POST api/2.0/files/share/{key}/password`. The visitor may be signed in or not. Send the link token in the `Request-Token` header. The visitor gets one
-    /// entry with `isLink` true, which holds the public key of the link and the file key wrapped for it in `fileKeyEnc`.
-    /// The visitor also gets the public keys of the room members, to find the member who made the wrap. A null
-    /// `fileKeyEnc` means that no member has wrapped the key for the link yet. For a file the link does not open, the
-    /// call returns 403.
+    /// returns 415. A visitor of an external link who is not a room member first opens the link with `POST
+    /// api/2.0/files/share/{key}/password`. The visitor may be signed in or not. Send the link token in the
+    /// `Request-Token` header. The visitor gets one entry with `isLink` true. It holds the public key of the link and,
+    /// in `fileKeyEnc`, the file key wrapped for it. The visitor also gets the public keys of the room members, to find
+    /// the member who made the wrap. A null `fileKeyEnc` means that no member has wrapped the key for the link yet. For
+    /// a file the link does not open, the call returns 403.
     /// </remarks>
     /// <summary>Get file encryption keys</summary>
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
@@ -391,18 +391,17 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
 {
     /// <remarks>
     /// Changes the owner of the listed rooms and files to one account. Requires the owner of each listed entry, or a
-    /// DocSpace admin. Other callers get 403. In a private room, a DocSpace admin must also be a member, in any role.
-    /// The call changes data, one entry at a time. It stops at the first entry
-    /// it may not change, and earlier entries stay changed. An entry that the account already owns stays unchanged,
-    /// so you can repeat the call. The previous owner stays in a transferred room as its room manager. A transferred
-    /// file gets a new version by the new owner. The call skips third-party files. The call returns 403 if the
-    /// new owner is not an active DocSpace admin or room admin. It also returns 403 for a private room if the new
-    /// owner has no encryption keys. It also returns 403 for a folder that is not a room, or a file outside the
-    /// common section. A file that is locked or being edited also returns 403. If the new owner lacks keys to some
-    /// encrypted files of a private room, the call returns 409. To find these files, use
-    /// `GET api/2.0/privacyroom/{roomId}/access/missing`. After their keys are added, repeat the call. Without
-    /// `userId`, the call returns 400. It also returns 400 if a string file id points to a storage account that is
-    /// not connected.
+    /// DocSpace admin. Other callers get 403. In a private room, a DocSpace admin must also be a member. Any role
+    /// works. The call changes data, one entry at a time. It stops at the first entry it may not change, and earlier
+    /// entries stay changed. An entry that the account already owns stays unchanged, so you can repeat the call. The
+    /// previous owner stays in a transferred room as its room manager. A transferred file gets a new version by the new
+    /// owner. The call skips third-party files. The call returns 403 if the new owner is not an active DocSpace admin
+    /// or room admin. It also returns 403 for a private room if the new owner has no encryption keys. It also returns
+    /// 403 for a folder that is not a room, or a file outside the common section. A file that is locked or being edited
+    /// also returns 403. If the new owner lacks keys to some encrypted files of a private room, the call returns 409.
+    /// To find these files, use `GET api/2.0/privacyroom/{roomId}/access/missing`. After their keys are added, repeat
+    /// the call. Without `userId`, the call returns 400. It also returns 400 if a string file id points to a storage
+    /// account that is not connected.
     /// </remarks>
     /// <summary>Change the room or file owner</summary>
     /// <path>api/2.0/files/owner</path>
@@ -566,17 +565,18 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     }
 
     /// <remarks>
-    /// Checks the password of a protected external share link, and returns the same data as
-    /// `GET api/2.0/files/share/{key}`. Call it after that operation reports that the link requires a password.
-    /// Anyone can call it without signing in. A signed-in caller who can read the room does not need the password.
-    /// The call changes data but not the entry. The portal remembers a correct password for the caller, so later
-    /// requests with the token skip it. The portal counts only wrong passwords for each link and calling address. So
-    /// you can repeat the call with the correct password. A wrong password gives an invalid-password `status`, not an
-    /// HTTP error. The portal then forgets the remembered password. After too many attempts, the call returns 403 until
-    /// the block expires, even with the correct password. A link of an item in a private room takes `proof` instead of
-    /// `password` and ignores a password. A correct proof also returns the sealed key of the link in
-    /// `linkPrivateKeyEnc`. Wrong proofs count as wrong passwords. A new password or a revoked link ends the remembered
-    /// proof.
+    /// Checks the password of a protected external share link, and returns the same data as `GET
+    /// api/2.0/files/share/{key}`. Call it after that operation reports that the link requires a password. Anyone can
+    /// call it without signing in. A signed-in caller who can read the room does not need the password. The call
+    /// changes data but not the entry. The portal remembers a correct password for the caller, so later requests with
+    /// the token skip it. The portal counts only wrong passwords for each link and calling address. So you can repeat
+    /// the call with the correct password. A wrong password gives an invalid-password `status`, not an HTTP error. The
+    /// portal then forgets the remembered password. After too many attempts, the call returns 403 until the block
+    /// expires, even with the correct password. A link of an item in a private room takes `proof` instead of `password`
+    /// and ignores a password. The call compares SHA-256 of the 32 decoded bytes of `proof` with the link's stored
+    /// hash. A proof that does not decode to 32 bytes is wrong. Other links ignore `proof`. A correct proof also
+    /// returns the sealed key of the link in `linkPrivateKeyEnc`. Wrong proofs count as wrong passwords. A new password
+    /// or a revoked link ends the remembered proof.
     /// </remarks>
     /// <summary>Unlock a password-protected link</summary>
     /// <path>api/2.0/files/share/{key}/password</path>

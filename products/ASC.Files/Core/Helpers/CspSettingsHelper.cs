@@ -136,7 +136,7 @@ public class CspSettingsHelper(
         // Beside every key of the full value, under the same host: the proxy sends it on the page of a link of a private item.
         if (!string.IsNullOrEmpty(privateLinkHeaderValue))
         {
-            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.SetAsync(GetPrivateLinkKey(headerKey), privateLinkHeaderValue, token: cs));
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.SetAsync(GetPrivateLinkKey(headerKey), privateLinkHeaderValue, PrivateLinkValueDuration, token: cs));
         }
         else
         {
@@ -196,7 +196,7 @@ public class CspSettingsHelper(
         if (!string.IsNullOrEmpty(privateLinkValue))
         {
             await hybridCache.RemoveAsync(GetPrivateLinkKey(oldKey));
-            await hybridCache.SetAsync(GetPrivateLinkKey(GetKey(newDomain)), privateLinkValue);
+            await hybridCache.SetAsync(GetPrivateLinkKey(GetKey(newDomain)), privateLinkValue, PrivateLinkValueDuration);
         }
     }
 
@@ -231,7 +231,10 @@ public class CspSettingsHelper(
         await hybridCache.SetAsync(GetKey(baseDomain), val);
 
         var privateLinkValue = await hybridCache.GetOrDefaultAsync<string>(GetPrivateLinkKey(GetKey(domain)));
-        await hybridCache.SetAsync(GetPrivateLinkKey(GetKey(baseDomain)), privateLinkValue);
+        if (!string.IsNullOrEmpty(privateLinkValue))
+        {
+            await hybridCache.SetAsync(GetPrivateLinkKey(GetKey(baseDomain)), privateLinkValue, PrivateLinkValueDuration);
+        }
     }
 
     /// <summary>
@@ -418,6 +421,12 @@ public class CspSettingsHelper(
     {
         return $"csp:{domain}";
     }
+
+    /// <summary>
+    /// How long the value for the page of a link of a private item is cached: for good, as the full value is. The proxy
+    /// reads it on every such page, and every path that rebuilds the full value rebuilds this one.
+    /// </summary>
+    public static readonly TimeSpan PrivateLinkValueDuration = TimeSpan.MaxValue;
 
     /// <summary>The key of the value for the page of a link of a private item, beside the full one: <c>csp:{host}:private</c>.</summary>
     public static string GetPrivateLinkKey(string headerKey)

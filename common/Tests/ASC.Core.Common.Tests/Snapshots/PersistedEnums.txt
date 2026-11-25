@@ -405,6 +405,7 @@ ASC.MessagingSystem.Core.MessageAction.PrivacyRoomKeyUpdated=5162
 ASC.MessagingSystem.Core.MessageAction.PrivacyRoomKeyDeleted=5163
 ASC.MessagingSystem.Core.MessageAction.FileKeysSet=5164
 ASC.MessagingSystem.Core.MessageAction.RoomFileKeysRevoked=5165
+ASC.MessagingSystem.Core.MessageAction.PrivateLinkOpened=5166
 ASC.MessagingSystem.Core.MessageAction.FileSavedButUserQuotaExceeded=5201
 ASC.MessagingSystem.Core.MessageAction.FileNotSavedDueToUserQuota=5202
 ASC.MessagingSystem.Core.MessageAction.FileSavedButRoomQuotaExceeded=5203

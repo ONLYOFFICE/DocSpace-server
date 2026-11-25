@@ -45,7 +45,6 @@ public class ExternalLinkHelper(
     FileMarker fileMarker,
     SocketManager socketManager,
     GlobalFolderHelper globalFolderHelper,
-    ShareLinkKeyDao shareLinkKeyDao,
     FilesMessageService filesMessageService)
 {
     /// <summary>
@@ -151,7 +150,7 @@ public class ExternalLinkHelper(
         // passed; a session opened earlier gets the content, not the key again.
         if (result.IsPrivate == true && !string.IsNullOrEmpty(proof))
         {
-            result.LinkPrivateKeyEnc = (await shareLinkKeyDao.GetAsync(record.Subject))?.PrivateKeyEnc;
+            result.LinkPrivateKeyEnc = (await externalShare.GetValidatedLinkKeyAsync(record.Subject))?.PrivateKeyEnc;
 
             // A matching proof opens a link session, and the reads of that session are not recorded one by one. The
             // audit trail names a private room and its items by the neutral titles of FilesMessageService.

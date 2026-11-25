@@ -57,10 +57,11 @@ public partial class EFLogger(ILogger logger) : ILogger
     internal const string RedactedParameters = "[redacted]";
 
     // The key material of private rooms and of their external links: sealed private keys, the proof hash of a link,
-    // the wraps of file keys and of link secrets. A command that writes these tables is logged without its parameter
-    // values, which the SQL log would otherwise keep (sensitive data logging is on), so they never reach a log file
-    // or the OTLP exporter. Reads keep their parameters: they bind ids only, never the values.
-    [GeneratedRegex(@"\b(INSERT\s+INTO|UPDATE)\s+[`""]?(files_share_link_keys|files_share_link_secret_wraps|files_file_keys)[`""]?(\s|\()",
+    // the wraps of file keys and of link secrets, and the users' own key pairs (the e2e profiles of account_links, kept
+    // with the other linked profiles there). A command that writes these tables is logged without its parameter values,
+    // which the SQL log would otherwise keep (sensitive data logging is on), so they never reach a log file or the OTLP
+    // exporter. Reads keep their parameters: they bind ids only, never the values.
+    [GeneratedRegex(@"\b(INSERT\s+INTO|UPDATE)\s+[`""]?(files_share_link_keys|files_share_link_secret_wraps|files_file_keys|account_links)[`""]?(\s|\()",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex WritesKeyMaterial();
 

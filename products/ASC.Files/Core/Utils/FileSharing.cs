@@ -155,10 +155,11 @@ public class FileSharingAceHelper(
             await RevokeFileKeysAsync(room, usersLeavingPrivateRoom);
 
             // A room manager who gets a lower role stays a member, but no longer manages the links: the wraps of their
-            // secrets go before the role does. The owner keeps them whatever their own record says.
+            // secrets go before the role does. The owner keeps them whatever their own record says, except when a change
+            // of owner gives the previous owner a lower role.
             var demotedManagers = aceWrappers
-                .Where(w => !w.IsLink && w.Id != room.CreateBy && w.Access is not (FileShare.RoomManager or FileShare.None) &&
-                            shares.Get(w.Id) is { Share: FileShare.RoomManager })
+                .Where(w => !w.IsLink && w.Access is not (FileShare.RoomManager or FileShare.None) &&
+                            (w.Id == room.CreateBy ? beforeOwnerChange : shares.Get(w.Id) is { Share: FileShare.RoomManager }))
                 .Select(w => w.Id)
                 .ToList();
 
@@ -955,6 +956,14 @@ public class FileSharingAceHelper(
                 throw new ArgumentException(null, "password");
             }
 
+            // Whether a visitor types a password is sealed into the key material: the flag changes only with a new sealed
+            // key and proof hash, or managers and visitors would be told of a protection the link does not have.
+            if (existedShare?.Options?.PasswordRequired is { } storedPasswordRequired && options.PasswordRequired is { } sentPasswordRequired &&
+                sentPasswordRequired != storedPasswordRequired && w.KeyMaterial is not { HasKeys: true })
+            {
+                throw new ArgumentException(null, "passwordRequired");
+            }
+
             var passwordRequired = options.PasswordRequired ?? existedShare?.Options?.PasswordRequired ?? true;
             options.PasswordRequired = passwordRequired;
 
@@ -1012,6 +1021,13 @@ public class FileSharingAceHelper(
             if (existedShare == null && storedKey != null)
             {
                 throw new ArgumentException(null, "linkId");
+            }
+
+            // A change of a link read before the lock: a concurrent revocation may have removed it since, and writing it
+            // again would bring back a revoked link.
+            if (existedShare != null && !await fileSecurity.GetPureSharesAsync(entry, [w.Id]).AnyAsync())
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_PrivateLinkRevoked);
             }
 
             if (w.KeyMaterial is not { HasKeys: true })
@@ -1093,7 +1109,7 @@ public class FileSharingAceHelper(
             }
             else
             {
-                await shareLinkKeyDao.SaveAsync(linkId, new LinkKeyMaterial(storedKey.PublicKey, storedKey.PrivateKeyEnc, storedKey.ProofHash));
+                await shareLinkKeyDao.SaveAsync(linkId, storedKey.ToKeyMaterial());
             }
         }
         catch (Exception rollback)
@@ -1877,7 +1893,7 @@ public class FileSharing(
         {
             var currentId = authContext.CurrentAccount.ID;
             var own = await shareLinkKeyDao.GetSecretWrapAsync(record.Subject, currentId);
-            w.OwnLinkSecretWrap = own == null ? null : new LinkSecretWrap(own.UserId, own.PublicKeyId, own.Wrap);
+            w.OwnLinkSecretWrap = own?.ToSecretWrap();
 
             var wrapped = await shareLinkKeyDao.GetSecretWrapUsersAsync(record.Subject);
             w.ManagersWithoutLinkSecretWrap = [.. (await fileSharingHelper.GetLinkManagersAsync(room)).Where(id => !wrapped.Contains(id)).Order()];

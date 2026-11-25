@@ -82,6 +82,7 @@ public class PortalRemovalService(
             }
 
             await hybridCache.RemoveAsync(GetCspKey(tenantDomain));
+            await hybridCache.RemoveAsync(GetPrivateLinkCspKey(tenantDomain));
         });
 
         if (beforePurgeAsync != null)
@@ -106,4 +107,7 @@ public class PortalRemovalService(
     }
 
     private static string GetCspKey(string domain) => $"csp:{domain}";
+
+    // The value for the page of a link of a private item, kept beside the full one (CspSettingsHelper.GetPrivateLinkKey).
+    private static string GetPrivateLinkCspKey(string domain) => $"{GetCspKey(domain)}:private";
 }

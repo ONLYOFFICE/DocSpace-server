@@ -52,6 +52,9 @@ public class PrivateRoomAccountHelper(
     UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     MessageService messageService,
+    ShareLinkKeyDao shareLinkKeyDao,
+    DocumentServiceHelper documentServiceHelper,
+    PrivateRoomsGate privateRoomsGate,
     ILogger<PrivateRoomAccountHelper> logger)
 {
     /// <summary>
@@ -73,9 +76,10 @@ public class PrivateRoomAccountHelper(
 
     /// <summary>
     /// Answers 403 when one of the accounts owns a private room; nothing is changed then. The message names the account
-    /// and the number of its private rooms, not the rooms: the caller may not be a member of them.
+    /// and the number of its private rooms, not the rooms: the caller may not be a member of them. With
+    /// <paramref name="toGuest"/>, the message says that such an owner is made a guest only with a recipient of the rooms.
     /// </summary>
-    public async Task DemandNoPrivateRoomOwnedAsync(IEnumerable<Guid> userIds)
+    public async Task DemandNoPrivateRoomOwnedAsync(IEnumerable<Guid> userIds, bool toGuest = false)
     {
         if (daoFactory.GetFolderDao<int>() is not FolderDao folderDao)
         {
@@ -89,7 +93,9 @@ public class PrivateRoomAccountHelper(
             {
                 var userName = (await userManager.GetUsersAsync(userId)).DisplayUserName(false, displayUserSettingsHelper);
 
-                throw new PrivateRoomOwnershipException(string.Format(FilesCommonResource.ErrorMessage_PrivateRoomOwnerCannotBeDisabled, userName, roomIds.Count));
+                var message = toGuest ? FilesCommonResource.ErrorMessage_PrivateRoomOwnerCannotBeGuest : FilesCommonResource.ErrorMessage_PrivateRoomOwnerCannotBeDisabled;
+
+                throw new PrivateRoomOwnershipException(string.Format(message, userName, roomIds.Count));
             }
         }
     }
@@ -101,8 +107,9 @@ public class PrivateRoomAccountHelper(
     }
 
     /// <summary>
-    /// Answers 403 when the recipient cannot take every private room the account owns: they hold no encryption key, or
-    /// no key of an encrypted file of one of the rooms. Made before a type change to guest changes anything.
+    /// Answers 403 when the private rooms the account owns cannot be handed over: the end-to-end encrypted rooms app is
+    /// off, a room is archived (a change of owner refuses both), or the recipient holds no encryption key or no key of an
+    /// encrypted file of one of the rooms. Made before a type change to guest changes anything.
     /// </summary>
     public async Task DemandPrivateRoomsCanPassToAsync(Guid userId, Guid recipientId)
     {
@@ -112,11 +119,21 @@ public class PrivateRoomAccountHelper(
             return;
         }
 
+        await privateRoomsGate.DemandEnabledAsync();
+
         var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
         var canTake = await encryptionLoginProvider.HasKeysAsync(recipientId);
 
         foreach (var roomId in roomIds)
         {
+            if ((await folderDao.GetFolderAsync(roomId)) is { RootFolderType: FolderType.Archive })
+            {
+                var ownerName = (await userManager.GetUsersAsync(userId)).DisplayUserName(false, displayUserSettingsHelper);
+
+                throw new PrivateRoomOwnershipException(string.Format(FilesCommonResource.ErrorMessage_PrivateRoomOwnedInArchive, ownerName));
+            }
+
             if (!canTake || (await DocSpaceHelper.GetEncryptedFilesWithoutKeyAsync(fileDao, roomId, recipientId)).Count != 0)
             {
                 var userName = (await userManager.GetUsersAsync(recipientId)).DisplayUserName(false, displayUserSettingsHelper);
@@ -152,8 +169,10 @@ public class PrivateRoomAccountHelper(
 
             await fileSecurity.ShareAsync(room.Id, FileEntryType.Folder, userId, FileShare.None);
 
+            // As a member who leaves: an open editor session of the room's files ends, then the client is told.
             try
             {
+                await documentServiceHelper.CheckRoomUsersForDropAsync(room);
                 await socketManager.DeleteFolder(room, [userId]);
             }
             catch (Exception exception)
@@ -185,7 +204,8 @@ public class PrivateRoomAccountHelper(
 
     /// <summary>
     /// Deletes every wrapped file key of a disabled account. Each private room it held keys in gets a revocation record
-    /// in the audit trail.
+    /// in the audit trail. The wraps of link secrets made for the account go too, in every room, also where it held no
+    /// file key: such an account manages no link.
     /// </summary>
     public async Task RevokeFileKeysOfDisabledAsync(Guid userId)
     {
@@ -205,5 +225,7 @@ public class PrivateRoomAccountHelper(
 
         // keys of files that belong to no private room any more
         await daoFactory.GetFileDao<int>().DeleteFileKeysAsync(userId);
+
+        await shareLinkKeyDao.DeleteSecretWrapsOfUserAsync(userId);
     }
 }

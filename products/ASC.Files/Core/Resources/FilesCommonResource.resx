@@ -650,6 +650,15 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Failed to synchronize form data to external database.</value>
   </data>
+  <data name="ErrorMessage_PrivateLinkRevoked" xml:space="preserve">
+    <value>The link was revoked while it was being changed</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOwnedInArchive" xml:space="preserve">
+    <value>{0} owns an archived private room. Restore it from the archive, then change the type</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOwnerCannotBeGuest" xml:space="preserve">
+    <value>{0} owns private rooms ({1}). To make the account a guest, change its type with a recipient who takes the rooms</value>
+  </data>
   <data name="ErrorMessage_PrivateRoomOwnerCannotBeDisabled" xml:space="preserve">
     <value>{0} owns private rooms ({1}). Before the account is disabled, each room needs another owner: its owner or a DocSpace admin who is a member of it can change the owner</value>
   </data>
@@ -660,7 +669,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
     <value>{0} cannot take the private rooms of this account. The recipient needs an encryption key and the keys of every encrypted file in those rooms</value>
   </data>
   <data name="ErrorMessage_PrivateRoomTypeNotSupported" xml:space="preserve">
-    <value>A Public room, a Form filling room or an AI agent cannot be private: each of them is reached without an encryption key</value>
+    <value>A public room, a form filling room, or an AI agent cannot be private</value>
   </data>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>An AI agent's instruction cannot be longer than {0} characters</value>

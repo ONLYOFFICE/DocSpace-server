@@ -673,6 +673,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-ai-access-settings", { enabled });
   }
 
+  function changePrivateRoomLinksSettings({ room, enabled } = {}) {
+    logger.info(`change private room links settings in room ${room}, enabled: ${enabled}`);
+    filesIO.to(room).emit("s:change-private-room-links-settings", { enabled });
+  }
+
   function changeExternalSharingSettings({
     room,
     externalShare,
@@ -800,6 +805,7 @@ module.exports = (io) => {
     quotaExceeded,
     changeAiConfig,
     changeAiAccessSettings,
+    changePrivateRoomLinksSettings,
     changeExternalSharingSettings,
     externalDbSettings,
     formSuggestedQuestions,

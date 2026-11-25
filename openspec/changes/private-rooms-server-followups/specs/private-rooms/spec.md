@@ -421,6 +421,11 @@ private room, delete their file keys with a revocation record and delete their k
 later type change restores none of it. If the recipient lacks an encryption key or a key of an encrypted file of such a room, the call MUST answer
 403 with the `error.type` of the ownership refusal before anything changes.
 
+#### Scenario: Owner of an archived private room
+
+- **WHEN** the owner of an archived private room is made a guest
+- **THEN** the call answers 403 before anything changes
+
 #### Scenario: Member made a guest
 
 - **WHEN** a member of a private room holding file keys is made a guest, and later a user again
@@ -441,3 +446,20 @@ later type change restores none of it. If the recipient lacks an encryption key 
 
 - **WHEN** the recipient lacks the key of an encrypted file of a private room the user owns
 - **THEN** the answer is 403 and the user, the room and the keys are unchanged
+
+### Requirement: Making a member a guest through updateMember leaves the private rooms
+
+`updateMember` with `isUser` true SHALL take the user out of every private room and delete their file keys, link secret
+wraps and key pair, as the type change to `Guest` does. If the user owns a private room, the call MUST answer 403 before
+anything changes: only the type change hands such a room over.
+
+#### Scenario: Member made a guest through updateMember
+
+- **WHEN** a member of a private room holding file keys is made a guest through `updateMember`
+- **THEN** they are no member of the room and hold no file key and no key pair
+
+#### Scenario: Owner made a guest through updateMember
+
+- **WHEN** the owner of a private room is made a guest through `updateMember`
+- **THEN** the answer is 403, and they stay a user who owns the room and keeps their keys
+
