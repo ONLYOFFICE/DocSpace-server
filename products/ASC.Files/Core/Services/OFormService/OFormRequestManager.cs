@@ -46,6 +46,27 @@ public class OFormRequestManager(
     public const string ProbePipelineName = "oform-gallery-probe";
 
     /// <summary>
+    /// The client the download asks the gallery with: every request of it gets an attempt timeout, retries and a circuit
+    /// breaker per host (<see cref="ConfigureHttpClientPipeline"/>), all inside the download deadline. The availability
+    /// check uses the default client: it is not retried, its answer is cached.
+    /// </summary>
+    public const string HttpClientName = "templateGallery";
+
+    public const string HttpClientPipelineName = "oform-gallery-http";
+
+    /// <summary>
+    /// How long one request of the download waits for the headers of its answer before it is retried.
+    /// </summary>
+    public static readonly TimeSpan AttemptTimeout = TimeSpan.FromSeconds(10);
+
+    /// <summary>
+    /// The first wait before a retry of the download; the next waits grow from it.
+    /// </summary>
+    public static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(1);
+
+    private const int MaxRetryAttempts = 2;
+
+    /// <summary>
     /// How long a gallery template is downloaded, both requests together: the editor page waits for the request that
     /// creates the file, so a gallery that does not answer must fail it rather than hold it for the 100 seconds of the
     /// client.
@@ -60,15 +81,27 @@ public class OFormRequestManager(
 
     /// <summary>
     /// The largest template file the download accepts: the file is held in memory, so a proxy that answers with a large
-    /// or endless body fails the download instead of filling the memory for the whole deadline.
+    /// or endless body fails the download instead of filling the memory for the whole deadline. It limits the file only;
+    /// the answers with the template list are limited by <see cref="MaxListSize"/>.
     /// </summary>
     public const long MaxTemplateSize = 50L * 1024 * 1024;
+
+    /// <summary>
+    /// The largest answer with the template list that the download and the availability check read: both ask for one
+    /// template, so a larger answer is the page of a proxy, not the list.
+    /// </summary>
+    public const long MaxListSize = 1024 * 1024;
+
+    // The buffer of the file grows from at most this size, whatever length the gallery announces
+    private const int MaxInitialBufferSize = 1024 * 1024;
 
     // A PDF reader looks for the PDF header in the first 1024 bytes of the file
     private const int SignatureLength = 1024;
 
-    // The event the timeout strategy of Polly reports; the manager logs the failure itself
+    // The events of Polly whose level the gallery's pipelines set: the manager logs a failure of the gallery itself
     private const string TimeoutEventName = "OnTimeout";
+    private const string RetryEventName = "OnRetry";
+    private const string CircuitOpenedEventName = "OnCircuitOpened";
 
     private static readonly TimeSpan _availableDuration = TimeSpan.FromMinutes(10);
 
@@ -101,11 +134,16 @@ public class OFormRequestManager(
     /// No gallery is configured, or the gallery has no such template, or no file of this format for it.
     /// </exception>
     /// <exception cref="CustomHttpException">
-    /// 502: the gallery cannot be reached, dropped the connection, did not answer in time, answered with an error status
-    /// or with a body that is not the template list, named a file at an address that cannot be requested, or returned a
-    /// file larger than <see cref="MaxTemplateSize"/>, a PDF without a PDF header in its first 1024 bytes or a DOCX, XLSX
-    /// or PPTX file without a ZIP signature.
+    /// 502: the gallery address is not an http or https address, the gallery cannot be reached, dropped the connection,
+    /// did not answer in time, answered with an error status, with a body that is not the template list or with a list
+    /// larger than <see cref="MaxListSize"/>, failed so often lately that its circuit is open, named a file at an
+    /// address that cannot be requested, or returned a file larger than <see cref="MaxTemplateSize"/>, a PDF without a
+    /// PDF header in its first 1024 bytes or a DOCX, XLSX or PPTX file without a ZIP signature.
     /// </exception>
+    /// <remarks>
+    /// The download deadline (<see cref="DownloadTimeout"/>) is the outermost strategy: the retries of the client
+    /// (<see cref="HttpClientName"/>) run inside it, so they never hold the editor longer than that.
+    /// </remarks>
     public async Task<Stream> Get(int id, string ext)
     {
         if (!IsConfigured)
@@ -113,9 +151,14 @@ public class OFormRequestManager(
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
+        if (!TryGetDomain(out var domain))
+        {
+            throw GalleryUnavailable();
+        }
+
         try
         {
-            return await GetPipeline(DownloadPipelineName, DownloadTimeout).ExecuteAsync(token => DownloadAsync(id, ext, token));
+            return await GetPipeline(DownloadPipelineName, DownloadTimeout).ExecuteAsync(token => DownloadAsync(domain, id, ext, token));
         }
         catch (Exception e) when (IsGalleryFailure(e))
         {
@@ -131,10 +174,10 @@ public class OFormRequestManager(
         }
     }
 
-    private async ValueTask<Stream> DownloadAsync(int id, string ext, CancellationToken cancellationToken)
+    private async ValueTask<Stream> DownloadAsync(Uri domain, int id, string ext, CancellationToken cancellationToken)
     {
-        var httpClient = httpClientFactory.CreateClient();
-        using var response = await httpClient.GetAsync($"{GetListUrl()}?filters[id][$eq]={id}&locale=*&populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={Uri.EscapeDataString(ext)}", cancellationToken);
+        var httpClient = httpClientFactory.CreateClient(HttpClientName);
+        using var response = await httpClient.GetAsync($"{GetListUrl()}?filters[id][$eq]={id}&locale=*&populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={Uri.EscapeDataString(ext)}", HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
             logger.WarningOFormGalleryStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
@@ -142,18 +185,16 @@ public class OFormRequestManager(
             throw GalleryUnavailable();
         }
 
-        var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(cancellationToken), _options);
+        var data = await ReadListAsync(response, cancellationToken);
         if (data?.Data == null)
         {
-            logger.WarningOFormGalleryNoList(response.RequestMessage?.RequestUri);
-
             throw GalleryUnavailable();
         }
 
         var file = GetFile(data, ext) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
 
         // A gallery that keeps its files itself (the local upload provider of Strapi) names them by a path on its host
-        if (!Uri.TryCreate(new Uri(_configuration.Domain), file.Url, out var fileUri))
+        if (!Uri.TryCreate(domain, file.Url, out var fileUri) || !IsHttp(fileUri))
         {
             logger.WarningOFormGalleryFileAddress(file.Url);
 
@@ -189,7 +230,9 @@ public class OFormRequestManager(
             throw GalleryUnavailable();
         }
 
-        var stream = new MemoryStream(length is { } size ? (int)size : read);
+        // The announced length only sizes the start of the buffer: a gallery that announces almost the limit and sends
+        // a short body must not take that much memory for each request
+        var stream = new MemoryStream(Math.Max(read, (int)Math.Min(length ?? read, MaxInitialBufferSize)));
 
         try
         {
@@ -236,6 +279,45 @@ public class OFormRequestManager(
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Reads the answer with the template list unless it is larger than <see cref="MaxListSize"/>. Logs why it gives
+    /// no list: an answer too large, or one without the list.
+    /// </summary>
+    /// <returns>The list, or <c>null</c> when the answer is not one.</returns>
+    /// <exception cref="JsonException">The answer is not JSON, the page of a proxy.</exception>
+    private async Task<OFromRequestData> ReadListAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        var uri = response.RequestMessage?.RequestUri;
+
+        if (response.Content.Headers.ContentLength > MaxListSize)
+        {
+            logger.WarningOFormGalleryAnswerTooLarge(uri, MaxListSize);
+
+            return null;
+        }
+
+        await using var body = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var buffer = new MemoryStream();
+
+        if (!await CopyAtMostAsync(body, buffer, MaxListSize, cancellationToken))
+        {
+            logger.WarningOFormGalleryAnswerTooLarge(uri, MaxListSize);
+
+            return null;
+        }
+
+        buffer.Position = 0;
+
+        // The gallery answers in UTF-8; a body in another charset is not its list
+        var data = await JsonSerializer.DeserializeAsync<OFromRequestData>(buffer, _options, cancellationToken);
+        if (data?.Data == null)
+        {
+            logger.WarningOFormGalleryNoList(uri);
+        }
+
+        return data;
     }
 
     /// <summary>
@@ -335,8 +417,14 @@ public class OFormRequestManager(
 
     private async ValueTask<bool> AskForListAsync(CancellationToken cancellationToken)
     {
+        if (!TryGetDomain(out _))
+        {
+            return false;
+        }
+
+        // The default client: the check is not retried, its deadline is short and its answer is cached
         var httpClient = httpClientFactory.CreateClient();
-        using var response = await httpClient.GetAsync($"{GetListUrl()}?pagination[pageSize]=1&fields[0]=updatedAt", cancellationToken);
+        using var response = await httpClient.GetAsync($"{GetListUrl()}?pagination[pageSize]=1&fields[0]=updatedAt", HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
             logger.WarningOFormGalleryProbeStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
@@ -344,15 +432,29 @@ public class OFormRequestManager(
             return false;
         }
 
-        var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(cancellationToken), _options);
-        if (data?.Data == null)
-        {
-            logger.WarningOFormGalleryNoList(response.RequestMessage?.RequestUri);
+        var data = await ReadListAsync(response, cancellationToken);
 
-            return false;
+        return data?.Data != null;
+    }
+
+    /// <summary>
+    /// The configured domain of the gallery, when it is an absolute http or https address; otherwise logs it.
+    /// </summary>
+    private bool TryGetDomain(out Uri domain)
+    {
+        if (Uri.TryCreate(_configuration.Domain, UriKind.Absolute, out domain) && IsHttp(domain))
+        {
+            return true;
         }
 
-        return true;
+        logger.WarningOFormGalleryAddress(_configuration.Domain);
+
+        return false;
+    }
+
+    private static bool IsHttp(Uri uri)
+    {
+        return uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps;
     }
 
     /// <summary>
@@ -369,36 +471,74 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// A deadline of <paramref name="timeout"/>. Its timeout is reported to the telemetry of Polly at the Debug level,
-    /// not at Error: the manager logs the failure of the gallery itself, as a warning.
+    /// A deadline of <paramref name="timeout"/>, with the levels of <see cref="ConfigureTelemetry{TBuilder}"/>.
     /// </summary>
     internal static void ConfigurePipeline(ResiliencePipelineBuilder builder, TelemetryOptions telemetry, TimeSpan timeout)
+    {
+        ConfigureTelemetry(builder, telemetry);
+        builder.AddTimeout(timeout);
+    }
+
+    /// <summary>
+    /// The strategies of every request of the download client, the outer one first: retries of a transient failure
+    /// (an exception of the network, a 5xx, 408 or 429, an attempt past <see cref="AttemptTimeout"/>), a circuit
+    /// breaker that fails the requests at once while the gallery keeps failing, and the timeout of one attempt. They all
+    /// run inside the download deadline, which ends the retries with the download.
+    /// </summary>
+    internal static void ConfigureHttpClientPipeline(ResiliencePipelineBuilder<HttpResponseMessage> builder, TelemetryOptions telemetry, TimeSpan retryDelay)
+    {
+        ConfigureTelemetry(builder, telemetry);
+        builder.AddRetry(new HttpRetryStrategyOptions
+        {
+            MaxRetryAttempts = MaxRetryAttempts,
+            Delay = retryDelay,
+            BackoffType = DelayBackoffType.Exponential,
+            UseJitter = true
+        });
+        builder.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+        {
+            FailureRatio = 0.5,
+            MinimumThroughput = 5,
+            SamplingDuration = TimeSpan.FromSeconds(30),
+            BreakDuration = TimeSpan.FromSeconds(30)
+        });
+        builder.AddTimeout(AttemptTimeout);
+    }
+
+    /// <summary>
+    /// The levels the telemetry of Polly reports the gallery's events at, set here for all of its pipelines: a timeout
+    /// at Debug and a retry at Information, not at Error and Warning, since the manager logs the failure of the gallery
+    /// itself, as a warning; an opened circuit at Warning, not at Error.
+    /// </summary>
+    private static void ConfigureTelemetry<TBuilder>(TBuilder builder, TelemetryOptions telemetry) where TBuilder : ResiliencePipelineBuilderBase
     {
         var severityProvider = telemetry.SeverityProvider;
 
         builder.ConfigureTelemetry(new TelemetryOptions(telemetry)
         {
-            SeverityProvider = args => args.Event.EventName == TimeoutEventName
-                ? ResilienceEventSeverity.Debug
-                : severityProvider?.Invoke(args) ?? args.Event.Severity
+            SeverityProvider = args => args.Event.EventName switch
+            {
+                TimeoutEventName => ResilienceEventSeverity.Debug,
+                RetryEventName => ResilienceEventSeverity.Information,
+                CircuitOpenedEventName => ResilienceEventSeverity.Warning,
+                _ => severityProvider?.Invoke(args) ?? args.Event.Severity
+            }
         });
-        builder.AddTimeout(timeout);
     }
 
     /// <summary>
     /// Whether the exception is a failure of the gallery or of the way to it rather than of this code. The requests get
     /// no token of an HTTP request: the download passes none, and the check passes the token of the cache factory, which
-    /// <see cref="IsAvailableAsync"/> starts without one. So a TimeoutRejectedException is the deadline of the pipeline,
-    /// and a cancellation is the timeout of the client. A connection dropped while the body is read comes as an
-    /// HttpRequestException from HttpContent; IOException covers a read the runtime does not wrap (HttpIOException). An
-    /// InvalidOperationException is a charset of the answer the runtime cannot decode, or a gallery address without a
-    /// scheme. UriFormatException and NotSupportedException cover malformed addresses and unsupported schemes, in the
-    /// configuration or in the file address the gallery gave.
+    /// <see cref="IsAvailableAsync"/> starts without one. So a TimeoutRejectedException is the deadline of the pipeline
+    /// or of the last attempt, and a cancellation is the timeout of the client. A connection dropped while the body is
+    /// read comes as an HttpRequestException from HttpContent; IOException covers a read the runtime does not wrap
+    /// (HttpIOException). A JsonException is an answer that is not JSON. A BrokenCircuitException is a gallery that
+    /// failed so often lately that the client does not ask it. The addresses are checked before the requests, so
+    /// anything else, a NotSupportedException of the serializer among them, is a failure of this code.
     /// </summary>
     private static bool IsGalleryFailure(Exception e)
     {
-        return e is TimeoutRejectedException or HttpRequestException or IOException or JsonException or OperationCanceledException or UriFormatException or NotSupportedException
-            or InvalidOperationException and not ObjectDisposedException;
+        return e is TimeoutRejectedException or HttpRequestException or IOException or JsonException or OperationCanceledException or BrokenCircuitException;
     }
 
     private string GetListUrl()
@@ -444,17 +584,28 @@ public class OFormRequestManager(
 public static class OFormRequestManagerExtension
 {
     /// <summary>
-    /// Registers the deadlines of the template gallery: the download of a template and the availability check. A host
-    /// that does not call this gets the same deadlines, <see cref="OFormRequestManager.DownloadTimeout"/> and
+    /// Registers the resilience of the template gallery: the deadlines of the download of a template and of the
+    /// availability check, and the client the download asks the gallery with
+    /// (<see cref="OFormRequestManager.HttpClientName"/>: retries, a circuit breaker per host and an attempt timeout).
+    /// A host that does not call this gets the same deadlines, <see cref="OFormRequestManager.DownloadTimeout"/> and
     /// <see cref="OFormRequestManager.ProbeTimeout"/>, as long as it has the pipeline registry, which every host gets
-    /// from AddStandardHttpClients; the parameters are for tests, which cannot wait that long.
+    /// from AddStandardHttpClients, but its download client is the default one, with no retries and no breaker: the
+    /// factory does not refuse a name never registered. Files.Server, and the Monolith through it, call this. The
+    /// parameters are for tests, which cannot wait that long.
     /// </summary>
-    public static IServiceCollection AddTemplateGalleryPipelines(this IServiceCollection services, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null)
+    public static IServiceCollection AddTemplateGalleryPipelines(this IServiceCollection services, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null,
+        TimeSpan? retryDelay = null)
     {
         services.AddResiliencePipeline(OFormRequestManager.DownloadPipelineName, (builder, context) =>
             OFormRequestManager.ConfigurePipeline(builder, GetTelemetryOptions(context.ServiceProvider), downloadTimeout ?? OFormRequestManager.DownloadTimeout));
         services.AddResiliencePipeline(OFormRequestManager.ProbePipelineName, (builder, context) =>
             OFormRequestManager.ConfigurePipeline(builder, GetTelemetryOptions(context.ServiceProvider), probeTimeout ?? OFormRequestManager.ProbeTimeout));
+
+        // A list and its files may come from different hosts (a CDN): each host gets a breaker of its own
+        services.AddHttpClient(OFormRequestManager.HttpClientName)
+            .AddResilienceHandler(OFormRequestManager.HttpClientPipelineName, (builder, context) =>
+                OFormRequestManager.ConfigureHttpClientPipeline(builder, GetTelemetryOptions(context.ServiceProvider), retryDelay ?? OFormRequestManager.RetryDelay))
+            .SelectPipelineByAuthority();
 
         return services;
     }

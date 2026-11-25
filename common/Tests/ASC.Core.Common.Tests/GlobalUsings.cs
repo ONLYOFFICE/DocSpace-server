@@ -81,6 +81,7 @@ global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
 global using ASC.Notify.Sinks;
 global using ASC.Notify.Textile;
+global using ASC.Files.Extensions;
 global using ASC.People.Extensions;
 global using ASC.Webhooks.Contract;
 global using ASC.Webhooks.Core;

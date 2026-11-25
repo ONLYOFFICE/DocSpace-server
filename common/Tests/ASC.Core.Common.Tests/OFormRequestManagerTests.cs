@@ -378,6 +378,116 @@ public sealed class OFormRequestManagerTests : IDisposable
         await Assert.ThrowsAsync<ItemNotFoundException>(() => CreateManager(null).Get(1, ".pdf"));
     }
 
+    [Theory]
+    [InlineData("http://exa mple:x")]
+    [InlineData("ftp://gallery.example")]
+    public async Task Get_GalleryAddressCannotBeRequested_Returns502(string domain)
+    {
+        await AssertGalleryUnavailableAsync(CreateManager(domain));
+    }
+
+    [Fact]
+    public async Task Get_ListLargerThanItsLimitWithoutItsLength_Returns502()
+    {
+        // An answer that goes on past the limit of the list is refused although it is a valid list naming a valid file:
+        // the read stops at that limit instead of holding the answer in memory until the deadline
+        var files = Gallery(request => IsFile(request)
+            ? new StubResponse(HttpStatusCode.OK, Pdf)
+            : StubResponse.Json(HttpStatusCode.OK, ListWithFile()));
+        var gallery = RawFile(head: ListWithFile(), contentLength: null, padding: OFormRequestManager.MaxListSize, stall: false,
+            paddingByte: (byte)' ');
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url));
+
+        gallery.CallCount.Should().Be(1);
+        files.CallCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Get_ListAnnouncedLargerThanItsLimit_Returns502WithoutReadingIt()
+    {
+        var gallery = RawFile(head: "", contentLength: OFormRequestManager.MaxListSize + 1, padding: 0, stall: true);
+        var manager = CreateManager(gallery.Url, clientTimeout: Timeout.InfiniteTimeSpan, downloadTimeout: TimeSpan.FromSeconds(10));
+
+        var watch = Stopwatch.StartNew();
+        await AssertGalleryUnavailableAsync(manager);
+
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(3));
+    }
+
+    [Theory]
+    [InlineData(typeof(NotSupportedException))]
+    [InlineData(typeof(InvalidOperationException))]
+    [InlineData(typeof(ObjectDisposedException))]
+    public async Task Get_FailureOfThisCode_IsNotCalledAnUnavailableGallery(Type exceptionType)
+    {
+        // A serializer that cannot read a changed DTO, or a disposed handler, is a fault of the portal: it must reach
+        // the error log, not answer every creation from a template with "the gallery is temporarily unavailable"
+        var exception = (Exception)Activator.CreateInstance(exceptionType, "fault")!;
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, ListWithFile()));
+        var manager = CreateManager(gallery.Url, primaryHandler: () => new ThrowingHandler(exception));
+
+        var thrown = await Assert.ThrowsAnyAsync<Exception>(() => manager.Get(1, ".pdf"));
+
+        thrown.Should().BeSameAs(exception);
+    }
+
+    [Fact]
+    public async Task Get_GalleryAnswers5xx_IsAskedAgainBeforeA502()
+    {
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.ServiceUnavailable));
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url));
+
+        gallery.CallCount.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task Get_GalleryAnswers5xxOnce_ReturnsTheFile()
+    {
+        var failedOnce = 0;
+        var gallery = Gallery(request => IsFile(request)
+            ? new StubResponse(HttpStatusCode.OK, Pdf)
+            : Interlocked.Exchange(ref failedOnce, 1) == 0
+                ? new StubResponse(HttpStatusCode.BadGateway)
+                : StubResponse.Json(HttpStatusCode.OK, ListWithFile()));
+
+        await using var stream = await CreateManager(gallery.Url).Get(1, ".pdf");
+
+        using var reader = new StreamReader(stream);
+        (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(Pdf);
+    }
+
+    [Fact]
+    public async Task Get_GalleryKeepsFailing_OpensTheCircuitAndAnswers502WithoutAskingIt()
+    {
+        // While the gallery keeps failing, a creation from a template answers 502 at once instead of waiting for it
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.ServiceUnavailable));
+        var manager = CreateManager(gallery.Url);
+
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+        var asked = gallery.CallCount;
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        gallery.CallCount.Should().Be(asked);
+    }
+
+    [Fact]
+    public async Task Get_RetriesOfTheClient_EndWithTheDownloadDeadline()
+    {
+        // The deadline of the download is the outer strategy: a retry that would wait past it never starts
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.ServiceUnavailable));
+        var manager = CreateManager(gallery.Url, downloadTimeout: TimeSpan.FromMilliseconds(500), retryDelay: TimeSpan.FromSeconds(10));
+
+        var watch = Stopwatch.StartNew();
+        await AssertGalleryUnavailableAsync(manager);
+
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(3));
+        gallery.CallCount.Should().Be(1);
+    }
+
     [Fact]
     public async Task IsAvailableAsync_GalleryAnswersWithItsList_IsTrueAndAskedOnce()
     {
@@ -468,6 +578,27 @@ public sealed class OFormRequestManagerTests : IDisposable
         var timeouts = logs.Entries.Where(entry => entry.Message.Contains("OnTimeout", StringComparison.Ordinal)).ToList();
         timeouts.Should().NotBeEmpty();
         timeouts.Should().OnlyContain(entry => entry.Level == LogLevel.Debug);
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_GalleryAnswers5xx_IsFalseWithoutAskingAgain()
+    {
+        // The check is not retried: its answer is cached, and retries would only push it past the hard timeout
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.ServiceUnavailable));
+
+        (await CreateManager(gallery.Url).IsAvailableAsync()).Should().BeFalse();
+
+        gallery.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_ListLargerThanItsLimit_IsFalse()
+    {
+        // A valid list padded with spaces past the limit: only the limit makes it "unavailable"
+        var gallery = RawFile(head: List, contentLength: null, padding: OFormRequestManager.MaxListSize, stall: false,
+            paddingByte: (byte)' ');
+
+        (await CreateManager(gallery.Url).IsAvailableAsync()).Should().BeFalse();
     }
 
     [Fact]
@@ -743,9 +874,9 @@ public sealed class OFormRequestManagerTests : IDisposable
         return server;
     }
 
-    private RawFileServer RawFile(string head, long? contentLength, long padding, bool stall)
+    private RawFileServer RawFile(string head, long? contentLength, long padding, bool stall, byte paddingByte = 0)
     {
-        var server = new RawFileServer(head, contentLength, padding, stall);
+        var server = new RawFileServer(head, contentLength, padding, stall, paddingByte);
         _rawServers.Add(server);
 
         return server;
@@ -776,17 +907,19 @@ public sealed class OFormRequestManagerTests : IDisposable
     /// <param name="loggerProvider">Where the logs of the services (Polly's among them) go; none by default.</param>
     /// <param name="registerPipelines">
     /// <c>false</c> registers the registry without the pipelines of the gallery, as a host that does not call
-    /// AddTemplateGalleryPipelines has it: the deadlines are then the manager's own.
+    /// AddTemplateGalleryPipelines has it: the deadlines are then the manager's own, and the download client has no
+    /// retries and no breaker.
     /// </param>
+    /// <param name="retryDelay">The first wait before a retry of the download; 50 ms by default, so retries stay quick.</param>
     private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null,
         Func<HttpMessageHandler>? primaryHandler = null, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null,
-        ILoggerProvider? loggerProvider = null, bool registerPipelines = true)
+        ILoggerProvider? loggerProvider = null, bool registerPipelines = true, TimeSpan? retryDelay = null)
     {
         var services = new ServiceCollection();
 
         if (registerPipelines)
         {
-            services.AddTemplateGalleryPipelines(downloadTimeout, probeTimeout);
+            services.AddTemplateGalleryPipelines(downloadTimeout, probeTimeout, retryDelay ?? TimeSpan.FromMilliseconds(50));
         }
         else
         {
@@ -798,17 +931,21 @@ public sealed class OFormRequestManagerTests : IDisposable
             services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(loggerProvider));
         }
 
-        var builder = services.AddHttpClient(Options.DefaultName, client =>
+        // The check asks with the default client, the download with the gallery's own
+        foreach (var name in new[] { Options.DefaultName, OFormRequestManager.HttpClientName })
         {
-            if (clientTimeout is { } timeout)
+            var builder = services.AddHttpClient(name, client =>
             {
-                client.Timeout = timeout;
-            }
-        });
+                if (clientTimeout is { } timeout)
+                {
+                    client.Timeout = timeout;
+                }
+            });
 
-        if (primaryHandler is not null)
-        {
-            builder.ConfigurePrimaryHttpMessageHandler(primaryHandler);
+            if (primaryHandler is not null)
+            {
+                builder.ConfigurePrimaryHttpMessageHandler(primaryHandler);
+            }
         }
 
         var provider = services.BuildServiceProvider();
@@ -998,11 +1135,12 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     /// <summary>
-    /// A server that answers 200 with <paramref name="head"/> and then <paramref name="padding"/> zero bytes. With a
+    /// A server that answers 200 with <paramref name="head"/> and then <paramref name="padding"/> bytes of
+    /// <paramref name="paddingByte"/>, zero by default; a space keeps a JSON head valid JSON. With a
     /// <paramref name="contentLength"/> it announces that length whatever it writes; without one the body ends when the
     /// connection closes. With <paramref name="stall"/> it keeps the connection open after that and writes nothing more.
     /// </summary>
-    private sealed class RawFileServer(string head, long? contentLength, long padding, bool stall) : RawServer
+    private sealed class RawFileServer(string head, long? contentLength, long padding, bool stall, byte paddingByte = 0) : RawServer
     {
         protected override async Task AnswerAsync(Socket connection, CancellationToken stopped)
         {
@@ -1011,6 +1149,7 @@ public sealed class OFormRequestManagerTests : IDisposable
                 $"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n{length}\r\n{head}"));
 
             var zeros = new byte[64 * 1024];
+            Array.Fill(zeros, paddingByte);
             for (var left = padding; left > 0; left -= zeros.Length)
             {
                 await connection.SendAsync(zeros.AsMemory(0, (int)Math.Min(left, zeros.Length)), stopped);

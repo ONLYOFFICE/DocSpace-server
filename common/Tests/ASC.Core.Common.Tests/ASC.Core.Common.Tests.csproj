@@ -44,10 +44,12 @@
          (BackupsContext in ASC.Data.Backup.Core, LegacyAiDbContext in the AI service), so PersistedEnumValuesTests
          sees every stored enum. -->
     <ProjectReference Include="..\..\Tools\ASC.Migrations.Core\ASC.Migrations.Core.csproj" />
-    <!-- ASC.People and ASC.AI.Worker carry the service extensions that register the document service clients:
+    <!-- ASC.People and ASC.AI.Worker carry the service extensions that register the document service clients, and
+         ASC.Files (Files.Server) the one that registers the template gallery client:
          HostHttpClientRegistrationTests calls them on a bare service collection. -->
     <ProjectReference Include="..\..\..\products\ASC.People\Server\ASC.People.csproj" />
     <ProjectReference Include="..\..\..\products\ASC.AI\Worker\ASC.AI.Worker.csproj" />
+    <ProjectReference Include="..\..\..\products\ASC.Files\Server\ASC.Files.csproj" />
   </ItemGroup>
 
   <ItemGroup>

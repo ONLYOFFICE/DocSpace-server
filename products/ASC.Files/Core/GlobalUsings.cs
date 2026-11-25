@@ -267,6 +267,7 @@ global using OpenAI;
 global using OpenSearch.Client;
 
 global using Polly;
+global using Polly.CircuitBreaker;
 global using Polly.Contrib.WaitAndRetry;
 global using Polly.Registry;
 global using Polly.Retry;

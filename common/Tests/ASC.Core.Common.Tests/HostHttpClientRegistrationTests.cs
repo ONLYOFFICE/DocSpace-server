@@ -42,7 +42,8 @@ namespace ASC.Core.Common.Tests;
 /// certificate validation off, and nothing fails until a request reaches a document server with a self-signed
 /// certificate. People and AI.Worker register them in their service extensions, which can be called on a bare
 /// service collection. Files.Server, Files.Worker and Web.Api did so before; ApiSystem registers them in
-/// <c>ConfigureServices</c>, which needs Redis and the DI scan, and is not checked here.
+/// <c>ConfigureServices</c>, which needs Redis and the DI scan, and is not checked here. Files.Server registers the
+/// client of the template gallery (AddTemplateGalleryPipelines) the same way, and the Monolith through it.
 /// </remarks>
 public sealed class HostHttpClientRegistrationTests
 {
@@ -64,6 +65,20 @@ public sealed class HostHttpClientRegistrationTests
         services.AddAiWorkerServices(EmptyConfiguration());
 
         AssertDocumentServiceClients(services);
+    }
+
+    [Fact]
+    [Trait("Bug", "78009")]
+    public void FilesServer_RegistersTheTemplateGalleryClient()
+    {
+        // Files.Server, and the Monolith through it, run the downloads from the template gallery. Without the
+        // registration the factory hands out the default handler for the name: no retries and no circuit breaker
+        var services = new ServiceCollection();
+
+        services.AddFilesServerServices(EmptyConfiguration());
+
+        using var provider = services.BuildServiceProvider();
+        HttpHandlerProbe.ResilienceHandlers(provider, OFormRequestManager.HttpClientName).Should().Be(1);
     }
 
     private static void AssertDocumentServiceClients(ServiceCollection services)
