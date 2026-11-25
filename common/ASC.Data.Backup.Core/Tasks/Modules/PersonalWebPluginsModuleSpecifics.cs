@@ -32,11 +32,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Data.Backup.Tasks.Modules;
-public class WebPluginsModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
+public class PersonalWebPluginsModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
 {
-    private const string PersonalFolderName = ".personal";
-
-    public override ModuleName ModuleName => ModuleName.WebPlugins;
+    public override ModuleName ModuleName => ModuleName.PersonalWebPlugins;
 
     public override IEnumerable<TableInfo> Tables => new List<TableInfo>();
 
@@ -44,21 +42,21 @@ public class WebPluginsModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(he
 
     public override bool TryAdjustFilePath(bool dump, ColumnMapper columnMapper, ref string filePath)
     {
-        var parts = filePath.Replace('\\', '/').Split('/', 3);
+        var parts = filePath.Replace('\\', '/').Split('/', 2);
 
-        if (parts.Length < 3 || parts[0] != PersonalFolderName)
+        if (parts.Length < 2)
         {
             return true;
         }
 
-        var userId = columnMapper.GetUserMapping(parts[1]);
+        var userId = columnMapper.GetUserMapping(parts[0]);
 
         if (userId == null)
         {
             return dump;
         }
 
-        filePath = $"{PersonalFolderName}/{userId}/{parts[2]}";
+        filePath = $"{userId}/{parts[1]}";
 
         return true;
     }

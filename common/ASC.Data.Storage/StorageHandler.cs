@@ -80,7 +80,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
         if (checkAuth && !authContext.IsAuthenticated && !SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) && !fromPublicRoom
             || module == "backup" && (!authContext.IsAuthenticated || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
-            || module == "webplugins" && IsForeignPersonalWebPlugin(pathInfo, authContext))
+            || module == "personalwebplugins" && !IsOwnPersonalWebPlugin(pathInfo, authContext))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;
@@ -246,29 +246,11 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         return length;
     }
 
-    private static bool IsForeignPersonalWebPlugin(string pathInfo, AuthContext authContext)
+    private static bool IsOwnPersonalWebPlugin(string pathInfo, AuthContext authContext)
     {
-        var segments = pathInfo.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries);
+        var owner = pathInfo.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
 
-        if (segments.Length == 0)
-        {
-            return false;
-        }
-
-        if (segments[0] != ".personal")
-        {
-            return !IsWebPluginName(segments[0]);
-        }
-
-        return !authContext.IsAuthenticated
-            || segments.Length < 2
-            || !Guid.TryParse(segments[1], out var owner)
-            || owner != authContext.CurrentAccount.ID;
-    }
-
-    private static bool IsWebPluginName(string segment)
-    {
-        return segment[0] != '.' && segment.All(c => c is >= 'a' and <= 'z' or >= '0' and <= '9' or '_' or '.' or '-');
+        return authContext.IsAuthenticated && owner == authContext.CurrentAccount.ID.ToString();
     }
 
     private static bool IsTraversal(string pathInfo)

@@ -35,23 +35,24 @@
 namespace ASC.Data.Backup.Core.Tests;
 
 /// <summary>
-/// Covers the files of the webplugins storage module on restore: a personal plugin lies under the folder of its
-/// owner, whose user id the restore can change.
+/// Covers the files of the personalwebplugins storage module on restore: a personal plugin lies under the folder of
+/// its owner, whose user id the restore can change.
 /// </summary>
 [Trait("Category", "Backup")]
 [Trait("Feature", "Restore")]
-public class WebPluginsModuleSpecificsTests
+public class PersonalWebPluginsModuleSpecificsTests
 {
     private const string OldUserId = "6c5b1b3e-0c7f-4d1a-9a55-2f1f0f6a1b01";
     private const string NewUserId = "0b7e8c2d-5a4f-4f3e-8c1b-9d2e3f4a5b6c";
 
-    private static readonly WebPluginsModuleSpecifics _module =
-        new(new Helpers(new InstanceCrypto(new MachinePseudoKeys(new ConfigurationBuilder().Build()))));
+    private static readonly Helpers _helpers = new(new InstanceCrypto(new MachinePseudoKeys(new ConfigurationBuilder().Build())));
+
+    private static readonly PersonalWebPluginsModuleSpecifics _module = new(_helpers);
 
     [Theory]
-    [InlineData($".personal/{OldUserId}/hello/plugin.js")]
-    [InlineData($".personal\\{OldUserId}\\hello\\plugin.js")]
-    public void TryAdjustFilePath_PersonalPluginOfARemappedUser_MovesToTheNewId(string path)
+    [InlineData($"{OldUserId}/hello/plugin.js")]
+    [InlineData($"{OldUserId}\\hello\\plugin.js")]
+    public void TryAdjustFilePath_PluginOfARemappedUser_MovesToTheNewId(string path)
     {
         // Arrange
         var columnMapper = new ColumnMapper();
@@ -63,50 +64,37 @@ public class WebPluginsModuleSpecificsTests
 
         // Assert
         adjusted.Should().BeTrue();
-        path.Should().Be($".personal/{NewUserId}/hello/plugin.js");
-    }
-
-    [Fact]
-    public void TryAdjustFilePath_PortalPlugin_KeepsItsPath()
-    {
-        // Arrange
-        var path = "hello/plugin.js";
-
-        // Act
-        var adjusted = _module.TryAdjustFilePath(false, new ColumnMapper(), ref path);
-
-        // Assert
-        adjusted.Should().BeTrue();
-        path.Should().Be("hello/plugin.js");
+        path.Should().Be($"{NewUserId}/hello/plugin.js");
     }
 
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, true)]
-    public void TryAdjustFilePath_PersonalPluginOfAUserNotRestored_IsKeptOnlyInADump(bool dump, bool expected)
+    public void TryAdjustFilePath_PluginOfAUserNotRestored_IsKeptOnlyInADump(bool dump, bool expected)
     {
         // Arrange
-        var path = $".personal/{OldUserId}/hello/plugin.js";
+        var path = $"{OldUserId}/hello/plugin.js";
 
         // Act
         var adjusted = _module.TryAdjustFilePath(dump, new ColumnMapper(), ref path);
 
         // Assert
         adjusted.Should().Be(expected);
-        path.Should().Be($".personal/{OldUserId}/hello/plugin.js");
+        path.Should().Be($"{OldUserId}/hello/plugin.js");
     }
 
-    [Fact]
-    public void GetByStorageModule_WebPlugins_IsTheModuleThatAdjustsThePaths()
+    [Theory]
+    [InlineData("personalwebplugins", true)]
+    [InlineData("webplugins", false)]
+    public void GetByStorageModule_OnlyThePersonalModule_AdjustsThePaths(string storageModule, bool adjusts)
     {
         // Arrange
-        var helpers = new Helpers(new InstanceCrypto(new MachinePseudoKeys(new ConfigurationBuilder().Build())));
-        var moduleProvider = new ModuleProvider(NullLogger<ModuleProvider>.Instance, helpers, null!);
+        var moduleProvider = new ModuleProvider(NullLogger<ModuleProvider>.Instance, _helpers, null!);
 
         // Act
-        var module = moduleProvider.GetByStorageModule("webplugins");
+        var module = moduleProvider.GetByStorageModule(storageModule);
 
         // Assert
-        module.Should().BeOfType<WebPluginsModuleSpecifics>();
+        (module is PersonalWebPluginsModuleSpecifics).Should().Be(adjusts);
     }
 }

@@ -52,7 +52,7 @@ public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, Cor
 
     private IModuleSpecifics RoomLogosModule { get; } = new RoomLogosModuleSpecifics(helpers);
 
-    private IModuleSpecifics WebPluginsModule { get; } = new WebPluginsModuleSpecifics(helpers);
+    private IModuleSpecifics PersonalWebPluginsModule { get; } = new PersonalWebPluginsModuleSpecifics(helpers);
 
     public IModuleSpecifics GetByStorageModule(string storageModuleName, string storageDomainName = null)
     {
@@ -60,7 +60,7 @@ public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, Cor
         {
             "files" => AllModules.FirstOrDefault(m => m.ModuleName == ModuleName.Files),
             "room_logos" => RoomLogosModule,
-            "webplugins" => WebPluginsModule,
+            "personalwebplugins" => PersonalWebPluginsModule,
             _ => null
         };
     }

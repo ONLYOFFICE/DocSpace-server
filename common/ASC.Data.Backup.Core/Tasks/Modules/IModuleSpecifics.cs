@@ -44,7 +44,7 @@ public enum ModuleName
     RoomLogos,
     Identity,
     Ai,
-    WebPlugins
+    PersonalWebPlugins
 }
 
 public interface IModuleSpecifics

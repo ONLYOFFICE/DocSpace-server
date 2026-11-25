@@ -137,6 +137,7 @@ public abstract class PortalTaskBase(
                     "customnavigation",
                     "room_logos",
                     "webplugins",
+                    "personalwebplugins",
                     "mcp_icons"
                 };
 
