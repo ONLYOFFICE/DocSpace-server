@@ -42,6 +42,8 @@ namespace ASC.Files.Tests.Tests._05_Features.Socket;
 [Trait("Feature", "AiHub")]
 public class SocketAiRoomLinkEventsTests(AspireAppFixture fixture) : SocketTestBase(fixture)
 {
+    protected override bool PlantsAiProfile => true;
+
     [Fact]
     public async Task LinkSources_ByAProjectManager_ReachesTheOwnerWatchingTheSection()
     {

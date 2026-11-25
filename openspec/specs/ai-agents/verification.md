@@ -122,6 +122,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,82,93,106,119`; a private project 400: `Hub/AiHubRoomSettingsTests.cs:69` (not run yet) | TEST-CONFIRMED [run: PASS] |
 | Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED [run: PASS] |
 | Knowledge room needs vectorization 403 | `Security:1424,1443`; `AI/Core/Settings` | CODE-ONLY |
+| AI project needs the AI gateway or a profile 403 | `Hub/AiHubNoAiProviderTests.cs:47,59` | TEST-CONFIRMED [run: PASS] |
 | **Members of the AI rooms** | | |
 | Content creator reads, Room manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
 | DocSpace admin outside the project reads its model, sources and skills (scenario) | `Hub/AiRoomOutsiderAccessTests.cs:55` | TEST-CONFIRMED (not run yet) |

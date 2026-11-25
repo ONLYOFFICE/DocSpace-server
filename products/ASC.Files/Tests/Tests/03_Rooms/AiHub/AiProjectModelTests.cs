@@ -35,8 +35,8 @@ namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
 /// The AI model of an AI project: `GET` and `PUT api/2.0/files/rooms/{id}/model`. The Files suite starts neither the
-/// AI service nor an AI gateway, so the portal has no AI model profile to select and a successful `PUT` cannot be
-/// reached here; the tests cover reading, access and the refusals.
+/// AI service nor an AI gateway; the portal's only profile is the one planted in the database so that it may create
+/// projects. The tests cover reading, access and the refusals.
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AiHub")]

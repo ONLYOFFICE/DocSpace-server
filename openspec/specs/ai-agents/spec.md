@@ -423,7 +423,8 @@ every binding of one profile.
 
 Instructions rooms, Knowledge rooms and AI projects SHALL be rooms created through `createRoom` with their
 `roomType`, by the owner, a DocSpace admin or a Room admin (User, Guest 403), landing in the AI rooms section
-and never in Rooms; a Knowledge room needs vectorization enabled (403). Settings that do not apply to the
+and never in Rooms; a Knowledge room needs vectorization enabled (403), an AI project needs the AI gateway or an
+AI model profile of the portal (403). Settings that do not apply to the
 type SHALL be refused on create and update (400). They are never archived (403), make no template (403),
 take no folder in the section root (403) and are deleted outright.
 
