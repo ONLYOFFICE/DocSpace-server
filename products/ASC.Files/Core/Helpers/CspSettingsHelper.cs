@@ -50,6 +50,7 @@ public class CspSettingsHelper(
     CspConfigSettings cspConfigSettings)
 {
     private static readonly TimeSpan _personalHeaderDuration = TimeSpan.FromDays(1);
+    private static readonly TimeSpan _personalGenerationDuration = TimeSpan.FromDays(2);
 
     public async Task<string> SaveAsync(IEnumerable<string> domains, bool updateInDb = true, bool forNewTenant = false)
     {
@@ -113,26 +114,48 @@ public class CspSettingsHelper(
         return await CreatePersonalHeaderAsync(settings.Domains, personalDomains) ?? throw new CspHeaderTooLargeException(cspConfigSettings.MaxSize);
     }
 
-    public async Task SaveSessionHeaderAsync(string headerValue)
+    public async Task<string> GetSessionKeyAsync()
     {
         var request = httpContextAccessor.HttpContext?.Request;
 
         if (request == null || !string.IsNullOrEmpty(request.Headers.Authorization) ||
-            !request.Cookies.TryGetValue(CookiesManager.AuthCookiesName, out var authKey) || string.IsNullOrEmpty(authKey))
+            !request.Cookies.TryGetValue(CookiesManager.AuthCookiesName, out var authKey) || string.IsNullOrEmpty(authKey) ||
+            CountCookies(request.Headers.Cookie, CookiesManager.AuthCookiesName) > 1)
         {
-            return;
+            return null;
         }
 
         var hostKey = GetKey(request.Host.Host.ToLowerInvariant());
-        var generation = await hybridCache.GetOrDefaultAsync<string>(GetPersonalGenerationKey(hostKey));
-        var sessionKey = GetSessionKey(hostKey, generation, authKey);
+        var generation = (await hybridCache.TryGetAsync<string>(GetPersonalGenerationKey(hostKey), InProxyLevel)).GetValueOrDefault();
 
-        if (await hybridCache.GetOrDefaultAsync<string>(sessionKey) == headerValue)
+        return GetSessionKey(hostKey, generation, authKey);
+    }
+
+    public async Task SaveSessionHeaderAsync(string sessionKey, string headerValue)
+    {
+        if (sessionKey == null)
         {
             return;
         }
 
-        await hybridCache.SetAsync(sessionKey, headerValue, _personalHeaderDuration);
+        if ((await hybridCache.TryGetAsync<string>(sessionKey, InProxyLevel)).GetValueOrDefault() == headerValue)
+        {
+            return;
+        }
+
+        await hybridCache.SetAsync(sessionKey, headerValue, options => InProxyLevel(options.SetDuration(_personalHeaderDuration)));
+    }
+
+    public static int CountCookies(IEnumerable<string> cookieHeaders, string name)
+    {
+        return cookieHeaders
+            .SelectMany(header => (header ?? string.Empty).Split(';'))
+            .Count(cookie => cookie.TrimStart().StartsWith(name + "=", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void InProxyLevel(FusionCacheEntryOptions options)
+    {
+        options.SetSkipMemoryCache(hybridCache.HasDistributedCache);
     }
 
     public async Task ResetPersonalAsync()
@@ -147,7 +170,7 @@ public class CspSettingsHelper(
         var generation = Guid.NewGuid().ToString("N");
 
         await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) =>
-            await hybridCache.SetAsync(GetPersonalGenerationKey(headerKey), generation, token: cs));
+            await hybridCache.SetAsync(GetPersonalGenerationKey(headerKey), generation, options => InProxyLevel(options.SetDuration(_personalGenerationDuration)), cs));
     }
 
     private async Task<HashSet<string>> GetHeaderKeysAsync(Tenant tenant, bool record = true)
@@ -486,8 +509,6 @@ public class CspOptions
     public List<string> Fonts { get; set; } = [];
     public List<string> Connect { get; set; } = [];
     public List<string> Media { get; set; } = [];
-
-    public int MaxSize { get; set; } = 15 * 1024;
 
     public CspOptions()
     {

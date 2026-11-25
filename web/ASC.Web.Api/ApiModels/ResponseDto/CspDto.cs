@@ -49,7 +49,8 @@ public class CspDto
     /// <summary>
     /// The complete policy value the portal sends to browsers, assembled from `domains` together with the
     /// portal's own sources and the integrations it has switched on. It is therefore wider than `domains` alone,
-    /// and is filled in even while that list is empty.
+    /// and is filled in even while that list is empty. For a signed-in member with the `asc_personal_csp` cookie it
+    /// also holds the domains of the member's enabled personal plugins.
     /// </summary>
     /// <example>default-src 'self'; script-src 'self' https://example.com</example>
     public required string Header { get; set; }

@@ -681,18 +681,16 @@ public class SecurityController(
 
     /// <remarks>
     /// Returns the Content Security Policy of the portal, with the allowed external domains and the full header
-    /// value. Anyone can call it without signing in, from any origin. The call changes no settings. It stores the
-    /// portal's policy again in the cache the proxy reads when the cache has lost it. To skip an unchanged policy,
-    /// send the `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value exactly as you got
-    /// it. If the policy has not changed since then, the call returns 304 with an empty body. A signed-in member may
-    /// have enabled personal web plugins with domains. The domains of a plugin that a portal or installation-wide
-    /// plugin shadows do not count. If the request also carries the `asc_personal_csp` cookie, the header allows
-    /// those domains too, and the call stores the header for the member's session, where the proxy finds it for the
-    /// next pages. A header that would grow too large keeps the portal's domains only. Such a request never gets
-    /// 304. The `domains` field stays the portal's list. The list call `GET api/2.0/settings/webplugins` sets or
-    /// clears the cookie when called without `personal`. The calls `POST`, `PUT` and `DELETE` on
-    /// `api/2.0/settings/webplugins` with `personal` do the same. To change the allowed domains, use
-    /// `POST api/2.0/security/csp`, which requires the EditPortalSettings permission.
+    /// value. Anyone can call it without signing in, from any origin. The call is read-only. To skip an
+    /// unchanged policy, send the `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value
+    /// exactly as you got it. If the policy has not changed since then, the call returns 304 with an empty body.
+    /// With the `asc_personal_csp` cookie, a signed-in member's header also allows their enabled personal plugins'
+    /// domains. A personal plugin that a portal or installation-wide plugin shadows adds no domains. A header that
+    /// would grow too large keeps the portal's domains only. A member with the cookie and personal domains never
+    /// gets 304. The `domains` field stays the portal's list. The list call `GET api/2.0/settings/webplugins` without
+    /// `personal` sets or clears the cookie. Calls with `personal` to `POST api/2.0/settings/webplugins` and to `PUT`
+    /// or `DELETE api/2.0/settings/webplugins/{name}` do the same. To change the allowed domains, use
+    /// `POST api/2.0/security/csp`.
     /// </remarks>
     /// <summary>
     /// Get CSP settings
@@ -711,16 +709,26 @@ public class SecurityController(
 
         List<string> personalCspDomains = [];
 
-        var personalSession = securityContext.IsAuthenticated && Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName);
+        string sessionKey = null;
 
-        if (personalSession)
+        if (securityContext.IsAuthenticated && Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName))
         {
+            try
+            {
+                sessionKey = await cspSettingsHelper.GetSessionKeyAsync();
+            }
+            catch (Exception e)
+            {
+                logger.WarningSessionCspKeyNotRead(e);
+            }
+
             try
             {
                 personalCspDomains = await webPluginManager.GetPersonalCspDomainsAsync(tenantManager.GetCurrentTenantId());
             }
             catch (Exception e)
             {
+                sessionKey = null;
                 logger.WarningPersonalCspDomainsNotRead(e);
             }
         }
@@ -745,11 +753,11 @@ public class SecurityController(
 
         var header = personalHeader ?? await cspSettingsHelper.CreateHeaderAsync(settings.Domains);
 
-        if (personalSession)
+        if (sessionKey != null)
         {
             try
             {
-                await cspSettingsHelper.SaveSessionHeaderAsync(header);
+                await cspSettingsHelper.SaveSessionHeaderAsync(sessionKey, header);
             }
             catch (Exception e)
             {

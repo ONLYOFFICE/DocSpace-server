@@ -50,18 +50,15 @@ public class PersonalWebPluginsController(
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
-    /// Returns the personal web plugins that the members of the portal installed for themselves, for an
-    /// administrator to review. Each entry has the member in `createBy`, the member's type in `createByType` and
-    /// `createByIsOwner`, the upload time in `createOn`, the domains in `cspDomains` and whether the plugin runs for the
-    /// member in `enabled`. The `settings` field is always empty,
-    /// because a member's plugin settings stay private. Requires the EditPortalSettings permission, which the portal
-    /// owner and DocSpace admins have. Other callers get 403. The call also returns 403 while the installation turns
-    /// off web plugins. The call is read-only. It lists the plugins whatever the personal plugins switch says, the
-    /// ones a portal plugin hides included, and the plugins of deleted members too. The list has no paging; a member
-    /// holds at most 10 personal plugins by default. To switch a plugin off for its member, use
+    /// Returns the personal web plugins that the members of the portal installed for themselves. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The call
+    /// also returns 403 while the installation turns off web plugins. The call is read-only. The list includes
+    /// plugins hidden by the personal plugins switch or by a portal plugin. It also includes the plugins of deleted
+    /// members. The `settings` field is always empty, and `enabled` is the state stored for the member. The list has
+    /// no paging. A member holds at most 10 personal plugins by default. To switch a plugin off for its member, use
     /// `PUT api/2.0/settings/personalwebplugins/plugins/{userId}/{name}`.
     /// </remarks>
-    /// <summary>Get the personal web plugins of members</summary>
+    /// <summary>List members' web plugins</summary>
     /// <path>api/2.0/settings/personalwebplugins/plugins</path>
     /// <collection>list</collection>
     [Tags("Settings / Webplugins")]
@@ -74,27 +71,27 @@ public class PersonalWebPluginsController(
 
         var webPlugins = await webPluginManager.GetMembersWebPluginsAsync(tenantManager.GetCurrentTenantId());
 
-        Dictionary<Guid, EmployeeType> memberTypes = [];
+        Dictionary<Guid, (UserInfo User, EmployeeType Type)> members = [];
         List<MemberWebPluginDto> outDto = [];
         foreach (var webPlugin in webPlugins)
         {
-            outDto.Add(await ToMemberDtoAsync(webPlugin, memberTypes));
+            outDto.Add(await ToMemberDtoAsync(webPlugin, members));
         }
 
         return outDto;
     }
 
     /// <remarks>
-    /// Switches a personal web plugin of a member on or off for that member. Take the member from the `createBy` field
-    /// and the name from the `name` field of `GET api/2.0/settings/personalwebplugins/plugins`. Requires the
-    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The call
-    /// also returns 403 while the installation turns off web plugins. The call changes data, and you can repeat it with
-    /// the same body. It keeps the settings the member saved for the plugin, and the member can switch the plugin
-    /// again. The open clients of the member get the `s:change-personal-web-plugin` socket event. The call returns 404
-    /// if the member has no plugin with this name. To remove the plugin, use
+    /// Switches a personal web plugin of a member on or off for that member. Take the member from `createBy` and the
+    /// name from `name` of `GET api/2.0/settings/personalwebplugins/plugins`. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call also returns 403
+    /// while the installation turns off web plugins. It works on the plugins of every member, the owner included. The
+    /// call changes data, and you can repeat it with the same body. It keeps the settings the member saved, and the
+    /// member can switch the plugin again. The call returns 400 if the body cannot be read. It returns 404 if the
+    /// member has no plugin with this name. To remove the plugin, use
     /// `DELETE api/2.0/settings/personalwebplugins/plugins/{userId}/{name}`.
     /// </remarks>
-    /// <summary>Switch a personal web plugin of a member</summary>
+    /// <summary>Switch a member's web plugin</summary>
     /// <path>api/2.0/settings/personalwebplugins/plugins/{userId}/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The personal web plugin of the member after the change", typeof(MemberWebPluginDto))]
@@ -102,64 +99,71 @@ public class PersonalWebPluginsController(
     [SwaggerResponse(403, "The caller has no portal-settings right, or the installation turns off web plugins")]
     [SwaggerResponse(404, "The member has no personal web plugin with this manifest name")]
     [HttpPut("plugins/{userId}/{name}")]
-    public async Task<MemberWebPluginDto> SetMemberWebPlugin(MemberWebPluginStateRequestDto inDto)
+    public async Task<MemberWebPluginDto> SetMemberWebPlugin(SetMemberWebPluginRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var webPlugin = await webPluginManager.SetMemberWebPluginEnabledAsync(tenantManager.GetCurrentTenantId(), inDto.UserId, inDto.Name, inDto.State.Enabled);
 
-        await SendMemberWebPluginAuditAsync(MessageAction.PersonalWebPluginUpdated, inDto.UserId, webPlugin);
-
         await ResetPersonalCspAsync();
+
+        await SendMemberWebPluginAuditAsync(MessageAction.PersonalWebPluginUpdated, inDto.UserId, webPlugin);
 
         return await ToMemberDtoAsync(webPlugin, []);
     }
 
-    private async Task<MemberWebPluginDto> ToMemberDtoAsync(WebPlugin webPlugin, Dictionary<Guid, EmployeeType> memberTypes)
+    private async Task<MemberWebPluginDto> ToMemberDtoAsync(WebPlugin webPlugin, Dictionary<Guid, (UserInfo User, EmployeeType Type)> members)
     {
-        if (!memberTypes.TryGetValue(webPlugin.CreateBy, out var memberType))
+        if (!members.TryGetValue(webPlugin.CreateBy, out var member))
         {
-            memberType = await userManager.GetUserTypeAsync(await userManager.GetUsersAsync(webPlugin.CreateBy));
-            memberTypes.Add(webPlugin.CreateBy, memberType);
+            var user = await userManager.GetUsersAsync(webPlugin.CreateBy, false);
+            member = (user, await userManager.GetUserTypeAsync(user.Removed ? ASC.Core.Users.Constants.LostUser : user));
+            members.Add(webPlugin.CreateBy, member);
         }
 
         var isOwner = webPlugin.CreateBy == tenantManager.GetCurrentTenant().OwnerId;
 
-        return await mapper.ToMemberDtoManual(webPlugin, memberType, isOwner);
+        return await mapper.ToMemberDtoManual(webPlugin, member.User, member.Type, isOwner);
     }
 
     /// <remarks>
-    /// Deletes a personal web plugin of a member together with the files of its package. Take the member from the
-    /// `createBy` field and the name from the `name` field of `GET api/2.0/settings/personalwebplugins/plugins`.
-    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get
-    /// 403. The call also returns 403 while the installation turns off web plugins. The call cannot be undone. It
-    /// also deletes the state and the settings the member stored for the plugin. The open clients of the member get
-    /// the `s:change-personal-web-plugin` socket event. The call returns 404 if the member has no plugin with this
-    /// name, so a repeated call returns 404 too.
+    /// Deletes a personal web plugin of a member together with the files of its package. Take the member from
+    /// `createBy` and the name from `name` of `GET api/2.0/settings/personalwebplugins/plugins`. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The call
+    /// also returns 403 while the installation turns off web plugins. It works on the plugins of every member, the
+    /// owner included. The call cannot be undone. It also deletes the state and the settings the member stored for
+    /// the plugin. The call returns 404 if the member has no plugin with this name. A repeated call returns 404 too.
     /// </remarks>
-    /// <summary>Delete a personal web plugin of a member</summary>
+    /// <summary>Delete a member's web plugin</summary>
     /// <path>api/2.0/settings/personalwebplugins/plugins/{userId}/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The personal web plugin of the member and the files of its package are removed")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or the installation turns off web plugins")]
     [SwaggerResponse(404, "The member has no personal web plugin with this manifest name")]
     [HttpDelete("plugins/{userId}/{name}")]
-    public async Task DeleteMemberWebPlugin(MemberWebPluginRequestDto inDto)
+    public async Task DeleteMemberWebPlugin(DeleteMemberWebPluginRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var webPlugin = await webPluginManager.DeleteMemberWebPluginAsync(tenantManager.GetCurrentTenantId(), inDto.UserId, inDto.Name);
 
-        await SendMemberWebPluginAuditAsync(MessageAction.PersonalWebPluginDeleted, inDto.UserId, webPlugin);
-
         await ResetPersonalCspAsync();
+
+        await SendMemberWebPluginAuditAsync(MessageAction.PersonalWebPluginDeleted, inDto.UserId, webPlugin);
     }
 
     private async Task SendMemberWebPluginAuditAsync(MessageAction action, Guid userId, WebPlugin webPlugin)
     {
-        var user = await userManager.GetUsersAsync(userId);
+        try
+        {
+            var user = await userManager.GetUsersAsync(userId, false);
 
-        messageService.Send(action, MessageTarget.Create(userId), webPlugin.Name, user.DisplayUserName(false, displayUserSettingsHelper));
+            messageService.Send(action, MessageTarget.Create(userId), webPlugin.Name, user.DisplayUserName(false, displayUserSettingsHelper));
+        }
+        catch (Exception e)
+        {
+            logger.WarningMemberWebPluginAuditNotSent(e);
+        }
     }
 
     private async Task ResetPersonalCspAsync()
@@ -176,22 +180,23 @@ public class PersonalWebPluginsController(
 
     /// <remarks>
     /// Switches personal web plugins on or off for the portal. While they are on, every member other than a guest may
-    /// install web plugins for themselves through `POST api/2.0/settings/webplugins?personal=true`. A new portal has
-    /// them off. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other
-    /// callers get 403. The call also returns 403 while the installation turns off web plugins or personal plugins.
-    /// The call changes data, and you can repeat it with the same body. Switching them off hides the personal plugins
-    /// of all members at once: they are neither listed nor loaded, their domains leave the Content Security Policy,
-    /// and the calls with `personal=true` return 403. Their files and states stay, so switching them on again brings
-    /// them back. Open clients of the portal get the `s:change-personal-web-plugins` socket event. The call returns
-    /// the plugin switches as `GET api/2.0/settings` reports them afterwards.
+    /// install web plugins through `POST api/2.0/settings/webplugins` with `personal`. A new portal has them off.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get
+    /// 403. The call also returns 403 while the installation turns off web plugins or personal plugins. The call
+    /// changes data, and you can repeat it with the same body. Switching them off hides the personal plugins from
+    /// their members. They are neither listed nor loaded, and their domains leave the Content Security Policy. The
+    /// calls with `personal=true` then return 403. Their files and states stay, so switching them on again brings
+    /// them back. The call returns 400 if the body cannot be read. It returns the plugin switches after the change, as
+    /// `GET api/2.0/settings` reports them.
     /// </remarks>
     /// <summary>Switch personal web plugins</summary>
     /// <path>api/2.0/settings/personalwebplugins</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The plugin switches of the portal after the change", typeof(PluginsDto))]
+    [SwaggerResponse(400, "The request body cannot be read")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or the installation turns off web plugins or personal plugins")]
     [HttpPost("")]
-    public async Task<PluginsDto> SetPersonalWebPlugins(PersonalWebPluginsRequestDto inDto)
+    public async Task<PluginsDto> SetPersonalWebPlugins(SetPersonalWebPluginsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

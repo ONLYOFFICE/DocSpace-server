@@ -69,7 +69,7 @@ public class WebPluginsController(
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The installed web plugin, enabled, with the `url` its script is served from", typeof(WebPluginDto))]
     [SwaggerResponse(400, "The uploaded package is missing, more than one file was sent, the package is of the wrong type, empty or too large, the archive or its manifest is rejected, another plugin uses its `pluginName`, a personal plugin takes the `name` or `pluginName` of a portal or installation-wide plugin or its `cspDomains` lists an invalid address or is too long, `personal` is combined with `system`, or the portal or the caller already holds the maximum number of plugins")]
-    [SwaggerResponse(403, "The caller has no portal-settings right, or for a personal plugin is a guest or personal plugins are switched off; the request is not a form, the request carries the session cookie or Basic credentials and a `Sec-Fetch-Site` other than `same-origin` or `none`, or, without that header, an `Origin` that is not the portal's, web plugins or plugin uploads are switched off for the installation, `system` was requested outside a standalone installation, or the domains the plugin declares would push the Content Security Policy header over its size limit")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or for a personal plugin is a guest or personal plugins are switched off; the request is not a form, the request carries the session cookie or Basic credentials and does not come from a portal page, web plugins or plugin uploads are switched off for the installation, `system` was requested outside a standalone installation, or the domains the plugin declares would push the Content Security Policy header over its size limit")]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
@@ -143,13 +143,15 @@ public class WebPluginsController(
     {
         var tenant = tenantManager.GetCurrentTenant();
 
+        var sessionKey = !inDto.Personal && await webPluginManager.IsPersonalWebPluginsEnabledAsync() ? await GetSessionKeyAsync() : null;
+
         var webPlugins = inDto.Personal
             ? await webPluginManager.GetPersonalWebPluginsAsync(tenant.Id)
             : await webPluginManager.GetAvailableWebPluginsAsync(tenant.Id);
 
         if (!inDto.Personal)
         {
-            await SyncPersonalCspAsync(tenant.Id, WebPluginManager.GetPersonalCspDomains(webPlugins));
+            await SyncPersonalCspAsync(sessionKey, WebPluginManager.GetPersonalCspDomains(webPlugins));
         }
 
         List<WebPluginDto> outDto = [];
@@ -359,51 +361,79 @@ public class WebPluginsController(
         return originTenant?.Id == tenantManager.GetCurrentTenantId();
     }
 
-    private async Task SyncPersonalCspAsync(int tenantId, List<string> personalCspDomains = null, bool refuseTooLarge = false)
+    private async Task SyncPersonalCspAsync(int tenantId, bool refuseTooLarge = false)
     {
         try
         {
-            if (personalCspDomains == null)
-            {
-                await cspSettingsHelper.ResetPersonalAsync();
+            await cspSettingsHelper.ResetPersonalAsync();
 
-                personalCspDomains = await webPluginManager.GetPersonalCspDomainsAsync(tenantId);
-            }
+            var sessionKey = await cspSettingsHelper.GetSessionKeyAsync();
 
-            if (personalCspDomains.Count == 0)
-            {
-                DeletePersonalCspCookie();
-
-                return;
-            }
-
-            string headerValue;
-
-            try
-            {
-                headerValue = await cspSettingsHelper.CreateSessionHeaderAsync(personalCspDomains);
-            }
-            catch (CspHeaderTooLargeException)
-            {
-                DeletePersonalCspCookie();
-
-                throw;
-            }
-
-            Response.Cookies.Append(WebPluginManager.PersonalCspCookieName, "1", new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = Request.IsHttps,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTimeOffset.UtcNow.AddYears(1)
-            });
-
-            await cspSettingsHelper.SaveSessionHeaderAsync(headerValue);
+            await WritePersonalCspAsync(sessionKey, await webPluginManager.GetPersonalCspDomainsAsync(tenantId));
         }
         catch (Exception e) when (!refuseTooLarge || e is not CspHeaderTooLargeException)
         {
             logger.WarningPersonalCspNotUpdated(e);
         }
+    }
+
+    private async Task SyncPersonalCspAsync(string sessionKey, List<string> personalCspDomains)
+    {
+        try
+        {
+            await WritePersonalCspAsync(sessionKey, personalCspDomains);
+        }
+        catch (Exception e)
+        {
+            logger.WarningPersonalCspNotUpdated(e);
+        }
+    }
+
+    private async Task<string> GetSessionKeyAsync()
+    {
+        try
+        {
+            return await cspSettingsHelper.GetSessionKeyAsync();
+        }
+        catch (Exception e)
+        {
+            logger.WarningPersonalCspNotUpdated(e);
+
+            return null;
+        }
+    }
+
+    private async Task WritePersonalCspAsync(string sessionKey, List<string> personalCspDomains)
+    {
+        if (personalCspDomains.Count == 0)
+        {
+            DeletePersonalCspCookie();
+
+            return;
+        }
+
+        string headerValue;
+
+        try
+        {
+            headerValue = await cspSettingsHelper.CreateSessionHeaderAsync(personalCspDomains);
+        }
+        catch (CspHeaderTooLargeException)
+        {
+            DeletePersonalCspCookie();
+
+            throw;
+        }
+
+        Response.Cookies.Append(WebPluginManager.PersonalCspCookieName, "1", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTimeOffset.UtcNow.AddYears(1)
+        });
+
+        await cspSettingsHelper.SaveSessionHeaderAsync(sessionKey, headerValue);
     }
 
     private async Task ResetPersonalCspAsync()

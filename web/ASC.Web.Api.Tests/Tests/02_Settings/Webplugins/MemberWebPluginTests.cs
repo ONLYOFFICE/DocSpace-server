@@ -47,15 +47,16 @@ public class MemberWebPluginTests(
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     [Fact]
-    public async Task GetMembersWebPlugins_Owner_ListsThePluginWithItsMemberAndWithoutSettings()
+    public async Task GetMembersWebPlugins_DocSpaceAdmin_ListsThePluginWithItsMemberAndWithoutSettings()
     {
         // Arrange
         const string pluginName = "member-listed";
         var member = await InviteMember(EmployeeType.User);
+        var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
         await UploadWithSettingsAsync(member, pluginName);
 
         // Act
-        await _webApiClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(admin);
         var plugins = await ReadMembersPluginsAsync();
 
         // Assert
@@ -87,36 +88,85 @@ public class MemberWebPluginTests(
     }
 
     [Fact]
-    public async Task SetMemberWebPlugin_Off_MemberGetsItOffWithItsSettings()
+    public async Task GetMembersWebPlugins_DeletedMember_ListsThePluginUnderTheMemberWhoCanBeAddressed()
     {
         // Arrange
-        const string pluginName = "member-switched";
+        const string pluginName = "member-removed";
         var member = await InviteMember(EmployeeType.User);
-        await UploadWithSettingsAsync(member, pluginName);
+        await UploadPersonalAsync(member, pluginName);
+        await _peopleClient.Authenticate(Owner);
+        await _userStatusApi.UpdateUserStatusAsync(EmployeeStatus.Terminated, new UpdateMembersRequestDto([member.Id], false), Ct);
+        await _profilesApi.DeleteMemberAsync(member.Id.ToString(), Ct);
 
         // Act
         await _webApiClient.Authenticate(Owner);
+        var plugin = (await ReadMembersPluginsAsync()).Single(x => x.GetProperty("name").GetString() == pluginName);
+        var memberId = plugin.GetProperty("createBy").GetProperty("id").GetGuid();
+        using var delete = await _webApiClient.DeleteAsync($"api/2.0/settings/personalwebplugins/plugins/{memberId}/{pluginName}", Ct);
+
+        // Assert
+        memberId.Should().Be(member.Id);
+        plugin.GetProperty("createByType").GetString().Should().Be(nameof(EmployeeType.Guest));
+        delete.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SetMemberWebPlugin_DocSpaceAdmin_MemberGetsTheStateWithItsSettings(bool enabled)
+    {
+        // Arrange
+        var pluginName = enabled ? "member-switched-on" : "member-switched-off";
+        var member = await InviteMember(EmployeeType.User);
+        var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
+        await UploadWithSettingsAsync(member, pluginName);
+        await _webApiClient.Authenticate(admin);
+        if (enabled)
+        {
+            await SetMemberPluginAsync(member, pluginName, false);
+        }
+
+        // Act
         using var response = await _webApiClient.PutAsJsonAsync(
-            $"api/2.0/settings/personalwebplugins/plugins/{member.Id}/{pluginName}", new { enabled = false }, Ct);
+            $"api/2.0/settings/personalwebplugins/plugins/{member.Id}/{pluginName}", new { enabled }, Ct);
         var (status, body) = await WebPluginsTestData.ReadAsync(response, Ct);
         var plugin = await GetPluginAsMemberAsync(member, pluginName);
 
         // Assert
         status.Should().Be(200, body);
-        plugin.Enabled.Should().BeFalse();
+        JsonDocument.Parse(body).RootElement.GetProperty("response").GetProperty("enabled").GetBoolean().Should().Be(enabled);
+        plugin.Enabled.Should().Be(enabled);
         plugin.Settings.Should().Be(PluginSettings);
     }
 
     [Fact]
-    public async Task DeleteMemberWebPlugin_Owner_RemovesItFromTheMemberOnce()
+    public async Task SetMemberWebPlugin_UnknownPlugin_NotFound()
+    {
+        // Arrange
+        var member = await InviteMember(EmployeeType.User);
+
+        // Act
+        await _webApiClient.Authenticate(Owner);
+        using var response = await _webApiClient.PutAsJsonAsync(
+            $"api/2.0/settings/personalwebplugins/plugins/{member.Id}/member-unknown", new { enabled = false }, Ct);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, Ct);
+
+        // Assert
+        status.Should().Be(404, body);
+        body.Should().Contain("Plugin not found");
+    }
+
+    [Fact]
+    public async Task DeleteMemberWebPlugin_DocSpaceAdmin_RemovesItFromTheMemberOnce()
     {
         // Arrange
         const string pluginName = "member-deleted";
         var member = await InviteMember(EmployeeType.User);
+        var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
         await UploadWithSettingsAsync(member, pluginName);
 
         // Act
-        await _webApiClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(admin);
         using var first = await _webApiClient.DeleteAsync($"api/2.0/settings/personalwebplugins/plugins/{member.Id}/{pluginName}", Ct);
         using var second = await _webApiClient.DeleteAsync($"api/2.0/settings/personalwebplugins/plugins/{member.Id}/{pluginName}", Ct);
         await _webApiClient.Authenticate(member);
@@ -128,24 +178,44 @@ public class MemberWebPluginTests(
         memberPlugins.Should().NotContain(x => x.Name == pluginName);
     }
 
-    [Fact]
-    public async Task MembersWebPluginsCalls_Member_Forbidden()
+    [Theory]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    public async Task MembersWebPluginsCalls_WithoutPortalSettingsRight_ForbiddenAndPluginKept(EmployeeType callerType)
     {
         // Arrange
-        const string pluginName = "member-guarded";
+        var pluginName = $"member-guarded-{callerType}".ToLowerInvariant();
         var member = await InviteMember(EmployeeType.User);
         await UploadWithSettingsAsync(member, pluginName);
+        var caller = await InviteMember(callerType);
+        await _webApiClient.Authenticate(caller);
 
         // Act
         using var list = await _webApiClient.GetAsync("api/2.0/settings/personalwebplugins/plugins", Ct);
         using var update = await _webApiClient.PutAsJsonAsync(
             $"api/2.0/settings/personalwebplugins/plugins/{member.Id}/{pluginName}", new { enabled = false }, Ct);
+        var (updateStatus, updateBody) = await WebPluginsTestData.ReadAsync(update, Ct);
         using var delete = await _webApiClient.DeleteAsync($"api/2.0/settings/personalwebplugins/plugins/{member.Id}/{pluginName}", Ct);
+        var (deleteStatus, deleteBody) = await WebPluginsTestData.ReadAsync(delete, Ct);
+        var plugin = await GetPluginAsMemberAsync(member, pluginName);
 
         // Assert
         list.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        update.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        delete.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        updateStatus.Should().Be(403, updateBody);
+        updateBody.Should().Contain("Access denied");
+        deleteStatus.Should().Be(403, deleteBody);
+        deleteBody.Should().Contain("Access denied");
+        plugin.Enabled.Should().BeTrue();
+        plugin.Settings.Should().Be(PluginSettings);
+    }
+
+    private async Task SetMemberPluginAsync(User member, string pluginName, bool enabled)
+    {
+        using var response = await _webApiClient.PutAsJsonAsync(
+            $"api/2.0/settings/personalwebplugins/plugins/{member.Id}/{pluginName}", new { enabled }, Ct);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, Ct);
+
+        status.Should().Be(200, body);
     }
 
     /// <summary>Uploads a personal plugin as the member and saves settings for it, leaving the client on the member.</summary>

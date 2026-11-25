@@ -73,46 +73,71 @@ public class PersonalWebPluginsSwitchTests(
         uploadResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Act
-        await SetAsync(false);
+        var switchedOff = await SetAsync(false);
+        var adminListWhileOff = await ListMembersPluginsAsync();
         await _webApiClient.Authenticate(member);
         var whileOff = await ReadPluginSwitchesAsync();
         using var listWhileOff = await _webApiClient.GetAsync("api/2.0/settings/webplugins?personal=true", Ct);
         var availableWhileOff = await ListAvailableAsync();
 
-        await SetAsync(true);
+        var switchedOn = await SetAsync(true);
         await _webApiClient.Authenticate(member);
         var availableAfter = await ListAvailableAsync();
 
         // Assert
+        switchedOff.GetProperty("personal").GetBoolean().Should().BeFalse();
+        switchedOn.GetProperty("personal").GetBoolean().Should().BeTrue();
+        adminListWhileOff.Should().Contain(pluginName);
         whileOff.GetProperty("personal").GetBoolean().Should().BeFalse();
         listWhileOff.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        availableWhileOff.Should().NotContain(pluginName);
-        availableAfter.Should().Contain(pluginName);
+        availableWhileOff.Should().NotContainKey(pluginName);
+        availableAfter.Should().Contain(pluginName, true);
     }
 
-    [Fact]
-    public async Task SetPersonalWebPlugins_Member_Forbidden()
+    [Theory]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    public async Task SetPersonalWebPlugins_WithoutPortalSettingsRight_ForbiddenAndSwitchKept(EmployeeType callerType)
     {
         // Arrange
-        await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
+        await _webApiClient.Authenticate(await InviteMember(callerType));
+        var before = (await ReadPluginSwitchesAsync()).GetProperty("personal").GetBoolean();
 
         // Act
-        using var response = await _webApiClient.PostAsJsonAsync("api/2.0/settings/personalwebplugins", new { enabled = true }, Ct);
+        using var response = await _webApiClient.PostAsJsonAsync("api/2.0/settings/personalwebplugins", new { enabled = !before }, Ct);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, Ct);
+        var after = (await ReadPluginSwitchesAsync()).GetProperty("personal").GetBoolean();
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        status.Should().Be(403, body);
+        body.Should().Contain("Access denied");
+        after.Should().Be(before);
     }
 
-    private async Task SetAsync(bool enabled)
+    private async Task<JsonElement> SetAsync(bool enabled)
     {
-        await _webApiClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(await InviteMember(EmployeeType.DocSpaceAdmin));
 
         using var response = await _webApiClient.PostAsJsonAsync("api/2.0/settings/personalwebplugins", new { enabled }, Ct);
         var (status, body) = await WebPluginsTestData.ReadAsync(response, Ct);
 
         status.Should().Be(200, body);
+
+        return JsonDocument.Parse(body).RootElement.GetProperty("response").Clone();
     }
 
+    private async Task<List<string>> ListMembersPluginsAsync()
+    {
+        using var response = await _webApiClient.GetAsync("api/2.0/settings/personalwebplugins/plugins", Ct);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, Ct);
+        status.Should().Be(200, body);
+
+        return JsonDocument.Parse(body).RootElement.GetProperty("response").EnumerateArray()
+            .Select(x => x.GetProperty("name").GetString() ?? string.Empty)
+            .ToList();
+    }
+
+    /// <summary>Reads <c>plugins</c> of <c>GET api/2.0/settings</c> raw: the generated SDK lacks <c>personal</c> and <c>personalAvailable</c>.</summary>
     private async Task<JsonElement> ReadPluginSwitchesAsync()
     {
         using var response = await _webApiClient.GetAsync("api/2.0/settings", Ct);
@@ -122,14 +147,13 @@ public class PersonalWebPluginsSwitchTests(
         return JsonDocument.Parse(body).RootElement.GetProperty("response").GetProperty("plugins").Clone();
     }
 
-    private async Task<List<string>> ListAvailableAsync()
+    private async Task<Dictionary<string, bool>> ListAvailableAsync()
     {
         using var response = await _webApiClient.GetAsync("api/2.0/settings/webplugins", Ct);
         var (status, body) = await WebPluginsTestData.ReadAsync(response, Ct);
         status.Should().Be(200, body);
 
         return JsonDocument.Parse(body).RootElement.GetProperty("response").EnumerateArray()
-            .Select(x => x.GetProperty("name").GetString() ?? string.Empty)
-            .ToList();
+            .ToDictionary(x => x.GetProperty("name").GetString() ?? string.Empty, x => x.GetProperty("enabled").GetBoolean());
     }
 }

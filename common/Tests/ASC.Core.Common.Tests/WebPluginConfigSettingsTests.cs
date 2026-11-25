@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Web.Core;
-
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
@@ -60,7 +58,7 @@ public class WebPluginConfigSettingsTests
         settings.PersonalMaxCount.Should().Be(10);
         settings.MaxSize.Should().Be(5L * 1024 * 1024);
         settings.Extension.Should().Be(".zip");
-        settings.AssetExtensions.Should().BeEmpty();
+        settings.AssetExtensions.Should().Equal(".jpg", ".jpeg", ".png", ".svg");
         settings.AssetMaxCount.Should().Be(10);
         logger.Warnings.Should().BeEmpty();
     }
@@ -73,15 +71,22 @@ public class WebPluginConfigSettingsTests
         { "plugins:personal", "nope", nameof(WebPluginConfigSettings.Personal), true, true },
         { "plugins:enabled", "1", nameof(WebPluginConfigSettings.Enabled), true, false },
         { "plugins:maxCount", "many", nameof(WebPluginConfigSettings.MaxCount), 100, true },
-        { "plugins:maxCount", "0", nameof(WebPluginConfigSettings.MaxCount), 1, true },
+        { "plugins:maxCount", "0", nameof(WebPluginConfigSettings.MaxCount), 100, true },
+        { "plugins:maxCount", "1", nameof(WebPluginConfigSettings.MaxCount), 1, false },
         { "plugins:maxCount", "-5", nameof(WebPluginConfigSettings.MaxCount), 1, true },
         { "plugins:maxCount", "100000", nameof(WebPluginConfigSettings.MaxCount), 1000, true },
-        { "plugins:personalMaxCount", "0", nameof(WebPluginConfigSettings.PersonalMaxCount), 1, true },
+        { "plugins:personalMaxCount", "0", nameof(WebPluginConfigSettings.PersonalMaxCount), 10, true },
         { "plugins:personalMaxCount", "100000", nameof(WebPluginConfigSettings.PersonalMaxCount), 100, true },
-        { "plugins:maxSize", "0", nameof(WebPluginConfigSettings.MaxSize), 1024L, true },
+        { "plugins:personalMaxCount", "-1", nameof(WebPluginConfigSettings.PersonalMaxCount), 1, true },
+        { "plugins:personalMaxCount", "x", nameof(WebPluginConfigSettings.PersonalMaxCount), 10, true },
+        { "plugins:maxSize", "0", nameof(WebPluginConfigSettings.MaxSize), 5L * 1024 * 1024, true },
+        { "plugins:maxSize", "10", nameof(WebPluginConfigSettings.MaxSize), 1024L, true },
         { "plugins:maxSize", "1000000000000", nameof(WebPluginConfigSettings.MaxSize), 100L * 1024 * 1024, true },
-        { "plugins:assetMaxCount", "0", nameof(WebPluginConfigSettings.AssetMaxCount), 0, false },
-        { "plugins:assetMaxCount", "-1", nameof(WebPluginConfigSettings.AssetMaxCount), 0, true },
+        { "plugins:maxSize", "00", nameof(WebPluginConfigSettings.MaxSize), 5L * 1024 * 1024, true },
+        { "plugins:maxSize", "-1", nameof(WebPluginConfigSettings.MaxSize), 1024L, true },
+        { "plugins:maxSize", "x", nameof(WebPluginConfigSettings.MaxSize), 5L * 1024 * 1024, true },
+        { "plugins:assetMaxCount", "0", nameof(WebPluginConfigSettings.AssetMaxCount), 10, true },
+        { "plugins:assetMaxCount", "-1", nameof(WebPluginConfigSettings.AssetMaxCount), 1, true },
         { "plugins:assetMaxCount", "1000", nameof(WebPluginConfigSettings.AssetMaxCount), 100, true }
     };
 
@@ -121,17 +126,30 @@ public class WebPluginConfigSettingsTests
     }
 
     [Fact]
-    public void Read_AssetExtensionsAsOneValue_AllowsNoExtensionWithAWarning()
+    public void Read_AssetExtensionsAsOneValue_KeepsTheDefaultListWithAWarning()
     {
         // Arrange
         var logger = new RecordingLogger<WebPluginConfigSettings>();
 
         // Act
-        var settings = new WebPluginConfigSettings(Configuration(new() { ["plugins:assetExtensions"] = ".png,.svg" }), logger);
+        var settings = new WebPluginConfigSettings(Configuration(new() { ["plugins:assetExtensions"] = ".html,.js" }), logger);
 
         // Assert
-        settings.AssetExtensions.Should().BeEmpty();
+        settings.AssetExtensions.Should().Equal(".jpg", ".jpeg", ".png", ".svg");
         logger.Warnings.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void Read_AssetExtensionsEmptyList_KeepsTheDefaultList()
+    {
+        // Arrange
+        var logger = new RecordingLogger<WebPluginConfigSettings>();
+
+        // Act
+        var settings = new WebPluginConfigSettings(Configuration(new() { ["plugins:assetExtensions:0"] = "" }), logger);
+
+        // Assert
+        settings.AssetExtensions.Should().Equal(".jpg", ".jpeg", ".png", ".svg");
     }
 
     private static IConfiguration Configuration(Dictionary<string, string?> values)

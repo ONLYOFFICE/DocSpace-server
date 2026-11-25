@@ -176,12 +176,10 @@ public class GetWebPluginsRequestDto
 ///   "enabled": true
 /// }
 /// </example>
-public class PersonalWebPluginsRequestDto
+public class SetPersonalWebPluginsRequestDto
 {
     /// <summary>
-    /// Whether every member other than a guest may install, switch and delete web plugins of their own. Switching it
-    /// off hides the personal plugins of all members at once and keeps their files and states, so switching it on again
-    /// brings them back.
+    /// Whether members other than guests may install web plugins of their own.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }
@@ -190,7 +188,7 @@ public class PersonalWebPluginsRequestDto
 /// <summary>
 /// Which personal web plugin of a member an administrator addresses.
 /// </summary>
-public class MemberWebPluginRequestDto
+public abstract class MemberWebPluginRequestDto
 {
     /// <summary>
     /// The member who installed the plugin for themselves: the `id` of the `createBy` object that
@@ -210,25 +208,30 @@ public class MemberWebPluginRequestDto
 }
 
 /// <summary>
+/// Which personal web plugin of a member an administrator deletes.
+/// </summary>
+public class DeleteMemberWebPluginRequestDto : MemberWebPluginRequestDto;
+
+/// <summary>
 /// Which personal web plugin of a member an administrator switches, and whether it is to run.
 /// </summary>
-public class MemberWebPluginStateRequestDto : MemberWebPluginRequestDto
+public class SetMemberWebPluginRequestDto : MemberWebPluginRequestDto
 {
     /// <summary>
     /// The state the plugin is to have for the member.
     /// </summary>
     /// <example>{"enabled": false}</example>
     [FromBody]
-    public required MemberWebPluginState State { get; set; }
+    public required SetMemberWebPluginRequest State { get; set; }
 }
 
 /// <summary>
 /// The state an administrator sets for a personal web plugin of a member.
 /// </summary>
-public class MemberWebPluginState
+public class SetMemberWebPluginRequest
 {
     /// <summary>
-    /// Whether the plugin runs for the member.
+    /// Whether the plugin is switched on for the member.
     /// </summary>
     /// <example>false</example>
     public bool Enabled { get; set; }

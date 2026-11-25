@@ -43,7 +43,7 @@ public class WebPluginDto
     /// <summary>
     /// The plugin's manifest name, which is what every other operation of this group addresses it by. A name is
     /// unique within its level: an installation-wide plugin wins the name over a portal one, and a portal plugin over
-    /// the caller's personal one.
+    /// a member's personal one.
     /// </summary>
     /// <example>example-plugin</example>
     public required string Name { get; set; }
@@ -110,8 +110,8 @@ public class WebPluginDto
     public required string Image { get; set; }
 
     /// <summary>
-    /// The portal member who uploaded the plugin. For a plugin that ships with the installation it is an empty
-    /// profile, since no member put it there.
+    /// The portal member who uploaded the plugin, and for a personal plugin the member who owns it. For a plugin that
+    /// ships with the installation it is an empty profile, since no member put it there.
     /// </summary>
     /// <example>{"displayName": "John Doe", "email": "john.doe@example.com"}</example>
     public required EmployeeDto CreateBy { get; set; }
@@ -137,15 +137,16 @@ public class WebPluginDto
     public required bool System { get; set; }
 
     /// <summary>
-    /// Whether the plugin was installed by the calling user for themselves rather than for the portal. A personal
-    /// plugin is addressed with `personal=true`.
+    /// Whether the plugin is a member's personal plugin rather than a portal or installation-wide one. Its owner
+    /// addresses it with `personal=true`.
     /// </summary>
     /// <example>false</example>
     public required bool Personal { get; set; }
 
     /// <summary>
     /// The address of the plugin's script, which a client loads to run it. It ends in a `hash` query taken from
-    /// `version`, so the address changes whenever the plugin is updated and an old one may be cached.
+    /// `version`, so the address changes whenever the plugin is updated and an old one may be cached. The files of a
+    /// personal plugin are served to its owner only.
     /// </summary>
     /// <example>https://example.com/plugin.js</example>
     public required string Url { get; set; }
@@ -164,9 +165,9 @@ public class WebPluginDto
     public required string CspDomains { get; set; }
 
     /// <summary>
-    /// The settings string kept for the plugin, by the portal or, for a personal plugin, for its owner, stored and
-    /// returned verbatim - only the plugin knows its shape. It is empty until `PUT api/2.0/settings/webplugins/{name}`
-    /// saves one.
+    /// The settings string saved for the plugin, by the portal or, for a personal plugin, by its owner. Only the
+    /// plugin knows its shape. It is empty until `PUT api/2.0/settings/webplugins/{name}` saves one, and the settings
+    /// of a personal plugin are returned to its owner only.
     /// </summary>
     /// <example>{"theme":"dark"}</example>
     public required string Settings { get; set; }
@@ -214,7 +215,7 @@ public class MemberWebPluginDto : WebPluginDto
 }
 
 [Scope]
-[Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
+[Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true, RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
 {
     [MapProperty(nameof(WebPluginDto.CreateBy), nameof(WebPlugin.CreateBy), Use = nameof(MapCreateBy))]
@@ -239,10 +240,10 @@ public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
         return dto;
     }
 
-    public async Task<MemberWebPluginDto> ToMemberDtoManual(WebPlugin source, EmployeeType createByType, bool createByIsOwner)
+    public async Task<MemberWebPluginDto> ToMemberDtoManual(WebPlugin source, UserInfo createBy, EmployeeType createByType, bool createByIsOwner)
     {
         var dto = ToMemberDto(source, createByType, createByIsOwner);
-        dto.CreateBy = await employeeDtoHelper.GetAsync(source.CreateBy);
+        dto.CreateBy = await employeeDtoHelper.GetAsync(createBy);
 
         return dto;
     }

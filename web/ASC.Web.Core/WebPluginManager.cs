@@ -181,6 +181,19 @@ public class WebPluginManager(
         webPlugin.CssUrl = null;
     }
 
+    public static void PrepareStoredPlugin(WebPlugin webPlugin, bool system, Guid? owner)
+    {
+        webPlugin.System = system;
+        webPlugin.Personal = owner.HasValue;
+
+        if (owner.HasValue)
+        {
+            webPlugin.CreateBy = owner.Value;
+        }
+
+        ClearManifestState(webPlugin, system);
+    }
+
     private static bool IsPluginConfigPath(string path)
     {
         return path.Split('/', '\\').Length == 2;
@@ -530,19 +543,27 @@ public class WebPluginManager(
 
         var storage = await GetPluginStorageAsync(tenantId, true);
 
+        var configFiles = await storage.ListFilesRelativeAsync(string.Empty, string.Empty, ConfigFileName, true).ToArrayAsync();
+
         var webPlugins = new List<WebPlugin>();
 
-        await foreach (var folder in storage.ListDirectoriesRelativeAsync(string.Empty, string.Empty, false))
+        foreach (var owner in GetPersonalPluginOwners(configFiles))
         {
-            if (!Guid.TryParse(folder.Trim('/', '\\'), out var owner))
-            {
-                continue;
-            }
-
             webPlugins.AddRange(await GetMemberWebPluginsAsync(tenantId, owner));
         }
 
         return webPlugins;
+    }
+
+    public static List<Guid> GetPersonalPluginOwners(IEnumerable<string> configFiles)
+    {
+        return configFiles
+            .Select(path => path.Split('/', '\\'))
+            .Where(segments => segments.Length == 3)
+            .Select(segments => Guid.TryParse(segments[0], out var owner) ? owner : Guid.Empty)
+            .Where(owner => owner != Guid.Empty)
+            .Distinct()
+            .ToList();
     }
 
     private async Task<List<WebPlugin>> GetMemberWebPluginsAsync(int tenantId, Guid owner)
@@ -746,10 +767,7 @@ public class WebPluginManager(
             {
                 var webPlugin = await ReadWebPluginConfigAsync(storage, Path.Combine(basePath, path));
 
-                webPlugin.System = system;
-                webPlugin.Personal = owner.HasValue;
-
-                ClearManifestState(webPlugin, system);
+                PrepareStoredPlugin(webPlugin, system, owner);
 
                 var hash = string.IsNullOrEmpty(webPlugin.Version) ? string.Empty : $"?hash={webPlugin.Version}";
 
@@ -1109,17 +1127,17 @@ public class WebPluginManager(
                 {
                     var ext = Path.GetExtension(zipEntry.Name);
 
-                    if (webPluginConfigSettings.AssetExtensions.Length != 0 && !webPluginConfigSettings.AssetExtensions.Contains(ext))
+                    if (!webPluginConfigSettings.AssetExtensions.Contains(ext))
                     {
                         continue;
                     }
-
-                    await ExtractEntry(zipFile, zipEntry, tempDir);
 
                     if (assetsCount++ >= webPluginConfigSettings.AssetMaxCount)
                     {
                         break;
                     }
+
+                    await ExtractEntry(zipFile, zipEntry, tempDir);
                 }
             }
 

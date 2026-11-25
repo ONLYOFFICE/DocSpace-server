@@ -42,16 +42,31 @@ public class WebPluginConfigSettings
         Upload = configuration.ReadBool("plugins:upload", false, logger);
         Delete = configuration.ReadBool("plugins:delete", false, logger);
         Personal = configuration.ReadBool("plugins:personal", true, logger);
-        // plugins a portal holds: 1 to 1000, 100 when not set
-        MaxCount = configuration.ReadInt("plugins:maxCount", 100, 1, 1000, logger);
-        // personal plugins a member holds: 1 to 100, 10 when not set
-        PersonalMaxCount = configuration.ReadInt("plugins:personalMaxCount", 10, 1, 100, logger);
-        // bytes of an uploaded package: 1024 (1 KB) to 104857600 (100 MB), 5242880 (5 MB) when not set
-        MaxSize = configuration.ReadLong("plugins:maxSize", 5L * 1024L * 1024L, 1024L, 100L * 1024L * 1024L, logger);
+        // plugins a portal holds: 1 to 1000, 100 when not set or 0; a negative value is raised to 1
+        MaxCount = IsZero(configuration, "plugins:maxCount", logger) ? 100 : configuration.ReadInt("plugins:maxCount", 100, 1, 1000, logger);
+        // personal plugins a member holds: 1 to 100, 10 when not set or 0; a negative value is raised to 1
+        PersonalMaxCount = IsZero(configuration, "plugins:personalMaxCount", logger) ? 10 : configuration.ReadInt("plugins:personalMaxCount", 10, 1, 100, logger);
+        // bytes of an uploaded package: 1024 (1 KB) to 104857600 (100 MB), 5242880 (5 MB) when not set or 0; a negative
+        // value is raised to 1024
+        MaxSize = IsZero(configuration, "plugins:maxSize", logger) ? 5L * 1024L * 1024L : configuration.ReadLong("plugins:maxSize", 5L * 1024L * 1024L, 1024L, 100L * 1024L * 1024L, logger);
         Extension = configuration["plugins:extension"] ?? ".zip";
         AssetExtensions = ReadAssetExtensions(configuration, logger);
-        // asset files in a package: 0 to 100, 10 when not set
-        AssetMaxCount = configuration.ReadInt("plugins:assetMaxCount", 10, 0, 100, logger);
+        // asset files in a package: 1 to 100, 10 when not set or 0; a negative value is raised to 1
+        AssetMaxCount = IsZero(configuration, "plugins:assetMaxCount", logger) ? 10 : configuration.ReadInt("plugins:assetMaxCount", 10, 1, 100, logger);
+    }
+
+    private static readonly string[] _defaultAssetExtensions = [".jpg", ".jpeg", ".png", ".svg"];
+
+    private static bool IsZero(IConfiguration configuration, string key, ILogger logger)
+    {
+        if (!long.TryParse(configuration[key], NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) || value != 0)
+        {
+            return false;
+        }
+
+        logger.WarningZeroReadAsDefault(key);
+
+        return true;
     }
 
     private static string[] ReadAssetExtensions(IConfiguration configuration, ILogger logger)
@@ -60,15 +75,17 @@ public class WebPluginConfigSettings
 
         if (section.Value != null)
         {
-            logger.WarningAssetExtensionsNotAList(section.Path);
+            logger.WarningAssetExtensionsNotAList(section.Path, string.Join(' ', _defaultAssetExtensions));
 
-            return [];
+            return _defaultAssetExtensions;
         }
 
-        return section.GetChildren()
+        var assetExtensions = section.GetChildren()
             .Select(x => x.Value)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .ToArray();
+
+        return assetExtensions.Length == 0 ? _defaultAssetExtensions : assetExtensions;
     }
 
     public bool Enabled { get; }

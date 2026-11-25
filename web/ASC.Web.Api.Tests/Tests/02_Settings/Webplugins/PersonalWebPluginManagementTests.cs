@@ -214,7 +214,7 @@ public class PersonalWebPluginManagementTests(
     public async Task GetCspSettings_CookieWithoutPersonalDomains_NotModified()
     {
         // Arrange: the policy the owner saves carries a Last-Modified; the member installs no personal plugin
-        const string anyPersonalCspCookie = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+        const string anyPersonalCspCookie = "1";
         await _cspApi.ConfigureCspAsync(new CspRequestDto([PortalCspDomain]), TestContext.Current.CancellationToken);
         await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
 

@@ -73,10 +73,10 @@ public class PluginsDto
     /// <summary>
     /// Whether a portal member other than a guest may install plugins for themselves alone through
     /// `POST api/2.0/settings/webplugins?personal=true`. It is `true` only while `personalAvailable` is `true` and an
-    /// administrator switched personal plugins on for the portal through `PUT api/2.0/settings/personalwebplugins`,
+    /// administrator switched personal plugins on for the portal through `POST api/2.0/settings/personalwebplugins`,
     /// which a new portal has not. It is of no use while `enabled` is `false`, and uploading one still needs
-    /// `upload`. While it is `false`, the personal plugins installed before are neither listed nor loaded, and the
-    /// calls with `personal=true` are refused.
+    /// `upload`. While it is `false`, the personal plugins installed before are neither listed for nor loaded by
+    /// their members, and the calls with `personal=true` are refused.
     /// </summary>
     /// <example>true</example>
     public bool Personal { get; set; }
@@ -84,7 +84,7 @@ public class PluginsDto
     /// <summary>
     /// Whether the installation lets the administrators of a portal switch personal plugins on. It is `true` unless
     /// the installation switched personal plugins off in its configuration. While it is `false`, `personal` is
-    /// `false` and `PUT api/2.0/settings/personalwebplugins` is refused.
+    /// `false` and `POST api/2.0/settings/personalwebplugins` is refused.
     /// </summary>
     /// <example>true</example>
     public bool PersonalAvailable { get; set; }
@@ -94,5 +94,6 @@ public class PluginsDto
 public static partial class PluginsDtoMapper
 {
     [MapProperty(nameof(WebPluginConfigSettings.Personal), nameof(PluginsDto.PersonalAvailable))]
+    [MapperIgnoreTarget(nameof(PluginsDto.Personal))]
     public static partial PluginsDto Map(this WebPluginConfigSettings source);
 }

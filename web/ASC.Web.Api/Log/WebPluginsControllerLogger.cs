@@ -37,4 +37,7 @@ internal static partial class WebPluginsControllerLogger
 {
     [LoggerMessage(LogLevel.Warning, "Failed to update the personal CSP")]
     public static partial void WarningPersonalCspNotUpdated(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Failed to record the audit event of a member's web plugin")]
+    public static partial void WarningMemberWebPluginAuditNotSent(this ILogger logger, Exception exception);
 }

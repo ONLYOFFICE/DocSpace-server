@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Web.Api.Core;
-
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
@@ -59,6 +57,31 @@ public class CspSessionKeyTests
         var key = CspSettingsHelper.GetSessionKey("csp:portal.example.com", null, "t1Hz/ab+c=");
 
         // Assert
-        key.Should().StartWith("csp:portal.example.com:personal:0:");
+        key.Should().Be("csp:portal.example.com:personal:0:0a77e33d87028293bd1d419269d414dbf028a387a34729946dd30594adc378ba");
+    }
+
+    [Theory]
+    [InlineData("asc_auth_key=a; other=b", 1)]
+    [InlineData("asc_auth_key=a; asc_auth_key=b", 2)]
+    [InlineData("ASC_AUTH_KEY=a; asc_auth_key=b", 2)]
+    [InlineData("x_asc_auth_key=a; asc_auth_key=b", 1)]
+    [InlineData("other=b", 0)]
+    public void CountCookies_CookieHeader_CountsTheCookiesOfThatName(string header, int expected)
+    {
+        // Act
+        var count = CspSettingsHelper.CountCookies([header], "asc_auth_key");
+
+        // Assert
+        count.Should().Be(expected);
+    }
+
+    [Fact]
+    public void CountCookies_SeveralCookieHeaders_CountsAcrossThem()
+    {
+        // Act
+        var count = CspSettingsHelper.CountCookies(["asc_auth_key=a", "asc_auth_key=b"], "asc_auth_key");
+
+        // Assert
+        count.Should().Be(2);
     }
 }

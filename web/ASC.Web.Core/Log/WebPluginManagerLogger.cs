@@ -41,6 +41,9 @@ internal static partial class WebPluginManagerLogger
     [LoggerMessage(LogLevel.Warning, "Failed to send the change of the personal web plugins switch")]
     public static partial void WarningPersonalWebPluginsChangeNotSent(this ILogger logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Warning, "{key} is not a list of extensions, no asset extension is allowed")]
-    public static partial void WarningAssetExtensionsNotAList(this ILogger logger, string key);
+    [LoggerMessage(LogLevel.Warning, "{key} is not a list of extensions, the asset extensions {extensions} are allowed")]
+    public static partial void WarningAssetExtensionsNotAList(this ILogger logger, string key, string extensions);
+
+    [LoggerMessage(LogLevel.Warning, "{key} is 0, its default is used")]
+    public static partial void WarningZeroReadAsDefault(this ILogger logger, string key);
 }
