@@ -120,6 +120,9 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.InvitationSettingsUpdated,MessageAction.IPRestrictionsSettingsUpdated,MessageAction.LoginSettingsUpdated,
                     MessageAction.AIAccessEnabled,
                     MessageAction.AIAccessDisabled,
+                    MessageAction.PersonalWebPluginsEnabled,
+                    MessageAction.PersonalWebPluginsDisabled,
+                    MessageAction.PersonalWebPluginUpdated,
                     MessageAction.UserUpdatedAiSettings,
                     MessageAction.DocsCloudConfigUpdated,
                     MessageAction.AiProfileUpdated,
@@ -163,6 +166,7 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.AiProfileUnassigned,
                     MessageAction.AiByokKeyDeleted,
                     MessageAction.WebpluginDeleted,
+                    MessageAction.PersonalWebPluginDeleted,
                     MessageAction.ScheduledBackupDeleted,
                     MessageAction.CustomerServiceLimitDeleted
                 ]

@@ -461,6 +461,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-personal-web-plugin", { webPluginName, enabled });
   }
 
+  function changePersonalWebPlugins({ room, enabled } = {}) {
+    logger.info(`changed personal web plugins in room ${room}, enabled ${enabled}`);
+    filesIO.to(room).emit("s:change-personal-web-plugins", { enabled });
+  }
+
   function changeAppEnabled({ room, id, enabled } = {}) {
     logger.info(`changed app enabled in room ${room}, id ${id}, enabled ${enabled}`);
     filesIO.to(room).emit("s:change-app-enabled", { id, enabled });
@@ -772,6 +777,7 @@ module.exports = (io) => {
     changeInvitationLimitValue,
     changeWebPlugin,
     changePersonalWebPlugin,
+    changePersonalWebPlugins,
     changeAppEnabled,
     topUpWallet,
     walletLowBalance,

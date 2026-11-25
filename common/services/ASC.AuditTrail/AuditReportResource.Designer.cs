@@ -2309,7 +2309,43 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("PasswordStrengthSettingsUpdated", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Personal plugin {0} of user {1} deleted.
+        /// </summary>
+        public static string PersonalWebPluginDeleted {
+            get {
+                return ResourceManager.GetString("PersonalWebPluginDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Personal plugin {0} of user {1} updated.
+        /// </summary>
+        public static string PersonalWebPluginUpdated {
+            get {
+                return ResourceManager.GetString("PersonalWebPluginUpdated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Personal plugins have been disabled.
+        /// </summary>
+        public static string PersonalWebPluginsDisabled {
+            get {
+                return ResourceManager.GetString("PersonalWebPluginsDisabled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Personal plugins have been enabled.
+        /// </summary>
+        public static string PersonalWebPluginsEnabled {
+            get {
+                return ResourceManager.GetString("PersonalWebPluginsEnabled", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Platform.
         /// </summary>

@@ -1123,6 +1123,18 @@ public enum MessageAction
     [Description("Promo code applied")]
     CustomerPromoCodeApplied = 6127,
 
+    [Description("Personal web plugins enabled")]
+    PersonalWebPluginsEnabled = 6128,
+
+    [Description("Personal web plugins disabled")]
+    PersonalWebPluginsDisabled = 6129,
+
+    [Description("Personal web plugin of a user updated")]
+    PersonalWebPluginUpdated = 6130,
+
+    [Description("Personal web plugin of a user deleted")]
+    PersonalWebPluginDeleted = 6131,
+
     #endregion
 
     #region others

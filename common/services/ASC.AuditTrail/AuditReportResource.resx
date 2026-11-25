@@ -1296,6 +1296,18 @@
   <data name="AIAccessDisabled" xml:space="preserve">
     <value>AI services have been disabled</value>
   </data>
+  <data name="PersonalWebPluginsEnabled" xml:space="preserve">
+    <value>Personal plugins have been enabled</value>
+  </data>
+  <data name="PersonalWebPluginsDisabled" xml:space="preserve">
+    <value>Personal plugins have been disabled</value>
+  </data>
+  <data name="PersonalWebPluginUpdated" xml:space="preserve">
+    <value>Personal plugin {0} of user {1} updated</value>
+  </data>
+  <data name="PersonalWebPluginDeleted" xml:space="preserve">
+    <value>Personal plugin {0} of user {1} deleted</value>
+  </data>
   <data name="DocumentsExternalShareSettingsUpdated" xml:space="preserve">
     <value>Access settings for external links updated</value>
   </data>
