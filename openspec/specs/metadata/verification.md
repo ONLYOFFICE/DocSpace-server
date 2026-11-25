@@ -289,8 +289,8 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): only endpoint descriptions and doc
 | **Clients are told about metadata changes** | | |
 | `update-file` / `update-folder` after every write; cascade, template and field deletions and a visibility change notify affected entries by parent folder recipients | `T/MetadataSocketEventsTests.cs:50-161` (file assign, values, unassign; folder custom fields; hiding; template and field deletion; cascade switched on: each file and the room); `Service:170-178, 1167-1196`; `Notifier:35-103`; `Socket:86-93` | TEST-CONFIRMED [run: PASS] (owner's client), CODE-ONLY (a failed send does not fail the call; recipients other than the owner) |
 | **Audit trail of the metadata actions** | | |
-| Eight event texts with the object's name after one session | `T/MetadataAuditTests.cs:47-118`; `Audit:1291-1318`; `MessageAction:1177-1210` | TEST-CONFIRMED [run: PASS] |
-| Custom field write audited as "Metadata values updated"; cascade start as "Metadata cascade assignment started" | `T/MetadataAuditTests.cs:87-112`; `Audit:1329-1333` | TEST-CONFIRMED [run: PASS] |
+| Eight event texts with the object's name after one session | `T/MetadataAuditTests.cs:47-118`; `Audit:1323-1346`; `MessageAction:1197-1219` | TEST-CONFIRMED [run: PASS] |
+| Custom field write audited as "Metadata values updated"; cascade start as "Metadata cascade assignment started" | `T/MetadataAuditTests.cs:87-112`; `Audit:1347-1352` | TEST-CONFIRMED [run: PASS] |
 | **Metadata in backup and restore** | | |
 | Four tables declared with user and date columns; template/field ids remapped, links and values follow template, field and entry ids, `source_folder_id` remapped | `common/Tests/ASC.Data.Backup.Core.Tests/FilesModuleSpecificsTests.cs:339-420` (link: template, entry and `source_folder_id` remapped; value: field and entry remapped, unit); `BackupCoverageTests.cs:109` (every tenant table declared); `Backup:80-101, 158-168` | TEST-CONFIRMED [run: PASS] (unit), CODE-ONLY (a restore on a second installation; the user and date columns) |
 

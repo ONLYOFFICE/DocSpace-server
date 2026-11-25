@@ -39,8 +39,8 @@ alone, while the administrator keeps control of what runs for the portal.
   installation-wide plugin (`system=true`) keeps them, so its manifest stays the default state of the other
   portals.
 - A personal plugin's `cspDomains` are checked at upload: every entry has to be an http, https, ws or wss host,
-  with an optional `*.` wildcard below a name of two labels or more, and the value at most 15360 characters;
-  otherwise the upload answers 400 "The cspDomains value lists an invalid address or is too long".
+  with an optional `*.` wildcard below a name of two labels or more, and the value at most 15360 characters (the
+  member's header size limit binds first for distinct addresses); otherwise the upload answers 400 "The cspDomains value lists an invalid address or is too long".
 - The domains a personal plugin declares in `cspDomains` never reach the portal Content Security Policy. A
   signed-in member whose request carries the `asc_personal_csp` cookie gets them in the `header` that
   `getCspSettings` returns, outside `frame-ancestors`, unless the header would pass its size limit; if reading
@@ -50,8 +50,10 @@ alone, while the administrator keeps control of what runs for the portal.
   back to the portal header without an error. The cookie, `1`, is set and cleared by `getWebPlugins` without
   `personal` and by the personal uploads, updates and deletions, and every response that clears the session
   cookie, `logout` among them, deletes it too. The member's header is cached for the proxy for a day under a key
-  the proxy derives itself from the session cookie and the portal's generation of member headers; a change that
-  can alter a member's personal domains, and a save of the portal policy, start a new generation.
+  the proxy derives itself from the session cookie and the portal's generation of member headers; the personal
+  uploads, updates and deletions, portal plugin uploads and deletions, the administrator's member-plugin calls,
+  the personal switch and a save of the portal policy start a new generation, and after any other change the
+  member's next plugin list writes the header again.
 - `WebPluginDto` carries `cspDomains`, an empty string for a plugin that declares none.
 - A refusal of an upload because an installed plugin holds the `name` or `pluginName`, or because of the plugin
   limit, answers 400 with its reason alone, without the "Wrong plugin archive. " a fault of the archive keeps.
@@ -104,16 +106,24 @@ None.
   plugin files served to their owner, the checks of personal `cspDomains`, the size limit of a member's header,
   the `asc_personal_csp` cookie, the header cached for a member.
 - `portal-settings`: found by `getCspSettings`. Requirement modified: "Reading the Content Security Policy"
-  (no 304 for a request that gets personal domains); requirement added: "Personal domains in the policy
+  (no 304 for a request with `asc_personal_csp` from a caller who has personal domains); requirement added: "Personal domains in the policy
   header". `configureCsp` now also starts a new generation of member headers; "Configuring the Content Security
   Policy" and "Content Security Policy follows the domain" still hold as written.
 - `portal-lifecycle`: reached by `deletePortal` and `PUT portal/portalrename`, which now also start a new
   generation of member headers under the old domain. Its requirements still hold as written; no delta.
+- `backup-and-restore`: the portal archive now also holds the `personalwebplugins` module. "Contents of a portal
+  archive" still holds as written, its web plugins now including the personal ones; no delta.
 
 ## Breaks current behaviour
 
 "Before the branch" below means `release/v4.1.0`, where the five operations had no `personal` parameter, so a
 `personal=true` in the query was ignored.
+
+- **Plugin configuration** (`plugins` section): a negative `maxCount`, `maxSize` or `assetMaxCount` is raised to
+  its minimum with a warning, where it gave the default before; `0` still gives the default, now with a warning.
+  `assetExtensions` missing, a single value or an empty list gives `.jpg .jpeg .png .svg`, where it allowed every
+  extension before. Affected: installations that set such values; the shipped buildtools `appsettings.json` sets
+  positive values and that same list. Stored data: none.
 
 - **Installation-wide plugin switches** (`getPortalSettings`): new `plugins.personalAvailable` and
   `plugins.personal` fields. `personal` is false on every portal until an administrator switches personal

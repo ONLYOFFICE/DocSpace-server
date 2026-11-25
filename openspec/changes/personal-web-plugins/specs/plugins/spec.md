@@ -4,8 +4,8 @@
 
 ### Requirement: Switch for personal plugins
 
-`getPortalSettings` SHALL report `plugins.personalAvailable`, true unless the installation switched personal
-plugins off, and `plugins.personal`, true only while they are available and an administrator switched them on
+`getPortalSettings` SHALL report to a signed-in caller `plugins.personalAvailable`, true unless the installation
+switched personal plugins off, and `plugins.personal`, true only while they are available and an administrator switched them on
 for the portal, which a new portal has not. While plugins are on and `personal` is false, a guest's or member's
 call with `personal=true` SHALL answer 403 "Access denied", and `getWebPlugins` SHALL list no personal plugin.
 
@@ -39,13 +39,14 @@ of personal plugins, so switching on again brings them back.
 
 #### Scenario: Member asks to switch
 
-- **WHEN** a User calls `setPersonalWebPlugins`
-- **THEN** the system answers 403 "Access denied"
+- **WHEN** a User or a Room admin calls `setPersonalWebPlugins`
+- **THEN** the system answers 403 "Access denied" and `getPortalSettings` reports `plugins.personal` unchanged
 
 #### Scenario: Off and on again
 
-- **WHEN** a User holds an enabled personal plugin and the owner switches personal plugins off and then on again
-- **THEN** while they are off the User's `getWebPlugins` lists none of the User's personal plugins
+- **WHEN** a User holds an enabled personal plugin and a DocSpace admin switches personal plugins off and then on again
+- **THEN** each call answers `personal` as switched
+- **AND** while they are off the User's `getWebPlugins` lists none of the User's personal plugins, and `getMembersWebPlugins` still lists the plugin
 - **AND** afterwards it lists the plugin with `enabled` true
 
 ### Requirement: Personal plugins of members for an administrator
@@ -56,37 +57,48 @@ members, each with its member in `createBy`, `createByType` and `createByIsOwner
 Switching SHALL keep the member's settings, deleting SHALL drop the files and the state, and both SHALL answer
 404 "Plugin not found" for a name the member lacks.
 
-#### Scenario: Owner lists the plugins of members
+#### Scenario: DocSpace admin lists the plugins of members
 
-- **WHEN** a User holds a personal plugin with saved settings and the owner calls `getMembersWebPlugins`
-- **THEN** the list holds the plugin with `createBy` the User, `createByType` User, `createByIsOwner` false, `enabled` true and empty `settings`
+- **WHEN** a User holds a personal plugin with saved settings and a DocSpace admin calls `getMembersWebPlugins`
+- **THEN** the list holds the plugin with `createBy` the User, `createByType` `User`, `createByIsOwner` false, `enabled` true and empty `settings`
 
 #### Scenario: Owner lists a plugin of their own
 
 - **WHEN** the owner holds a personal plugin and calls `getMembersWebPlugins`
-- **THEN** the list holds the plugin with `createBy` the owner, `createByType` DocSpace admin and `createByIsOwner` true
+- **THEN** the list holds the plugin with `createBy` the owner, `createByType` `DocSpaceAdmin` and `createByIsOwner` true
 
-#### Scenario: Owner switches a member's plugin off
+#### Scenario: DocSpace admin switches a member's plugin off and on
 
-- **WHEN** the owner calls `setMemberWebPlugin` with `enabled` false for that plugin
-- **THEN** the system answers 200 and the User's `getWebPlugin` with `personal=true` reports `enabled` false with the settings the User saved
+- **WHEN** a DocSpace admin calls `setMemberWebPlugin` with `enabled` false, or with `enabled` true after false, for that plugin
+- **THEN** the system answers 200 and the User's `getWebPlugin` with `personal=true` reports that `enabled` with the settings the User saved
 
-#### Scenario: Owner deletes a member's plugin
+#### Scenario: DocSpace admin deletes a member's plugin
 
-- **WHEN** the owner calls `deleteMemberWebPlugin` for that plugin twice
+- **WHEN** a DocSpace admin calls `deleteMemberWebPlugin` for that plugin twice
 - **THEN** the first call answers 200, the second 404 "Plugin not found", and the User's `getWebPlugins` with `personal=true` no longer lists the plugin
+
+#### Scenario: Plugin of a deleted member
+
+- **WHEN** a User holding a personal plugin is deleted and the owner calls `getMembersWebPlugins`
+- **THEN** the list holds the plugin with `createBy` carrying the User's id and `createByType` `Guest`
+- **AND** `deleteMemberWebPlugin` with that id answers 200
+
+#### Scenario: Unknown plugin of a member
+
+- **WHEN** the owner calls `setMemberWebPlugin` for a name the User holds no plugin under
+- **THEN** the system answers 404 "Plugin not found"
 
 #### Scenario: Member asks for the plugins of members
 
-- **WHEN** a User calls `getMembersWebPlugins`, `setMemberWebPlugin` or `deleteMemberWebPlugin`
-- **THEN** the system answers 403 "Access denied"
+- **WHEN** a User or a Room admin calls `getMembersWebPlugins`, `setMemberWebPlugin` or `deleteMemberWebPlugin`
+- **THEN** the system answers 403 "Access denied" and the member's plugin stays on with its settings
 
 ### Requirement: Personal plugins
 
 With `personal=true`, a signed-in member other than a guest SHALL upload, list, read, switch and delete
 plugins of their own (`addWebPluginFromFile`, `getWebPlugins`, `getWebPlugin`, `updateWebPlugin`,
-`deleteWebPlugin`) without the portal-settings right. A personal plugin SHALL carry `personal` true and be
-listed, with its state and `settings`, for its owner only. With `system=true` too, an upload SHALL answer 400
+`deleteWebPlugin`) without the portal-settings right. A personal plugin SHALL carry `personal` true, and its
+`settings` SHALL reach its owner only. With `system=true` too, an upload SHALL answer 400
 "Changes to system plugins are prohibited" once the personal checks pass.
 
 #### Scenario: User installs a plugin for themselves
@@ -211,7 +223,7 @@ SHALL declare no domain. The domains SHALL reach only their owner's policy heade
 
 #### Scenario: Value at the length limit
 
-- **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` lists valid addresses in exactly 15360 characters
+- **WHEN** a User uploads with `personal=true` a manifest whose `cspDomains` lists one valid address repeated to exactly 15360 characters
 - **THEN** the system answers 200
 
 #### Scenario: Value over the length limit
@@ -283,10 +295,11 @@ request that carries it, unless reading the caller's plugins fails. A response t
 
 ### Requirement: Policy header cached for a member
 
-The calls that set `asc_personal_csp`, and `getCspSettings` for a caller signed in by the session cookie and
-carrying `asc_personal_csp`, SHALL cache for the proxy, for a day, the header `getCspSettings` gives the caller,
-under a key derived from the session cookie and the portal's generation of member headers. A change that can
-alter the personal domains of a member, and a save of the portal's policy, SHALL start a new generation.
+The calls that set `asc_personal_csp`, and `getCspSettings` for a session-cookie caller carrying it, SHALL
+cache for the proxy, for a day, the header `getCspSettings` gives the caller, under a key of the session cookie
+and the portal's member-header generation. Personal uploads, updates and deletions, portal plugin
+uploads and deletions, the member-plugin calls, the personal switch and a policy save SHALL start a new
+generation; a header cached before another change SHALL last at most a day.
 
 #### Scenario: Unchanged header
 
@@ -297,6 +310,11 @@ alter the personal domains of a member, and a save of the portal's policy, SHALL
 
 - **WHEN** a request carries `asc_personal_csp` and the session cookie of one member
 - **THEN** the proxy serves the header cached for that session or asks `getCspSettings`, whatever the value of `asc_personal_csp`
+
+#### Scenario: Session cookie sent twice
+
+- **WHEN** a request carries `asc_auth_key` twice, in any letter case, with `asc_personal_csp`
+- **THEN** the proxy asks `getCspSettings`, which answers for the session it authenticated and caches nothing for it
 
 #### Scenario: New generation
 
@@ -317,7 +335,7 @@ alter the personal domains of a member, and a save of the portal's policy, SHALL
 
 ### Requirement: Installation-wide plugin switches
 
-`getPortalSettings` SHALL report the installation switches `plugins.enabled`, `plugins.upload`,
+`getPortalSettings` SHALL report to a signed-in caller the installation switches `plugins.enabled`, `plugins.upload`,
 `plugins.delete` (false unless set) and `plugins.personalAvailable` (true unless set), and `plugins.personal`.
 While plugins are off, every `settings/webplugins` and `settings/personalwebplugins` operation SHALL answer 403
 "Access denied", and so SHALL an upload while upload is off and a portal plugin deletion while delete is off.

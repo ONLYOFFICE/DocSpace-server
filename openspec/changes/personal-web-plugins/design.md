@@ -100,13 +100,18 @@ Alternatives:
 
 ### The personal plugins of members for an administrator
 
-`getMembersWebPlugins` lists the top-level folders of the `personalwebplugins` module, one per member who ever
-uploaded, and reads each member's plugins through the per-member manifest cache, so a repeated call costs no
-storage reads. Each entry carries the member as `createBy` and the member's `enabled`, and never the member's
-`settings`, which may hold the member's own keys. `setMemberWebPlugin` writes the member's settings row, keeping
+`getMembersWebPlugins` lists the `config.json` files of the `personalwebplugins` module once per call, takes the
+member from the first segment of each path (object storage has no folders to list), and reads each member's
+plugins through the per-member manifest cache. Each entry carries the member whose folder holds it as
+`createBy`, whatever the manifest says, so a restore that gives the member a new id or a deleted member keeps an
+address `setMemberWebPlugin` and `deleteMemberWebPlugin` accept. It carries the member's `enabled`, and never the
+member's `settings`, which may hold the member's own keys. `setMemberWebPlugin` writes the member's settings row, keeping
 the member's settings; `deleteMemberWebPlugin` deletes the folder and the state. Both send
 `s:change-personal-web-plugin` to the member's private room and write an audit event with the member as the
-target. The list includes the plugins of deleted members, so an administrator can remove them.
+target. The list includes the plugins of deleted members, so an administrator can remove them. An administrator
+manages every member's plugins, the owner's and other DocSpace admins' included: switching off or deleting a
+plugin is the lever against a harmful one, and the audit trail records who did it. The event goes to the member
+only; an administrator's open list refreshes when it is opened again.
 
 ### Personal domains: checked as hosts, kept out of frame-ancestors
 
@@ -114,8 +119,8 @@ Every entry of a personal `cspDomains`, trimmed, has to be an http, https, ws or
 `*.` wildcard below a name of two labels or more, besides passing the address check of `configureCsp`; the
 whole value is at most 15360 characters. A bare scheme (`https:`), a lone `*`, a wildcard over a top-level
 domain and a keyword are refused with 400, since each would open the member's pages to any site. The domains go
-into every fetch directive of the member's header but not into `frame-ancestors`: a plugin that shows another
-site in a frame does not need that site to frame the portal.
+into every directive the member's header sets, `default-src` and `frame-ancestors` excepted: a plugin that shows
+another site in a frame does not need that site to frame the portal.
 
 ### Personal CSP: a header per session, under a key the proxy derives itself
 
@@ -172,7 +177,8 @@ to the members' new ids. `ModuleProvider` returns `PersonalWebPluginsModuleSpeci
 restore and on a transfer to another region it moves `<oldUserId>/` to the user's new id through the user
 mapping, and skips a file of a user who is not restored, except in a dump restore, which keeps the ids. The
 `createBy` inside a restored manifest keeps the old user id, as the `config.json` of a portal plugin already
-does.
+does, but the API reports the member whose folder holds a personal plugin, so the restored plugin is listed
+and addressed under the member's new id.
 
 ### Configuration
 
@@ -189,6 +195,11 @@ from these settings through a mapper and adds the portal switch.
   the plugins of deleted members, which the administrator can delete; the per-member limit bounds their number
   and the package size limit each one; quota and automatic cleanup are follow-ups.
 - [Parallel uploads of one member can pass the count limit] → stated in the requirement; follow-up.
+- [An administrator's switch and the member's own save of the plugin's settings at the same moment] → both load
+  and save the member's settings row, so the later save wins; follow-up together with the count limit.
+- [A browser that sends `asc_personal_csp` with a session cookie the cache holds no header for costs the proxy
+  one `getCspSettings` call per page] → the call caches the header for a valid session; a revoked one keeps
+  costing until the browser signs in again.
 - [Every personal change starts a new generation for the whole portal, so each member with personal domains
   costs the proxy one `getCspSettings` call on the next page] → personal changes are rare, and the call caches
   the header again.
@@ -197,7 +208,20 @@ from these settings through a mapper and adds the portal switch.
 - [Another device, or a browser without the hint, gets no personal CSP until a page loaded after its first
   plugin list] → that list sets the hint.
 - [A member whose personal header would pass the size limit gets 403 from a personal upload or switch-on and the
-  portal policy on their pages] → the 15360-character cap bounds one plugin, not the member's sum; follow-up.
+  portal policy on their pages] → the header size limit (15 KB by default) binds long before the 15360-character
+  cap of one plugin for distinct addresses, so the cap guards the stored manifest and the limit the header;
+  follow-up.
+- [A cached member header outlives a change outside the calls that start a new generation: a member made a guest,
+  an installation-wide plugin uploaded or deleted on another portal, a refresh that changes shadowing, a changed
+  configuration re-saved at startup, a member on a host alias of the portal] → the member's next plugin list
+  writes the header again, and a header expires after a day.
+- [The session cookie is `SameSite=Strict` by default, so a page opened from another site gets the portal policy
+  until the next page] → the plugin list of that page writes the header for the next one; follow-up.
+- [A request carrying `asc_auth_key` twice] → the proxy skips the cached member header and asks `getCspSettings`,
+  which answers for the session it authenticated and caches nothing, so a cookie set for a parent domain cannot
+  pick another session's header.
+- [An administrator's open list of members' plugins is not told about changes] → it is read again when opened;
+  follow-up together with live updates in the client.
 - [A member installs a malicious plugin from someone else] → it runs with that member's rights only; personal
   plugins are off on a portal until an administrator switches them on, and the administrator sees and can remove
   every member's plugin.

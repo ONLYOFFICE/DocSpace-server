@@ -35,7 +35,7 @@ read of the personal domains SHALL count as none.
 ### Requirement: Reading the Content Security Policy
 
 `getCspSettings` SHALL answer 200 with `domains` and a non-empty `header` to every caller, an anonymous one
-included, and, unless the request gets personal domains (requirement "Personal domains in the policy header"),
+included, and, unless the request carries `asc_personal_csp` and the caller has personal domains (requirement "Personal domains in the policy header"),
 SHALL answer 304 with an empty body when the settings did not change since `If-Modified-Since`. A portal with no
 stored domains SHALL answer an empty `domains`.
 

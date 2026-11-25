@@ -123,7 +123,7 @@ and from the method body where a row needed the request; test line numbers point
 | **Saving third-party service keys** | | |
 | Owner, admin 200 true; roles | `S/Authorization/SaveAuthKeysTests.cs:49,64`; `S/Authorization/SaveAuthKeysPermissionsTests.cs:47,65` | TEST-CONFIRMED [run: PASS] |
 | Clear on all-empty; 403 unknown provider; 402 | `S/Authorization/AuthServiceRulesTests.cs:53,72`; `B/Settings/FreePlanSettingsTests.cs:99` | TEST-CONFIRMED [run: PASS] |
-| Rejected keys cleared and 400; 403 not settable | `Set:1242-1287`; yaml. Rejected keys unreachable: every key-validating provider asks its outside service. Not settable: not attempted, it needs a consumer with preset keys in the installation config | CODE-ONLY |
+| Rejected keys cleared and 400; 403 not settable | `Set:1233-1283`; yaml. Rejected keys unreachable: every key-validating provider asks its outside service. Not settable: not attempted, it needs a consumer with preset keys in the installation config | CODE-ONLY |
 | **Testing an external database connection** | | |
 | Failure answer; roles | `S/Authorization/TestExternalDatabaseConnectionTests.cs:48,63`; `S/Authorization/TestExternalDatabaseConnectionPermissionsTests.cs:47,66` | TEST-CONFIRMED [run: PASS] |
 | SQLite refused on hosted; success path | `B/Settings/FreePlanSettingsTests.cs:115`; `S/Authorization/AuthServiceRulesTests.cs:89` (the stack's MySQL), `:125` (standalone tries SQLite) | TEST-CONFIRMED [run: PASS] |
