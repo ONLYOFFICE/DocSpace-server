@@ -76,6 +76,7 @@ global using Xunit;
 
 global using AccountLinkContext = ASC.Core.Common.EF.Context.AccountLinkContext;
 global using AccountLinks = ASC.Core.Common.EF.Model.AccountLinks;
+global using AiIntegrationContext = ASC.AI.Integration.Database.AiIntegrationContext;
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
 global using BuiltinFormsDbOptions = ASC.Files.Core.ExternalDatabase.BuiltinFormsDbOptions;
 global using CoreConstants = ASC.Core.Users.Constants;
@@ -89,6 +90,7 @@ global using DbColumnType = ASC.Files.Core.ExternalDatabase.DbColumnType;
 global using DbFilesMetadataValue = ASC.Files.Core.EF.DbFilesMetadataValue;
 global using DbFilesThirdpartyAccount = ASC.Files.Core.EF.DbFilesThirdpartyAccount;
 global using DbFormsMetadataSearch = ASC.Files.Core.DbFormsMetadataSearch;
+global using DbProfile = ASC.AI.Integration.Database.Models.DbProfile;
 global using DistributedLockException = ASC.Common.Threading.DistributedLock.Common.DistributedLockException;
 global using ExternalDatabaseClient = ASC.Files.Core.ExternalDatabase.ExternalDatabaseClient;
 global using ExternalShareRequestParam = DocSpace.API.SDK.Model.ExternalShareRequestParam;

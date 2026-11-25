@@ -227,6 +227,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected SharingApi SharingApi => _clients.SharingApi;
     protected FilesQuotaApi FilesQuotaApi => _clients.FilesQuotaApi;
     protected DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi ThirdPartyIntegrationApi => _clients.ThirdPartyIntegrationApi;
+    protected DocSpace.API.SDK.Api.Files.SettingsApi FilesSettingsApi => _clients.FilesSettingsApi;
     protected DocSpace.API.SDK.Api.Rooms.AIApi RoomsAiApi => _clients.RoomsAiApi;
 
     protected HttpClient StudioHttpClient => _clients.StudioHttpClient;

@@ -57,6 +57,7 @@ global using Microsoft.EntityFrameworkCore;
 global using Xunit;
 
 global using CoreConstants = ASC.Core.Users.Constants;
+global using CoreEmployeeActivationStatus = ASC.Core.Users.EmployeeActivationStatus;
 global using CoreFileShare = ASC.Files.Core.Security.FileShare;
 global using CoreSubjectType = ASC.Files.Core.Security.SubjectType;
 global using CoreUserGroupRefType = ASC.Core.UserGroupRefType;

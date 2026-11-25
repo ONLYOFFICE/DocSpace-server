@@ -223,6 +223,23 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBas
     }
 
     [Fact]
+    public async Task List_WithSortBy_KeepsTheSavedDefaultOrder()
+    {
+        var projectId = await CreateProjectAsync();
+        var thread = await CreateThreadInternalAsync(entityId: projectId.ToString());
+        await UploadArtifactAsync(thread.Id, "report.txt");
+
+        await FoldersApi.GetMyFolderAsync(sortBy: nameof(SortedByType.AZ), sortOrder: SortOrder.Ascending, cancellationToken: TestContext.Current.CancellationToken);
+
+        await RoomsAiApi.GetThreadArtifactsAsync(projectId, thread.Id, sortBy: nameof(SortedByType.Size), sortOrder: SortOrder.Descending, cancellationToken: TestContext.Current.CancellationToken);
+
+        var settings = await FilesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken);
+
+        settings.Response.DefaultOrder.Property.Should().Be(SortedByType.AZ);
+        settings.Response.DefaultOrder.IsAsc.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task List_SomeoneElsesThread_Returns404EvenToTheProjectOwner()
     {
         var projectId = await CreateProjectAsync();

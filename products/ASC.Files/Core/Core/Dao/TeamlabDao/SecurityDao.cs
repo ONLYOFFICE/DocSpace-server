@@ -548,9 +548,13 @@ internal abstract class SecurityBaseDao<T>(
                         q1 = q1.Where(r => r.User.ActivationStatus == status.Value);
                     }
 
-                    q = q1.OrderBy(r => r.User.ActivationStatus)
+                    q = q1.OrderBy(r => (r.User.ActivationStatus & EmployeeActivationStatus.Activated) == EmployeeActivationStatus.Activated
+                            ? 0
+                            : r.User.ActivationStatus == EmployeeActivationStatus.Pending
+                                ? 2
+                                : 1)
                         .ThenBy(predicate)
-                        .ThenBy(r => r.User.FirstName)
+                        .ThenBy(r => r.User.ActivationStatus == EmployeeActivationStatus.Pending ? r.User.Email : r.User.FirstName)
                         .Select(r => r.Security);
                     break;
                 }
@@ -1096,8 +1100,12 @@ internal abstract class SecurityBaseDao<T>(
         }
 
         q1 = q1
-            .OrderBy(u => u.User.ActivationStatus)
-            .ThenBy(u => u.User.FirstName);
+            .OrderBy(u => (u.User.ActivationStatus & EmployeeActivationStatus.Activated) == EmployeeActivationStatus.Activated
+                ? 0
+                : u.User.ActivationStatus == EmployeeActivationStatus.Pending
+                    ? 2
+                    : 1)
+            .ThenBy(u => u.User.ActivationStatus == EmployeeActivationStatus.Pending ? u.User.Email : u.User.FirstName);
 
         return q1;
     }
