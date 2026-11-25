@@ -46,29 +46,26 @@ public abstract class ApiKeysTestBase(
 
     /// <summary>
     /// Moves the expiry of a key into the past directly in the stack's database: no API call makes a key expire on
-    /// demand, and the shortest <c>expiresInDays</c> is one day. MySQL only, like the webhook suites' helper.
+    /// demand, and the shortest <c>expiresInDays</c> is one day.
     /// </summary>
     protected async Task ExpireAsync(Guid keyId)
     {
-        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        DateTime? expiresAt = DateTime.UtcNow.AddHours(-1);
 
-        command.CommandText = "UPDATE core_user_api_key SET expires_at = UTC_TIMESTAMP() - INTERVAL 1 HOUR WHERE id = @id";
-        command.Parameters.AddWithValue("@id", keyId.ToString());
+        await using var db = await _fixture.CreateDbContextAsync<ApiKeysDbContext>(TestContext.Current.CancellationToken);
 
-        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1, "the key should be in the database");
+        (await db.DbApiKey
+            .Where(key => key.Id == keyId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(key => key.ExpiresAt, expiresAt), TestContext.Current.CancellationToken))
+            .Should().Be(1, "the key should be in the database");
     }
 
-    /// <summary>The number of keys of the portal's database whose stored hash column equals <paramref name="value"/>. MySQL only.</summary>
+    /// <summary>The number of keys of the portal's database whose stored hash column equals <paramref name="value"/>.</summary>
     protected async Task<long> CountKeysWithStoredHashAsync(string value)
     {
-        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await _fixture.CreateDbContextAsync<ApiKeysDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = "SELECT COUNT(*) FROM core_user_api_key WHERE hashed_key = @value";
-        command.Parameters.AddWithValue("@value", value);
-
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken), CultureInfo.InvariantCulture);
+        return await db.DbApiKey.LongCountAsync(key => key.HashedKey == value, TestContext.Current.CancellationToken);
     }
 
     /// <summary>

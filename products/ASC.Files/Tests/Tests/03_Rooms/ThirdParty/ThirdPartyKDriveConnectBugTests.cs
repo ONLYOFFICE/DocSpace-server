@@ -154,25 +154,30 @@ public class ThirdPartyKDriveConnectBugTests(
             .Build();
         var password = await new InstanceCrypto(new MachinePseudoKeys(configuration)).EncryptAsync("legacy-password");
 
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await Fixture.CreateDbContextAsync<FilesDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText =
-            """
-            INSERT INTO files_thirdparty_account
-                (tenant_id, provider, customer_title, user_name, password, token, url, user_id, folder_type, room_type, private, has_logo, create_on, modified_on)
-            VALUES
-                (@tenantId, 'kDrive', @title, @login, @password, '', '', @userId, @folderType, 0, 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
-            SELECT LAST_INSERT_ID();
-            """;
+        var now = DateTime.UtcNow;
+        var account = new DbFilesThirdpartyAccount
+        {
+            TenantId = TenantId,
+            Provider = "kDrive",
+            Title = customerTitle,
+            UserName = KDriveLogin,
+            Password = password,
+            Token = string.Empty,
+            Url = string.Empty,
+            UserId = Owner.Id,
+            FolderType = (CoreFolderType)folderType,
+            RoomType = 0,
+            Private = false,
+            HasLogo = false,
+            CreateOn = now,
+            ModifiedOn = now
+        };
 
-        command.Parameters.AddWithValue("@tenantId", TenantId);
-        command.Parameters.AddWithValue("@title", customerTitle);
-        command.Parameters.AddWithValue("@login", KDriveLogin);
-        command.Parameters.AddWithValue("@password", password);
-        command.Parameters.AddWithValue("@userId", Owner.Id.ToString());
-        command.Parameters.AddWithValue("@folderType", folderType);
+        db.ThirdpartyAccount.Add(account);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        return Convert.ToInt32(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
+        return account.Id;
     }
 }

@@ -134,13 +134,9 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
     /// <summary>Turns a file into one stored before private rooms refused open content: nothing can create it through the API any more.</summary>
     protected async Task MakeFileOpen(int fileId)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await Fixture.CreateDbContextAsync<FilesDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = "UPDATE files_file SET encrypted = 0 WHERE id = @id;";
-        command.Parameters.AddWithValue("@id", fileId);
-
-        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        await db.Files.Where(file => file.Id == fileId).ExecuteUpdateAsync(setters => setters.SetProperty(file => file.Encrypted, false), TestContext.Current.CancellationToken);
     }
 
     /// <summary>
@@ -165,21 +161,10 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
     /// <summary>Writes one row of <c>account_links</c>; the caching caveat of <see cref="PlantLegacyKeys"/> applies.</summary>
     protected async Task PlantAccountLink(Guid userId, string provider, string uid, string profile)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await Fixture.CreateDbContextAsync<AccountLinkContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText =
-            """
-            INSERT INTO account_links (id, uid, provider, profile, linked)
-            VALUES (@id, @uid, @provider, @profile, UTC_TIMESTAMP());
-            """;
-
-        command.Parameters.AddWithValue("@id", userId.ToString());
-        command.Parameters.AddWithValue("@uid", uid);
-        command.Parameters.AddWithValue("@provider", provider);
-        command.Parameters.AddWithValue("@profile", profile);
-
-        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        db.AccountLinks.Add(new AccountLinks { Id = userId.ToString(), UId = uid, Provider = provider, Profile = profile, Linked = DateTime.UtcNow });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
     /// <summary>

@@ -186,9 +186,10 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _clients.ConnectSocketAsync(user, TestContext.Current.CancellationToken);
     }
 
-    protected Task<MySqlConnector.MySqlConnection> OpenDatabaseAsync()
+    /// <summary>A context of the stack's database, on the provider the stack runs on. The test disposes it.</summary>
+    protected Task<TContext> CreateDbContextAsync<TContext>() where TContext : DbContext
     {
-        return fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        return fixture.CreateDbContextAsync<TContext>(TestContext.Current.CancellationToken);
     }
 
     protected Task<EventBusProbe> ListenToEventBusAsync(string eventName)

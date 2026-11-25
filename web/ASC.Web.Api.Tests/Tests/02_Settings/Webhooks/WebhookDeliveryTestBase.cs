@@ -74,7 +74,7 @@ public abstract class WebhookDeliveryTestBase(
     /// A <c>next_attempt_on</c> that is already due: the sender claims such a record at its next poll, at most
     /// <see cref="SenderPollPeriod"/> later.
     /// </summary>
-    private const string DueNow = "UTC_TIMESTAMP() - INTERVAL 1 SECOND";
+    protected static DateTime DueNow => DateTime.UtcNow.AddSeconds(-1);
 
     /// <summary>
     /// A receiver endpoint of this test's own that answers every delivery with <paramref name="status"/> and
@@ -313,47 +313,56 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// Writes to the stack's database directly, for the states no API call can produce on demand: a
-    /// subscription that has been failing for days, or a delivery record taken over by another sender. Returns the
-    /// number of rows the statement changed.
+    /// Changes a delivery record in the stack's database directly, for the states no API call can produce on demand: a
+    /// record taken over by another sender, or one put back to unsent. <paramref name="where"/> narrows the record
+    /// further (a state it must still be in). Returns the number of records changed.
     /// </summary>
-    /// <remarks>
-    /// MySQL only: the connection is the MySQL container of the integration-test profile, and the statements the
-    /// tests pass are written in its dialect (<c>UTC_TIMESTAMP() - INTERVAL 4 DAY</c>, GUIDs as <c>varchar(36)</c>).
-    /// A run of the suite against PostgreSQL needs both this helper and those statements ported.
-    /// </remarks>
-    protected async Task<int> ExecuteSqlAsync(string sql, params (string Name, object Value)[] parameters)
+    protected async Task<int> UpdateDeliveryRecordAsync(
+        int recordId,
+        Action<UpdateSettersBuilder<DbWebhooksLog>> setters,
+        System.Linq.Expressions.Expression<Func<DbWebhooksLog, bool>>? where = null)
     {
-        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await _fixture.CreateDbContextAsync<WebhooksDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = sql;
+        var records = db.WebhooksLogs.Where(record => record.Id == recordId);
 
-        foreach (var (name, value) in parameters)
+        if (where is not null)
         {
-            command.Parameters.AddWithValue(name, value);
+            records = records.Where(where);
         }
 
-        return await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        return await records.ExecuteUpdateAsync(setters, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Changes every delivery record of a subscription, as <see cref="UpdateDeliveryRecordAsync"/> changes one.</summary>
+    protected async Task<int> UpdateDeliveryRecordsOfAsync(int configId, Action<UpdateSettersBuilder<DbWebhooksLog>> setters)
+    {
+        await using var db = await _fixture.CreateDbContextAsync<WebhooksDbContext>(TestContext.Current.CancellationToken);
+
+        return await db.WebhooksLogs.Where(record => record.ConfigId == configId).ExecuteUpdateAsync(setters, TestContext.Current.CancellationToken);
     }
 
     /// <summary>
-    /// Reads one number from the stack's database, for what no API call reports: the delivery records left of a
-    /// removed subscription. MySQL only, like <see cref="ExecuteSqlAsync"/>.
+    /// Changes a subscription in the stack's database directly, for the states no API call can produce on demand: a
+    /// subscription that has been failing for days, or one whose stored address or trigger the API would refuse.
+    /// Returns the number of subscriptions changed.
     /// </summary>
-    protected async Task<long> QueryCountAsync(string sql, params (string Name, object Value)[] parameters)
+    protected async Task<int> UpdateSubscriptionAsync(int configId, Action<UpdateSettersBuilder<DbWebhooksConfig>> setters)
     {
-        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await _fixture.CreateDbContextAsync<WebhooksDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = sql;
+        return await db.WebhooksConfigs.Where(config => config.Id == configId).ExecuteUpdateAsync(setters, TestContext.Current.CancellationToken);
+    }
 
-        foreach (var (name, value) in parameters)
-        {
-            command.Parameters.AddWithValue(name, value);
-        }
+    /// <summary>
+    /// The delivery records of a subscription in the stack's database, for what no API call reports: the records left
+    /// of a removed subscription.
+    /// </summary>
+    protected async Task<long> CountDeliveryRecordsAsync(int configId)
+    {
+        await using var db = await _fixture.CreateDbContextAsync<WebhooksDbContext>(TestContext.Current.CancellationToken);
 
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken), CultureInfo.InvariantCulture);
+        return await db.WebhooksLogs.LongCountAsync(record => record.ConfigId == configId, TestContext.Current.CancellationToken);
     }
 
     /// <summary>
@@ -410,9 +419,12 @@ public abstract class WebhookDeliveryTestBase(
     /// </summary>
     protected Task PlantInFlightAsync(int recordId)
     {
-        return ExecuteSqlAsync(
-            "UPDATE webhooks_logs SET lease_id = @leaseId, next_attempt_on = UTC_TIMESTAMP() + INTERVAL 1 DAY WHERE id = @id",
-            ("@leaseId", Guid.NewGuid().ToString()), ("@id", recordId));
+        Guid? leaseId = Guid.NewGuid();
+        DateTime? nextAttemptOn = DateTime.UtcNow.AddDays(1);
+
+        return UpdateDeliveryRecordAsync(recordId, setters => setters
+            .SetProperty(record => record.LeaseId, leaseId)
+            .SetProperty(record => record.NextAttemptOn, nextAttemptOn));
     }
 
     /// <summary>
@@ -422,16 +434,23 @@ public abstract class WebhookDeliveryTestBase(
     /// </summary>
     protected Task RequeueAsUnsentAsync(int recordId, bool due = true)
     {
-        return ExecuteSqlAsync(
-            "UPDATE webhooks_logs SET status = 0, delivery = NULL, attempts = 0, lease_id = NULL, response_payload = NULL, " +
-            $"next_attempt_on = {(due ? DueNow : "UTC_TIMESTAMP() + INTERVAL 1 DAY")} WHERE id = @id",
-            ("@id", recordId));
+        DateTime? nextAttemptOn = due ? DueNow : DateTime.UtcNow.AddDays(1);
+
+        return UpdateDeliveryRecordAsync(recordId, setters => setters
+            .SetProperty(record => record.Status, 0)
+            .SetProperty(record => record.Delivery, (DateTime?)null)
+            .SetProperty(record => record.Attempts, 0)
+            .SetProperty(record => record.LeaseId, (Guid?)null)
+            .SetProperty(record => record.ResponsePayload, (string?)null)
+            .SetProperty(record => record.NextAttemptOn, nextAttemptOn));
     }
 
     /// <summary>Makes a delivery record due at the next poll of the sender, keeping its other columns.</summary>
     protected Task MakeDueAsync(int recordId)
     {
-        return ExecuteSqlAsync($"UPDATE webhooks_logs SET next_attempt_on = {DueNow} WHERE id = @id", ("@id", recordId));
+        DateTime? nextAttemptOn = DueNow;
+
+        return UpdateDeliveryRecordAsync(recordId, setters => setters.SetProperty(record => record.NextAttemptOn, nextAttemptOn));
     }
 
     /// <summary>

@@ -61,6 +61,7 @@ global using FluentAssertions;
 
 global using Medallion.Threading.Redis;
 
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 global using StackExchange.Redis;
@@ -80,6 +81,7 @@ global using ZiggyCreatures.Caching.Fusion;
 global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 
 global using AuditTrailDataApi = DocSpace.API.SDK.Api.Security.AuditTrailDataApi;
+global using CoreDbContext = ASC.Core.Common.EF.CoreDbContext;
 global using CSPApi = DocSpace.API.SDK.Api.Security.CSPApi;
 global using HttpMethodAttribute = Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute;
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;

@@ -37,8 +37,8 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// What an attempt may write once it ends: only the delivery record it still holds the lease of, only the
 /// delivery bookkeeping of the subscription, and a disabled subscription only when it has really gone days
 /// without a success. The states behind these — a lease taken over, a subscription failing for days — are
-/// planted in the database, since no API call produces them on demand, with MySQL statements
-/// (<see cref="WebhookDeliveryTestBase.ExecuteSqlAsync"/>).
+/// planted in the database, since no API call produces them on demand
+/// (<see cref="WebhookDeliveryTestBase.UpdateDeliveryRecordAsync"/>, <see cref="WebhookDeliveryTestBase.UpdateSubscriptionAsync"/>).
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebhookDeliveryStateTests(
@@ -61,9 +61,11 @@ public class WebhookDeliveryStateTests(
         // Act: while the attempt waits for its answer, the record passes to another sender. The statement changes the
         // record only while it is still unanswered, so a machine too slow for the receiver's delay loses the race
         // visibly instead of passing without one
-        var planted = await ExecuteSqlAsync(
-            "UPDATE webhooks_logs SET lease_id = @leaseId WHERE id = @id AND status = 0 AND delivery IS NULL",
-            ("@leaseId", Guid.NewGuid().ToString()), ("@id", record.Id));
+        Guid? leaseId = Guid.NewGuid();
+        var planted = await UpdateDeliveryRecordAsync(
+            record.Id,
+            setters => setters.SetProperty(stored => stored.LeaseId, leaseId),
+            stored => stored.Status == 0 && stored.Delivery == null);
 
         planted.Should().Be(1, "the lease must change hands while the attempt is in flight; the receiver's delay was not enough");
 
@@ -105,10 +107,14 @@ public class WebhookDeliveryStateTests(
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
         // Act
-        await ExecuteSqlAsync(
-            "UPDATE webhooks_logs SET status = 0, delivery = NULL, attempts = 0, lease_id = @leaseId, " +
-            "next_attempt_on = UTC_TIMESTAMP() - INTERVAL 1 SECOND WHERE id = @id",
-            ("@leaseId", Guid.NewGuid().ToString()), ("@id", record.Id));
+        Guid? staleLeaseId = Guid.NewGuid();
+        DateTime? dueNow = DueNow;
+        await UpdateDeliveryRecordAsync(record.Id, setters => setters
+            .SetProperty(stored => stored.Status, 0)
+            .SetProperty(stored => stored.Delivery, (DateTime?)null)
+            .SetProperty(stored => stored.Attempts, 0)
+            .SetProperty(stored => stored.LeaseId, staleLeaseId)
+            .SetProperty(stored => stored.NextAttemptOn, dueNow));
 
         // Assert: another poll claims it with a lease of its own and delivers it
         var redelivered = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -162,9 +168,8 @@ public class WebhookDeliveryStateTests(
         // Arrange: the subscription was created four days ago and has never been delivered to
         var receiver = CreateReceiver(500);
         var subscription = await CreateSubscriptionAsync(receiver);
-        await ExecuteSqlAsync(
-            "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY WHERE id = @id",
-            ("@id", subscription.Id));
+        DateTime? createdOn = DateTime.UtcNow.AddDays(-4);
+        await UpdateSubscriptionAsync(subscription.Id, setters => setters.SetProperty(config => config.CreatedOn, createdOn));
 
         // Act
         await FireEventAsync();
@@ -187,9 +192,8 @@ public class WebhookDeliveryStateTests(
         // fails once and then answers
         var receiver = WebhookReceiver.CreateSequence(500, 200);
         var subscription = await CreateSubscriptionAsync(receiver);
-        await ExecuteSqlAsync(
-            "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY WHERE id = @id",
-            ("@id", subscription.Id));
+        DateTime? createdOn = DateTime.UtcNow.AddDays(-4);
+        await UpdateSubscriptionAsync(subscription.Id, setters => setters.SetProperty(config => config.CreatedOn, createdOn));
 
         // Act
         await FireEventAsync();
@@ -210,9 +214,11 @@ public class WebhookDeliveryStateTests(
         // Arrange: four days old, but delivered to an hour ago
         var receiver = CreateReceiver(500);
         var subscription = await CreateSubscriptionAsync(receiver);
-        await ExecuteSqlAsync(
-            "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY, last_success_on = UTC_TIMESTAMP() - INTERVAL 1 HOUR WHERE id = @id",
-            ("@id", subscription.Id));
+        DateTime? createdOn = DateTime.UtcNow.AddDays(-4);
+        DateTime? lastSuccessOn = DateTime.UtcNow.AddHours(-1);
+        await UpdateSubscriptionAsync(subscription.Id, setters => setters
+            .SetProperty(config => config.CreatedOn, createdOn)
+            .SetProperty(config => config.LastSuccessOn, lastSuccessOn));
 
         // Act
         await FireEventAsync();

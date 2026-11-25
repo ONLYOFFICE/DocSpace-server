@@ -21,6 +21,8 @@
         <ProjectReference Include="..\..\ASC.AppHost\ASC.AppHost.csproj" IsAspireProjectResource="false" />
         <!-- the event types and the bus serializer, for EventBusProbe -->
         <ProjectReference Include="..\..\ASC.Common\ASC.Common.csproj" />
+        <!-- the EF contexts and InstallerOptionsAction, for CreateDbContextAsync: the services' own model on either database -->
+        <ProjectReference Include="..\..\ASC.Core.Common\ASC.Core.Common.csproj" />
     </ItemGroup>
 
 </Project>

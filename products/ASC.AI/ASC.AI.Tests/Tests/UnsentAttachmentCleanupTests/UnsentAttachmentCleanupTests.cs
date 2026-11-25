@@ -221,14 +221,9 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
 
     private async Task<long> CountDraftsAsync(Guid userId, int fileId)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        await using var db = await CreateDbContextAsync<AiIntegrationContext>();
 
-        command.CommandText = "SELECT COUNT(*) FROM ai_integration_attachments WHERE created_by = @userId AND entry_id = @fileId";
-        command.Parameters.AddWithValue("@userId", userId.ToString());
-        command.Parameters.AddWithValue("@fileId", fileId);
-
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
+        return await db.Attachments.LongCountAsync(attachment => attachment.CreatedBy == userId && attachment.EntryId == fileId, TestContext.Current.CancellationToken);
     }
 
     private async Task<AiAttachment?> ReadDraftAsync(string id)

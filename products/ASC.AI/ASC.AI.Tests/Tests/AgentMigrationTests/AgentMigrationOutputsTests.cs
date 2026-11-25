@@ -197,25 +197,17 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
         int[] fileIds = [direct.Id, nested.Id];
         var past = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        await using (var connection = await OpenDatabaseAsync())
-        await using (var command = connection.CreateCommand())
+        await using (var db = await CreateDbContextAsync<FilesDbContext>())
         {
-            command.CommandText = "UPDATE files_file SET modified_on = @past WHERE id IN (@direct, @nested)";
-            command.Parameters.AddWithValue("@past", past);
-            command.Parameters.AddWithValue("@direct", direct.Id);
-            command.Parameters.AddWithValue("@nested", nested.Id);
+            (await db.Files
+                .Where(f => fileIds.Contains(f.Id))
+                .ExecuteUpdateAsync(setters => setters.SetProperty(f => f.ModifiedOn, past), TestContext.Current.CancellationToken))
+                .Should().BeGreaterThanOrEqualTo(2);
 
-            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().BeGreaterThanOrEqualTo(2);
-        }
-
-        await using (var connection = await OpenDatabaseAsync())
-        await using (var command = connection.CreateCommand())
-        {
-            command.CommandText = "UPDATE files_folder SET modified_on = @past WHERE id = @folder";
-            command.Parameters.AddWithValue("@past", past);
-            command.Parameters.AddWithValue("@folder", folder.Id);
-
-            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+            (await db.Folders
+                .Where(f => f.Id == folder.Id)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(f => f.ModifiedOn, past), TestContext.Current.CancellationToken))
+                .Should().Be(1);
         }
 
         await AddOlderVersionAsync(direct.Id, past);
@@ -225,21 +217,13 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
         await ConvertAgentsAsync();
 
         // Assert - the periodic pass of the full-text index reads the files by modified_on and stores their new ancestor chain
-        var modified = new Dictionary<int, DateTime>();
+        Dictionary<int, DateTime> modified;
 
-        await using (var connection = await OpenDatabaseAsync())
-        await using (var command = connection.CreateCommand())
+        await using (var db = await CreateDbContextAsync<FilesDbContext>())
         {
-            command.CommandText = "SELECT id, modified_on FROM files_file WHERE id IN (@direct, @nested) AND current_version = 1";
-            command.Parameters.AddWithValue("@direct", direct.Id);
-            command.Parameters.AddWithValue("@nested", nested.Id);
-
-            await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
-
-            while (await reader.ReadAsync(TestContext.Current.CancellationToken))
-            {
-                modified[reader.GetInt32(0)] = reader.GetDateTime(1);
-            }
+            modified = await db.Files
+                .Where(f => fileIds.Contains(f.Id) && f.CurrentVersion)
+                .ToDictionaryAsync(f => f.Id, f => f.ModifiedOn, TestContext.Current.CancellationToken);
         }
 
         modified.Keys.Should().BeEquivalentTo(fileIds);
@@ -248,13 +232,12 @@ public class AgentMigrationOutputsTests(AspireAppFixture fixture) : AgentMigrati
         versions[1].Should().BeAfter(past, "the periodic pass of the index finds a file by the modified_on of its first version");
         versions[2].Should().Be(past, "a version between the first and the current one keeps its date in the version history");
 
-        await using (var connection = await OpenDatabaseAsync())
-        await using (var command = connection.CreateCommand())
+        await using (var db = await CreateDbContextAsync<FilesDbContext>())
         {
-            command.CommandText = "SELECT modified_on FROM files_folder WHERE id = @folder";
-            command.Parameters.AddWithValue("@folder", folder.Id);
-
-            var folderModifiedOn = (DateTime)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken))!;
+            var folderModifiedOn = await db.Folders
+                .Where(f => f.Id == folder.Id)
+                .Select(f => f.ModifiedOn)
+                .SingleAsync(TestContext.Current.CancellationToken);
             folderModifiedOn.Should().BeAfter(past, "the periodic pass of the folder index finds a subfolder of the moved Chat outputs folder by its modified_on");
         }
     }

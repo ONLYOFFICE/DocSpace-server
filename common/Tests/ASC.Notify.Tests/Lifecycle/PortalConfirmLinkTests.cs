@@ -61,17 +61,16 @@ public class PortalConfirmLinkTests
     /// <summary>The portal's alias, status and status date as the database has them, past every cache.</summary>
     private static async Task<(string Alias, TenantStatus Status, DateTime? StatusChanged)> ReadTenantAsync(LetterStackFixture stack, int tenantId)
     {
-        await using var connection = await stack.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await stack.CreateDbContextAsync<TenantDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = "select alias, status, statuschanged from tenants_tenants where id = @id";
-        command.Parameters.AddWithValue("@id", tenantId);
+        var tenant = await db.Tenants
+            .Where(row => row.Id == tenantId)
+            .Select(row => new { row.Alias, row.Status, row.StatusChanged })
+            .FirstOrDefaultAsync(TestContext.Current.CancellationToken);
 
-        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
+        tenant.Should().NotBeNull("the row stays until the removal worker purges it");
 
-        (await reader.ReadAsync(TestContext.Current.CancellationToken)).Should().BeTrue("the row stays until the removal worker purges it");
-
-        return (reader.GetString(0), (TenantStatus)reader.GetInt32(1), reader.IsDBNull(2) ? null : reader.GetDateTime(2));
+        return (tenant!.Alias, tenant.Status, tenant.StatusChanged);
     }
 
     /// <summary>Calls <paramref name="request"/> with <paramref name="confirm"/> as its link, and returns its status.</summary>

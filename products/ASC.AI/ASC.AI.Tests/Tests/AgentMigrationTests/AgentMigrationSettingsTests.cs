@@ -231,20 +231,15 @@ public class AgentMigrationSettingsTests(AspireAppFixture fixture) : AgentMigrat
     /// <summary>The marks of one type linked to a folder, for any user.</summary>
     private async Task<long> MarksOnAsync(int folderId, int tagType)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        var entryId = folderId.ToString();
+        var entryType = (DbFileEntryType)FolderEntryType;
+        var type = (DbTagType)tagType;
 
-        command.CommandText =
-            """
-            SELECT COUNT(*) FROM files_tag_link l
-            JOIN files_tag t ON t.tenant_id = l.tenant_id AND t.id = l.tag_id
-            WHERE l.entry_type = @entryType AND l.entry_id = @id AND t.flag = @flag
-            """;
-        command.Parameters.AddWithValue("@entryType", FolderEntryType);
-        command.Parameters.AddWithValue("@id", folderId.ToString());
-        command.Parameters.AddWithValue("@flag", tagType);
+        await using var db = await CreateDbContextAsync<FilesDbContext>();
 
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
+        return await db.TagLink
+            .Join(db.Tag, link => new { link.TenantId, Id = link.TagId }, tag => new { tag.TenantId, tag.Id }, (link, tag) => new { link, tag })
+            .LongCountAsync(row => row.link.EntryType == entryType && row.link.EntryId == entryId && row.tag.Type == type, TestContext.Current.CancellationToken);
     }
 
     /// <summary>The "new" marks are written after the upload answers, so they are polled.</summary>
@@ -267,47 +262,53 @@ public class AgentMigrationSettingsTests(AspireAppFixture fixture) : AgentMigrat
 
     private async Task TurnRoomSettingsOnBySqlAsync(int roomId)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        await using var db = await CreateDbContextAsync<FilesDbContext>();
 
-        command.CommandText =
-            "UPDATE files_room_settings SET indexing = 1, private = 1, send_form_to_external_db = 1, save_form_as_xlsx = 1 WHERE room_id = @id";
-        command.Parameters.AddWithValue("@id", roomId);
-
-        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+        (await db.RoomSettings
+            .Where(settings => settings.RoomId == roomId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(settings => settings.Indexing, true)
+                .SetProperty(settings => settings.Private, true)
+                .SetProperty(settings => settings.SendFormToExternalDB, true)
+                .SetProperty(settings => settings.SaveFormAsXLSX, true), TestContext.Current.CancellationToken))
+            .Should().Be(1);
     }
 
     private async Task<(bool SendFormToExternalDb, bool SaveFormAsXlsx)> FormFlagsAsync(int roomId)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        await using var db = await CreateDbContextAsync<FilesDbContext>();
 
-        command.CommandText = "SELECT send_form_to_external_db, save_form_as_xlsx FROM files_room_settings WHERE room_id = @id";
-        command.Parameters.AddWithValue("@id", roomId);
+        var flags = await db.RoomSettings
+            .Where(settings => settings.RoomId == roomId)
+            .Select(settings => new { settings.SendFormToExternalDB, settings.SaveFormAsXLSX })
+            .SingleAsync(TestContext.Current.CancellationToken);
 
-        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
-        (await reader.ReadAsync(TestContext.Current.CancellationToken)).Should().BeTrue();
-
-        return (reader.GetBoolean(0), reader.GetBoolean(1));
+        return (flags.SendFormToExternalDB, flags.SaveFormAsXLSX);
     }
 
     private async Task AddRecentMarkAsync(int folderId, Guid userId)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        var cancellationToken = TestContext.Current.CancellationToken;
 
-        command.CommandText =
-            """
-            INSERT INTO files_tag (tenant_id, name, owner, flag)
-            SELECT tenant_id, 'recent', @owner, @flag FROM files_folder WHERE id = @id;
-            INSERT INTO files_tag_link (tenant_id, tag_id, entry_type, entry_id, create_by, create_on, tag_count)
-            SELECT tenant_id, LAST_INSERT_ID(), @entryType, @id, @owner, UTC_TIMESTAMP(), 0 FROM files_folder WHERE id = @id;
-            """;
-        command.Parameters.AddWithValue("@owner", userId.ToString());
-        command.Parameters.AddWithValue("@flag", RecentTagType);
-        command.Parameters.AddWithValue("@entryType", FolderEntryType);
-        command.Parameters.AddWithValue("@id", folderId);
+        await using var db = await CreateDbContextAsync<FilesDbContext>();
 
-        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(2);
+        var tenantId = await db.Folders.Where(folder => folder.Id == folderId).Select(folder => folder.TenantId).SingleAsync(cancellationToken);
+
+        var tag = new DbFilesTag { TenantId = tenantId, Name = "recent", Owner = userId, Type = (DbTagType)RecentTagType };
+        db.Tag.Add(tag);
+        await db.SaveChangesAsync(cancellationToken);
+
+        db.TagLink.Add(new DbFilesTagLink
+        {
+            TenantId = tenantId,
+            TagId = tag.Id,
+            EntryType = (DbFileEntryType)FolderEntryType,
+            EntryId = folderId.ToString(),
+            CreateBy = userId,
+            CreateOn = DateTime.UtcNow,
+            Count = 0
+        });
+
+        (await db.SaveChangesAsync(cancellationToken)).Should().Be(1);
     }
 }

@@ -236,25 +236,20 @@ public class PrivateRoomFileKeysTests(AspireAppFixture fixture) : PrivacyRoomTes
 
     private async Task<long> FileKeyRows(Guid userId)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await Fixture.CreateDbContextAsync<FilesDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = "SELECT COUNT(*) FROM files_file_keys WHERE user_id = @user;";
-        command.Parameters.AddWithValue("@user", userId.ToString());
-
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
+        return await db.DbFileKeys.LongCountAsync(key => key.UserId == userId, TestContext.Current.CancellationToken);
     }
 
     private async Task<long> AuditEvents(int action, Guid mentionedUser)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        var pattern = $"%{mentionedUser}%";
 
-        command.CommandText = "SELECT COUNT(*) FROM audit_events WHERE action = @action AND description LIKE @user;";
-        command.Parameters.AddWithValue("@action", action);
-        command.Parameters.AddWithValue("@user", $"%{mentionedUser}%");
+        await using var db = await Fixture.CreateDbContextAsync<MessagesContext>(TestContext.Current.CancellationToken);
 
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
+        return await db.AuditEvents.LongCountAsync(
+            auditEvent => auditEvent.Action == action && EF.Functions.Like(auditEvent.DescriptionRaw, pattern),
+            TestContext.Current.CancellationToken);
     }
 
     [Fact]

@@ -215,49 +215,47 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
 
     protected async Task AgeDraftAsync(string attachmentId, TimeSpan age)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        var id = Guid.Parse(attachmentId);
+        var createdAt = DateTime.UtcNow - age;
 
-        command.CommandText = "UPDATE ai_integration_attachments SET created_at = @createdAt WHERE id = @id";
-        command.Parameters.AddWithValue("@createdAt", DateTime.UtcNow - age);
-        command.Parameters.AddWithValue("@id", attachmentId);
+        await using var db = await CreateDbContextAsync<AiIntegrationContext>();
 
-        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+        (await db.Attachments
+            .Where(attachment => attachment.Id == id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(attachment => attachment.CreatedAt, createdAt), TestContext.Current.CancellationToken))
+            .Should().Be(1);
     }
 
     protected async Task MarkDraftDeletedAsync(string attachmentId, TimeSpan ago)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        var id = Guid.Parse(attachmentId);
+        DateTime? deletedOn = DateTime.UtcNow - ago;
 
-        command.CommandText = "UPDATE ai_integration_attachments SET deleted_on = @deletedOn WHERE id = @id";
-        command.Parameters.AddWithValue("@deletedOn", DateTime.UtcNow - ago);
-        command.Parameters.AddWithValue("@id", attachmentId);
+        await using var db = await CreateDbContextAsync<AiIntegrationContext>();
 
-        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+        (await db.Attachments
+            .Where(attachment => attachment.Id == id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(attachment => attachment.DeletedOn, deletedOn), TestContext.Current.CancellationToken))
+            .Should().Be(1);
     }
 
     protected async Task MarkThreadDeletedAsync(Guid threadId, TimeSpan ago)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        DateTime? deletedOn = DateTime.UtcNow - ago;
 
-        command.CommandText = "UPDATE ai_integration_threads SET deleted_on = @deletedOn WHERE id = @id";
-        command.Parameters.AddWithValue("@deletedOn", DateTime.UtcNow - ago);
-        command.Parameters.AddWithValue("@id", threadId.ToString());
+        await using var db = await CreateDbContextAsync<AiIntegrationContext>();
 
-        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+        (await db.Threads
+            .Where(thread => thread.Id == threadId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(thread => thread.DeletedOn, deletedOn), TestContext.Current.CancellationToken))
+            .Should().Be(1);
     }
 
     protected async Task<bool> ThreadRowExistsAsync(Guid threadId)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        await using var db = await CreateDbContextAsync<AiIntegrationContext>();
 
-        command.CommandText = "SELECT COUNT(*) FROM ai_integration_threads WHERE id = @id";
-        command.Parameters.AddWithValue("@id", threadId.ToString());
-
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken)) > 0;
+        return await db.Threads.AnyAsync(thread => thread.Id == threadId, TestContext.Current.CancellationToken);
     }
 
     private static ThreadFilesPage ToPage(FileArrayWrapper page)

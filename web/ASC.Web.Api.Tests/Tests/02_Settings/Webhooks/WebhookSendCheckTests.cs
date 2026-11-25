@@ -36,8 +36,8 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// <summary>
 /// What the sender checks again right before each attempt, whatever was checked when the subscription was saved:
 /// the target URL (one that points into a blacklisted network removes the subscription, one that is no longer
-/// usable disables it) and whether the subscription is still enabled. The states are planted with MySQL statements
-/// (<see cref="WebhookDeliveryTestBase.ExecuteSqlAsync"/>) on a record that was delivered once and is then put
+/// usable disables it) and whether the subscription is still enabled. The states are planted in the database
+/// (<see cref="WebhookDeliveryTestBase.UpdateSubscriptionAsync"/>) on a record that was delivered once and is then put
 /// back as unsent, since the API refuses such a URL and an event published to a disabled subscription is sent
 /// before a test could switch it off.
 /// </summary>
@@ -55,7 +55,7 @@ public class WebhookSendCheckTests(
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        await ExecuteSqlAsync("UPDATE webhooks_config SET uri = 'http://10.0.0.1/hook' WHERE id = @id", ("@id", subscription.Id));
+        await UpdateSubscriptionAsync(subscription.Id, setters => setters.SetProperty(config => config.Uri, "http://10.0.0.1/hook"));
 
         // Act
         await RequeueAsUnsentAsync(record.Id);
@@ -81,7 +81,7 @@ public class WebhookSendCheckTests(
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        await ExecuteSqlAsync("UPDATE webhooks_config SET `ssl` = 1 WHERE id = @id", ("@id", subscription.Id));
+        await UpdateSubscriptionAsync(subscription.Id, setters => setters.SetProperty(config => config.SSL, true));
 
         // Act
         await RequeueAsUnsentAsync(record.Id);

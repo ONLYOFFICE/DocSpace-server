@@ -64,6 +64,8 @@ global using DocSpace.Webhooks.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Query;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging.Abstractions;
 
@@ -79,11 +81,15 @@ global using Xunit;
 
 global using ActiveConnectionsApi = DocSpace.API.SDK.Api.Security.ActiveConnectionsApi;
 global using ApiKeysApi = DocSpace.API.SDK.Api.ApiKeys.ApiKeysApi;
+global using ApiKeysDbContext = ASC.Core.Common.EF.ApiKeysDbContext;
 global using AuditTrailDataApi = DocSpace.API.SDK.Api.Security.AuditTrailDataApi;
 global using AuthorizationApi = DocSpace.API.SDK.Api.Settings.AuthorizationApi;
+global using CoreWebhookTrigger = ASC.Webhooks.Core.WebhookTrigger;
 global using CSPApi = DocSpace.API.SDK.Api.Security.CSPApi;
 // Not the whole System.Data namespace: the ONLYOFFICE backup fixture needs only these two, and the rest would crowd the SDK model names.
 global using DataTable = System.Data.DataTable;
+global using DbWebhooksConfig = ASC.Webhooks.Core.EF.Model.DbWebhooksConfig;
+global using DbWebhooksLog = ASC.Webhooks.Core.EF.Model.DbWebhooksLog;
 global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
 global using FirebaseApi = DocSpace.API.SDK.Api.Security.FirebaseApi;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
@@ -107,6 +113,9 @@ global using SettingsQuotaApi = DocSpace.API.SDK.Api.Settings.QuotaApi;
 global using SharingApi = DocSpace.API.SDK.Api.Files.SharingApi;
 global using SMTPSettingsApi = DocSpace.API.SDK.Api.Security.SMTPSettingsApi;
 global using Task = System.Threading.Tasks.Task;
+global using TenantDbContext = ASC.Core.Common.EF.Context.TenantDbContext;
 global using ThirdPartyApi = DocSpace.API.SDK.Api.ThirdParty.ThirdPartyApi;
 global using User = ASC.Tests.Common.Data.User;
+global using WebhooksDbContext = ASC.Webhooks.Core.EF.Context.WebhooksDbContext;
+global using WebstudioDbContext = ASC.Core.Common.EF.Context.WebstudioDbContext;
 global using XmlWriteMode = System.Data.XmlWriteMode;

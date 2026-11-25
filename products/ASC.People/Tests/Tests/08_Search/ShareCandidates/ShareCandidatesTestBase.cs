@@ -147,24 +147,35 @@ public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : Sharin
     /// </summary>
     protected async Task RestrictInRoomAsync(int roomId, Guid subject, Guid templateSubject)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        var cancellationToken = TestContext.Current.CancellationToken;
 
-        command.CommandText =
-            """
-            INSERT INTO files_security (tenant_id, entry_id, internal_entry_id, entry_type, subject, owner, security, timestamp, subject_type, options)
-            SELECT tenant_id, entry_id, internal_entry_id, entry_type, @subject, owner, @restrict, UTC_TIMESTAMP(), 0, NULL
-            FROM files_security
-            WHERE internal_entry_id = @roomId AND entry_type = 1 AND subject = @templateSubject
-            ON DUPLICATE KEY UPDATE security = @restrict;
-            """;
-        command.Parameters.AddWithValue("@subject", subject.ToString());
-        command.Parameters.AddWithValue("@restrict", (int)FileShare.Restrict);
-        command.Parameters.AddWithValue("@roomId", roomId);
-        command.Parameters.AddWithValue("@templateSubject", templateSubject.ToString());
+        await using var db = await Fixture.CreateDbContextAsync<FilesDbContext>(cancellationToken);
 
-        var written = await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
-        written.Should().BePositive("the room must have a record of the template subject to copy");
+        // Read without tracking, so each template row, changed below, is added as a new row.
+        var templates = await db.Security
+            .Where(row => row.InternalEntryId == roomId && row.EntryType == ASC.Files.Core.FileEntryType.Folder && row.Subject == templateSubject)
+            .ToListAsync(cancellationToken);
+        templates.Should().NotBeEmpty("the room must have a record of the template subject to copy");
+
+        foreach (var row in templates)
+        {
+            // An existing record of the subject is restricted in place, as the former ON DUPLICATE KEY UPDATE did.
+            var restricted = await db.Security
+                .Where(existing => existing.TenantId == row.TenantId && existing.EntryId == row.EntryId && existing.EntryType == row.EntryType && existing.Subject == subject)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(existing => existing.Share, CoreFileShare.Restrict), cancellationToken);
+
+            if (restricted == 0)
+            {
+                row.Subject = subject;
+                row.Share = CoreFileShare.Restrict;
+                row.TimeStamp = DateTime.UtcNow;
+                row.SubjectType = CoreSubjectType.User;
+                row.Options = null;
+                db.Security.Add(row);
+            }
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
     }
 
     /// <summary>
@@ -175,14 +186,11 @@ public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : Sharin
     /// </summary>
     protected async Task MakeManagerOnlyAsync(Guid groupId, Guid userId)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await Fixture.CreateDbContextAsync<UserDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = "UPDATE core_usergroup SET userid = @userId WHERE groupid = @groupId AND ref_type = 1 AND removed = 0;";
-        command.Parameters.AddWithValue("@userId", userId.ToString());
-        command.Parameters.AddWithValue("@groupId", groupId.ToString());
-
-        var written = await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        var written = await db.UserGroups
+            .Where(row => row.UserGroupId == groupId && row.RefType == CoreUserGroupRefType.Manager && !row.Removed)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.Userid, userId), TestContext.Current.CancellationToken);
         written.Should().Be(1, "the group must have exactly one manager row to hand over");
     }
 

@@ -68,28 +68,33 @@ global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 
-
 global using Xunit;
 
+global using AccountLinkContext = ASC.Core.Common.EF.Context.AccountLinkContext;
+global using AccountLinks = ASC.Core.Common.EF.Model.AccountLinks;
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
 global using BuiltinFormsDbOptions = ASC.Files.Core.ExternalDatabase.BuiltinFormsDbOptions;
 global using CoreConstants = ASC.Core.Users.Constants;
 global using CoreExternalDatabaseType = ASC.FederatedLogin.DatabaseProviders.ExternalDatabaseType;
+global using CoreFolderType = ASC.Files.Core.FolderType;
 global using CoreMetadataFieldType = ASC.Files.Core.MetadataFieldType;
 global using CreateFolder = DocSpace.API.SDK.Model.CreateFolderRequest;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
 global using DbColumnDefinition = ASC.Files.Core.ExternalDatabase.DbColumnDefinition;
 global using DbColumnType = ASC.Files.Core.ExternalDatabase.DbColumnType;
 global using DbFilesMetadataValue = ASC.Files.Core.EF.DbFilesMetadataValue;
+global using DbFilesThirdpartyAccount = ASC.Files.Core.EF.DbFilesThirdpartyAccount;
 global using DbFormsMetadataSearch = ASC.Files.Core.DbFormsMetadataSearch;
 global using DistributedLockException = ASC.Common.Threading.DistributedLock.Common.DistributedLockException;
 global using ExternalDatabaseClient = ASC.Files.Core.ExternalDatabase.ExternalDatabaseClient;
 global using ExternalShareRequestParam = DocSpace.API.SDK.Model.ExternalShareRequestParam;
 global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;
 global using FileOperationDto = DocSpace.API.SDK.Model.FileOperationDto;
+global using FilesDbContext = ASC.Files.Core.EF.FilesDbContext;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FolderType = DocSpace.API.SDK.Model.FolderType;
 global using FormEditorFieldRenames = ASC.Files.Core.FormEditorFieldRenames;
@@ -105,6 +110,7 @@ global using InstanceCrypto = ASC.Security.Cryptography.InstanceCrypto;
 global using LinkType = DocSpace.API.SDK.Model.LinkType;
 global using LockStatus = ASC.Common.Threading.DistributedLock.Common.LockStatus;
 global using MachinePseudoKeys = ASC.Security.Cryptography.MachinePseudoKeys;
+global using MessagesContext = ASC.MessagingSystem.EF.Context.MessagesContext;
 global using MetadataCascadeResolver = ASC.Files.Core.MetadataCascadeResolver;
 global using MetadataField = ASC.Files.Core.MetadataField;
 global using MetadataFieldOption = ASC.Files.Core.MetadataFieldOption;

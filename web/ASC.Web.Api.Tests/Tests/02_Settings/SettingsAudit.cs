@@ -62,23 +62,15 @@ internal static class SettingsAudit
 
     /// <summary>
     /// One settings row of the calling portal as stored (<c>webstudio_settings</c>): the <c>Data</c> per user id,
-    /// <see cref="Guid.Empty"/> for the portal-wide row. MySQL only, like the other raw reads of this suite.
+    /// <see cref="Guid.Empty"/> for the portal-wide row. On PostgreSQL the data is jsonb, which the database writes back
+    /// in its own layout (a space after each colon), so compare it without spaces.
     /// </summary>
-    public static async Task<Dictionary<Guid, string>> ReadSettingsRowsAsync(MySqlConnector.MySqlConnection connection, int tenantId, Guid settingsId)
+    public static async Task<Dictionary<Guid, string>> ReadSettingsRowsAsync(AspireAppFixture fixture, int tenantId, Guid settingsId)
     {
-        await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT UserID, Data FROM webstudio_settings WHERE TenantID = @tenant AND LOWER(ID) = @id";
-        command.Parameters.AddWithValue("@tenant", tenantId);
-        command.Parameters.AddWithValue("@id", settingsId.ToString().ToLowerInvariant());
+        await using var db = await fixture.CreateDbContextAsync<WebstudioDbContext>(TestContext.Current.CancellationToken);
 
-        var rows = new Dictionary<Guid, string>();
-        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
-
-        while (await reader.ReadAsync(TestContext.Current.CancellationToken))
-        {
-            rows[Guid.Parse(reader.GetString(0))] = reader.GetString(1);
-        }
-
-        return rows;
+        return await db.WebstudioSettings
+            .Where(row => row.TenantId == tenantId && row.Id == settingsId)
+            .ToDictionaryAsync(row => row.UserId, row => row.Data, TestContext.Current.CancellationToken);
     }
 }

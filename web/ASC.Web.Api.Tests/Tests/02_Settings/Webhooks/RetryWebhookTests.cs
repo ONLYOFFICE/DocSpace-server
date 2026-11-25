@@ -82,9 +82,11 @@ public class RetryWebhookTests(
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var original = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
-        await ExecuteSqlAsync(
-            "UPDATE webhooks_logs SET status = 500, delivery = NULL, next_attempt_on = UTC_TIMESTAMP() + INTERVAL 1 DAY WHERE id = @id",
-            ("@id", original.Id));
+        DateTime? nextAttemptOn = DateTime.UtcNow.AddDays(1);
+        await UpdateDeliveryRecordAsync(original.Id, setters => setters
+            .SetProperty(record => record.Status, 500)
+            .SetProperty(record => record.Delivery, (DateTime?)null)
+            .SetProperty(record => record.NextAttemptOn, nextAttemptOn));
 
         // Act
         await _webApiClient.Authenticate(Owner);
@@ -237,7 +239,7 @@ public class RetryWebhookTests(
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
-        await ExecuteSqlAsync("UPDATE webhooks_logs SET attempts = 0 WHERE id = @id", ("@id", record.Id));
+        await UpdateDeliveryRecordAsync(record.Id, setters => setters.SetProperty(stored => stored.Attempts, 0));
 
         // Act
         await _webApiClient.Authenticate(Owner);
@@ -259,15 +261,15 @@ public class RetryWebhookTests(
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
-        await ExecuteSqlAsync(
-            """
-            UPDATE webhooks_logs
-            SET attempts = 0, status = 0, delivery = NULL, request_headers = NULL, response_headers = NULL,
-                next_attempt_on = NULL, lease_id = NULL, response_payload = @note
-            WHERE id = @id
-            """,
-            ("@id", record.Id),
-            ("@note", ASC.Webhooks.Core.DbWorker.PreviousVersionNote));
+        await UpdateDeliveryRecordAsync(record.Id, setters => setters
+            .SetProperty(stored => stored.Attempts, 0)
+            .SetProperty(stored => stored.Status, 0)
+            .SetProperty(stored => stored.Delivery, (DateTime?)null)
+            .SetProperty(stored => stored.RequestHeaders, (string?)null)
+            .SetProperty(stored => stored.ResponseHeaders, (string?)null)
+            .SetProperty(stored => stored.NextAttemptOn, (DateTime?)null)
+            .SetProperty(stored => stored.LeaseId, (Guid?)null)
+            .SetProperty(stored => stored.ResponsePayload, ASC.Webhooks.Core.DbWorker.PreviousVersionNote));
 
         // Act
         await _webApiClient.Authenticate(Owner);

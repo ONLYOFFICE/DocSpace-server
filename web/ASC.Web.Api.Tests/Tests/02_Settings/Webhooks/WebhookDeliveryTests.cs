@@ -172,9 +172,11 @@ public class WebhookDeliveryTests(
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var failed = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
-        await ExecuteSqlAsync(
-            "UPDATE webhooks_logs SET status = 500, delivery = NULL, next_attempt_on = UTC_TIMESTAMP() + INTERVAL 1 DAY WHERE id = @id",
-            ("@id", failed.Id));
+        DateTime? nextAttemptOn = DateTime.UtcNow.AddDays(1);
+        await UpdateDeliveryRecordAsync(failed.Id, setters => setters
+            .SetProperty(record => record.Status, 500)
+            .SetProperty(record => record.Delivery, (DateTime?)null)
+            .SetProperty(record => record.NextAttemptOn, nextAttemptOn));
 
         await _webApiClient.Authenticate(Owner);
         await _webhooksApi.EnableWebhookAsync(new UpdateWebhooksConfigRequestDto(subscription.Id)

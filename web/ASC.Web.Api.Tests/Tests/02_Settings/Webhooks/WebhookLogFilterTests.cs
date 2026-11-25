@@ -76,7 +76,7 @@ public class WebhookLogFilterTests(
         await FireEventAsync();
         await WaitForAnswersAsync(unanswered, answered);
 
-        await ExecuteSqlAsync("UPDATE webhooks_logs SET status = 0 WHERE config_id = @id", ("@id", unanswered.Id));
+        await UpdateDeliveryRecordsOfAsync(unanswered.Id, setters => setters.SetProperty(record => record.Status, 0));
 
         // Act / Assert
         (await ConfigNamesAsync(WebhookGroupStatus.NotSent)).Should().BeEquivalentTo([unanswered.Name]);

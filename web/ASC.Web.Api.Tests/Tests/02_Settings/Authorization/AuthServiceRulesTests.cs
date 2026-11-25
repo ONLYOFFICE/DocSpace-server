@@ -86,32 +86,37 @@ public class AuthServiceRulesTests(
     }
 
     [Fact]
-    public async Task TestExternalDatabaseConnection_ReachableMySql_ReturnsSuccess()
+    public async Task TestExternalDatabaseConnection_ReachableStackDatabase_ReturnsSuccess()
     {
-        // Arrange: the stack's own database, as the services reach it
+        // Arrange: the stack's own database, MySQL or PostgreSQL, as the services reach it
         await _webApiClient.Authenticate(Owner);
-        string server;
-        string database;
-        int port;
-        string user;
+        var connectionString = await Fixture.GetMainDatabaseConnectionStringAsync(TestContext.Current.CancellationToken);
+        ExternalDatabaseConnectionRequestDto settings;
 
-        await using (var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken))
+        if (Fixture.MainDatabaseOnPostgreSql)
         {
-            var builder = new System.Data.Common.DbConnectionStringBuilder { ConnectionString = connection.ConnectionString };
-            server = connection.DataSource;
-            database = connection.Database;
-            port = builder.TryGetValue("Port", out var p) ? Convert.ToInt32(p, CultureInfo.InvariantCulture) : 3306;
-            user = builder.TryGetValue("User ID", out var u) ? (string)u : "root";
+            var builder = new Npgsql.NpgsqlConnectionStringBuilder(connectionString);
+            settings = new ExternalDatabaseConnectionRequestDto(
+                databaseType: "postgresql",
+                dbHost: builder.Host!,
+                dbPort: builder.Port,
+                dbName: builder.Database!,
+                dbUser: builder.Username!,
+                dbPassword: builder.Password!,
+                dbSsl: false);
         }
-
-        var settings = new ExternalDatabaseConnectionRequestDto(
-            databaseType: "mysql",
-            dbHost: server,
-            dbPort: port,
-            dbName: database,
-            dbUser: user,
-            dbPassword: StackMySqlPassword,
-            dbSsl: false);
+        else
+        {
+            var builder = new MySqlConnector.MySqlConnectionStringBuilder(connectionString);
+            settings = new ExternalDatabaseConnectionRequestDto(
+                databaseType: "mysql",
+                dbHost: builder.Server,
+                dbPort: (int)builder.Port,
+                dbName: builder.Database!,
+                dbUser: builder.UserID,
+                dbPassword: string.IsNullOrEmpty(builder.Password) ? StackMySqlPassword : builder.Password,
+                dbSsl: false);
+        }
 
         // Act
         var result = await _settingsAuthorizationApi.TestExternalDatabaseConnectionAsync(settings, TestContext.Current.CancellationToken);

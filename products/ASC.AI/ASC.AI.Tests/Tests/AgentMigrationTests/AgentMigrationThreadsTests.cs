@@ -247,14 +247,11 @@ public class AgentMigrationThreadsTests(AspireAppFixture fixture) : AgentMigrati
     /// </summary>
     private async Task<int?> StoredEntryIdAsync(Guid threadId)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        await using var db = await CreateDbContextAsync<AiIntegrationContext>();
 
-        command.CommandText = "SELECT entry_id FROM ai_integration_threads WHERE id = @id";
-        command.Parameters.AddWithValue("@id", threadId.ToString());
-
-        var value = await command.ExecuteScalarAsync(TestContext.Current.CancellationToken);
-
-        return value is null or DBNull ? null : Convert.ToInt32(value);
+        return await db.Threads
+            .Where(thread => thread.Id == threadId)
+            .Select(thread => thread.EntryId)
+            .FirstOrDefaultAsync(TestContext.Current.CancellationToken);
     }
 }

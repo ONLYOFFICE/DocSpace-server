@@ -47,9 +47,7 @@ public class AdminHelperTests(
 
     private async Task<Dictionary<Guid, string>> StoredRowsAsync()
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-
-        return await SettingsAudit.ReadSettingsRowsAsync(connection, TenantId, _adminHelperSettingsId);
+        return await SettingsAudit.ReadSettingsRowsAsync(Fixture, TenantId, _adminHelperSettingsId);
     }
 
     [Fact]

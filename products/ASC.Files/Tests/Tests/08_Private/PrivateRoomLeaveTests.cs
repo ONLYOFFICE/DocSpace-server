@@ -162,14 +162,11 @@ public class PrivateRoomLeaveTests(AspireAppFixture fixture) : PrivacyRoomTestBa
 
     private async Task<long> ShareRowsOf(int roomId, Guid userId)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        var entryId = roomId.ToString();
 
-        command.CommandText = "SELECT COUNT(*) FROM files_security WHERE entry_id = @room AND subject = @user;";
-        command.Parameters.AddWithValue("@room", roomId.ToString());
-        command.Parameters.AddWithValue("@user", userId.ToString());
+        await using var db = await Fixture.CreateDbContextAsync<FilesDbContext>(TestContext.Current.CancellationToken);
 
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
+        return await db.Security.LongCountAsync(share => share.EntryId == entryId && share.Subject == userId, TestContext.Current.CancellationToken);
     }
 
     [Fact]

@@ -293,13 +293,10 @@ public class AgentMigrationAccessTests(AspireAppFixture fixture) : AgentMigratio
 
     private async Task<long> StoredSharesOfFileAsync(int fileId)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        var entryId = fileId.ToString();
 
-        command.CommandText = "SELECT COUNT(*) FROM files_security WHERE entry_id = @id AND entry_type = @type";
-        command.Parameters.AddWithValue("@id", fileId.ToString());
-        command.Parameters.AddWithValue("@type", FileEntryTypeFile);
+        await using var db = await CreateDbContextAsync<FilesDbContext>();
 
-        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
+        return await db.Security.LongCountAsync(share => share.EntryId == entryId && share.EntryType == (DbFileEntryType)FileEntryTypeFile, TestContext.Current.CancellationToken);
     }
 }

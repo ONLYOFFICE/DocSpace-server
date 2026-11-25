@@ -53,12 +53,9 @@ public class DnsSettingsTests(
 
     private async Task<string?> StoredMappedDomainAsync()
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT mappeddomain FROM tenants_tenants WHERE id = @id";
-        command.Parameters.AddWithValue("@id", TenantId);
+        await using var db = await Fixture.CreateDbContextAsync<TenantDbContext>(TestContext.Current.CancellationToken);
 
-        return await command.ExecuteScalarAsync(TestContext.Current.CancellationToken) as string;
+        return await db.Tenants.Where(tenant => tenant.Id == TenantId).Select(tenant => tenant.MappedDomain).SingleAsync(TestContext.Current.CancellationToken);
     }
 
     [Fact]

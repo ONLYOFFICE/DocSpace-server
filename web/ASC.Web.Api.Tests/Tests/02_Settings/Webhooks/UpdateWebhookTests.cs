@@ -113,7 +113,7 @@ public class UpdateWebhookTests(
     {
         // Arrange
         var subscription = await CreateSubscriptionAsync(CreateReceiver());
-        await ExecuteSqlAsync("UPDATE webhooks_config SET `ssl` = 1 WHERE id = @id", ("@id", subscription.Id));
+        await UpdateSubscriptionAsync(subscription.Id, setters => setters.SetProperty(config => config.SSL, true));
 
         // Act
         await _webApiClient.Authenticate(Owner);

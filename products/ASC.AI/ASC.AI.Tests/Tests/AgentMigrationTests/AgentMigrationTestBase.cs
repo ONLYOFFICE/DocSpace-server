@@ -172,21 +172,28 @@ public abstract class AgentMigrationTestBase(AspireAppFixture fixture) : BaseTes
         var outputs = await AgentFolderAsync(agentId, FolderType.ChatOutputs);
         var knowledge = await AgentFolderAsync(agentId, FolderType.Knowledge);
 
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var size = file.Size;
 
-        command.CommandText =
-            """
-            UPDATE files_file SET folder_id = @knowledge WHERE id = @id AND folder_id = @outputs;
-            UPDATE files_folder SET counter = counter - @size, filesCount = filesCount - 1 WHERE id = @outputs;
-            UPDATE files_folder SET counter = counter + @size, filesCount = filesCount + 1 WHERE id = @knowledge;
-            """;
-        command.Parameters.AddWithValue("@knowledge", knowledge.Id);
-        command.Parameters.AddWithValue("@outputs", outputs.Id);
-        command.Parameters.AddWithValue("@id", file.Id);
-        command.Parameters.AddWithValue("@size", file.Size);
+        await using var db = await CreateDbContextAsync<FilesDbContext>();
 
-        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().BeGreaterThanOrEqualTo(3, $"the file {file.Id} lies in Chat outputs");
+        var changed = await db.Files
+            .Where(f => f.Id == file.Id && f.ParentId == outputs.Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(f => f.ParentId, knowledge.Id), cancellationToken);
+
+        changed += await db.Folders
+            .Where(folder => folder.Id == outputs.Id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(folder => folder.Counter, folder => folder.Counter - size)
+                .SetProperty(folder => folder.FilesCount, folder => folder.FilesCount - 1), cancellationToken);
+
+        changed += await db.Folders
+            .Where(folder => folder.Id == knowledge.Id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(folder => folder.Counter, folder => folder.Counter + size)
+                .SetProperty(folder => folder.FilesCount, folder => folder.FilesCount + 1), cancellationToken);
+
+        changed.Should().BeGreaterThanOrEqualTo(3, $"the file {file.Id} lies in Chat outputs");
 
         var moved = (await FilesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         moved.FolderId.Should().Be(knowledge.Id, "the Files service reads the parent of the file from the database");
@@ -238,41 +245,33 @@ public abstract class AgentMigrationTestBase(AspireAppFixture fixture) : BaseTes
 
     protected async Task AddOlderVersionAsync(int fileId, DateTime modifiedOn)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        var cancellationToken = TestContext.Current.CancellationToken;
 
-        command.CommandText =
-            """
-            CREATE TEMPORARY TABLE autotest_file_version AS SELECT * FROM files_file WHERE id = @id AND current_version = 1;
-            UPDATE autotest_file_version SET version = version + 1, version_group = version_group + 1;
-            UPDATE files_file SET current_version = 0, modified_on = @modifiedOn WHERE id = @id AND current_version = 1;
-            INSERT INTO files_file SELECT * FROM autotest_file_version;
-            DROP TEMPORARY TABLE autotest_file_version;
-            """;
-        command.Parameters.AddWithValue("@id", fileId);
-        command.Parameters.AddWithValue("@modifiedOn", modifiedOn);
+        await using var db = await CreateDbContextAsync<FilesDbContext>();
 
-        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        // The current version, copied as the next one: the row it was read into is not tracked, so adding it inserts a
+        // new row with the same values but the version.
+        var next = await db.Files.SingleAsync(f => f.Id == fileId && f.CurrentVersion, cancellationToken);
+        next.Version++;
+        next.VersionGroup++;
+
+        await db.Files
+            .Where(f => f.Id == fileId && f.CurrentVersion)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(f => f.CurrentVersion, false)
+                .SetProperty(f => f.ModifiedOn, modifiedOn), cancellationToken);
+
+        db.Files.Add(next);
+        await db.SaveChangesAsync(cancellationToken);
     }
 
     protected async Task<Dictionary<int, DateTime>> ModifiedOnByVersionAsync(int fileId)
     {
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        await using var db = await CreateDbContextAsync<FilesDbContext>();
 
-        command.CommandText = "SELECT version, modified_on FROM files_file WHERE id = @id";
-        command.Parameters.AddWithValue("@id", fileId);
-
-        var result = new Dictionary<int, DateTime>();
-
-        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
-
-        while (await reader.ReadAsync(TestContext.Current.CancellationToken))
-        {
-            result.Add(reader.GetInt32(0), reader.GetDateTime(1));
-        }
-
-        return result;
+        return await db.Files
+            .Where(f => f.Id == fileId)
+            .ToDictionaryAsync(f => f.Version, f => f.ModifiedOn, TestContext.Current.CancellationToken);
     }
 
     protected async Task<AiProjectSourcesDto> ProjectSourcesAsync(int projectId, User? actor = null)

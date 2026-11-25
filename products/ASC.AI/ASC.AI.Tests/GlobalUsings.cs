@@ -52,6 +52,8 @@ global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.EntityFrameworkCore;
+
 global using WireMock;
 global using WireMock.Matchers;
 global using WireMock.RequestBuilders;
@@ -61,12 +63,14 @@ global using WireMock.Types;
 global using WireMock.Util;
 
 global using Xunit;
+
 global using AgentsMigrationDto = ASCAi::ASC.AI.Models.ResponseDto.AgentsMigrationDto;
 // The public AI surface (/api/2.0/ai, the Node chat service). Aliased: several names clash with other SDK areas.
 global using AiAssignmentsApi = DocSpace.API.SDK.Api.AI.AssignmentsApi;
 global using AiChatApi = DocSpace.API.SDK.Api.AI.AIApi;
 global using AiContextApi = DocSpace.API.SDK.Api.AI.ContextApi;
 global using AiExportApi = DocSpace.API.SDK.Api.AI.ExportApi;
+global using AiIntegrationContext = ASC.AI.Integration.Database.AiIntegrationContext;
 global using AiMessageContent = DocSpace.API.SDK.Model.AiThreadMessageLikeContent;
 global using AiMessageContentBlock = DocSpace.API.SDK.Model.AiThreadMessageLikeContentAnyOfInner;
 global using AiPreferencesApi = DocSpace.API.SDK.Api.AI.PreferencesApi;
@@ -80,6 +84,10 @@ global using CommonSettingsApi = DocSpace.API.SDK.Api.Settings.CommonSettingsApi
 global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfileRequestDto;
 global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfilesRequestDto;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
+global using DbFileEntryType = ASC.Files.Core.FileEntryType;
+global using DbFilesTag = ASC.Files.Core.EF.DbFilesTag;
+global using DbFilesTagLink = ASC.Files.Core.EF.DbFilesTagLink;
+global using DbTagType = ASC.Files.Core.TagType;
 global using DocumentAgentReasoning = ASC.AI.Integration.DocumentAgent.DocumentAgentReasoning;
 global using DocumentAgentSettingsDto = ASCAi::ASC.AI.Models.ResponseDto.DocumentAgentSettingsDto;
 // The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
@@ -87,6 +95,7 @@ global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
 global using FileIndexAction = ASC.Files.Core.IntegrationEvents.Events.FileIndexAction;
 global using FileIndexIntegrationEvent = ASC.Files.Core.IntegrationEvents.Events.FileIndexIntegrationEvent;
 global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
+global using FilesDbContext = ASC.Files.Core.EF.FilesDbContext;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FilesQuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
 global using FolderIndexAction = ASC.Files.Core.IntegrationEvents.Events.FolderIndexAction;

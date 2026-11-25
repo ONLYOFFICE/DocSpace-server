@@ -92,20 +92,10 @@ public class KeysAndLoginLinksTests(AspireAppFixture fixture) : PrivacyRoomTestB
 
     private async Task<List<string>> ReadProviders(Guid userId)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        var id = userId.ToString();
 
-        command.CommandText = "SELECT provider FROM account_links WHERE id = @id;";
-        command.Parameters.AddWithValue("@id", userId.ToString());
+        await using var db = await Fixture.CreateDbContextAsync<AccountLinkContext>(TestContext.Current.CancellationToken);
 
-        var providers = new List<string>();
-
-        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
-        while (await reader.ReadAsync(TestContext.Current.CancellationToken))
-        {
-            providers.Add(reader.GetString(0));
-        }
-
-        return providers;
+        return await db.AccountLinks.Where(link => link.Id == id).Select(link => link.Provider).ToListAsync(TestContext.Current.CancellationToken);
     }
 }

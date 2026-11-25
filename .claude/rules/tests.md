@@ -153,8 +153,13 @@ What leaves a test unable to fail:
   creates what the refused call could change, and an assertion that the snapshot is not empty.
 - **Going around the path under test.** Enter where the product enters: the engine with a stub
   channel, not the request's failure callback; the service with its real `Init`, not values typed
-  into the check; the handler that writes a state, not an SQL insert of it. Use SQL in Arrange only for
-  a state the API cannot produce, and then the code that produces it gets a test of its own.
+  into the check; the handler that writes a state, not an SQL insert of it. Write to the database in
+  Arrange only for a state the API cannot produce, and then the code that produces it gets a test of its
+  own. Such a write, and a read of what the API does not expose, goes through
+  `Fixture.CreateDbContextAsync<TContext>()` with LINQ, `ExecuteUpdateAsync` or `Add` + `SaveChangesAsync`:
+  the context is the services' own model on the provider the stack runs on, so the test runs on MySQL
+  and on PostgreSQL alike. No raw SQL: a dialect (`UTC_TIMESTAMP()`, backticks, `LAST_INSERT_ID()`) ties
+  the test to one database; compute a date in the test (`DateTime.UtcNow.AddDays(-4)`) instead.
 - **Substituting our own code.** Stub only what lies outside the process, at the HTTP boundary
   (WireMock.Net), so that our client, its auth handler, the parsing and the error mapping run. A mock
   of our own interface (`ITariffService`, `IBillingClient`) belongs only in a unit test of the class

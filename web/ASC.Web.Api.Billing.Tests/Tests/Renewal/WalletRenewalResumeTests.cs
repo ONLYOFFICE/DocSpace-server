@@ -455,17 +455,17 @@ public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixtu
 
         // The journal entry names the row by its quota and its due date as the database holds it, to the second;
         // no endpoint returns the quota id of the wallet plan.
-        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await _fixture.CreateDbContextAsync<CoreDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = "SELECT quota, quantity, due_date FROM tenants_tariffrow WHERE tenant = @tenant AND due_date IS NOT NULL ORDER BY tariff_id DESC LIMIT 1";
-        command.Parameters.AddWithValue("@tenant", TenantId);
+        var row = await db.TariffRows
+            .Where(tariffRow => tariffRow.TenantId == TenantId && tariffRow.DueDate != null)
+            .OrderByDescending(tariffRow => tariffRow.TariffId)
+            .Select(tariffRow => new TariffRow(tariffRow.Quota, tariffRow.Quantity, tariffRow.DueDate!.Value))
+            .FirstOrDefaultAsync(TestContext.Current.CancellationToken);
 
-        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
+        row.Should().NotBeNull("the tariff read has stored the paid row");
 
-        (await reader.ReadAsync(TestContext.Current.CancellationToken)).Should().BeTrue("the tariff read has stored the paid row");
-
-        return new TariffRow(reader.GetInt32(0), reader.GetInt32(1), reader.GetDateTime(2));
+        return row!;
     }
 
     // the entry a process leaves when it stops after it has claimed the renewal

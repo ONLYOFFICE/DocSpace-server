@@ -52,13 +52,19 @@ global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.EntityFrameworkCore;
+
 global using Xunit;
 
 global using CoreConstants = ASC.Core.Users.Constants;
+global using CoreFileShare = ASC.Files.Core.Security.FileShare;
+global using CoreSubjectType = ASC.Files.Core.Security.SubjectType;
+global using CoreUserGroupRefType = ASC.Core.UserGroupRefType;
 // Files-service clients the People tests need for room-scoped scenarios. Imported one by one
 // instead of the whole namespace: DocSpace.API.SDK.Api.Files also carries QuotaApi and SettingsApi,
 // which would clash with the People and Settings ones already in scope here.
 global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
+global using FilesDbContext = ASC.Files.Core.EF.FilesDbContext;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
 // Both the People and the Group areas publish a SearchApi, so neither can be used unqualified.
@@ -72,3 +78,4 @@ global using PeopleSearchApi = DocSpace.API.SDK.Api.People.SearchApi;
 global using RoomType = DocSpace.API.SDK.Model.RoomType;
 global using SharingApi = DocSpace.API.SDK.Api.Files.SharingApi;
 global using User = ASC.Tests.Common.Data.User;
+global using UserDbContext = ASC.Core.Common.EF.UserDbContext;

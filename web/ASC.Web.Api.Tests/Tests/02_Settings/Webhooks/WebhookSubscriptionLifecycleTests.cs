@@ -99,7 +99,7 @@ public class WebhookSubscriptionLifecycleTests(
     {
         // Arrange: the address is planted, since the API refuses it on every save
         var subscription = await SwitchedOffSubscriptionAsync(Owner);
-        await ExecuteSqlAsync("UPDATE webhooks_config SET uri = 'http://10.1.2.3/hook' WHERE id = @id", ("@id", subscription.Id));
+        await UpdateSubscriptionAsync(subscription.Id, setters => setters.SetProperty(config => config.Uri, "http://10.1.2.3/hook"));
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -116,8 +116,8 @@ public class WebhookSubscriptionLifecycleTests(
         // Arrange: a User's subscription with user.created, which only an admin may receive, planted
         var user = await InviteContact(EmployeeType.User);
         var subscription = await SwitchedOffSubscriptionAsync(user, WebhookTrigger.FileCreated);
-        await ExecuteSqlAsync("UPDATE webhooks_config SET triggers = @triggers WHERE id = @id",
-            ("@triggers", Convert.ToInt64(WebhookTrigger.UserCreated, CultureInfo.InvariantCulture)), ("@id", subscription.Id));
+        var triggers = (CoreWebhookTrigger)Convert.ToInt64(WebhookTrigger.UserCreated, CultureInfo.InvariantCulture);
+        await UpdateSubscriptionAsync(subscription.Id, setters => setters.SetProperty(config => config.Triggers, triggers));
 
         // Act
         await _webApiClient.Authenticate(user);
@@ -133,7 +133,7 @@ public class WebhookSubscriptionLifecycleTests(
     {
         // Arrange: a user-event target that names nobody, planted
         var subscription = await SwitchedOffSubscriptionAsync(Owner, WebhookTrigger.UserUpdated);
-        await ExecuteSqlAsync("UPDATE webhooks_config SET target_id = 'not-a-guid' WHERE id = @id", ("@id", subscription.Id));
+        await UpdateSubscriptionAsync(subscription.Id, setters => setters.SetProperty(config => config.TargetId, "not-a-guid"));
 
         // Act
         var result = await _webhooksApi.EnableWebhookAsync(Switch(subscription, true), TestContext.Current.CancellationToken);
@@ -284,6 +284,6 @@ public class WebhookSubscriptionLifecycleTests(
 
     private Task<long> CountRecordsAsync(int configId)
     {
-        return QueryCountAsync("SELECT COUNT(*) FROM webhooks_logs WHERE config_id = @id", ("@id", configId));
+        return CountDeliveryRecordsAsync(configId);
     }
 }

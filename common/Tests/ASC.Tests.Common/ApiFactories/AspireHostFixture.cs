@@ -620,25 +620,49 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
-    /// An open connection to the stack's database, for a test that has to plant a row no API call
-    /// writes any more — data left behind by an older release that the current code must still read —
-    /// or to set or read a value the API does not expose; such a test says why next to the query.
-    /// The queries of those tests are MySQL ones, so on a PostgreSQL stack (<see cref="MainDatabaseOnPostgreSql"/>) the
-    /// call skips the test instead of failing it on the SQL.
+    /// A context of the stack's database, built the way the services build theirs (<c>InstallerOptionsAction</c>, for the
+    /// provider the stack runs on), for a test that has to plant a row no API call writes any more - data left behind by
+    /// an older release that the current code must still read - or to set or read a value the API does not expose; such
+    /// a test says why next to the query. The model is the services' own, PostgreSqlModelCustomizer included, so the same
+    /// LINQ runs on MySQL and on PostgreSQL. Queries do not track (as in the services); write with ExecuteUpdateAsync or
+    /// ExecuteDeleteAsync. The caller disposes the context.
     /// </summary>
-    public async Task<MySqlConnection> OpenDatabaseAsync(CancellationToken cancellationToken = default)
+    public async Task<TContext> CreateDbContextAsync<TContext>(CancellationToken cancellationToken = default) where TContext : DbContext
     {
-        if (MainDatabaseOnPostgreSql)
+        if (_dbContextServices is null)
         {
-            // xUnit reports an exception whose message starts with this token as a skip with the rest as the reason.
-            throw new InvalidOperationException(
-                Xunit.v3.DynamicSkipToken.Value + "The test reads or writes the database with MySQL queries; the stack runs on PostgreSQL.");
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["ConnectionStrings:default:name"] = "default",
+                    ["ConnectionStrings:default:connectionString"] = await GetConnectionStringAsync(ResourceNames.Database, cancellationToken),
+                    ["ConnectionStrings:default:providerName"] = MainDatabaseProviderName
+                })
+                .Build();
+
+            // Kept for the run: the options of every context hold its EFLoggerFactory.
+            _dbContextServices = new ServiceCollection()
+                .AddSingleton<IConfiguration>(configuration)
+                .AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance)
+                .AddSingleton<ASC.Common.Logging.EFLoggerFactory>()
+                .BuildServiceProvider();
         }
 
-        var connection = new MySqlConnection(await GetConnectionStringAsync(ResourceNames.Database, cancellationToken));
-        await connection.OpenAsync(cancellationToken);
+        var optionsBuilder = new DbContextOptionsBuilder<TContext>();
+        new ASC.Core.Common.EF.InstallerOptionsAction("current", "default").OptionsAction(_dbContextServices, optionsBuilder);
 
-        return connection;
+        return (TContext)Activator.CreateInstance(typeof(TContext), optionsBuilder.Options)!;
+    }
+
+    private ServiceProvider? _dbContextServices;
+
+    /// <summary>
+    /// The connection string of the stack's main database as Aspire publishes it, for a test that hands the database's
+    /// address to the API (the external database check); its provider is <see cref="MainDatabaseProviderName"/>.
+    /// </summary>
+    public Task<string> GetMainDatabaseConnectionStringAsync(CancellationToken cancellationToken = default)
+    {
+        return GetConnectionStringAsync(ResourceNames.Database, cancellationToken);
     }
 
     /// <summary>

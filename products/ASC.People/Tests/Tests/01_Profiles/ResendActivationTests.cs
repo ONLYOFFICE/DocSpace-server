@@ -194,26 +194,23 @@ public class ResendActivationTests(AspireAppFixture fixture) : BaseTest(fixture)
 
     private async Task SetLastModifiedAsync(Guid userId, DateTime lastModified)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await Fixture.CreateDbContextAsync<UserDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = "UPDATE core_user SET last_modified = @lastModified WHERE tenant = @tenantId AND id = @userId";
-        command.Parameters.AddWithValue("@lastModified", lastModified);
-        command.Parameters.AddWithValue("@tenantId", TenantId);
-        command.Parameters.AddWithValue("@userId", userId.ToString());
-
-        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+        (await db.Users
+            .Where(user => user.TenantId == TenantId && user.Id == userId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(user => user.LastModified, lastModified), TestContext.Current.CancellationToken))
+            .Should().Be(1);
     }
 
     private async Task<DateTime> GetLastModifiedAsync(Guid userId)
     {
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
+        await using var db = await Fixture.CreateDbContextAsync<UserDbContext>(TestContext.Current.CancellationToken);
 
-        command.CommandText = "SELECT last_modified FROM core_user WHERE tenant = @tenantId AND id = @userId";
-        command.Parameters.AddWithValue("@tenantId", TenantId);
-        command.Parameters.AddWithValue("@userId", userId.ToString());
+        var lastModified = await db.Users
+            .Where(user => user.TenantId == TenantId && user.Id == userId)
+            .Select(user => user.LastModified)
+            .SingleAsync(TestContext.Current.CancellationToken);
 
-        return DateTime.SpecifyKind((DateTime)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken))!, DateTimeKind.Utc);
+        return DateTime.SpecifyKind(lastModified, DateTimeKind.Utc);
     }
 }

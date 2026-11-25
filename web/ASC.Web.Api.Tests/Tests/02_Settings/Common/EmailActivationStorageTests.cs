@@ -59,8 +59,7 @@ public class EmailActivationStorageTests(
         await _commonSettingsApi.UpdateEmailActivationSettingsAsync(new EmailActivationSettingsRequestDto(true), TestContext.Current.CancellationToken);
 
         // Assert: the owner's false is stored under the owner's id and the user's call did not touch it
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        var rows = await SettingsAudit.ReadSettingsRowsAsync(connection, TenantId, _emailActivationSettingsId);
+        var rows = await SettingsAudit.ReadSettingsRowsAsync(Fixture, TenantId, _emailActivationSettingsId);
         rows.Should().ContainKey(Owner.Id);
         // false is the CLR default and is left out of the stored JSON, so the owner's row reads "{}"
         rows[Owner.Id].Replace(" ", "").Should().NotContainEquivalentOf("\"Show\":true");

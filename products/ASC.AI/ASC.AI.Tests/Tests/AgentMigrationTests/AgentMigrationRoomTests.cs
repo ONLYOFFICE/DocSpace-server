@@ -150,14 +150,12 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
         var file = await AddKnowledgeFileAsync(agent.Id, "autotest-knowledge.txt");
         var past = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        await using (var connection = await OpenDatabaseAsync())
-        await using (var command = connection.CreateCommand())
+        await using (var db = await CreateDbContextAsync<FilesDbContext>())
         {
-            command.CommandText = "UPDATE files_file SET modified_on = @past WHERE id = @id";
-            command.Parameters.AddWithValue("@past", past);
-            command.Parameters.AddWithValue("@id", file.Id);
-
-            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().BeGreaterThan(0);
+            (await db.Files
+                .Where(f => f.Id == file.Id)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(f => f.ModifiedOn, past), TestContext.Current.CancellationToken))
+                .Should().BeGreaterThan(0);
         }
 
         await AddOlderVersionAsync(file.Id, past);
@@ -168,31 +166,28 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
 
         // Assert - the periodic pass of the full-text index finds a file by the modified_on of its first version and
         // reads its current version
-        await using (var connection = await OpenDatabaseAsync())
-        await using (var command = connection.CreateCommand())
+        await using (var db = await CreateDbContextAsync<FilesDbContext>())
         {
-            command.CommandText = "SELECT folder_id, modified_on, current_version, version FROM files_file WHERE id = @id";
-            command.Parameters.AddWithValue("@id", file.Id);
+            var versions = await db.Files
+                .Where(f => f.Id == file.Id)
+                .Select(f => new { f.ParentId, f.ModifiedOn, f.CurrentVersion, f.Version })
+                .ToListAsync(TestContext.Current.CancellationToken);
 
-            await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
-            var rows = 0;
-
-            while (await reader.ReadAsync(TestContext.Current.CancellationToken))
+            foreach (var version in versions)
             {
-                rows++;
-                reader.GetInt32(0).Should().Be(agent.Id, "every version of the knowledge file lies directly in the room");
+                version.ParentId.Should().Be(agent.Id, "every version of the knowledge file lies directly in the room");
 
-                if (reader.GetBoolean(2) || reader.GetInt32(3) == 1)
+                if (version.CurrentVersion || version.Version == 1)
                 {
-                    reader.GetDateTime(1).Should().BeAfter(past, "the move of a knowledge file into the room is a change the index has to pick up");
+                    version.ModifiedOn.Should().BeAfter(past, "the move of a knowledge file into the room is a change the index has to pick up");
                 }
                 else
                 {
-                    reader.GetDateTime(1).Should().Be(past, "a version between the first and the current one keeps its date in the version history");
+                    version.ModifiedOn.Should().Be(past, "a version between the first and the current one keeps its date in the version history");
                 }
             }
 
-            rows.Should().Be(3);
+            versions.Should().HaveCount(3);
         }
     }
 
@@ -372,21 +367,25 @@ public class AgentMigrationRoomTests(AspireAppFixture fixture) : AgentMigrationT
         var outputs = await AgentFolderAsync(agentId, FolderType.ChatOutputs);
         var knowledge = await AgentFolderAsync(agentId, FolderType.Knowledge);
 
-        await using var connection = await OpenDatabaseAsync();
-        await using var command = connection.CreateCommand();
+        var cancellationToken = TestContext.Current.CancellationToken;
 
-        command.CommandText =
-            """
-            UPDATE files_folder SET parent_id = @knowledge WHERE id = @folder AND parent_id = @outputs;
-            UPDATE files_folder_tree SET parent_id = @knowledge
-            WHERE parent_id = @outputs
-              AND folder_id IN (SELECT folder_id FROM (SELECT folder_id FROM files_folder_tree WHERE parent_id = @folder) subtree);
-            """;
-        command.Parameters.AddWithValue("@knowledge", knowledge.Id);
-        command.Parameters.AddWithValue("@outputs", outputs.Id);
-        command.Parameters.AddWithValue("@folder", folderId);
+        await using var db = await CreateDbContextAsync<FilesDbContext>();
 
-        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().BeGreaterThanOrEqualTo(2, $"the folder {folderId} lies in Chat outputs");
+        var changed = await db.Folders
+            .Where(folder => folder.Id == folderId && folder.ParentId == outputs.Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(folder => folder.ParentId, knowledge.Id), cancellationToken);
+
+        // The folder and everything under it; read first, since MySQL refuses an UPDATE that selects from its own table.
+        var subtree = await db.Tree
+            .Where(tree => tree.ParentId == folderId)
+            .Select(tree => tree.FolderId)
+            .ToListAsync(cancellationToken);
+
+        changed += await db.Tree
+            .Where(tree => tree.ParentId == outputs.Id && subtree.Contains(tree.FolderId))
+            .ExecuteUpdateAsync(setters => setters.SetProperty(tree => tree.ParentId, knowledge.Id), cancellationToken);
+
+        changed.Should().BeGreaterThanOrEqualTo(2, $"the folder {folderId} lies in Chat outputs");
     }
 
     private async Task SetLogoAsync(int roomId)
