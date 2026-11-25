@@ -48,6 +48,11 @@ public class TemplateGalleryRequestManager(
 
     public async Task<Stream> Get(int id, string ext)
     {
+        if (string.IsNullOrEmpty(_configuration?.Domain) || string.IsNullOrEmpty(_configuration.Path))
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
         try
         {
             using var httpClient = httpClientFactory.CreateClient();

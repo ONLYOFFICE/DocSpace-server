@@ -49,8 +49,7 @@ public class CreateFileRequest<T>
 
     /// <summary>
     /// An existing file the new one copies its content from, as a number for a file in the portal and as a string for
-    /// one in a connected third-party storage; the caller has to be able to read it. Left out, a blank template for
-    /// the format and the language of the caller is used.
+    /// one in a connected third-party storage; the caller has to be able to read it.
     /// </summary>
     /// <example>1</example>
     public T TemplateId { get; set; }
@@ -64,7 +63,7 @@ public class CreateFileRequest<T>
 
     /// <summary>
     /// A ready form from the template gallery to copy instead of a template, named by the identifier the gallery
-    /// reports for it. Ignored when `templateId` is a number or a string; 0 means no form.
+    /// reports for it; 0 means no form.
     /// </summary>
     /// <example>0</example>
     public int FormId { get; set; }

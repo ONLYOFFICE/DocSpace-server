@@ -46,6 +46,9 @@ public class FileChecker(
     private const byte Dse3FlagIsForm = 0x02;
     private static readonly TimeSpan _isFormCacheDuration = TimeSpan.FromDays(1);
 
+    // Empty when the installation configures no template gallery: then no PDF counts as a form by its signature.
+    private readonly string _formSignature = configuration["files:template-gallery:signature"];
+
     public async Task<bool> CheckExtendedPDF<T>(File<T> file)
     {
         const int limit = 300;
@@ -66,9 +69,7 @@ public class FileChecker(
             return ((byte)message[6] & Dse3FlagIsForm) != 0;
         }
 
-        var config = configuration.GetSection("files:template-gallery").Get<TemplateGallerySettings>();
-
-        return IsExtendedPDFFile(message, config.Signature);
+        return !string.IsNullOrEmpty(_formSignature) && IsExtendedPDFFile(message, _formSignature);
     }
     public async Task<bool> IsFormPDFFile<T>(File<T> file)
     {

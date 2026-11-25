@@ -48233,13 +48233,6 @@
         "description": "The successful API response containing the TelegramStatusDto object."
       },
       "TemplateGalleryDto": {
-        "required": [
-          "domain",
-          "path",
-          "uploadDashboard",
-          "uploadDomain",
-          "uploadPath"
-        ],
         "type": "object",
         "properties": {
           "path": {
