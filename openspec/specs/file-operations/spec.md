@@ -69,13 +69,19 @@ from the template gallery (bug 78009); `templateId` is not specified here.
 - **AND** the call answers 404 when no gallery is configured, when the list has no such template, or when the template has no file of that format
 - **AND** the call answers 502 when the gallery cannot be reached, does not answer before the download deadline, drops the connection while answering, answers the list or the file with an error status, answers the list without its template list (a page of a proxy), names a file at an address that cannot be requested, or returns a PDF without a PDF header or a DOCX, XLSX or PPTX without a ZIP signature
 
+#### Scenario: Non-PDF file in a Form filling room
+
+- **WHEN** a `.docx`, a text file or an HTML file is created directly in a Form filling room
+- **THEN** the system answers 403 and stores nothing
+- **AND** a Form filling room refuses the creation of anything but a PDF form
+
 ### Requirement: Template gallery availability
 
 `getTemplateGalleryAvailable` (`GET api/2.0/files/templateGallery/available`) SHALL tell a signed-in caller
 whether the template gallery answers with its template list, and SHALL refuse an anonymous caller (401). The
-answer SHALL be `false` when no gallery is configured or a check fails with no earlier answer known. The answer
-is kept for the whole installation, and a failed check SHALL NOT replace a known `true` for up to a day (bug
-78009).
+answer SHALL be `false` when no gallery is configured or a check fails with no earlier answer known. A `true`
+is kept for the whole installation, and a failed check SHALL NOT replace a known `true` for a day after the last
+answer while the cache holds it (bug 78009).
 
 #### Scenario: Gallery answers
 
@@ -86,24 +92,19 @@ is kept for the whole installation, and a failed check SHALL NOT replace a known
 
 - **WHEN** no gallery is configured, or the gallery answers with an error status, with a page that is not the list, not in time, drops the connection, cannot be reached, or the check fails for a reason other than the gallery
 - **THEN** the call returns `false`
-- **AND** that `false` stays with the process that checked: another process of the installation asks the gallery itself
+- **AND** that `false` stays with the process that checked, for up to a minute: another process of the installation asks the gallery itself
 
 #### Scenario: Check fails with available known
 
 - **WHEN** the call returned `true` and a later check gets an error status or a page that is not the list
 - **THEN** the call still returns `true`
+- **AND** it keeps the `true` for a day after the last answer; repeated failed checks or a process that took it from the distributed cache may keep it longer, and without a distributed cache a restart forgets it
 
 #### Scenario: Caller
 
 - **WHEN** a signed-in user calls it
 - **THEN** the answer is a boolean
 - **AND** an anonymous caller gets 401
-
-#### Scenario: Non-PDF file in a Form filling room
-
-- **WHEN** a `.docx`, a text file or an HTML file is created directly in a Form filling room
-- **THEN** the system answers 403 and stores nothing
-- **AND** a Form filling room refuses the creation of anything but a PDF form
 
 ### Requirement: Creating a text or HTML file from content
 

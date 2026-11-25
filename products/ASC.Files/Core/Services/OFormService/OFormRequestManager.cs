@@ -38,20 +38,24 @@ public class OFormRequestManager(
     ILogger<OFormRequestManager> logger,
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory,
-    IFusionCache cache)
+    IFusionCache cache,
+    ResiliencePipelineRegistry<string> resiliencePipelineRegistry)
 {
+    public const string DownloadPipelineName = "oform-gallery-download";
+    public const string ProbePipelineName = "oform-gallery-probe";
+
     /// <summary>
     /// How long a gallery template is downloaded, both requests together: the editor page waits for the request that
     /// creates the file, so a gallery that does not answer must fail it rather than hold it for the 100 seconds of the
     /// client.
     /// </summary>
-    private static readonly TimeSpan _downloadTimeout = TimeSpan.FromSeconds(30);
+    public static readonly TimeSpan DownloadTimeout = TimeSpan.FromSeconds(30);
 
     /// <summary>
     /// How long the availability check waits for the gallery: below the 5-second lock timeout of this process's cache,
     /// so the readers of this process that arrive meanwhile wait for this check instead of starting their own.
     /// </summary>
-    private static readonly TimeSpan _probeTimeout = TimeSpan.FromSeconds(4);
+    public static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(4);
 
     private static readonly TimeSpan _availableDuration = TimeSpan.FromMinutes(10);
 
@@ -93,60 +97,9 @@ public class OFormRequestManager(
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        using var cts = new CancellationTokenSource(_downloadTimeout);
-
         try
         {
-            var httpClient = httpClientFactory.CreateClient();
-            using var response = await httpClient.GetAsync($"{GetListUrl()}?filters[id][$eq]={id}&locale=*&populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={ext}", cts.Token);
-            if (!response.IsSuccessStatusCode)
-            {
-                logger.WarningOFormGalleryStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
-
-                throw GalleryUnavailable();
-            }
-
-            var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(cts.Token), _options);
-            if (data?.Data == null)
-            {
-                logger.WarningOFormGalleryNoList(response.RequestMessage?.RequestUri);
-
-                throw GalleryUnavailable();
-            }
-
-            var file = GetFile(data, ext) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-
-            // A gallery that keeps its files itself (the local upload provider of Strapi) names them by a path on its host
-            if (!Uri.TryCreate(new Uri(_configuration.Domain), file.Url, out var fileUri))
-            {
-                logger.WarningOFormGalleryFileAddress(file.Url);
-
-                throw GalleryUnavailable();
-            }
-
-            using var streamResponse = await httpClient.GetAsync(fileUri, HttpCompletionOption.ResponseHeadersRead, cts.Token);
-            if (!streamResponse.IsSuccessStatusCode)
-            {
-                logger.WarningOFormGalleryStatus(streamResponse.RequestMessage?.RequestUri, (int)streamResponse.StatusCode);
-
-                throw GalleryUnavailable();
-            }
-
-            var stream = new MemoryStream();
-            await streamResponse.Content.CopyToAsync(stream, cts.Token);
-            stream.Position = 0;
-
-            // A proxy of a closed network answers 200 with a page of its own: such a page saved as the template opens as
-            // a blank editor
-            if (!await HasFormatSignatureAsync(stream, ext))
-            {
-                await stream.DisposeAsync();
-                logger.WarningOFormGalleryNotForm(fileUri);
-
-                throw GalleryUnavailable();
-            }
-
-            return stream;
+            return await GetPipeline(DownloadPipelineName, DownloadTimeout).ExecuteAsync(token => DownloadAsync(id, ext, token));
         }
         catch (Exception e) when (IsGalleryFailure(e))
         {
@@ -162,14 +115,83 @@ public class OFormRequestManager(
         }
     }
 
+    private async ValueTask<Stream> DownloadAsync(int id, string ext, CancellationToken cancellationToken)
+    {
+        var httpClient = httpClientFactory.CreateClient();
+        using var response = await httpClient.GetAsync($"{GetListUrl()}?filters[id][$eq]={id}&locale=*&populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={Uri.EscapeDataString(ext)}", cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.WarningOFormGalleryStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
+
+            throw GalleryUnavailable();
+        }
+
+        var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(cancellationToken), _options);
+        if (data?.Data == null)
+        {
+            logger.WarningOFormGalleryNoList(response.RequestMessage?.RequestUri);
+
+            throw GalleryUnavailable();
+        }
+
+        var file = GetFile(data, ext) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+
+        // A gallery that keeps its files itself (the local upload provider of Strapi) names them by a path on its host
+        if (!Uri.TryCreate(new Uri(_configuration.Domain), file.Url, out var fileUri))
+        {
+            logger.WarningOFormGalleryFileAddress(file.Url);
+
+            throw GalleryUnavailable();
+        }
+
+        using var streamResponse = await httpClient.GetAsync(fileUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        if (!streamResponse.IsSuccessStatusCode)
+        {
+            logger.WarningOFormGalleryStatus(streamResponse.RequestMessage?.RequestUri, (int)streamResponse.StatusCode);
+
+            throw GalleryUnavailable();
+        }
+
+        var stream = new MemoryStream();
+
+        try
+        {
+            await streamResponse.Content.CopyToAsync(stream, cancellationToken);
+            stream.Position = 0;
+
+            // A proxy of a closed network answers 200 with a page of its own: such a page saved as the template opens as
+            // a blank editor
+            if (!await HasFormatSignatureAsync(stream, ext))
+            {
+                logger.WarningOFormGalleryNotForm(fileUri);
+
+                throw GalleryUnavailable();
+            }
+        }
+        catch
+        {
+            await stream.DisposeAsync();
+
+            throw;
+        }
+
+        return stream;
+    }
+
     /// <summary>
     /// Whether the gallery is configured and answers with its template list. "Available" is cached per list URL,
-    /// kept in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" for up to a
-    /// day, so a short failure of the gallery or the network never hides a gallery that answered before. With nothing
-    /// known, a failed check means "unavailable" for 1 minute, kept by this process only, so one process that cannot
-    /// reach the gallery never hides it from the others. When the next check takes longer than 200 ms, a reader with an
-    /// expired answer can get that answer while the check continues. The CMS probe times out after 4 seconds.
-    /// Distributed cache access and waiting for its local lock can add to the overall response time.
+    /// kept in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" by the
+    /// fail-safe of the cache, so a short failure of the gallery or the network never hides a gallery that answered
+    /// before: for a day after the last answer. Repeated failed checks, or a process that copies the entry from the
+    /// distributed cache to its memory (a restart, an eviction), may keep it longer; no test pins how much. Without a
+    /// distributed cache (Redis off), a restart forgets it. With nothing known, a failed check means "unavailable" for
+    /// up to 1 minute (a "true" another process writes ends it earlier), kept by this process only, so one process that
+    /// cannot reach the gallery never hides it from the others. When the next check takes longer than 200 ms, a reader
+    /// with an expired answer gets that answer while the check continues in the background; the check then caches what
+    /// it gets, or, when it fails with "available" known, the fail-safe keeps that answer. A check past the cache's
+    /// 5-second hard timeout with nothing known answers "unavailable" after that timeout, and its late answer still goes
+    /// into the cache. The CMS probe times out after <see cref="ProbeTimeout"/>. Distributed cache access and waiting
+    /// for its local lock can add to the overall response time.
     /// </summary>
     public async Task<bool> IsAvailableAsync()
     {
@@ -180,7 +202,7 @@ public class OFormRequestManager(
 
         try
         {
-            return await cache.GetOrSetAsync<bool>(GetAvailabilityCacheKey(GetListUrl()), async (context, cancellationToken) =>
+            return await cache.GetOrSetAsync<bool>(GetAvailabilityCacheKey(GetListUrl()),async (context, cancellationToken) =>
             {
                 if (await ProbeAsync(cancellationToken))
                 {
@@ -206,7 +228,8 @@ public class OFormRequestManager(
         }
         catch (SyntheticTimeoutException)
         {
-            // The check ran past the cache's hard timeout with no answer known: no answer is "unavailable"
+            // The check ran past the cache's hard timeout with no answer known: no answer is "unavailable" for this
+            // reader, while the check completes in the background and caches what it gets
             return false;
         }
     }
@@ -229,29 +252,9 @@ public class OFormRequestManager(
     /// </summary>
     private async Task<bool> ProbeAsync(CancellationToken cancellationToken)
     {
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(_probeTimeout);
-
         try
         {
-            var httpClient = httpClientFactory.CreateClient();
-            using var response = await httpClient.GetAsync($"{GetListUrl()}?pagination[pageSize]=1&fields[0]=updatedAt", cts.Token);
-            if (!response.IsSuccessStatusCode)
-            {
-                logger.WarningOFormGalleryProbeStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
-
-                return false;
-            }
-
-            var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(cts.Token), _options);
-            if (data?.Data == null)
-            {
-                logger.WarningOFormGalleryNoList(response.RequestMessage?.RequestUri);
-
-                return false;
-            }
-
-            return true;
+            return await GetPipeline(ProbePipelineName, ProbeTimeout).ExecuteAsync(AskForListAsync, cancellationToken);
         }
         catch (Exception e) when (IsGalleryFailure(e))
         {
@@ -269,9 +272,44 @@ public class OFormRequestManager(
         }
     }
 
+    private async ValueTask<bool> AskForListAsync(CancellationToken cancellationToken)
+    {
+        var httpClient = httpClientFactory.CreateClient();
+        using var response = await httpClient.GetAsync($"{GetListUrl()}?pagination[pageSize]=1&fields[0]=updatedAt", cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.WarningOFormGalleryProbeStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
+
+            return false;
+        }
+
+        var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(cancellationToken), _options);
+        if (data?.Data == null)
+        {
+            logger.WarningOFormGalleryNoList(response.RequestMessage?.RequestUri);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// The pipeline registered under <paramref name="name"/> (<see cref="OFormRequestManagerExtension.AddTemplateGalleryPipelines"/>),
+    /// or, in a host that registers none, one with the default <paramref name="timeout"/>. GetOrAddPipeline alone would
+    /// not do: it never looks at the registered pipelines.
+    /// </summary>
+    private ResiliencePipeline GetPipeline(string name, TimeSpan timeout)
+    {
+        return resiliencePipelineRegistry.TryGetPipeline(name, out var pipeline)
+            ? pipeline
+            : resiliencePipelineRegistry.GetOrAddPipeline(name, builder => builder.AddTimeout(timeout));
+    }
+
     /// <summary>
     /// Whether the exception is a failure of the gallery or of the way to it rather than of this code. No token of a
-    /// caller reaches the requests: a cancellation is a timeout, of the request or of the client. A connection dropped
+    /// caller reaches the requests: a TimeoutRejectedException is the deadline of the pipeline, and a cancellation is the
+    /// timeout of the client. A connection dropped
     /// while the body is read comes as an HttpRequestException from HttpContent; IOException covers a read the runtime
     /// does not wrap (HttpIOException). An InvalidOperationException is a charset of the
     /// answer the runtime cannot decode, or a gallery address without a scheme. UriFormatException and
@@ -280,7 +318,7 @@ public class OFormRequestManager(
     /// </summary>
     private static bool IsGalleryFailure(Exception e)
     {
-        return e is HttpRequestException or IOException or JsonException or OperationCanceledException or UriFormatException or NotSupportedException
+        return e is TimeoutRejectedException or HttpRequestException or IOException or JsonException or OperationCanceledException or UriFormatException or NotSupportedException
             or InvalidOperationException and not ObjectDisposedException;
     }
 
@@ -326,5 +364,23 @@ public class OFormRequestManager(
         var files = form.Files ?? form.Attributes?.File?.Data?.Select(f => f.Attributes);
 
         return files?.FirstOrDefault(f => f?.Ext == ext);
+    }
+}
+
+public static class OFormRequestManagerExtension
+{
+    /// <summary>
+    /// Registers the deadlines of the template gallery: the download of a template and the availability check. A host
+    /// that does not call this gets the same deadlines, <see cref="OFormRequestManager.DownloadTimeout"/> and
+    /// <see cref="OFormRequestManager.ProbeTimeout"/>; the parameters are for tests, which cannot wait that long.
+    /// </summary>
+    public static IServiceCollection AddTemplateGalleryPipelines(this IServiceCollection services, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null)
+    {
+        services.AddResiliencePipeline(OFormRequestManager.DownloadPipelineName,
+            builder => builder.AddTimeout(downloadTimeout ?? OFormRequestManager.DownloadTimeout));
+        services.AddResiliencePipeline(OFormRequestManager.ProbePipelineName,
+            builder => builder.AddTimeout(probeTimeout ?? OFormRequestManager.ProbeTimeout));
+
+        return services;
     }
 }

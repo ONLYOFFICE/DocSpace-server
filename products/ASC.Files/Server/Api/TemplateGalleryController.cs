@@ -46,11 +46,11 @@ public class TemplateGalleryController(OFormRequestManager oFormRequestManager) 
     /// Returns whether the template gallery answers the server with its template list. Call it when the gallery
     /// opens. If it returns `false`, show the gallery as unavailable and do not offer its templates. The check does not
     /// ask for the template files, which can be on another host. Any signed-in user can call it. Other callers get 401.
-    /// The call is read-only. The server keeps the answer for 10 minutes for all portals of the installation. A failed
-    /// check keeps a known `true` for up to a day. With nothing known, a failed check returns `false` for 1 minute.
-    /// After 200 ms of waiting for a refresh, the call can return an expired answer. The request to the gallery times
-    /// out after 4 seconds. Cache access and waiting for a lock can add time. Without a configured gallery, the call
-    /// returns `false`.
+    /// The call is read-only. The server keeps a `true` for 10 minutes for all portals of the installation. A failed
+    /// check keeps a known `true` for a day after the last answer. Repeated failed checks or a server restart may keep it
+    /// longer. With nothing known, a failed check returns `false`. The server process that checked keeps that `false`
+    /// for up to 1 minute. After 200 ms of waiting for a refresh, the call can return an expired answer. The request to
+    /// the gallery times out after 4 seconds. Without a configured gallery, the call returns `false`.
     /// </remarks>
     /// <summary>
     /// Check the template gallery

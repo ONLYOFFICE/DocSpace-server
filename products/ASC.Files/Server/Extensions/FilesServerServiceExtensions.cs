@@ -46,6 +46,7 @@ public static class FilesServerServiceExtensions
         services.RegisterFreeBackupQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddDocumentServiceHttpClient(configuration);
+        services.AddTemplateGalleryPipelines();
 
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
