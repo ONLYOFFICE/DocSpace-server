@@ -138,10 +138,11 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
 global using System.Security;
-global using System.Security.Cryptography;
 
 global using Swashbuckle.AspNetCore.Annotations;
 
 global using Riok.Mapperly.Abstractions;
 
 global using ZiggyCreatures.Caching.Fusion;
+
+global using SecurityContext = ASC.Core.SecurityContext;

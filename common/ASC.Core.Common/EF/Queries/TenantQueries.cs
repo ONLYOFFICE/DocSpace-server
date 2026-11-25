@@ -54,6 +54,18 @@ public partial class TenantDbContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<int> ActiveTenantIdsModifiedSinceAsync(DateTime from)
+    {
+        return Queries.ActiveTenantIdsModifiedSinceAsync(this, from);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> ActiveTenantIdsAfterAsync(int afterId, int count)
+    {
+        return Queries.ActiveTenantIdsAfterAsync(this, afterId, count);
+    }
+
+    [PreCompileQuery]
     public Task<DbTenant> TenantAsync(int tenantId)
     {
         return Queries.TenantAsync(this, tenantId);
@@ -144,6 +156,22 @@ static file class Queries
             (TenantDbContext ctx, int tenantId) =>
                 ctx.Tenants.AsTracking().FirstOrDefault(r => r.Id == tenantId));
 
+
+    public static readonly Func<TenantDbContext, DateTime, IAsyncEnumerable<int>> ActiveTenantIdsModifiedSinceAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (TenantDbContext ctx, DateTime from) =>
+                ctx.Tenants
+                    .Where(r => r.Status == TenantStatus.Active && r.LastModified >= from)
+                    .Select(r => r.Id));
+
+    public static readonly Func<TenantDbContext, int, int, IAsyncEnumerable<int>> ActiveTenantIdsAfterAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (TenantDbContext ctx, int afterId, int count) =>
+                ctx.Tenants
+                    .Where(r => r.Status == TenantStatus.Active && r.Id > afterId)
+                    .OrderBy(r => r.Id)
+                    .Select(r => r.Id)
+                    .Take(count));
 
     public static readonly Func<TenantDbContext, IEnumerable<TenantStatus>, IAsyncEnumerable<int>> TenantIdsByStatusAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

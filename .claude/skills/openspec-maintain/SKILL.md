@@ -128,6 +128,6 @@ changes.
   the script to a file and run `python -I -X utf8 <file>`. Every agent brief repeats this as its first line.
 - TaskStop on an agent does not stop the Git Bash scripts it started; check for leftover `dotnet test` and
   `bash.exe` processes afterwards.
-- Document-server tests need port 8092 free: stop the Windows `nginx` service of an installed DocSpace first.
+- Document-server tests no longer need port 8092 free: a test run publishes its router on a free port (`HostPorts`; not with `Docker=true`, which keeps the fixed ports), next to an installed DocSpace or a dev stand.
 - Licence tests must not run on a stand whose configuration sets a licence file path.
 - A ported TS expectation is a claim, not the spec: check it against resources and enums before calling a defect.

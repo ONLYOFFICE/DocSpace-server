@@ -610,7 +610,7 @@ to their creator. A room may be in several groups and two groups may share a nam
 The copy keeps the original name with a numeric suffix so nothing is overwritten; a folder is copied with its
 content, and a room with its settings but without its members. The caller needs the rights that creating an
 item in that folder needs — inside a room, Room manager or Content creator; an empty selection queues nothing.
-
+Files of an Instructions room SHALL carry `security.Duplicate` false (v4.1);
 #### Scenario: Room duplicated
 
 - **WHEN** a room is duplicated

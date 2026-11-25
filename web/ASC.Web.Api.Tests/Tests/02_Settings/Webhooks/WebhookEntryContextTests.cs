@@ -256,6 +256,7 @@ public class WebhookEntryContextTests(
     {
         // Arrange: a project of the owner with a Content creator, both subscribed to room.updated
         var cancellationToken = TestContext.Current.CancellationToken;
+        await PlantAiProfileAsync();
         var member = await InviteContact(EmployeeType.User);
 
         await _filesClient.Authenticate(Owner);
@@ -284,6 +285,28 @@ public class WebhookEntryContextTests(
         ownerPayload!.Model.UsedSpace.Should().NotBeNull("the owner may edit the project");
         memberPayload.Should().NotBeNull("a Content creator reads the project");
         memberPayload!.Model.UsedSpace.Should().BeNull("a Content creator may not edit the project");
+    }
+
+    /// <summary>
+    /// Writes one AI model profile of the portal straight into <c>ai_integration_profiles</c>: the integration-test
+    /// stack has neither an AI gateway nor the AI service, and without a profile the portal refuses to create an AI
+    /// project. Runs before anything asks whether the portal has a profile, since that answer is cached.
+    /// </summary>
+    private async Task PlantAiProfileAsync()
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText =
+            """
+            INSERT INTO ai_integration_profiles (id, tenant_id, name, provider_type, base_url, model_id, created_at)
+            VALUES (@id, @tenantId, 'test', 'openai', 'http://localhost', 'test-model', UTC_TIMESTAMP());
+            """;
+
+        command.Parameters.AddWithValue("@id", Guid.NewGuid().ToString());
+        command.Parameters.AddWithValue("@tenantId", TenantId);
+
+        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
     }
 
     /// <summary>A custom room of the owner with a quota of its own; room quotas are turned on for it.</summary>

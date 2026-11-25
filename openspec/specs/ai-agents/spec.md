@@ -423,7 +423,8 @@ every binding of one profile.
 
 Instructions rooms, Knowledge rooms and AI projects SHALL be rooms created through `createRoom` with their
 `roomType`, by the owner, a DocSpace admin or a Room admin (User, Guest 403), landing in the AI rooms section
-and never in Rooms; a Knowledge room needs vectorization enabled (403). Settings that do not apply to the
+and never in Rooms; a Knowledge room needs vectorization enabled (403), an AI project needs the AI gateway or an
+AI model profile of the portal (403). Settings that do not apply to the
 type SHALL be refused on create and update (400). They are never archived (403), make no template (403),
 take no folder in the section root (403) and are deleted outright.
 
@@ -445,11 +446,11 @@ take no folder in the section root (403) and are deleted outright.
 ### Requirement: Members of the AI rooms
 
 An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
-the same without Editor, an AI project only Room manager and Content creator. Every member reads the project;
-only a Room manager edits it; a non-member other than a DocSpace admin SHALL NOT read its model, sources or
-skills (403).
+the same without Editor, an AI project only Content creator. Every member reads the project; a member SHALL NOT
+edit it, its owner does; a non-member other than a DocSpace admin SHALL NOT read its model, sources or skills
+(403).
 
-#### Scenario: Content creator reads, Room manager writes
+#### Scenario: Content creator reads, does not write
 
 - **WHEN** a Content creator of the project reads the project model and then sets it
 - **THEN** the read answers 200 and the write 403
@@ -463,11 +464,12 @@ skills (403).
 
 The members of an AI project SHALL be users only: a group SHALL NOT be invited to a project with any role
 (403, "The role is not available for this user type"). A Guest SHALL NOT hold any role in a project (403,
-nobody added), while a User joins through an invitation link as Content creator.
+nobody added), while a User is invited by id or by email as Content creator. A project SHALL have no invitation
+link: `setRoomLink` with the invitation type answers 403 and creates no link.
 
 #### Scenario: Guest invited to a project
 
-- **WHEN** the owner invites a Guest to a project as Content creator by id, by email or through an invitation link
+- **WHEN** the owner invites a Guest to a project as Content creator by id or by email
 - **THEN** the system answers 403 and the Guest is not a member
 
 #### Scenario: Group invited to a project
@@ -478,14 +480,14 @@ nobody added), while a User joins through an invitation link as Content creator.
 ### Requirement: The model of an AI project
 
 `getProjectModel` SHALL answer the project's own chat model as a profile id, null while none is selected or
-the profile is gone (the portal's Chat binding then answers); `setProjectModel` SHALL need a project
-manager (403) and a `profileId` naming a catalogue profile that can chat (missing, unknown or image-only
+the profile is gone (the portal's Chat binding then answers); `setProjectModel` SHALL refuse a member of the
+project (403) and a `profileId` naming a catalogue profile that can chat (missing, unknown or image-only
 400, the project keeping its model), replace the previous choice, be audited and pushed to clients. An
 Instructions room or an unknown id answers 404 on either route.
 
 #### Scenario: Image profile refused
 
-- **WHEN** a Room manager of the project sets an image-only profile on a project that runs on a chat profile
+- **WHEN** the owner of the project sets an image-only profile on a project that runs on a chat profile
 - **THEN** the system answers 400 and the project keeps its model
 
 #### Scenario: Content creator reads the fixed model
@@ -495,12 +497,12 @@ Instructions room or an unknown id answers 404 on either route.
 
 #### Scenario: Model moved
 
-- **WHEN** a Room manager of the project sets another chat profile on a project with an open thread
+- **WHEN** the owner of the project sets another chat profile on a project with an open thread
 - **THEN** new rounds run on the new profile and the existing thread keeps its model
 
 #### Scenario: Selection cannot be cleared
 
-- **WHEN** a manager sends `setProjectModel` without a `profileId`
+- **WHEN** the owner sends `setProjectModel` without a `profileId`
 - **THEN** the system answers 400 and the selection stays: a selected model is replaced, never cleared
 
 ### Requirement: Sources of an AI project
@@ -509,16 +511,16 @@ Instructions room or an unknown id answers 404 on either route.
 `linkProjectSources` SHALL link active rooms of those two types that the caller manages and refuse the whole
 call (400, linking nothing) for any other room id, an empty list, over 40 ids or more than 20 rooms of one
 kind; `unlinkProjectSources` SHALL remove the listed links without checking rights on the rooms. Both writes
-need a Room manager of the project (403) and are audited.
+refuse a member of the project (403) and are audited.
 
 #### Scenario: Over the limit
 
-- **WHEN** a manager links a 21st Knowledge room
+- **WHEN** the owner of the project links a 21st Knowledge room
 - **THEN** the system answers 400 and the existing links stay
 
 #### Scenario: Room not linkable
 
-- **WHEN** a manager links an unknown room, a deleted one, a Custom room, another project or an Instructions room where they are only a Viewer
+- **WHEN** the owner of the project links an unknown room, a deleted one, a Custom room, another project or an Instructions room where they are only a Viewer
 - **THEN** the system answers 400 and nothing is linked
 
 #### Scenario: Deleted room
@@ -528,7 +530,7 @@ need a Room manager of the project (403) and are audited.
 
 #### Scenario: Duplicates and pushed changes
 
-- **WHEN** a manager links a room twice, or one already linked
+- **WHEN** the owner of the project links a room twice, or one already linked
 - **THEN** the room is linked once, and clients are told of the change
 
 ### Requirement: Access through a project
@@ -541,7 +543,7 @@ the skills of its linked Instructions rooms to any member.
 
 #### Scenario: Access ends with the link
 
-- **WHEN** a Content creator of the project reads a file of a linked Knowledge room and a Room manager of the project then unlinks the room
+- **WHEN** a Content creator of the project reads a file of a linked Knowledge room and the owner of the project then unlinks the room
 - **THEN** the read answers 200 before and 403 after
 
 ### Requirement: Skills of an Instructions room
@@ -939,12 +941,12 @@ neither the question nor an answer.
 
 #### Scenario: Project without a usable model
 
-- **WHEN** the owner or a manager sends into an AI project whose model is gone or cannot chat
+- **WHEN** the owner sends into an AI project whose model is gone or cannot chat
 - **THEN** the system answers 409 with `code` `projectModelUnavailable` before any stream
 
 ### Requirement: The model of a chat
 
-A round that the owner or a manager of an AI project sends with the project as `entityId` SHALL run on the
+A round that the owner or a member of an AI project sends with the project as `entityId` SHALL run on the
 project's model — its own, else the portal's Chat binding — whatever `profileId` it carries (blank or unknown
 included), never moving the thread. Outside a project a send with no `profileId` runs on the thread's own
 model, else on Chat, else on Default; a `profileId` sent becomes the thread's model; rebinding Chat moves no
@@ -952,7 +954,7 @@ thread.
 
 #### Scenario: Project answers on its model
 
-- **WHEN** a Room manager of the project sends into a project thread naming another profile
+- **WHEN** the owner of the project sends into a project thread naming another profile
 - **THEN** the reply runs on the project's model and the thread still reports that model
 - **AND** when a read member sends the same, the request does not reach the project's model (bug 82914)
 
@@ -2327,8 +2329,8 @@ threads of the project SHALL keep their files.
 
 ### Requirement: Losing access to a project deletes the member's threads
 
-When a member's own access to an AI project is removed (by `setRoomSecurity` with no access, sent by a manager
-or by the member, or by `removeSecurityInfo` sent by the project's owner), the threads that member created in
+When a member's own access to an AI project is removed (by `setRoomSecurity` with no access, sent by the
+project's owner or by the member, or by `removeSecurityInfo` sent by the project's owner), the threads that member created in
 the project SHALL be deleted as by `aiThreadsDelete`, with their files. Threads of other members SHALL stay, a
 later invitation SHALL NOT bring the threads back, and a change of the project's owner SHALL delete nothing.
 
@@ -2613,7 +2615,7 @@ an AI project included, SHALL NOT carry the field.
 
 #### Scenario: Number follows the links
 
-- **WHEN** a room is linked to two projects, a Room manager of the first unlinks it with `unlinkProjectSources`, and the second project is then deleted with `deleteRoom`
+- **WHEN** a room is linked to two projects, the owner of the first unlinks it with `unlinkProjectSources`, and the second project is then deleted with `deleteRoom`
 - **THEN** `getRoomInfo` of the room carries `linkedProjectsCount` 1 after the unlink and 0 after the deletion has completed
 
 ### Requirement: Listing the projects that use a room
@@ -2729,12 +2731,12 @@ SHALL send no such event for a room.
 
 #### Scenario: Room linked
 
-- **WHEN** a Room manager of a project links a Knowledge room while the owner of the portal listens to the AI rooms section
+- **WHEN** a Room admin who owns a project links a Knowledge room while the owner of the portal listens to the AI rooms section
 - **THEN** the owner's client receives the updated-folder event for the room
 
 #### Scenario: Room unlinked
 
-- **WHEN** a Room manager of a project unlinks a linked Instructions room while the owner of the portal listens to the AI rooms section
+- **WHEN** a Room admin who owns a project unlinks a linked Instructions room while the owner of the portal listens to the AI rooms section
 - **THEN** the owner's client receives the updated-folder event for the room
 
 #### Scenario: Project deleted
@@ -2744,5 +2746,257 @@ SHALL send no such event for a room.
 
 #### Scenario: Nothing linked anew
 
-- **WHEN** a Room manager links a room the project already links, after a first link whose event the owner's client received
+- **WHEN** a Room admin who owns a project links a room the project already links, after a first link whose event the owner's client received
 - **THEN** the owner's client receives no second updated-folder event for the room
+
+### Requirement: Conversion of an AI agent into an AI project
+
+An AI agent of an active portal SHALL be converted with no request from a user: an AI project is created with
+the agent's title, owner, colour, cover, logo and custom tags, and the agent stops being a room of the AI room
+type. An agent SHALL be converted once, and an agent the conversion has not reached yet SHALL stay unchanged.
+
+#### Scenario: Agent converted
+
+- **WHEN** the conversion has run for a portal that holds one agent
+- **THEN** `getRoomsFolder` of the AI rooms section lists a project with the agent's title whose `createdBy` is the agent's owner, and no room of the AI room type is listed in any section
+
+#### Scenario: Conversion run twice
+
+- **WHEN** the conversion runs a second time for the same portal
+- **THEN** the AI rooms section still lists one project for the agent
+
+#### Scenario: Pinned agent
+
+- **WHEN** a member had pinned the agent and the conversion has run
+- **THEN** the project is pinned for that member
+
+### Requirement: The room of a converted agent becomes a Knowledge room
+
+An agent whose Knowledge folder holds at least one file SHALL keep its id as a Knowledge room linked to the
+project and titled `<agent title> (<title of its Knowledge folder>)`; a title over the length limit of a room
+title SHALL be cut inside the agent title. The knowledge files SHALL keep their ids and lie directly in the
+room, and the Knowledge folder SHALL be gone; folders inside it SHALL be deleted with their files. The room SHALL be
+made also while vectorization is off.
+
+#### Scenario: Knowledge kept
+
+- **WHEN** the conversion has run for an agent "Sales bot" with one knowledge file
+- **THEN** `getRoomInfo` with the agent's id answers a Knowledge room titled "Sales bot (Knowledge)", `getProjectSources` of the project lists that room, `getFileInfo` of the file answers the same file id with the room as its `folderId`, and the id of the former Knowledge folder answers 404
+
+#### Scenario: Title at the limit
+
+- **WHEN** the agent's title has the greatest length a room title may have
+- **THEN** the title of the Knowledge room has that same length and ends with ` (Knowledge)`
+
+#### Scenario: Vectorization off
+
+- **WHEN** the conversion runs for an agent with a knowledge file on a portal where vectorization is turned off
+- **THEN** the Knowledge room is made and linked all the same
+
+### Requirement: The Knowledge room of a converted agent drops the settings it refuses
+
+The Knowledge room made from an agent SHALL keep none of the agent's lifetime, watermark, download restriction,
+indexing, privacy and form settings: `updateRoom` refuses each of them for a Knowledge room and `createRoom` refuses a
+private one, so one carried over could not be turned off.
+
+#### Scenario: Restricted agent converted
+
+- **WHEN** the conversion has run for a private agent with a knowledge file, a lifetime, a watermark, downloads denied, indexing on and both form settings on
+- **THEN** `getRoomInfo` with the agent's id answers a Knowledge room with no `lifetime` and no `watermark`, and `denyDownload`, `indexing` and `private` false, and both form settings of the room are off
+
+### Requirement: An agent without knowledge leaves no room
+
+An agent whose Knowledge folder holds no file SHALL be deleted once its project exists: the project has no linked
+room and the agent's id answers 404. When that deletion fails, a Knowledge room with the agent's id and no file stays.
+
+#### Scenario: Empty Knowledge folder
+
+- **WHEN** the conversion has run for an agent whose Knowledge folder is empty
+- **THEN** `getProjectSources` of the project answers an empty list and `getRoomInfo` with the agent's id answers 404
+
+### Requirement: Threads of an agent become threads of the project
+
+Every thread started with the agent as `entityId` SHALL become a thread of the project with its messages,
+whoever created it. `aiThreadsList` SHALL list it for the project's id, and no longer for another `entityId` or
+without one, to its creator while the creator may use AI in the project. A Guest is refused on every thread route,
+so the thread of a creator who is a Guest at the conversion stays stored in the project and answers 403 to them.
+
+#### Scenario: Thread follows the agent
+
+- **WHEN** a member has a thread with messages in an agent and the conversion has run
+- **THEN** `aiThreadsList` with the project's id lists the thread to that member, `aiThreadsList` without an entity does not, and `aiThreadsReadMessages` of the thread answers the same messages
+
+#### Scenario: Thread started elsewhere
+
+- **WHEN** the same member has a thread started without an entity
+- **THEN** that thread is still listed without an entity and is not listed for the project
+
+#### Scenario: Thread of a Guest
+
+- **WHEN** a member who started a thread in the agent is a Guest when the conversion runs
+- **THEN** the thread is stored as a thread of the project, the project does not list the Guest among its members, and the Guest reading the thread gets 403
+
+### Requirement: The model of an agent becomes the model of the project
+
+The Chat assignment scoped to the agent SHALL become the model of the project: `getProjectModel` answers the
+profile the agent was bound to, and null when the agent had no assignment of its own.
+
+#### Scenario: Agent bound to a profile
+
+- **WHEN** the agent carried a Chat assignment to profile A while the portal's Chat binding is B, and the conversion has run
+- **THEN** `getProjectModel` of the project answers A
+
+#### Scenario: Agent without an assignment
+
+- **WHEN** the agent carried no Chat assignment of its own
+- **THEN** `getProjectModel` of the project answers null
+
+### Requirement: Members of a converted agent
+
+The project SHALL take the agent's members as users only, each as Content creator, the only role of a project:
+a Room manager, a Content creator and a Viewer of the agent, and each member of a group invited to the agent as
+the group is at the conversion. A Guest and an invitation link SHALL NOT be carried over.
+
+#### Scenario: Roles carried over
+
+- **WHEN** an agent with a Room manager, a Content creator and a Viewer is converted
+- **THEN** `getRoomSecurityInfo` of the project lists all three as Content creator
+
+#### Scenario: Group invited to the agent
+
+- **WHEN** a group of two Users was invited to the agent as Viewer, one of the two being also a Room manager of the agent by their own role
+- **THEN** `getRoomSecurityInfo` of the project lists no group and both Users as Content creator
+
+#### Scenario: Joining the group later
+
+- **WHEN** a User joins that group after the conversion
+- **THEN** the User is not a member of the project
+
+#### Scenario: Guest of the agent
+
+- **WHEN** a Guest was a Viewer of the agent
+- **THEN** `getRoomSecurityInfo` of the project does not list the Guest
+
+### Requirement: Access to the Knowledge room of a converted agent
+
+In the Knowledge room made from an agent, the users and groups that were Room manager or Content creator of the
+agent SHALL keep that role, a Guest included. Viewers and invitation links SHALL be removed from the room: a Viewer
+reads it through the project only. An external link of a knowledge file SHALL be removed.
+
+#### Scenario: Content creator keeps the room
+
+- **WHEN** an agent with a Room manager and a Content creator is converted
+- **THEN** `getRoomSecurityInfo` of the Knowledge room lists both with the role they had in the agent
+
+#### Scenario: Viewer reads through the project
+
+- **WHEN** a Viewer of the agent reads a knowledge file after the conversion
+- **THEN** the read answers 200 and `getRoomSecurityInfo` of the Knowledge room does not list that user
+
+#### Scenario: Guest of the agent
+
+- **WHEN** a Guest who was a Viewer of the agent reads a knowledge file after the conversion
+- **THEN** the read answers 403
+
+#### Scenario: External link of a knowledge file
+
+- **WHEN** a knowledge file had an external link and the conversion has run
+- **THEN** the link is no longer listed among the links of the file
+
+### Requirement: Chat outputs of a converted agent move to My documents
+
+The Chat outputs folder of an agent SHALL move, with its content and the ids of its files, into the My documents
+of the agent's owner as an ordinary folder titled `<agent title> (<title of the Chat outputs folder>)`; an empty
+one SHALL be deleted. Its size SHALL be added to that user's used space with no check of the quota. If the
+owner's account is deleted or disabled, the portal owner SHALL take the folder.
+
+#### Scenario: Outputs moved
+
+- **WHEN** the conversion has run for an agent "Sales bot" whose Chat outputs folder holds a file
+- **THEN** `getMyFolder` of the agent's owner lists a folder "Sales bot (Chat outputs)", `getFileInfo` of the file answers the same file id inside that folder, and another member of the agent reading the file gets 403
+
+#### Scenario: Empty Chat outputs
+
+- **WHEN** the Chat outputs folder of the agent holds nothing
+- **THEN** `getMyFolder` of the agent's owner lists no folder for the agent
+
+#### Scenario: Owner over the quota
+
+- **WHEN** the files of Chat outputs are larger than the free space left in the personal quota of the agent's owner
+- **THEN** the conversion completes, the folder is in the owner's My documents and the owner's used space is above the quota
+
+#### Scenario: Owner disabled
+
+- **WHEN** the account of the agent's owner is disabled
+- **THEN** the folder is listed by `getMyFolder` of the portal owner
+
+### Requirement: The background pass converts agents by itself
+
+A background pass SHALL convert the agents of every active portal changed since its previous pass, and of every
+active portal on its first pass. A portal restored or transferred from an archive that holds agents SHALL be
+converted by the first pass that starts after the portal became active, or by a later one when the lock of the legacy
+AI providers migration is held or an agent fails; until then it holds agents. A portal that is not active SHALL be
+skipped.
+
+#### Scenario: Restored archive
+
+- **WHEN** an archive made while the portal held an agent is restored and a pass has started after the restore completed
+- **THEN** the restored portal holds a project for the agent and no room of the AI room type
+
+#### Scenario: Portal being restored
+
+- **WHEN** a pass runs while a portal is still being restored
+- **THEN** the pass changes nothing in that portal and a later pass converts it
+
+#### Scenario: Unchanged portal
+
+- **WHEN** a pass runs and a portal without agents was not changed since the previous pass
+- **THEN** the pass reads nothing of that portal
+
+### Requirement: A failed conversion is retried and then left
+
+An agent whose conversion fails SHALL stay an agent and SHALL NOT stop the other agents of the portal. The pass
+SHALL try the portal again on its next passes; after the configured number of passes that ended with a failed
+agent it SHALL leave the portal alone; no later pass resumes it, while the internal route still converts its agents.
+
+#### Scenario: One agent of two fails
+
+- **WHEN** the conversion of one of two agents of a portal fails
+- **THEN** the other agent is converted and the failed one is still a room of the AI room type
+
+#### Scenario: Failure repeated
+
+- **WHEN** the same agent fails on every pass up to the configured number
+- **THEN** the following passes do not read the portal
+
+#### Scenario: Success after a failure
+
+- **WHEN** an agent that failed on one pass is converted on the next
+- **THEN** the portal is no longer retried and its count of failed passes starts from zero
+
+### Requirement: Starting the conversion by request
+
+`POST internal/ai/agents/migration`, an internal route kept for the integration tests, SHALL convert the agents
+of the caller's portal before it answers: 200 with `migrated` and `failed` (this call's counts), or 409 with nothing
+converted while the legacy AI providers migration holds its lock. It SHALL need the portal owner or a DocSpace admin
+(others 403, no sign-in 401) and work while the AI switch is off. A repeated call converts nothing again.
+
+#### Scenario: Owner starts the conversion
+
+- **WHEN** the portal owner calls the route for a portal with two agents
+- **THEN** the call answers 200 with `migrated` 2 and `failed` 0
+
+#### Scenario: Portal without agents
+
+- **WHEN** the route is called a second time, or for a portal that never held an agent
+- **THEN** the call answers 200 with `migrated` 0 and `failed` 0
+
+#### Scenario: Room admin refused
+
+- **WHEN** a Room admin or a User calls the route
+- **THEN** the system answers 403 and no agent is converted
+
+#### Scenario: AI switched off
+
+- **WHEN** the portal owner calls the route while the AI switch of the portal is off
+- **THEN** the call answers 200 and the agents are converted
