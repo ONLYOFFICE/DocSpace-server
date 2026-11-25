@@ -465,7 +465,7 @@ public class ThirdpartyController(
     {
         try
         {
-            var bytes = await DownloadAvatarAsync(userID, url);
+            var bytes = await DownloadAvatarAsync(userID, url, HttpContext?.RequestAborted ?? CancellationToken.None);
 
             if (bytes != null)
             {
@@ -479,7 +479,7 @@ public class ThirdpartyController(
         }
     }
 
-    private async Task<byte[]> DownloadAvatarAsync(Guid userID, string url)
+    private async Task<byte[]> DownloadAvatarAsync(Guid userID, string url, CancellationToken cancellationToken)
     {
         var address = url;
 
@@ -495,21 +495,24 @@ public class ThirdpartyController(
             var httpClient = httpClientFactory.CreateClient(UrlValidator.PinnedHttpClient);
             using var request = new HttpRequestMessage(HttpMethod.Get, validation.ParsedUri);
             request.Options.Set(UrlValidator.PinnedIpKey, validation.ResolvedAddresses[0]);
-            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-            if (IsRedirect(response.StatusCode) && response.Headers.Location != null)
+            // each request, with its body, has the deadline of LimitedImageReader; the lookup of the next address
+            // (ValidateAsync) is outside it
+            var download = await LimitedImageReader.DownloadAsync(httpClient, request, setupInfo.MaxImageUploadSize, cancellationToken);
+
+            if (IsRedirect(download.StatusCode) && download.Location != null)
             {
-                address = new Uri(validation.ParsedUri, response.Headers.Location).ToString();
+                address = new Uri(validation.ParsedUri, download.Location).ToString();
                 continue;
             }
 
-            if (!response.IsSuccessStatusCode)
+            if ((int)download.StatusCode is < 200 or > 299)
             {
-                logger.WarningAvatarNotSaved(userID, $"the provider answered {(int)response.StatusCode}");
+                logger.WarningAvatarNotSaved(userID, $"the provider answered {(int)download.StatusCode}");
                 return null;
             }
 
-            var bytes = await LimitedImageReader.ReadAsync(response.Content, setupInfo.MaxImageUploadSize);
+            var bytes = download.Bytes;
             if (bytes == null)
             {
                 logger.WarningAvatarNotSaved(userID, "the image is over the size limit");

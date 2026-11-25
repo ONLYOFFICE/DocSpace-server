@@ -835,8 +835,10 @@ public abstract class FilesController<T>(
     /// <remarks>
     /// Replaces the content of a file with an uploaded file and returns the updated file. The call takes the first
     /// file of the form, or the `file` field if the form has none. Requires editing access to the file. Other callers
-    /// get 403. The call changes data. Do not repeat it. Each call saves the content again. If no file has this id,
-    /// the call returns 404.
+    /// get 403. Without `Forcesave`, the call closes the caller's own editing session of the file. If another user has
+    /// the file open for editing, the call then returns 403 and the caller's session stays. With `Forcesave`, the call
+    /// saves the content even while the file is open, and closes no session. The call changes data. Do not repeat it. Each call
+    /// saves the content again. If no file has this id, the call returns 404.
     /// </remarks>
     /// <summary>Update file contents</summary>
     /// <path>api/2.0/files/{fileId}/update</path>
@@ -844,7 +846,7 @@ public abstract class FilesController<T>(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [SwaggerResponse(403, "The caller has no editing access to the file, or, without `Forcesave`, another user has the file open for editing")]
     [SwaggerResponse(404, "File not found")]
     [HttpPut("{fileId}/update")]
     public async Task<FileDto<T>> UpdateFileStreamFromForm(FileStreamRequestDto<T> inDto)
@@ -1148,8 +1150,8 @@ public abstract class FilesController<T>(
     /// remembered, `Start` also deletes the drafts of the previous round. The action `Stop` (0) stops the filling.
     /// In a virtual data room, it records who stopped it and at which role. It also notifies the users of the other
     /// roles. In a form-filling room, `Stop` closes the form for filling. The action `Resume` (1) continues a stopped
-    /// filling and clears that record. The action `Edit` (3) returns the form to editing, closes it for filling, and
-    /// remembers the version.
+    /// filling and clears that record. The action `Edit` (3) in a form-filling room returns the form to editing,
+    /// closes it for filling, and remembers the version. In other rooms it changes no filling state.
     /// The call reads the form id only from `formId` in the body. Send the same value in the route. The form must be
     /// a PDF in a room. The action `Start` requires the right to start the filling, which a room manager and a
     /// content creator have. Other callers get 403. Only a room manager can stop a filling that another user started.
@@ -1170,7 +1172,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The action was applied to the form")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId`")]
-    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start, stop or resume its filling or, in a form-filling room, put it back into editing, or `action` is not one of the known values")]
+    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start, stop or resume its filling or has no editing access to it for `Edit`, or `action` is not one of the known values")]
     // Same shape as formrolemapping above: the id travels in the body, the route placeholder is
     // unbound, and the client fills both with the same value.
     [SwaggerPathParameter("fileId", "The form the action applies to. Send the same value as the `formId` of the request body, which is the one the handler reads.")]

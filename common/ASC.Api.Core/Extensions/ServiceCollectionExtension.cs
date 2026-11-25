@@ -504,7 +504,7 @@ public static class ServiceCollectionExtension
                 });
             services.AddHttpClient(UrlValidator.PinnedHttpClient)
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
+                .ConfigureHttpClient(c => c.Timeout = UrlValidator.PinnedClientTimeout)
                 .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
                 {
                     AllowAutoRedirect = false,
@@ -512,7 +512,7 @@ public static class ServiceCollectionExtension
                 });
             services.AddHttpClient(UrlValidator.PinnedHttpClientSslIgnore)
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
+                .ConfigureHttpClient(c => c.Timeout = UrlValidator.PinnedClientTimeout)
                 .ConfigurePrimaryHttpMessageHandler(_ =>
                 {
                     var handler = new SocketsHttpHandler

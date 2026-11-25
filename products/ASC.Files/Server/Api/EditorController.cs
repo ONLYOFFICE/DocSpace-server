@@ -205,7 +205,8 @@ public abstract class EditorController<T>(
     /// open. Pass in `docKeyForTrack` the key that `POST api/2.0/files/file/{fileId}/startedit` returned. If the key
     /// matches neither the current revision nor the edited one, the call returns 403. The call tracks each `tabId`
     /// separately, so several tabs and users can edit one file. With `isFinish` false, the call refreshes the entry,
-    /// and the file stays marked as edited. With `isFinish` true, the call deletes the entry of this tab. A refresh
+    /// and the file stays marked as edited. With `isFinish` true, the call deletes the entry of this tab when the tab
+    /// belongs to the caller. A tab of another account stays, and the call still succeeds. A refresh
     /// requires the right to edit, review, comment, fill forms, or edit filters. Other callers get 403. An
     /// anonymous caller needs an external link. Without a link, it gets 401. A refresh through a link that does not
     /// allow editing also returns 401. The call changes data of the session, not the document. You can repeat it. On

@@ -147,14 +147,14 @@ public abstract class PeopleControllerBase(
         var httpClient = httpClientFactory.CreateClient(UrlValidator.PinnedHttpClient);
         using var request = new HttpRequestMessage(HttpMethod.Get, photoValidation.ParsedUri);
         request.Options.Set(UrlValidator.PinnedIpKey, photoValidation.ResolvedAddresses[0]);
-        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        var download = await LimitedImageReader.DownloadAsync(httpClient, request, _setupInfo.MaxImageUploadSize, HttpContext?.RequestAborted ?? CancellationToken.None);
 
-        if (!response.IsSuccessStatusCode)
+        if ((int)download.StatusCode is < 200 or > 299)
         {
-            throw new InvalidOperationException($"Failed to download photo: {response.StatusCode}");
+            throw new InvalidOperationException($"Failed to download photo: {download.StatusCode}");
         }
 
-        var imageByteArray = await LimitedImageReader.ReadAsync(response.Content, _setupInfo.MaxImageUploadSize) ?? throw new ImageSizeLimitException();
+        var imageByteArray = download.Bytes ?? throw new ImageSizeLimitException();
 
         await _userPhotoManager.SaveOrUpdatePhoto(user.Id, imageByteArray);
     }

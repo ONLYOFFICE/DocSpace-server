@@ -67,19 +67,34 @@ public class FormFillingEditOutsideFillingRoomTests(
         exception.ErrorCode.Should().Be(403);
     }
 
-    [Fact]
-    public async Task Edit_OwnerOutsideAFormFillingRoom_Succeeds()
+    /// <summary>
+    /// The allowed cell of the same matrix: a member with editing access gets 200 where a reader gets 403, so the 403
+    /// above comes from the access check and not from a refusal of every caller.
+    /// </summary>
+    [Theory]
+    [InlineData(RoomType.VirtualDataRoom)]
+    [InlineData(RoomType.CustomRoom)]
+    public async Task Edit_MemberWithEditingAccessOutsideAFormFillingRoom_IsAccepted(RoomType roomType)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var room = await CreateVDRRoom("Autotest Edit Form Owner Room " + Guid.NewGuid().ToString()[..8]);
+        var room = roomType == RoomType.VirtualDataRoom
+            ? await CreateVDRRoom("Autotest Edit Form Editor Room " + Guid.NewGuid().ToString()[..8])
+            : await CreateCustomRoom("Autotest Edit Form Editor Room " + Guid.NewGuid().ToString()[..8]);
         var form = await CreateFormInRoom(room.Id);
 
+        var editor = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, editor, FileShare.Editing);
+        await _filesClient.Authenticate(editor);
+
         // Act
-        await Manage(form.Id, FormFillingManageAction.Edit);
+        var status = (await _filesApi.ManageFormFillingWithHttpInfoAsync(
+            form.Id.ToString(),
+            new ManageFormFillingDto(form.Id, FormFillingManageAction.Edit),
+            TestContext.Current.CancellationToken)).StatusCode;
 
         // Assert
-        (await _filesApi.GetFileInfoAsync(form.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.Id.Should().Be(form.Id);
+        ((int)status).Should().Be(200);
     }
 
     private async Task Manage(int formId, FormFillingManageAction action)

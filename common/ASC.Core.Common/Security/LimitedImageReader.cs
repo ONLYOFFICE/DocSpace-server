@@ -39,6 +39,34 @@ namespace ASC.Core.Common.Security;
 /// </summary>
 public static class LimitedImageReader
 {
+    /// <summary>
+    /// The deadline of one download, the request and the body together: the client timeout ends when the headers
+    /// arrive, so a server that sends the body a byte at a time would otherwise hold the request for as long as it likes.
+    /// It is the timeout of the pinned clients.
+    /// </summary>
+    public static readonly TimeSpan DownloadTimeout = UrlValidator.PinnedClientTimeout;
+
+    /// <summary>
+    /// Sends the request and reads the image within <see cref="DownloadTimeout"/> (or <paramref name="timeout"/>). A
+    /// response that is not a success comes back with its status and <c>Location</c> and no bytes; a success comes
+    /// back with the bytes, or with none when the body is longer than <paramref name="limit"/>. When the deadline
+    /// passes, the call throws <see cref="OperationCanceledException"/>.
+    /// </summary>
+    public static async Task<ImageDownload> DownloadAsync(HttpClient client, HttpRequestMessage request, long limit, CancellationToken cancellationToken, TimeSpan? timeout = null)
+    {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(timeout ?? DownloadTimeout);
+
+        using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, deadline.Token);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new ImageDownload(response.StatusCode, response.Headers.Location, null);
+        }
+
+        return new ImageDownload(response.StatusCode, null, await ReadAsync(response.Content, limit, deadline.Token));
+    }
+
     /// <summary>The bytes of the body, or null when the body is longer than <paramref name="limit"/>.</summary>
     public static async Task<byte[]> ReadAsync(HttpContent content, long limit, CancellationToken cancellationToken = default)
     {
@@ -65,3 +93,6 @@ public static class LimitedImageReader
         return buffer.ToArray();
     }
 }
+
+/// <summary>The answer of <see cref="LimitedImageReader.DownloadAsync"/>.</summary>
+public sealed record ImageDownload(HttpStatusCode StatusCode, Uri Location, byte[] Bytes);

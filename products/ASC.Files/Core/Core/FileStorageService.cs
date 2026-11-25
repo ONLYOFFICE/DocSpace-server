@@ -2237,9 +2237,12 @@ public class FileStorageService //: IFileStorageService
 
         if (isFinish)
         {
-            // a key of the document opens no right to end another account's tab
-            await fileTracker.RemoveOwnTabAsync(fileId, tabId, authContext.CurrentAccount.ID);
-            await socketManager.StopEditAsync(fileId);
+            // a key of the document opens no right to end another account's tab, nor to tell the clients that the
+            // editing ended
+            if (await fileTracker.RemoveOwnTabAsync(fileId, tabId, authContext.CurrentAccount.ID))
+            {
+                await socketManager.StopEditAsync(fileId);
+            }
         }
         else
         {
@@ -2284,13 +2287,21 @@ public class FileStorageService //: IFileStorageService
         return (await fileTracker.GetEditingByAsync(fileId)).Contains(authContext.CurrentAccount.ID);
     }
 
+    private async Task<bool> IsEditedByCurrentUserOnlyAsync<T>(T fileId)
+    {
+        var editors = await fileTracker.GetEditingByAsync(fileId);
+
+        return editors.Count > 0 && editors.TrueForAll(id => id == authContext.CurrentAccount.ID);
+    }
+
     public async Task<File<T>> UpdateFileStreamAsync<T>(T fileId, Stream stream, string fileExtension, bool encrypted, bool forcesave)
     {
         try
         {
-            // The same rule as in SaveEditingAsync: the caller closes only their own sessions, so a file that a
-            // co-editor still has open is refused.
-            if (!forcesave && await fileTracker.IsEditingAsync(fileId) && await IsEditedByCurrentUserAsync(fileId))
+            // The caller closes only their own sessions (all of their tabs), and only when nobody else has the file open;
+            // a file a co-editor still edits is refused below and the caller's session stays. Anonymous callers of the
+            // API all have the guest account id, so for them every anonymous tab opened through the API is their own.
+            if (!forcesave && await fileTracker.IsEditingAsync(fileId) && await IsEditedByCurrentUserOnlyAsync(fileId))
             {
                 await fileTracker.RemoveAsync(fileId, userId: authContext.CurrentAccount.ID);
                 await socketManager.StopEditAsync(fileId);
@@ -2391,8 +2402,16 @@ public class FileStorageService //: IFileStorageService
             }
             catch (Exception)
             {
-                // only the tab this call may have added is undone, and only while it is the caller's
-                await fileTracker.RemoveOwnTabAsync(fileId, tabId, userId);
+                // only the tab this call may have added is undone, and only while it is the caller's; a failure of the
+                // cleanup is logged and the refusal of the claim reaches the caller
+                try
+                {
+                    await fileTracker.RemoveOwnTabAsync(fileId, tabId, userId);
+                }
+                catch (Exception cleanupError)
+                {
+                    _logger.ErrorStartEditCleanup(fileId.ToString(), cleanupError);
+                }
 
                 throw;
             }

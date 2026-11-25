@@ -1298,9 +1298,10 @@ public class FileSecurity(
         var folder = e as Folder<T>;
         var isRoom = folder is { IsRoom: true };
 
-        // What the entry carries (its share record, its access) and what the request carries (the link it was opened
-        // with) belong to the current account; a check of another account takes none of them.
+        // What the entry carries (its share record, its access) belongs to the current account; a check of another
+        // account takes none of it. The link of the request follows RequestLinkApplies.
         var forCurrentAccount = userId == authContext.CurrentAccount.ID;
+        var requestLinkApplies = RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes > 0);
 
         if ((e.RootFolderType == FolderType.AiHub || folder is { FolderType: FolderType.AiHub }) && !await aiAccessibility.IsAccessEnabledAsync())
         {
@@ -2227,7 +2228,7 @@ public class FileSecurity(
             var cachedRecords = GetCachedRecords<T>();
             if (((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
                  cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
-                (forCurrentAccount && cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))) &&
+                (requestLinkApplies && cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))) &&
                 value != null)
             {
                 ace = value.Clone();
@@ -3759,7 +3760,8 @@ public class FileSecurity(
     {
         if (string.Equals(httpContextAccessor?.HttpContext?.Request.Method, nameof(HttpMethod.Get), StringComparison.OrdinalIgnoreCase))
         {
-            return await _subjects.GetOrAdd(new SubjectRecord(userId, includeAvailableLinks), s =>
+            // the request's link is part of the answer, so a check inside the scope is cached apart
+            return await _subjects.GetOrAdd(new SubjectRecord(userId, includeAvailableLinks, _requestLinkScopes > 0), s =>
                 new Lazy<Task<List<OrderedSubject>>>(GetUserOrderedSubjectsAsync<int>(s.UserId, s.IncludeLinks))).Value;
         }
 
@@ -4029,7 +4031,49 @@ public class FileSecurity(
                availableRolesBySubject.Contains(share);
     }
 
-    private record SubjectRecord(Guid UserId, bool IncludeLinks);
+    /// <summary>
+    /// Whether a check of <paramref name="userId"/> may use the link the request was opened with. The link is the
+    /// current account's, so a check of another account (a mentioned user, a webhook subscriber, a recipient of file
+    /// keys) takes only that account's own records, also in a request with no signed-in account, such as an anonymous
+    /// upload through the link. The one exception is a check made inside <see cref="ApplyRequestLinkToEveryAccount"/>.
+    /// </summary>
+    public static bool RequestLinkApplies(Guid userId, Guid currentAccountId, bool insideRequestLinkScope)
+    {
+        return userId == currentAccountId || insideRequestLinkScope;
+    }
+
+    private int _requestLinkScopes;
+
+    /// <summary>
+    /// Makes the link of the request apply to every account checked until the returned scope is disposed. The document
+    /// server's edit callback uses it around the check of each editor: the callback carries the link the document was
+    /// opened with, it is not signed in, and an anonymous editor is checked as <see cref="Guid.Empty"/>. Nothing else
+    /// runs inside the scope, so no other account is checked with the link.
+    /// </summary>
+    public IDisposable ApplyRequestLinkToEveryAccount()
+    {
+        _requestLinkScopes++;
+
+        return new RequestLinkScope(this);
+    }
+
+    private sealed class RequestLinkScope(FileSecurity owner) : IDisposable
+    {
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+            owner._requestLinkScopes--;
+        }
+    }
+
+    private record SubjectRecord(Guid UserId, bool IncludeLinks, bool WithRequestLink);
 
     private readonly ConcurrentDictionary<SubjectRecord, Lazy<Task<List<OrderedSubject>>>> _subjects = new();
 
@@ -4057,9 +4101,9 @@ public class FileSecurity(
             result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
         }
 
-        // the link the request was opened with is the current account's; another account checked during the request
-        // has only its own links
-        var linkId = userId == authContext.CurrentAccount.ID ? await externalShare.GetLinkIdAsync() : Guid.Empty;
+        var linkId = RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes > 0)
+            ? await externalShare.GetLinkIdAsync()
+            : Guid.Empty;
         if (linkId != Guid.Empty)
         {
             result.Add(new(linkId, SubjectOrderType.CurrentLink));

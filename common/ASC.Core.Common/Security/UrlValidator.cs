@@ -108,6 +108,9 @@ public class UrlValidator(
     /// <summary>Named <see cref="HttpClient"/> with SSRF-safe <see cref="PinnedConnectCallback"/> and full TLS verification.</summary>
     public const string PinnedHttpClient = "pinnedHttpClient";
 
+    /// <summary>The timeout of the pinned clients, and the deadline of a whole image download (LimitedImageReader).</summary>
+    public static readonly TimeSpan PinnedClientTimeout = TimeSpan.FromSeconds(10);
+
     /// <summary>Named <see cref="HttpClient"/> with SSRF-safe <see cref="PinnedConnectCallback"/> and TLS certificate validation disabled.</summary>
     public const string PinnedHttpClientSslIgnore = "pinnedHttpClientSslIgnore";
 

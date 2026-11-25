@@ -33,7 +33,7 @@ from a Form Filler now skips the room's owner, whose access record can be a link
 brought `03_Rooms/FormFilling/FormFillingRoomOwnerAccessTests.cs`; the scenario "Room owner keeps a
 not-started form whatever record decides their access" was added and "Form Filler does not see a form that
 is not started" got the 403-by-id bullet. The spreadsheet report tests are no longer skipped. The role set
-moved from `FileSecurity.cs:199-209` to `:199-209`. D8 and D13 are unchanged.
+stayed at `FileSecurity.cs:199-209`. D8 and D13 are unchanged.
 
 Revision 2026-11-11: the ten CODE-ONLY rows got Form filling room tests and ran green (the role matrices `03_Rooms/Permissions/FormFillingRoomManagementRolesTests.cs`, `01_Files/FormFilling/FormFillingRoomFileRolesTests.cs`, two cases in `ManageFormFillingPermissionsTests.cs`, two rows in `RoomShareAccessLevelTests.cs`). A Form Filler's 403 on `getFileInfo` of a not-started form is the intended rule of "Form Filler does not see a form that is not started", already asserted by `FormFillingRoomOwnerAccessTests.cs:120-137`; no spec change, no new defect.
 
@@ -79,7 +79,7 @@ Revision 2026-11-11: the ten CODE-ONLY rows got Form filling room tests and ran 
 | Room manager cancels the owner's collection | `01_Files/FormFilling/ManageFormFillingPermissionsTests.cs:147-167` (Room admin as Room manager stops the owner's started form) | TEST-CONFIRMED [run: PASS] |
 | Form Filler cannot start or cancel | `01_Files/FormFilling/ManageFormFillingPermissionsTests.cs:169-196` (Start of a not-started form and Stop of a started one: 403 each, the form stays started) | TEST-CONFIRMED [run: PASS] |
 | Form Filler sees started forms, not not-started ones; `getFileInfo` of a not-started form → 403 for a Form Filler member | `03_Rooms/FormFilling/FormFillingRoomOwnerAccessTests.cs:120-137` (403 by id); submissions read `FormSubmissionsPermissionsTests.cs:47-65`; the VDR analogue `04_Security/RoomShareTests.cs:1058-1066`; the listing: `FileSecurity.cs:1375-1388` | TEST-CONFIRMED [run: PASS] (by id) / CODE-ONLY (listing) |
-| Room owner keeps a not-started form whatever record decides their access (link token on the request; owner in a Form Filler group; a Room admin owner): `security.delete` true | `03_Rooms/FormFilling/FormFillingRoomOwnerAccessTests.cs:55-114` [Bug 84849]; `FileSecurity.cs:1375-1388` (`HasFullAccessAsync` exemption), `:3900-3925` | TEST-CONFIRMED [run: PASS] |
+| Room owner keeps a not-started form whatever record decides their access (link token on the request; owner in a Form Filler group; a Room admin owner): `security.delete` true | `03_Rooms/FormFilling/FormFillingRoomOwnerAccessTests.cs:55-114` [Bug 84849]; `FileSecurity.cs:1375-1388` (`HasFullAccessAsync` exemption), `:4147-4175` (`HasFullAccessAsync`) | TEST-CONFIRMED [run: PASS] |
 | Results folders: every role sees them; Content creator and Form Filler see and delete only own results | `deviations.md` matrix row "A Form Filler does not … delete 'Complete' forms / deletes own results in both folders (delete: code only)" | LIVE-CONFIRMED |
 | Results folder exists after the first spreadsheet run; the report completes and `resultFileId` resolves to the form | `FormXlsxTests.cs:52-114` (`resultsFolderId` > 0 at `:64-65`; no longer skipped since the host runs a document server) | TEST-CONFIRMED [run: PASS] |
 

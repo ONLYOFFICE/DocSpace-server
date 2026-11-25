@@ -176,7 +176,8 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         {
             logger.ErrorMetadataCascade(ex);
             // only the message is kept with the task, and it reaches every reader of the folder through the progress:
-            // a refusal the pass raises itself keeps its text, any other failure (SQL, a path) gets a generic one
+            // a missing entry, a lack of rights or a quota keeps its text, any other failure gets a generic one
+            // (TaskErrorText)
             Exception = TaskErrorText.ForReaders(ex, FilesCommonResource.ErrorMessage_MetadataCascadeFailed);
             IsCompleted = true;
         }

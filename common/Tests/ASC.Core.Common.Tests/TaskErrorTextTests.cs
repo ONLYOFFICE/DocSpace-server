@@ -47,8 +47,6 @@ public class TaskErrorTextTests
     {
         new ItemNotFoundException("Folder not found."),
         new System.Security.SecurityException("Access denied."),
-        new ArgumentException("The title is too long."),
-        new ArgumentNullException("title"),
         new TenantQuotaException("The quota is exceeded.")
     };
 
@@ -58,7 +56,9 @@ public class TaskErrorTextTests
         new InvalidOperationException("Sequence contains no elements"),
         new IOException(@"Could not find a part of the path 'C:\Data\tenant1'."),
         new NullReferenceException(),
-        new HttpRequestException("Connection refused (db.internal:3306)")
+        new HttpRequestException("Connection refused (db.internal:3306)"),
+        new ArgumentException("Option 'serverr' not supported."),
+        new ArgumentNullException("connectionString")
     };
 
     [Theory]

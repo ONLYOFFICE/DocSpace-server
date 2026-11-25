@@ -116,15 +116,17 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
 
     /// <summary>
     /// Removes one editing tab of a file, and only when that tab belongs to the given account: a tab id that comes
-    /// from a request must not end the session of somebody else.
+    /// from a request must not end the session of somebody else. Returns whether a tab was removed. Like the other
+    /// writes of the tracker it reads and writes the whole entry, so a tab another request adds in between is lost;
+    /// anonymous callers of the API all have the guest account id, so for them any tab of that id is their own.
     /// </summary>
-    public async Task RemoveOwnTabAsync<T>(T fileId, Guid tabId, Guid userId)
+    public async Task<bool> RemoveOwnTabAsync<T>(T fileId, Guid tabId, Guid userId)
     {
         var tracker = await GetTrackerAsync(fileId);
 
         if (tracker == null || !tracker.EditingBy.TryGetValue(tabId, out var trackInfo) || trackInfo.UserId != userId)
         {
-            return;
+            return false;
         }
 
         tracker.EditingBy.TryRemove(tabId, out _);
@@ -133,10 +135,12 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         {
             await RemoveTrackerAsync(fileId);
 
-            return;
+            return true;
         }
 
         await SetTrackerAsync(fileId, tracker);
+
+        return true;
     }
 
     public async Task SetAnonymousSessionsAsync<T>(T fileId, List<string> anonymousSessions)

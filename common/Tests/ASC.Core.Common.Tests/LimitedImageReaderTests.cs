@@ -79,6 +79,79 @@ public class LimitedImageReaderTests
         read.Should().BeNull();
     }
 
+    /// <summary>
+    /// A server that sends the body a byte at a time and never ends it: the client timeout is over once the headers
+    /// arrive, so the download ends only by its own deadline (<see cref="LimitedImageReader.DownloadTimeout"/>, shortened
+    /// here).
+    /// </summary>
+    [Fact]
+    public async Task DownloadAsync_BodyThatNeverEnds_EndsAtTheDeadline()
+    {
+        using var client = new HttpClient(new TrickleHandler());
+        using var request = new HttpRequestMessage(HttpMethod.Get, "https://avatars.example.com/a.png");
+
+        var download = async () => await LimitedImageReader.DownloadAsync(
+            client, request, Limit, TestContext.Current.CancellationToken, TimeSpan.FromMilliseconds(300));
+
+        await download.Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    [Fact]
+    public async Task DownloadAsync_Redirect_ReturnsTheLocationAndNoBytes()
+    {
+        using var client = new HttpClient(new RedirectHandler());
+        using var request = new HttpRequestMessage(HttpMethod.Get, "https://graph.example.com/1/picture");
+
+        var download = await LimitedImageReader.DownloadAsync(client, request, Limit, TestContext.Current.CancellationToken);
+
+        download.StatusCode.Should().Be(HttpStatusCode.Found);
+        download.Location.Should().Be(new Uri("https://cdn.example.com/1.jpg"));
+        download.Bytes.Should().BeNull();
+    }
+
+    private sealed class TrickleHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(new TrickleStream()) });
+        }
+    }
+
+    private sealed class RedirectHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.Found);
+            response.Headers.Location = new Uri("https://cdn.example.com/1.jpg");
+
+            return Task.FromResult(response);
+        }
+    }
+
+    /// <summary>Returns one byte per read, after a pause, for ever.</summary>
+    private sealed class TrickleStream : Stream
+    {
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            await Task.Delay(50, cancellationToken);
+            buffer.Span[0] = 1;
+
+            return 1;
+        }
+
+        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
+
     /// <summary>A body sent without a Content-Length, as a chunked response arrives, that counts what was read.</summary>
     private sealed class UnsizedContent(byte[] body) : HttpContent
     {

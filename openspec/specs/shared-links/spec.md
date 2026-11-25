@@ -225,8 +225,8 @@ create, edit or delete links there.
 
 #### Scenario: First primary link in a Public room
 
-- **WHEN** a member who can read an entry of a Public room creates its primary read link and the entry has none
-- **THEN** the link is created; a link that exists stays as it was, and changing it returns 403
+- **WHEN** a caller who can read an entry of a Public room (a member, or a signed-in user who opened the room's link) creates its primary read link and the entry has none
+- **THEN** the link is created; a link that exists stays as it was, and changing it, or creating another primary link, returns 403
 
 #### Scenario: Content creator cannot create a file link
 
@@ -242,7 +242,7 @@ create, edit or delete links there.
 
 - **WHEN** a Room manager or a Content creator requests the primary link of a Custom room
 - **THEN** the link is returned
-- **AND** a member with a lower role (Editor, Reviewer, Commentator, Viewer) is refused (403) while the room has no primary link, because the read would create it; a primary link that exists is returned to any member who can read the room or the folder, its password included; reading the primary link of a file requires the right to manage links
+- **AND** a member with a lower role (Editor, Reviewer, Commentator, Viewer) is refused (403) while the room has no primary link, because the read would create it; a primary link that exists is returned to any caller who can read the room, the folder or the file, its password included; creating the primary link of a file requires the right to manage links
 
 #### Scenario: Non-member admin cannot create a link
 

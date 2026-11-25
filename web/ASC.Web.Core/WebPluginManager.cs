@@ -311,7 +311,8 @@ public class WebPluginManager(
                     catch (CryptographicException e)
                     {
                         // every page load of every member reads the plugins, so the failure is logged once an hour
-                        // per plugin, until an admin stores new settings
+                        // per plugin in each process (the mark is in the local memory cache), until an admin stores new
+                        // settings
                         if (!(await _cache.TryGetAsync<bool>(GetDecryptFailureLoggedKey(tenantId, webPlugin.Name))).HasValue)
                         {
                             log.ErrorWithException(webPlugin.Name, e);

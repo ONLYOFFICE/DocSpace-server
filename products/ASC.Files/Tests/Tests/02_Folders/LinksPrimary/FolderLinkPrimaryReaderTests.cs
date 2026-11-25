@@ -106,6 +106,38 @@ public class FolderLinkPrimaryReaderTests(
         stored.DenyDownload.Should().NotBe(true);
     }
 
+    /// <summary>
+    /// A public room gets its primary link when it is created, so a request for one more primary link with a new id is
+    /// no first link: it takes the right to manage the links.
+    /// </summary>
+    [Fact]
+    public async Task SetPrimaryLink_ContentCreatorAsksForAnotherPrimaryLinkOfAPublicRoom_Returns403AndAddsNoLink()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreatePublicRoom("Autotest Public Room Another Primary Link");
+        var linksBefore = (await _foldersApi.GetFolderLinksAsync(room.Id, TestContext.Current.CancellationToken)).Response;
+        linksBefore.Should().Contain(l => l.SharedLink.Primary, "a public room gets its primary link when it is created");
+
+        var member = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, member, FileShare.ContentCreator);
+        await _filesClient.Authenticate(member);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.SetFolderPrimaryExternalLinkAsync(
+                room.Id,
+                new FolderLinkRequest(access: FileShare.Read, title: "Autotest Second Primary", primary: true),
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+
+        await _filesClient.Authenticate(Owner);
+        var linksAfter = (await _foldersApi.GetFolderLinksAsync(room.Id, TestContext.Current.CancellationToken)).Response;
+        linksAfter.Select(l => l.SharedLink.Id).Should().BeEquivalentTo(linksBefore.Select(l => l.SharedLink.Id));
+    }
+
     [Fact]
     public async Task SetPrimaryLink_ContentCreatorCreatesTheFirstPrimaryLinkOfAFolderInAPublicRoom_Returns200()
     {

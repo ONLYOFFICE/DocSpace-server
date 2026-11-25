@@ -35,14 +35,16 @@ namespace ASC.Files.Core.Helpers;
 
 /// <summary>
 /// The text of a failure that a background task keeps for whoever reads its progress, often every reader of a room.
-/// A refusal the task raises itself (a missing entry, a lack of rights, a wrong argument, a quota) keeps its own text;
-/// any other failure (SQL, a path, a dependency) gets the generic text of the task, and the details stay in the log.
+/// The decision is by the type of the exception: a missing entry, a lack of rights and a quota keep their own text,
+/// as the portal raises them with a text meant for the user; every other exception gets the generic text of the task,
+/// an <see cref="ArgumentException"/> included, which a dependency (a database driver, a path) raises with its own
+/// details. The details stay in the log.
 /// </summary>
 public static class TaskErrorText
 {
     public static bool KeepsOwnText(Exception exception)
     {
-        return exception is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException;
+        return exception is ItemNotFoundException or SecurityException or TenantQuotaException;
     }
 
     public static Exception ForReaders(Exception exception, string genericText)

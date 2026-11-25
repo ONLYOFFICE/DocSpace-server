@@ -168,7 +168,8 @@ public class DocumentServiceTrackerHelper(
     FileTrackerHelper fileTracker,
     IHttpClientFactory clientFactory,
     IHttpContextAccessor httpContextAccessor,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    FileSecurity fileSecurity)
 {
     public string GetCallbackUrl<T>(T fileId, int? tenantId = null)
     {
@@ -314,7 +315,12 @@ public class DocumentServiceTrackerHelper(
 
                 try
                 {
-                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant(), fillingSessionId: httpContextAccessor.HttpContext.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault());
+                    // the callback is not signed in and carries the link the document was opened with: each editor is
+                    // checked with it, an anonymous one as Guid.Empty
+                    using (fileSecurity.ApplyRequestLinkToEveryAccount())
+                    {
+                        file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant(), fillingSessionId: httpContextAccessor.HttpContext.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault());
+                    }
                 }
                 catch (Exception e)
                 {

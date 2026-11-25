@@ -101,8 +101,8 @@ public class EditingSessionOwnershipTests(
 
     /// <summary>
     /// Two accounts edit the file together, and one of them updates it through the hidden
-    /// <c>PUT api/2.0/files/{fileId}/update</c>: the update closes only the caller's session, the other one still has
-    /// the file open, and the update is refused. Hidden from the OpenAPI document, so it is called over raw HTTP.
+    /// <c>PUT api/2.0/files/{fileId}/update</c>: the other one still has the file open, so the update is refused and
+    /// closes no session, the caller's included. Hidden from the OpenAPI document, so it is called over raw HTTP.
     /// </summary>
     [Fact]
     public async Task UpdateFileStream_CoEditorWhileTheOtherStillEdits_ForbiddenAndTheOtherSessionStays()
@@ -115,7 +115,8 @@ public class EditingSessionOwnershipTests(
         await InviteToRoom(room.Id, member, FileShare.Editing);
 
         var docKey = await GetDocKey(file.Id);
-        await _filesApi.TrackEditFileAsync(file.Id, tabId: Guid.NewGuid(), docKeyForTrack: docKey, cancellationToken: TestContext.Current.CancellationToken);
+        var ownerTab = Guid.NewGuid();
+        await _filesApi.TrackEditFileAsync(file.Id, tabId: ownerTab, docKeyForTrack: docKey, cancellationToken: TestContext.Current.CancellationToken);
         var versionBefore = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.Version;
 
         await _filesClient.Authenticate(member);
@@ -129,6 +130,10 @@ public class EditingSessionOwnershipTests(
         var after = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         after.Version.Should().Be(versionBefore);
         (await IsEditingAsync(file.Id)).Should().BeTrue("the owner still has the file open");
+
+        // the refused caller keeps their own session: once the owner closes theirs, the file is still being edited
+        await _filesApi.TrackEditFileAsync(file.Id, tabId: ownerTab, docKeyForTrack: docKey, isFinish: true, cancellationToken: TestContext.Current.CancellationToken);
+        (await IsEditingAsync(file.Id)).Should().BeTrue("the member's session was kept by the refused update");
     }
 
     /// <summary>Whether the file is open for editing, as the owner reads it; the client stays on the owner.</summary>

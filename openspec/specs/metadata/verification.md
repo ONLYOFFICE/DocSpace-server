@@ -185,18 +185,18 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): only endpoint descriptions and doc
 | Writes serialised under one lock per portal | `T/MetadataCustomFieldsTests.cs:324-361` (five parallel writes of one new name: one field, a filter by the name finds all five rooms); `Service:339` | TEST-CONFIRMED [run: PASS] (the observable consequence; the lock itself CODE-ONLY) |
 | **Cascade of a template over the content of a folder** | | |
 | Every depth: sub-folder, folder two levels down and the files in both take the value; the folder reports the mode | `T/MetadataFolderAssignmentTests.cs:92-131` | TEST-CONFIRMED [run: PASS] |
-| Skip fills the empty ones and keeps the held values; overwrite replaces all, on files and sub-folders | `T/MetadataFolderAssignmentTests.cs:133-176`; `Op:200-262` | TEST-CONFIRMED [run: PASS] |
-| Nearest cascading folder wins, also in overwrite mode | `T/MetadataCascadeTests.cs:77-113`; `Op:200-262` | TEST-CONFIRMED [run: PASS] |
-| Only filled fields travel; empty folder field never overwrites; empty template linked | `T/MetadataCascadeTests.cs:143-185`; `Op:200-217` (`!v.IsEmpty`) | TEST-CONFIRMED [run: PASS] |
+| Skip fills the empty ones and keeps the held values; overwrite replaces all, on files and sub-folders | `T/MetadataFolderAssignmentTests.cs:133-176`; `Op:201-263` | TEST-CONFIRMED [run: PASS] |
+| Nearest cascading folder wins, also in overwrite mode | `T/MetadataCascadeTests.cs:77-113`; `Op:201-263` | TEST-CONFIRMED [run: PASS] |
+| Only filled fields travel; empty folder field never overwrites; empty template linked | `T/MetadataCascadeTests.cs:143-185`; `Op:201-218` (`!v.IsEmpty`) | TEST-CONFIRMED [run: PASS] |
 | Snapshot: edit after the pass changes the folder only; new file inherits the edit; skip keeps, overwrite pushes | `T/MetadataCascadeTests.cs:187-230` | TEST-CONFIRMED [run: PASS] |
-| Back-to-back {A} then {A,B}: both reach; re-request after an edit pushes the edit (not folded into a started pass) | `T/MetadataCascadeTests.cs:47-75, 232-263`; `Worker:43-80`; `Op:105-187` (per-tree run lock) | TEST-CONFIRMED [run: PASS] |
+| Back-to-back {A} then {A,B}: both reach; re-request after an edit pushes the edit (not folded into a started pass) | `T/MetadataCascadeTests.cs:47-75, 232-263`; `Worker:43-80`; `Op:105-188` (per-tree run lock) | TEST-CONFIRMED [run: PASS] |
 | New sub-folder in a cascading room found by the filter right away | `T/MetadataCascadeTests.cs:115-141`; `FolderDao:668-682` | TEST-CONFIRMED [run: PASS] |
 | The room cascades like a folder, to its files | `T/MetadataTemplateChangesTests.cs:129-151` | TEST-CONFIRMED [run: PASS] |
 | **Progress of a cascade** | | |
 | Idle folder: completed, no `id`, empty `templateIds`; pass named by its templates | `T/MetadataCascadeAssignmentTests.cs:81-104`; `T/MetadataFolderAssignmentTests.cs:178-188`; `Worker:91-99`; `Dto:446-462` | TEST-CONFIRMED [run: PASS] |
 | Finished pass stays reported with the same `id`, `templateIds`, progress 100, no error | `T/MetadataFolderAssignmentTests.cs:190-218` | TEST-CONFIRMED [run: PASS] |
 | Read right: non-member 403; missing folder 404 | `T/MetadataEntryPermissionsTests.cs:116-123`; `T/MetadataFolderAssignmentTests.cs:220-227`; `Service:676-681` | TEST-CONFIRMED [run: PASS] |
-| Failed pass completes with `error` | `Op:175-182`; `Dto:459` — unreachable: no request makes a pass fail on the stand (it would need a database or index failure mid-pass) | CODE-ONLY |
+| Failed pass completes with `error` | `Op:175-183`; `Dto:459` — unreachable: no request makes a pass fail on the stand (it would need a database or index failure mid-pass) | CODE-ONLY |
 | **Switching the cascade of an assigned template** | | |
 | Off keeps template and values on the room, file keeps inherited as own, later file inherits nothing, off again is a no-op | `T/MetadataCascadeAssignmentTests.cs:106-146`; `Service:627-640` | TEST-CONFIRMED [run: PASS] |
 | On queues a pass (`id`, `templateIds`), file receives the value, mode stored on the link | `T/MetadataCascadeAssignmentTests.cs:148-178`; `T/MetadataFolderAssignmentTests.cs:173-175`; `Service:642-665` | TEST-CONFIRMED [run: PASS] |
@@ -205,8 +205,8 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): only endpoint descriptions and doc
 | **Inheritance when an entry is created or moved** | | |
 | Created under a cascade: stamped inside the save transaction (file and folder) | `T/MetadataInheritanceOnMoveTests.cs:60-79`; `T/MetadataFolderAssignmentTests.cs:229-240`; `FileDao:738-742`; `FolderDao:837-841` | TEST-CONFIRMED [run: PASS] |
 | Moved in (batch path inside a room and per-file path from My documents): skip fills empty, overwrite replaces | `T/MetadataInheritanceOnMoveTests.cs:81-113`; `FileDao:1593-1623, 1695-1715` | TEST-CONFIRMED [run: PASS] |
-| Moved folder: itself stamped inline, content by a background stamp pass | `T/MetadataInheritanceOnMoveTests.cs:115-131`; `FolderDao:1305-1362`; `Op:264-345` | TEST-CONFIRMED [run: PASS] |
-| Moved cascading folder keeps its own cascade for its subtree, `Department` stays empty | `T/MetadataInheritanceOnMoveTests.cs:133-161`; `Op:284-294` | TEST-CONFIRMED [run: PASS] |
+| Moved folder: itself stamped inline, content by a background stamp pass | `T/MetadataInheritanceOnMoveTests.cs:115-131`; `FolderDao:1305-1362`; `Op:265-346` | TEST-CONFIRMED [run: PASS] |
+| Moved cascading folder keeps its own cascade for its subtree, `Department` stays empty | `T/MetadataInheritanceOnMoveTests.cs:133-161`; `Op:285-295` | TEST-CONFIRMED [run: PASS] |
 | Moved out: inherited becomes own, a copy carries it (file and content of a moved folder) | `T/MetadataInheritanceOnMoveTests.cs:163-204`; `FolderDao:1317-1323` | TEST-CONFIRMED [run: PASS] |
 | Move to Trash stamps nothing | `T/MetadataTrashMoveTests.cs:46-88` (a file and a folder trashed and restored: the inherited link stays inherited, a copy carries nothing); `FileDao:1593, 1695`; `FolderDao:1301, 1317` | TEST-CONFIRMED [run: PASS] |
 | **Metadata of a copy** | | |
@@ -261,7 +261,7 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): only endpoint descriptions and doc
 | Templates section 400 by id, `@templates` alias (raw) and `searchFolder` | `T/MetadataSectionFiltersTests.cs:207-221`; `T/MetadataSectionAliasFiltersTests.cs:188-200`; `T/MetadataTypedSearchTests.cs:126-136`; `EntryManager:402-409` | TEST-CONFIRMED [run: PASS] |
 | Private rooms section filtered like the rooms; only the legacy Privacy folder refused | `products/ASC.Files/Tests/Tests/08_Private/PrivateRoomSectionMetadataFilterTests.cs:46-60` (private rooms section by id, `searchFolder` and the rooms listing with `PrivateRooms`: filtered, not refused); `EntryManager:405-408` refuses `FolderType.Privacy` (13), the legacy folder of the desktop encryption, which the stand cannot open | TEST-CONFIRMED [run: PASS] (private rooms filtered; spec corrected), CODE-ONLY (legacy Privacy folder 400) |
 | **The AI rooms root is searched flat** | | |
-| Filter on the AI rooms root (scenario) | `products/ASC.AI/ASC.AI.Tests/Tests/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:69`; `products/ASC.Files/Core/Core/Security/FileSecurity.cs:3073-3076` | TEST-CONFIRMED |
+| Filter on the AI rooms root (scenario) | `products/ASC.AI/ASC.AI.Tests/Tests/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:69`; `products/ASC.Files/Core/Core/Security/FileSecurity.cs:3078-3081` | TEST-CONFIRMED |
 | **Typed metadata search** | | |
 | Agrees with the listing (ids and `total`) | `T/MetadataTypedSearchTests.cs:46-72`; `T/MetadataFilterOperatorsTests.cs:70-82, 138-148` | TEST-CONFIRMED [run: PASS] |
 | `count` 101/0/-1/absent, `startIndex` -1 → 400 on `searchFolder`; 101/-1 on `searchRooms` | `T/MetadataRequestLimitsTests.cs:50-96`; `Request` (`[Range(1, 100)]`, `[Range(0, int.MaxValue)]`) | TEST-CONFIRMED [run: PASS] |
@@ -346,7 +346,7 @@ limit" (21150, 21249); `MetadataFilterConditionRequest.fieldId` now says a custo
   the worker's refresh policy changed in 4.1.0 (`09cfe2c5ed`, `32ad89fb81`); only their observable rule ("the stored
   values are the truth") is specified.
 - **Cascade internals**: the per-tree run lock and its one-hour timeout, batch size 1000, the reconciliation of a
-  pass that outlived a template/field change or an un-cascade (`Op:437-522`), the dedupe rule of the queue
+  pass that outlived a template/field change or an un-cascade (`Op:438-523`), the dedupe rule of the queue
   (`Worker:43-80`), the nearest-source resolver (`Resolver`, unit-tested in `T/MetadataCascadeResolverTests.cs`):
   implementation behind the "nearest cascading ancestor wins" requirement.
 - **The portal-wide custom-field lock and the per-entry link lock** (`Service:78-85, 339`): concurrency plumbing.
@@ -370,8 +370,8 @@ line shift. MD9 is narrowed: one of its three parts is fixed. MD10 is new.
 
 | # | Where | What the server does | Evidence | 4.1.0 |
 |---|-------|----------------------|----------|-------|
-| MD1 | Updating a field | A type change between single and multiple choice is refused with 400 "values exist" like any other retype, although the two kinds share the option rows (the cascade reconciliation treats them as the same kind). A choice field retyped to another type must also be sent `options: []`, or the kept options fail with "Options are supported by choice fields only". | `Service:262-270, 1010-1049`; `Op:515-522` | STILL OPEN — the retype branch and `ValidateField` are unchanged |
-| MD2 | Progress of a cascade | The stamp pass queued by a move is invisible: `getCascadeProgress` reports assign passes only, the stamp pass is queued with an empty template list and no audit event, so a client cannot tell that a moved folder's content is still being stamped. | `FolderDao:1354-1362`; `Worker:91-99`; `Op:264-345` | STILL OPEN — the stamp pass is still started with `[]` and no audit |
+| MD1 | Updating a field | A type change between single and multiple choice is refused with 400 "values exist" like any other retype, although the two kinds share the option rows (the cascade reconciliation treats them as the same kind). A choice field retyped to another type must also be sent `options: []`, or the kept options fail with "Options are supported by choice fields only". | `Service:262-270, 1010-1049`; `Op:516-523` | STILL OPEN — the retype branch and `ValidateField` are unchanged |
+| MD2 | Progress of a cascade | The stamp pass queued by a move is invisible: `getCascadeProgress` reports assign passes only, the stamp pass is queued with an empty template list and no audit event, so a client cannot tell that a moved folder's content is still being stamped. | `FolderDao:1354-1362`; `Worker:91-99`; `Op:265-346` | STILL OPEN — the stamp pass is still started with `[]` and no audit |
 | MD4 | Assigning templates to a file | An empty `templateIds` on a file is accepted: nothing is linked, yet the audit event "Metadata template assigned" and the socket update are sent; the folder variant returns early for the same input. The 4.1.0 test pins the 200 and the unchanged file, not the audit. | `Service:507-535` vs `545-550`; `T/MetadataFileAssignmentTests.cs:63-76` | STILL OPEN |
 | MD5 | Switching the cascade | Turning a cascade off writes no audit event, while turning it on writes "Metadata cascade assignment started" and the unassignment writes "unassigned"; the only silent write of the API. | `Service:627-640` | STILL OPEN |
 | MD6 | Custom fields | A request that only removes names the entry does not hold (after the system template exists) is a no-op that still writes "Metadata values updated", sends the socket event and re-indexes the entry. | `Service:402-410, 440-444` | STILL OPEN |
