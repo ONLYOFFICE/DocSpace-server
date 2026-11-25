@@ -699,6 +699,8 @@ describe.each([
   // HANDLED DOWNSTREAM ai-8: a /config read that fails without a refusal of the caller's own counts as "paid" and the round opens its stream. In production the gateway refuses an unpaid portal itself (AiGatewayProxyController.cs, 403), so nothing is billed: the caller gets an error frame instead of the 402; it shows only with the engine or the service stubbed.
   it.each([
     ["answers 503", () => HttpResponse.json({ error: "down" }, { status: 503 }), "AI service 503"],
+    ["answers 404", () => HttpResponse.json({ error: "gone" }, { status: 404 }), "AI service 404"],
+    ["answers 429", () => HttpResponse.json({ error: "slow" }, { status: 429 }), "AI service 429"],
     ["drops the connection", () => HttpResponse.error(), "TypeError: Failed to fetch"],
   ])("runs when /config %s, with a warning", async (_what, answer, logged) => {
     config(answer);
@@ -714,12 +716,12 @@ describe.each([
     );
   });
 
-  it("passes on a /config read the AI service refuses with 403", async () => {
-    config(() => HttpResponse.json({ error: "no" }, { status: 403 }));
+  it.each([401, 403])("passes on a /config read the AI service refuses with %i", async (status) => {
+    config(() => HttpResponse.json({ error: "no" }, { status }));
 
     const reply = await h.call(aiController[name], body);
 
-    expect(reply.status).toBe(403);
+    expect(reply.status).toBe(status);
     expect(h.engine[name]).not.toHaveBeenCalled();
   });
 

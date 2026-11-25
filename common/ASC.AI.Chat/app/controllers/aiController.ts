@@ -903,7 +903,7 @@ async function aiToolsUnpaidError(providerType: string | undefined): Promise<str
     // check only moves the gateway's refusal out of the stream, and the
     // gateway refuses an unpaid portal itself (AiGatewayProxyController.cs), so nothing is
     // billed and the caller gets an error frame instead of the 402.
-    if (err instanceof AiServiceHttpError && err.status < 500) {
+    if (err instanceof AiServiceHttpError && (err.status === 401 || err.status === 403)) {
       throw err;
     }
     logger.warn(
