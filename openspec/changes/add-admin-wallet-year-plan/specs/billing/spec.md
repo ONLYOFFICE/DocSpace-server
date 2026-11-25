@@ -59,13 +59,23 @@ administrators plan while the tariff holds the other with its period not ended (
 
 Before `updateWalletPayment` with `Add` buys `adminwallet` or `adminwalletyear`, it SHALL ask the billing
 service for the portal's current payments and check the other plan on that answer. If the billing service
-does not answer, the call answers 402 and buys nothing. If another such purchase holds the portal's lock
-until the wait for it ends, the call answers 409 and buys nothing.
+answers with an error or cannot be reached, the call answers 402 and buys nothing. If another such purchase
+holds the portal's lock until the wait for it ends, the call answers 409 and buys nothing.
 
 #### Scenario: Billing service does not list the payments
 
 - **WHEN** the owner calls `updateWalletPayment` with `Add` for `adminwallet` or `adminwalletyear` and the billing service answers 500 to the request for the current payments
-- **THEN** the system answers 402, and neither a purchase nor a deposit is sent to the billing service
+- **THEN** the system answers 402 "Billing request failed", and neither a purchase nor a deposit is sent to the billing service
+
+#### Scenario: Answer that is not a list of payments
+
+- **WHEN** the owner calls `updateWalletPayment` with `Add` for `adminwalletyear` and the request for the current payments is answered 200 with an HTML page
+- **THEN** the system answers 500, and neither a purchase nor a deposit is sent to the billing service
+
+#### Scenario: Billing service knows no payment of the portal
+
+- **WHEN** the owner calls `updateWalletPayment` with `Add` for `adminwalletyear` and the billing service answers the request for the current payments with "error: cannot find"
+- **THEN** the system answers 200 `true` and the billing service is asked for the yearly product
 
 ### Requirement: Moving a subscription keeps its period
 

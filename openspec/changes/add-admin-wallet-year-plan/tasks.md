@@ -51,6 +51,12 @@
 - [x] 6.5 Shift every citation of `PaymentRequestsDto.cs` and `PaymentHelper.cs` since the merge-base and of `PaymentsController.cs` and the yearly plan tests for this round, in the three `verification.md` files that cite them, the bare ranges that continue a citation included; verify the cited lines of the rows the round touches
 - [x] 6.6 Re-emit the Web.Api document and rebuild the C# SDK package for the changed texts and the 409; verify the diff of the document, then run `ASC.Web.Api.Billing.Tests` and the unit classes of the change on the repository's package
 
+## 7. After the re-check of 6c7a7da179
+
+- [x] 7.1 Pin the other answers to the request for the current payments: an answer that is not a list (500, nothing bought) and "cannot find" (the plan is bought), and the message of the 402; send that request without the retry of a "cannot find" answer; verify with the three tests of `AdminWalletYearPlanTests`
+- [x] 7.2 Correct the citations the round of 6.5 left wrong, by opening the cited lines: the bare range of the goodwill row, the audit row of `storage-and-integrations`, the ranges of the yearly plan tests, and four ranges of `PaymentsController.cs` that were off before the branch. The `Helper:` ranges that are one line early since before the branch are left
+- [x] 7.3 Say in the remarks, the delta and the design which failures of that request answer 402 and which 500, and that no test reaches the 409; re-emit the Web.Api document and the C# SDK package; verify with `check_texts.py`, the diff of the document and a run of `ASC.Web.Api.Billing.Tests`
+
 ## Workflow follow-up
 
 - The billing product 1021 and the accounting service `adminyear` are registered; an environment with its own payment system needs both before the migration.

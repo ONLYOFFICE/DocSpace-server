@@ -235,7 +235,8 @@ public class PaymentController(
     /// the service yet. With `Add`, an empty or zero quantity also returns 400. The admins plan has two products,
     /// the monthly `adminwallet` and the yearly `adminwalletyear`. With `Add`, a request for one returns 400 while
     /// the portal has the other. A plan whose period has ended does not count. For this check, the call asks the
-    /// billing service for the current plans. If that request fails, the call returns 402 and buys nothing. If
+    /// billing service for the current plans. If the billing service answers that request with an error or cannot
+    /// be reached, the call returns 402. The call buys nothing then. If
     /// another purchase of an admins plan is still running for the portal, the call returns 409. It buys nothing
     /// then, so you can repeat it. While Docs Connect is active, a
     /// request for Docs Connect Dev Pack returns 400. To move to Docs Connect Dev Pack, use

@@ -18,8 +18,9 @@ the plan behaves like `adminwallet`.
 - `updateWalletPayment` with `Add` refuses one administrators plan with 400 "Quota is already set" while the
   tariff holds the other with its period not ended. A plan that has ended does not count. The check and the
   purchase are one step per portal, so two requests sent together do not buy both. For the check the billing
-  service is asked for the portal's current payments: when it does not answer, the call answers 402 and
-  buys nothing, and a request that waits for the step of another until the wait ends answers 409. Switching
+  service is asked for the portal's current payments: when it answers with an error or cannot be reached,
+  the call answers 402 and buys nothing, and a request that waits for the step of another until the wait
+  ends answers 409. Switching
   between the two while one is in force is not part of this change.
 - `moveSubscriptionToWallet` accepts `adminwalletyear` as well as `adminwallet`, and the move keeps the
   period: a yearly subscription moves to `adminwalletyear` only, a monthly one to `adminwallet` only. The plan
@@ -67,8 +68,8 @@ None.
 - **"Buying wallet services"** (text unchanged): `updateWalletPayment` with `Add` for `adminwallet` on a portal
   whose `adminwalletyear` is in force now answers 400 "Quota is already set". No existing portal holds that
   plan, so no existing caller sees a difference. `Add` for `adminwallet` now answers 402 when the billing
-  service does not answer the request for the current payments; it used to go on to the purchase on the
-  stored tariff. It answers 409 when another purchase of an administrators plan holds the portal's lock for
+  service answers the request for the current payments with an error or cannot be reached, and 500 when
+  its answer cannot be read; it used to go on to the purchase on the stored tariff. It answers 409 when another purchase of an administrators plan holds the portal's lock for
   the whole wait.
 - **"Wallet services switched on per portal"**: `changeTenantWalletServiceState` with `service` `AdminYear`
   answered 400 (not a member of the enum); it now answers 200 and stores it, as it does for `Admin`.

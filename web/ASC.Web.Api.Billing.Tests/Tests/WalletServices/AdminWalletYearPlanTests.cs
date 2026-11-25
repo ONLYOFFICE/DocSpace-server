@@ -183,9 +183,53 @@ public class AdminWalletYearPlanTests(AspireAppFixture fixture) : BaseTest(fixtu
 
         // Assert
         exception.ErrorCode.Should().Be(402);
-        PaymentCalls.Should().Contain(c => c.Route == ActiveResourcesRoute, "billing was asked for the payments");
+        exception.ErrorContent!.ToString().Should().Contain("Billing request failed with status code");
         PaymentCalls.Should().NotContain(c => c.Route == ChangeRoute, "nothing is bought");
         PaymentCalls.Should().NotContain(c => c.Route == DepositRoute, "nothing is paid");
+    }
+
+    // An answer that is not the list of payments (a page of a proxy) says nothing about the other plan either.
+    [Fact]
+    public async Task UpdateWalletPayment_AddPlanWhileThePaymentsAnswerIsUnreadable_BuysNothing()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .Balance(1000m)
+            .On(PaymentService.Billing, "POST", ChangeRoute, "true")
+            .On(PaymentService.Billing, "POST", ActiveResourcesRoute, "<html><body>Bad gateway</body></html>");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _paymentApi.UpdateWalletPaymentAsync(
+            new WalletQuantityRequestDto(new Dictionary<string, int?> { [Plans.AdminWalletYearPlanName] = 1 }, ProductQuantityType.Add),
+            TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(500);
+        PaymentCalls.Should().NotContain(c => c.Route == ChangeRoute, "nothing is bought");
+        PaymentCalls.Should().NotContain(c => c.Route == DepositRoute, "nothing is paid");
+    }
+
+    // Billing answers "cannot find" for a portal it has no payment of. That is an answer, not a failure: the first
+    // administrators plan of a portal is bought on it.
+    [Fact]
+    public async Task UpdateWalletPayment_AddPlanWhileBillingKnowsNoPaymentOfThePortal_BuysIt()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .Balance(1000m)
+            .On(PaymentService.Billing, "POST", ChangeRoute, "true")
+            .On(PaymentService.Billing, "POST", ActiveResourcesRoute, """{"Message":"error: cannot find portal"}""");
+
+        // Act
+        var bought = (await _paymentApi.UpdateWalletPaymentAsync(
+            new WalletQuantityRequestDto(new Dictionary<string, int?> { [Plans.AdminWalletYearPlanName] = 1 }, ProductQuantityType.Add),
+            TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        bought.Should().BeTrue();
+
+        var purchase = PaymentCalls.Should().ContainSingle(c => c.Route == ChangeRoute).Subject;
+        BillingValue(purchase, "ProductId").Should().Be(Plans.AdminWalletYearProductId.ToString(CultureInfo.InvariantCulture));
     }
 
     private async Task<int> AddStatusAsync(string plan)

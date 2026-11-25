@@ -2506,7 +2506,8 @@ public class TariffService(
     /// The rows of the tariff as the billing service lists the portal's payments now, read from it and not from the
     /// stored tariff. Unlike <see cref="GetTariffAsync"/>, which falls back on the stored tariff when the billing
     /// service does not answer, a failure of the request reaches the caller: a check that must not take "no answer"
-    /// for "no payment" reads the rows here. An answer that the portal has no payments is an empty list.
+    /// for "no payment" reads the rows here. An answer that the portal has no payments, the "cannot find" answer
+    /// included, is an empty list. A payment the billing service has accepted but does not list yet is not seen.
     /// </summary>
     public async Task<List<Quota>> GetCurrentPaymentQuotasAsync(int tenantId)
     {
@@ -2514,7 +2515,8 @@ public class TariffService(
 
         try
         {
-            currentPayments = await billingClient.GetCurrentPaymentsAsync(await coreSettings.GetKeyAsync(tenantId), true);
+            // without the retry of a "cannot find" answer: it is a known answer here, and the caller holds a lock
+            currentPayments = await billingClient.GetCurrentPaymentsAsync(await coreSettings.GetKeyAsync(tenantId), false);
         }
         catch (BillingNotFoundException)
         {

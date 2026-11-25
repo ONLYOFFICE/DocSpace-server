@@ -67,12 +67,16 @@ See proposal.md for the motivation. What shapes the approach:
    Under the lock the current payments are asked from the billing service itself, and the other plan is
    looked for in that answer and in the tariff read anew. The tariff read alone is not enough: it falls
    back on the stored tariff when the billing service does not answer, so "no answer" would read as "no
-   other plan" right after a purchase whose outcome is unknown. A failure of the request for the payments
-   ends the call with the status of a billing failure (402) before anything is paid; an answer that the
-   portal has no payments is a known answer. The lock is released when the request ends, also on a
-   failure. A request that does not get the lock within the provider's wait answers 409 and buys nothing,
-   so the caller may repeat it (the status chosen by the task owner). The wait is the lock provider's own:
-   30 seconds in the in-memory provider, the configured value with Redis. `movetowallet` has no check of
+   other plan" right after a purchase whose outcome is unknown. An error status or no connection on the
+   request for the payments ends the call with the status of a billing failure (402) before anything is
+   paid, and an answer that cannot be read as the list ends it with 500, as an unreadable answer of the
+   payment services does elsewhere. An answer that the portal has no payments is a known answer, the
+   "cannot find" answer included; that request is sent without the retry the tariff read gives a "cannot
+   find" answer, so it adds one request under the lock and no wait. The lock is released when the request
+   ends, also on a failure. A request that does not get the lock within the provider's wait answers 409
+   and buys nothing, so the caller may repeat it (the status chosen by the task owner). No test reaches
+   the 409: the payment stub answers at once. The wait is the lock provider's own: 30 seconds in the
+   in-memory provider and with Redis, where `core:lock:minTimeout` can only raise it. `movetowallet` has no check of
    its own and takes no lock: it answers 400 "Invalid product" when the first primary row of the tariff is
    a wallet product, and the billing service refuses a wallet plan while the portal has an active provider
    subscription (confirmed by the task owner), so a subscription with a wallet administrators plan beside
@@ -113,6 +117,10 @@ See proposal.md for the motivation. What shapes the approach:
   may still carry it out after the due date, when the other plan is already bought, and the portal then
   pays for both. Accepted as a known limitation by the task owner: closing it would mean reading the
   renewal records before the other plan is sold.
+- [A purchase whose answer was lost and that the billing service does not list yet] → the next `Add` of
+  the other plan reads the payments without it and buys. The window is the time the billing service takes
+  to list a payment it accepted; nothing on the server records the attempt. Left as it is, next to the
+  pending renewal: a record of purchase attempts is a change of its own.
 - [The enum members `Admin` and `AdminYear` are published with their names as descriptions] → kept: the
   `[Description]` of a member is also what the generated enum extensions print and parse (the audit record
   of a switched service, the wallet flag names of the quota features), so a sentence there would change
