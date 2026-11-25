@@ -45,35 +45,35 @@ public class SocketAiRoomLinkEventsTests(AspireAppFixture fixture) : SocketTestB
     protected override bool PlantsAiProfile => true;
 
     [Fact]
-    public async Task LinkSources_ByAProjectManager_ReachesTheOwnerWatchingTheSection()
+    public async Task LinkSources_ByARoomAdminOwningTheProject_ReachesTheOwnerWatchingTheSection()
     {
         await _filesClient.Authenticate(Owner);
-        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
         var roomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
-        var manager = await InviteContact(EmployeeType.RoomAdmin);
-        await InviteToRoom(projectId, manager, FileShare.RoomManager);
-        await InviteToRoom(roomId, manager, FileShare.RoomManager);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await InviteToRoom(roomId, roomAdmin, FileShare.RoomManager);
         await using var socket = await ConnectAndWatch(Owner, await GetAiHubIdAsync());
 
-        await _filesClient.Authenticate(manager);
+        await _filesClient.Authenticate(roomAdmin);
+        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
         await LinkAsync(projectId, roomId);
 
         await WaitForModified(socket, "update", "folder", roomId);
     }
 
     [Fact]
-    public async Task UnlinkSources_ByAProjectManager_ReachesTheOwnerWatchingTheSection()
+    public async Task UnlinkSources_ByARoomAdminOwningTheProject_ReachesTheOwnerWatchingTheSection()
     {
         await _filesClient.Authenticate(Owner);
-        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
         var roomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
-        var manager = await InviteContact(EmployeeType.RoomAdmin);
-        await InviteToRoom(projectId, manager, FileShare.RoomManager);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await InviteToRoom(roomId, roomAdmin, FileShare.RoomManager);
         await using var socket = await ConnectAndWatch(Owner, await GetAiHubIdAsync());
+
+        await _filesClient.Authenticate(roomAdmin);
+        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
         await LinkAsync(projectId, roomId);
         await WaitForModified(socket, "update", "folder", roomId);
 
-        await _filesClient.Authenticate(manager);
         await _roomsAiApi.UnlinkProjectSourcesAsync(projectId, new UnlinkAiProjectSourcesRequest([roomId]), TestContext.Current.CancellationToken);
 
         await WaitForUpdates(socket, roomId, 2);
@@ -102,15 +102,14 @@ public class SocketAiRoomLinkEventsTests(AspireAppFixture fixture) : SocketTestB
     public async Task LinkSources_RoomAlreadyLinked_SendsNoSecondEvent()
     {
         await _filesClient.Authenticate(Owner);
-        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
         var roomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
         var laterRoomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
-        var manager = await InviteContact(EmployeeType.RoomAdmin);
-        await InviteToRoom(projectId, manager, FileShare.RoomManager);
-        await InviteToRoom(roomId, manager, FileShare.RoomManager);
-        await InviteToRoom(laterRoomId, manager, FileShare.RoomManager);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await InviteToRoom(roomId, roomAdmin, FileShare.RoomManager);
+        await InviteToRoom(laterRoomId, roomAdmin, FileShare.RoomManager);
         await using var socket = await ConnectAndWatch(Owner, await GetAiHubIdAsync());
-        await _filesClient.Authenticate(manager);
+        await _filesClient.Authenticate(roomAdmin);
+        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
         await LinkAsync(projectId, roomId);
         await WaitForModified(socket, "update", "folder", roomId);
 

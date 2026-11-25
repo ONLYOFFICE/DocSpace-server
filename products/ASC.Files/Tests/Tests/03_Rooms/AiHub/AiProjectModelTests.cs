@@ -147,14 +147,12 @@ public class AiProjectModelTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
     }
 
     [Fact]
-    public async Task SetModel_ProjectManagerWithUnknownProfile_PassesAccessCheckAndReturns400()
+    public async Task SetModel_RoomAdminOwnerWithUnknownProfile_PassesAccessCheckAndReturns400()
     {
         // Arrange
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin);
         var projectId = await CreateProjectAsync();
-        var manager = await InviteContact(EmployeeType.RoomAdmin);
-        await ShareRoomAsync(projectId, manager.Id, FileShare.RoomManager);
-
-        await _filesClient.Authenticate(manager);
 
         // Act
         using var response = await SetModelResponseAsync(projectId, Guid.NewGuid());

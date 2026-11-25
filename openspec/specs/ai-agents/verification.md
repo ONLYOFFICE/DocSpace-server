@@ -124,15 +124,15 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Knowledge room needs vectorization 403 | `Security:1424,1443`; `AI/Core/Settings` | CODE-ONLY |
 | AI project needs the AI gateway or a profile 403 | `Hub/AiHubNoAiProviderTests.cs:47,59` | TEST-CONFIRMED [run: PASS] |
 | **Members of the AI rooms** | | |
-| Content creator reads, Room manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
+| Content creator reads, does not write (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
 | DocSpace admin outside the project reads its model, sources and skills (scenario) | `Hub/AiRoomOutsiderAccessTests.cs:55` | TEST-CONFIRMED (not run yet) |
 | Role sets of Instructions and Knowledge rooms | `Security` (`GetAccesses`); `products/ASC.Files/Core/Helpers` | CODE-ONLY |
 | **Users only in an AI project** | | |
-| Guest not in a project (scenario); User joins through a link as Content creator | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
-| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED (not run yet) |
+| Guest not in a project (scenario); no invitation link | `Hub/AiProjectGuestInviteTests.cs:45,61`; `Hub/AiProjectInvitationLinkTests.cs:47` | TEST-CONFIRMED [run: PASS] |
+| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED [run: PASS] |
 | **The model of an AI project** | | |
-| Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,93,167` | TEST-CONFIRMED [run: PASS] |
-| Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:106,123,137,150` | TEST-CONFIRMED [run: PASS] |
+| Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,93,165` | TEST-CONFIRMED [run: PASS] |
+| Member refused; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:106,123,137,150` | TEST-CONFIRMED [run: PASS] |
 | Image profile refused (scenario) | `T/ChatTests/ChatProjectModelTests.cs:238,255` | TEST-CONFIRMED [run: PASS] |
 | Content creator reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60` | TEST-CONFIRMED [run: PASS] (`ChatProjectModelTests.GetModel_ProjectMember_…` fails later, at the round on the project's model: A16, not this claim) |
 | Model moved (scenario) | `T/ChatTests/ChatProjectModelTests.cs:94` | TEST-CONFIRMED [run: PASS] |
@@ -172,10 +172,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | DocSpace admin outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:98` | TEST-CONFIRMED (not run yet) |
 | Creator of a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:111` | TEST-CONFIRMED (not run yet) |
 | **Clients are told when the number of projects of a room changes** | | |
-| Room linked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:46` | TEST-CONFIRMED (not run yet) |
-| Room unlinked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:63` | TEST-CONFIRMED (not run yet) |
-| Project deleted (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:81` | TEST-CONFIRMED (not run yet) |
-| Nothing linked anew (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:100` | TEST-CONFIRMED (not run yet) |
+| Room linked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:46` | TEST-CONFIRMED [run: PASS] |
+| Room unlinked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:62` | TEST-CONFIRMED [run: PASS] |
+| Project deleted (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:81` | TEST-CONFIRMED [run: PASS] |
+| Nothing linked anew (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:100` | TEST-CONFIRMED [run: PASS] |
 | **Skills of an Instructions room** | | |
 | Front matter rules, upload, chunked, new version (scenario "Invalid name") | `Instr/SkillUploadTests.cs:41-221` | TEST-CONFIRMED [run: PASS] |
 | Copy and move refused; no folder | `Instr/SkillMoveCopyTests.cs:58,90,107`; `Instr/InstructionsRoomFolderTests.cs:41,56,75,91` | TEST-CONFIRMED [run: PASS] |
