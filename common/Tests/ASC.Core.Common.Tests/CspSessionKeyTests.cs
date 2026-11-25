@@ -1,0 +1,64 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+using ASC.Web.Api.Core;
+
+namespace ASC.Core.Common.Tests;
+
+/// <summary>
+/// The key the header of a signed-in session is stored under (<c>CspSettingsHelper.GetSessionKey</c>). The proxy
+/// (<c>buildtools/config/nginx/onlyoffice.conf</c>) builds the same key itself: the host key, <c>:personal:</c>, the
+/// generation of the portal or <c>0</c> while there is none, and the lowercase SHA-256 of the session cookie it got.
+/// </summary>
+public class CspSessionKeyTests
+{
+    [Fact]
+    public void GetSessionKey_WithAGeneration_HashesTheSessionCookie()
+    {
+        // Act
+        var key = CspSettingsHelper.GetSessionKey("csp:portal.example.com", "8d1f", "t1Hz/ab+c=");
+
+        // Assert: the hash is the one the proxy computes for the cookie value t1Hz%2Fab%2Bc%3D
+        key.Should().Be("csp:portal.example.com:personal:8d1f:0a77e33d87028293bd1d419269d414dbf028a387a34729946dd30594adc378ba");
+    }
+
+    [Fact]
+    public void GetSessionKey_WithoutAGeneration_UsesZero()
+    {
+        // Act
+        var key = CspSettingsHelper.GetSessionKey("csp:portal.example.com", null, "t1Hz/ab+c=");
+
+        // Assert
+        key.Should().StartWith("csp:portal.example.com:personal:0:");
+    }
+}

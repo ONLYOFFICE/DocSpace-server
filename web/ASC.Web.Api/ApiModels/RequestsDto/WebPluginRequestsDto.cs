@@ -67,7 +67,7 @@ public class WebPluginRequestsDto
     /// <summary>
     /// The plugin to change, by the manifest name `GET api/2.0/settings/webplugins` publishes as `name`, matched
     /// without regard to case. It is neither the localized display name nor the JavaScript object name in
-    /// `pluginName`, so it cannot be read off the interface; a name that is not installed answers 404.
+    /// `pluginName`, so it cannot be read off the interface.
     /// </summary>
     /// <example>example-plugin</example>
     [FromRoute(Name = "name")]
@@ -97,7 +97,7 @@ public class WebPluginNameRequestDto
     /// <summary>
     /// The plugin to act on, by the manifest name `GET api/2.0/settings/webplugins` publishes as `name`, matched
     /// without regard to case. It is neither the localized display name nor the JavaScript object name in
-    /// `pluginName`; a name that is not installed answers 404.
+    /// `pluginName`.
     /// </summary>
     /// <example>example-plugin</example>
     [FromRoute(Name = "name")]
@@ -118,9 +118,8 @@ public class WebPluginNameRequestDto
 public class WebPluginFromFileRequestDto
 {
     /// <summary>
-    /// Whether the plugin is installed for every portal of the installation rather than only this one. Without
-    /// `personal`, it is accepted on a self-hosted installation alone and refused with 403 elsewhere; an
-    /// installation-wide plugin also hides a portal plugin that carries the same name.
+    /// Whether the plugin is installed for every portal of the installation rather than only this one. An
+    /// installation-wide plugin hides a portal plugin that carries the same name.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "system")]
@@ -167,4 +166,70 @@ public class GetWebPluginsRequestDto
     /// <example>false</example>
     [FromQuery(Name = "personal")]
     public bool Personal { get; set; }
+}
+
+/// <summary>
+/// Whether the members of the portal may install web plugins for themselves.
+/// </summary>
+/// <example>
+/// {
+///   "enabled": true
+/// }
+/// </example>
+public class PersonalWebPluginsRequestDto
+{
+    /// <summary>
+    /// Whether every member other than a guest may install, switch and delete web plugins of their own. Switching it
+    /// off hides the personal plugins of all members at once and keeps their files and states, so switching it on again
+    /// brings them back.
+    /// </summary>
+    /// <example>true</example>
+    public bool Enabled { get; set; }
+}
+
+/// <summary>
+/// Which personal web plugin of a member an administrator addresses.
+/// </summary>
+public class MemberWebPluginRequestDto
+{
+    /// <summary>
+    /// The member who installed the plugin for themselves: the `id` of the `createBy` object that
+    /// `GET api/2.0/settings/personalwebplugins/plugins` returns with the plugin.
+    /// </summary>
+    /// <example>3e2c6a1f-8f1b-4c2e-9a6d-1b2c3d4e5f60</example>
+    [FromRoute(Name = "userId")]
+    public required Guid UserId { get; set; }
+
+    /// <summary>
+    /// The plugin, by the manifest name that `GET api/2.0/settings/personalwebplugins/plugins` publishes as `name`,
+    /// matched without regard to case.
+    /// </summary>
+    /// <example>example-plugin</example>
+    [FromRoute(Name = "name")]
+    public required string Name { get; set; }
+}
+
+/// <summary>
+/// Which personal web plugin of a member an administrator switches, and whether it is to run.
+/// </summary>
+public class MemberWebPluginStateRequestDto : MemberWebPluginRequestDto
+{
+    /// <summary>
+    /// The state the plugin is to have for the member.
+    /// </summary>
+    /// <example>{"enabled": false}</example>
+    [FromBody]
+    public required MemberWebPluginState State { get; set; }
+}
+
+/// <summary>
+/// The state an administrator sets for a personal web plugin of a member.
+/// </summary>
+public class MemberWebPluginState
+{
+    /// <summary>
+    /// Whether the plugin runs for the member.
+    /// </summary>
+    /// <example>false</example>
+    public bool Enabled { get; set; }
 }

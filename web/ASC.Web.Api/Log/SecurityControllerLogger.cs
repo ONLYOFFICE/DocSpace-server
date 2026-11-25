@@ -37,4 +37,7 @@ internal static partial class SecurityControllerLogger
 {
     [LoggerMessage(LogLevel.Warning, "Failed to read the personal CSP domains")]
     public static partial void WarningPersonalCspDomainsNotRead(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Failed to store the CSP header of the session")]
+    public static partial void WarningSessionCspNotSaved(this ILogger logger, Exception exception);
 }

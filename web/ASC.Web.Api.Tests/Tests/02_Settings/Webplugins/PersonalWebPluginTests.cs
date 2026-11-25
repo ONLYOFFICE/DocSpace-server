@@ -51,6 +51,9 @@ public class PersonalWebPluginTests(
     public static TheoryData<string> InvalidCspDomains => new()
     {
         "'unsafe-inline'",
+        "https:",
+        "*",
+        "*.com",
         "https://first.personal-csp.example https://second.personal-csp.example",
         "https://personal-csp.example;script-src",
         // every address is valid, only the length of the list (over 15 KB) is not
@@ -339,12 +342,37 @@ public class PersonalWebPluginTests(
 
         // Assert
         uploadResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        personalCspCookie.Should().MatchRegex("^[0-9a-f]{64}$");
+        personalCspCookie.Should().Be("1");
         ownerCsp.Header.Should().Contain(cspDomain);
         ownerCsp.Domains.Should().NotContain(cspDomain);
         ownerCspWithoutCookie.Header.Should().NotContain(cspDomain);
         otherUserCsp.Header.Should().NotContain(cspDomain);
         personalPlugins.Should().ContainSingle(x => x.Name == "personal-csp-autotest" && x.CspDomains == cspDomain);
+    }
+
+    [Fact]
+    public async Task UploadPersonalWebPlugin_DomainsOverTheHeaderLimit_ForbiddenWithoutCookieAndPluginKept()
+    {
+        // Arrange: each domain goes into every directive, so 120 of them push the header well over the 15 KB limit
+        // while the list itself stays far below the 15 KB a manifest may declare
+        const string pluginName = "personal-csp-limit";
+        var manifest = WebPluginsTestData.Manifest(pluginName);
+        manifest["cspDomains"] = string.Join(',', Enumerable.Range(0, 120).Select(i => $"https://d{i:000}.personal-limit.example.com"));
+        await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
+
+        // Act
+        using var uploadResponse = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, manifest, true, TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(uploadResponse, TestContext.Current.CancellationToken);
+        using var listResponse = await _webApiClient.GetAsync("api/2.0/settings/webplugins", TestContext.Current.CancellationToken);
+        var personalPlugins = await ListPluginsAsync(personal: true);
+
+        // Assert
+        status.Should().Be(403, body);
+        body.Should().Contain("CSP header size exceeds");
+        GetPersonalCspCookie(uploadResponse).Should().BeEmpty();
+        GetPersonalCspCookie(listResponse).Should().BeEmpty();
+        personalPlugins.Should().ContainSingle(x => x.Name == pluginName && x.Enabled);
     }
 
     [Fact]

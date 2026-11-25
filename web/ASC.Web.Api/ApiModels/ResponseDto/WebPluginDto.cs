@@ -130,7 +130,8 @@ public class WebPluginDto
     public required bool Enabled { get; set; }
 
     /// <summary>
-    /// Whether the plugin ships with the installation rather than having been uploaded here.
+    /// Whether the plugin is installation-wide and serves every portal of the installation, whether it ships with
+    /// the installation or a self-hosted installation uploaded it with `system`.
     /// </summary>
     /// <example>false</example>
     public required bool System { get; set; }
@@ -192,6 +193,26 @@ public class WebPluginDto
     public string Runtime { get; set; }
 }
 
+/// <summary>
+/// A member's personal web plugin as an administrator sees it, with the type of the member who installed it.
+/// </summary>
+public class MemberWebPluginDto : WebPluginDto
+{
+    /// <summary>
+    /// The type of the member in `createBy`, as of the request, and guest for a member who has been deleted. The
+    /// portal owner is a DocSpace admin here; `createByIsOwner` tells the owner apart.
+    /// </summary>
+    /// <example>User</example>
+    public required EmployeeType CreateByType { get; set; }
+
+    /// <summary>
+    /// Whether the member in `createBy` is the portal owner: true for the owner's own personal plugins, false for
+    /// every other member's, DocSpace admins included.
+    /// </summary>
+    /// <example>false</example>
+    public required bool CreateByIsOwner { get; set; }
+}
+
 [Scope]
 [Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
 public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
@@ -199,6 +220,10 @@ public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
     [MapProperty(nameof(WebPluginDto.CreateBy), nameof(WebPlugin.CreateBy), Use = nameof(MapCreateBy))]
     [MapProperty(nameof(WebPlugin.CspDomains), nameof(WebPluginDto.CspDomains), Use = nameof(MapCspDomains))]
     private partial WebPluginDto ToDto(WebPlugin webPlugin);
+
+    [MapProperty(nameof(WebPluginDto.CreateBy), nameof(WebPlugin.CreateBy), Use = nameof(MapCreateBy))]
+    [MapProperty(nameof(WebPlugin.CspDomains), nameof(WebPluginDto.CspDomains), Use = nameof(MapCspDomains))]
+    private partial MemberWebPluginDto ToMemberDto(WebPlugin webPlugin, EmployeeType createByType, bool createByIsOwner);
 
     [UserMapping(Default = false)]
     private static EmployeeDto MapCreateBy(Guid _) => new();
@@ -209,6 +234,14 @@ public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
     public async Task<WebPluginDto> ToDtoManual(WebPlugin source)
     {
         var dto = ToDto(source);
+        dto.CreateBy = await employeeDtoHelper.GetAsync(source.CreateBy);
+
+        return dto;
+    }
+
+    public async Task<MemberWebPluginDto> ToMemberDtoManual(WebPlugin source, EmployeeType createByType, bool createByIsOwner)
+    {
+        var dto = ToMemberDto(source, createByType, createByIsOwner);
         dto.CreateBy = await employeeDtoHelper.GetAsync(source.CreateBy);
 
         return dto;

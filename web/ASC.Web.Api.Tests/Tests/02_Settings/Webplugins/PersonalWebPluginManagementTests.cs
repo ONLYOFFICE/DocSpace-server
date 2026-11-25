@@ -193,7 +193,7 @@ public class PersonalWebPluginManagementTests(
         await UploadPersonalAsync(Owner, manifest);
         using var listResponse = await _webApiClient.GetAsync("api/2.0/settings/webplugins", TestContext.Current.CancellationToken);
         var personalCspCookie = GetPersonalCspCookie(listResponse);
-        personalCspCookie.Should().MatchRegex("^[0-9a-f]{64}$");
+        personalCspCookie.Should().Be("1");
         (await GetCspAsync(personalCspCookie)).Header.Should().Contain(cspDomain);
 
         // Act
@@ -242,7 +242,7 @@ public class PersonalWebPluginManagementTests(
         await UploadPersonalAsync(await InviteMember(EmployeeType.User), manifest);
         using var listResponse = await _webApiClient.GetAsync("api/2.0/settings/webplugins", TestContext.Current.CancellationToken);
         var personalCspCookie = GetPersonalCspCookie(listResponse);
-        personalCspCookie.Should().MatchRegex("^[0-9a-f]{64}$");
+        personalCspCookie.Should().Be("1");
 
         using var portalCsp = await SendCspAsync(null);
         var lastModified = ConditionalGet.Header(portalCsp, "Last-Modified");

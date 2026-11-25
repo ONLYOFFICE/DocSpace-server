@@ -74,7 +74,8 @@ public partial class SettingsController(
     UserSocketManager userSocketManager,
     QuotaSocketManager quotaSocketManager,
     ExternalDatabaseClient externalDatabaseClient,
-    WebPluginConfigSettings webPluginConfigSettings)
+    WebPluginConfigSettings webPluginConfigSettings,
+    WebPluginManager webPluginManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
@@ -180,6 +181,7 @@ public partial class SettingsController(
             }
 
             settings.Plugins = webPluginConfigSettings.Map();
+            settings.Plugins.Personal = await webPluginManager.IsPersonalWebPluginsEnabledAsync();
 
             var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = formGallerySettings.Map();

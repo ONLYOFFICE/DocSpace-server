@@ -36,28 +36,39 @@ namespace ASC.Web.Core;
 [Singleton]
 public class WebPluginConfigSettings
 {
-    public WebPluginConfigSettings(IConfiguration configuration)
+    public WebPluginConfigSettings(IConfiguration configuration, ILogger<WebPluginConfigSettings> logger)
     {
-        Enabled = ReadBool(configuration, "plugins:enabled", false);
-        Upload = ReadBool(configuration, "plugins:upload", false);
-        Delete = ReadBool(configuration, "plugins:delete", false);
-        Personal = ReadBool(configuration, "plugins:personal", true);
-        MaxCount = ReadPositive(configuration, "plugins:maxCount", 100);
-        PersonalMaxCount = ReadPositive(configuration, "plugins:personalMaxCount", 10);
-        MaxSize = long.TryParse(configuration["plugins:maxSize"], out var maxSize) && maxSize > 0 ? maxSize : 5L * 1024L * 1024L;
+        Enabled = configuration.ReadBool("plugins:enabled", false, logger);
+        Upload = configuration.ReadBool("plugins:upload", false, logger);
+        Delete = configuration.ReadBool("plugins:delete", false, logger);
+        Personal = configuration.ReadBool("plugins:personal", true, logger);
+        // plugins a portal holds: 1 to 1000, 100 when not set
+        MaxCount = configuration.ReadInt("plugins:maxCount", 100, 1, 1000, logger);
+        // personal plugins a member holds: 1 to 100, 10 when not set
+        PersonalMaxCount = configuration.ReadInt("plugins:personalMaxCount", 10, 1, 100, logger);
+        // bytes of an uploaded package: 1024 (1 KB) to 104857600 (100 MB), 5242880 (5 MB) when not set
+        MaxSize = configuration.ReadLong("plugins:maxSize", 5L * 1024L * 1024L, 1024L, 100L * 1024L * 1024L, logger);
         Extension = configuration["plugins:extension"] ?? ".zip";
-        AssetExtensions = configuration.GetSection("plugins:assetExtensions").Get<string[]>() ?? [];
-        AssetMaxCount = ReadPositive(configuration, "plugins:assetMaxCount", 10);
+        AssetExtensions = ReadAssetExtensions(configuration, logger);
+        // asset files in a package: 0 to 100, 10 when not set
+        AssetMaxCount = configuration.ReadInt("plugins:assetMaxCount", 10, 0, 100, logger);
     }
 
-    private static bool ReadBool(IConfiguration configuration, string key, bool defaultValue)
+    private static string[] ReadAssetExtensions(IConfiguration configuration, ILogger logger)
     {
-        return bool.TryParse(configuration[key], out var value) ? value : defaultValue;
-    }
+        var section = configuration.GetSection("plugins:assetExtensions");
 
-    private static int ReadPositive(IConfiguration configuration, string key, int defaultValue)
-    {
-        return int.TryParse(configuration[key], out var value) && value > 0 ? value : defaultValue;
+        if (section.Value != null)
+        {
+            logger.WarningAssetExtensionsNotAList(section.Path);
+
+            return [];
+        }
+
+        return section.GetChildren()
+            .Select(x => x.Value)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToArray();
     }
 
     public bool Enabled { get; }
@@ -81,6 +92,20 @@ public class WebPluginSettings : ISettings<WebPluginSettings>
     public WebPluginSettings GetDefault()
     {
         return new WebPluginSettings();
+    }
+
+    public DateTime LastModified { get; set; }
+}
+
+public class PersonalWebPluginsSettings : ISettings<PersonalWebPluginsSettings>
+{
+    public bool Enabled { get; set; }
+
+    public static Guid ID => new("{2120AD18-1091-4061-8E4B-27BF0A988BCE}");
+
+    public PersonalWebPluginsSettings GetDefault()
+    {
+        return new PersonalWebPluginsSettings();
     }
 
     public DateTime LastModified { get; set; }

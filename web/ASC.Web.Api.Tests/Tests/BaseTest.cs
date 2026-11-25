@@ -191,7 +191,15 @@ public class BaseTest(
 
         await _webApiClient.Authenticate(Owner);
 
+        await OnPortalReadyAsync();
+
         Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
+    }
+
+    /// <summary>Runs once the portal of the test exists and the client is signed in as its owner.</summary>
+    protected virtual ValueTask OnPortalReadyAsync()
+    {
+        return ValueTask.CompletedTask;
     }
 
     public ValueTask DisposeAsync()

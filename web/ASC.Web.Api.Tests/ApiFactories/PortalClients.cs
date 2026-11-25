@@ -62,6 +62,9 @@ public sealed class PortalClients : PortalClientsBase
     public RoomsApi RoomsApi { get; }
     public PrivacyRoomApi PrivacyRoomApi { get; }
     public SharingApi SharingApi { get; }
+
+    // Web.Studio serves the stored files through the storage handlers, a personal plugin's plugin.js among them
+    public HttpClient WebStudioHttpClient { get; }
     public FilesApi FilesApi { get; }
     public FoldersApi FoldersApi { get; }
     public OperationsApi OperationsApi { get; }
@@ -127,6 +130,8 @@ public sealed class PortalClients : PortalClientsBase
         FilesApi = new FilesApi(FilesHttpClient, filesConfig);
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
         OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
+
+        WebStudioHttpClient = CreateClient(ResourceNames.WebStudio);
 
         IdentityHttpClient = CreateClient(ResourceNames.IdentityRegistration);
 

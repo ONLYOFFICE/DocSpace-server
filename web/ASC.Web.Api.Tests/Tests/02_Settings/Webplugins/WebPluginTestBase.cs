@@ -41,6 +41,27 @@ public abstract class WebPluginTestBase(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
+    /// <summary>A new portal has personal plugins off: these suites switch them on, as an administrator would.</summary>
+    protected override async ValueTask OnPortalReadyAsync()
+    {
+        await SetPersonalWebPluginsAsync(true);
+    }
+
+    /// <summary>
+    /// Switches personal plugins of the portal as the owner and leaves the client on the owner. Raw HTTP: the generated
+    /// SDK has no operation for it yet.
+    /// </summary>
+    protected async Task SetPersonalWebPluginsAsync(bool enabled)
+    {
+        await _webApiClient.Authenticate(Owner);
+
+        using var response = await _webApiClient.PostAsJsonAsync(
+            "api/2.0/settings/personalwebplugins", new { enabled }, TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, TestContext.Current.CancellationToken);
+
+        status.Should().Be(200, body);
+    }
+
     /// <summary>Uploads a default package with this manifest name as the owner and leaves the client on the owner.</summary>
     protected async Task UploadAsOwnerAsync(string pluginName, string version = "1.0.0")
     {

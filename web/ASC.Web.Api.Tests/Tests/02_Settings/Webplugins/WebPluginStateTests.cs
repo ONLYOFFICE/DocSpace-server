@@ -220,10 +220,11 @@ public class WebPluginStateTests(
         exception.ErrorContent!.ToString().Should().Contain("Plugin not found");
     }
 
-    // P1 of the plugins spec: the manifest was read into the object that carries the portal state, so a
-    // config.json declaring "enabled": true reported the plugin on whenever the portal had no stored row, and
-    // switching it off without settings removed that row. An upload no longer keeps the manifest's enabled,
-    // settings and cssUrl, except for an installation-wide plugin.
+    // P1 of the plugins spec: the manifest is read into the object that carries the portal state, so a
+    // config.json declaring "enabled": true reports the plugin on whenever the portal has no stored row, and
+    // switching it off without settings removes that row. A portal or personal plugin takes neither the enabled,
+    // the settings nor the cssUrl of its manifest, on upload or when the storage is read; P1 stays open for an
+    // installation-wide plugin.
     [Fact]
     public async Task Update_ManifestDeclaringEnabled_PluginCanStillBeSwitchedOff()
     {

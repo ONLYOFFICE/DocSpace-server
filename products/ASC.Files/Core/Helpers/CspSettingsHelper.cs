@@ -46,7 +46,8 @@ public class CspSettingsHelper(
     IFusionCache hybridCache,
     IDistributedCache distributedCache,
     IHttpContextAccessor httpContextAccessor,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    CspConfigSettings cspConfigSettings)
 {
     private static readonly TimeSpan _personalHeaderDuration = TimeSpan.FromDays(1);
 
@@ -56,10 +57,9 @@ public class CspSettingsHelper(
         var headerKeys = await GetHeaderKeysAsync(tenant);
 
         var headerValue = await CreateHeaderAsync(domains);
-        var defaultOptions = configuration.GetSection("csp:default").Get<CspOptions>();
-        if (!string.IsNullOrEmpty(headerValue) && Encoding.UTF8.GetByteCount(headerValue) > defaultOptions.MaxSize)
+        if (!string.IsNullOrEmpty(headerValue) && Encoding.UTF8.GetByteCount(headerValue) > cspConfigSettings.MaxSize)
         {
-            throw new InvalidOperationException($"CSP header size exceeds maximum allowed size of {defaultOptions.MaxSize} bytes.");
+            throw new CspHeaderTooLargeException(cspConfigSettings.MaxSize);
         }
 
         if (!string.IsNullOrEmpty(headerValue))
@@ -91,89 +91,66 @@ public class CspSettingsHelper(
             }
         }
 
-        await RemovePersonalHeadersAsync(tenant.Id, headerKeys);
+        if (updateInDb)
+        {
+            await SetPersonalGenerationAsync(headerKeys);
+        }
 
         return headerValue;
     }
 
     public async Task<string> CreatePersonalHeaderAsync(IEnumerable<string> domains, IEnumerable<string> personalDomains)
     {
-        var headerValue = await CreateHeaderAsync((domains ?? []).Concat(personalDomains));
+        var headerValue = await CreateHeaderAsync(domains, personalDomains: personalDomains);
 
-        return Encoding.UTF8.GetByteCount(headerValue) > GetMaxSize() ? null : headerValue;
+        return Encoding.UTF8.GetByteCount(headerValue) > cspConfigSettings.MaxSize ? null : headerValue;
     }
 
-    public async Task SavePersonalAsync(string personalToken, IEnumerable<string> personalDomains)
+    public async Task<string> CreateSessionHeaderAsync(IEnumerable<string> personalDomains)
     {
-        var tenant = tenantManager.GetCurrentTenant();
-
         var settings = await LoadAsync();
-        var headerValue = await CreatePersonalHeaderAsync(settings.Domains, personalDomains);
 
-        if (headerValue == null)
-        {
-            await RemovePersonalAsync(personalToken);
+        return await CreatePersonalHeaderAsync(settings.Domains, personalDomains) ?? throw new CspHeaderTooLargeException(cspConfigSettings.MaxSize);
+    }
 
-            throw new InvalidOperationException($"CSP header size exceeds maximum allowed size of {GetMaxSize()} bytes.");
-        }
+    public async Task SaveSessionHeaderAsync(string headerValue)
+    {
+        var request = httpContextAccessor.HttpContext?.Request;
 
-        var personalTokens = await GetPersonalTokensAsync(tenant.Id);
-        var storedValue = await hybridCache.GetOrDefaultAsync<string>(GetPersonalKey(GetKey(tenant.GetTenantDomain(coreSettings)), personalToken));
-
-        if (headerValue == storedValue && personalTokens.Contains(personalToken))
+        if (request == null || !string.IsNullOrEmpty(request.Headers.Authorization) ||
+            !request.Cookies.TryGetValue(CookiesManager.AuthCookiesName, out var authKey) || string.IsNullOrEmpty(authKey))
         {
             return;
         }
 
-        var headerKeys = await GetHeaderKeysAsync(tenant);
+        var hostKey = GetKey(request.Host.Host.ToLowerInvariant());
+        var generation = await hybridCache.GetOrDefaultAsync<string>(GetPersonalGenerationKey(hostKey));
+        var sessionKey = GetSessionKey(hostKey, generation, authKey);
 
-        await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) =>
-            await hybridCache.SetAsync(GetPersonalKey(headerKey, personalToken), headerValue, _personalHeaderDuration, token: cs));
-
-        personalTokens.Add(personalToken);
-
-        await hybridCache.SetAsync(GetPersonalTokensKey(tenant.Id), string.Join(';', personalTokens), _personalHeaderDuration);
-    }
-
-    public async Task RemovePersonalAsync(string personalToken)
-    {
-        var tenant = tenantManager.GetCurrentTenant();
-        var headerKeys = await GetHeaderKeysAsync(tenant);
-
-        await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) =>
-            await hybridCache.RemoveAsync(GetPersonalKey(headerKey, personalToken), token: cs));
-
-        var personalTokens = await GetPersonalTokensAsync(tenant.Id);
-
-        if (personalTokens.Remove(personalToken))
-        {
-            await hybridCache.SetAsync(GetPersonalTokensKey(tenant.Id), string.Join(';', personalTokens), _personalHeaderDuration);
-        }
-    }
-
-    private async Task RemovePersonalHeadersAsync(int tenantId, HashSet<string> headerKeys)
-    {
-        var personalTokens = await GetPersonalTokensAsync(tenantId);
-
-        if (personalTokens.Count == 0)
+        if (await hybridCache.GetOrDefaultAsync<string>(sessionKey) == headerValue)
         {
             return;
         }
 
-        var personalKeys = headerKeys.SelectMany(headerKey => personalTokens.Select(personalToken => GetPersonalKey(headerKey, personalToken)));
-
-        await Parallel.ForEachAsync(personalKeys, async (personalKey, cs) => await hybridCache.RemoveAsync(personalKey, token: cs));
-        await hybridCache.RemoveAsync(GetPersonalTokensKey(tenantId));
+        await hybridCache.SetAsync(sessionKey, headerValue, _personalHeaderDuration);
     }
 
-    private async Task<HashSet<string>> GetPersonalTokensAsync(int tenantId)
+    public async Task ResetPersonalAsync()
     {
-        var value = await hybridCache.GetOrDefaultAsync<string>(GetPersonalTokensKey(tenantId));
+        var headerKeys = await GetHeaderKeysAsync(tenantManager.GetCurrentTenant(), false);
 
-        return string.IsNullOrEmpty(value) ? [] : value.Split(';', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+        await SetPersonalGenerationAsync(headerKeys);
     }
 
-    private async Task<HashSet<string>> GetHeaderKeysAsync(Tenant tenant)
+    private async Task SetPersonalGenerationAsync(IEnumerable<string> headerKeys)
+    {
+        var generation = Guid.NewGuid().ToString("N");
+
+        await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) =>
+            await hybridCache.SetAsync(GetPersonalGenerationKey(headerKey), generation, token: cs));
+    }
+
+    private async Task<HashSet<string>> GetHeaderKeysAsync(Tenant tenant, bool record = true)
     {
         var domain = tenant.GetTenantDomain(coreSettings);
         HashSet<string> headerKeys = [GetKey(domain)];
@@ -191,7 +168,7 @@ public class CspSettingsHelper(
         if (domain == Tenant.LocalHost && tenant.Alias == Tenant.LocalHost)
         {
             var domainsKey = $"{GetKey(domain)}:keys";
-            if (httpContextAccessor.HttpContext != null)
+            if (record && httpContextAccessor.HttpContext != null)
             {
                 var keys = new HashSet<string> { GetKey(Tenant.HostName) };
 
@@ -204,10 +181,10 @@ public class CspSettingsHelper(
                     keys.Add(GetKey(httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString()));
                 }
 
-                var host = httpContextAccessor.HttpContext.Request.Host.Value;
+                var host = httpContextAccessor.HttpContext.Request.Host.Host;
                 if (!string.IsNullOrEmpty(host))
                 {
-                    keys.Add(GetKey(host));
+                    keys.Add(GetKey(host.ToLowerInvariant()));
                 }
 
                 await hybridCache.SetAsync(domainsKey, string.Join(';', keys));
@@ -240,6 +217,12 @@ public class CspSettingsHelper(
             }
         }
 
+        var requestHost = httpContextAccessor.HttpContext?.Request.Host.Host;
+        if (!record && !string.IsNullOrEmpty(requestHost))
+        {
+            headerKeys.Add(GetKey(requestHost.ToLowerInvariant()));
+        }
+
         return headerKeys;
     }
 
@@ -269,7 +252,7 @@ public class CspSettingsHelper(
             await hybridCache.SetAsync(GetKey(newDomain), val);
         }
 
-        await RemovePersonalHeadersAsync(tenantManager.GetCurrentTenantId(), [oldKey]);
+        await SetPersonalGenerationAsync([oldKey]);
     }
 
     public async Task UpdateBaseDomainAsync()
@@ -303,11 +286,12 @@ public class CspSettingsHelper(
         await hybridCache.SetAsync(GetKey(baseDomain), val);
     }
 
-    public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)
+    public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true, IEnumerable<string> personalDomains = null)
     {
         domains ??= [];
 
         var options = domains.Select(r => new CspOptions(r)).ToList();
+        var personalOptions = (personalDomains ?? []).Select(r => new CspOptions(r)).ToList();
 
         var defaultOptions = configuration.GetSection("csp:default").Get<CspOptions>();
         if (!coreBaseSettings.Standalone && !string.IsNullOrEmpty(coreBaseSettings.Basedomain))
@@ -397,43 +381,49 @@ public class CspSettingsHelper(
 
         var csp = new CspBuilder();
 
-        foreach (var domain in options.SelectMany(r => r.Def).Distinct())
+        var allOptions = options.Concat(personalOptions).ToList();
+
+        foreach (var domain in allOptions.SelectMany(r => r.Def).Distinct())
         {
             csp.ByDefaultAllow.From(domain);
         }
 
-        foreach (var domain in options.SelectMany(r => r.Script).Distinct())
+        foreach (var domain in allOptions.SelectMany(r => r.Script).Distinct())
         {
             csp.AllowScripts.From(domain);
         }
 
-        foreach (var domain in options.SelectMany(r => r.Style).Distinct())
+        foreach (var domain in allOptions.SelectMany(r => r.Style).Distinct())
         {
             csp.AllowStyles.From(domain);
         }
 
-        foreach (var domain in options.SelectMany(r => r.Img).Distinct())
+        foreach (var domain in allOptions.SelectMany(r => r.Img).Distinct())
         {
             csp.AllowImages.From(domain);
         }
 
-        foreach (var domain in options.SelectMany(r => r.Frame).Distinct())
+        foreach (var domain in allOptions.SelectMany(r => r.Frame).Distinct())
         {
             csp.AllowFrames.From(domain);
+        }
+
+        foreach (var domain in options.SelectMany(r => r.Frame).Distinct())
+        {
             csp.AllowFraming.From(domain);
         }
 
-        foreach (var domain in options.SelectMany(r => r.Fonts).Distinct())
+        foreach (var domain in allOptions.SelectMany(r => r.Fonts).Distinct())
         {
             csp.AllowFonts.From(domain);
         }
 
-        foreach (var domain in options.SelectMany(r => r.Connect).Distinct())
+        foreach (var domain in allOptions.SelectMany(r => r.Connect).Distinct())
         {
             csp.AllowConnections.To(domain);
         }
 
-        foreach (var domain in options.SelectMany(r => r.Media).Distinct())
+        foreach (var domain in allOptions.SelectMany(r => r.Media).Distinct())
         {
             csp.AllowAudioAndVideo.From(domain);
         }
@@ -447,7 +437,7 @@ public class CspSettingsHelper(
         var headerKey = GetKey(domain);
         await hybridCache.RemoveAsync(headerKey);
 
-        await RemovePersonalHeadersAsync(tenantManager.GetCurrentTenantId(), [headerKey]);
+        await SetPersonalGenerationAsync([headerKey]);
     }
 
     public async Task<bool> ExistsInCacheAsync()
@@ -473,19 +463,16 @@ public class CspSettingsHelper(
         return $"csp:{domain}";
     }
 
-    private int GetMaxSize()
+    private static string GetPersonalGenerationKey(string headerKey)
     {
-        return configuration.GetSection("csp:default").Get<CspOptions>().MaxSize;
+        return $"{headerKey}:personal";
     }
 
-    private static string GetPersonalKey(string headerKey, string personalToken)
+    public static string GetSessionKey(string headerKey, string generation, string authKey)
     {
-        return $"{headerKey}:{personalToken}";
-    }
+        var sessionHash = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(authKey)));
 
-    private static string GetPersonalTokensKey(int tenantId)
-    {
-        return $"csp-personal-tokens:{tenantId}";
+        return $"{GetPersonalGenerationKey(headerKey)}:{generation ?? "0"}:{sessionHash}";
     }
 }
 

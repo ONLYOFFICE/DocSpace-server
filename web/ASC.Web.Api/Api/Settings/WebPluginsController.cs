@@ -108,6 +108,7 @@ public class WebPluginsController(
         }
         else
         {
+            await ResetPersonalCspAsync();
             await ChangeCspSettings(webPlugin, webPlugin.Enabled);
         }
 
@@ -171,7 +172,8 @@ public class WebPluginsController(
     /// plugins. Take the name from the `name` field of `GET api/2.0/settings/webplugins`. The call ignores the case of
     /// the name. Any signed-in user can call it. With `personal`, a guest gets 403. With `personal`, every caller also gets
     /// 403 while personal plugins are off. If the installation turns off web plugins, the call returns 403. The call is
-    /// read-only. The response includes the `enabled` state and the `settings` stored for the plugin. If no
+    /// read-only, except that it switches off a plugin whose stored settings cannot be decrypted. The response
+    /// includes the `enabled` state and the `settings` stored for the plugin. If no
     /// plugin has this name, the call returns 404. To change the state of the plugin, use
     /// `PUT api/2.0/settings/webplugins/{name}`.
     /// </remarks>
@@ -248,9 +250,10 @@ public class WebPluginsController(
     /// off web plugins, the call also returns 403. The call compares the version it serves with the `version` of the
     /// manifest in storage. The server reloads the plugin list if they differ or the plugin appeared or disappeared.
     /// For an installation-wide plugin, it reloads the list of every portal. The call changes data only then, so you
-    /// can repeat it. It does not change the stored state, the settings, or the Content Security Policy. Personal
-    /// plugins change only through an upload. The call returns the plugin as the portal serves it after the check. If no plugin has this name after the check, the call returns 404. To install a new
-    /// version, use `POST api/2.0/settings/webplugins`.
+    /// can repeat it. It does not change the stored state, the settings, or the Content Security Policy. The call does
+    /// not check personal plugins. The call returns the plugin as the portal serves it after the check. If no plugin
+    /// has this name after the check, the call returns 404. To install a new version, use
+    /// `POST api/2.0/settings/webplugins`.
     /// </remarks>
     /// <summary>Refresh a web plugin</summary>
     /// <path>api/2.0/settings/webplugins/{name}/refresh</path>
@@ -312,6 +315,7 @@ public class WebPluginsController(
         }
         else
         {
+            await ResetPersonalCspAsync();
             await ChangeCspSettings(webPlugin, false);
         }
     }
@@ -357,40 +361,68 @@ public class WebPluginsController(
 
     private async Task SyncPersonalCspAsync(int tenantId, List<string> personalCspDomains = null, bool refuseTooLarge = false)
     {
-        var personalChange = personalCspDomains == null;
-
         try
         {
-            personalCspDomains ??= await webPluginManager.GetPersonalCspDomainsAsync(tenantId);
-
-            var personalCspToken = webPluginManager.GetPersonalCspToken(tenantId);
-            var hasCookie = Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName);
-
-            if (personalCspDomains.Count != 0)
+            if (personalCspDomains == null)
             {
-                Response.Cookies.Append(WebPluginManager.PersonalCspCookieName, personalCspToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = Request.IsHttps,
-                    SameSite = SameSiteMode.Lax,
-                    Expires = DateTimeOffset.UtcNow.AddYears(1)
-                });
+                await cspSettingsHelper.ResetPersonalAsync();
 
-                await cspSettingsHelper.SavePersonalAsync(personalCspToken, personalCspDomains);
+                personalCspDomains = await webPluginManager.GetPersonalCspDomainsAsync(tenantId);
             }
-            else if (hasCookie || personalChange)
+
+            if (personalCspDomains.Count == 0)
             {
-                if (hasCookie)
-                {
-                    Response.Cookies.Delete(WebPluginManager.PersonalCspCookieName);
-                }
+                DeletePersonalCspCookie();
 
-                await cspSettingsHelper.RemovePersonalAsync(personalCspToken);
+                return;
             }
+
+            string headerValue;
+
+            try
+            {
+                headerValue = await cspSettingsHelper.CreateSessionHeaderAsync(personalCspDomains);
+            }
+            catch (CspHeaderTooLargeException)
+            {
+                DeletePersonalCspCookie();
+
+                throw;
+            }
+
+            Response.Cookies.Append(WebPluginManager.PersonalCspCookieName, "1", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddYears(1)
+            });
+
+            await cspSettingsHelper.SaveSessionHeaderAsync(headerValue);
         }
-        catch (Exception e) when (!refuseTooLarge || e is not InvalidOperationException)
+        catch (Exception e) when (!refuseTooLarge || e is not CspHeaderTooLargeException)
         {
             logger.WarningPersonalCspNotUpdated(e);
+        }
+    }
+
+    private async Task ResetPersonalCspAsync()
+    {
+        try
+        {
+            await cspSettingsHelper.ResetPersonalAsync();
+        }
+        catch (Exception e)
+        {
+            logger.WarningPersonalCspNotUpdated(e);
+        }
+    }
+
+    private void DeletePersonalCspCookie()
+    {
+        if (Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName))
+        {
+            Response.Cookies.Delete(WebPluginManager.PersonalCspCookieName);
         }
     }
 
