@@ -51,6 +51,8 @@ public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture
 
     protected RawApiClient Files => new(_filesClient);
 
+    protected override bool PlantsAiProfile => true;
+
     protected async Task<JsonElement> CreateHubRoomAsync(int roomType, string title)
     {
         using var response = await CreateHubRoomResponseAsync(new { title, roomType });

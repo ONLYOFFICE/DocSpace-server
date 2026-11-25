@@ -172,11 +172,11 @@ public class PaymentServiceContractTests
         };
     }
 
-    private static Task<bool> BillingOkCall(BillingClient client, string route)
+    private static async Task<bool> BillingOkCall(BillingClient client, string route)
     {
         return route == "/billing/Deposit"
-            ? client.TopUpDepositAsync(PortalId, 100, "USD", null, "portal.example.com")
-            : client.GetDocsCloudTrialAsync(PortalId, new DocsCloudTrialCustomer("owner@example.com", "https://portal.example.com", "Owner", null, "en-US", null));
+            ? await client.TopUpDepositAsync(PortalId, 100, "USD", null, "portal.example.com")
+            : (await client.GetDocsCloudTrialAsync(PortalId, new DocsCloudTrialCustomer("owner@example.com", "https://portal.example.com", "Owner", null, "en-US", null))).Granted;
     }
 
     private static Func<Task> Call(string service, HttpStub stub)

@@ -42,7 +42,9 @@ public class AiProjectThreadsService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    SocketManager socketManager,
+    ILogger<AiProjectThreadsService> logger)
 {
     private const string ArtifactsSuffix = "artifacts";
     private const string AttachmentsSuffix = "attachments";
@@ -86,7 +88,23 @@ public class AiProjectThreadsService(
         file.ContentLength = contentLength;
         file.CreateBy = thread.CreatedBy;
 
-        return await fileDao.SaveThreadFileAsync(file, content, thread.Id);
+        var saved = await fileDao.SaveThreadFileAsync(file, content, thread.Id);
+
+        await NotifyFileCreatedAsync(project.Id, thread, ThreadFolderKind.Artifacts, saved.Id);
+
+        return saved;
+    }
+
+    public async Task NotifyFileCreatedAsync(int projectId, AiThread thread, ThreadFolderKind kind, int fileId)
+    {
+        try
+        {
+            await socketManager.CreateThreadFileAsync(projectId, thread.Id, kind, fileId, [thread.CreatedBy]);
+        }
+        catch (Exception e)
+        {
+            logger.WarningThreadFileEventNotSent(e, fileId, thread.Id);
+        }
     }
 
     public async Task<int> GetOrCreateAttachmentsFolderAsync(AiThread thread)

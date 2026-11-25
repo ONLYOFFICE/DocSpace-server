@@ -45,6 +45,7 @@ public sealed class PortalClients : PortalClientsBase
     public HttpClient AiHttpClient { get; }
     public HttpClient FilesHttpClient { get; }
     public HttpClient PeopleHttpClient { get; }
+    public HttpClient StudioHttpClient { get; }
 
     /// <summary>ASC.AI's internal storage API (<c>/internal/ai</c>), the one the Node chat service calls.</summary>
     public RawApiClient Ai { get; }
@@ -74,6 +75,7 @@ public sealed class PortalClients : PortalClientsBase
     public SharingApi SharingApi { get; }
     public FilesQuotaApi FilesQuotaApi { get; }
     public DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi ThirdPartyIntegrationApi { get; }
+    public DocSpace.API.SDK.Api.Files.SettingsApi FilesSettingsApi { get; }
 
     /// <summary>The project routes of a room (<c>files/rooms/{id}/model</c>), on the Files service.</summary>
     public DocSpace.API.SDK.Api.Rooms.AIApi RoomsAiApi { get; }
@@ -83,6 +85,8 @@ public sealed class PortalClients : PortalClientsBase
     public UserStatusApi UserStatusApi { get; }
     public UserTypeApi UserTypeApi { get; }
     public UserDataApi UserDataApi { get; }
+    public DocSpace.API.SDK.Api.People.QuotaApi PeopleQuotaApi { get; }
+    public DocSpace.API.SDK.Api.Group.GroupApi GroupApi { get; }
 
     // Web.Api: the portal-wide AI switch (settings/ai-access)
     public CommonSettingsApi CommonSettingsApi { get; }
@@ -96,6 +100,7 @@ public sealed class PortalClients : PortalClientsBase
         AiHttpClient = CreateClient(ResourceNames.Ai);
         FilesHttpClient = CreateClient(ResourceNames.Files);
         PeopleHttpClient = CreateClient(ResourceNames.People);
+        StudioHttpClient = CreateClient(ResourceNames.WebStudio);
 
         Ai = new RawApiClient(AiHttpClient);
 
@@ -124,6 +129,7 @@ public sealed class PortalClients : PortalClientsBase
         SharingApi = new SharingApi(FilesHttpClient, filesConfig);
         FilesQuotaApi = new FilesQuotaApi(FilesHttpClient, filesConfig);
         ThirdPartyIntegrationApi = new DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
+        FilesSettingsApi = new DocSpace.API.SDK.Api.Files.SettingsApi(FilesHttpClient, filesConfig);
         RoomsAiApi = new DocSpace.API.SDK.Api.Rooms.AIApi(FilesHttpClient, filesConfig);
 
         var peopleConfig = new Configuration { BasePath = BasePathOf(ResourceNames.People) };
@@ -131,6 +137,8 @@ public sealed class PortalClients : PortalClientsBase
         UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
         UserTypeApi = new UserTypeApi(PeopleHttpClient, peopleConfig);
         UserDataApi = new UserDataApi(PeopleHttpClient, peopleConfig);
+        PeopleQuotaApi = new DocSpace.API.SDK.Api.People.QuotaApi(PeopleHttpClient, peopleConfig);
+        GroupApi = new DocSpace.API.SDK.Api.Group.GroupApi(PeopleHttpClient, peopleConfig);
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);

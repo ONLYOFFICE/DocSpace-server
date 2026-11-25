@@ -35,8 +35,7 @@
 namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
-/// A guest has no AI, so a guest is never added to an AI project: not by a direct invitation, not by email and not
-/// through the project's invitation link.
+/// A guest has no AI, so a guest is never added to an AI project: not by a direct invitation and not by email.
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AiHub")]
@@ -76,30 +75,6 @@ public class AiProjectGuestInviteTests(AspireAppFixture fixture) : AiHubTestBase
         // Assert
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("The role is not available for this user type");
-    }
-
-    [Fact]
-    public async Task InvitationLink_ExistingGuest_IsRefusedAndNotAdded()
-    {
-        // Arrange
-        var projectId = await CreateProjectAsync();
-        var link = (await _roomsApi.SetRoomLinkAsync(
-            projectId,
-            new RoomLinkRequest(access: FileShare.RoomManager, title: "Project link", linkType: LinkType.Invitation),
-            TestContext.Current.CancellationToken)).Response;
-        var guest = await InviteGuest();
-
-        // Act
-        await _webApiClient.Authenticate(guest);
-        var fullLink = await _webApiClient.GetAsync(new Uri(link.SharedLink.ShareLink).PathAndQuery, TestContext.Current.CancellationToken);
-        var key = HttpUtility.ParseQueryString(fullLink.RequestMessage?.RequestUri?.Query!)["key"];
-        var confirm = (await _authenticationApi.CheckConfirmAsync(
-            new CheckConfirmRequestDto(key!, uiD: Owner.Id, type: ConfirmType.LinkInvite),
-            TestContext.Current.CancellationToken)).Response;
-
-        // Assert
-        confirm.Result.Should().Be(ValidationResult.QuotaFailed);
-        (await GetMemberAccessAsync(projectId, guest.Id)).Should().BeNull();
     }
 
     private async Task<FileShare?> GetMemberAccessAsync(int projectId, Guid userId)

@@ -120,6 +120,9 @@ public static class DbToolPrefsExtension
 
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.ServerType, e.EntryId })
                 .HasDatabaseName("IX_tenant_id_created_by_server_type_entry_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("IX_tenant_id_entry_id");
         });
     }
 
@@ -167,6 +170,9 @@ public static class DbToolPrefsExtension
 
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.ServerType, e.EntryId })
                 .HasDatabaseName("ix_ai_integration_tool_preferences_tenant_id_created_by_server_type_entry_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("ix_ai_integration_tool_preferences_tenant_id_entry_id");
         });
     }
 }

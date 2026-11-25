@@ -83,6 +83,19 @@ public class SocketManager(
         await MakeRequest("create-folder", folder, true, users);
     }
 
+    public async Task CreateThreadFileAsync(int projectId, Guid threadId, ThreadFolderKind kind, int fileId, IEnumerable<Guid> users)
+    {
+        var room = FolderRoom(projectId);
+        await MakeRequest("create-thread-file", new
+        {
+            room,
+            id = fileId,
+            threadId,
+            kind = kind == ThreadFolderKind.Artifacts ? "artifacts" : "attachments",
+            userIds = users
+        });
+    }
+
     public async Task UpdateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
         await MakeRequest("update-file", file, true, users: users);

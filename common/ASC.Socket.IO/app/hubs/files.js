@@ -324,6 +324,13 @@ module.exports = (io) => {
     }
   }
 
+  function createThreadFile({ id, room, threadId, kind, userIds } = {}) {
+    logger.info(`create ${kind} file ${id} of thread ${threadId} in room ${room}`);
+    userIds?.forEach((userId) =>
+      filesIO.to(`${room}-${userId}`).emit("s:modify-thread-files", { cmd: "create", id, threadId, kind })
+    );
+  }
+
   function createFolder({ id, room, data, userIds } = {}) {
     logger.info(`create new folder ${id} in room ${room}`);
     if(userIds)
@@ -745,6 +752,7 @@ module.exports = (io) => {
     startEdit,
     stopEdit,
     createFile,
+    createThreadFile,
     createForm,
     createFolder,
     deleteFile,

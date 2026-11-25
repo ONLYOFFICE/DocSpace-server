@@ -92,7 +92,7 @@ public class OrphanAttachmentsCleanerService(
                 totals,
                 stoppingToken);
         }
-        catch (Exception e) when (e is not OperationCanceledException)
+        catch (Exception e) when (!stoppingToken.IsCancellationRequested)
         {
             logger.ErrorCleanUpOrphanAttachments(e);
         }
@@ -135,7 +135,7 @@ public class OrphanAttachmentsCleanerService(
                     totals.Drafts += drafts;
                     totals.Files += files;
                 }
-                catch (Exception e) when (e is not OperationCanceledException)
+                catch (Exception e) when (!stoppingToken.IsCancellationRequested)
                 {
                     logger.ErrorDeleteOrphanAttachments(group.Key, e);
 

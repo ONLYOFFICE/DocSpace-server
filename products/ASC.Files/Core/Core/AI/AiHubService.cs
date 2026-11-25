@@ -47,6 +47,8 @@ public class AiHubService(
     AuthContext authContext,
     TenantManager tenantManager,
     GlobalFolderHelper globalFolderHelper,
+    FilesSettingsHelper filesSettingsHelper,
+    FileConverter fileConverter,
     IDistributedLockProvider distributedLockProvider,
     FilesMessageService filesMessageService,
     SocketManager socketManager,
@@ -262,14 +264,42 @@ public class AiHubService(
         return profile;
     }
 
-    public async Task<int?> GetThreadArtifactsFolderIdAsync(int projectId, Guid threadId)
+    public async Task<ThreadFiles> GetThreadFilesAsync(int projectId, Guid threadId, ThreadFolderKind kind, OrderBy orderBy, string text, int offset, int count)
     {
-        return (await GetThreadAsync(projectId, threadId)).ArtifactsFolderId;
-    }
+        var project = await GetProjectAsync(projectId);
+        var thread = await projectThreadsService.GetForReadAsync(projectId, threadId);
 
-    public async Task<int?> GetThreadAttachmentsFolderIdAsync(int projectId, Guid threadId)
-    {
-        return (await GetThreadAsync(projectId, threadId)).AttachmentsFolderId;
+        var folderId = kind == ThreadFolderKind.Artifacts ? thread.ArtifactsFolderId : thread.AttachmentsFolderId;
+        if (folderId is null)
+        {
+            return new ThreadFiles(null, [], 0);
+        }
+
+        orderBy ??= await filesSettingsHelper.GetDefaultOrder();
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderTask = daoFactory.GetFolderDao<int>().GetFolderAsync(folderId.Value);
+        var totalTask = fileDao.GetFilesCountAsync(folderId.Value, FilterType.None, false, Guid.Empty, text, null, false);
+        var files = await fileDao.GetFilesAsync(folderId.Value, orderBy, FilterType.None, false, Guid.Empty, text, null, false, offset: offset, count: count).ToListAsync();
+
+        var folder = await folderTask ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        var total = await totalTask;
+
+        var listed = new List<File<int>>(files.Count);
+        foreach (var file in files)
+        {
+            if (await fileConverter.IsConverting(file))
+            {
+                total--;
+                continue;
+            }
+
+            file.ParentRoomType = project.FolderType;
+            file.ParentRoomCreatedBy = project.CreateBy;
+            listed.Add(file);
+        }
+
+        return new ThreadFiles(folder, listed, total);
     }
 
     private async Task NotifyRoomsUpdatedAsync(List<Folder<int>> rooms)
@@ -303,13 +333,6 @@ public class AiHubService(
                 .ThenBy(r => r.Id)
                 .Select(r => new RoomSkills(r, skills.GetValueOrDefault(r.Id) ?? []))
         ];
-    }
-
-    private async Task<AiThread> GetThreadAsync(int projectId, Guid threadId)
-    {
-        await GetProjectAsync(projectId);
-
-        return await projectThreadsService.GetForReadAsync(projectId, threadId);
     }
 
     private async Task<Folder<int>> GetProjectAsync(int projectId)

@@ -260,3 +260,43 @@ describe("regenerateStream", () => {
     expect(setRoundThreadId).toHaveBeenCalledWith("t1");
   });
 });
+
+// The entry a round is billed to: where the user chats. Inside an AI project
+// that is the project, not the folder the project context set as the round's
+// location (the picked folder, else My documents); elsewhere the folder or
+// room the user is in, and a composer-picked context folder only without one.
+const { primeSourceMeta } = await import("../../storage/docspaceFilesApi.js");
+const { contextFolderIdsOf } = await import("../../storage/contextFolders.js");
+
+describe("source attribution", () => {
+  const prime = vi.mocked(primeSourceMeta);
+  const pickedFolders = vi.mocked(contextFolderIdsOf);
+
+  beforeEach(() => {
+    prime.mockClear();
+    pickedFolders.mockReset().mockReturnValue([]);
+  });
+
+  it("bills a round in an AI project to the project, not to its folder", async () => {
+    pickedFolders.mockReturnValue(["555"]);
+    await run("sendWithStream", {
+      threadId: "t1",
+      entityId: "42",
+      contextEntityId: "4",
+      userMessage: text("hi"),
+    });
+    expect(prime).toHaveBeenCalledWith("42");
+  });
+
+  it("bills a round outside a project to the room the user is in", async () => {
+    pickedFolders.mockReturnValue(["555"]);
+    await run("sendWithStream", { threadId: "t1", contextEntityId: "10", userMessage: text("hi") });
+    expect(prime).toHaveBeenCalledWith("10");
+  });
+
+  it("falls back to a picked context folder only when the round has no location", async () => {
+    pickedFolders.mockReturnValue(["555"]);
+    await run("sendWithStream", { threadId: "t1", userMessage: text("hi") });
+    expect(prime).toHaveBeenCalledWith("555");
+  });
+});
