@@ -185,13 +185,14 @@ public class OFormRequestManager(
     /// before: for a day after the last answer. Repeated failed checks, or a process that copies the entry from the
     /// distributed cache to its memory (a restart, an eviction), may keep it longer; no test pins how much. Without a
     /// distributed cache (Redis off), a restart forgets it. With nothing known, a failed check means "unavailable" for
-    /// up to 1 minute (a "true" another process writes ends it earlier), kept by this process only, so one process that
-    /// cannot reach the gallery never hides it from the others. When the next check takes longer than 200 ms, a reader
-    /// with an expired answer gets that answer while the check continues in the background; the check then caches what
-    /// it gets, or, when it fails with "available" known, the fail-safe keeps that answer. A check past the cache's
-    /// 5-second hard timeout with nothing known answers "unavailable" after that timeout, and its late answer still goes
-    /// into the cache. The CMS probe times out after <see cref="ProbeTimeout"/>. Distributed cache access and waiting
-    /// for its local lock can add to the overall response time.
+    /// up to 1 minute, kept by this process only, so one process that cannot reach the gallery never hides it from the
+    /// others. A "true" another process writes ends it earlier, unless both checked at almost the same moment: the
+    /// backplane drops a notification older than the local entry, and the "unavailable" stays for its minute. When the
+    /// next check takes longer than 200 ms, a reader with an expired answer gets that answer while the check continues
+    /// in the background; the check then caches what it gets, or, when it fails with "available" known, the fail-safe
+    /// keeps that answer. A check past the cache's 5-second hard timeout with nothing known answers "unavailable" after
+    /// that timeout, and its late answer still goes into the cache. The CMS probe times out after
+    /// <see cref="ProbeTimeout"/>. Distributed cache access and waiting for its local lock can add to the time.
     /// </summary>
     public async Task<bool> IsAvailableAsync()
     {
