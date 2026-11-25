@@ -301,11 +301,11 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Roles (scenario "Member cannot register") | `T/McpTests/McpToolsManagePermissionsTests.cs:46`; `McpToolsMemberPermissionsTests.cs:46`; `McpToolsAccessTests.cs:138`; `McpToolsAnonymousTests.cs:58` | TEST-CONFIRMED [run: PASS] |
 | Round trip (scenario), no dial, verbatim, flag (scenario) | `T/McpTests/McpServerRegistryTests.cs:50,93,135,349,366` | TEST-CONFIRMED [run: PASS] |
 | Unregistered name (scenario) | `T/McpTests/McpServerRegistryTests.cs:260` | TEST-CONFIRMED [run: PASS] |
-| AI off (scenario), off period (scenario) | `T/McpTests/McpToolsAiDisabledTests.cs:58,82`; `McpToolsAccessTests.cs:286` | TEST-CONFIRMED [run: PASS] |
+| AI off (scenario), off period (scenario) | `T/McpTests/McpToolsAiDisabledTests.cs:58,82`; `McpToolsAccessTests.cs:287` | TEST-CONFIRMED [run: PASS] |
 | Audited | `AI/Server/Service/McpServerStorageService.cs` (`ServerCreated/Updated/Deleted`) | CODE-ONLY |
 | **One registry per portal** | | |
 | Registered from a room (scenario); folder | `T/McpTests/McpServerEntityScopeTests.cs:49,66,77,97`; `T/ThirdPartyTests/ThirdPartyToolsTests.cs:68,80` (skips on the stand) | TEST-CONFIRMED [run: PASS] |
-| Unknown room (scenario), deleted, unopenable | `T/McpTests/McpServerEntityScopeTests.cs:160,190`; `McpToolsAccessTests.cs:208` | TEST-CONFIRMED [run: PASS] |
+| Unknown room (scenario), deleted, unopenable | `T/McpTests/McpServerEntityScopeTests.cs:160,190`; `McpToolsAccessTests.cs:209` | TEST-CONFIRMED [run: PASS] |
 | Reads ignore the entity (scenario) | `T/McpTests/McpServerEntityScopeTests.cs:146` | TEST-CONFIRMED [run: PASS] |
 | Name without config | `T/McpTests/McpServerRegistryTests.cs:236,247` | TEST-CONFIRMED [run: PASS] |
 | **Server names** | | |
@@ -322,7 +322,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Server type and list refusals (scenario "Refused list") | `T/McpTests/McpDisabledToolsTests.cs:164,186,201,217,233` | TEST-CONFIRMED [run: PASS] |
 | Per user | `T/McpTests/McpToolPrefsLifecycleTests.cs:146`; `McpToolsSettingsPermissionsTests.cs:46` | TEST-CONFIRMED [run: PASS] |
 | Dropped server (scenario) | `T/McpTests/McpToolPrefsLifecycleTests.cs:45,81`; `T/McpServerStorageTests/McpServerReplaceTests.cs:139` | TEST-CONFIRMED [run: PASS] |
-| Guest, AI off naming a server (scenario) | `T/McpTests/McpToolsAccessTests.cs:318,338` | TEST-CONFIRMED [run: PASS] |
+| Guest, AI off naming a server (scenario) | `T/McpTests/McpToolsAccessTests.cs:320,340` | TEST-CONFIRMED [run: PASS] |
 | Portal-wide list for everyone (`scope` `tenant`) | `Chat/controllers/toolsController.ts` (`parseToolPrefsScope`, bug 84381); `T/McpTests/McpToolPrefsTenantScopeTests.cs:63,81,96` | TEST-CONFIRMED [run: PASS] - read by every member and folded into each member's own list, written by an administrator only (403 otherwise), emptied by an empty list (`McpToolPrefsTenantScopeTests.cs:63,81,96`) |
 | **Pre-approving tools** | | |
 | Flat tokens, idempotent, revoke, falsy, string, missing | `T/McpTests/McpAllowAlwaysTests.cs:46,57,67,127,144,158,173,186` | TEST-CONFIRMED [run: PASS] |
@@ -330,8 +330,8 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Approval with `allowAlways` (scenario) | `T/McpTests/McpAllowAlwaysPauseTests.cs:92,122,136`; `McpRegisteredServerChatTests.cs:116` | TEST-CONFIRMED [run: PASS] |
 | Same name on another server (scenario) | `T/McpTests/McpAllowAlwaysTests.cs:96,110` | TEST-CONFIRMED [run: PASS] |
 | **Tools catalogue** | | |
-| Groups, no twin, every role, Guest, AI off, entity | `T/McpTests/McpToolsCatalogueTests.cs:47,59,91,107,125,137`; `McpToolsAiDisabledTests.cs:82` | TEST-CONFIRMED [run: PASS] |
-| Unreachable server (scenario) | `T/McpTests/McpToolsCatalogueTests.cs:74`; `McpRegisteredServerChatTests.cs:95` | TEST-CONFIRMED [run: PASS] |
+| Groups, no twin, every non-guest role, entity; Guest or AI off 403 (scenario) | `T/McpTests/McpToolsCatalogueTests.cs:48,60,92,108,125,138`; `McpToolsAiDisabledTests.cs:82`; `McpToolsAccessTests.cs:138,287` | TEST-CONFIRMED [run: PASS] |
+| Unreachable server (scenario) | `T/McpTests/McpToolsCatalogueTests.cs:75`; `McpRegisteredServerChatTests.cs:95` | TEST-CONFIRMED [run: PASS] |
 | Registered tools reach the model | `T/McpTests/McpRegisteredServerChatTests.cs:85` | TEST-CONFIRMED [run: PASS] |
 | **Web-search configuration on a self-hosted portal** | | |
 | Probe; wrong key (scenario); unreachable; malformed; business 400 | `T/WebSearchTests/WebSearchConfigureTests.cs:46,62,78,95,112` | TEST-CONFIRMED [run: PASS] |
@@ -358,10 +358,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Gateway proxy path list | `AI/Server/Api/AiGatewayProxyController.cs` | CODE-ONLY |
 | **Editor tools catalogue** | | |
 | Names, schema, approval; repeated reads | `T/EditorToolTests/EditorToolListTests.cs:51,64,102,111,149,165,186` | TEST-CONFIRMED [run: PASS] |
-| Guest catalogue (scenario); non-guest same; anonymous; AI off | `T/EditorToolTests/EditorToolPermissionTests.cs:49,63,163`; `EditorToolAiDisabledTests.cs:53` | TEST-CONFIRMED [run: PASS] (skips on the stand) |
+| Guest refused (scenario); non-guest same; anonymous; AI off | `T/EditorToolTests/EditorToolPermissionTests.cs:48,63,161`; `EditorToolAiDisabledTests.cs:53` | TEST-CONFIRMED [run: PASS] (the non-guest case skips on the stand) |
 | **Calling an editor tool** | | |
 | Name rules, argument rules | `T/EditorToolTests/EditorToolCallTests.cs:79,89,104,122`; `EditorToolArgumentTests.cs:45,71,102` | TEST-CONFIRMED [run: PASS] |
-| Guest; AI off (scenario) | `T/EditorToolTests/EditorToolPermissionTests.cs:101,113,137`; `EditorToolAiDisabledTests.cs:66,88,104,116` | TEST-CONFIRMED [run: PASS] |
+| Guest; AI off (scenario) | `T/EditorToolTests/EditorToolPermissionTests.cs:99,111,135`; `EditorToolAiDisabledTests.cs:66,88,104,116` | TEST-CONFIRMED [run: PASS] |
 | Tool never exceeds the member (scenario); failure inside `result` | `T/EditorToolTests/EditorToolRestToolTests.cs:92,167` | TEST-CONFIRMED [run: SKIP] (skips on the stand) |
 | Generator in a room (scenario); no write (scenario); entity names nothing (scenario) | `T/EditorToolTests/EditorToolEntityIdTests.cs:78,93,110,127,156,182` | TEST-CONFIRMED [run: SKIP] (skips on the stand) |
 | **Creating chat attachments** | | |

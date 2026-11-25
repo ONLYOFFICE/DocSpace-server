@@ -34,8 +34,9 @@
 namespace ASC.AI.Tests.Tests.McpTests;
 
 /// <summary>
-/// Every route of the tools surface answers 401 to an anonymous caller — not a sample: <c>list-system-tools</c> asks
-/// for no membership, so it is the one most likely to have been left unauthenticated by accident.
+/// Every route of the tools surface answers 401 to an anonymous caller — not a sample: <c>list-system-tools</c> is
+/// outside the operation lists of the role matrix, so it is the one most likely to have been left unauthenticated by
+/// accident.
 /// </summary>
 [Trait("Category", "Permissions")]
 [Trait("Feature", "AI/Mcp")]

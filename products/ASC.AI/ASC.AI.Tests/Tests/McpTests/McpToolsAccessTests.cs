@@ -131,11 +131,11 @@ public class McpToolsAccessTests(AspireAppFixture fixture) : McpToolsPermissionT
     }
 
     /// <summary>
-    /// A Guest is refused on twelve routes and answered on the catalogue, which asks for no membership. Nothing the
-    /// owner stored moves, and no refusal carries the config.
+    /// A Guest is refused on all thirteen routes, the catalogue included. Nothing the owner stored moves, and no
+    /// refusal carries the config.
     /// </summary>
     [Fact]
-    public async Task Guest_IsRefusedOnEveryRouteButTheCatalogue_AndTheOwnersStateIsUntouched()
+    public async Task Guest_IsRefusedOnEveryRoute_AndTheOwnersStateIsUntouched()
     {
         await StageOwnersStateAsync();
         var before = await SnapshotAsync();
@@ -154,7 +154,8 @@ public class McpToolsAccessTests(AspireAppFixture fixture) : McpToolsPermissionT
             settled[i].Text.Should().NotContain(Secret, calls[i].Label);
         }
 
-        catalogue.Code.Should().Be(200);
+        catalogue.Code.Should().Be(403, "list-system-tools: " + catalogue);
+        catalogue.Text.Should().NotContain(Secret, "list-system-tools");
     }
 
     /// <summary>A User and a RoomAdmin keep their own tool settings but cannot touch the registry; the owner's state is left alone.</summary>
@@ -281,7 +282,7 @@ public class McpToolsAccessTests(AspireAppFixture fixture) : McpToolsPermissionT
         afterReinvite.Code.Should().Be(200, afterReinvite.ToString());
     }
 
-    /// <summary>With AI access off every route but the catalogue is refused; nothing stored is lost to, or changed by, the off period.</summary>
+    /// <summary>With AI access off every route is refused, the catalogue included; nothing stored is lost to, or changed by, the off period.</summary>
     [Fact]
     public async Task AiSwitchOffAndOn_EveryRouteIsRefusedWhileOff_AndNothingStoredChanges()
     {
@@ -301,7 +302,8 @@ public class McpToolsAccessTests(AspireAppFixture fixture) : McpToolsPermissionT
             settled[i].Text.Should().NotContain(Secret, calls[i].Label);
         }
 
-        catalogue.Code.Should().Be(200, "the catalogue is the one route AI-off does not gate");
+        catalogue.Code.Should().Be(403, "list-system-tools: " + catalogue);
+        catalogue.Error.Should().Be("Forbidden", "list-system-tools");
 
         await SetPortalAiAccessAsync(true);
         (await SnapshotAsync()).Should().Be(before, "servers, disabled lists and approvals all survived, and no refused write landed");

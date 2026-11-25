@@ -1172,7 +1172,7 @@ is replaced whole on update; each change is audited.
 #### Scenario: AI off
 
 - **WHEN** AI is off and a member calls any of these routes
-- **THEN** the system answers 403 while the tools catalogue still answers
+- **THEN** the system answers 403, and so does the tools catalogue
 
 ### Requirement: One registry per portal
 
@@ -1312,9 +1312,14 @@ list under the server-prefixed key, where the read finds it.
 
 `aiToolsListSystemTools` SHALL answer the portal's tools grouped by server type — a registered server's tools
 under its name — the system group keys in `system` and in `errors` the reason a registered server delivered
-none (its credentials never echoed), to every signed-in member, Guests included, with AI on or off, whatever
-`entityId` it carries. The catalogue lists no tool twice, lists a registered server as no system group, and
+none (its credentials never echoed), to every non-guest member, whatever `entityId` it carries; a Guest and
+an AI-off portal get 403. The catalogue lists no tool twice, lists a registered server as no system group, and
 a registered server's tools reach the model in every chat.
+
+#### Scenario: Guest or AI off
+
+- **WHEN** a Guest reads the catalogue, or a member reads it while AI is off
+- **THEN** the system answers 403
 
 #### Scenario: Unreachable registered server
 
@@ -1444,13 +1449,13 @@ chat completions, image generation, search and contents (others 404).
 
 `aiEditorToolsList` SHALL publish the tool catalogue — unique names, a description, an object input schema
 whose required arguments are declared and never also defaulted, `requireApproval` off for read tools and on
-for the ones that change something — identically to every non-guest member and on repeated reads, a Guest
-getting it without the document generators. Anonymous 401; AI off 403.
+for the ones that change something — identically to every non-guest member and on repeated reads.
+Anonymous 401; a Guest 403; AI off 403.
 
-#### Scenario: Guest catalogue
+#### Scenario: Guest refused
 
-- **WHEN** a Guest and a User read the catalogue
-- **THEN** the User's list holds the document generators and the Guest's does not
+- **WHEN** a Guest reads the catalogue
+- **THEN** the system answers 403
 
 ### Requirement: Calling an editor tool
 
