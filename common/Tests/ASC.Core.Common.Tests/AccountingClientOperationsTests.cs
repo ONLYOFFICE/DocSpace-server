@@ -64,7 +64,7 @@ public class AccountingClientOperationsTests
         await client.GetCustomerOperationsAsync("portal-1", filter);
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-1/operations");
+        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/by-name/portal-1/operations");
 
         var query = ParseQuery(handler.LastUri);
         query["startDate"].Should().Be("2024-01-15T10:30:00.0000000Z");
@@ -97,7 +97,7 @@ public class AccountingClientOperationsTests
         await client.GetCustomerMonthlyUsageAsync("portal-1", filter);
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-1/usage/monthly");
+        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/by-name/portal-1/usage/monthly");
 
         var query = ParseQuery(handler.LastUri);
         query["timeZone"].Should().Be("Europe/Riga");
@@ -155,7 +155,7 @@ public class AccountingClientOperationsTests
         var calls = 0;
         var (client, _) = CreateAccountingClient(_ => ++calls == 1
             ? Reply(HttpStatusCode.OK, OperationsPage(count: 2, totalQuantity: 10))
-            : Reply(HttpStatusCode.BadRequest, "Customer not found"));
+            : CustomerNotFound());
 
         var act = async () =>
         {
@@ -187,7 +187,7 @@ public class AccountingClientOperationsTests
         }
 
         items.Should().Be(3);
-        paths.Should().Equal("/api/customer/portal-1/usage?offset=0", "/api/customer/portal-1/usage?offset=2");
+        paths.Should().Equal("/api/customer/by-name/portal-1/usage?offset=0", "/api/customer/by-name/portal-1/usage?offset=2");
     }
 
     // The usage report builds this filter from a JSON body, where an empty or blank value is not turned into null

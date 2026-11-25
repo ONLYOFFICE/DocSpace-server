@@ -40,7 +40,7 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Customer;
 /// </summary>
 public class CustomerServiceUsageTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    private const string UsageRoute = "/customer/{portalId}/usage";
+    private const string UsageRoute = "/customer/by-name/{portalId}/usage";
 
     [Fact]
     public async Task GetCustomerServiceUsage_TotalWithASplit_ReturnsItWithTheBonusPartMarked()
@@ -119,7 +119,7 @@ public class CustomerServiceUsageTests(AspireAppFixture fixture) : BaseTest(fixt
     {
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/usage",
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/usage",
                 """{"collection":[],"offset":0,"limit":25,"totalQuantity":0,"totalPage":0,"currentPage":1}""");
 
         var metadata = new Dictionary<string, string> { ["agent_id"] = "42", ["provider"] = "OpenAI" };
@@ -128,7 +128,7 @@ public class CustomerServiceUsageTests(AspireAppFixture fixture) : BaseTest(fixt
         await _paymentApi.GetCustomerServiceUsageAsync(metadata: metadata, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/{portalId}/usage").Subject;
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/by-name/{portalId}/usage").Subject;
         var query = HttpUtility.ParseQueryString(request.Query);
         query["metadata.agent_id"].Should().Be("42");
         query["metadata.provider"].Should().Be("OpenAI");

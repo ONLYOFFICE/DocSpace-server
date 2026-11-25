@@ -193,7 +193,7 @@ public class AccountingClientServiceLimitErrorTests
     [Fact]
     public async Task GetRequestOutsideServiceLimits_NotFound_IsStillRetried()
     {
-        // Outside the service limits a 404 may be transient: a customer created a moment ago may not be visible yet.
+        // Outside the service limits a 404 that names no missing customer may be transient, so it is asked again.
         var calls = 0;
         var (client, handler) = CreateAccountingClient(_ =>
         {

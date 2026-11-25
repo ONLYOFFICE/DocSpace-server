@@ -1950,14 +1950,16 @@ public static class AccountingHttpClientExtension
                         }
 
                         // A missing service limit is a definitive result ("no limit is set"), so its 404 is not retried.
-                        // Other 404s are retried: a customer created a moment ago may not be visible yet.
                         if (response.StatusCode == HttpStatusCode.NotFound && IsServiceLimitRequest(response.RequestMessage))
                         {
                             return false;
                         }
 
                         // "Customer not found" is a definitive result, not a transient error - retrying won't change it.
-                        if (response.StatusCode == HttpStatusCode.BadRequest)
+                        // The customer reads answer it with 404, which counts only when it names the customer, and the
+                        // service limit paths with 400, which counts whenever it says "not found". Other 404s and 400s
+                        // are retried.
+                        if (response.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.NotFound)
                         {
                             var content = await response.Content.ReadAsStringAsync();
                             return !IsCustomerNotFound(response.StatusCode, content);
@@ -2019,8 +2021,9 @@ public static class AccountingHttpClientExtension
         var detail = GetProblemDetail(content);
         var serviceLimitRequest = IsServiceLimitRequest(response.RequestMessage);
 
-        // On the service limit paths a 400 "not found" may name something other than the customer - a service group the
-        // accounting service does not have - and reporting that as a missing customer would hide the real reason.
+        // A missing customer is a 404 on the customer reads and a 400 on the service limit paths. There a 400 "not found"
+        // may name something other than the customer - a service group the accounting service does not have - and
+        // reporting that as a missing customer would hide the real reason.
         if (IsCustomerNotFound(response.StatusCode, content) &&
             (!serviceLimitRequest || detail.StartsWith("Customer", StringComparison.OrdinalIgnoreCase)))
         {
@@ -2113,8 +2116,18 @@ public static class AccountingHttpClientExtension
 
     private static bool IsCustomerNotFound(HttpStatusCode status, string content)
     {
-        return status == HttpStatusCode.BadRequest &&
-               content.Contains("not found", StringComparison.OrdinalIgnoreCase);
+        return status switch
+        {
+            HttpStatusCode.BadRequest => content.Contains("not found", StringComparison.OrdinalIgnoreCase),
+            HttpStatusCode.NotFound => IsCustomerNotFoundDetail(GetProblemDetail(content)),
+            _ => false
+        };
+    }
+
+    private static bool IsCustomerNotFoundDetail(string detail)
+    {
+        return detail.StartsWith("Customer", StringComparison.OrdinalIgnoreCase) &&
+               detail.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 
     // Registered in UrlParameterFormatterMap for bool only, so nullable and non-nullable booleans in both

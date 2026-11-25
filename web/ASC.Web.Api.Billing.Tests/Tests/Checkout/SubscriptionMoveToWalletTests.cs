@@ -55,7 +55,7 @@ public class SubscriptionMoveToWalletTests(AspireAppFixture fixture) : BaseTest(
             .Balance(0m)
             .On(PaymentService.Billing, "POST", "/billing/SubscriptionBalanceToWallet", """{"amount":0,"currency":"usd"}""")
             .On(PaymentService.Billing, "POST", "/billing/ChangeSubscription", "true")
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/goodwill", GoodwillJson((decimal)bonus));
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/goodwill", GoodwillJson((decimal)bonus));
 
         // the plan is read anew, so the move sees the paid subscription instead of the cached free plan
         await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
@@ -91,7 +91,7 @@ public class SubscriptionMoveToWalletTests(AspireAppFixture fixture) : BaseTest(
             .Balance(0m)
             .On(PaymentService.Billing, "POST", "/billing/SubscriptionBalanceToWallet", """{"amount":0,"currency":"usd"}""")
             .On(PaymentService.Billing, "POST", "/billing/ChangeSubscription", "true")
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/goodwill", GoodwillJson(40m, "EUR"));
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/goodwill", GoodwillJson(40m, "EUR"));
 
         // the plan is read anew, so the move sees the paid subscription instead of the cached free plan
         await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
@@ -113,11 +113,11 @@ public class SubscriptionMoveToWalletTests(AspireAppFixture fixture) : BaseTest(
         // Arrange
         Payments.Paid(Plans.AdminProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1), Owner.Email)
             .Customer(Owner.Email)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/balance",
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/balance",
                 $$"""{"accountNumber":{{Payments.AccountNumber}},"subAccountNumber":0,"accountCurrency":"USD","subAccounts":[]}""")
             .On(PaymentService.Billing, "POST", "/billing/SubscriptionBalanceToWallet", """{"amount":0,"currency":"usd"}""")
             .On(PaymentService.Billing, "POST", "/billing/ChangeSubscription", "true")
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/goodwill", GoodwillJson(40m));
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/goodwill", GoodwillJson(40m));
 
         // the plan is read anew, so the move sees the paid subscription instead of the cached free plan
         await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);

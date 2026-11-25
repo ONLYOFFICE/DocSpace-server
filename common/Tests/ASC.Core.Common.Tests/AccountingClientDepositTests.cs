@@ -35,7 +35,7 @@ namespace ASC.Core.Common.Tests;
 
 /// <summary>
 /// Contract tests for the balance top-ups of <see cref="AccountingClient"/>: the request line and query of
-/// <c>customer/{portalId}/deposits</c>, the deposit model read from the answer, and the paging over it.
+/// <c>customer/by-name/{portalId}/deposits</c>, the deposit model read from the answer, and the paging over it.
 /// </summary>
 public class AccountingClientDepositTests
 {
@@ -57,7 +57,7 @@ public class AccountingClientDepositTests
         var report = await client.GetCustomerDepositsAsync("portal-1", filter);
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-1/deposits");
+        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/by-name/portal-1/deposits");
 
         var query = ParseQuery(handler.LastUri);
         query["startDate"].Should().Be("2026-01-01T00:00:00.0000000Z");
@@ -144,7 +144,7 @@ public class AccountingClientDepositTests
         }
 
         ids.Should().Equal(1, 2, 3, 4, 5);
-        requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be("/api/customer/portal-1/deposits"));
+        requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be("/api/customer/by-name/portal-1/deposits"));
         requests.Select(uri => ParseQuery(uri)["offset"]).Should().Equal("0", "2", "4");
         requests.Should().AllSatisfy(uri => ParseQuery(uri)["limit"].Should().Be("2"));
     }

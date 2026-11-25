@@ -194,7 +194,7 @@ public class PaymentServiceContractTests
         return service switch
         {
             "Billing" => "POST /billing/GetPayments",
-            "Accounting" => "GET /customer/{portalId}/balance",
+            "Accounting" => "GET /customer/by-name/{portalId}/balance",
             _ => "GET /tenant/config"
         };
     }

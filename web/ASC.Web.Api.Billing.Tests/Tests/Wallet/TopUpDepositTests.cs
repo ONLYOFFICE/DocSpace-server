@@ -63,7 +63,7 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
         BillingValue(deposit, "CustomerParticipantName").Should().Be(Owner.Id.ToString());
 
         // The stack answers only once accounting shows the money: it reads the balance again after the charge.
-        calls.Skip(depositAt + 1).Should().Contain(call => call.Route == "/customer/{portalId}/balance",
+        calls.Skip(depositAt + 1).Should().Contain(call => call.Route == "/customer/by-name/{portalId}/balance",
             "a confirmed charge is waited for until the wallet moves");
     }
 
@@ -84,7 +84,7 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
         var depositAt = calls.FindIndex(call => call.Route == "/billing/Deposit");
         depositAt.Should().BeGreaterThanOrEqualTo(0);
         calls.Count(call => call.Route == "/billing/Deposit").Should().Be(1, "a declined charge is reported, not tried again");
-        calls.Skip(depositAt + 1).Should().NotContain(call => call.Route == "/customer/{portalId}/balance",
+        calls.Skip(depositAt + 1).Should().NotContain(call => call.Route == "/customer/by-name/{portalId}/balance",
             "nothing is waited for once billing declines the charge");
     }
 

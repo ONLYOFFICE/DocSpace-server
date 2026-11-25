@@ -191,6 +191,16 @@ internal static class PaymentStubs
         return StubResponse.Json(status, json);
     }
 
+    /// <summary>
+    /// What the accounting service answers on the customer reads (<c>customer/by-name/{name}/...</c>) for a portal it
+    /// has no customer for: 404 with the customer named in <c>detail</c>.
+    /// </summary>
+    public static StubResponse CustomerNotFound(string portalId = "portal-1")
+    {
+        return Reply(HttpStatusCode.NotFound,
+            $$"""{"title":"Resource not found","status":404,"detail":"Customer '{{portalId}}' not found","code":"not_found"}""");
+    }
+
     public static StubResponse TransportFault()
     {
         return StubResponse.TransportFault();

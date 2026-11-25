@@ -152,7 +152,7 @@ public class AccountingClientTests
         var balance = await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-1/balance");
+        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/by-name/portal-1/balance");
 
         balance.AccountNumber.Should().Be(42);
         balance.AccountCurrency.Should().Be("USD");
@@ -169,7 +169,7 @@ public class AccountingClientTests
 
         await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
-        handler.LastUri!.PathAndQuery.Should().Be("/customer/portal-1/balance");
+        handler.LastUri!.PathAndQuery.Should().Be("/customer/by-name/portal-1/balance");
     }
 
     [Fact]
@@ -261,13 +261,27 @@ public class AccountingClientTests
     [Fact]
     public async Task GetRequest_IsNotRetried_WhenCustomerNotFound()
     {
-        // A 400 "customer not found" on a GET is a definitive result - it must not be retried.
-        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.BadRequest, "Customer not found"));
+        // A 404 "customer not found" on a customer read is a definitive result - it must not be retried.
+        var (client, handler) = CreateAccountingClient(_ => CustomerNotFound());
 
         var act = async () => await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
         await act.Should().ThrowExactlyAsync<AccountingCustomerNotFoundException>();
         handler.CallCount.Should().Be(1);
+    }
+
+    [Theory]
+    [InlineData("""{"title":"Resource not found","status":404}""")]
+    [InlineData("""{"title":"Resource not found","status":404,"detail":"Customer 'portal-1' has no wallet","code":"not_found"}""")]
+    public async Task GetRequest_NotFoundOfSomethingElse_ThrowsNotFoundAfterRetries(string body)
+    {
+        // Only a 404 that names a missing customer is one; any other 404 stays a missing resource and is retried.
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.NotFound, body));
+
+        var act = async () => await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowExactlyAsync<AccountingNotFoundException>();
+        handler.CallCount.Should().Be(3);
     }
 
     [Fact]

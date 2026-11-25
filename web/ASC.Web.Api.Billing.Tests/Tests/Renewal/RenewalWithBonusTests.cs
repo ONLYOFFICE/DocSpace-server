@@ -59,7 +59,7 @@ public class RenewalWithBonusTests(AspireAppFixture fixture) : BaseTest(fixture)
             .Customer(Owner.Email)
             .Balance(0m)
             .On(PaymentService.Billing, "POST", "/billing/ChangeSubscription", "true")
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/goodwill", new JsonObject
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/goodwill", new JsonObject
             {
                 ["accountNumber"] = Payments.AccountNumber,
                 ["subAccountNumber"] = 53,

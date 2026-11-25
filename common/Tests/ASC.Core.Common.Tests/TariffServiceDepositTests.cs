@@ -47,7 +47,7 @@ public class TariffServiceDepositTests
 {
     private const int TenantId = 1;
     private const string PaymentRegion = "portal-";
-    private const string GoodwillPath = $"/api/customer/{PaymentRegion}1/goodwill";
+    private const string GoodwillPath = $"/api/customer/by-name/{PaymentRegion}1/goodwill";
 
     private static readonly DateTime _utcStartDate = new(2021, 3, 9, 17, 46, 59, DateTimeKind.Utc);
     private static readonly DateTime _utcEndDate = new(2026, 10, 26, 12, 0, 0, DateTimeKind.Utc);
@@ -75,7 +75,7 @@ public class TariffServiceDepositTests
         requests.Select(uri => ParseQuery(uri)["offset"]).Should().Equal("0", "100");
         requests.Should().AllSatisfy(uri =>
         {
-            uri.AbsolutePath.Should().Be($"/api/customer/{PaymentRegion}{TenantId}/deposits");
+            uri.AbsolutePath.Should().Be($"/api/customer/by-name/{PaymentRegion}{TenantId}/deposits");
 
             var query = ParseQuery(uri);
             query["startDate"].Should().Be("2021-03-09T17:46:59.0000000Z");
@@ -105,7 +105,7 @@ public class TariffServiceDepositTests
     [Fact]
     public async Task FindCustomerDeposit_NoAccountingCustomer_ThrowsCustomerNotFound()
     {
-        var (tariffService, _) = CreateService(_ => Reply(HttpStatusCode.BadRequest, "Customer not found"));
+        var (tariffService, _) = CreateService(_ => CustomerNotFound($"{PaymentRegion}{TenantId}"));
 
         var act = async () => await tariffService.FindCustomerDepositAsync(TenantId, 150, _utcStartDate, _utcEndDate, TestContext.Current.CancellationToken);
 
@@ -130,23 +130,23 @@ public class TariffServiceDepositTests
         var report = await tariffService.GetCustomerDepositsAsync(TenantId, new DepositFilter { Offset = 0, Limit = 25 });
 
         report.Collection.Select(d => d.Id).Should().Equal(7, 8);
-        handler.LastUri!.AbsolutePath.Should().Be($"/api/customer/{PaymentRegion}{TenantId}/deposits");
+        handler.LastUri!.AbsolutePath.Should().Be($"/api/customer/by-name/{PaymentRegion}{TenantId}/deposits");
     }
 
     // The list answers an empty result rather than an error, both for a portal without a wallet and for a failed read.
     [Theory]
-    [InlineData("Customer not found")]
-    [InlineData("The limit is out of range")]
-    public async Task GetCustomerDeposits_AccountingError_ReturnsNull(string body)
+    [InlineData(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404,"detail":"Customer 'portal-1' not found","code":"not_found"}""")]
+    [InlineData(HttpStatusCode.BadRequest, "The limit is out of range")]
+    public async Task GetCustomerDeposits_AccountingError_ReturnsNull(HttpStatusCode status, string body)
     {
-        var (tariffService, handler) = CreateService(_ => Reply(HttpStatusCode.BadRequest, body));
+        var (tariffService, handler) = CreateService(_ => Reply(status, body));
 
         var report = await tariffService.GetCustomerDepositsAsync(TenantId, new DepositFilter { Offset = 0, Limit = 25 });
 
         report.Should().BeNull();
         // The null comes from the answer, not from a failure before the request: TariffService turns either into null.
-        // A 400 that names no missing customer is asked again, so only the route of every request is pinned.
-        handler.Requests.Should().NotBeEmpty().And.OnlyContain(request => request.Path == $"/api/customer/{PaymentRegion}{TenantId}/deposits");
+        // A failure that names no missing customer is asked again, so only the route of every request is pinned.
+        handler.Requests.Should().NotBeEmpty().And.OnlyContain(request => request.Path == $"/api/customer/by-name/{PaymentRegion}{TenantId}/deposits");
     }
 
     [Fact]

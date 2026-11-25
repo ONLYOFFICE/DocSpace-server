@@ -279,7 +279,7 @@ public sealed class HttpStub : IDisposable
 
 /// <summary>
 /// A request as <see cref="HttpStub"/> received it, with the stub's own path prefix taken off, so a path reads as it
-/// does behind the configured base URL (<c>/billing/GetPayments</c>, <c>/api/customer/portal-1/balance</c>).
+/// does behind the configured base URL (<c>/billing/GetPayments</c>, <c>/api/customer/by-name/portal-1/balance</c>).
 /// </summary>
 public sealed record StubRequest(HttpMethod Method, Uri Uri, string? Body, string? ContentType, string? Authorization)
 {

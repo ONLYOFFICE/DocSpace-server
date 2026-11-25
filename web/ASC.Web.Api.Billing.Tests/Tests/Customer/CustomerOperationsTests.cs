@@ -45,7 +45,7 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
     {
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/operations",
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/operations",
                 """{"collection":[{"date":"2026-10-20T10:00:00Z","service":"ai-tools","description":"Chat","quantity":3,"currency":"USD","credit":0,"debit":1.5}],"offset":5,"limit":10,"totalQuantity":6,"totalPage":1,"currentPage":1}""");
 
         // Act
@@ -58,7 +58,7 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
         operation.Quantity.Should().Be(3);
         operation.Debit.Should().Be(1.5);
 
-        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/{portalId}/operations").Subject;
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/by-name/{portalId}/operations").Subject;
         var query = HttpUtility.ParseQueryString(request.Query);
         query["offset"].Should().Be("5");
         query["limit"].Should().Be("10");
@@ -70,14 +70,14 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
     {
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/operations",
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/operations",
                 """{"collection":[],"offset":0,"limit":25,"totalQuantity":0,"totalPage":0,"currentPage":1}""");
 
         // Act
         await _paymentApi.GetCustomerOperationsAsync(type: OperationType.GoodwillCredit, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/{portalId}/operations").Subject;
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/by-name/{portalId}/operations").Subject;
         HttpUtility.ParseQueryString(request.Query).GetValues("operationTypes").Should().Equal("GoodwillCredit");
     }
 
@@ -87,7 +87,7 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
         // Arrange: the rest of an expired bonus written off the bonus sub-account, and a charge paid partly by bonuses,
         // both with the parts given with a minus.
         Payments.Customer(Owner.Email).Balance(10m)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/operations",
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/operations",
                 """
                 {"collection":[
                   {"date":"2026-10-21T10:00:00Z","service":null,"description":null,"quantity":0,"currency":"USD","credit":0,"debit":4.5,"type":"GoodwillExpiration","sources":[{"subAccount":53,"amount":-4.5}]},
@@ -122,7 +122,7 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
 
         // Assert
         report.Should().BeNull();
-        PaymentCalls.Should().NotContain(call => call.Route == "/customer/{portalId}/operations");
+        PaymentCalls.Should().NotContain(call => call.Route == "/customer/by-name/{portalId}/operations");
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
     {
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/deposits",
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/deposits",
                 """{"collection":[{"id":15342,"date":"2026-10-23T11:13:53Z","sum":40.0,"currency":"USD","status":"Completed","paymentRef":"pi_3QabcDEF"},{"id":15343,"date":"2026-10-24T11:13:53Z","sum":20.0,"currency":"USD","status":"Completed","paymentRef":"ch_3QabcDEF"}],"offset":0,"limit":25,"totalQuantity":2,"totalPage":1,"currentPage":1}""");
 
         // Act
@@ -148,7 +148,7 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
     {
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/deposits",
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/deposits",
                 """{"collection":[],"offset":0,"limit":25,"totalQuantity":0,"totalPage":0,"currentPage":1}""");
 
         var metadata = new Dictionary<string, string> { ["details"] = "Automatic top up", ["source"] = "promo", ["empty"] = "", ["blank"] = " " };
@@ -158,7 +158,7 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
             cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/{portalId}/deposits").Subject;
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/by-name/{portalId}/deposits").Subject;
         var query = HttpUtility.ParseQueryString(request.Query);
         query["status"].Should().Be("Completed");
         query["initiator"].Should().Be("Automatic");
@@ -172,7 +172,7 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
     {
         // Arrange: a top-up by a user, one by the portal, and one accounting gives without an initiator.
         Payments.Customer(Owner.Email).Balance(10m)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/deposits",
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/deposits",
                 """{"collection":[{"id":1,"date":"2026-10-23T11:13:53Z","sum":40.0,"currency":"USD","status":"Completed","initiator":"Manual"},{"id":2,"date":"2026-10-24T11:13:53Z","sum":20.0,"currency":"USD","status":"Completed","initiator":"Automatic"},{"id":3,"date":"2026-10-25T11:13:53Z","sum":10.0,"currency":"USD","status":"Completed"}],"offset":0,"limit":25,"totalQuantity":3,"totalPage":1,"currentPage":1}""");
 
         // Act

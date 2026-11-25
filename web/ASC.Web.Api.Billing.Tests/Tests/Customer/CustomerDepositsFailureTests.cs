@@ -50,14 +50,14 @@ public class CustomerDepositsFailureTests(AspireAppFixture fixture) : BaseTest(f
     {
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/deposits", Failure, HttpStatusCode.InternalServerError);
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/deposits", Failure, HttpStatusCode.InternalServerError);
 
         // Act
         var exception = await Record.ExceptionAsync(
             async () => await _paymentApi.GetCustomerDepositsAsync(cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        PaymentCalls.Should().Contain(call => call.Route == "/customer/{portalId}/deposits", "the list is read from accounting");
+        PaymentCalls.Should().Contain(call => call.Route == "/customer/by-name/{portalId}/deposits", "the list is read from accounting");
         exception.Should().BeOfType<ApiException>("a failed read is not a portal without top-ups")
             .Which.ErrorCode.Should().Be(402);
     }
@@ -67,7 +67,7 @@ public class CustomerDepositsFailureTests(AspireAppFixture fixture) : BaseTest(f
     {
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/deposits", Failure, HttpStatusCode.InternalServerError);
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/deposits", Failure, HttpStatusCode.InternalServerError);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -75,6 +75,6 @@ public class CustomerDepositsFailureTests(AspireAppFixture fixture) : BaseTest(f
 
         // Assert
         exception.ErrorCode.Should().Be(402);
-        PaymentCalls.Should().Contain(call => call.Route == "/customer/{portalId}/deposits");
+        PaymentCalls.Should().Contain(call => call.Route == "/customer/by-name/{portalId}/deposits");
     }
 }

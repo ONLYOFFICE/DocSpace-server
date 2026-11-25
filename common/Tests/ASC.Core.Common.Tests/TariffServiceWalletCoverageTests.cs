@@ -48,8 +48,8 @@ public class TariffServiceWalletCoverageTests
 {
     private const int TenantId = 1;
     private const string PaymentRegion = "portal-";
-    private const string BalancePath = $"/api/customer/{PaymentRegion}1/balance";
-    private const string GoodwillPath = $"/api/customer/{PaymentRegion}1/goodwill";
+    private const string BalancePath = $"/api/customer/by-name/{PaymentRegion}1/balance";
+    private const string GoodwillPath = $"/api/customer/by-name/{PaymentRegion}1/goodwill";
 
     [Fact]
     public async Task EnsureWalletBalance_BonusCoversThePrice_TopsUpNothing()
@@ -195,7 +195,8 @@ public class TariffServiceWalletCoverageTests
     // that failed or an answer that cannot be read is unknown, never "no bonus".
     [Theory]
     [InlineData(HttpStatusCode.OK, """{"accountNumber":42,"subAccountNumber":53,"accountCurrency":"USD","subAccounts":[],"lots":[]}""", true)]
-    [InlineData(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer not found"}""", true)]
+    [InlineData(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404,"detail":"Customer 'portal-1' not found","code":"not_found"}""", true)]
+    [InlineData(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}""", false)]
     [InlineData(HttpStatusCode.InternalServerError, """{"title":"Internal Server Error","status":500}""", false)]
     [InlineData(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Something went wrong"}""", false)]
     [InlineData(HttpStatusCode.OK, "<html>Bad Gateway</html>", false)]

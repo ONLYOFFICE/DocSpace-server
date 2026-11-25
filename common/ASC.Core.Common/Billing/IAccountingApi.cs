@@ -40,10 +40,10 @@ namespace ASC.Core.Billing;
 /// </summary>
 public interface IAccountingApi
 {
-    [Get("/customer/{portalId}/balance")]
+    [Get("/customer/by-name/{portalId}/balance")]
     Task<Balance> GetCustomerBalanceAsync(string portalId, CancellationToken cancellationToken = default);
 
-    [Get("/customer/{portalId}/goodwill")]
+    [Get("/customer/by-name/{portalId}/goodwill")]
     Task<GoodwillBalance> GetCustomerGoodwillAsync(string portalId, CancellationToken cancellationToken = default);
 
     [Post("/session/open")]
@@ -58,13 +58,13 @@ public interface IAccountingApi
     [Post("/session/complete")]
     Task CompleteCustomerSessionAsync([Body] SessionCompleteOperation data);
 
-    [Get("/customer/{portalId}/operations")]
+    [Get("/customer/by-name/{portalId}/operations")]
     Task<Report> GetCustomerOperationsAsync(string portalId, [Query] OperationFilter filter);
 
-    [Get("/customer/{portalId}/usage/monthly")]
+    [Get("/customer/by-name/{portalId}/usage/monthly")]
     Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(string portalId, [Query] MonthlyUsageFilter filter);
 
-    [Get("/customer/{portalId}/usage")]
+    [Get("/customer/by-name/{portalId}/usage")]
     Task<UsageReport> GetCustomerServiceUsageAsync(string portalId, UsageFilter filter);
 
     /// <summary>
@@ -73,24 +73,24 @@ public interface IAccountingApi
     /// <see cref="BaseReport{T}.TotalQuantity"/> or on an empty page. Leave <see cref="PagedFilter.Offset"/> unset -
     /// the offset travels in its own query parameter.
     /// </summary>
-    [Get("/customer/{portalId}/operations")]
+    [Get("/customer/by-name/{portalId}/operations")]
     [Paged(Items = nameof(Report.Collection), Total = nameof(Report.TotalQuantity))]
     PagedEnumerable<Report, Operation> GetCustomerOperationPages(string portalId, [Query] OperationFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
 
     /// <summary>
     /// All service usage records matching the filter, page by page; paging as in <see cref="GetCustomerOperationPages"/>.
     /// </summary>
-    [Get("/customer/{portalId}/usage")]
+    [Get("/customer/by-name/{portalId}/usage")]
     [Paged(Items = nameof(UsageReport.Collection), Total = nameof(UsageReport.TotalQuantity))]
     PagedEnumerable<UsageReport, CustomerServiceUsage> GetCustomerServiceUsagePages(string portalId, UsageFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
 
-    [Get("/customer/{portalId}/deposits")]
+    [Get("/customer/by-name/{portalId}/deposits")]
     Task<DepositReport> GetCustomerDepositsAsync(string portalId, [Query] DepositFilter filter);
 
     /// <summary>
     /// All balance top-ups matching the filter, page by page; paging as in <see cref="GetCustomerOperationPages"/>.
     /// </summary>
-    [Get("/customer/{portalId}/deposits")]
+    [Get("/customer/by-name/{portalId}/deposits")]
     [Paged(Items = nameof(DepositReport.Collection), Total = nameof(DepositReport.TotalQuantity))]
     PagedEnumerable<DepositReport, Deposit> GetCustomerDepositPages(string portalId, [Query] DepositFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
 

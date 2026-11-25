@@ -41,8 +41,8 @@ namespace ASC.Web.Api.Billing.Tests.Tests.WalletServices;
 /// </summary>
 public class WalletPurchaseWithoutSubAccountTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    private const string BalanceRoute = "/customer/{portalId}/balance";
-    private const string GoodwillRoute = "/customer/{portalId}/goodwill";
+    private const string BalanceRoute = "/customer/by-name/{portalId}/balance";
+    private const string GoodwillRoute = "/customer/by-name/{portalId}/goodwill";
 
     [Fact]
     public async Task CalculateWalletPayment_NoWalletSubAccountButABonus_IsNotRefused()

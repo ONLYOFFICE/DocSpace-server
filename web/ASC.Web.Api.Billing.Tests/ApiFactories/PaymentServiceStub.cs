@@ -57,7 +57,7 @@ namespace ASC.Web.Api.Billing.Tests.ApiFactories;
 /// </remarks>
 public sealed class PaymentServiceStub : IDisposable
 {
-    private static readonly Regex _portalInPath = new(@"/(?:customer|by-customer)/(?<portal>[^/]+)", RegexOptions.Compiled);
+    private static readonly Regex _portalInPath = new(@"/(?:customer/by-name|customer|by-customer)/(?<portal>[^/]+)", RegexOptions.Compiled);
 
     /// <summary>Where the checkout addresses of the stub lead; the query names the products and the portal.</summary>
     public const string CheckoutUrl = "https://checkout.example.com/pay";
@@ -257,6 +257,11 @@ public sealed class PaymentServiceStub : IDisposable
                 PaymentServiceAnswer.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""),
 
             (PaymentService.Accounting, "GET", "/currency/all") => PaymentServiceAnswer.Json("[]"),
+
+            // The customer reads answer a missing customer with 404, the spending limits still with 400.
+            (PaymentService.Accounting, "GET", _) when call.Route.StartsWith("/customer/by-name/{portalId}/", StringComparison.Ordinal) =>
+                PaymentServiceAnswer.Json(HttpStatusCode.NotFound,
+                    $$"""{"title":"Resource not found","status":404,"detail":"Customer '{{call.PortalId}}' not found","code":"not_found"}"""),
             (PaymentService.Accounting, _, _) => PaymentServiceAnswer.Json(HttpStatusCode.BadRequest,
                 $$"""{"title":"Bad request","status":400,"detail":"Customer '{{call.PortalId}}' not found"}"""),
 
@@ -333,7 +338,7 @@ public enum PaymentService
 /// <summary>
 /// One request a service made to <see cref="PaymentServiceStub"/>. <see cref="Route"/> is the path below the
 /// service's base URL with the portal's key put back as <c>{portalId}</c>, so it reads like the client's own route:
-/// <c>/billing/GetActiveResources</c>, <c>/customer/{portalId}/balance</c>; <see cref="Query"/> is the query string
+/// <c>/billing/GetActiveResources</c>, <c>/customer/by-name/{portalId}/balance</c>; <see cref="Query"/> is the query string
 /// as it came, with its leading <c>?</c>.
 /// </summary>
 public sealed record PaymentServiceCall(PaymentService Service, string Method, string Route, string? PortalId, string? Body, string Query)
@@ -502,7 +507,7 @@ public sealed class PortalPayments(string portalId)
             _wallet = (amount, currency);
         }
 
-        On(PaymentService.Accounting, "GET", "/customer/{portalId}/balance", _ => PaymentServiceAnswer.Json(BalanceJson()));
+        On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/balance", _ => PaymentServiceAnswer.Json(BalanceJson()));
 
         return On(PaymentService.Billing, "POST", "/billing/Deposit", call =>
         {

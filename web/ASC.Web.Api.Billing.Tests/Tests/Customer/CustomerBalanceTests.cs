@@ -54,7 +54,7 @@ public class CustomerBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
         var subAccount = balance.SubAccounts.Should().ContainSingle().Subject;
         subAccount.Currency.Should().Be("USD");
         subAccount.Amount.Should().Be(150.25);
-        PaymentCalls.Should().Contain(call => call.Service == PaymentService.Accounting && call.Route == "/customer/{portalId}/balance");
+        PaymentCalls.Should().Contain(call => call.Service == PaymentService.Accounting && call.Route == "/customer/by-name/{portalId}/balance");
     }
 
     // The accounting service may send its times without an offset, or with an offset of its own; the answer gives the
@@ -67,7 +67,7 @@ public class CustomerBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         // Arrange
         Payments.Customer(Owner.Email)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/balance", $$"""
+            .On(PaymentService.Accounting, "GET", "/customer/by-name/{portalId}/balance", $$"""
                 {
                   "accountCurrency": "USD",
                   "subAccounts": [{"currency": "USD", "amount": 150.25}],
@@ -90,6 +90,6 @@ public class CustomerBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         balance.Should().BeNull();
-        PaymentCalls.Should().NotContain(call => call.Service == PaymentService.Accounting && call.Route == "/customer/{portalId}/balance");
+        PaymentCalls.Should().NotContain(call => call.Service == PaymentService.Accounting && call.Route == "/customer/by-name/{portalId}/balance");
     }
 }

@@ -39,7 +39,7 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Bonus;
 /// </summary>
 public class GoodwillBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    private const string GoodwillRoute = "/customer/{portalId}/goodwill";
+    private const string GoodwillRoute = "/customer/by-name/{portalId}/goodwill";
 
     [Fact]
     public async Task GetCustomerGoodwill_Customer_ReturnsTheBonusAccountWithItsCredits()
