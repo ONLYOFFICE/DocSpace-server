@@ -80,9 +80,9 @@ gallery, template or file of the format, 502 if the gallery fails (bug 78009).
 ### Requirement: Template gallery availability
 
 `getTemplateGalleryAvailable` (`GET api/2.0/files/templateGallery/available`) SHALL tell a signed-in caller
-the last answer the server got from its check of the template gallery, kept as the scenarios state, and SHALL
+the last answer of the server's check of the template gallery, kept as the scenarios state, and SHALL
 refuse an anonymous caller (401). It SHALL be `false` when no gallery is configured or a check fails with no
-earlier answer known. A `true` is kept for the installation; a failed check SHALL NOT replace it for a day
+`true` known from the last day. A `true` is kept for the installation; a failed check SHALL NOT replace it for a day
 after the last answer while the cache holds it (bug 78009).
 
 #### Scenario: Gallery answers
@@ -100,7 +100,7 @@ after the last answer while the cache holds it (bug 78009).
 - **WHEN** the gallery answers with an error status, with a page that is not the list, not in time, drops the connection, cannot be reached, the check fails for a reason other than the gallery, or the check runs past the hard timeout of the cache
 - **THEN** the call returns `false`
 - **AND** that `false` stays with the process that checked, for up to a minute: another process of the installation asks the gallery itself
-- **AND** after that minute, while a new check takes longer than 200 ms, the call returns the expired `false`
+- **AND** after that minute, while a new check takes longer than 200 ms, the call returns the expired `false`, for up to a day after it was stored
 
 #### Scenario: Check fails with available known
 

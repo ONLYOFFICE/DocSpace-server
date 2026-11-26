@@ -356,23 +356,24 @@ public class OFormRequestManager(
 
     /// <summary>
     /// Whether the gallery is configured and answers with its template list. "Available" is cached per list URL, kept
-    /// in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" by the fail-safe
-    /// of the cache, so a short failure of the gallery or the network never hides a gallery that answered before: for a
-    /// day after the gallery last answered, then a failed check means "unavailable". The time of that answer is kept in
-    /// the cached value, since every failed check stores the entry again and would otherwise keep it for as long as the
-    /// checks keep failing. Without a distributed cache (Redis off), a restart forgets it. With nothing known, a failed
-    /// check means "unavailable" for up to 1 minute, kept by this process only, so one process that cannot reach the
-    /// gallery never hides it from the others. A "true" another process writes ends it earlier, unless both checked at
-    /// almost the same moment: the backplane drops a notification older than the local entry, and the "unavailable"
-    /// stays for its minute. When the next check takes longer than 200 ms, a reader with an expired answer gets that
-    /// answer while the check continues in the background, except an "available" a day after the gallery last answered,
-    /// which that reader gets as "unavailable"; the check then caches what it gets, or, when it fails with "available"
-    /// known for less than a day, the fail-safe keeps that answer. A check past the cache's 5-second hard timeout with
-    /// nothing known answers "unavailable" after that timeout, and its late answer still goes into the cache. The CMS
-    /// probe times out after <see cref="ProbeTimeout"/>. Distributed cache access and waiting for its local lock can
-    /// add to the time. The check does not go through the circuit breaker of the download client (<see
-    /// cref="HttpClientName"/>), so it may answer a cached "available" while the downloads fail at once on an open
-    /// circuit.
+    /// in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" in this process
+    /// for a minute and then asks again, so a short failure of the gallery or the network never hides a gallery that
+    /// answered before: for a day after the gallery last answered, then a failed check means "unavailable". The time of
+    /// that answer is kept in the cached value, since every failed check stores the entry again and would otherwise
+    /// keep it for as long as the checks keep failing. The known "available" may be another process's, read from the
+    /// distributed cache, also when this process holds an expired "unavailable" of its own. Without a distributed cache
+    /// (Redis off), a restart forgets it. With nothing known, a failed check means "unavailable" for up to 1 minute,
+    /// kept by this process only, so one process that cannot reach the gallery never hides it from the others. A "true"
+    /// another process writes ends it earlier, unless both checked at almost the same moment: the backplane drops a
+    /// notification older than the local entry, and the "unavailable" stays for its minute. When the next check takes
+    /// longer than 200 ms, a reader with an expired answer of the last day gets that answer while the check continues
+    /// in the background, except an "available" a day after the gallery last answered, which that reader gets as
+    /// "unavailable"; the check then caches what it gets, or, when it fails with "available" known for less than a day,
+    /// keeps that answer. A check past the cache's 5-second hard timeout with nothing known answers "unavailable" after
+    /// that timeout, and its late answer still goes into the cache. The CMS probe times out after <see
+    /// cref="ProbeTimeout"/>. Distributed cache access and waiting for its local lock can add to the time. The check
+    /// does not go through the circuit breaker of the download client (<see cref="HttpClientName"/>), so it may answer
+    /// a cached "available" while the downloads fail at once on an open circuit.
     /// </summary>
     public async Task<bool> IsAvailableAsync()
     {
@@ -392,19 +393,19 @@ public class OFormRequestManager(
                     return new AvailabilityAnswer(true, now);
                 }
 
-                // A failed check is no answer: the fail-safe keeps a known "available" and asks again after a minute,
-                // until a day has passed since the gallery last answered
-                if (context.HasStaleValue && context.StaleValue.Value is { Available: true } known && !IsOlderThanTheFailSafe(known, now))
-                {
-                    return context.Fail("The template gallery did not answer its check");
-                }
+                // A failed check is no answer. A known "available" is kept, until a day has passed since the gallery last
+                // answered. It is returned here, not by context.Fail: with an expired "unavailable" of this process in
+                // memory and an "available" of another process in the distributed cache, the stale value the check sees
+                // is the "available", but the fail-safe of the cache gives back the "unavailable"
+                var known = context.HasStaleValue ? context.StaleValue.Value : null;
 
-                // "Unavailable" stays in this process: it never replaces the answer other processes got
+                // What the failed check answers stays in this process for a minute: it never replaces the answer other
+                // processes got, and the gallery is asked again after it
                 context.Options.Duration = _unavailableDuration;
                 context.Options.SkipDistributedCacheWrite = true;
                 context.Options.SkipBackplaneNotifications = true;
 
-                return new AvailabilityAnswer(false, now);
+                return known is { Available: true } && !IsOlderThanTheFailSafe(known, now) ? known : new AvailabilityAnswer(false, now);
             }, entry => entry
                 .SetDuration(_availableDuration)
                 .SetFailSafe(true, _availabilityFailSafe, _unavailableDuration)

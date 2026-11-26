@@ -1054,7 +1054,9 @@ public sealed class OFormRequestManagerTests : IDisposable
 
         failing = true;
         var refreshFailed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _cache.Events.FactorySuccess += (_, _) => refreshFailed.TrySetResult();
         _cache.Events.FactoryError += (_, _) => refreshFailed.TrySetResult();
+        _cache.Events.BackgroundFactorySuccess += (_, _) => refreshFailed.TrySetResult();
         _cache.Events.BackgroundFactoryError += (_, _) => refreshFailed.TrySetResult();
         await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: TestContext.Current.CancellationToken);
 
@@ -1096,6 +1098,10 @@ public sealed class OFormRequestManagerTests : IDisposable
         await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: token);
 
         (await manager.IsAvailableAsync()).Should().BeFalse();
+
+        // The check itself stops keeping the "available", not only the answer to the reader: the cache then holds
+        // "unavailable". Waiting for it also lets a check that ended in the background finish before the test does
+        await WaitForCachedAnswerAsync(_cache, AvailabilityCacheKey(gallery), expected: false);
     }
 
     [Fact]
@@ -1144,6 +1150,7 @@ public sealed class OFormRequestManagerTests : IDisposable
 
         failing = true;
         var refreshFailed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _cache.Events.BackgroundFactorySuccess += (_, _) => refreshFailed.TrySetResult();
         _cache.Events.BackgroundFactoryError += (_, _) => refreshFailed.TrySetResult();
         await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: TestContext.Current.CancellationToken);
 
@@ -1235,6 +1242,33 @@ public sealed class OFormRequestManagerTests : IDisposable
         failing = false;
         (await CreateManager(gallery.Url, cache: second).IsAvailableAsync()).Should().BeTrue();
         gallery.CallCount.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_LocalFalseAndATrueOfAnotherNode_FailedCheckKeepsTheTrue()
+    {
+        // A node that failed with nothing known keeps its "unavailable" to itself; another node has since put an
+        // "available" into the distributed cache, which has expired there but is kept by its fail-safe. When the node's
+        // own "unavailable" has expired too and its check fails, the "available" of the last day wins
+        var distributed = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        using var first = CreateNodeCache(distributed);
+        using var second = CreateNodeCache(distributed);
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.BadGateway));
+        var firstManager = CreateManager(gallery.Url, cache: first);
+        var key = AvailabilityCacheKey(gallery);
+        var token = TestContext.Current.CancellationToken;
+
+        (await firstManager.IsAvailableAsync()).Should().BeFalse();
+
+        // The other node's answer, already past its duration in the distributed cache, and the node's own minute over
+        await second.SetAsync(key, new OFormRequestManager.AvailabilityAnswer(true, DateTimeOffset.UtcNow), options => options
+            .SetDuration(TimeSpan.FromMilliseconds(1))
+            .SetFailSafe(true, TimeSpan.FromDays(1)), token);
+        await first.ExpireAsync(key, options => options.SkipDistributedCacheWrite = true, token);
+        await Task.Delay(TimeSpan.FromMilliseconds(50), token);
+
+        (await firstManager.IsAvailableAsync()).Should().BeTrue();
+        gallery.CallCount.Should().Be(2);
     }
 
     [Fact]
