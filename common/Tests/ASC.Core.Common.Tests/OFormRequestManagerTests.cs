@@ -873,9 +873,10 @@ public sealed class OFormRequestManagerTests : IDisposable
     {
         // The default client and the other standard ones keep the cookies the gallery sets for every caller of the
         // process. The check asks with customHttpClientNoCookie, whose handler keeps none
-        // (StandardHttpClientsTests.NoCookieClient_KeepsNoCookies): every other client of this test fails
+        // (StandardHttpClientsTests.NoCookieClient_KeepsNoCookies): every other client of this test fails, the gallery's
+        // own too, since no pipeline of the gallery is registered here
         var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List));
-        var manager = CreateManager(gallery.Url, onlyWorkingClient: "customHttpClientNoCookie");
+        var manager = CreateManager(gallery.Url, registerPipelines: false, onlyWorkingClient: "customHttpClientNoCookie");
 
         (await manager.IsAvailableAsync()).Should().BeTrue();
     }
@@ -1317,7 +1318,10 @@ public sealed class OFormRequestManagerTests : IDisposable
     /// </param>
     /// <param name="retryDelay">The first wait before a retry of the download; 50 ms by default, so retries stay quick.</param>
     /// <param name="attemptTimeout">The timeout of one request of the download in place of the manager's 10 seconds.</param>
-    /// <param name="onlyWorkingClient">The only client name that reaches the network; every other client of the factory fails.</param>
+    /// <param name="onlyWorkingClient">
+    /// The only client name that reaches the network; every other client of the factory fails, except the gallery's own
+    /// when <paramref name="registerPipelines"/> is <c>true</c>, which keeps the handler AddTemplateGalleryPipelines gives it.
+    /// </param>
     private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null,
         Func<HttpMessageHandler>? primaryHandler = null, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null,
         ILoggerProvider? loggerProvider = null, bool registerPipelines = true, TimeSpan? retryDelay = null, TimeSpan? attemptTimeout = null,
