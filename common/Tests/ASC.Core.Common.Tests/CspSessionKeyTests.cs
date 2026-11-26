@@ -122,6 +122,14 @@ public class CspSessionKeyTests
     }
 
     [Fact]
+    public void PersonalDomains_AfterUnknown_CountAsChangedButNoneAsAdded()
+    {
+        // Act and assert
+        CspSettingsHelper.PersonalDomainsChanged(["a.example"], null).Should().BeTrue();
+        CspSettingsHelper.PersonalDomainsAdded(["a.example"], null).Should().BeFalse();
+    }
+
+    [Fact]
     public void GetGenerationHostKeys_AliasAndRequestHost_AreAddedToTheHeaderKeys()
     {
         // Act

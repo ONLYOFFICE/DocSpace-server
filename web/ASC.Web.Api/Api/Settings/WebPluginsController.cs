@@ -375,7 +375,7 @@ public class WebPluginsController(
         }
         catch (Exception e)
         {
-            logger.WarningPersonalCspDomainsBeforeNotRead(e);
+            logger.WarningPersonalCspDomainsNotRead(e);
 
             return null;
         }
@@ -385,11 +385,16 @@ public class WebPluginsController(
     {
         try
         {
-            var domains = await webPluginManager.GetPersonalCspDomainsAsync(tenantId);
+            var domains = await GetPersonalCspDomainsAsync(tenantId);
 
             if (CspSettingsHelper.PersonalDomainsChanged(domainsBefore, domains))
             {
                 await cspSettingsHelper.ResetPersonalAsync();
+            }
+
+            if (domains == null)
+            {
+                return;
             }
 
             var sessionKey = await cspSettingsHelper.GetSessionKeyAsync();
@@ -422,7 +427,7 @@ public class WebPluginsController(
         }
         catch (Exception e)
         {
-            logger.WarningPersonalCspNotUpdated(e);
+            logger.WarningSessionCspKeyNotRead(e);
 
             return null;
         }

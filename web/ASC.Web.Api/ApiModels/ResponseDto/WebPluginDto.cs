@@ -84,8 +84,8 @@ public class WebPluginDto
     public required string Author { get; set; }
 
     /// <summary>
-    /// The plugin's own page, for a person to read more about it. It is an http or https address, and empty when the
-    /// manifest names none or names an address of another kind.
+    /// The plugin's own page, for a person to read more about it. It is an http or https address, left out when the
+    /// manifest names none or an address of another kind.
     /// </summary>
     /// <example>https://example.com</example>
     public required string HomePage { get; set; }
@@ -104,8 +104,9 @@ public class WebPluginDto
     public required string Scopes { get; set; }
 
     /// <summary>
-    /// The plugin's icon as a path inside the plugin's own package - resolve it against the directory `url` points
-    /// into. It is empty when the manifest names none, or names an absolute address or a path outside the package.
+    /// The plugin's icon, as a path inside the `assets` folder of the package. Resolve it against `assets/` in the
+    /// directory `url` points into. It is left out when the manifest names none or anything but a plain path inside
+    /// the package.
     /// </summary>
     /// <example>icon.svg</example>
     public required string Image { get; set; }

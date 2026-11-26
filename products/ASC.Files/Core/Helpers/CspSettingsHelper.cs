@@ -147,12 +147,12 @@ public class CspSettingsHelper(
 
     public static bool PersonalDomainsChanged(IEnumerable<string> before, IEnumerable<string> after)
     {
-        return before == null || !after.ToHashSet(StringComparer.OrdinalIgnoreCase).SetEquals(before);
+        return before == null || after == null || !after.ToHashSet(StringComparer.OrdinalIgnoreCase).SetEquals(before);
     }
 
     public static bool PersonalDomainsAdded(IEnumerable<string> before, IEnumerable<string> after)
     {
-        return before != null && after.Except(before, StringComparer.OrdinalIgnoreCase).Any();
+        return before != null && after != null && after.Except(before, StringComparer.OrdinalIgnoreCase).Any();
     }
 
     public static bool CanCacheSessionHeader(string authorization, IEnumerable<string> cookieHeaders, string authKey)

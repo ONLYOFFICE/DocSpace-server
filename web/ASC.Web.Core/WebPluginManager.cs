@@ -198,7 +198,7 @@ public class WebPluginManager(
     {
         return !string.IsNullOrWhiteSpace(path) &&
             path[0] is not ('/' or '\\') &&
-            path.IndexOfAny([':', '?', '#', '%']) < 0 &&
+            !path.Any(c => c is ':' or '?' or '#' or '%' || char.IsControl(c)) &&
             !path.Split('/', '\\').Any(segment => segment is "" or "." or "..");
     }
 

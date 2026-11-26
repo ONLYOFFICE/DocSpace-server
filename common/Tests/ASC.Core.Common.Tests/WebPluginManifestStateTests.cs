@@ -108,6 +108,8 @@ public class WebPluginManifestStateTests
     [InlineData("logo%2Esvg", null)]
     [InlineData("\\logo.svg", null)]
     [InlineData("icons/./logo.svg", null)]
+    [InlineData("\t../plugin.js", null)]
+    [InlineData("icons/\n../logo.svg", null)]
     public void PrepareStoredPlugin_Image_KeptOnlyAsAPathInsideThePackage(string image, string? expected)
     {
         // Arrange
