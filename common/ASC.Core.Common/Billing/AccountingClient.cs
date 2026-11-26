@@ -383,7 +383,7 @@ public enum OperationOrderType
 /// <summary>
 /// The operation type
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(TolerantOperationTypeConverter))]
 public enum OperationType
 {
     [Description("Unknown")]
@@ -434,6 +434,49 @@ public enum OperationType
     /// </summary>
     [Description("The unspent rest of a bonus credit written off when the credit expires")]
     GoodwillExpiration
+}
+
+/// <summary>
+/// Reads <see cref="OperationType"/> from the accounting answer as <see cref="JsonStringEnumConverter"/> does, except that a
+/// type this enum does not know yet reads as <see cref="OperationType.Unknown"/> instead of failing the whole page: the
+/// accounting service adds operation types on its own schedule, and one new row must not hide the history of a portal.
+/// Writes the name, as before.
+/// </summary>
+internal sealed class TolerantOperationTypeConverter : JsonConverter<OperationType>
+{
+    public override OperationType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        switch (reader.TokenType)
+        {
+            case JsonTokenType.String:
+                // Enum.TryParse would also take numbers and comma lists, so only a name matches.
+                var text = reader.GetString();
+
+                foreach (var name in Enum.GetNames<OperationType>())
+                {
+                    if (string.Equals(name, text, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return Enum.Parse<OperationType>(name);
+                    }
+                }
+
+                return OperationType.Unknown;
+
+            case JsonTokenType.Number when reader.TryGetInt32(out var number) && Enum.IsDefined((OperationType)number):
+                return (OperationType)number;
+
+            case JsonTokenType.Number:
+                return OperationType.Unknown;
+
+            default:
+                throw new JsonException($"Unexpected token {reader.TokenType} for {nameof(OperationType)}");
+        }
+    }
+
+    public override void Write(Utf8JsonWriter writer, OperationType value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString());
+    }
 }
 
 /// <summary>

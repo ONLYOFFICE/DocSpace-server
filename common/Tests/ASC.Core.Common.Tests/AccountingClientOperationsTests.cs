@@ -106,6 +106,18 @@ public class AccountingClientOperationsTests
     }
 
     [Fact]
+    public async Task GetCustomerOperations_TypeTheClientDoesNotKnow_ReadsAsUnknownAndKeepsThePage()
+    {
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
+            """{"collection":[{"type":"Deposit"},{"type":"SubscriptionRefund"},{"type":"goodwillCredit"},{"type":4}],"totalQuantity":4}"""));
+
+        var report = await client.GetCustomerOperationsAsync("portal-1", new OperationFilter());
+
+        report.Collection.Select(operation => operation.Type).Should().Equal(
+            OperationType.Deposit, OperationType.Unknown, OperationType.GoodwillCredit, OperationType.Deposit);
+    }
+
+    [Fact]
     public async Task GetCustomerOperationPages_AdvancesOffsetByItemsUntilTotalQuantity()
     {
         var requests = new List<Uri>();
