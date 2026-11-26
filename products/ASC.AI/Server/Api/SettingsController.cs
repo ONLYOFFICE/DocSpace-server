@@ -46,7 +46,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     [SwaggerResponse(200, "Vectorization settings", typeof(VectorizationSettingsDto))]
     [SwaggerResponse(400, "The request body cannot be read, `type` is not a known provider type, `key` is empty for a provider, or the provider rejects `key`")]
     [SwaggerResponse(403, "The installation has an AI gateway configured, which manages these settings, or the caller is not a DocSpace administrator")]
-    [SwaggerResponse(502, "The embedding provider did not answer, answered with a server error, or limited the requests")]
+    [SwaggerResponse(502, "The embedding provider did not answer or answered with an error status (a server error, a limit of the requests, or any other refusal)")]
     [HttpPut("config/vectorization")]
     [AiFeature]
     public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)

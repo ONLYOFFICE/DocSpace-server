@@ -250,15 +250,16 @@ public class LicenseController(
     /// including such a token after the wizard is complete. The call changes data. A
     /// new upload replaces the staged file, so you can repeat it. The call returns a localized text that you can show
     /// to the user. For a license past its due date, the text adds the date when support and updates ended. The call
-    /// still accepts such a license. The call returns 400 if the request has no file or the license starts
-    /// later. It returns 415 on a SaaS or open-source installation, which takes no license file. The editing service
-    /// checks the license only at activation.
+    /// still accepts such a license. The call returns 400 if the request has no file or the license starts later. It
+    /// also returns 400 for a file that is empty, cannot be read, or has no customer ID or signature. It returns 415
+    /// on a SaaS or open-source installation, which takes no license file. The editing service checks the license
+    /// only at activation.
     /// </remarks>
     /// <summary>Upload a license</summary>
     /// <path>api/2.0/settings/license</path>
     [Tags("Settings / License")]
     [SwaggerResponse(200, "A localized confirmation that the file was staged, carrying the date support and updates ended when the license is already overdue", typeof(string))]
-    [SwaggerResponse(400, "The request carried no license file, or the license does not start until a later date")]
+    [SwaggerResponse(400, "The request carried no license file, the file is empty, cannot be read or has no customer ID or signature, or the license does not start until a later date")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or a confirmation link was used after the setup wizard had already been completed")]
     [SwaggerResponse(415, "The installation has no license path configured, so it cannot be given a license file")]
     [AllowNotPayment]

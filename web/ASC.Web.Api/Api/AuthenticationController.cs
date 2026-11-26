@@ -258,7 +258,7 @@ public class AuthenticationController(
     [SwaggerResponse(200, "The authentication token, or the second factor that has to be passed before a token is issued", typeof(AuthenticationTokenDto))]
     [SwaggerResponse(400, "The request body could not be validated, for example `confirmData.email` is not an email address")]
     [SwaggerResponse(401, "The password, the confirmation key or the third-party profile was rejected, or third-party sign-in is not allowed for this portal")]
-    [SwaggerResponse(403, "The user is disabled, too many failed attempts and CAPTCHA failures have blocked further sign-ins for these credentials, or the phone number has been sent too many SMS codes")]
+    [SwaggerResponse(403, "The user is disabled, or too many failed attempts and CAPTCHA failures have blocked further sign-ins for these credentials")]
     [SwaggerResponse(404, "No user of this portal matches the credentials in the request body")]
     [SwaggerResponse(429, "The portal rate limiter rejected the call - retry after the interval in the `Retry-After` header")]
     [AllowNotPayment, AllowAnonymous]
@@ -524,9 +524,10 @@ public class AuthenticationController(
     /// 403. The call changes data. It saves the number as not activated. The number becomes activated when
     /// `POST api/2.0/authentication/{code}` accepts a code sent to it. If a code sent to this number is still valid,
     /// the call sends no new SMS. You can repeat it to change a number that is not activated yet. The answer has no
-    /// token. To send another code, use `POST api/2.0/authentication/sendsms`. The call cannot change an activated
-    /// number. If SMS codes are on for the user but the portal cannot send them, the call returns 405. It still saves
-    /// the number but sends no SMS.
+    /// token. To send another code, use `POST api/2.0/authentication/sendsms`. If the number of the account is already
+    /// activated, the call returns 409 and changes nothing. A number without digits returns 400. If SMS codes are on
+    /// for the user but the portal cannot send them, the call returns 405. It still saves the number but sends no
+    /// SMS.
     /// </remarks>
     /// <summary>
     /// Set a mobile phone
@@ -536,7 +537,7 @@ public class AuthenticationController(
     [SwaggerResponse(200, "The masked phone number the code was sent to and the moment that code expires - no authentication token yet", typeof(AuthenticationTokenDto))]
     [SwaggerResponse(400, "The phone number has no digits")]
     [SwaggerResponse(401, "The request carries no confirmation token from a phone activation link, or the link is invalid or expired")]
-    [SwaggerResponse(403, "The request is signed with an authentication token instead of the phone activation link, or the phone number has been sent too many SMS codes")]
+    [SwaggerResponse(403, "The request is signed with an authentication token instead of the phone activation link")]
     [SwaggerResponse(405, "SMS two-factor is switched on for the user but the portal cannot send SMS codes, for example because its plan does not include them; the number is stored and no code is sent")]
     [SwaggerResponse(409, "The phone number of the account is already activated and cannot be replaced")]
     [AllowNotPayment]

@@ -527,14 +527,14 @@ public class SettingsController(
     /// deletes the previous custom blank of that extension. So a repeated call makes a new copy and deletes the
     /// previous one. If the extension is not in the built-in template set, the call changes nothing. If the caller
     /// cannot copy the file, the call returns 403. The call returns 400 if `selectedFile` is neither a number nor a
-    /// string. It also returns 400 if the file extension is not exactly `fileExtension`, including case. If the file
-    /// does not exist, the call returns 404.
+    /// string. It also returns 400 for a number that is not a 32-bit integer. It also returns 400 if the file
+    /// extension is not exactly `fileExtension`, including case. If the file does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Change the default template setting</summary>
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The blank document configured for each supported extension after the change", typeof(DefaultTemplateSettingsDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `selectedFile` or `fileExtension`, the file identifier is of an unsupported kind, or its extension is not the one requested")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `selectedFile` or `fileExtension`, the file identifier is of an unsupported kind or a number that is not a 32-bit integer, or its extension is not the one requested")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or may not copy the selected file")]
     [SwaggerResponse(404, "The selected file does not exist")]
     [HttpPut("settings/defaulttemplate")]

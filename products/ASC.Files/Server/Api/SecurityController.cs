@@ -393,8 +393,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// common section. A file that is locked or being edited also returns 403. If the new owner lacks keys to some
     /// encrypted files of a private room, the call returns 409. To find these files, use
     /// `GET api/2.0/privacyroom/{roomId}/access/missing`. After their keys are added, repeat the call. Without
-    /// `userId`, the call returns 400. It also returns 400 if a string file id points to a storage account that is
-    /// not connected.
+    /// `userId`, the call returns 400. It also returns 400 for a numeric id that is not a 32-bit integer. A string
+    /// file id that points to a storage account that is not connected also returns 400.
     /// </remarks>
     /// <summary>Change the room or file owner</summary>
     /// <path>api/2.0/files/owner</path>
@@ -404,7 +404,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for every file whose owner changes")]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rooms and files whose owner has been changed, as folder and file objects", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `userId`, or a third-party file identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`, a numeric identifier is not a 32-bit integer, or a third-party file identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The new owner is not an active account allowed to manage rooms or has not set up encryption keys for a listed private room, the caller may not change the owner of a listed entry, a listed folder lies outside the rooms and common sections, or a listed file is locked, being edited or lies outside the common section")]
     [SwaggerResponse(409, "The new owner holds no key for some encrypted files of a listed private room: `GET api/2.0/privacyroom/{roomId}/access/missing` names them, and the call can be repeated once their keys are written")]
     [HttpPost("owner")]
@@ -499,15 +499,15 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// nothing but returns the rights of the other listed subjects on that entry. In a listed room, a repeated `None`
     /// for an account emails a room invitation if `notify` is true. For one room, use
     /// `PUT api/2.0/files/rooms/{id}/share`. The call returns 400 for an invalid or too long `email`, too many email
-    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access, or lacks
-    /// encryption keys for a private room.
+    /// invitations, or a too long `sharingMessage`. It also returns 400 for a numeric id that is not a 32-bit integer.
+    /// It returns 403 if a subject cannot get the access, or lacks encryption keys for a private room.
     /// </remarks>
     /// <summary>Set sharing rights in batch</summary>
     /// <path>api/2.0/files/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rights of the listed accounts and groups on every entry that was processed", typeof(IAsyncEnumerable<FileShareDto>))]
-    [SwaggerResponse(400, "The request body cannot be read, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, or `sharingMessage` is longer than 255 characters")]
+    [SwaggerResponse(400, "The request body cannot be read, a numeric identifier is not a 32-bit integer, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, or `sharingMessage` is longer than 255 characters")]
     [SwaggerResponse(403, "The caller may not change the sharing of a listed entry, a listed subject cannot be given the requested access on it, or a listed private room has an account in `share` that has not set up its encryption keys")]
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfo(SecurityInfoRequestDto inDto)

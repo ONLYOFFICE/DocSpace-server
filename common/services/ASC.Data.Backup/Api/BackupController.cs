@@ -130,8 +130,10 @@ public class BackupController(
     /// are spent and the paid service is off, the scheduler deletes the schedule. It then sends a notice that
     /// the scheduled backup failed. The call returns 400 if `cronParams` is missing or a value is out of range.
     /// A weekly or monthly schedule without `day` also returns 400. It also returns 400 if `storageParams` has
-    /// no key that the storage needs, or repeats a key. It also returns 400 for an unknown `module` or a
-    /// `Documents` folder ID that is not a number. If the target folder does not exist, the call returns 404.
+    /// no key that the storage needs, or repeats a key. An item of `storageParams` without a key or a value also
+    /// returns 400. So does `Local` storage on a portal that is not a standalone installation. It also returns 400
+    /// for an unknown `module` or a `Documents` folder ID that is not a number. If the target folder does not exist,
+    /// the call returns 404.
     /// It returns 403 if you cannot create files in the folder. The root folders of rooms, the archive, and
     /// room templates also return 403. If the plan has no free backups and the paid backup service is off, the
     /// call returns 402. It also returns 402 if the portal subscription has expired or is not paid.
@@ -140,7 +142,7 @@ public class BackupController(
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "True if the schedule was saved", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read, `cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, the number of the stored copies is outside 1-30, `storageType` is not a storage the backups can be written to, a `ThirdPartyConsumer` schedule has no known `module`, the `folderId` or `filePath` key the storage type needs is missing, the `folderId` of a `Documents` schedule is not a number, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`")]
+    [SwaggerResponse(400, "The request body cannot be read, `cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, the number of the stored copies is outside 1-30, `storageType` is not a storage the backups can be written to, a `ThirdPartyConsumer` schedule has no known `module`, the `folderId` or `filePath` key the storage type needs is missing, the `folderId` of a `Documents` schedule is not a number, a dump or `Local` storage was requested on a portal that is not a standalone installation, an item of `storageParams` is null, has no key or no value, or `storageParams` repeats a key or, on a dump, contains `tenantId`")]
     [SwaggerResponse(402, "The portal subscription does not cover scheduled backups, has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder was not found")]
@@ -236,15 +238,17 @@ public class BackupController(
     /// to the portal wallet. It then also turns on the paid backup service. If the wallet cannot pay for the backup,
     /// the call returns 402. It also returns 402 for a `Documents` backup if the portal is over its storage quota. The
     /// call returns 400 if `folderId` is missing or does not match `storageType`. It also returns 400 if an item of
-    /// `storageParams` has no key or value, or repeats a key. If the target folder does not exist, the call returns
-    /// 404. It returns 403 if you cannot create files in the folder. The root folders of rooms, the archive, and room
+    /// `storageParams` has no key or value, or repeats a key. `Local` storage without `filePath` also returns 400. So
+    /// does `Local` storage on a portal that is not a standalone installation. If the target folder does not exist,
+    /// the call returns 404. It returns 403 if you cannot create files in the folder. The root folders of rooms, the
+    /// archive, and room
     /// templates also return 403.
     /// </remarks>
     /// <summary>Start the backup</summary>
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The state of the queued backup job", typeof(BackupProgressDto))]
-    [SwaggerResponse(400, "The request body cannot be read, the folder ID does not match the storage type or is missing, an item of `storageParams` is null, has no key or no value, or repeats a key, or a dump was requested on a portal that is not a standalone installation")]
+    [SwaggerResponse(400, "The request body cannot be read, the folder ID does not match the storage type or is missing, an item of `storageParams` is null, has no key or no value, or repeats a key, `Local` storage has no `filePath`, or a dump or `Local` storage was requested on a portal that is not a standalone installation")]
     [SwaggerResponse(402, "The portal already uses more storage than its plan allows and the backup goes to `Documents`, or the free backups of the current month are used up and the paid backup service is not available to this portal or cannot be charged")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder or the backup quota was not found")]

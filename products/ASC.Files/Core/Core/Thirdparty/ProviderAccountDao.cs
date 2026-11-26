@@ -179,10 +179,13 @@ internal class ProviderAccountDao(
     }
 
     /// <summary>
-    /// Asks the storage whether it accepts the credentials. A refusal is false (the callers answer 403). A storage that
-    /// cannot be asked at all (no connection, a timeout, an error of its API) used to reach the caller as a 500; it is a
-    /// failure of the upstream storage, so it is 502, as a third-party folder that cannot be listed is. The refusals of
-    /// our own code on the way (an address that is not a URL, a missing token) keep their status.
+    /// Asks the storage whether it accepts the credentials. A refusal the provider's own check reports as false stays
+    /// false (the callers answer 403). Any other exception used to reach the caller as a 500; it is read as a failure of
+    /// the upstream storage (no connection, a timeout, an error of its API), so it is 502, as a third-party folder that
+    /// cannot be listed is. ArgumentException, UnauthorizedAccessException, SecurityException, InvalidOperationException
+    /// and HttpException keep their status, as the refusals of our own code on the way do (an address that is not a URL,
+    /// a missing token). The split is by exception type only: a provider whose check throws on a rejected token instead
+    /// of returning false answers 502, and one of the listed types thrown by a provider library keeps its status.
     /// </summary>
     public async Task<bool> CheckProviderInfoAsync(IProviderInfo providerInfo)
     {

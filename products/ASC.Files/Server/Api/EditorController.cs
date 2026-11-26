@@ -591,7 +591,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// `http://` to an address without a scheme. Requires the EditPortalSettings permission, which the portal owner
     /// and DocSpace admins have. Other callers get 403. The call changes data, and you can repeat it with the same
     /// body. The check calls the editor api script, the healthcheck, the converter, the command service, and the
-    /// document builder. If one fails, the portal restores all previous settings. Then the call fails. On success,
+    /// document builder. If one fails, the portal restores all previous settings, and the call returns 502. On success,
     /// it returns what `GET api/2.0/files/docservice` returns without `version`. The call returns 400 if an address
     /// cannot be parsed or is an absolute address with a query string. It also returns 400 for a secret without a
     /// header. It also returns 400 for an `http` public address on a portal served over `https`.
@@ -604,7 +604,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     [SwaggerResponse(200, "The settings are stored and the Document Server answered the verification requests", typeof(DocServiceUrlDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `docServiceUrl`, an address cannot be parsed or carries a query string, the signature secret is sent without its header, or an http address is given for a portal served over https")]
     [SwaggerResponse(403, "The caller is not the portal owner or a DocSpace administrator")]
-    [SwaggerResponse(502, "The Document Server did not answer the verification requests at the new addresses; the previous settings are restored")]
+    [SwaggerResponse(502, "The Document Server at the new addresses did not answer, answered with an error, or failed the converter, command service or document builder check; the previous settings are restored")]
     //[SwaggerResponse(503, "Unable to establish a connection with the Document Server")]
     [HttpPut("docservice")]
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)

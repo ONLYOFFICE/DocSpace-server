@@ -288,7 +288,8 @@ public abstract class FilesController<T>(
     /// room. If the file or the folder does not exist, the call returns 404. If the copy exceeds the storage quota or
     /// the converted content exceeds the maximum upload size, the call returns 402. If the installation does not
     /// accept the format of the new title, the call returns 415. If the new title is empty and the source has no
-    /// extension, the call returns 400. To copy many items without conversion, use `PUT api/2.0/files/fileops/copy`.
+    /// extension, the call returns 400. It also returns 400 if `destFolderId` is a number that is not a 32-bit integer.
+    /// To copy many items without conversion, use `PUT api/2.0/files/fileops/copy`.
     /// If the destination folder is in a full connected storage other than SharePoint, the call returns 400.
     /// The user has to free up space there first.
     /// </remarks>
@@ -300,7 +301,7 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileUploaded, When = "as well when the copy is converted to another format")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The copy that was created", typeof(FileEntryBaseDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, the new title is empty while the source file has no extension, the document service refuses the source (it is protected with a password, too large, or cannot be converted to the new format), or the connected storage other than SharePoint that holds the destination folder has no free space left in its own account; free up space there and repeat the call")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, `destFolderId` is a number that is not a 32-bit integer, the new title is empty while the source file has no extension, the document service refuses the source (it is protected with a password, too large, or cannot be converted to the new format), or the connected storage other than SharePoint that holds the destination folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size")]
     [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room")]
     [SwaggerResponse(404, "The file or the destination folder does not exist")]
@@ -330,8 +331,10 @@ public abstract class FilesController<T>(
     /// the template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable template. The
     /// call returns 404 for an unknown `formId` or a gallery form without a file of this format. It also returns 404 if
     /// `templateId` is a string that matches no third-party file. If the new file exceeds the storage quota, the call
-    /// returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own
-    /// section, use `POST api/2.0/files/@my/file`.
+    /// returns 402. The call returns 400 if `title` is missing, empty, or too long. It also returns 400 if
+    /// `templateId` is a number that is not a 32-bit integer. A folder id of 0 means My documents of the caller. A
+    /// guest without My documents gets 404 for it. To create the file in your own section, use
+    /// `POST api/2.0/files/@my/file`.
     /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
     /// The user has to free up space there first.
     /// </remarks>
@@ -342,10 +345,10 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, the title is empty or longer than 165 characters, `templateId` is a number that is not a 32-bit integer, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
-    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
+    [SwaggerResponse(404, "The folder id is 0 and the caller is a guest without My documents, the folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -734,7 +737,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(400, "The version is missing or is already the current one, `url` is not an absolute address, or the document service refuses to convert the content at `url`")]
     [SwaggerResponse(402, "The restored content does not fit into the storage quota")]
     [SwaggerResponse(403, "The caller may not change the version history of the file, the file is locked by somebody else, or, with `url`, may not edit the file or the file is being edited")]
-    [SwaggerResponse(404, "Without `url`, the file id or the requested version resolves to nothing")]
+    [SwaggerResponse(404, "The file id or the requested version resolves to nothing")]
     [SwaggerResponse(502, "With `url`, the address did not answer or answered with an error, or the document service failed to convert the content")]
     [AllowAnonymous]
     [HttpPost("file/{fileId}/restoreversion")]
@@ -1068,11 +1071,11 @@ public abstract class FilesController<T>(
     /// Other callers get 403. The call changes data. Do not repeat it. Each call adds another PDF with the same
     /// title. In a third-party storage, each PDF gets a unique title instead. The call marks the result as new in the
     /// room. It saves the result as a PDF form if the portal recognizes the source as a form. If the body has no
-    /// `folderId` or `title`, the call returns 400. If the file or the folder does not exist, the call returns 404.
-    /// If the PDF exceeds the storage quota, the call returns 402. To convert the file itself, use
-    /// `PUT api/2.0/files/file/{fileId}/checkconversion`.
-    /// If the destination folder is in a full connected storage other than SharePoint, the call returns 400.
-    /// The user has to free up space there first.
+    /// `folderId` or `title`, the call returns 400. A source with a password, a too large source, or a format without
+    /// PDF conversion also returns 400. If the file or the folder does not exist, the call returns 404. If the PDF
+    /// exceeds the storage quota, the call returns 402. To convert the file itself, use `PUT
+    /// api/2.0/files/file/{fileId}/checkconversion`. If the destination folder is in a full connected storage other
+    /// than SharePoint, the call returns 400. The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Save a file as PDF
@@ -1081,7 +1084,7 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The PDF file that was created", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `folderId` or `title`, or the connected storage other than SharePoint that holds the destination folder has no free space left in its own account; free up space there and repeat the call")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `folderId` or `title`, the document service refuses the source (it is protected with a password, too large, or cannot be converted to PDF), or the connected storage other than SharePoint that holds the destination folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The PDF does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller cannot read the source file or may not create files in the destination folder")]
     [SwaggerResponse(404, "The source file or the destination folder does not exist")]
@@ -1102,7 +1105,8 @@ public abstract class FilesController<T>(
     /// a room. Requires the right to start or reset the filling, which a room manager and a content creator have.
     /// Other callers get 403. The call changes data. Do not repeat it. In a virtual data room, a repeated call
     /// returns 403. In a form-filling room, each call notifies the users in the roles again. If `roles` is missing,
-    /// the call returns 400. To read the stored roles, use `GET api/2.0/files/file/{fileId}/formroles`.
+    /// the call returns 400. If the form does not exist, the call returns 403. To read the stored roles, use
+    /// `GET api/2.0/files/file/{fileId}/formroles`.
     /// </remarks>
     /// <summary>
     /// Save form role mapping
@@ -1111,7 +1115,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The roles were stored and the filling was started or reset")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId` or `roles`, or `roles` is null")]
-    [SwaggerResponse(403, "The caller may not start or reset the filling of this form, or the file is not a PDF or lies outside a room")]
+    [SwaggerResponse(403, "The caller may not start or reset the filling of this form, the form does not exist, or the file is not a PDF or lies outside a room")]
     // The handler reads the id from the body (`formId`), not from the route, so nothing binds this
     // placeholder; the client sends the same value in both places.
     [SwaggerPathParameter("fileId", "The form the role mapping belongs to. Send the same value as the `formId` of the request body, which is the one the handler reads.")]
@@ -1317,10 +1321,12 @@ public class FilesControllerCommon(
     /// the portal copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that form
     /// from the form gallery. If neither is set, the portal uses its blank template for the format and the language of
     /// the caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any signed-in user
-    /// can call it, except a guest. A guest who has My documents gets 403. The call changes data. Do not repeat it.
+    /// can call it, except a guest. A guest who has My documents gets 403, and a guest without it gets 404. The call
+    /// changes data. Do not repeat it.
     /// Each call creates another file. The returned title shows the extension that the portal stored. To create a file
     /// in a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title` is
-    /// missing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403 if the
+    /// missing, empty, or too long. It also returns 400 if `templateId` is a number that is not a 32-bit integer. It
+    /// returns 402 if the file does not fit into a storage quota. It returns 403 if the
     /// template does not exist or the caller cannot read it. It returns 404 for an unknown `formId` or a gallery form
     /// without a file of the format of the title. If a string `templateId` is not a file of a connected third-party
     /// storage, the call also returns 404.
@@ -1332,10 +1338,10 @@ public class FilesControllerCommon(
     [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, the title is empty or longer than 165 characters, or `templateId` is a number that is not a 32-bit integer")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller is a guest whose My documents still exists, or the template does not exist or cannot be read")]
-    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
+    [SwaggerResponse(404, "The caller is a guest without My documents, `templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {

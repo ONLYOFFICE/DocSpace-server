@@ -129,7 +129,9 @@ public static class ModelBindingContextExtension
     /// <remarks>
     /// The text used to be pasted into a JSON literal and parsed, so a quote, a control character or a backslash
     /// in an id (and a number with a sign or a leading zero, which <c>int.TryParse</c> accepts and JSON does not)
-    /// ended the request as 500. Such an id now names nothing, like any other unknown string id.
+    /// ended the request as 500. A number with a sign or a leading zero now reads as that number ("05" is the id 5,
+    /// "+5" too); text with a quote, a control character or a backslash is a third-party id that names nothing, like
+    /// any other unknown string id.
     /// </remarks>
     public static JsonElement ParseQueryParam(string? data)
     {

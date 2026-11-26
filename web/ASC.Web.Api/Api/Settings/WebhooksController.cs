@@ -106,7 +106,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The created webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the creator may see has that ID, or the portal already has a subscription with the same `name` and `uri`")]
+    [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or refuses the connection, times out or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the creator may see has that ID, or the portal already has a subscription with the same `name` and `uri`")]
     [SwaggerResponse(403, "The caller is a `Guest`, or a non-admin caller while the developer tools are restricted")]
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(CreateWebhooksConfigRequestsDto inDto)
@@ -144,7 +144,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The updated webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the subscription's creator may see has that ID")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or refuses the connection, times out or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the subscription's creator may see has that ID")]
     [SwaggerResponse(403, "The subscription belongs to another member, or the caller may not use webhooks at all")]
     [SwaggerResponse(404, "No webhook subscription with this ID exists in the portal")]
     [HttpPut("webhook")]
@@ -213,7 +213,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/enable</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The webhook subscription in its new state, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, although this call reads only `id` and `enabled`, or on switching on the saved target answers the HEAD request with a non-success code or the saved secret no longer passes the password rules, or a saved trigger is no longer open to the creator's role")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, although this call reads only `id` and `enabled`, or on switching on the saved target refuses the connection, times out or answers the HEAD request with a non-success code or the saved secret no longer passes the password rules, or a saved trigger is no longer open to the creator's role")]
     [SwaggerResponse(403, "The subscription belongs to another member, or the caller may not use webhooks at all")]
     [SwaggerResponse(404, "No webhook subscription with this ID exists in the portal")]
     [HttpPut("webhook/enable")]

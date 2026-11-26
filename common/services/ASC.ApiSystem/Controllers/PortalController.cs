@@ -86,7 +86,7 @@ public class PortalController(
     /// <path>apisystem/portal/register</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
-    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty, the password does not meet the password policy, the first or last name is empty or not a valid user name, the portal address is already taken, no free portal address could be generated, too many registrations came from this network address, or the reCAPTCHA response is invalid")]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty, the password does not meet the password policy, the first name is empty or the first and last names do not form a valid user name, the portal address is already taken, no free portal address could be generated, too many registrations came from this network address, or the reCAPTCHA response is invalid")]
     [SwaggerResponse(500, "A server failure while saving the portal or in a step after it, such as sending the welcome email; a portal saved before the failure stays registered")]
     [HttpPost("register")]
     //[AllowCrossSiteJson]
@@ -122,7 +122,7 @@ public class PortalController(
     /// <path>apisystem/portal/registerbyemail</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
-    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty and no third-party profile supplied one, `password` does not meet the password policy, the first or last name is empty or not a valid user name, the portal address is already taken, no free portal address could be generated, or too many registrations came from this network address")]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty and no third-party profile supplied one, `password` does not meet the password policy, the portal address is already taken, no free portal address could be generated, or too many registrations came from this network address")]
     [SwaggerResponse(500, "A server failure while saving the portal or in a step after it, such as sending the welcome email; a portal saved before the failure stays registered")]
     [HttpPost("registerbyemail")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
@@ -157,7 +157,7 @@ public class PortalController(
     /// <path>apisystem/portal/registerbyoauth</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
-    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provider` is empty, `accessToken` and `codeOAuth` are both empty, the provider returned no profile or no email address, `password` does not meet the password policy, the first or last name is empty or not a valid user name, the portal address is already taken, no free portal address could be generated, or too many registrations came from this network address")]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provider` is empty, `accessToken` and `codeOAuth` are both empty, the provider returned no profile or no email address, `password` does not meet the password policy, the portal address is already taken, no free portal address could be generated, or too many registrations came from this network address")]
     [SwaggerResponse(500, "A server failure while saving the portal or in a step after it, such as sending the welcome email; a portal saved before the failure stays registered")]
     [HttpPost("registerbyoauth")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
@@ -217,7 +217,7 @@ public class PortalController(
     /// <path>apisystem/portal/provision</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
-    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provisionProvider` or its `name`, `clientId` or `clientSecret` is missing, `email` is empty, the provider is not a known sign-in provider, the first or last name is empty or not a valid user name, the portal address is already taken, no free portal address could be generated, too many registrations came from this network address, the reCAPTCHA response is invalid, or `password` does not meet the password policy")]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provisionProvider` or its `name`, `clientId` or `clientSecret` is missing, `email` is empty, the provider is not a known sign-in provider, the first or last name is not a valid user name, the portal address is already taken, no free portal address could be generated, too many registrations came from this network address, the reCAPTCHA response is invalid, or `password` does not meet the password policy")]
     [SwaggerResponse(500, "A server failure while saving the portal or in a step after it, such as sending the welcome email; a portal saved before the failure stays registered")]
     [HttpPost("provision")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]

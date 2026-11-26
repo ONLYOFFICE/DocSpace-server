@@ -119,8 +119,10 @@ public class OwnerController(
     /// with the same link returns 401. If the new owner is not a DocSpace admin yet, the call makes them one first.
     /// The previous owner keeps their account and role but loses the owner's rights. The call returns no body. To read
     /// the new `ownerId`, use `GET api/2.0/settings` as a signed-in user. After this call, a new transfer needs the
-    /// new owner. The new owner must be an active account of the portal, not a guest. If promoting the new owner
-    /// needs a paid seat that the portal lacks, the call returns 402. Then ownership does not move. Without `ownerId`,
+    /// new owner. If no user has the ID in `ownerId`, the call returns 404. If the new owner is a guest or not
+    /// active, the call returns 403. It also returns 403 if the `encemail` of the link does not name the portal
+    /// owner. If promoting the new owner needs a paid seat that the portal lacks, the call returns 402. Then
+    /// ownership does not move. Without `ownerId`,
     /// the call returns 400.
     /// </remarks>
     /// <summary>
@@ -132,7 +134,7 @@ public class OwnerController(
     [SwaggerResponse(400, "The request body cannot be read or has no `ownerId`")]
     [SwaggerResponse(401, "The caller is not signed in and sent no owner change link, or the link is invalid or expired, its address no longer belongs to the portal owner, or its `uid` account is deleted or disabled")]
     [SwaggerResponse(402, "The user named as the new owner is a regular user, and promoting them to DocSpace administrator needs a paid seat the portal has run out of")]
-    [SwaggerResponse(403, "The caller is signed in but sent no owner change link, whatever their role, or sent a valid confirmation link of another type")]
+    [SwaggerResponse(403, "The caller is signed in but sent no owner change link, whatever their role, or sent a valid confirmation link of another type; the user in `ownerId` is a guest or not active; or the `encemail` of the link does not name the portal owner")]
     [SwaggerResponse(404, "No user has the ID in `ownerId`")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]

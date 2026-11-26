@@ -48,7 +48,7 @@ public class FirebaseRequestsDto
     // (PostgreSQL, MySQL in strict mode); it is the caller's input, so model validation refuses it with 400 first
     /// <summary>
     /// The registration token Firebase issued to the mobile client for this device, obtained on the device itself.
-    /// It is kept as an opaque string of up to 255 characters and is never verified here; it identifies the device
+    /// It is kept as an opaque string and is never verified here; it identifies the device
     /// and is matched but never changed, and a token belonging to another member or another portal matches nothing.
     /// </summary>
     /// <example>dGhpc2lzYXRva2Vu...</example>

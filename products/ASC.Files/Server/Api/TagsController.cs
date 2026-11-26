@@ -116,14 +116,15 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// marked item stays listed once. It returns `true` even when it marks nothing. To see the result, use
     /// `GET api/2.0/files/@favorites`. A marked entry in the trash is not listed there until it is restored. The call
     /// reads only `fileIds` and `folderIds` from the body. To delete marks, use `DELETE api/2.0/files/favorites`. To
-    /// mark one file, use `GET api/2.0/files/favorites/{fileId}`. If a string id points to a storage account that is
-    /// not connected, the call returns 400. If it names an unknown storage type, the call returns 404.
+    /// mark one file, use `GET api/2.0/files/favorites/{fileId}`. A numeric id that is not a 32-bit integer returns
+    /// 400. If a string id points to a storage account that is not connected, the call also returns 400. If it names
+    /// an unknown storage type, the call returns 404.
     /// </remarks>
     /// <summary>Add favorite files and folders</summary>
     /// <path>api/2.0/files/favorites</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Always true: the request was understood, which does not mean that anything was marked", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read, a numeric identifier is not a 32-bit integer, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(404, "A third-party identifier names a storage type the portal does not know")]
     [HttpPost("favorites")]
     public async Task<bool> AddFavorites(BaseBatchRequestDto inDto)
@@ -165,14 +166,15 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// same body. It returns `true` even when it deletes nothing. The call reads only `fileIds` and `folderIds` from
     /// the body. The route also accepts them as repeated query parameters, but only in a request without a body. To
     /// delete the entries themselves, use `PUT api/2.0/files/fileops/delete`. To mark entries again, use
-    /// `POST api/2.0/files/favorites`. If a string id points to a storage account that is not connected, the call
-    /// returns 400. If it names an unknown storage type, the call returns 404.
+    /// `POST api/2.0/files/favorites`. A numeric id that is not a 32-bit integer returns 400. If a string id points to
+    /// a storage account that is not connected, the call also returns 400. If it names an unknown storage type, the
+    /// call returns 404.
     /// </remarks>
     /// <summary>Delete favorite files and folders</summary>
     /// <path>api/2.0/files/favorites</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Always true: the marks named in the request are gone or were never there", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read, a numeric identifier is not a 32-bit integer, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(404, "A third-party identifier names a storage type the portal does not know")]
     [HttpDelete("favorites")]
     [Consumes("application/json")]
@@ -232,15 +234,15 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// third-party storage no longer has the file, its entry stays. The call changes data. You can repeat it with the
     /// same body. It returns an empty body and does not report what it deleted. The portal adds an entry again when
     /// the caller opens the file or calls `POST api/2.0/files/file/{fileId}/recent`. The call reads only `fileIds`
-    /// and `folderIds` from the body. To hide the whole section, use `PUT api/2.0/files/displayrecent`. If a string
-    /// id points to a storage account that is not connected, the call returns 400. If it names an unknown storage
-    /// type, the call returns 404.
+    /// and `folderIds` from the body. To hide the whole section, use `PUT api/2.0/files/displayrecent`. A numeric id
+    /// that is not a 32-bit integer returns 400. If a string id points to a storage account that is not connected,
+    /// the call also returns 400. If it names an unknown storage type, the call returns 404.
     /// </remarks>
     /// <summary>Delete recent files</summary>
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Empty answer: the listed entries no longer appear in the Recent section")]
-    [SwaggerResponse(400, "The request body cannot be read, or a third-party file or folder identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read, a numeric identifier is not a 32-bit integer, or a third-party file or folder identifier refers to a storage account that is not connected")]
     [SwaggerResponse(404, "A third-party file or folder identifier names a storage type the portal does not know")]
     [HttpDelete("recent")]
     public async Task<NoContentResult> DeleteRecent(BaseBatchRequestDto inDto)

@@ -301,8 +301,10 @@ public class MigrationController(
     /// `POST api/2.0/migration/clear`. The clean-up deletes the job and the uploaded backup, and the imported data
     /// stays. The call returns an empty body. After it, `GET api/2.0/migration/status` returns an empty result. Also,
     /// `GET api/2.0/migration/logs` returns 404, so download the log first. You can repeat the call with `false`.
-    /// With `true`, do not repeat it. A repeat can send the emails again. It returns 400 if the body has no
-    /// `isSendWelcomeEmail`.
+    /// With `true`, do not repeat it. A repeat before the clean-up ends can send the emails again, and after it the
+    /// call returns 404. With `true`, the call also returns 404 if there is no job or the job ended before it imported
+    /// users. With `true`, it returns 409 while the job still runs and has not imported users yet. It returns 400 if
+    /// the body has no `isSendWelcomeEmail`.
     /// </remarks>
     /// <summary>
     /// Finish migration
