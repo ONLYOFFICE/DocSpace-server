@@ -80,7 +80,7 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
     {
         EnsureConfigured();
 
-        return await accountingApi.ExtendCustomerSessionAsync(sessionId, duration);
+        return await accountingApi.ExtendCustomerSessionAsync(sessionId, new SessionExtendOperation(duration));
     }
 
     public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity,
@@ -1872,6 +1872,8 @@ public record SessionOpenOperation(
     string ExternalRef,
     int Quantity,
     int Duration);
+
+public record SessionExtendOperation(int Duration);
 
 public record SessionCompleteOperation(
     string CustomerName,

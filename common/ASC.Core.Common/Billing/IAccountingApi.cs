@@ -49,11 +49,11 @@ public interface IAccountingApi
     [Post("/session/open")]
     Task<Session> OpenCustomerSessionAsync([Body] SessionOpenOperation data);
 
-    [Put("/session/close")]
-    Task CloseCustomerSessionAsync([Query] int sessionId);
+    [Post("/session/{sessionId}/close")]
+    Task CloseCustomerSessionAsync(long sessionId);
 
-    [Put("/session/extend")]
-    Task<Session> ExtendCustomerSessionAsync([Query] int sessionId, [Query] int duration);
+    [Post("/session/{sessionId}/extend")]
+    Task<Session> ExtendCustomerSessionAsync(long sessionId, [Body] SessionExtendOperation data);
 
     [Post("/session/complete")]
     Task CompleteCustomerSessionAsync([Body] SessionCompleteOperation data);

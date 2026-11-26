@@ -74,6 +74,35 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task CloseCustomerSession_PostsToSessionClosePathWithTheIdInIt()
+    {
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.NoContent, ""));
+
+        await client.CloseCustomerSessionAsync(42);
+
+        handler.LastMethod.Should().Be(HttpMethod.Post);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/session/42/close");
+        handler.LastUri.Query.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ExtendCustomerSession_PostsTheDurationInTheBodyToSessionExtendPath()
+    {
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
+            """{"sessionId":42,"reservedAmount":1.5,"currency":"USD","expire":"2026-11-27T12:00:00Z"}"""));
+
+        var session = await client.ExtendCustomerSessionAsync(42, 600);
+
+        handler.LastMethod.Should().Be(HttpMethod.Post);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/session/42/extend");
+        handler.LastUri.Query.Should().BeEmpty();
+
+        using var body = JsonDocument.Parse(handler.LastRequestBody!);
+        body.RootElement.GetProperty("duration").GetInt32().Should().Be(600);
+        session.SessionId.Should().Be(42);
+    }
+
+    [Fact]
     public async Task GetProductPriceInfo_SendsNamesInOneRequest_AndLeavesUnknownServicesOut()
     {
         var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, ServicesPage(totalQuantity: 2,
