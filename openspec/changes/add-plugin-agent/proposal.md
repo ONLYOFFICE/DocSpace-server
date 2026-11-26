@@ -13,7 +13,8 @@ describe a plugin in the chat and get it built, checked and installed without le
 - The AI chat offers a new delegating tool, `plugin_agent`, to the owner and DocSpace admins of a portal
   whose installation configures a plugin agent. The tool hands a description of a plugin to a sub-agent that
   runs inside the ASC.AI.Chat process, as a background task of the chat round that called it; the call waits
-  for the task and shows its steps, like `document_agent` does.
+  for the task and shows its steps, like `document_agent` does. Unlike it, the call asks for approval under
+  the default permission mode too.
 - The sub-agent works in a sandbox of its own, guided by the `apps-plugin-sdk` skill, which ships with
   ASC.AI.Chat as a git submodule. The sandbox service is not part of this change: it is built and deployed
   by its own owner, and ASC.AI.Chat only connects to it with the address and token of the installation's
@@ -25,7 +26,9 @@ describe a plugin in the chat and get it built, checked and installed without le
 - A follow-up request ("add a button", "fix this") is a new task that starts from a sources archive of an
   earlier one, named by its file id.
 - A second tool, `install_plugin`, installs a package file of the workspace through the existing
-  `addWebPluginFromFile` operation under the caller's session. It asks for approval on every call.
+  `addWebPluginFromFile` operation under the caller's session. It never installs on a standing permission:
+  the call is approved by the user each time, and where the user's settings would let it run unasked it
+  installs nothing; a pre-approval of the tool is withdrawn when it is met, so that the next call asks.
 - ASC.AI.Chat serves the sandbox a read-only npm registry that forwards to the public registry and caches
   what it fetched, so a sandbox needs network access to this service only. Any package may be requested.
 - No preview run and no screenshot in this change: the checks are the build, the type check and the
@@ -42,9 +45,10 @@ None.
 - `ai-agents`: new requirements for the plugin agent — who is offered `plugin_agent` and `install_plugin`,
   what a task takes and returns, what a failed or interrupted task leaves, the approval of an installation,
   and the package registry a sandbox reads. Found by the tool and settings requirements that govern the
-  sibling `document_agent` ("Tool calls and the approval pause", "Pre-approving tools", "Document agent
-  settings") and the chat send operations they belong to (`aiApproveToolCall`, `aiDenyToolCall`). No existing
-  requirement of the capability is modified.
+  sibling `document_agent` ("Tool calls and the approval pause", "Tool permission mode of a user",
+  "Pre-approving tools", "Document agent settings") and the chat send operations they belong to (`aiApproveToolCall`, `aiDenyToolCall`). One existing
+  requirement is modified, "Pre-approving tools" (`aiToolsSetAllowAlways`, `aiToolsIsAllowAlways`): see
+  "Breaks current behaviour".
 
 `plugins` is touched but not changed: `install_plugin` calls `addWebPluginFromFile`
 (`POST api/2.0/settings/webplugins`) as any client would, and relies on "Installation-wide plugin switches",
@@ -53,7 +57,30 @@ plugin under the same name" and "Portal plugin count limit" exactly as they are.
 
 ## Breaks current behaviour
 
-None. The change adds two tools and one internal route and modifies no requirement:
+One requirement is modified, `ai-agents` "Pre-approving tools", in its scenarios and only for the new tool:
+
+- **What a caller sees differently**: a pre-approval of `install_plugin` does not last. Today
+  "`allowAlways` on an approval lands in the same list … where the read finds it", and the scenario "Approval
+  with allowAlways" says the tool's next call runs without a pause. For `install_plugin` the call that meets
+  the entry installs nothing and removes it: after an approval with `allowAlways`, or a grant through
+  `aiToolsSetAllowAlways`, `aiToolsIsAllowAlways` answers false once the tool was called, and the next call
+  pauses again. Only this tool's entry is taken out, and only from the caller's own list; the list is read
+  anew and written back whole, as every write of it is, so a change the user makes to it in the same moment
+  can be lost.
+- **Who is affected**: only the owner and DocSpace admins of a portal with a plugin agent, since nobody else
+  is offered the tool. In the web client the "always allow" choice on this tool's dialog has no lasting
+  effect and that call installs nothing; the client shows the tool's answer, which says to ask again. The
+  published SDKs and the OpenAPI document are unchanged (no operation, field or status changes); webhooks,
+  socket events, backup and restore, the portal migration and stored data are not affected, as the list is
+  the user's existing tool preferences and is only made shorter.
+
+Two more requirements keep their letter and are named because one tool behaves unlike the others under
+them: "Tool permission mode of a user" (under `allow` "every call runs without asking") and "Tool calls and
+the approval pause" ("a tool that … is pre-approved runs unasked"). An `install_plugin` call does run
+unasked there, as they say; what it does is answer that nothing was installed, so an admin in `allow` mode
+cannot install a plugin from the chat until the mode is changed.
+
+Everything else is added behaviour:
 
 - **Web client (`../client`)**: the tools reach it through the existing tool-call and approval flow of the
   chat; a client that knows nothing of them shows them as any other tool call. A portal without a configured

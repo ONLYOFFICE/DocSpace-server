@@ -68,6 +68,7 @@ import { vectorizationController } from "./controllers/vectorizationController.j
 import { webSearchController } from "./controllers/webSearchController.js";
 import { webSearchPassthroughController } from "./controllers/webSearchPassthroughController.js";
 import { registerDocumentAgentFiles } from "./tools/documentAgentFiles.js";
+import { registerPluginAgentRegistry } from "./pluginAgent/npmRegistry.js";
 
 export { API_PREFIX };
 
@@ -269,6 +270,9 @@ export default function registerRoutes(app: Application): void {
   // The document agent's file-link server, outside the API prefix and its
   // catalog: a machine endpoint with its own token, not a route of the chat.
   registerDocumentAgentFiles(app);
+  // The package registry a plugin task's sandbox installs from: outside the API prefix for the
+  // same reason, with the token of a running task as its gate.
+  registerPluginAgentRegistry(app);
 
   app.use(API_PREFIX, router);
 

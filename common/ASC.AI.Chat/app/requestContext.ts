@@ -199,6 +199,20 @@ export function getRoundThreadId(): string | undefined {
   return als.getStore()?.roundThreadId;
 }
 
+// The signal of the current chat round: fired when the client goes away before the reply ended
+// (see `responseAbortSignal` of aiController.ts). A tool that works for minutes reads it to stop
+// with the reply; a tool call itself is handed none. The first value stays.
+export function setRoundSignal(signal: AbortSignal): void {
+  const store = als.getStore();
+  if (store && store.roundSignal === undefined) {
+    store.roundSignal = signal;
+  }
+}
+
+export function getRoundSignal(): AbortSignal | undefined {
+  return als.getStore()?.roundSignal;
+}
+
 // Attachment ref ids of the current user message (see RequestContext.roundAttachmentIds).
 export function setRoundAttachmentIds(ids: string[]): void {
   const store = als.getStore();

@@ -30,6 +30,70 @@ environment, which wins:
 | `ai.documentAgent.portalUrl`          | `AI__DOCUMENT_AGENT__PORTAL_URL`           | the AI service's address  |
 | `ai.documentAgent.filesUrl`           | `AI__DOCUMENT_AGENT__FILES_URL`            | `http://localhost:<port>` |
 
+### Plugin agent
+
+The chat can build a DocSpace plugin and install it (`app/pluginAgent/`). The model of the owner
+and of a DocSpace admin gets two more tools: `plugin_agent` hands a description of a plugin to a
+sub-agent that runs inside this service, builds the plugin in a sandbox by the `apps-plugin-sdk`
+skill and saves two new files in the workspace, the package (`<name>.zip`) and its sources
+(`<name>-src.zip`); `install_plugin` installs a package into the portal. Without the
+configuration below, without the skill, or for any other member, neither tool is offered.
+
+The agent is configured in the shared `appsettings.json` under `ai.pluginAgent`, or from the
+environment, which wins:
+
+| `appsettings.json`                  | Environment                              | Default                                 | Bounds     |
+| ----------------------------------- | ---------------------------------------- | --------------------------------------- | ---------- |
+| `ai.pluginAgent.sandboxUrl`         | `AI__PLUGIN_AGENT__SANDBOX_URL`          | —                                       |            |
+| `ai.pluginAgent.sandboxToken`       | `AI__PLUGIN_AGENT__SANDBOX_TOKEN`        | —                                       |            |
+| `ai.pluginAgent.taskTimeoutSeconds` | `AI__PLUGIN_AGENT__TASK_TIMEOUT_SECONDS` | `1800`                                  | 60 – 7200  |
+| `ai.pluginAgent.maxToolCalls`       | `AI__PLUGIN_AGENT__MAX_TOOL_CALLS`       | `150`                                   | 1 – 10000  |
+| `ai.pluginAgent.maxConcurrentTasks` | `AI__PLUGIN_AGENT__MAX_CONCURRENT_TASKS` | `2`                                     | 1 – 16     |
+| `ai.pluginAgent.sandboxTtlSeconds`  | `AI__PLUGIN_AGENT__SANDBOX_TTL_SECONDS`  | `600`                                   | 60 – 3600  |
+| `ai.pluginAgent.serviceUrl`         | `AI__PLUGIN_AGENT__SERVICE_URL`          | `http://localhost:<port>`               |            |
+| `ai.pluginAgent.registryUrl`        | `AI__PLUGIN_AGENT__REGISTRY_URL`         | `https://registry.npmjs.org`            |            |
+| `ai.pluginAgent.cacheDir`           | `AI__PLUGIN_AGENT__CACHE_DIR`            | `asc-ai-chat/npm-cache` in the temp dir |            |
+| `ai.pluginAgent.cacheMaxMb`         | `AI__PLUGIN_AGENT__CACHE_MAX_MB`         | `2048`                                  | 64 – 65536 |
+
+The agent is on when the sandbox's URL and token are both set; for these two a variable that is
+set wins even when it is empty. A number out of its bounds falls back to the next source or the
+default, with one warning in the log.
+
+**The sandbox is not part of this service.** It is the sandbox gateway of the document agent's
+repository (`gateway.v1.SandboxService`), provided and deployed by its owner; this service only
+calls it (`app/pluginAgent/sandboxClient.ts`). What it relies on:
+
+- the gateway's `Create`, `Renew`, `Delete`, `Exec` and `MakeDir` methods and the file routes
+  `/sandboxes/{id}/files?path=`, with the bearer token above;
+- an image with `node`, `npm`, `zip` and `unzip` on the path and a writable `/workspace`;
+- network access from a sandbox to this service at `serviceUrl`, and to nothing else. `serviceUrl`
+  has to lead to the very instance that runs the task (the token a sandbox presents is known to it
+  alone), so the default `localhost` fits one instance on the sandbox's own host only.
+
+A sandbox is created per task with the lifetime `sandboxTtlSeconds`, renewed three times within
+it while the task runs and deleted when the task ends. A task that dies with the process, or a
+deletion the gateway does not take, leaves the sandbox to expire within that lifetime.
+
+**The package registry.** A sandbox installs npm packages from this service:
+`GET /plugin-agent/npm/...`, outside the API prefix, forwards to `registryUrl` and keeps the
+archives it fetched in `cacheDir` (the one read longest ago is dropped past `cacheMaxMb`). The
+route answers only a request that carries the token of a running task. This service therefore
+needs outbound access to the registry; any package may be requested. A redirect of the registry is
+not followed (a mirror has to serve its archives itself), at most four requests are served at a time, and
+a document or an archive is held in memory while it is served (up to 64 and 128 MiB). The limit of
+concurrent tasks is per instance of the service, for all its portals together.
+
+**The skill** is the git submodule `skills/agent-skills` (`ONLYOFFICE/agent-skills`), pinned by
+its commit: run `git submodule update --init` before `docker build`, as the image copies it. Its
+`SKILL.md` and `references/` are read by the model from this service; its `scripts/` and
+`templates/` are copied into the sandbox when a task starts.
+
+**Installing.** `install_plugin` uploads the package with `POST api/2.0/settings/webplugins`
+under the user's session, so the portal's own checks apply. The call needs the user's approval
+each time: under the "Allow" permission mode it installs nothing and says what to change, and
+with the tool on the always-allowed list it installs nothing and takes the tool off the list, so
+that the next call asks. `plugin_agent` asks for approval too, but may be pre-approved.
+
 ### Automatic history compaction
 
 The chat engine can fold a thread that nears its model's context window into a summary message

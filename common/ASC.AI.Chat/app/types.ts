@@ -99,6 +99,8 @@ export interface RequestContext {
   // results are kept among the thread's artifacts; the thread slice of the
   // chat-context snapshot cannot say it once the round has touched the thread.
   roundThreadId?: string;
+  /** The signal of the round's reply: aborted when the client stops it before it ended. */
+  roundSignal?: AbortSignal;
   // Attachment ref ids of the current user message, captured before the
   // engine runs so an in-round tool call can hand the attached files on.
   roundAttachmentIds?: string[];
@@ -147,6 +149,27 @@ export interface DocumentAgentSetting {
   filesUrl?: string;
 }
 
+// The plugin agent (`ai.pluginAgent` in the shared `appsettings.json`): a sub-agent of this
+// service that builds a DocSpace plugin in a sandbox somebody else provides. Absent or without
+// the sandbox's URL and token, its tools are not offered.
+export interface PluginAgentSetting {
+  /** The sandbox gateway and the bearer token every route of it wants. */
+  sandboxUrl?: string;
+  sandboxToken?: string;
+  taskTimeoutSeconds?: number;
+  maxToolCalls?: number;
+  maxConcurrentTasks?: number;
+  /** The lifetime a sandbox is created and renewed with. */
+  sandboxTtlSeconds?: number;
+  /** This service as a sandbox reaches it, for the package registry route; `http://localhost:<port>` by default. */
+  serviceUrl?: string;
+  /** The npm registry the route forwards to; the public one by default. */
+  registryUrl?: string;
+  /** Where fetched package archives are kept, and the most they may take together, in MiB. */
+  cacheDir?: string;
+  cacheMaxMb?: number;
+}
+
 // Automatic history compaction (`ai.compaction` in the shared
 // `appsettings.json`): the library folds a thread that nears its model's
 // context window into a summary message before the round. On by default.
@@ -170,6 +193,7 @@ export interface RootConfig {
   ai?: {
     mcp?: McpServerSetting[];
     documentAgent?: DocumentAgentSetting;
+    pluginAgent?: PluginAgentSetting;
     compaction?: CompactionSetting;
   };
 }

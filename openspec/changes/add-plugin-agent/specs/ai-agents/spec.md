@@ -5,7 +5,7 @@
 ### Requirement: Who is offered the plugin agent
 
 The chat SHALL offer the tools `plugin_agent` and `install_plugin` to the model only when the installation
-configures a plugin agent and the caller is the owner or a DocSpace admin. They SHALL NOT be offered to any
+configures a plugin agent with its plugin skill and the caller is the owner or a DocSpace admin. They SHALL NOT be offered to any
 other member, on an installation without that configuration, or in a round where the caller's role could not
 be read.
 
@@ -31,10 +31,11 @@ be read.
 
 ### Requirement: Arguments of a plugin task
 
-`plugin_agent` SHALL take `task`, a string of 1 to 20000 characters that is not blank, and an optional
-`sourcesFileId`, a positive integer naming a sources archive of an earlier task. A call with other arguments
-SHALL return an error to the model and start no task. The call SHALL pause for approval as a tool of an
-approval-required group does, and a denied call SHALL start no task.
+`plugin_agent` SHALL take `task`, a string of 1 to 20000 characters counted without the white space around
+it, and an optional `sourcesFileId`, a positive integer naming a sources archive of an earlier task. A call
+with other arguments SHALL return an error to the model and start no task. The call SHALL pause for approval
+unless the caller's tool permission mode runs every tool unasked or the caller pre-approved the tool, and a
+denied call SHALL start no task.
 
 #### Scenario: Blank task
 
@@ -43,7 +44,7 @@ approval-required group does, and a denied call SHALL start no task.
 
 #### Scenario: Task at and over the length limit
 
-- **WHEN** the model calls `plugin_agent` with a `task` of 20000 characters and then one of 20001
+- **WHEN** the model calls `plugin_agent` with a `task` of 20000 characters, with or without white space around them, and then one of 20001
 - **THEN** the first call starts a task and the second returns an error without starting one
 
 #### Scenario: Sources id that is not a positive integer
@@ -56,6 +57,11 @@ approval-required group does, and a denied call SHALL start no task.
 - **WHEN** the model calls `plugin_agent` with a valid `task` and no `sourcesFileId`
 - **THEN** the task starts a new plugin project
 
+#### Scenario: Asked under the default mode
+
+- **WHEN** the caller's tool permission mode is the default one, the tool is not pre-approved, and the model calls `plugin_agent`
+- **THEN** the call pauses for the caller's approval
+
 #### Scenario: Call denied
 
 - **WHEN** the caller denies a pending `plugin_agent` call
@@ -64,32 +70,66 @@ approval-required group does, and a denied call SHALL start no task.
 ### Requirement: Result of a plugin task
 
 A plugin task SHALL take the package only after the project built, passed its type check and passed the
-validator of the plugin skill. It SHALL then save two new files, the package `<name>.zip` and the sources
-`<name>-src.zip`, in the folder the chat is opened in when the caller may create files there, else in My
-documents, and return their ids with the plugin's name, version and direct dependencies. It SHALL install
-nothing and change no existing file.
+validator of the plugin skill, with a package and a sources archive of at most 32 MiB each. It SHALL then
+save two new files, the package `<name>.zip` and the sources `<name>-src.zip`, and return their ids with that
+name (the project's package name made fit for a file title), the version and the direct dependencies. It
+SHALL install nothing and change no existing file.
 
 #### Scenario: Plugin built
 
-- **WHEN** an approved `plugin_agent` task ends with a project that passes the three checks
-- **THEN** the caller's folder holds the two new files and the call returns their ids, the plugin's name, its version and its direct dependencies
+- **WHEN** a `plugin_agent` task ends with a project that passes the three checks
+- **THEN** the two new files are saved and the call returns their ids, the name, the version and the direct dependencies
 - **AND** the list of the portal's plugins is unchanged
-
-#### Scenario: Folder the caller cannot write to
-
-- **WHEN** the chat is opened in a folder where the caller may not create files
-- **THEN** the two files are saved in the caller's My documents
 
 #### Scenario: Sources archive without build output
 
 - **WHEN** the sources archive of a finished task is opened
 - **THEN** it holds the project files without the installed dependencies and without the build output
 
+#### Scenario: Package over the size limit
+
+- **WHEN** the build leaves a package larger than 32 MiB
+- **THEN** the check of the package fails, the model is told so, and nothing is saved
+
+### Requirement: Where the results of a plugin task are saved
+
+The two files SHALL go among the artifacts of the conversation when it belongs to an AI project, else into
+the folder the chat is opened in when the caller may create files there, else into My documents. A save the
+workspace refuses SHALL be reported as not saved; a save whose answer cannot be read SHALL be reported as
+possibly saved. When only the sources are not saved, the call SHALL still return the package's id with a
+warning.
+
+#### Scenario: Conversation of an AI project
+
+- **WHEN** the task runs in a conversation of an AI project
+- **THEN** both files are saved among that conversation's artifacts
+
+#### Scenario: Folder the caller cannot write to
+
+- **WHEN** the chat is opened in a folder where the caller may not create files and the conversation belongs to no AI project
+- **THEN** the two files are saved in the caller's My documents
+
+#### Scenario: Workspace refuses the package
+
+- **WHEN** the workspace answers the save of the package with a 4xx
+- **THEN** the call returns that the plugin was built and no file was saved
+
+#### Scenario: Answer to saving the package cannot be read
+
+- **WHEN** the workspace answers the save of the package with a 5xx, an unreadable body or not in time
+- **THEN** the call returns that the file may or may not have been saved
+
+#### Scenario: Sources not saved
+
+- **WHEN** the package is saved and the save of the sources fails
+- **THEN** the call returns the package's id, no sources id and a warning
+
 ### Requirement: Continuing from a sources archive
 
 With `sourcesFileId` the task SHALL start from the content of that file, read under the caller's rights, and
-save its results as new files, as a task for a new plugin does. A file the caller cannot read, one that is
-not a zip archive, or one larger than 32 MiB SHALL return an error to the model without starting a task.
+save its results as new files, as a task for a new plugin does. A file the caller cannot read, one whose name
+does not end in `.zip` or whose content is not a zip archive, or one larger than 32 MiB SHALL return an error
+to the model without starting a task.
 
 #### Scenario: Follow-up task
 
@@ -108,16 +148,21 @@ not a zip archive, or one larger than 32 MiB SHALL return an error to the model 
 
 #### Scenario: Not an archive
 
-- **WHEN** `sourcesFileId` names a file that is not a zip archive
+- **WHEN** `sourcesFileId` names a file with another extension, or a `.zip` file whose content is not a zip archive
 - **THEN** the call returns an error and no task starts
+
+#### Scenario: Archive that does not unpack
+
+- **WHEN** `sourcesFileId` names a zip archive that cannot be unpacked
+- **THEN** the call returns an error, no task runs and the sandbox is removed
 
 ### Requirement: Limits and failures of a plugin task
 
 A plugin task SHALL end when its time limit (30 minutes unless the installation sets another) or its budget
-of tool calls (150 unless the installation sets another) is spent, and when the reply it belongs to is
-stopped. A task that ends without a project that passes the three checks SHALL save no file and return a
-failure with its reason to the model. Its sandbox SHALL be removed when the task ends, except when the
-service stops while the task runs: then the sandbox expires on its own.
+of tool calls (150 unless set otherwise) is spent, when its reply is stopped, and when the model's provider
+fails a request. A task that ends without a passing project SHALL save no file and return a failure with its
+reason. Its sandbox SHALL be removed when the task ends, unless the service stops first or the sandbox
+service refuses the removal: it then expires on its own.
 
 #### Scenario: Checks never pass
 
@@ -134,6 +179,16 @@ service stops while the task runs: then the sandbox expires on its own.
 - **WHEN** the caller stops the reply while the task runs
 - **THEN** the task is stopped, its sandbox is removed and no file is saved
 
+#### Scenario: Provider fails a request
+
+- **WHEN** the model's provider fails a request of the task
+- **THEN** the task ends, the call returns that the provider failed and no file is saved
+
+#### Scenario: Model stops without a plugin
+
+- **WHEN** the model answers three times in a row without calling a tool
+- **THEN** the task ends, the call returns that the agent stopped and no file is saved
+
 #### Scenario: Sandbox cannot be created
 
 - **WHEN** the sandbox service is unreachable or has no free sandbox when a task starts
@@ -141,13 +196,13 @@ service stops while the task runs: then the sandbox expires on its own.
 
 ### Requirement: Concurrent plugin tasks
 
-The service SHALL run at most 2 plugin tasks at a time unless the installation sets another number. A call
-that would start one more SHALL return an error that says the plugin agent is busy and start no task; it
-SHALL NOT wait for a free place.
+Each instance of the service SHALL run at most 2 plugin tasks at a time, whatever portal they belong to,
+unless the installation sets another number. A call that would start one more SHALL return an error that says
+the plugin agent is busy and start no task; it SHALL NOT wait for a free place.
 
 #### Scenario: Limit reached
 
-- **WHEN** 2 tasks are running and a third `plugin_agent` call is approved
+- **WHEN** 2 tasks are running in an instance and it gets a third `plugin_agent` call
 - **THEN** the third call returns the busy error at once and the two tasks continue
 
 #### Scenario: Place freed
@@ -158,25 +213,31 @@ SHALL NOT wait for a free place.
 ### Requirement: Steps of a plugin task
 
 While a plugin task runs, the pending `plugin_agent` call SHALL show the caller the task's steps in the order
-they happen, one line for each tool call of the task. The lines SHALL NOT be stored as chat text and SHALL NOT
-carry the content of files or the output of commands.
+they happen, one line for each tool call: the path the call is about, the start of the first line of a
+command, or a fixed line for the hand-over. The lines SHALL NOT be stored as chat text and SHALL NOT carry a
+file's content or a command's output.
 
 #### Scenario: Steps shown
 
 - **WHEN** a task writes a file and then runs the build
-- **THEN** the pending call shows a line for the write and then a line for the build
+- **THEN** the pending call shows a line with the file's path and then a line with the build command
+
+#### Scenario: Hand-over
+
+- **WHEN** a task hands the plugin over
+- **THEN** the pending call shows the line "Checking and packaging the plugin"
 
 ### Requirement: Installing a built plugin
 
-`install_plugin` SHALL take `fileId`, a positive integer, and SHALL pause for approval on every call: neither
-a pre-approval nor a tool permission mode lets it run unasked. Once approved it SHALL read that file under the
-caller's rights and upload it with `addWebPluginFromFile` under the caller's session, returning the plugin's
-name, version and `enabled` on 200 and the refusal's status and message otherwise. A denied call SHALL
-install nothing.
+`install_plugin` SHALL take `fileId`, a positive integer, and SHALL install only on a call the caller was
+asked about. Under the tool permission mode that runs every tool unasked it SHALL install nothing; with the
+tool pre-approved it SHALL install nothing and withdraw the pre-approval, so the next call asks.
+Otherwise the call pauses for approval and, once approved, uploads the file with `addWebPluginFromFile` under
+the caller's session and returns the plugin's name, version and `enabled`.
 
 #### Scenario: Approved installation
 
-- **WHEN** a DocSpace admin approves `install_plugin` for the package a task saved
+- **WHEN** a DocSpace admin approves `install_plugin` for the package a task saved, without pre-approving the tool
 - **THEN** the plugin appears in `getWebPlugins` with `enabled` true and the call returns its name and version
 
 #### Scenario: Denied installation
@@ -184,47 +245,80 @@ install nothing.
 - **WHEN** the caller denies the pending `install_plugin` call
 - **THEN** `getWebPlugins` is unchanged and the reply finishes
 
-#### Scenario: Pre-approval does not apply
+#### Scenario: Permission mode that asks nothing
 
-- **WHEN** the caller holds an `allowAlways` entry for `install_plugin`, or a tool permission mode that runs tools unasked, and the model calls the tool
-- **THEN** the call still pauses for approval
+- **WHEN** the caller's tool permission mode runs every tool unasked and the model calls `install_plugin`
+- **THEN** nothing is installed and the call returns that the mode has to be changed to one that asks
+
+#### Scenario: Pre-approved tool
+
+- **WHEN** the caller's mode skips the dialog for pre-approved tools, the caller holds an `allowAlways` entry for `install_plugin`, and the model calls it
+- **THEN** nothing is installed, the entry is removed, and the call returns that the tool has to be called again
+
+#### Scenario: Approved with "always allow"
+
+- **WHEN** the caller approves the pending call with `allowAlways` under that mode
+- **THEN** nothing is installed by that call, the entry is removed, and the next `install_plugin` call pauses for approval
+
+#### Scenario: Mode that asks for every call
+
+- **WHEN** the caller's mode asks for every tool call and the caller approves `install_plugin`, with or without an `allowAlways` entry for it
+- **THEN** the plugin is installed
 
 #### Scenario: New version of an installed plugin
 
 - **WHEN** an approved `install_plugin` uploads a package whose `name` is already installed in the portal
 - **THEN** the plugin is replaced as a re-upload under the same name is, keeping its stored `settings`
 
-#### Scenario: Portal refuses the package
-
-- **WHEN** `addWebPluginFromFile` answers 400 or 403, such as "Wrong plugin archive. Plugin already exist" or "Forbidden action"
-- **THEN** the call returns that status and message to the model and nothing is installed
-
 #### Scenario: File id that is not a positive integer
 
 - **WHEN** the model calls `install_plugin` with `fileId` missing, 0, negative, a fraction or a string
-- **THEN** the call returns an error without pausing for approval
+- **THEN** the call returns an error and nothing is installed
 
-#### Scenario: File the caller cannot read
+#### Scenario: File that is not a readable archive
 
-- **WHEN** `fileId` names a file that does not exist or that the caller may not read
-- **THEN** the approved call returns an error and nothing is installed
+- **WHEN** `fileId` names a file that does not exist, that the caller may not read, that is larger than 32 MiB, whose name does not end in `.zip` or whose content is not a zip archive
+- **THEN** the call returns an error and nothing is installed
+
+### Requirement: Refusals and unknown answers of an installation
+
+When `addWebPluginFromFile` answers 400, `install_plugin` SHALL return the status and the portal's message
+and say that nothing was installed. When it answers 403, the call SHALL return the status and the message
+without saying whether the plugin was installed: the portal answers 403 also after an installation whose
+domains overflow the Content Security Policy header. After a 5xx, an unreadable answer or none in time, the
+call SHALL say that the plugin may have been installed.
+
+#### Scenario: Portal refuses the package
+
+- **WHEN** `addWebPluginFromFile` answers 400 "Wrong plugin archive. Plugin already exist"
+- **THEN** the call returns that status and message and that nothing was installed
+
+#### Scenario: Portal answers 403
+
+- **WHEN** `addWebPluginFromFile` answers 403 "Forbidden action"
+- **THEN** the call returns that status and message and that it is not known whether the plugin was installed
+
+#### Scenario: Portal's answer cannot be read
+
+- **WHEN** `addWebPluginFromFile` answers 5xx, a 200 whose body cannot be read, or nothing in time
+- **THEN** the call returns that the plugin may have been installed
 
 ### Requirement: Package registry of a plugin task
 
 The service SHALL answer `GET` and `HEAD` under `/plugin-agent/npm/` with the package metadata and archives of
-the public npm registry for requests that carry the token of a running plugin task, keeping fetched archives
-for later requests; archive links in the metadata SHALL point back at this route. The route SHALL answer 401
-without such a token, 405 for any other method, 404 for a package the registry does not have and 502 while the
-registry does not answer and the archive is not kept.
+the npm registry the installation names, for requests that carry the token of a running plugin task, and
+keep fetched archives. Archive links that lead to that registry SHALL point back at this route. The route
+SHALL answer 401 without such a token and, with one, 405 for another method, 404 for a path or package the
+registry does not have, and 502 otherwise.
 
 #### Scenario: Install inside a task
 
 - **WHEN** a running task requests the metadata of a package and then the archive the metadata links to
-- **THEN** both answer 200 and the archive link names this route, not the public registry
+- **THEN** both answer 200 and the archive link names this route, not the registry
 
 #### Scenario: No token or a wrong one
 
-- **WHEN** a request carries no token or a token no running task holds
+- **WHEN** a request of any method carries no token or a token no running task holds
 - **THEN** the route answers 401
 
 #### Scenario: Token of an ended task
@@ -234,20 +328,50 @@ registry does not answer and the archive is not kept.
 
 #### Scenario: Publishing refused
 
-- **WHEN** a request uses `PUT`, `POST` or `DELETE`
-- **THEN** the route answers 405 and nothing is sent to the public registry
+- **WHEN** a request with the token of a running task uses `PUT`, `POST` or `DELETE`
+- **THEN** the route answers 405 and nothing is sent to the registry
 
-#### Scenario: Unknown package
+#### Scenario: Unknown package or path
 
-- **WHEN** a running task requests a package the public registry does not have
+- **WHEN** a running task requests a package the registry does not have, or a path that names neither a package nor an archive
 - **THEN** the route answers 404
 
-#### Scenario: Registry does not answer
+#### Scenario: Registry does not give the package
 
-- **WHEN** the public registry does not answer and the requested archive was not fetched before
-- **THEN** the route answers 502
+- **WHEN** the registry does not answer, answers anything but 200 and 404, redirects to another address, or sends more than 64 MiB of metadata or 128 MiB of archive, and the archive was not fetched before
+- **THEN** the route answers 502 and no other address is asked
 
 #### Scenario: Kept archive
 
-- **WHEN** an archive that was fetched before is requested while the public registry does not answer
+- **WHEN** an archive that was fetched before is requested while the registry does not answer
 - **THEN** the route answers 200 with the kept archive
+
+## MODIFIED Requirements
+
+### Requirement: Pre-approving tools
+
+`aiToolsSetAllowAlways`, `aiToolsGetAllowAlways` and `aiToolsIsAllowAlways` SHALL keep, per user, the flat
+`serverType_toolName` pre-approvals: setting is idempotent, revoking one entry touches no other, a falsy,
+missing or string value grants nothing (400, never 500), and a grant for one server type never answers for
+another. The list SHALL be independent of the disabled list; `allowAlways` on an approval lands in the same
+list under the server-prefixed key, where the read finds it.
+
+#### Scenario: One user's approval
+
+- **WHEN** a member pre-approves a tool and the owner reads their own list
+- **THEN** the owner's list does not carry it
+
+#### Scenario: Approval with allowAlways
+
+- **WHEN** the owner approves a pending call of a tool other than `install_plugin` with `allowAlways` true and the model calls the same tool again
+- **THEN** the second call runs without a pause and `aiToolsIsAllowAlways` answers true for it
+
+#### Scenario: Same name on another server
+
+- **WHEN** the owner pre-approves a host tool `delete_file`
+- **THEN** the DocSpace `delete_file` still pauses for approval
+
+#### Scenario: Pre-approval of install_plugin does not last
+
+- **WHEN** a DocSpace admin pre-approves `install_plugin`, through `aiToolsSetAllowAlways` or with `allowAlways` on an approval, and the tool is called under the mode that skips the dialog for pre-approved tools
+- **THEN** that call installs nothing and `aiToolsIsAllowAlways` answers false for the tool afterwards

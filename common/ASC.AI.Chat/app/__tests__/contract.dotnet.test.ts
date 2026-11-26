@@ -240,6 +240,10 @@ const CONTRACTS: Contract[] = [
     notSent: { response: "the DocSpace envelope `{ response }` around the DTO" },
   },
   {
+    cs: [["web/ASC.Web.Api/ApiModels/ResponseDto/WebPluginDto.cs", "WebPluginDto"]],
+    node: ["app/storage/docspacePeopleApi.ts", "parseWebPlugin"],
+  },
+  {
     cs: [
       [SKILLS, "AiSkillsDto"],
       [SKILLS, "AiSkillsRoomDto"],

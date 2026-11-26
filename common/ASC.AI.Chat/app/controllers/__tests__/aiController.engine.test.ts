@@ -198,7 +198,7 @@ describe("the engine the controller builds", () => {
     expect(deps.resolveSource()).toBeUndefined();
   });
 
-  it("asks for approval for system, custom, integration and document agent tools", async () => {
+  it("asks for approval for system, custom, integration, document agent and plugin agent tools", async () => {
     const { deps, getServerTypes, context, inRequestContext } = await load();
     getServerTypes.mockReturnValue(["portal-mcp"]);
 
@@ -212,6 +212,8 @@ describe("the engine the controller builds", () => {
       "my-server",
       "docspace-integration-approval",
       "document-agent",
+      "plugin-agent",
+      "plugin-install",
     ]);
   });
 

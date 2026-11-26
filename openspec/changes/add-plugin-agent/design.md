@@ -52,9 +52,11 @@ See proposal.md for the motivation. What shapes the approach:
 
 `plugin_agent` is a `ToolsAdapter` like the two existing ones. Its `callTool` creates the task, awaits it
 and reports steps through the engine's `ProgressCallback`, as `document_agent` does. The task is a plain
-async function bound to the round's `AbortSignal` and to a timer; a registry in memory holds the running
-tasks, keyed by a task id, for the concurrency limit and for the registry tokens (decision 6). Each entry
-carries its portal and user, and nothing in it is read across tasks.
+async function bound to a timer and to the signal of the round's reply, which the controller now leaves in
+the request context: a tool call is handed no signal of its own; a registry in memory holds the running
+tasks, keyed by a task id, for the concurrency limit and for the registry tokens (decision 6). An entry
+holds a random id and a random token and nothing of a portal or a user, and nothing in it is read across
+tasks.
 
 *Alternatives:* a child process or a worker thread per task isolates memory, but the work is network I/O and
 the model profile, the request context and the progress callback would have to be passed across; a
@@ -68,15 +70,15 @@ with the stream. See Risks.
 
 A small loop over the `custom` action of `@onlyoffice/ai-chat/core`, modelled on `formAnalysisSubAgent.ts`
 for the call shape and on the document agent's `task/loop.ts` for what a long task needs: a tool-call
-budget, a nudge when the model asks a question nobody can answer, a "finish now" message when the budget is
-spent, and history compaction with the library's own `compactHistory`. It runs on the chat's own model
+budget that ends the task when it is spent, a nudge (twice at most) when the model asks a question nobody
+can answer, and history compaction with the library's own `compactHistory`. It runs on the chat's own model
 profile and bills to the chat's source, as `document_agent` does.
 
 The model's tools:
 
 | Tool | What it does |
 |---|---|
-| `bash` | one shell command in the project directory through `Exec`, with a timeout; output capped |
+| `bash` | one shell command in the workspace through `Exec`, with a timeout; output capped |
 | `read_file`, `write_file` | a file of the sandbox by absolute path, through the file routes; size capped |
 | `read_skill` | a file of the skill's `SKILL.md` and `references/`, read from the service's own disk |
 | `deliver_plugin` | runs the gate of decision 5 and ends the task when it passes |
@@ -88,8 +90,8 @@ written for this task; the copy would also bring the generated protobuf client a
 
 `ONLYOFFICE/agent-skills` becomes a submodule under `common/ASC.AI.Chat/skills/agent-skills`, pinned by its
 commit; the service's Docker image copies it with the rest of the directory (`COPY . .`), so a build needs
-the submodule checked out. A missing or empty skill directory at start switches the feature off with one
-warning and does not stop the service.
+the submodule checked out. A missing skill switches the feature off, said once in the log, and does not
+stop the service; it is looked for when the tools are offered, not at start.
 
 - `SKILL.md` goes into the system prompt of the task; `references/` is served by `read_skill`, which refuses
   any path that leaves the skill directory.
@@ -104,8 +106,9 @@ packaging the skill).
 
 One new upstream client module, the only place that calls the gateway: unary methods as the plain JSON
 `POST` the gateway documents, `Exec` as a Connect server stream (`application/connect+json`, enveloped
-messages), files as HTTP bodies. It gets its place in the ESLint rule that keeps `fetch` in the upstream
-clients, and every call is bounded with `withTimeout`.
+messages), files as HTTP bodies. Its requests go through `providerFetch`, the service's helper for an
+address that is not one of the .NET services, so the ESLint rule that keeps `fetch` in the upstream clients
+needs no exception; every call is bounded with `withTimeout`.
 
 Sandbox lifetime: `Create` with a short `ttl` and a fresh session UUID per task, `Renew` on a timer while
 the task runs, `Delete` in a `finally`. A `Delete` that fails is logged and left to the `ttl`.
@@ -115,20 +118,28 @@ our own, two more dependencies and a generated file to keep in step with another
 
 ### 5. The delivery gate
 
-`deliver_plugin` is the only way a task succeeds, and it runs in the harness, not in the model:
+`deliver_plugin` is the only way a task succeeds, and it is run by the harness, not reported by the model:
 
-1. `npm run build`, `npm run typecheck`, `node <skill>/scripts/validate-plugin.mjs <project> --invoke`, each
-   through `Exec`; the first non-zero exit is returned to the model as the tool's result, and the loop goes
-   on within its budget.
-2. On success: read `dist/plugin.zip`; archive the project without `node_modules` and `dist` inside the
-   sandbox and read that; read `name`, `version` and the direct dependencies from the project's manifest and
-   `package.json`.
-3. Save both files under the caller's session in the folder `document_agent` would choose (the current
-   folder when the caller may create there, else My documents), with the thread kept as their origin when
-   there is one.
+1. The project directory is a plain path under `/workspace` (names of letters, digits, `.`, `_`, `-`); the
+   harness asks the sandbox whether it is a directory, so a wrong one is something the model reads.
+2. `npm run build`, `npm run typecheck`, `node <skill>/scripts/validate-plugin.mjs . --invoke`, each through
+   `Exec` in that directory; the first non-zero exit is returned to the model as the tool's result, and the
+   loop goes on within its budget.
+3. On success: read `name`, `version` and the direct dependencies from the project's `package.json` (each
+   bounded and checked for its shape, since they go into the result the chat model reads); read
+   `dist/plugin.zip`; archive the project without `node_modules`, `dist` and `.git` inside the sandbox and
+   read that. Either file over 32 MiB fails the gate.
+4. Save both files under the caller's session where `document_agent` would (among the artifacts of a
+   conversation of an AI project, else the current folder when the caller may create there, else My
+   documents). Each save answers for itself: a refusal says "not saved", an unknown answer "may have been
+   saved", and the package alone is returned with a warning when only the sources fail.
+
+What the gate is not: a defence against the model. The commands run in the sandbox, where the model can
+write any file, the project's scripts and the copied validator included. The gate catches a plugin that does
+not build or load; the admin-only offer and the approval of an installation are the security boundary.
 
 A package over the portal's upload limit is still saved: the portal judges it at installation ("Uploading a
-plugin package", 5 MB), and the result text says the size.
+plugin package", 5 MB), and the result names its size in bytes.
 
 ### 6. The registry route
 
@@ -137,31 +148,56 @@ portal's router does not forward to it and only the internal network sees it.
 
 - **Gate:** a random token per task, given to the sandbox in an `.npmrc` (`registry=` and the matching
   `_authToken`), compared in constant time against the tokens of the running tasks. The token dies with the
-  task.
+  task, and it is known to the instance that runs the task only.
 - **What is served:** `GET`/`HEAD` of a package document and of an archive. The archive links of a document
-  are rewritten to this route; an archive request is mapped back to a path of the configured upstream, so
-  the route never follows a URL taken from a response or a request.
-- **Cache:** archives are immutable and kept on disk under a configured directory with a size cap (oldest
-  first out); package documents are not kept. This is a file cache of a Node service, outside the
-  FusionCache rule, which governs the C# services.
-- **Upstream:** the public registry unless the installation names another (a mirror), reached through a
-  second small upstream client with a timeout.
+  that lead to the registry are rewritten to this route; an archive request is mapped back to a path of the
+  configured registry. No address is taken from a request or an answer: a redirect of the registry is not
+  followed, it is a failed fetch.
+- **Memory:** a document (up to 64 MiB) and an archive (up to 128 MiB) are held in memory while they are
+  served, so at most four requests are served at a time in an instance and the rest wait: a request takes
+  its turn before it fetches or reads from the cache and keeps it until its answer has left or its client is
+  gone, which also ends its fetch. Streaming is left out (see Known limitations).
+- **Cache:** archives are immutable and kept on disk under a configured directory (the system's temporary
+  directory unless the installation names one) with a size cap; past it the ones read longest ago go, down
+  to nine tenths of the cap. Only the cache's own files in that directory are counted or deleted, and a
+  half-written one of the last ten minutes is left alone. The count is an estimate between listings, so
+  requests in flight can pass the cap by what they write. Package documents are not kept.
+- **Lock files:** the sandbox's npm is told to leave registry addresses out of `package-lock.json`, so the
+  sources archive does not carry this service's internal address.
+- **Upstream:** the public registry unless the installation names another (a mirror), reached through
+  `providerFetch` with a timeout and a size limit on every body.
 
 *Alternatives the user set aside:* a fixed list of allowed packages; pre-fetched archives only; a separate
 Verdaccio.
 
-### 7. Installation as a second tool with a hard approval
+### 7. Approval of the two tools
 
-`install_plugin` is declared with `requireApproval: true` under a server type of its own that is listed in
-the engine's `systemServerTypes`. The spec asks for more than `document_agent` has: no pre-approval and no
-permission mode may skip the pause, because the package then runs in every user's browser. Whether the
-engine can hold that for one tool is not known from this repository; task 6.2 proves it with a test, and if
-the engine cannot, the adapter refuses to run without a fresh approval marker for the call and the gap goes
-to the library as a follow-up.
+`plugin_agent` is declared with `requireApproval: true` under a server type listed in the engine's
+`systemServerTypes`: unlike `document_agent` it asks under the default permission mode too, since a task
+takes many minutes of a sandbox and of the model. The user may pre-approve it, and the mode that runs every
+tool unasked runs it as well.
+
+`install_plugin` has a server type of its own and must never run on a standing permission, because the
+package then runs in every user's browser. The engine (`@onlyoffice/ai-chat`, `resolveAutoAllow`) pauses the
+call under "ask" always and under "auto" unless the tool is on the user's always-allow list; under "allow"
+it pauses nothing, and it has no way to pin one tool to "always ask". The adapter closes both gaps before it
+reads the file:
+
+- under "allow" it installs nothing and says that the mode has to change;
+- under "auto" with the tool on the list it installs nothing, removes the entry (from the list read anew,
+  not from the round's snapshot) and asks to be called again, so the next call pauses. The engine writes that entry before it runs the very call the user approved with
+  "always allow", so that call lands here too: the user is asked once more instead of being sent to the
+  settings, and the adapter never has to tell a fresh approval from an old one.
+
+A per-tool "always ask" in the library would turn both refusals into a dialog (a follow-up for
+`@onlyoffice/ai-chat`).
 
 The upload itself is a multipart `POST api/2.0/settings/webplugins` with the caller's forwarded headers,
-through the portal API client. The portal's answer is the truth: the tool checks nothing the portal checks
-(role, switches, archive, name, limit) and relays the status and message.
+through the portal's People/settings client. The portal's answer is the truth: the tool checks nothing the
+portal checks (role, switches, archive, name, limit). A 400 says that nothing was installed. A 403 does not:
+the portal answers it before the installation (no right, uploads off) and after it (the plugin's domains do
+not fit into the CSP header), so the answer relays the status and message and says that it is not known.
+After a 5xx, a timeout or a 200 it cannot read, the answer says that the plugin may have been installed.
 
 ### 8. Configuration
 
@@ -177,10 +213,10 @@ are both present, as with `ai.documentAgent`.
 | sandbox `ttl`, seconds | 600 | 60 – 3600 |
 | address the sandbox reaches this service at | `http://localhost:<port>` | — |
 | upstream registry | `https://registry.npmjs.org` | — |
-| cache directory, cache size cap in MiB | under the service's data path, 2048 | 64 – 65536 |
+| cache directory, cache size cap in MiB | `asc-ai-chat/npm-cache` under the system's temporary directory, 2048 | 64 – 65536 |
 
 Each has an environment override in the `AI__PLUGIN_AGENT__*` form. A value out of range falls back to the
-default with one warning.
+next source (the appsettings for an environment value) or the default, with one warning.
 
 ### 9. What the sandbox is expected to give
 
@@ -188,11 +224,13 @@ The sandbox is somebody else's deliverable, so the design fixes only what the cl
 list is the request to its owner, and the place to change first when the answer differs:
 
 - **API:** the gateway API as the document agent's repository documents it today — `Create`, `Renew`,
-  `Delete`, `Exec`, `MakeDir`, `Stat`, and file bytes over `/sandboxes/{id}/files?path=`, with a bearer
-  token. Nothing else of it is used: no MCP tunnel, no `ListDir`, no `Remove`.
-- **Image:** `node`, `npm`, `zip` and `unzip` on the path, and a writable working directory. The skill's
-  scripts are copied in by ASC.AI.Chat, so the image does not have to carry them.
-- **Network:** a sandbox reaches ASC.AI.Chat at the configured address and nothing else is needed.
+  `Delete`, `Exec`, `MakeDir`, and file bytes over `/sandboxes/{id}/files?path=`, with a bearer token.
+  Nothing else of it is used: no MCP tunnel, no `ListDir`, no `Stat`, no `Remove`.
+- **Image:** `sh`, `node`, `npm`, `zip`, `unzip`, `mkdir`, `rm` and `test` on the path, and a writable
+  `/workspace`: the client works under that path and nowhere else. The skill's scripts are copied in by
+  ASC.AI.Chat, so the image does not have to carry them.
+- **Network:** a sandbox reaches ASC.AI.Chat at the configured address and nothing else is needed. That
+  address has to lead to the very instance that runs the task: the registry token is known to it alone.
 - **Selection:** a gateway serves one image, so the address in `ai.pluginAgent` is expected to be an
   endpoint that gives Node sandboxes; how that endpoint is provided is the owner's choice.
 - **Lifetime:** a `ttl` of at least 60 seconds that `Renew` extends, and a refusal that can be told from
@@ -201,8 +239,9 @@ list is the request to its owner, and the place to change first when the answer 
 ### Existing behaviour the design relies on
 
 - `ai-agents` — "Tool calls and the approval pause" and "Decisions on a tool call": the pause, approval and
-  denial of both tools are the engine's own. "Pre-approving tools": the list `install_plugin` must not be
-  served from.
+  denial of both tools are the engine's own. "Tool permission mode of a user": the three modes and the
+  default one, which decide when the engine asks. "Pre-approving tools": the list `install_plugin` must not
+  be served from, and the routes a user re-grants an entry through after the adapter removed it.
 - `plugins` — "Installation-wide plugin switches", "Uploading a plugin package", "Contents of a plugin
   package", "Plugin name and uniqueness", "Re-uploading a plugin under the same name", "Portal plugin count
   limit": every check of an installation, and the replacement of an installed plugin that makes a follow-up
@@ -228,15 +267,34 @@ only ordinary workspace files and the files of the cache directory.
 - **A long loop in the request-serving process** → the concurrency cap, the tool-call budget, output and
   file size caps on every tool, compaction of the history.
 - **The hand-written `Exec` stream reader may disagree with the gateway on a protocol detail** → unit tests
-  against a fake built from the gateway's documented frames, and task 3.4 runs the client against the
-  provided sandbox before the loop is built on it.
+  against a fake built from the gateway's documented frames; task 3.4 runs the client against the provided
+  sandbox, which had not been delivered when the loop was written, so that run is still to come.
 - **The sandbox is delivered by someone else and may differ from what decision 9 assumes, or arrive late** →
   everything but tasks 3.4 and 7.1 is built and tested against a fake gateway; the gateway is called from one
   module only, so a different API changes that module and its tests.
 - **The submodule must be present in the Docker build context** → the build fails the feature, not the
-  service: a missing skill switches the tools off with a warning; the deployment note of task 1.2 says so.
+  service: a missing skill switches the tools off with a warning; the README of the service says so.
 - **The skill's toolchain changes upstream** (script names, flags) → the submodule is pinned; a bump is a
   commit that re-runs the task tests.
+
+## Known limitations
+
+- **One quota for all portals.** The limit of concurrent tasks is per instance of the service, not per
+  portal or user: two long tasks of one caller keep every other portal of that instance out until they end.
+- **One instance.** The registry token of a task is known to the instance that runs it, and the default
+  address a sandbox reaches the service at is `localhost`. With several instances behind one address, or a
+  sandbox on another host, the address has to be configured to lead to the instance itself.
+- **The registry holds bodies in memory.** Four requests at a time, each an archive of up to 128 MiB (and
+  the chunks it arrived in while it is read) or a document of up to 64 MiB with its parsed form. Streaming
+  to disk and to the client would remove that cost.
+- **A file route's 404 is read as "no such file".** The gateway answers 404 for an unknown sandbox too, so a
+  sandbox that expired mid-task first shows as a missing file; the next command reports it as lost.
+- **`install_plugin` installs any zip archive the admin can read**, by the file id the model names. The
+  approval shows that id, not the content: a file replaced by another room member between the build and the
+  approval, or an archive the model was talked into naming, is installed if approved.
+- **The delivery gate does not hold against the model** (decision 5).
+- **The upload and the registry are tested against stubs.** The request to `settings/webplugins` and what a
+  real `npm install` asks of the route are first seen against the real services in task 7.1.
 
 ## Migration Plan
 

@@ -38,7 +38,9 @@
 import { getForwardedHeaders } from "../requestContext.js";
 import { DocspaceApiHttpError } from "./docspaceFilesApi.js";
 import { proxyBaseUrl, withTimeout } from "./httpClient.js";
-import { getBoolean, getObject, isObject } from "../narrow.js";
+import { getBoolean, getObject, getString, isObject } from "../narrow.js";
+import type { JsonObject } from "../narrow.js";
+import { errorBodyText } from "./errorBody.js";
 import { jsonAnswer, mapped } from "./upstreamShape.js";
 
 export interface DocspaceSelf {
@@ -82,4 +84,74 @@ export async function isPortalAdmin(): Promise<boolean> {
 export async function mayCreateAiRooms(): Promise<boolean> {
   const self = await getSelf();
   return self.isOwner || self.isAdmin || self.isRoomAdmin;
+}
+
+/** What the portal answered an upload of a plugin package with. */
+export type WebPluginInstall =
+  | { installed: true; name: string; version: string; enabled: boolean }
+  /** A refusal of the portal: its status and the reason it gave. */
+  | { installed: false; status: number; message: string };
+
+/** `WebPluginDto` as an installation reports it: the name, the version and whether it is on. */
+export function parseWebPlugin(
+  dto: JsonObject | undefined,
+): { name: string; version: string; enabled: boolean } | undefined {
+  const name = dto ? getString(dto, "name") : undefined;
+  const version = dto ? getString(dto, "version") : undefined;
+  const enabled = dto ? getBoolean(dto, "enabled") : undefined;
+  return name === undefined || version === undefined || enabled === undefined
+    ? undefined
+    : { name, version, enabled };
+}
+
+/**
+ * `POST settings/webplugins` (WebPluginsController.AddWebPluginFromFile): installs a plugin
+ * package for the portal under the caller's own session, which needs the right to change the
+ * portal's settings. A 4xx is the portal's judgement of the caller or of the package and comes
+ * back as a value with the reason the portal gave; any other failure throws, and after it the
+ * package may or may not be installed.
+ */
+export async function addWebPlugin(title: string, bytes: Uint8Array): Promise<WebPluginInstall> {
+  const url = `${proxyBaseUrl}/api/2.0/settings/webplugins`;
+  const form = new FormData();
+  form.append("file", new Blob([bytes], { type: "application/zip" }), title);
+  const { signal, cancel } = withTimeout(undefined);
+  try {
+    // No Content-Type here: `fetch` derives the multipart boundary from the body.
+    const res = await fetch(url, {
+      method: "POST",
+      headers: getForwardedHeaders(),
+      body: form,
+      signal,
+    });
+    if (res.status >= 400 && res.status < 500) {
+      return {
+        installed: false,
+        status: res.status,
+        message: refusalMessage(await errorBodyText(res)),
+      };
+    }
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    const raw = await jsonAnswer(res, "POST settings/webplugins");
+    const plugin = mapped(
+      parseWebPlugin(isObject(raw) ? getObject(raw, "response") : undefined),
+      "POST settings/webplugins",
+    );
+    return { installed: true, ...plugin };
+  } finally {
+    cancel();
+  }
+}
+
+/** `error.message` of a refusal in the portal's envelope; empty when the body is something else. */
+function refusalMessage(body: string): string {
+  try {
+    const parsed: unknown = JSON.parse(body);
+    const error = isObject(parsed) ? getObject(parsed, "error") : undefined;
+    return (error ? getString(error, "message") : undefined) ?? "";
+  } catch {
+    return "";
+  }
 }
