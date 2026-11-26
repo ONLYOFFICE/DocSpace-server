@@ -264,7 +264,7 @@ header, outside `frame-ancestors`, never the portal's list.
 
 A personal upload or update that adds domains to the caller's header and so makes it pass the size limit, 15 KB
 by default, SHALL keep its change, answer 403 "CSP header size exceeds maximum allowed size of 15360 bytes." and
-leave `asc_personal_csp` as it was, unless the caller's domains before it could not be read. Any other personal
+leave `asc_personal_csp` as it was, unless the caller's domains before or after it could not be read. Any other personal
 call, and `getWebPlugins` without `personal`, SHALL answer 200, and `getCspSettings` SHALL fall back to the
 portal's header.
 
@@ -293,8 +293,8 @@ portal's header.
 
 `getWebPlugins` without `personal`, and an upload, update or deletion with `personal=true` that answers 200,
 SHALL set the HttpOnly cookie `asc_personal_csp` to `1` while the caller has personal domains within the size
-limit, and otherwise delete it from a request that carries it. If reading the caller's plugins after the change,
-or a new generation, fails, the cookie SHALL stay until the next plugin list. A response that clears the session
+limit, and otherwise delete it from a request that carries it. If a step after the change fails before the
+cookie is written, the cookie SHALL stay until the next plugin list. A response that clears the session
 cookie, `logout` included, SHALL delete it too.
 
 #### Scenario: Cookie set by the plugin list
@@ -345,6 +345,11 @@ member's domains SHALL reach their cached header within a day.
 - **WHEN** a request carries `asc_auth_key` twice, in any letter case, the second one after a `;` or a `,`, with `asc_personal_csp`
 - **THEN** the proxy asks `getCspSettings`, which answers for the session it authenticated and caches nothing for it
 
+#### Scenario: Personal domains not read
+
+- **WHEN** `getCspSettings` cannot read the personal domains of a member whose request carries `asc_personal_csp`
+- **THEN** it answers the portal's `header` and caches nothing for the session
+
 #### Scenario: New generation
 
 - **WHEN** a member uploads, switches or deletes a personal plugin so that the domains of their header change, the owner uploads or deletes a portal plugin, switches personal plugins or a member's personal plugin with domains, or saves the portal's domains with `configureCsp`, on any host of the portal
@@ -353,7 +358,7 @@ member's domains SHALL reach their cached header within a day.
 #### Scenario: Personal change that moves no domain
 
 - **WHEN** a member uploads, switches or deletes a personal plugin without domains, or saves its settings
-- **THEN** the generation stays, and the member headers cached under it are served on
+- **THEN** the generation stays, unless the member's domains before or after the call could not be read, and the member headers cached under it are served on
 
 #### Scenario: Portal removed by the retention job
 

@@ -47,7 +47,7 @@ alone, while the administrator keeps control of what runs for the portal.
   `getCspSettings` returns, outside `frame-ancestors`, unless the header would pass its size limit; if reading
   them fails, the portal header is served. A personal upload, or a personal update with `enabled` true, that
   adds domains over the size limit of the member's header keeps its change, answers 403 "CSP header size exceeds
-  maximum allowed size of N bytes." and leaves the cookie as it was, unless reading the domains before it failed; a call that adds no domain, a personal
+  maximum allowed size of N bytes." and leaves the cookie as it was, unless reading the domains before or after it failed; a call that adds no domain, a personal
   deletion or switch-off, the plugin list and `getCspSettings` fall back to the portal header without an error. The cookie, `1`, is set and cleared by `getWebPlugins` without
   `personal` and by the personal uploads, updates and deletions, and every response that clears the session
   cookie, `logout` among them, deletes it too. The member's header is cached for the proxy for a day under a key
@@ -177,7 +177,7 @@ None.
   without a shipped `plugin.css` no longer shows in `cssUrl` (for `enabled` and `settings` see "Stored state of
   a plugin"). A personal upload that adds domains over the size limit of the member's policy header answers 403
   "CSP header size exceeds maximum allowed size of N bytes." with the plugin installed and on, and the cookie
-  left as it was, unless reading the member's domains before it failed. The answer of a personal upload can set or delete the `asc_personal_csp` cookie. Affected: the
+  left as it was, unless reading the member's domains before or after it failed. The answer of a personal upload can set or delete the `asc_personal_csp` cookie. Affected: the
   web client, which uploads personal plugins from the profile's Plugins tab; plugin packages whose manifest
   carries a `cssUrl`; the SDKs and the OpenAPI document (the new query parameter). A manifest stored before no
   longer applies these fields either (see "Stored state of a plugin").
@@ -210,7 +210,7 @@ None.
   switches their own plugin and stores its settings in their own row; before the branch an administrator's call
   with it changed the portal plugin of that name, and anyone else's got 403 "Access denied". A personal call with
   `enabled` true that adds domains over the size limit of the member's policy header answers 403 "CSP header size
-  exceeds maximum allowed size of N bytes." with the new state saved, unless reading the member's domains before it failed; a call that adds no domain and a personal
+  exceeds maximum allowed size of N bytes." with the new state saved, unless reading the member's domains before or after it failed; a call that adds no domain and a personal
   switch-off answer 200. The
   answer of a personal call can set or delete the cookie. Calls without `personal=true` answer as before. Affected: the web client (profile tab), the SDKs and
   the OpenAPI document (the new query parameter).
@@ -267,8 +267,8 @@ None.
   manifest's `createBy` and `createOn` are still trusted.
 - **P2** (state saved before the CSP save, then 403): kept, and extended to personal plugins. A personal upload,
   or a personal update with `enabled` true, that adds domains over the size limit of the member's policy header
-  answers 403 after its change was saved, as a portal call does, unless reading the member's domains before it
-  failed.
+  answers 403 after its change was saved, as a portal call does, unless reading the member's domains before or
+  after it failed.
 - **P4** (every failure after the size checks becomes 400 "Wrong plugin archive. …"): narrowed. A refusal
   because an installed plugin holds the `name` or `pluginName`, because of the plugin limit or, for a personal
   upload, because of its `cspDomains` now answers 400 with its reason alone; a fault of the archive or its

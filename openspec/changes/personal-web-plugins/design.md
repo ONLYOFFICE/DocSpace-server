@@ -162,7 +162,8 @@ its own session's.
   `enabled` true, that add domains then answer 403 "CSP header size exceeds maximum allowed size of N bytes."
   after the change was saved, as the portal path does (P2), and leave the hint as it was. When the domains
   before the call could not be read, nothing counts as added: the call refuses nothing and sets or deletes the
-  hint by the domains after it; the refusal is
+  hint by the domains after it. When those after it could not be read, the call starts a new generation, refuses
+  nothing and leaves the hint. The refusal is
   recognised by its own exception type. A call that adds no domain, a personal DELETE, a PUT with `enabled` false
   and the plugin list log a warning without the stack, delete the hint and answer as usual.
 - Every response that clears the session cookie also deletes the hint. The session's header stays until it
