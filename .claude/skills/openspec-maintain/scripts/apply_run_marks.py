@@ -39,9 +39,10 @@ LEGEND_EN = (
 MARK = re.compile(r" \[run: [A-Z-]+\]")
 # A test is cited by name, `File.cs::Method` (several: `File.cs::A, B`), which survives every edit of the file, or,
 # in older rows, by lines, `File.cs:12-40`, which moves with every edit above it.
-# A further name after a comma is not the file of the next citation (`B.cs::X`) and ends the item (a comma, a
-# backtick, `;`, `)`, `|` or the end follows), so that the prose after a citation is not read as a name.
-CITE = re.compile(r"([A-Za-z_0-9]+\.cs)(?:::([A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*(?![\w.]*::|\.\w)(?=\s*(?:[,`;)|]|$)))*)"
+# A further name after a comma starts with a capital or an underscore, as test methods do, is not the file of the
+# next citation (`B.cs::X`) and ends the item (a comma, a backtick, `;`, `)`, `|` or the end follows), so that the
+# prose after a citation is not read as a name - the same as NAME_CITATION in review-branch/scan.py.
+CITE = re.compile(r"([A-Za-z_0-9]+\.cs)(?:::([A-Za-z_]\w*(?:\s*,\s*[A-Z_]\w*(?![\w.]*::|\.\w)(?=\s*(?:[,`;)|]|$)))*)"
                   r"|:([0-9][0-9,\s\-]*))?")
 METHOD = re.compile(r"^\s*(?:public|internal)\s+(?:async\s+)?(?:Task|ValueTask|void)\s+(\w+)\s*\(")
 
