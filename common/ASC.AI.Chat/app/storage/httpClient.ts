@@ -112,8 +112,17 @@ export interface RequestOptions {
 }
 
 function unwrapDocSpaceEnvelope(json: unknown): unknown {
-  if (isObject(json) && "response" in json && "status" in json) {
+  if (!isObject(json) || !("status" in json)) {
+    return json;
+  }
+  if ("response" in json) {
     return json.response;
+  }
+  // The portal API leaves null properties out of its JSON, so an action that returned null is
+  // wrapped without `response`: `{ count, status, statusCode }`. That is the same answer as
+  // `response: null`, not an object of an unknown shape.
+  if (typeof json["status"] === "number" && typeof json["statusCode"] === "number") {
+    return null;
   }
   return json;
 }

@@ -170,6 +170,10 @@ describe("read", () => {
   it.each([
     ["nothing configured (204)", noContent],
     ["null", () => docspace(null)],
+    [
+      "an envelope without a response",
+      () => HttpResponse.json({ count: 0, status: 0, statusCode: 200 }),
+    ],
     ["a 404", () => docspaceError(404)],
   ])("reads %s as none", async (_name, answer) => {
     upstream.use(http.get("*/internal/ai/web-search", answer));

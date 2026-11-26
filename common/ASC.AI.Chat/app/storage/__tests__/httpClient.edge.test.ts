@@ -95,6 +95,23 @@ describe("aiService answers", () => {
     await expect(aiService.get("/null")).resolves.toBeNull();
   });
 
+  // What the portal API really sends for an action that returned null: it omits null properties.
+  it("reads an envelope without a response as null", async () => {
+    upstream.use(
+      http.get("*/internal/ai/none", () =>
+        HttpResponse.json({ count: 0, status: 0, statusCode: 200 }),
+      ),
+    );
+
+    await expect(aiService.get("/none")).resolves.toBeNull();
+  });
+
+  it("keeps an object that only has a status, as it is", async () => {
+    upstream.use(http.get("*/internal/ai/job", () => HttpResponse.json({ status: "done" })));
+
+    await expect(aiService.get("/job")).resolves.toEqual({ status: "done" });
+  });
+
   it("answers a JSON array or a scalar as it came", async () => {
     upstream.use(
       http.get("*/internal/ai/arr", () => HttpResponse.json([1, 2])),
