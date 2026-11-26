@@ -83,7 +83,7 @@ public class WebPluginManager(
 {
     private const string StorageSystemModuleName = "systemwebplugins";
     private const string StorageModuleName = "webplugins";
-    private const string StoragePersonalModuleName = "personalwebplugins";
+    private const string StoragePersonalModuleName = WebPluginConfigSettings.PersonalStorageModule;
 
     public const string PersonalCspCookieName = "asc_personal_csp";
     private const string ConfigFileName = "config.json";
@@ -181,6 +181,27 @@ public class WebPluginManager(
         webPlugin.CssUrl = null;
     }
 
+    public static void ClearUnsafeLinks(WebPlugin webPlugin)
+    {
+        if (!Uri.TryCreate(webPlugin.HomePage, UriKind.Absolute, out var homePage) || homePage.Scheme is not ("http" or "https"))
+        {
+            webPlugin.HomePage = null;
+        }
+
+        if (!IsPackagePath(webPlugin.Image))
+        {
+            webPlugin.Image = null;
+        }
+    }
+
+    private static bool IsPackagePath(string path)
+    {
+        return !string.IsNullOrWhiteSpace(path) &&
+            path[0] is not ('/' or '\\') &&
+            path.IndexOfAny([':', '?', '#', '%']) < 0 &&
+            !path.Split('/', '\\').Any(segment => segment is "" or "." or "..");
+    }
+
     public static void PrepareStoredPlugin(WebPlugin webPlugin, bool system, Guid? owner)
     {
         webPlugin.System = system;
@@ -192,6 +213,7 @@ public class WebPluginManager(
         }
 
         ClearManifestState(webPlugin, system);
+        ClearUnsafeLinks(webPlugin);
     }
 
     private static bool IsPluginConfigPath(string path)
@@ -259,7 +281,7 @@ public class WebPluginManager(
             throw new InvalidOperationException(Resource.ErrorWebPluginForbiddenSystem);
         }
 
-        if (Path.GetExtension(file.FileName).ToLowerInvariant() != webPluginConfigSettings.Extension)
+        if (!string.Equals(Path.GetExtension(file.FileName), webPluginConfigSettings.Extension, StringComparison.OrdinalIgnoreCase))
         {
             throw new ArgumentException(Resource.ErrorWebPluginFileExtension);
         }
@@ -281,6 +303,7 @@ public class WebPluginManager(
             : await GetWebPluginsForTenantAsync(tenantId);
 
         string tempDirToDelete = null;
+        var storeTouched = false;
 
         try
         {
@@ -306,7 +329,11 @@ public class WebPluginManager(
 
             var basePath = GetBasePath(owner);
 
+            storeTouched = true;
+
             await CopyPluginFromTempToStore(webPlugin, tempPath, storage, basePath, owner.HasValue ? ACL.Private : ACL.Auto);
+
+            storeTouched = false;
 
             await ResetWebPluginsCacheAsync(system ? Tenant.DefaultTenant : tenantId, owner);
 
@@ -332,10 +359,17 @@ public class WebPluginManager(
         }
         catch (Exception ex) when (ex is not WebPluginRefusedException)
         {
-            throw new ArgumentException($"{Resource.ErrorWebPluginArchive}. {ex.Message}");
+            log.WarningWebPluginUploadFailed(file.FileName, ex);
+
+            throw new ArgumentException($"{Resource.ErrorWebPluginArchive}. {ex.Message}", ex);
         }
         finally
         {
+            if (storeTouched)
+            {
+                await ResetWebPluginsCacheAsync(system ? Tenant.DefaultTenant : tenantId, owner);
+            }
+
             if (!string.IsNullOrEmpty(tempDirToDelete) && Directory.Exists(tempDirToDelete))
             {
                 Directory.Delete(tempDirToDelete, true);
@@ -541,6 +575,11 @@ public class WebPluginManager(
     {
         DemandWebPlugins();
 
+        if (!webPluginConfigSettings.PersonalStorage)
+        {
+            return [];
+        }
+
         var storage = await GetPluginStorageAsync(tenantId, true);
 
         var configFiles = await storage.ListFilesRelativeAsync(string.Empty, string.Empty, ConfigFileName, true).ToArrayAsync();
@@ -568,6 +607,11 @@ public class WebPluginManager(
 
     private async Task<List<WebPlugin>> GetMemberWebPluginsAsync(int tenantId, Guid owner)
     {
+        if (!webPluginConfigSettings.PersonalStorage)
+        {
+            return [];
+        }
+
         var webPlugins = (await GetWebPluginsFromCacheAsync(tenantId, owner))
             .Select(x => x.Clone())
             .ToList();
@@ -1095,6 +1139,7 @@ public class WebPluginManager(
             webPlugin.CreateOn = DateTime.UtcNow;
 
             ClearManifestState(webPlugin, system);
+            ClearUnsafeLinks(webPlugin);
 
             configFileContent = JsonSerializer.Serialize(webPlugin, options);
 
@@ -1127,7 +1172,7 @@ public class WebPluginManager(
                 {
                     var ext = Path.GetExtension(zipEntry.Name);
 
-                    if (!webPluginConfigSettings.AssetExtensions.Contains(ext))
+                    if (!webPluginConfigSettings.AssetExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
                     {
                         continue;
                     }

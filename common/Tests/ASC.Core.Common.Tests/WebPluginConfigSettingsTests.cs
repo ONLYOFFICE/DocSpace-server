@@ -36,7 +36,8 @@ namespace ASC.Core.Common.Tests;
 /// <summary>
 /// The <c>plugins</c> section (<c>WebPluginConfigSettings</c>) goes through the configuration readers
 /// (<c>.claude/rules/configuration.md</c>): a missing key gives the default, a value that does not parse gives the
-/// default and a warning, and a number out of its bounds gives the nearest bound and a warning.
+/// default and a warning, and a number out of its bounds gives the nearest bound and a warning. Personal plugins are
+/// available only while the storage configuration declares their module.
 /// </summary>
 public class WebPluginConfigSettingsTests
 {
@@ -47,13 +48,14 @@ public class WebPluginConfigSettingsTests
         var logger = new RecordingLogger<WebPluginConfigSettings>();
 
         // Act
-        var settings = new WebPluginConfigSettings(Configuration([]), logger);
+        var settings = Settings([], logger);
 
         // Assert
         settings.Enabled.Should().BeFalse();
         settings.Upload.Should().BeFalse();
         settings.Delete.Should().BeFalse();
         settings.Personal.Should().BeTrue();
+        settings.PersonalStorage.Should().BeTrue();
         settings.MaxCount.Should().Be(100);
         settings.PersonalMaxCount.Should().Be(10);
         settings.MaxSize.Should().Be(5L * 1024 * 1024);
@@ -87,7 +89,12 @@ public class WebPluginConfigSettingsTests
         { "plugins:maxSize", "x", nameof(WebPluginConfigSettings.MaxSize), 5L * 1024 * 1024, true },
         { "plugins:assetMaxCount", "0", nameof(WebPluginConfigSettings.AssetMaxCount), 10, true },
         { "plugins:assetMaxCount", "-1", nameof(WebPluginConfigSettings.AssetMaxCount), 1, true },
-        { "plugins:assetMaxCount", "1000", nameof(WebPluginConfigSettings.AssetMaxCount), 100, true }
+        { "plugins:assetMaxCount", "1000", nameof(WebPluginConfigSettings.AssetMaxCount), 100, true },
+        { "plugins:extension", ".ZIP", nameof(WebPluginConfigSettings.Extension), ".zip", false },
+        { "plugins:extension", "zip", nameof(WebPluginConfigSettings.Extension), ".zip", true },
+        { "plugins:extension", "", nameof(WebPluginConfigSettings.Extension), ".zip", true },
+        { "plugins:extension", "*.zip", nameof(WebPluginConfigSettings.Extension), ".zip", true },
+        { "plugins:extension", ".tar.gz", nameof(WebPluginConfigSettings.Extension), ".zip", true }
     };
 
     [Theory]
@@ -98,7 +105,7 @@ public class WebPluginConfigSettingsTests
         var logger = new RecordingLogger<WebPluginConfigSettings>();
 
         // Act
-        var settings = new WebPluginConfigSettings(Configuration(new() { [key] = configured }), logger);
+        var settings = Settings(new() { [key] = configured }, logger);
 
         // Assert
         typeof(WebPluginConfigSettings).GetProperty(property)!.GetValue(settings).Should().Be(expected);
@@ -106,23 +113,57 @@ public class WebPluginConfigSettingsTests
     }
 
     [Fact]
-    public void Read_AssetExtensionsList_KeepsTheNonEmptyElements()
+    public void Read_AssetExtensionsList_SkipsAnEmptyElementWithAWarning()
     {
         // Arrange
         var logger = new RecordingLogger<WebPluginConfigSettings>();
-        var configuration = Configuration(new()
+
+        // Act
+        var settings = Settings(new()
         {
             ["plugins:assetExtensions:0"] = ".png",
             ["plugins:assetExtensions:1"] = "",
             ["plugins:assetExtensions:2"] = ".svg"
-        });
-
-        // Act
-        var settings = new WebPluginConfigSettings(configuration, logger);
+        }, logger);
 
         // Assert
         settings.AssetExtensions.Should().Equal(".png", ".svg");
-        logger.Warnings.Should().BeEmpty();
+        logger.Warnings.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void Read_AssetExtensionsList_ReadsEveryElementAsALowercaseExtensionWithADot()
+    {
+        // Arrange
+        var logger = new RecordingLogger<WebPluginConfigSettings>();
+
+        // Act
+        var settings = Settings(new()
+        {
+            ["plugins:assetExtensions:0"] = "PNG",
+            ["plugins:assetExtensions:1"] = ".Svg",
+            ["plugins:assetExtensions:2"] = "*.js",
+            ["plugins:assetExtensions:3"] = ".png"
+        }, logger);
+
+        // Assert: "PNG" is read as ".png" and "*.js" is skipped, each with a warning; the case alone is not one
+        settings.AssetExtensions.Should().Equal(".png", ".svg");
+        logger.Warnings.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public void Read_WithoutThePersonalStorageModule_PersonalPluginsAreUnavailableWithAWarning()
+    {
+        // Arrange
+        var logger = new RecordingLogger<WebPluginConfigSettings>();
+
+        // Act
+        var settings = Settings([], logger, personalStorage: false);
+
+        // Assert
+        settings.Personal.Should().BeFalse();
+        settings.PersonalStorage.Should().BeFalse();
+        logger.Warnings.Should().HaveCount(1);
     }
 
     [Fact]
@@ -132,7 +173,7 @@ public class WebPluginConfigSettingsTests
         var logger = new RecordingLogger<WebPluginConfigSettings>();
 
         // Act
-        var settings = new WebPluginConfigSettings(Configuration(new() { ["plugins:assetExtensions"] = ".html,.js" }), logger);
+        var settings = Settings(new() { ["plugins:assetExtensions"] = ".html,.js" }, logger);
 
         // Assert
         settings.AssetExtensions.Should().Equal(".jpg", ".jpeg", ".png", ".svg");
@@ -146,14 +187,21 @@ public class WebPluginConfigSettingsTests
         var logger = new RecordingLogger<WebPluginConfigSettings>();
 
         // Act
-        var settings = new WebPluginConfigSettings(Configuration(new() { ["plugins:assetExtensions:0"] = "" }), logger);
+        var settings = Settings(new() { ["plugins:assetExtensions:0"] = "" }, logger);
 
         // Assert
         settings.AssetExtensions.Should().Equal(".jpg", ".jpeg", ".png", ".svg");
     }
 
-    private static IConfiguration Configuration(Dictionary<string, string?> values)
+    private static WebPluginConfigSettings Settings(Dictionary<string, string?> values, ILogger<WebPluginConfigSettings> logger, bool personalStorage = true)
     {
-        return new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+        if (personalStorage)
+        {
+            values = new(values) { ["storage:module:0:name"] = WebPluginConfigSettings.PersonalStorageModule };
+        }
+
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+
+        return new WebPluginConfigSettings(configuration, logger, new StorageFactoryConfig(configuration, new StorageConfigExtension(configuration)));
     }
 }

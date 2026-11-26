@@ -65,6 +65,7 @@ public class CspSessionKeyTests
     [InlineData("asc_auth_key=a; asc_auth_key=b", 2)]
     [InlineData("ASC_AUTH_KEY=a; asc_auth_key=b", 2)]
     [InlineData("x_asc_auth_key=a; asc_auth_key=b", 1)]
+    [InlineData("zz=1, asc_auth_key=a; asc_auth_key=b", 2)]
     [InlineData("other=b", 0)]
     public void CountCookies_CookieHeader_CountsTheCookiesOfThatName(string header, int expected)
     {
@@ -83,5 +84,50 @@ public class CspSessionKeyTests
 
         // Assert
         count.Should().Be(2);
+    }
+
+    [Theory]
+    [InlineData(null, "asc_auth_key=a; other=b", "a", true)]
+    [InlineData("Basic dXNlcjpwYXNz", "asc_auth_key=a", "a", false)]
+    [InlineData(null, "asc_auth_key=a; ASC_AUTH_KEY=b", "a", false)]
+    [InlineData(null, "zz=1, asc_auth_key=a; asc_auth_key=b", "b", false)]
+    [InlineData(null, "asc_auth_key=", "", false)]
+    public void CanCacheSessionHeader_Request_CachesOnlyForOneSessionCookieAndNoAuthorizationHeader(string? authorization, string cookieHeader, string authKey, bool expected)
+    {
+        // Act
+        var canCache = CspSettingsHelper.CanCacheSessionHeader(authorization, [cookieHeader], authKey);
+
+        // Assert
+        canCache.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(new[] { "a.example" }, new[] { "A.example" }, false, false)]
+    [InlineData(new[] { "a.example" }, new[] { "a.example", "b.example" }, true, true)]
+    [InlineData(new[] { "a.example", "b.example" }, new[] { "a.example" }, true, false)]
+    [InlineData(new string[0], new string[0], false, false)]
+    public void PersonalDomains_BeforeAndAfter_SayWhetherTheyChangedAndGrew(string[] before, string[] after, bool changed, bool added)
+    {
+        // Act and assert
+        CspSettingsHelper.PersonalDomainsChanged(before, after).Should().Be(changed);
+        CspSettingsHelper.PersonalDomainsAdded(before, after).Should().Be(added);
+    }
+
+    [Fact]
+    public void PersonalDomains_BeforeUnknown_CountAsChangedAndEveryDomainAsAdded()
+    {
+        // Act and assert
+        CspSettingsHelper.PersonalDomainsChanged(null, []).Should().BeTrue();
+        CspSettingsHelper.PersonalDomainsAdded(null, ["a.example"]).Should().BeTrue();
+    }
+
+    [Fact]
+    public void GetGenerationHostKeys_AliasAndRequestHost_AreAddedToTheHeaderKeys()
+    {
+        // Act
+        var keys = CspSettingsHelper.GetGenerationHostKeys(["csp:mapped.example.com"], "portal.onlyoffice.io", "Alias.Example.com");
+
+        // Assert
+        keys.Should().BeEquivalentTo("csp:mapped.example.com", "csp:portal.onlyoffice.io", "csp:alias.example.com");
     }
 }

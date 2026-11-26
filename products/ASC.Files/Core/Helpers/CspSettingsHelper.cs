@@ -94,7 +94,7 @@ public class CspSettingsHelper(
 
         if (updateInDb)
         {
-            await SetPersonalGenerationAsync(headerKeys);
+            await SetPersonalGenerationAsync(GetGenerationHostKeys(tenant, headerKeys));
         }
 
         return headerValue;
@@ -118,9 +118,8 @@ public class CspSettingsHelper(
     {
         var request = httpContextAccessor.HttpContext?.Request;
 
-        if (request == null || !string.IsNullOrEmpty(request.Headers.Authorization) ||
-            !request.Cookies.TryGetValue(CookiesManager.AuthCookiesName, out var authKey) || string.IsNullOrEmpty(authKey) ||
-            CountCookies(request.Headers.Cookie, CookiesManager.AuthCookiesName) > 1)
+        if (request == null || !request.Cookies.TryGetValue(CookiesManager.AuthCookiesName, out var authKey) ||
+            !CanCacheSessionHeader(request.Headers.Authorization, request.Headers.Cookie, authKey))
         {
             return null;
         }
@@ -146,23 +145,61 @@ public class CspSettingsHelper(
         await hybridCache.SetAsync(sessionKey, headerValue, options => InProxyLevel(options.SetDuration(_personalHeaderDuration)));
     }
 
+    public static bool PersonalDomainsChanged(IEnumerable<string> before, IEnumerable<string> after)
+    {
+        return before == null || !after.ToHashSet(StringComparer.OrdinalIgnoreCase).SetEquals(before);
+    }
+
+    public static bool PersonalDomainsAdded(IEnumerable<string> before, IEnumerable<string> after)
+    {
+        return after.Except(before ?? [], StringComparer.OrdinalIgnoreCase).Any();
+    }
+
+    public static bool CanCacheSessionHeader(string authorization, IEnumerable<string> cookieHeaders, string authKey)
+    {
+        return string.IsNullOrEmpty(authorization) && !string.IsNullOrEmpty(authKey) &&
+            CountCookies(cookieHeaders, CookiesManager.AuthCookiesName) == 1;
+    }
+
     public static int CountCookies(IEnumerable<string> cookieHeaders, string name)
     {
         return cookieHeaders
-            .SelectMany(header => (header ?? string.Empty).Split(';'))
+            .SelectMany(header => (header ?? string.Empty).Split(';', ','))
             .Count(cookie => cookie.TrimStart().StartsWith(name + "=", StringComparison.OrdinalIgnoreCase));
     }
 
     private void InProxyLevel(FusionCacheEntryOptions options)
     {
         options.SetSkipMemoryCache(hybridCache.HasDistributedCache);
+        options.SetSkipBackplaneNotifications(hybridCache.HasDistributedCache);
     }
 
     public async Task ResetPersonalAsync()
     {
-        var headerKeys = await GetHeaderKeysAsync(tenantManager.GetCurrentTenant(), false);
+        var tenant = tenantManager.GetCurrentTenant();
+        var headerKeys = await GetHeaderKeysAsync(tenant, false);
 
-        await SetPersonalGenerationAsync(headerKeys);
+        await SetPersonalGenerationAsync(GetGenerationHostKeys(tenant, headerKeys));
+    }
+
+    private HashSet<string> GetGenerationHostKeys(Tenant tenant, IEnumerable<string> headerKeys)
+    {
+        return GetGenerationHostKeys(headerKeys, tenant.GetTenantDomain(coreSettings, false), httpContextAccessor.HttpContext?.Request.Host.Host);
+    }
+
+    public static HashSet<string> GetGenerationHostKeys(IEnumerable<string> headerKeys, string aliasDomain, string requestHost)
+    {
+        HashSet<string> keys = [.. headerKeys];
+
+        foreach (var host in new[] { aliasDomain, requestHost })
+        {
+            if (!string.IsNullOrEmpty(host))
+            {
+                keys.Add(GetKey(host.ToLowerInvariant()));
+            }
+        }
+
+        return keys;
     }
 
     private async Task SetPersonalGenerationAsync(IEnumerable<string> headerKeys)

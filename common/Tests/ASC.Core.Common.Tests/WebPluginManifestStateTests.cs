@@ -34,10 +34,12 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// What a stored manifest may say about the state of its plugin (<c>WebPluginManager.ClearManifestState</c>, applied
-/// on upload and on every read of the storage): an installation-wide plugin keeps the <c>enabled</c>, <c>settings</c>
-/// and <c>cssUrl</c> its manifest declares, a portal or personal plugin takes none of them, so a manifest stored
-/// before uploads dropped those fields cannot switch a plugin on or hand out settings.
+/// What a stored manifest may say about its plugin (<c>WebPluginManager.ClearManifestState</c> and
+/// <c>WebPluginManager.ClearUnsafeLinks</c>, applied on upload and, through <c>PrepareStoredPlugin</c>, on every read
+/// of the storage): an installation-wide plugin keeps the <c>enabled</c>, <c>settings</c> and <c>cssUrl</c> its
+/// manifest declares, a portal or personal plugin takes none of them, so a manifest stored before uploads dropped
+/// those fields cannot switch a plugin on or hand out settings; on every level <c>homePage</c> is kept only as an
+/// http or https address and <c>image</c> only as a path inside the package.
 /// </summary>
 public class WebPluginManifestStateTests
 {
@@ -56,5 +58,61 @@ public class WebPluginManifestStateTests
         webPlugin.Enabled.Should().Be(system);
         (webPlugin.Settings != null).Should().Be(system);
         (webPlugin.CssUrl != null).Should().Be(system);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PrepareStoredPlugin_PortalOrPersonalManifestDeclaringState_TakesNone(bool personal)
+    {
+        // Arrange
+        var webPlugin = new WebPlugin { Name = "manifest-state", Enabled = true, Settings = "{\"key\":\"value\"}", CssUrl = "https://example.com/plugin.css" };
+
+        // Act
+        WebPluginManager.PrepareStoredPlugin(webPlugin, false, personal ? Guid.NewGuid() : null);
+
+        // Assert
+        webPlugin.Enabled.Should().BeFalse();
+        webPlugin.Settings.Should().BeNull();
+        webPlugin.CssUrl.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData("https://example.com/plugin", "https://example.com/plugin")]
+    [InlineData("http://example.com", "http://example.com")]
+    [InlineData("javascript:fetch('/api/2.0/people')", null)]
+    [InlineData("data:text/html,<script>alert(1)</script>", null)]
+    [InlineData("//example.com", null)]
+    [InlineData("example.com", null)]
+    public void PrepareStoredPlugin_HomePage_KeptOnlyAsAnHttpAddress(string homePage, string? expected)
+    {
+        // Arrange
+        var webPlugin = new WebPlugin { Name = "manifest-links", HomePage = homePage };
+
+        // Act
+        WebPluginManager.PrepareStoredPlugin(webPlugin, false, Guid.NewGuid());
+
+        // Assert
+        webPlugin.HomePage.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("logo.svg", "logo.svg")]
+    [InlineData("icons/logo.svg", "icons/logo.svg")]
+    [InlineData("../plugin.js", null)]
+    [InlineData("/logo.svg", null)]
+    [InlineData("https://example.com/logo.svg", null)]
+    [InlineData("logo.svg?x=1", null)]
+    [InlineData("icons//logo.svg", null)]
+    public void PrepareStoredPlugin_Image_KeptOnlyAsAPathInsideThePackage(string image, string? expected)
+    {
+        // Arrange
+        var webPlugin = new WebPlugin { Name = "manifest-links", Image = image };
+
+        // Act
+        WebPluginManager.PrepareStoredPlugin(webPlugin, false, Guid.NewGuid());
+
+        // Assert
+        webPlugin.Image.Should().Be(expected);
     }
 }

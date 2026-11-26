@@ -37,6 +37,21 @@ namespace ASC.Web.Api.Core;
 public class CspConfigSettings(IConfiguration configuration, ILogger<CspConfigSettings> logger)
 {
     // bytes of the Content-Security-Policy header the portal serves: 1024 (1 KB) to 65536 (64 KB), 15360 (15 KB) when
-    // not set
-    public int MaxSize { get; } = configuration.ReadInt("csp:default:maxSize", 15 * 1024, 1024, 64 * 1024, logger);
+    // not set or 0; a negative value is raised to 1024
+    public int MaxSize { get; } = ReadMaxSize(configuration, logger);
+
+    private static int ReadMaxSize(IConfiguration configuration, ILogger logger)
+    {
+        const string key = "csp:default:maxSize";
+        const int defaultMaxSize = 15 * 1024;
+
+        if (int.TryParse(configuration[key], NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value == 0)
+        {
+            logger.WarningZeroReadAsDefault(key);
+
+            return defaultMaxSize;
+        }
+
+        return configuration.ReadInt(key, defaultMaxSize, 1024, 64 * 1024, logger);
+    }
 }

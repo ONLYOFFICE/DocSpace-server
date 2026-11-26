@@ -56,9 +56,9 @@ public class WebPluginsController(
     /// standalone installation installs an installation-wide plugin. Elsewhere `system` returns 403. With both `system`
     /// and `personal`, the call returns 400. The call changes data and can be repeated. A package with an installed
     /// name replaces its files and keeps its settings. A portal plugin's domains go into the portal Content Security
-    /// Policy. A personal plugin's domains apply to the caller's pages only. If the header gets too large, the call
-    /// returns 403 but keeps the plugin. A personal plugin whose `cspDomains` lists an invalid address or is too long
-    /// returns 400. A bad package or manifest returns 400. A `pluginName` that another plugin uses also returns 400. A
+    /// Policy. A personal plugin's domains apply to the caller's pages only. If the plugin's domains make the header
+    /// too large, the call returns 403 but keeps the plugin. The caller's pages then get the portal header. A personal
+    /// plugin whose `cspDomains` lists an invalid address or is too long returns 400. A bad package or manifest returns 400. A `pluginName` that another plugin uses also returns 400. A
     /// personal plugin with the `name` of a portal plugin returns 400 too. A new plugin returns 400 at 100 portal
     /// plugins or 10 personal ones by default. A request that carries the session cookie or Basic credentials must come
     /// from a portal page. Otherwise the call returns 403. A script uses a Bearer token or an API key without the
@@ -98,13 +98,15 @@ public class WebPluginsController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
+        var domainsBefore = inDto.Personal ? await GetPersonalCspDomainsAsync(tenant.Id) : null;
+
         var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, inDto.System, inDto.Personal);
 
         messageService.Send(MessageAction.WebpluginUploaded, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
         if (inDto.Personal)
         {
-            await SyncPersonalCspAsync(tenant.Id, refuseTooLarge: true);
+            await SyncPersonalCspAsync(tenant.Id, domainsBefore);
         }
         else
         {
@@ -208,9 +210,9 @@ public class WebPluginsController(
     /// installation turns off web plugins. With `personal`, it also returns 403 while personal plugins are off. The
     /// call changes data. The body replaces the stored state and settings, so you can repeat the call with the same
     /// body. Switching a portal plugin on adds its manifest domains to the portal Content Security Policy. Switching it
-    /// off removes them. If switching a plugin on makes a policy header too large, the call returns 403 but saves the new
-    /// state. A personal plugin keeps its state for the caller alone. The call returns 400 if the body has no `settings` or `settings` is
-    /// too long. If no plugin has this name, the call returns 404. To install a plugin, use
+    /// off removes them. Switching a plugin on can add domains that make a policy header too large. Then the call
+    /// returns 403 but saves the new state. A personal plugin keeps its state for the caller alone. The call returns
+    /// 400 if the body has no `settings` or `settings` is too long. If no plugin has this name, the call returns 404. To install a plugin, use
     /// `POST api/2.0/settings/webplugins`.
     /// </remarks>
     /// <summary>Update a web plugin</summary>
@@ -230,13 +232,15 @@ public class WebPluginsController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
+        var domainsBefore = inDto.Personal ? await GetPersonalCspDomainsAsync(tenant.Id) : null;
+
         var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings, inDto.Personal);
 
         messageService.Send(MessageAction.WebpluginUpdated, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
         if (inDto.Personal)
         {
-            await SyncPersonalCspAsync(tenant.Id, refuseTooLarge: inDto.WebPlugin.Enabled);
+            await SyncPersonalCspAsync(tenant.Id, domainsBefore);
         }
         else
         {
@@ -307,13 +311,15 @@ public class WebPluginsController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
+        var domainsBefore = inDto.Personal ? await GetPersonalCspDomainsAsync(tenant.Id) : null;
+
         var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name, inDto.Personal);
 
         messageService.Send(MessageAction.WebpluginDeleted, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
         if (inDto.Personal)
         {
-            await SyncPersonalCspAsync(tenant.Id);
+            await SyncPersonalCspAsync(tenant.Id, domainsBefore);
         }
         else
         {
@@ -361,17 +367,36 @@ public class WebPluginsController(
         return originTenant?.Id == tenantManager.GetCurrentTenantId();
     }
 
-    private async Task SyncPersonalCspAsync(int tenantId, bool refuseTooLarge = false)
+    private async Task<List<string>> GetPersonalCspDomainsAsync(int tenantId)
     {
         try
         {
-            await cspSettingsHelper.ResetPersonalAsync();
+            return await webPluginManager.GetPersonalCspDomainsAsync(tenantId);
+        }
+        catch (Exception e)
+        {
+            logger.WarningPersonalCspNotUpdated(e);
+
+            return null;
+        }
+    }
+
+    private async Task SyncPersonalCspAsync(int tenantId, List<string> domainsBefore)
+    {
+        try
+        {
+            var domains = await webPluginManager.GetPersonalCspDomainsAsync(tenantId);
+
+            if (CspSettingsHelper.PersonalDomainsChanged(domainsBefore, domains))
+            {
+                await cspSettingsHelper.ResetPersonalAsync();
+            }
 
             var sessionKey = await cspSettingsHelper.GetSessionKeyAsync();
 
-            await WritePersonalCspAsync(sessionKey, await webPluginManager.GetPersonalCspDomainsAsync(tenantId));
+            await WritePersonalCspAsync(sessionKey, domains, CspSettingsHelper.PersonalDomainsAdded(domainsBefore, domains));
         }
-        catch (Exception e) when (!refuseTooLarge || e is not CspHeaderTooLargeException)
+        catch (Exception e) when (e is not CspHeaderTooLargeException)
         {
             logger.WarningPersonalCspNotUpdated(e);
         }
@@ -381,7 +406,7 @@ public class WebPluginsController(
     {
         try
         {
-            await WritePersonalCspAsync(sessionKey, personalCspDomains);
+            await WritePersonalCspAsync(sessionKey, personalCspDomains, false);
         }
         catch (Exception e)
         {
@@ -403,7 +428,7 @@ public class WebPluginsController(
         }
     }
 
-    private async Task WritePersonalCspAsync(string sessionKey, List<string> personalCspDomains)
+    private async Task WritePersonalCspAsync(string sessionKey, List<string> personalCspDomains, bool refuseTooLarge)
     {
         if (personalCspDomains.Count == 0)
         {
@@ -418,11 +443,13 @@ public class WebPluginsController(
         {
             headerValue = await cspSettingsHelper.CreateSessionHeaderAsync(personalCspDomains);
         }
-        catch (CspHeaderTooLargeException)
+        catch (CspHeaderTooLargeException e) when (!refuseTooLarge)
         {
+            logger.WarningPersonalCspTooLarge(e.Message);
+
             DeletePersonalCspCookie();
 
-            throw;
+            return;
         }
 
         Response.Cookies.Append(WebPluginManager.PersonalCspCookieName, "1", new CookieOptions

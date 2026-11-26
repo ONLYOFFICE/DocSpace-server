@@ -54,8 +54,9 @@ public class PersonalWebPluginsController(
     /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The call
     /// also returns 403 while the installation turns off web plugins. The call is read-only. The list includes
     /// plugins hidden by the personal plugins switch or by a portal plugin. It also includes the plugins of deleted
-    /// members. The `settings` field is always empty, and `enabled` is the state stored for the member. The list has
-    /// no paging. A member holds at most 10 personal plugins by default. To switch a plugin off for its member, use
+    /// members. The plugins come without the `settings` field. The `enabled` field is the state stored for the member.
+    /// A plugin hidden by a portal plugin keeps that state but does not run. The list has no paging. A member holds at
+    /// most 10 personal plugins by default. To switch a plugin off for its member, use
     /// `PUT api/2.0/settings/personalwebplugins/plugins/{userId}/{name}`.
     /// </remarks>
     /// <summary>List members' web plugins</summary>
@@ -87,15 +88,15 @@ public class PersonalWebPluginsController(
     /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call also returns 403
     /// while the installation turns off web plugins. It works on the plugins of every member, the owner included. The
     /// call changes data, and you can repeat it with the same body. It keeps the settings the member saved, and the
-    /// member can switch the plugin again. The call returns 400 if the body cannot be read. It returns 404 if the
-    /// member has no plugin with this name. To remove the plugin, use
+    /// member can switch the plugin again. The call returns 400 if `userId` is not a valid GUID or the body cannot be
+    /// read. It returns 404 if the member has no plugin with this name. To remove the plugin, use
     /// `DELETE api/2.0/settings/personalwebplugins/plugins/{userId}/{name}`.
     /// </remarks>
     /// <summary>Switch a member's web plugin</summary>
     /// <path>api/2.0/settings/personalwebplugins/plugins/{userId}/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The personal web plugin of the member after the change", typeof(MemberWebPluginDto))]
-    [SwaggerResponse(400, "The request body cannot be read")]
+    [SwaggerResponse(400, "The member identifier is not a valid GUID, or the request body cannot be read")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or the installation turns off web plugins")]
     [SwaggerResponse(404, "The member has no personal web plugin with this manifest name")]
     [HttpPut("plugins/{userId}/{name}")]
@@ -105,7 +106,7 @@ public class PersonalWebPluginsController(
 
         var webPlugin = await webPluginManager.SetMemberWebPluginEnabledAsync(tenantManager.GetCurrentTenantId(), inDto.UserId, inDto.Name, inDto.State.Enabled);
 
-        await ResetPersonalCspAsync();
+        await ResetPersonalCspAsync(webPlugin);
 
         await SendMemberWebPluginAuditAsync(MessageAction.PersonalWebPluginUpdated, inDto.UserId, webPlugin);
 
@@ -131,13 +132,16 @@ public class PersonalWebPluginsController(
     /// `createBy` and the name from `name` of `GET api/2.0/settings/personalwebplugins/plugins`. Requires the
     /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The call
     /// also returns 403 while the installation turns off web plugins. It works on the plugins of every member, the
-    /// owner included. The call cannot be undone. It also deletes the state and the settings the member stored for
-    /// the plugin. The call returns 404 if the member has no plugin with this name. A repeated call returns 404 too.
+    /// owner included. It also works while the installation forbids deleting the portal's own plugins. The call cannot be
+    /// undone. It also deletes the state and the settings the member stored for the plugin. The call returns 400 if
+    /// `userId` is not a valid GUID. It returns 404 if the member has no plugin with this name. A repeated call
+    /// returns 404 too.
     /// </remarks>
     /// <summary>Delete a member's web plugin</summary>
     /// <path>api/2.0/settings/personalwebplugins/plugins/{userId}/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The personal web plugin of the member and the files of its package are removed")]
+    [SwaggerResponse(400, "The member identifier is not a valid GUID")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or the installation turns off web plugins")]
     [SwaggerResponse(404, "The member has no personal web plugin with this manifest name")]
     [HttpDelete("plugins/{userId}/{name}")]
@@ -147,7 +151,7 @@ public class PersonalWebPluginsController(
 
         var webPlugin = await webPluginManager.DeleteMemberWebPluginAsync(tenantManager.GetCurrentTenantId(), inDto.UserId, inDto.Name);
 
-        await ResetPersonalCspAsync();
+        await ResetPersonalCspAsync(webPlugin);
 
         await SendMemberWebPluginAuditAsync(MessageAction.PersonalWebPluginDeleted, inDto.UserId, webPlugin);
     }
@@ -166,6 +170,14 @@ public class PersonalWebPluginsController(
         }
     }
 
+    private async Task ResetPersonalCspAsync(WebPlugin webPlugin)
+    {
+        if (!string.IsNullOrWhiteSpace(webPlugin.CspDomains))
+        {
+            await ResetPersonalCspAsync();
+        }
+    }
+
     private async Task ResetPersonalCspAsync()
     {
         try
@@ -180,7 +192,8 @@ public class PersonalWebPluginsController(
 
     /// <remarks>
     /// Switches personal web plugins on or off for the portal. While they are on, every member other than a guest may
-    /// install web plugins through `POST api/2.0/settings/webplugins` with `personal`. A new portal has them off.
+    /// install web plugins through `POST api/2.0/settings/webplugins` with `personal`. The installation has to allow
+    /// uploading plugins for that. A new portal has them off.
     /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get
     /// 403. The call also returns 403 while the installation turns off web plugins or personal plugins. The call
     /// changes data, and you can repeat it with the same body. Switching them off hides the personal plugins from

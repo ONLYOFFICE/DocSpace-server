@@ -177,4 +177,30 @@ public class WebPluginPackageTests(
         body.Should().Contain("Plugin already exist").And.NotContain("Wrong plugin archive");
         (await ListPluginsAsync()).Select(p => p.Name).Should().NotContain("pkg-second");
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Upload_ManifestLinksOutsideThePackageOrTheWeb_InstalledWithoutThem(bool personal)
+    {
+        // Arrange
+        var pluginName = personal ? "pkg-links-personal" : "pkg-links";
+        var manifest = WebPluginsTestData.Manifest(pluginName);
+        manifest["homePage"] = "javascript:fetch('/api/2.0/people')";
+        manifest["image"] = "https://example.com/logo.png";
+        await _webApiClient.Authenticate(Owner);
+
+        // Act
+        using var response = await WebPluginsTestData.UploadPluginAsync(_webApiClient, manifest, personal, TestContext.Current.CancellationToken);
+        var (status, body) = await WebPluginsTestData.ReadAsync(response, TestContext.Current.CancellationToken);
+        var read = await GetPluginAsync(pluginName, personal);
+
+        // Assert
+        status.Should().Be(200, body);
+        var uploaded = JsonDocument.Parse(body).RootElement.GetProperty("response");
+        uploaded.TryGetProperty("homePage", out _).Should().BeFalse(body);
+        uploaded.TryGetProperty("image", out _).Should().BeFalse(body);
+        read.HomePage.Should().BeNull();
+        read.Image.Should().BeNull();
+    }
 }

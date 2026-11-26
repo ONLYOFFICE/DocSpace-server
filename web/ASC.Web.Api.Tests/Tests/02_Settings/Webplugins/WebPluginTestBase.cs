@@ -136,6 +136,15 @@ public abstract class WebPluginTestBase(
             : null;
     }
 
+    /// <summary>The expiry a <c>Set-Cookie</c> line gives its cookie, or null when it gives none.</summary>
+    protected static DateTimeOffset? ExpiresOf(string setCookie)
+    {
+        var expires = setCookie.Split(';', StringSplitOptions.TrimEntries)
+            .FirstOrDefault(x => x.StartsWith("expires=", StringComparison.OrdinalIgnoreCase));
+
+        return expires is null ? null : DateTimeOffset.Parse(expires["expires=".Length..], CultureInfo.InvariantCulture);
+    }
+
     /// <summary>The value of the personal CSP cookie a response sets, or an empty string.</summary>
     protected static string GetPersonalCspCookie(HttpResponseMessage response)
     {

@@ -99,7 +99,7 @@ public class WebPluginCspTests(
         var domains = string.Join(',', Enumerable.Range(0, 600).Select(i => $"https://d{i:000}.plugin-csp-limit.example.com"));
 
         // Act + Assert
-        await AssertUploadRefusedAsync(WebPluginsTestData.CreatePluginZip(ManifestWithDomains("csp-limit", domains)), 403, "CSP header size exceeds");
+        await AssertUploadRefusedAsync(WebPluginsTestData.CreatePluginZip(ManifestWithDomains("csp-limit", domains)), 403, "CSP header size exceeds maximum allowed size of 15360 bytes.");
     }
 
     // P2 of the plugins spec: the plugin is stored and switched on before the policy is saved, so a refused

@@ -360,19 +360,59 @@ public class PersonalWebPluginTests(
         manifest["cspDomains"] = string.Join(',', Enumerable.Range(0, 120).Select(i => $"https://d{i:000}.personal-limit.example.com"));
         await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
 
-        // Act
+        // Act: the browser still holds the cookie from an earlier page
         using var uploadResponse = await WebPluginsTestData.UploadPluginAsync(
-            _webApiClient, manifest, true, TestContext.Current.CancellationToken);
+            _webApiClient, manifest, true, TestContext.Current.CancellationToken, ("Cookie", $"{PersonalCspCookieName}=1"));
         var (status, body) = await WebPluginsTestData.ReadAsync(uploadResponse, TestContext.Current.CancellationToken);
-        using var listResponse = await _webApiClient.GetAsync("api/2.0/settings/webplugins", TestContext.Current.CancellationToken);
+        using var listRequest = new HttpRequestMessage(HttpMethod.Get, "api/2.0/settings/webplugins");
+        listRequest.Headers.TryAddWithoutValidation("Cookie", $"{PersonalCspCookieName}=1");
+        using var listResponse = await _webApiClient.SendAsync(listRequest, TestContext.Current.CancellationToken);
         var personalPlugins = await ListPluginsAsync(personal: true);
 
-        // Assert
+        // Assert: the refusal leaves the cookie alone, and the list, which cannot build the header either, clears it
         status.Should().Be(403, body);
-        body.Should().Contain("CSP header size exceeds");
-        GetPersonalCspCookie(uploadResponse).Should().BeEmpty();
-        GetPersonalCspCookie(listResponse).Should().BeEmpty();
+        body.Should().Contain("CSP header size exceeds maximum allowed size of 15360 bytes.");
+        GetPersonalCspSetCookie(uploadResponse).Should().BeNull();
+        var clearedCookie = GetPersonalCspSetCookie(listResponse);
+        clearedCookie.Should().NotBeNull();
+        ExpiresOf(clearedCookie!).Should().BeBefore(DateTimeOffset.UtcNow);
         personalPlugins.Should().ContainSingle(x => x.Name == pluginName && x.Enabled);
+    }
+
+    [Fact]
+    public async Task PersonalWebPluginWithoutDomains_HeaderAlreadyOverTheLimit_InstalledAndSwitchedOn()
+    {
+        // Arrange: a plugin whose 120 domains push the member's header over the 15 KB limit is kept, switched on
+        var manifest = WebPluginsTestData.Manifest("personal-csp-over");
+        manifest["cspDomains"] = string.Join(',', Enumerable.Range(0, 120).Select(i => $"https://d{i:000}.personal-over.example.com"));
+        await _webApiClient.Authenticate(await InviteMember(EmployeeType.User));
+        using var overResponse = await WebPluginsTestData.UploadPluginAsync(_webApiClient, manifest, true, TestContext.Current.CancellationToken);
+        overResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        // Act: a plugin that adds no domains goes in, and is switched off and on again
+        using var uploadResponse = await WebPluginsTestData.UploadPluginAsync(
+            _webApiClient, WebPluginsTestData.Manifest("personal-csp-plain"), true, TestContext.Current.CancellationToken);
+        var (uploadStatus, uploadBody) = await WebPluginsTestData.ReadAsync(uploadResponse, TestContext.Current.CancellationToken);
+        using var offResponse = await _webApiClient.PutAsJsonAsync(
+            "api/2.0/settings/webplugins/personal-csp-plain?personal=true", new { enabled = false, settings = "" }, TestContext.Current.CancellationToken);
+        using var onResponse = await _webApiClient.PutAsJsonAsync(
+            "api/2.0/settings/webplugins/personal-csp-plain?personal=true", new { enabled = true, settings = "" }, TestContext.Current.CancellationToken);
+        var (onStatus, onBody) = await WebPluginsTestData.ReadAsync(onResponse, TestContext.Current.CancellationToken);
+        using var overOffResponse = await _webApiClient.PutAsJsonAsync(
+            "api/2.0/settings/webplugins/personal-csp-over?personal=true", new { enabled = false, settings = "" }, TestContext.Current.CancellationToken);
+        using var overOnResponse = await _webApiClient.PutAsJsonAsync(
+            "api/2.0/settings/webplugins/personal-csp-over?personal=true", new { enabled = true, settings = "" }, TestContext.Current.CancellationToken);
+        var (overOnStatus, overOnBody) = await WebPluginsTestData.ReadAsync(overOnResponse, TestContext.Current.CancellationToken);
+        var personalPlugins = await ListPluginsAsync(personal: true);
+
+        // Assert: only switching the plugin with the domains back on is refused, and its new state is kept
+        uploadStatus.Should().Be(200, uploadBody);
+        offResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        onStatus.Should().Be(200, onBody);
+        overOffResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        overOnStatus.Should().Be(403, overOnBody);
+        overOnBody.Should().Contain("CSP header size exceeds maximum allowed size of 15360 bytes.");
+        personalPlugins.Should().ContainSingle(x => x.Name == "personal-csp-over" && x.Enabled);
     }
 
     [Fact]

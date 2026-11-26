@@ -36,12 +36,15 @@ namespace ASC.Web.Core;
 [Singleton]
 public class WebPluginConfigSettings
 {
-    public WebPluginConfigSettings(IConfiguration configuration, ILogger<WebPluginConfigSettings> logger)
+    public const string PersonalStorageModule = "personalwebplugins";
+
+    public WebPluginConfigSettings(IConfiguration configuration, ILogger<WebPluginConfigSettings> logger, StorageFactoryConfig storageFactoryConfig)
     {
         Enabled = configuration.ReadBool("plugins:enabled", false, logger);
         Upload = configuration.ReadBool("plugins:upload", false, logger);
         Delete = configuration.ReadBool("plugins:delete", false, logger);
-        Personal = configuration.ReadBool("plugins:personal", true, logger);
+        PersonalStorage = HasPersonalStorage(storageFactoryConfig, logger);
+        Personal = configuration.ReadBool("plugins:personal", true, logger) && PersonalStorage;
         // plugins a portal holds: 1 to 1000, 100 when not set or 0; a negative value is raised to 1
         MaxCount = IsZero(configuration, "plugins:maxCount", logger) ? 100 : configuration.ReadInt("plugins:maxCount", 100, 1, 1000, logger);
         // personal plugins a member holds: 1 to 100, 10 when not set or 0; a negative value is raised to 1
@@ -49,13 +52,72 @@ public class WebPluginConfigSettings
         // bytes of an uploaded package: 1024 (1 KB) to 104857600 (100 MB), 5242880 (5 MB) when not set or 0; a negative
         // value is raised to 1024
         MaxSize = IsZero(configuration, "plugins:maxSize", logger) ? 5L * 1024L * 1024L : configuration.ReadLong("plugins:maxSize", 5L * 1024L * 1024L, 1024L, 100L * 1024L * 1024L, logger);
-        Extension = configuration["plugins:extension"] ?? ".zip";
+        Extension = ReadExtension(configuration, logger);
         AssetExtensions = ReadAssetExtensions(configuration, logger);
         // asset files in a package: 1 to 100, 10 when not set or 0; a negative value is raised to 1
         AssetMaxCount = IsZero(configuration, "plugins:assetMaxCount", logger) ? 10 : configuration.ReadInt("plugins:assetMaxCount", 10, 1, 100, logger);
     }
 
+    private const string DefaultExtension = ".zip";
+
     private static readonly string[] _defaultAssetExtensions = [".jpg", ".jpeg", ".png", ".svg"];
+
+    private static bool HasPersonalStorage(StorageFactoryConfig storageFactoryConfig, ILogger logger)
+    {
+        if (storageFactoryConfig.GetStorage("current")?.GetModuleElement(PersonalStorageModule) != null)
+        {
+            return true;
+        }
+
+        logger.WarningPersonalStorageModuleMissing(PersonalStorageModule);
+
+        return false;
+    }
+
+    public static string NormalizeExtension(string value)
+    {
+        var extension = value?.Trim().ToLowerInvariant();
+
+        if (string.IsNullOrEmpty(extension))
+        {
+            return null;
+        }
+
+        if (extension[0] != '.')
+        {
+            extension = "." + extension;
+        }
+
+        return extension.Length > 1 && extension.IndexOfAny(['.', '/', '\\', '*', '?', ':', ' '], 1) < 0 ? extension : null;
+    }
+
+    private static string ReadExtension(IConfiguration configuration, ILogger logger)
+    {
+        const string key = "plugins:extension";
+
+        var value = configuration[key];
+
+        if (value == null)
+        {
+            return DefaultExtension;
+        }
+
+        var extension = NormalizeExtension(value);
+
+        if (extension == null)
+        {
+            logger.WarningExtensionReadAsDefault(key, value, DefaultExtension);
+
+            return DefaultExtension;
+        }
+
+        if (!string.Equals(extension, value.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            logger.WarningExtensionReadAs(key, value, extension);
+        }
+
+        return extension;
+    }
 
     private static bool IsZero(IConfiguration configuration, string key, ILogger logger)
     {
@@ -80,18 +142,52 @@ public class WebPluginConfigSettings
             return _defaultAssetExtensions;
         }
 
-        var assetExtensions = section.GetChildren()
-            .Select(x => x.Value)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToArray();
+        var values = section.GetChildren().Select(x => x.Value).ToList();
 
-        return assetExtensions.Length == 0 ? _defaultAssetExtensions : assetExtensions;
+        if (values.Count == 0)
+        {
+            return _defaultAssetExtensions;
+        }
+
+        List<string> assetExtensions = [];
+
+        foreach (var value in values)
+        {
+            var extension = NormalizeExtension(value);
+
+            if (extension == null)
+            {
+                logger.WarningAssetExtensionSkipped(section.Path, value);
+
+                continue;
+            }
+
+            if (!string.Equals(extension, value.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                logger.WarningExtensionReadAs(section.Path, value, extension);
+            }
+
+            if (!assetExtensions.Contains(extension))
+            {
+                assetExtensions.Add(extension);
+            }
+        }
+
+        if (assetExtensions.Count == 0)
+        {
+            logger.WarningAssetExtensionsNotAList(section.Path, string.Join(' ', _defaultAssetExtensions));
+
+            return _defaultAssetExtensions;
+        }
+
+        return [.. assetExtensions];
     }
 
     public bool Enabled { get; }
     public bool Upload { get; }
     public bool Delete { get; }
     public bool Personal { get; }
+    public bool PersonalStorage { get; }
     public int MaxCount { get; }
     public int PersonalMaxCount { get; }
     public long MaxSize { get; }

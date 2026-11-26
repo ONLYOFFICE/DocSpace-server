@@ -124,7 +124,8 @@ public class WebPluginDto
 
     /// <summary>
     /// Whether the plugin is switched on. It is the state this portal stored, so an installation-wide plugin can be on
-    /// for one portal and off for another; for a personal plugin it is the state its owner stored.
+    /// for one portal and off for another; for a personal plugin it is the state stored for its owner, by the owner or
+    /// by an administrator.
     /// </summary>
     /// <example>true</example>
     public required bool Enabled { get; set; }

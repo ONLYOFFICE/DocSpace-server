@@ -46,6 +46,7 @@ public class PersonalWebPluginOwnersTests
         // Arrange
         var first = Guid.NewGuid();
         var second = Guid.NewGuid();
+        var withoutPlugins = Guid.NewGuid();
         string[] configFiles =
         [
             $"{first}/notes/config.json",
@@ -53,7 +54,8 @@ public class PersonalWebPluginOwnersTests
             $"{second}\\notes\\config.json",
             "notes/config.json",
             "not-a-user/notes/config.json",
-            $"{first}/notes/assets/config.json"
+            $"{first}/notes/assets/config.json",
+            $"{withoutPlugins}/notes/assets/config.json"
         ];
 
         // Act

@@ -59,16 +59,19 @@ public class PersonalWebPluginSocketTests(
         await Fixture.WaitForRouterAsync().WaitAsync(Ct);
         await using var ownerSocket = await Clients.ConnectSocketAsync(pluginOwner, Ct);
         await using var otherSocket = await Clients.ConnectSocketAsync(otherUser, Ct);
+        await otherSocket.SubscribeAsync(false, Ct, "quota");
 
         // Act
         await UploadPersonalAsync(pluginOwner, pluginName);
         var told = await ownerSocket.WaitForAsync(PluginEvent, payload => IsFor(payload, pluginName), cancellationToken: Ct);
         var otherTold = await otherSocket.ArrivesWithinAsync(PluginEvent, payload => IsFor(payload, pluginName), TimeSpan.FromSeconds(3), Ct);
+        var otherToldAsPortal = await otherSocket.ArrivesWithinAsync("s:change-web-plugin", payload => IsFor(payload, pluginName), TimeSpan.FromSeconds(1), Ct);
 
         // Assert
         told.Payload.EnumerateObject().Select(property => property.Name).Should().BeEquivalentTo("webPluginName", "enabled");
         told.Payload.GetProperty("enabled").GetBoolean().Should().BeTrue();
         otherTold.Should().BeFalse();
+        otherToldAsPortal.Should().BeFalse();
     }
 
     [Fact]

@@ -46,4 +46,19 @@ internal static partial class WebPluginManagerLogger
 
     [LoggerMessage(LogLevel.Warning, "{key} is 0, its default is used")]
     public static partial void WarningZeroReadAsDefault(this ILogger logger, string key);
+
+    [LoggerMessage(LogLevel.Warning, "The upload of the web plugin package {fileName} failed")]
+    public static partial void WarningWebPluginUploadFailed(this ILogger logger, string fileName, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "The storage module {module} is not configured, personal web plugins are unavailable")]
+    public static partial void WarningPersonalStorageModuleMissing(this ILogger logger, string module);
+
+    [LoggerMessage(LogLevel.Warning, "{key} is \"{value}\", read as {extension}")]
+    public static partial void WarningExtensionReadAs(this ILogger logger, string key, string value, string extension);
+
+    [LoggerMessage(LogLevel.Warning, "{key} is \"{value}\", which is not a file extension; {extension} is used")]
+    public static partial void WarningExtensionReadAsDefault(this ILogger logger, string key, string value, string extension);
+
+    [LoggerMessage(LogLevel.Warning, "{key} lists \"{value}\", which is not a file extension; it is skipped")]
+    public static partial void WarningAssetExtensionSkipped(this ILogger logger, string key, string value);
 }

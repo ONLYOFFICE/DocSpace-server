@@ -142,8 +142,12 @@ public class PersonalWebPluginManagementTests(
     {
         // Arrange
         const string pluginName = "unshadowed-autotest";
+        const string settings = "{\"key\":\"unshadowed\"}";
         var user = await InviteMember(EmployeeType.User);
         await UploadPersonalAsync(user, pluginName);
+        using var saveResponse = await _webApiClient.PutAsJsonAsync(
+            $"api/2.0/settings/webplugins/{pluginName}?personal=true", new { enabled = true, settings }, TestContext.Current.CancellationToken);
+        saveResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         await UploadAsOwnerAsync(pluginName);
 
         // Act
@@ -156,6 +160,7 @@ public class PersonalWebPluginManagementTests(
         var plugin = availablePlugins.Should().ContainSingle(x => x.Name == pluginName).Subject;
         plugin.Personal.Should().BeTrue();
         plugin.Enabled.Should().BeTrue();
+        plugin.Settings.Should().Be(settings);
     }
 
     [Fact]
@@ -279,14 +284,5 @@ public class PersonalWebPluginManagementTests(
         }
 
         return await _webApiClient.SendAsync(request, TestContext.Current.CancellationToken);
-    }
-
-    /// <summary>The expiry a <c>Set-Cookie</c> line gives its cookie, or null when it gives none.</summary>
-    private static DateTimeOffset? ExpiresOf(string setCookie)
-    {
-        var expires = setCookie.Split(';', StringSplitOptions.TrimEntries)
-            .FirstOrDefault(x => x.StartsWith("expires=", StringComparison.OrdinalIgnoreCase));
-
-        return expires is null ? null : DateTimeOffset.Parse(expires["expires=".Length..], CultureInfo.InvariantCulture);
     }
 }

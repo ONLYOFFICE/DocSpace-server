@@ -83,8 +83,8 @@ public class PluginsDto
 
     /// <summary>
     /// Whether the installation lets the administrators of a portal switch personal plugins on. It is `true` unless
-    /// the installation switched personal plugins off in its configuration. While it is `false`, `personal` is
-    /// `false` and `POST api/2.0/settings/personalwebplugins` is refused.
+    /// the installation switched personal plugins off in its configuration or keeps no storage for them. While it is
+    /// `false`, `personal` is `false` and `POST api/2.0/settings/personalwebplugins` is refused.
     /// </summary>
     /// <example>true</example>
     public bool PersonalAvailable { get; set; }

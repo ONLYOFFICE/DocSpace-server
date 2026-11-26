@@ -157,6 +157,22 @@ public class MemberWebPluginTests(
     }
 
     [Fact]
+    public async Task MemberWebPluginCalls_MemberIdNotAGuid_BadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+
+        // Act
+        using var put = await _webApiClient.PutAsJsonAsync(
+            "api/2.0/settings/personalwebplugins/plugins/not-a-guid/member-any", new { enabled = false }, Ct);
+        using var delete = await _webApiClient.DeleteAsync("api/2.0/settings/personalwebplugins/plugins/not-a-guid/member-any", Ct);
+
+        // Assert
+        put.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        delete.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task DeleteMemberWebPlugin_DocSpaceAdmin_RemovesItFromTheMemberOnce()
     {
         // Arrange
@@ -175,6 +191,7 @@ public class MemberWebPluginTests(
         // Assert
         first.StatusCode.Should().Be(HttpStatusCode.OK);
         second.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        (await second.Content.ReadAsStringAsync(Ct)).Should().Contain("Plugin not found");
         memberPlugins.Should().NotContain(x => x.Name == pluginName);
     }
 

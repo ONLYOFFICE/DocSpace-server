@@ -38,6 +38,9 @@ internal static partial class WebPluginsControllerLogger
     [LoggerMessage(LogLevel.Warning, "Failed to update the personal CSP")]
     public static partial void WarningPersonalCspNotUpdated(this ILogger logger, Exception exception);
 
+    [LoggerMessage(LogLevel.Warning, "The personal CSP header of the member is over the size limit, the portal header is used: {reason}")]
+    public static partial void WarningPersonalCspTooLarge(this ILogger logger, string reason);
+
     [LoggerMessage(LogLevel.Warning, "Failed to record the audit event of a member's web plugin")]
     public static partial void WarningMemberWebPluginAuditNotSent(this ILogger logger, Exception exception);
 }

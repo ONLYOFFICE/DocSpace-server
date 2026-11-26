@@ -147,6 +147,7 @@ public class PersonalWebPluginsSwitchTests(
         return JsonDocument.Parse(body).RootElement.GetProperty("response").GetProperty("plugins").Clone();
     }
 
+    /// <summary>Reads <c>GET api/2.0/settings/webplugins</c> raw: the generated client throws on a plugin without its optional fields (P8 of the plugins spec).</summary>
     private async Task<Dictionary<string, bool>> ListAvailableAsync()
     {
         using var response = await _webApiClient.GetAsync("api/2.0/settings/webplugins", Ct);

@@ -36,7 +36,8 @@ namespace ASC.Core.Common.Tests;
 /// <summary>
 /// The domains a personal web plugin may declare in <c>cspDomains</c> (<c>WebPluginManager.IsValidPersonalCspDomain</c>):
 /// a host, with an optional wildcard below a registered name, over http(s) or ws(s). A bare scheme, a lone wildcard, a
-/// wildcard over a top-level domain and a keyword would open the member's pages to any site.
+/// wildcard over a top-level domain and a keyword would open the member's pages to any site, and a space, a <c>;</c>
+/// or a quote, even in the path, would add a source or a directive to the member's header.
 /// </summary>
 public class PersonalCspDomainTests
 {
@@ -66,6 +67,9 @@ public class PersonalCspDomainTests
     [InlineData("ftp://files.example.com")]
     [InlineData("https://example.com;script-src")]
     [InlineData("https://example.com https://other.example.com")]
+    [InlineData("https://example.com/a 'unsafe-inline'")]
+    [InlineData("https://example.com/a;script-src")]
+    [InlineData("https://example.com/'self'")]
     public void IsValidPersonalCspDomain_NotAHost_Refused(string domain)
     {
         WebPluginManager.IsValidPersonalCspDomain(domain).Should().BeFalse();
