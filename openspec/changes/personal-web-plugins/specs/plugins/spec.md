@@ -201,8 +201,8 @@ folder, with the same `hash` query as a portal plugin.
 ### Requirement: Links of a plugin manifest
 
 A plugin of every level SHALL keep its manifest's `homePage` only when it is an absolute http or https address,
-and its `image` only when it is a relative path inside the package, without a query, a fragment, a `%` escape
-or an empty, `.` or `..` segment. Any other value SHALL be dropped on upload and on every read of the storage, and the plugin SHALL be
+and its `image` only when it is a relative path inside the package, without a query, a fragment, a `%` escape,
+a control character or an empty, `.` or `..` segment. Any other value SHALL be dropped on upload and on every read of the storage, and the plugin SHALL be
 installed and served without that field.
 
 #### Scenario: Manifest links outside the web or the package
@@ -220,10 +220,10 @@ installed and served without that field.
 ### Requirement: Content Security Policy domains of a personal plugin
 
 A personal upload SHALL answer 400 "The cspDomains value lists an invalid address or is too long" when the
-manifest's `cspDomains` passes 15360 characters or a comma-separated entry, trimmed, is not an ASCII host with
-an optional http, https, ws or wss scheme, port and path, a `*.` wildcard only below two labels and no space,
-`;` or quote. An empty value SHALL declare no domain. The domains SHALL reach only their owner's policy header, outside
-`frame-ancestors`, never the portal's domains.
+manifest's `cspDomains` passes 15360 characters or a comma-separated entry, trimmed, is not ASCII, or not a
+host with an optional http, https, ws or wss scheme, port and path, a `*.` wildcard only below two labels and no
+space, `;` or quote. An empty value SHALL declare no domain. The domains SHALL reach only their owner's policy
+header, outside `frame-ancestors`, never the portal's list.
 
 #### Scenario: Invalid entry
 
@@ -262,11 +262,11 @@ an optional http, https, ws or wss scheme, port and path, a `*.` wildcard only b
 
 ### Requirement: Size limit of a member's policy header
 
-A personal upload or update that adds domains to the caller's personal header (the portal's domains plus the
-caller's personal ones) and so makes it pass the size limit, 15 KB by default, SHALL keep its change, answer 403
-"CSP header size exceeds maximum allowed size of 15360 bytes." and leave `asc_personal_csp` as it was. Any other
-personal call, and `getWebPlugins` without `personal`, SHALL answer 200, and `getCspSettings` SHALL fall back to
-the portal's header.
+A personal upload or update that adds domains to the caller's header and so makes it pass the size limit, 15 KB
+by default, SHALL keep its change, answer 403 "CSP header size exceeds maximum allowed size of 15360 bytes." and
+leave `asc_personal_csp` as it was, unless the caller's domains before it could not be read. Any other personal
+call, and `getWebPlugins` without `personal`, SHALL answer 200, and `getCspSettings` SHALL fall back to the
+portal's header.
 
 #### Scenario: Personal upload over the limit
 
@@ -293,9 +293,9 @@ the portal's header.
 
 `getWebPlugins` without `personal`, and an upload, update or deletion with `personal=true` that answers 200,
 SHALL set the HttpOnly cookie `asc_personal_csp` to `1` while the caller has personal domains within the size
-limit, and otherwise delete it from a request that carries it. If reading the caller's plugins or starting a new
-generation fails, the cookie SHALL stay as it was until the next plugin list. A response that clears the session cookie, `logout` among others,
-SHALL delete it too.
+limit, and otherwise delete it from a request that carries it. If reading the caller's plugins after the change,
+or a new generation, fails, the cookie SHALL stay until the next plugin list. A response that clears the session
+cookie, `logout` included, SHALL delete it too.
 
 #### Scenario: Cookie set by the plugin list
 
@@ -324,11 +324,11 @@ SHALL delete it too.
 
 ### Requirement: Policy header cached for a member
 
-The calls that set `asc_personal_csp`, and `getCspSettings` (unless it answers 304) for a session-cookie caller
-carrying it, SHALL cache for the proxy, for a day, the header `getCspSettings` gives, under a key of the session
-cookie and the portal's member-header generation. The calls of the scenario "New generation" SHALL start a new
-generation on every host of the portal; any other change of a member's domains SHALL reach their cached header
-within a day.
+The calls that set `asc_personal_csp`, and `getCspSettings` (unless 304) for a caller carrying it, SHALL cache
+for the proxy, for a day, the header `getCspSettings` gives, under a key of the session cookie and the portal's
+member-header generation, if the request has one session cookie and no `Authorization`. The calls of the
+scenario "New generation" SHALL start a new generation on every host of the portal; any other change of a
+member's domains SHALL reach their cached header within a day.
 
 #### Scenario: Unchanged header
 

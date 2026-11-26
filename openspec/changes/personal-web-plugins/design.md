@@ -80,7 +80,8 @@ rows, and `cssUrl` is derived on every read from a shipped `plugin.css`. An inst
 three fields, so its manifest stays the default state of the other portals (P1 stays open for it).
 
 Every level, the installation-wide one included, keeps `homePage` only as an absolute http or https address and
-`image` only as a relative path inside the package, on upload and on every read: a member's manifest now reaches
+`image` only as a plain relative path inside the package (no query, fragment, `%` escape, control character or
+empty, `.` or `..` segment), on upload and on every read: a member's manifest now reaches
 an administrator's list, and a client renders both fields as a link and an image source. The read is the same
 `PrepareStoredPlugin` for every list, so a manifest stored before the rule is covered too.
 
@@ -152,12 +153,16 @@ its own session's.
   portal plugin upload or deletion (it can shadow a personal one), `setPersonalWebPlugins`, an administrator's
   switch or deletion of a member's plugin with domains, and a save of the portal policy, which every member header
   repeats. A personal change that moves no domain starts none, so it costs the other members nothing.
+  A personal call that cannot read the caller's domains before or after its change counts them as changed and
+  starts one.
   The headers under the old generation are no longer found and expire within a day. A re-cache of a missing
   portal header writes the same domains and starts none.
 - When the header would pass `csp:default:maxSize`, the calls that set the hint cache nothing, and
   `getCspSettings` answers and caches the portal header for the session. A personal POST, and a personal PUT with
   `enabled` true, that add domains then answer 403 "CSP header size exceeds maximum allowed size of N bytes."
-  after the change was saved, as the portal path does (P2), and leave the hint as it was; the refusal is
+  after the change was saved, as the portal path does (P2), and leave the hint as it was. When the domains
+  before the call could not be read, nothing counts as added: the call refuses nothing and sets or deletes the
+  hint by the domains after it; the refusal is
   recognised by its own exception type. A call that adds no domain, a personal DELETE, a PUT with `enabled` false
   and the plugin list log a warning without the stack, delete the hint and answer as usual.
 - Every response that clears the session cookie also deletes the hint. The session's header stays until it
@@ -227,7 +232,8 @@ from these settings through a mapper and adds the portal switch.
   manifests that changes shadowing, a changed configuration re-saved at startup] → the member's next plugin list
   writes the header again, and a header expires after a day.
 - [A call with `asc_personal_csp`, no personal domains and an unchanged `If-Modified-Since` gets 304 before
-  anything is cached; a personal call whose new generation fails leaves the cookie as it was] → the next plugin
+  anything is cached; a personal call whose new generation, or whose read of the domains after its change, fails leaves the
+  cookie as it was] → the next plugin
   list or the day-long expiry brings the header and the cookie in line.
 - [A request with an `Authorization` header, such as Basic credentials in front of the proxy, carries a session
   cookie that may not be what signed it in] → the server caches nothing for it, so with the hint the proxy asks
