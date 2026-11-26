@@ -249,18 +249,18 @@ public class AccountingClientServiceLimitRequestTests
     }
 
     [Fact]
-    public async Task UpdateServiceLimit_PutsBodyWithIdAndOnlyTheChangedFields()
+    public async Task UpdateServiceLimit_PutsOnlyTheChangedFieldsToThePathOfTheLimit()
     {
         var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, ServiceLimitJson));
 
         await client.UpdateServiceLimitAsync(42, null, 2000, false);
 
         handler.LastMethod.Should().Be(HttpMethod.Put);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit");
+        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/42");
 
         using var body = JsonDocument.Parse(handler.LastRequestBody!);
         var root = body.RootElement;
-        root.GetProperty("id").GetInt32().Should().Be(42);
+        root.TryGetProperty("id", out _).Should().BeFalse();
         root.GetProperty("quantityValue").GetInt32().Should().Be(2000);
         root.GetProperty("enabled").GetBoolean().Should().BeFalse();
         root.TryGetProperty("amountValue", out _).Should().BeFalse();

@@ -84,11 +84,6 @@ internal sealed class ServiceLimitStore
             return accountNumber is { } account ? Create(call, account) : CustomerNotFound(call.PortalId);
         }
 
-        if (call.Method == "PUT" && call.Route == LimitsPath)
-        {
-            return Update(call);
-        }
-
         if (call.Method == "PUT" && call.Route == ParticipantsPath)
         {
             return accountNumber is { } account ? SetParticipants(call, account) : CustomerNotFound(call.PortalId);
@@ -117,6 +112,7 @@ internal sealed class ServiceLimitStore
             return call.Method switch
             {
                 "GET" => _limits.TryGetValue(id, out var limit) ? PaymentServiceAnswer.Json(limit.ToJsonString()) : NotFound(),
+                "PUT" => Update(call, id),
                 "DELETE" => Delete(id),
                 _ => null
             };
@@ -191,10 +187,9 @@ internal sealed class ServiceLimitStore
         }
     }
 
-    private PaymentServiceAnswer Update(PaymentServiceCall call)
+    private PaymentServiceAnswer Update(PaymentServiceCall call, int id)
     {
         var body = JsonNode.Parse(call.Body!)!.AsObject();
-        var id = (int)body["id"]!;
 
         lock (_writeLock)
         {

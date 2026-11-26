@@ -274,7 +274,7 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
     {
         EnsureConfigured();
 
-        return await accountingApi.UpdateServiceLimitAsync(new ServiceLimitUpdateOperation(id, amountValue, quantityValue, enabled));
+        return await accountingApi.UpdateServiceLimitAsync(id, new ServiceLimitUpdateOperation(amountValue, quantityValue, enabled));
     }
 
     /// <summary>
@@ -1853,7 +1853,6 @@ public record ServiceLimitCreateOperation(
     ServiceLimitPeriod Period);
 
 public record ServiceLimitUpdateOperation(
-    int Id,
     decimal? AmountValue,
     int? QuantityValue,
     bool? Enabled);
@@ -2037,8 +2036,9 @@ public static class AccountingHttpClientExtension
             return new AccountingNotFoundException($"Accounting resource not found {content}");
         }
 
-        // A limit that does not exist is answered with 404 on a read but with 400 on an update or a deletion; both mean
-        // the same, and only this one 400 must not be confused with a threshold the accounting service rejects.
+        // A limit that does not exist is answered with 404; accounting versions before November 2026 answered 400 on an
+        // update or a deletion. Both mean the same, and only this one 400 must not be confused with a threshold the
+        // accounting service rejects.
         if (response.StatusCode == HttpStatusCode.BadRequest && serviceLimitRequest && IsServiceLimitNotFound(detail))
         {
             return new AccountingNotFoundException($"Accounting resource not found {content}");
@@ -2100,7 +2100,7 @@ public static class AccountingHttpClientExtension
         return content;
     }
 
-    // Both /serviceLimit itself (create, update) and every path below it.
+    // Both /serviceLimit itself (create) and every path below it.
     private static bool IsServiceLimitRequest(HttpRequestMessage request)
     {
         var path = request?.RequestUri?.AbsolutePath;

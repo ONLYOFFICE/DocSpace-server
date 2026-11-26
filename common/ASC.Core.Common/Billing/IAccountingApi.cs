@@ -137,8 +137,8 @@ public interface IAccountingApi
     [Post("/serviceLimit")]
     Task<ServiceLimit> CreateServiceLimitAsync([Body] ServiceLimitCreateOperation data);
 
-    [Put("/serviceLimit")]
-    Task<ServiceLimit> UpdateServiceLimitAsync([Body] ServiceLimitUpdateOperation data);
+    [Put("/serviceLimit/{id}")]
+    Task<ServiceLimit> UpdateServiceLimitAsync(int id, [Body] ServiceLimitUpdateOperation data);
 
     [Put("/serviceLimit/participants")]
     Task<int> SetParticipantServiceLimitsAsync([Body] ServiceLimitParticipantSetOperation data);
