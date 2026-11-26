@@ -616,7 +616,10 @@ function describeToolCallPending(event: Record<string, unknown>): string {
 // are returned by the engine as an ordinary tool result and are otherwise
 // invisible server-side: the library logs them only to its own console
 // logger. An error is named by `toolErrorForLog`, anything else by its shape
-// and size.
+// and size. An object is named by its first keys; the ones left out are
+// counted (`+N more`), so a cut list does not read as the whole one.
+const TOOL_RESULT_KEYS_IN_LOG = 10;
+
 function describeToolResult(result: unknown): string {
   const text = typeof result === "string" ? result : JSON.stringify(result);
   if (text === undefined) {
@@ -628,7 +631,12 @@ function describeToolResult(result: unknown): string {
     if (Array.isArray(parsed)) {
       shape = `a list of ${parsed.length}`;
     } else if (isObject(parsed)) {
-      shape = `{${Object.keys(parsed).slice(0, 10).join(",")}}`;
+      const keys = Object.keys(parsed);
+      const shown = keys.slice(0, TOOL_RESULT_KEYS_IN_LOG);
+      if (keys.length > shown.length) {
+        shown.push(`+${keys.length - shown.length} more`);
+      }
+      shape = `{${shown.join(",")}}`;
       const data = isObject(parsed["data"]) ? parsed["data"] : null;
       if (data && typeof data["base64"] === "string") {
         return `{data.base64=${data["base64"].length}B} (not persisted — no ref)`;

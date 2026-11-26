@@ -1481,6 +1481,18 @@ describe("the log of a stream", () => {
     ["an error that is neither", { error: 7 }, "error", "ERROR an error of type number"],
     ["an error object without a code", { error: { detail: 1 } }, "error", "ERROR an error object"],
     ["a plain object", { data: { rows: 3 } }, "info", "{data} (19B)"],
+    [
+      "an object of exactly ten keys",
+      Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`k${i}`, 1])),
+      "info",
+      "{k0,k1,k2,k3,k4,k5,k6,k7,k8,k9} (71B)",
+    ],
+    [
+      "an object of more keys than the log names",
+      Object.fromEntries(Array.from({ length: 13 }, (_, i) => [`k${i}`, 1])),
+      "info",
+      "{k0,k1,k2,k3,k4,k5,k6,k7,k8,k9,+3 more} (95B)",
+    ],
     ["a JSON array", [1, 2], "info", "a list of 2 (5B)"],
     ["a number", 42, "info", "a number (2B)"],
     ["null as a text", "null", "info", "a null (4B)"],
