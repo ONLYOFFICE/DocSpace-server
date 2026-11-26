@@ -205,7 +205,10 @@ export function getPersistIntervalMs(): number {
 export interface TelemetrySettings {
   /** `openTelemetry:enable` is `true` or the string `"true"`; any other value is off. */
   enabled: boolean;
-  /** The OTLP collector; undefined when it is absent, empty or not a string. */
+  /**
+   * The OTLP collector, trimmed; undefined when it is absent or blank, and when it is not the
+   * text of an `http:` or `https:` address (that one is reported, {@link refuse}).
+   */
   otlpEndpoint: string | undefined;
   /** `OTEL_EXPORTER_OTLP_PROTOCOL` trimmed; `http/protobuf` when absent, blank or not a string. */
   otlpProtocol: string;
@@ -216,12 +219,13 @@ export interface TelemetrySettings {
 // The OpenTelemetry settings mirror the .NET contract: `openTelemetry` of the shared appsettings
 // and the `OTEL_*` variables the Aspire AppHost injects. All of them go through nconf, so the
 // environment comes first and the settings files after it, the `OTEL_*` names at the root of
-// the settings tree. A value of the wrong type is no setting, so it cannot stop the host.
+// the settings tree. A value of the wrong type, and an endpoint the exporters could not parse,
+// is no setting here; app/telemetry/sdk.ts catches whatever the SDK still refuses at its start.
 export function getTelemetrySettings(): TelemetrySettings {
   const enable: unknown = nconf.get("openTelemetry:enable");
   return {
     enabled: enable === true || enable === "true",
-    otlpEndpoint: nonEmptyText(nconf.get("OTEL_EXPORTER_OTLP_ENDPOINT")),
+    otlpEndpoint: collectorUrl(nconf.get("OTEL_EXPORTER_OTLP_ENDPOINT")),
     otlpProtocol: nonEmptyText(nconf.get("OTEL_EXPORTER_OTLP_PROTOCOL"))?.trim() || "http/protobuf",
     // Matches the .NET services' fallback style (an assembly-like name).
     serviceName:
@@ -229,6 +233,24 @@ export function getTelemetrySettings(): TelemetrySettings {
       nonEmptyText(nconf.get("OTEL_SERVICE_NAME")) ??
       "ASC.AI.Chat",
   };
+}
+
+/**
+ * The address of the OTLP collector: the text of an `http:` or `https:` URL, trimmed. The
+ * exporters throw on an address they cannot parse, and they are made while the service loads.
+ */
+function collectorUrl(value: unknown): string | undefined {
+  if (!isGiven(value)) {
+    return undefined;
+  }
+  const text = typeof value === "string" ? value.trim() : undefined;
+  if (text === undefined || !URL.canParse(text) || !/^https?:$/.test(new URL(text).protocol)) {
+    refuse("OTEL_EXPORTER_OTLP_ENDPOINT", value, "an http or https address", {
+      effect: "OpenTelemetry stays off",
+    });
+    return undefined;
+  }
+  return text;
 }
 
 /** A string of at least one character, as given; anything else is undefined. */
@@ -402,6 +424,8 @@ const MAX_SHOWN_VALUE_LENGTH = 80;
 /** What a refused setting is replaced with, for the warning: a default of this file, or the next source. */
 interface Fallback {
   used?: number;
+  /** What happens instead, where no value takes the place of the refused one. */
+  effect?: string;
 }
 
 /** Whether a setting is given at all: `undefined`, `null` and blank text are not a value. */
@@ -427,7 +451,7 @@ function refuse(name: string, value: unknown, expected: string, fallback: Fallba
   const instead =
     fallback.used !== undefined
       ? `${fallback.used} is used`
-      : "the next source of the setting or its default is used";
+      : (fallback.effect ?? "the next source of the setting or its default is used");
   console.warn(`config: ${name} is ${text}, not ${expected}: ignored, ${instead}`);
 }
 

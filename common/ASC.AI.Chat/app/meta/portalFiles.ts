@@ -57,6 +57,7 @@ import { getForwardedHeaders } from "../requestContext.js";
 import { getObject, getObjectArray, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import { listAnswer, mapped, UpstreamShapeError } from "../storage/upstreamShape.js";
+import { pooled, UPSTREAM_CONCURRENCY } from "../storage/pooled.js";
 
 /** A file as the folder listing or the file-info endpoint describes it. */
 export interface PortalFile {
@@ -93,6 +94,27 @@ export class UnsupportedFileError extends Error {
     message: string,
   ) {
     super(message);
+  }
+}
+
+/**
+ * The portal ran the conversion of this file and reported an error for it: the file's own
+ * refusal, like a 403 or a 404 of the file, not a failure of the request.
+ */
+export class ConversionFailedError extends Error {
+  constructor(detail: string) {
+    super(`conversion failed: ${detail}`);
+  }
+}
+
+/**
+ * One file's conversion and the download of its text did not finish within
+ * `CONVERSION_BUDGET_MS`, while the request's own budget had not run out. What the portal did
+ * with the file is unknown (ts-ai-failure-paths.md §1).
+ */
+export class ConversionTimeoutError extends Error {
+  constructor(file: PortalFile, cause: unknown) {
+    super(`file ${file.id} was not read as text within ${CONVERSION_BUDGET_MS}ms`, { cause });
   }
 }
 
@@ -283,7 +305,7 @@ class OperationWatcher {
    */
   wait(op: FileOperation, signal: AbortSignal): Promise<FileOperation> {
     if (op.error) {
-      return Promise.reject(new Error(`conversion failed: ${op.error}`));
+      return Promise.reject(new ConversionFailedError(op.error));
     }
     if (op.finished) {
       return Promise.resolve(op);
@@ -323,7 +345,7 @@ class OperationWatcher {
     if (this.waiters.size === 0) {
       return;
     }
-    await Promise.all([...this.waiters.keys()].map((id) => this.pollOne(id)));
+    await pooled([...this.waiters.keys()], UPSTREAM_CONCURRENCY, (id) => this.pollOne(id));
     this.schedule();
   }
 
@@ -367,7 +389,7 @@ class OperationWatcher {
       return;
     }
     if (found.error) {
-      waiter.reject(new Error(`conversion failed: ${found.error}`));
+      waiter.reject(new ConversionFailedError(found.error));
     } else if (found.finished) {
       waiter.resolve(found);
     } else {
@@ -436,8 +458,11 @@ export class PortalTextReader {
   /**
    * The file's content as plain text. Throws {@link UnsupportedFileError}
    * when the portal has no text conversion for the file's extension, a
-   * {@link DocspaceApiHttpError} when the portal refuses the file, and an
-   * `Error` when the conversion fails or exceeds its budget.
+   * {@link DocspaceApiHttpError} when the portal refuses the file,
+   * {@link ConversionFailedError} when the portal reports an error for its conversion and
+   * {@link ConversionTimeoutError} when the file's own budget runs out; any other failure (a
+   * dropped connection, an answer of an unknown shape, an operation that disappeared) is
+   * thrown as it came.
    */
   async readFileAsText(file: PortalFile): Promise<string> {
     const target = await textTargetFor(file);
@@ -465,6 +490,12 @@ export class PortalTextReader {
         `meta.readFileAsText(${file.id} "${file.title}" -> ${target}) ${text.length} chars in ${Date.now() - started}ms`,
       );
       return text;
+    } catch (err) {
+      // The file's own budget, not the request's: the caller tells the two apart by the class.
+      if (timed.aborted && !this.signal.aborted) {
+        throw new ConversionTimeoutError(file, err);
+      }
+      throw err;
     } finally {
       cancel();
     }

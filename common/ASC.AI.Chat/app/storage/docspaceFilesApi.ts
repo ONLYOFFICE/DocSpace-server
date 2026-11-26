@@ -43,6 +43,7 @@ import { isObject, getNumber, getObject, getString, getEntityId } from "../narro
 import logger from "../log.js";
 import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 import { clientFault } from "../httpErrors.js";
+import { errorBodyText } from "./errorBody.js";
 import {
   assertEntityPath,
   jsonAnswer,
@@ -146,6 +147,26 @@ export class DocspaceApiHttpError extends Error {
   }
 }
 
+/**
+ * Ends an answer whose body nobody is going to use: a refusal, thrown or read as "absent". The
+ * body is read to its end, or to the limit of {@link errorBodyText} and then cancelled, because
+ * a body left unread keeps its connection out of the pool until the garbage collector finds
+ * the response. The text is dropped: the body of a refusal goes into no error and no log line
+ * here. Never throws, so a body that fails does not hide the status.
+ */
+export async function releaseBody(res: Response): Promise<void> {
+  await errorBodyText(res);
+}
+
+/**
+ * The error of a refused answer, made after its body has been released ({@link releaseBody}).
+ * Every non-2xx branch of the Files and People clients that throws goes through here.
+ */
+export async function refusedAnswer(res: Response, url: string): Promise<DocspaceApiHttpError> {
+  await releaseBody(res);
+  return new DocspaceApiHttpError(res.status, res.statusText, url);
+}
+
 /** A query value of {@link filesApiGet}: an array repeats the parameter once per item. */
 export type FilesApiQuery = Record<string, string | number | readonly (string | number)[]>;
 
@@ -178,7 +199,7 @@ export async function filesApiGet(
   try {
     const res = await fetch(url, { headers: getForwardedHeaders(), signal: timed.signal });
     if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      throw await refusedAnswer(res, url);
     }
     const raw = await jsonAnswer(res, `GET files/${path}`);
     if (!isObject(raw) || !("response" in raw)) {
@@ -215,7 +236,7 @@ export async function filesApiSend(
       signal: timed.signal,
     });
     if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      throw await refusedAnswer(res, url);
     }
     return responseOfWrite(await res.text());
   } finally {
@@ -274,7 +295,7 @@ export async function filesApiRequest(
           },
     );
     if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      throw await refusedAnswer(res, url);
     }
     return await jsonAnswer(res, `${method} files/${path}`);
   } finally {
@@ -301,7 +322,7 @@ export async function filesApiDownload<T>(
   try {
     const res = await fetch(href, { headers, signal: timed.signal });
     if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, href);
+      throw await refusedAnswer(res, href);
     }
     return await read(res);
   } finally {
@@ -403,10 +424,11 @@ export async function getFolderInfo(folderId: string): Promise<DocspaceFolderInf
   try {
     const res = await fetch(url, { headers: getForwardedHeaders(), signal });
     if (res.status === 404) {
+      await releaseBody(res);
       return undefined;
     }
     if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      throw await refusedAnswer(res, url);
     }
     return mapped(
       parseFolderInfo(await jsonAnswer(res, "GET files/folder/{id}")),
@@ -556,10 +578,11 @@ export async function getFileInfo(fileId: string): Promise<DocspaceFileInfo | un
   try {
     const res = await fetch(url, { headers: getForwardedHeaders(), signal });
     if (res.status === 404) {
+      await releaseBody(res);
       return undefined;
     }
     if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      throw await refusedAnswer(res, url);
     }
     return mapped(
       parseFileInfo(await jsonAnswer(res, "GET files/file/{id}")),
@@ -663,10 +686,11 @@ export async function getMyDocumentsFolderId(): Promise<string | undefined> {
     // is unknown and is rethrown, so it is not read as "no My documents".
     if (res.status === 403 || res.status === 404) {
       logger.warn(`getMyDocumentsFolderId: ${url} -> ${res.status} ${res.statusText}`);
+      await releaseBody(res);
       return undefined;
     }
     if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      throw await refusedAnswer(res, url);
     }
     const raw = await jsonAnswer(res, "GET files/@my");
     const envelope = isObject(raw) ? getObject(raw, "response") : undefined;

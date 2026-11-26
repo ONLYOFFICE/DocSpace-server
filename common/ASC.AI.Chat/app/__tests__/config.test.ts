@@ -505,6 +505,25 @@ describe("a setting that is refused", () => {
     expect(warn).toHaveBeenCalledExactlyOnceWith(line);
   });
 
+  it("says once that a collector address the exporters could not parse is ignored", () => {
+    settings({ OTEL_EXPORTER_OTLP_ENDPOINT: "http://[x" });
+
+    config.getTelemetrySettings();
+    config.getTelemetrySettings();
+
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      "config: OTEL_EXPORTER_OTLP_ENDPOINT is http://[x, not an http or https address: ignored, OpenTelemetry stays off",
+    );
+  });
+
+  it("says nothing for a blank collector address", () => {
+    settings({ OTEL_EXPORTER_OTLP_ENDPOINT: "  " });
+
+    config.getTelemetrySettings();
+
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   it("says it for a value of the settings file, shortened to 80 characters", () => {
     settings({ ai: { maxImageSize: "9".repeat(200), compaction: { threshold: 2 } } });
 
@@ -849,7 +868,12 @@ describe("getTelemetrySettings", () => {
     ["empty", "", undefined],
     ["a number", 4318, undefined],
     ["an object", { url: "x" }, undefined],
+    ["blank", "  ", undefined],
     ["a URL", "http://c:4318/", "http://c:4318/"],
+    ["a padded URL", " https://c:4318 ", "https://c:4318"],
+    ["no address", "http://[x", undefined],
+    ["a host without a scheme", "collector:4318", undefined],
+    ["an address of another scheme", "ftp://c/", undefined],
   ])("reads an endpoint that is %s", (_what, endpoint, expected) => {
     settings({ OTEL_EXPORTER_OTLP_ENDPOINT: endpoint });
 

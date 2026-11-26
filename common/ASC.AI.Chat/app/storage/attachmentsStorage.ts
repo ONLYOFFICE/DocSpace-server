@@ -57,6 +57,8 @@ import { copyManyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 import { clientFault } from "../httpErrors.js";
 import { listAnswer, mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
+import { pooled, UPSTREAM_CONCURRENCY } from "./pooled.js";
+import { writeWasRefused } from "./writeOutcome.js";
 
 const PATH = "/attachments";
 
@@ -326,7 +328,7 @@ async function projectOf(entityId: string | undefined): Promise<string | undefin
 }
 
 async function inlineImagesAsync(attachments: (Attachment | null)[]): Promise<void> {
-  const tasks: Promise<void>[] = [];
+  const images: { record: Attachment; src: string }[] = [];
   // A record named twice in one read is one object in two places: it is
   // downloaded once.
   const seen = new Set<Attachment>();
@@ -339,18 +341,16 @@ async function inlineImagesAsync(attachments: (Attachment | null)[]): Promise<vo
     if (!src || src.startsWith("data:")) {
       continue;
     }
-    tasks.push(
-      (async () => {
-        const dataUrl = await fetchImageAsDataUrl(src);
-        if (dataUrl) {
-          a.base64 = dataUrl;
-        }
-      })(),
-    );
+    images.push({ record: a, src });
   }
-  if (tasks.length > 0) {
-    await Promise.all(tasks);
-  }
+  // A few at a time: each download holds an image of up to `getMaxImageSize()` bytes and its
+  // base64 copy, so a history of sixty images started at once held sixty of them.
+  await pooled(images, UPSTREAM_CONCURRENCY, async ({ record, src }) => {
+    const dataUrl = await fetchImageAsDataUrl(src);
+    if (dataUrl) {
+      record.base64 = dataUrl;
+    }
+  });
 }
 
 // The C# `AttachmentsStorageController` exposes a DocSpace-specific shape
@@ -460,18 +460,10 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // with `source === "tool"` and no DocSpace entry. Upload the bytes as a
     // real file into the round's folder so they're persisted (and reclaimed
     // by the message/thread cascade), rather than cached in-memory.
-    const toolTasks: Promise<void>[] = [];
-    inputs.forEach((input, i) => {
-      if (input.source !== "tool") return;
-      toolTasks.push(
-        (async () => {
-          result[i] = await this.uploadToolImage(input);
-        })(),
-      );
+    const toolInputs = inputs.flatMap((input, i) => (input.source === "tool" ? [i] : []));
+    await pooled(toolInputs, UPSTREAM_CONCURRENCY, async (i) => {
+      result[i] = await this.uploadToolImage(inputs[i] as (typeof inputs)[number]);
     });
-    if (toolTasks.length > 0) {
-      await Promise.all(toolTasks);
-    }
 
     // Raw-payload drafts (device upload, dnd — no `input.path`, not a tool
     // upload) are rejected: the C# backend has no endpoint for raw content,
@@ -637,13 +629,18 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // that fails is logged with the file id and the file stays); after an
     // answer that leaves the record unknown the file is kept.
     let stored: string | undefined;
+    // Where a file is being created right now, for the catch below: a creation that got no
+    // usable answer may have stored a file nobody can name.
+    let creating: string | undefined;
     try {
       // A conversation of an AI project keeps what its replies produce in
       // its own folder of artifacts; any other conversation has none, and
       // the image goes to the round's folder as before.
+      creating = input.threadId ? `the artifacts of thread ${input.threadId}` : undefined;
       const artifact = input.threadId
         ? await insertThreadArtifactImage(input.threadId, input.base64)
         : undefined;
+      creating = undefined;
       if (artifact !== undefined) {
         stage = "attachment-record";
         stored = artifact;
@@ -698,6 +695,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       stage = "insert";
       let entryId: string;
       try {
+        creating = `folder ${targetFolderId}`;
         entryId = await insertGeneratedImage(targetFolderId, input.base64);
       } catch (err) {
         // `FolderDto.Security` is computed for the folder view-model while
@@ -707,6 +705,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         if (!(err instanceof DocspaceApiHttpError) || err.status !== 403) {
           throw err;
         }
+        creating = undefined;
         stage = "my-documents";
         const myDocumentsId = await getMyDocumentsFolderId();
         if (!myDocumentsId || myDocumentsId === targetFolderId) {
@@ -717,9 +716,11 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
             `-> retrying into My documents ${myDocumentsId}`,
         );
         stage = "insert-retry";
+        creating = `folder ${myDocumentsId}`;
         entryId = await insertGeneratedImage(myDocumentsId, input.base64);
         targetFolderId = myDocumentsId;
       }
+      creating = undefined;
       stage = "attachment-record";
       stored = entryId;
 
@@ -744,6 +745,13 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       );
       return attachment;
     } catch (err) {
+      if (creating !== undefined && !writeWasRefused(err)) {
+        // A timeout, a dropped connection, a 5xx or a 2xx without the file's id: only a
+        // refusal says that nothing was stored (ts-ai-failure-paths.md §6).
+        logger.error(
+          `uploadToolImage: a file may exist in ${creating}, its creation got no usable answer; nothing names it`,
+        );
+      }
       if (stored !== undefined) {
         if (recordWasRefused(err)) {
           await removeOrphanImage(stored);

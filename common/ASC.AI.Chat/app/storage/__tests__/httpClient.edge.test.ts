@@ -106,6 +106,20 @@ describe("aiService answers", () => {
     await expect(aiService.get("/none")).resolves.toBeNull();
   });
 
+  it.each([
+    ["the envelope of a failure", { error: { message: "boom" }, status: 1, statusCode: 500 }],
+    ["an envelope whose status is not 0", { count: 0, status: 1, statusCode: 200 }],
+    ["a successful envelope that carries an error", { error: {}, status: 0, statusCode: 200 }],
+  ])("rejects %s sent with a 200, without a response", async (_what, body) => {
+    upstream.use(http.get("*/internal/ai/none", () => HttpResponse.json(body)));
+
+    await expect(aiService.get("/none")).rejects.toMatchObject({
+      name: "UpstreamShapeError",
+      status: 502,
+      message: "GET /none: the answer has an unexpected shape",
+    });
+  });
+
   it("keeps an object that only has a status, as it is", async () => {
     upstream.use(http.get("*/internal/ai/job", () => HttpResponse.json({ status: "done" })));
 

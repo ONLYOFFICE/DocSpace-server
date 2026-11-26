@@ -70,6 +70,7 @@ import { findTemplate, readTemplateFile } from "./catalog.js";
 import type { AgentTemplate, SourceTemplate, Template, TemplateCatalog } from "./catalog.js";
 import { clientFault } from "../httpErrors.js";
 import { mapped, UpstreamShapeError } from "../storage/upstreamShape.js";
+import { writeWasRefused } from "../storage/writeOutcome.js";
 
 /** `RoomType` on the C# side. */
 const ROOM_TYPES = { skillSet: 10, knowledgeBase: 11, agent: 12 } as const;
@@ -88,7 +89,10 @@ export interface InstalledTemplate extends InstalledRoom {
   skillSets: InstalledRoom[];
   /** The Knowledge rooms made for an agent's knowledge bases; empty otherwise. */
   knowledgeBases: InstalledRoom[];
-  /** What was skipped: `modelNotSaved`; `instructionsNotSaved` for every agent. */
+  /**
+   * What was skipped: `modelNotSaved`, or `modelUnconfirmed` when the write of the model got
+   * no usable answer and the model may be stored; `instructionsNotSaved` for every agent.
+   */
   warnings: string[];
 }
 
@@ -239,9 +243,12 @@ async function installAgent(
   const warnings: string[] = [];
   // A template names no model, so the agent is given the one the portal
   // chats on now and keeps it when the portal's choice changes later.
+  // Set once the write of the model has started: only then can a failure have stored it.
+  let writing = false;
   try {
     const profileId = await portalChatProfileId();
     if (profileId) {
+      writing = true;
       await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/model`, { profileId });
     } else {
       logger.warn(`installTemplate: ${template.id}: model not saved (the portal has no chat model)`);
@@ -251,9 +258,13 @@ async function installAgent(
     // The rooms and the agent are made by now, so a read of the portal's
     // model or a write of it that fails in any way - a refusal, a timeout, a
     // dropped connection - is told as a warning and never loses the caller
-    // the ids of what was made.
+    // the ids of what was made. Only a refusal of the write (a 4xx), or a
+    // failure before it, says that the model is not stored: after a timeout,
+    // a dropped connection or a 5xx of the write it may be
+    // (ts-ai-failure-paths.md §6).
+    const unconfirmed = writing && !writeWasRefused(err);
     logger.warn(
-      `installTemplate: ${template.id}: model not saved (${
+      `installTemplate: ${template.id}: model ${unconfirmed ? "unconfirmed, its write got no usable answer" : "not saved"} (${
         err instanceof DocspaceApiHttpError
           ? err.status
           : err instanceof Error
@@ -261,7 +272,7 @@ async function installAgent(
             : String(err)
       })`,
     );
-    warnings.push("modelNotSaved");
+    warnings.push(unconfirmed ? "modelUnconfirmed" : "modelNotSaved");
   }
   // Nothing stores an agent's instructions yet (the Files service has no
   // `rooms/{id}/instructions`), so they are skipped and the caller is told.

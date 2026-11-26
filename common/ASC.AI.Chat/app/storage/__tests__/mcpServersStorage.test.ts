@@ -31,7 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import logger from "../../log.js";
 import {
   docspace,
   docspaceError,
@@ -49,6 +50,10 @@ import { inRound, scopeOf, snapshotOf } from "../../__tests__/fixtures/chatConte
 const upstream = useUpstream();
 const storage = new HttpMcpServersStorage();
 const noContent = () => new HttpResponse(null, { status: 204 });
+
+beforeEach(() => {
+  vi.mocked(logger.warn).mockClear();
+});
 
 /** `McpServerDto` (products/ASC.AI/Server/Models/ResponseDto/McpServerDto.cs): config is a JSON string. */
 const serverDto = (
@@ -88,20 +93,21 @@ describe("readByName", () => {
     expect(upstream.seen[0]?.path).toBe("/internal/ai/mcp-servers/my%20server");
   });
 
-  it.each([
-    ["config missing", { name: "jira" }],
-    ["config null", { name: "jira", config: null }],
-    ["config an object", { name: "jira", config: { url: "u" } }],
-    ["config not JSON", { name: "jira", config: "{" }],
-    ["null", null],
-  ])("reads an answer with %s as none", async (_name, body) => {
-    upstream.use(http.get("*/internal/ai/mcp-servers/:name", () => docspace(body)));
+  it("reads an answer of null as none", async () => {
+    upstream.use(http.get("*/internal/ai/mcp-servers/:name", () => docspace(null)));
     await expect(storage.readByName("jira")).resolves.toBeNull();
   });
 
+  // A stored server whose config cannot be read is not "no such server": read as none, an
+  // update wrote it without its stored headers.
   it.each([
     ["a list", [serverDto()]],
     ["a string", "jira"],
+    ["no config", { name: "jira" }],
+    ["config null", { name: "jira", config: null }],
+    ["config an object", { name: "jira", config: { url: "u" } }],
+    ["config not JSON", { name: "jira", config: "{" }],
+    ["config a JSON list", { name: "jira", config: "[]" }],
   ])("rejects an answer with %s as of an unknown shape, not as none", async (_name, body) => {
     upstream.use(http.get("*/internal/ai/mcp-servers/:name", () => docspace(body)));
     await expect(storage.readByName("jira")).rejects.toMatchObject({
@@ -164,6 +170,48 @@ describe("readAll", () => {
       github: { url: "g" },
     });
     expect(upstream.seen).toMatchObject([{ method: "GET", path: "/internal/ai/mcp-servers" }]);
+    // Each entry left out is named: nothing else shows that the server is stored.
+    const left = "HttpMcpServersStorage.readAll: an entry of the registry is left out, its";
+    expect(vi.mocked(logger.warn).mock.calls.map(([line]) => line)).toEqual([
+      `${left} name cannot be read`,
+      `${left} name cannot be read`,
+      `${left} name cannot be read`,
+      `${left} name cannot be read`,
+      `${left} config (server object) cannot be read`,
+      `${left} config (server broken) cannot be read`,
+      `${left} config (server list) cannot be read`,
+    ]);
+  });
+
+  describe("readAllForWrite", () => {
+    it("answers the registry when every entry can be read, past a round's snapshot", async () => {
+      upstream.use(
+        http.get("*/internal/ai/mcp-servers", () => docspace([serverDto("jira", '{"url":"j"}')])),
+      );
+      const snapshot = snapshotOf({ global: scopeOf({ mcpServers: { old: { url: "o" } } }) });
+
+      await expect(inRound(snapshot, () => storage.readAllForWrite())).resolves.toEqual({
+        jira: { url: "j" },
+      });
+    });
+
+    it.each([
+      ["an entry that is null", null],
+      ["an entry without a name", { config: '{"url":"n"}' }],
+      ["an entry without a config", { name: "jira" }],
+      ["an entry whose config is not JSON", { name: "jira", config: "not json" }],
+    ])("rejects %s as an answer of an unknown shape, not as no such server", async (_w, entry) => {
+      upstream.use(
+        http.get("*/internal/ai/mcp-servers", () =>
+          docspace([serverDto("github", '{"url":"g"}'), entry]),
+        ),
+      );
+
+      await expect(storage.readAllForWrite()).rejects.toMatchObject({
+        name: "UpstreamShapeError",
+        status: 502,
+      });
+    });
   });
 
   // McpServerStorageController always answers a list: anything else is unknown, not "no custom

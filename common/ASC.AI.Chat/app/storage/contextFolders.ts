@@ -33,6 +33,7 @@
 
 import { isObject } from "../narrow.js";
 import logger from "../log.js";
+import { pooled, UPSTREAM_CONCURRENCY } from "./pooled.js";
 import {
   DocspaceApiHttpError,
   folderSourceType,
@@ -120,8 +121,10 @@ function toContextFolder(id: string, info: DocspaceFolderInfo): ContextFolder {
  * model the user selected fewer folders. Order is kept.
  */
 export async function resolveContextFolders(ids: readonly string[]): Promise<ContextFolder[]> {
-  const resolved = await Promise.all(
-    ids.slice(0, CONTEXT_FOLDERS_LIMIT).map(async (id) => {
+  const resolved = await pooled(
+    ids.slice(0, CONTEXT_FOLDERS_LIMIT),
+    UPSTREAM_CONCURRENCY,
+    async (id) => {
       try {
         const info = await getFolderInfoCached(id);
         return info ? toContextFolder(id, info) : undefined;
@@ -134,7 +137,7 @@ export async function resolveContextFolders(ids: readonly string[]): Promise<Con
         );
         return undefined;
       }
-    }),
+    },
   );
   return resolved.filter((folder): folder is ContextFolder => folder !== undefined);
 }

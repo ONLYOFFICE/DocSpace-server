@@ -77,6 +77,13 @@ const processEnv = {
     "Read the environment in config/index.ts, through a reader with both bounds and a default (ts-ai-style.md, Config).",
 };
 
+const unboundedFanOut = {
+  selector:
+    "CallExpression[callee.object.name='Promise'][callee.property.name=/^all(Settled)?$/] > CallExpression.arguments[callee.property.name='map']",
+  message:
+    "Promise.all over a mapped list starts every call at once. Calls made in a loop for one request go through pooled(items, limit, run) (ts-ai-style.md, Upstream calls).",
+};
+
 export default tseslint.config(
   {
     ignores: [
@@ -117,7 +124,7 @@ export default tseslint.config(
       ],
       "no-empty": ["error", { allowEmptyCatch: false }],
       "no-console": "error",
-      "no-restricted-syntax": ["error", ...swallowingCatch, processEnv],
+      "no-restricted-syntax": ["error", ...swallowingCatch, processEnv, unboundedFanOut],
       // Every upstream has one client that owns the timeout, the envelope and the error class.
       "no-restricted-globals": [
         "error",
@@ -141,7 +148,10 @@ export default tseslint.config(
   {
     // The one place that reads the environment; it runs before the logger exists.
     files: ["config/**/*.ts"],
-    rules: { "no-console": "off", "no-restricted-syntax": ["error", ...swallowingCatch] },
+    rules: {
+      "no-console": "off",
+      "no-restricted-syntax": ["error", ...swallowingCatch, unboundedFanOut],
+    },
   },
   {
     // The clients of the AI service, the Files API and the People API are the places a bare

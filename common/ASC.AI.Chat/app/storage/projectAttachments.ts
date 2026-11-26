@@ -55,6 +55,8 @@ import { FileTooLargeError, readFileBytes } from "./roomSkills.js";
 import { getEntityId, getNumber, getObject, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import { UpstreamShapeError } from "./upstreamShape.js";
+import { pooled, UPSTREAM_CONCURRENCY } from "./pooled.js";
+import { writeWasRefused } from "./writeOutcome.js";
 
 /** The largest file copied: its bytes are held in memory on the way. */
 export const MAX_COPY_BYTES = 50 * 1024 * 1024;
@@ -136,22 +138,37 @@ export async function uploadInChunks(
 
   const size = await chunkSize();
   const count = Math.max(1, Math.ceil(bytes.byteLength / size));
-  let last: unknown;
-  for (let index = 0; index < count; index++) {
-    const form = new FormData();
-    form.append(
-      "file",
-      new Blob([bytes.subarray(index * size, (index + 1) * size)], { type: mediaType }),
-      name,
-    );
-    last = await postFiles(`${folder}/session/${encodeURIComponent(sessionId)}`, { form });
+  // The session alone makes no file; the chunk that completes it does.
+  let index = 0;
+  try {
+    let last: unknown;
+    for (; index < count; index++) {
+      const form = new FormData();
+      form.append(
+        "file",
+        new Blob([bytes.subarray(index * size, (index + 1) * size)], { type: mediaType }),
+        name,
+      );
+      last = await postFiles(`${folder}/session/${encodeURIComponent(sessionId)}`, { form });
+    }
+    const file = isObject(last) ? (getObject(last, "file") ?? last) : undefined;
+    const id = file ? getEntityId(file, "id") : undefined;
+    if (id === undefined) {
+      throw new UpstreamShapeError("POST files/{folderId}/session/{sessionId}");
+    }
+    return id;
+  } catch (err) {
+    // Only a refusal (a 4xx) says that no file was made. The last chunk completes the file, so
+    // from that chunk on a timeout, a dropped connection, a 5xx or an answer without the
+    // file's id leaves a file that may exist; the callers answer the failure, the line says
+    // where it may lie (ts-ai-failure-paths.md §6).
+    if (index >= count - 1 && !writeWasRefused(err)) {
+      logger.warn(
+        `uploadInChunks: ${name} may exist in folder ${folderId}, its last chunk got no usable answer`,
+      );
+    }
+    throw err;
   }
-  const file = isObject(last) ? (getObject(last, "file") ?? last) : undefined;
-  const id = file ? getEntityId(file, "id") : undefined;
-  if (id === undefined) {
-    throw new UpstreamShapeError("POST files/{folderId}/session/{sessionId}");
-  }
-  return id;
 }
 
 /**
@@ -208,14 +225,10 @@ export async function copyManyIntoProject(
   projectId: string,
   entryIds: readonly string[],
 ): Promise<string[]> {
-  const copies = new Map<string, Promise<string>>();
-  const copyOnce = (id: string): Promise<string> => {
-    let copy = copies.get(id);
-    if (copy === undefined) {
-      copy = copyIntoProject(projectId, id);
-      copies.set(id, copy);
-    }
-    return copy;
-  };
-  return Promise.all(entryIds.map(copyOnce));
+  // A few at a time: each file is read from the Files API before its copy waits for its turn,
+  // and a request may name a hundred of them.
+  const unique = [...new Set(entryIds)];
+  const copied = await pooled(unique, UPSTREAM_CONCURRENCY, (id) => copyIntoProject(projectId, id));
+  const copies = new Map(unique.map((id, i) => [id, copied[i] as string]));
+  return entryIds.map((id) => copies.get(id) as string);
 }

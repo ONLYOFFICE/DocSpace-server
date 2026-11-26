@@ -104,7 +104,7 @@ vi.mock("../threadsController.js", async () => ({
   assertThreadCreatable: (await import("./aiController.harness.js")).assertThreadCreatable,
 }));
 
-const { aiController } = await import("../aiController.js");
+const { aiController, KNOWLEDGE_ROOMS_LIMIT } = await import("../aiController.js");
 
 const upstream = useUpstream();
 
@@ -438,6 +438,14 @@ describe("the knowledge rooms of a round", () => {
         ],
       }),
     ).toEqual([12, 5]);
+  });
+
+  it("takes no more rooms than the limit, repeated ids not counted", async () => {
+    const sent = Array.from({ length: KNOWLEDGE_ROOMS_LIMIT + 5 }, (_, i) => ({ id: i + 1 }));
+
+    const rooms = await roomsOf({ knowledgeRooms: [{ id: 1 }, { id: 1 }, ...sent] });
+
+    expect(rooms).toEqual(sent.slice(0, KNOWLEDGE_ROOMS_LIMIT).map((room) => room.id));
   });
 
   it("reads the single knowledgeRoom of an older widget", async () => {

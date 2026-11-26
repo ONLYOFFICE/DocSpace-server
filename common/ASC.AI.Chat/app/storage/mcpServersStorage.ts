@@ -33,7 +33,14 @@
 
 import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString } from "../narrow.js";
-import { listAnswer, namesNoEntity, objectOrNone } from "./upstreamShape.js";
+import {
+  listAnswer,
+  mapped,
+  namesNoEntity,
+  objectOrNone,
+  UpstreamShapeError,
+} from "./upstreamShape.js";
+import logger from "../log.js";
 import type { McpServersStorage, McpServerConfig } from "@onlyoffice/ai-chat/core";
 import {
   invalidateChatContext,
@@ -61,6 +68,33 @@ export function parseMcpServerConfig(raw: unknown): McpServerConfig | null {
     }
   }
   return isObject(raw) ? raw : null;
+}
+
+/** The registry as the AI service lists it; `complete` refuses an entry that cannot be read. */
+async function readRegistry(complete: boolean): Promise<Record<string, McpServerConfig>> {
+  // A body that is no list is unknown, not "nothing registered": read as empty, it let a
+  // replace-all keep none of the stored headers (ts-ai-failure-paths.md §1).
+  const raw = listAnswer(await aiService.get(PATH), "GET mcp-servers");
+  const result: Record<string, McpServerConfig> = {};
+  for (const item of raw) {
+    const name = isObject(item) ? getString(item, "name") : undefined;
+    const cfg = isObject(item) ? parseMcpServerConfig(getString(item, "config")) : null;
+    if (name !== undefined && cfg !== null) {
+      result[name] = cfg;
+      continue;
+    }
+    if (complete) {
+      throw new UpstreamShapeError("GET mcp-servers");
+    }
+    // A listing and a round go on without the entry (one malformed element of a list is
+    // left out), and say so: the server is stored, and nothing else shows that it is.
+    logger.warn(
+      `HttpMcpServersStorage.readAll: an entry of the registry is left out, its ${
+        name === undefined ? "name" : `config (server ${name})`
+      } cannot be read`,
+    );
+  }
+  return result;
 }
 
 export class HttpMcpServersStorage implements McpServersStorage {
@@ -91,8 +125,10 @@ export class HttpMcpServersStorage implements McpServersStorage {
       if (raw === null) {
         return null;
       }
-      const cfg = getString(raw, "config");
-      return parseMcpServerConfig(cfg);
+      // A server that is stored and whose config cannot be read is not "no such server": read
+      // as none, an update wrote the server without its stored headers
+      // (ts-ai-failure-paths.md §1).
+      return mapped(parseMcpServerConfig(getString(raw, "config")), "GET mcp-servers/{name}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;
@@ -110,24 +146,17 @@ export class HttpMcpServersStorage implements McpServersStorage {
       return { ...snapshot.global.mcpServers };
     }
     reportChatContextMiss("mcpServers.readAll");
-    // A body that is no list is unknown, not "nothing registered": read as empty, it let a
-    // replace-all keep none of the stored headers (ts-ai-failure-paths.md §1).
-    const raw = listAnswer(await aiService.get(PATH), "GET mcp-servers");
-    const result: Record<string, McpServerConfig> = {};
-    for (const item of raw) {
-      if (!isObject(item)) {
-        continue;
-      }
-      const name = getString(item, "name");
-      if (name === undefined) {
-        continue;
-      }
-      const cfg = parseMcpServerConfig(getString(item, "config"));
-      if (cfg !== null) {
-        result[name] = cfg;
-      }
-    }
-    return result;
+    return readRegistry(false);
+  }
+
+  /**
+   * The registry as a write builds on it: read from the AI service, never from a round's
+   * snapshot, and complete. An entry whose name or config cannot be read throws
+   * {@link UpstreamShapeError} instead of being left out: a replace-all built on a map without
+   * it would write that server without its stored headers (ts-ai-failure-paths.md §1).
+   */
+  async readAllForWrite(): Promise<Record<string, McpServerConfig>> {
+    return readRegistry(true);
   }
 
   async update(name: string, config: McpServerConfig, _entityId?: string): Promise<void> {

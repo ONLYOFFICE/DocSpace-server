@@ -40,11 +40,16 @@ const otel = vi.hoisted(() => ({
   created: [] as [string, unknown][],
   started: 0,
   shutdown: { calls: 0, fail: false },
+  /** The kind whose constructor (or, for `NodeSDK.start`, whose start) throws. */
+  failing: undefined as string | undefined,
 }));
 
 function recorder(kind: string) {
   return class {
     constructor(options?: unknown) {
+      if (otel.failing === kind) {
+        throw new Error(`${kind} refused its configuration`);
+      }
       otel.created.push([kind, options]);
     }
   };
@@ -69,6 +74,9 @@ vi.mock("@opentelemetry/sdk-node", () => ({
       otel.created.push(["NodeSDK", options]);
     }
     start(): void {
+      if (otel.failing === "NodeSDK.start") {
+        throw new Error("NodeSDK.start refused its configuration");
+      }
       otel.started += 1;
     }
     shutdown(): Promise<void> {
@@ -140,6 +148,7 @@ beforeEach(() => {
   otel.created = [];
   otel.started = 0;
   otel.shutdown = { calls: 0, fail: false };
+  otel.failing = undefined;
   onceSpy = spyOnce();
   exitSpy = spyExit();
   vi.stubEnv("OTEL_METRIC_EXPORT_INTERVAL", undefined);
@@ -160,6 +169,8 @@ describe("telemetry switched off", () => {
     ["no endpoint", { "openTelemetry:enable": true }],
     ["an empty endpoint", { ...ENABLED, OTEL_EXPORTER_OTLP_ENDPOINT: "" }],
     ["a numeric endpoint", { ...ENABLED, OTEL_EXPORTER_OTLP_ENDPOINT: 4318 }],
+    ["a blank endpoint", { ...ENABLED, OTEL_EXPORTER_OTLP_ENDPOINT: " " }],
+    ["an endpoint that is no address", { ...ENABLED, OTEL_EXPORTER_OTLP_ENDPOINT: "http://[x" }],
   ])("starts nothing for %s", async (_name, config) => {
     const log = await load(config);
 
@@ -167,6 +178,36 @@ describe("telemetry switched off", () => {
     expect(otel.started).toBe(0);
     expect(onceSpy).not.toHaveBeenCalled();
     expect(log.info).toHaveBeenCalledWith(DISABLED_LINE);
+  });
+});
+
+// Telemetry is optional and sdk.ts is the first import of app.ts: a configuration the exporters
+// or the SDK refuse leaves the service without telemetry, it does not stop the load.
+describe("telemetry that cannot be started", () => {
+  it.each<[string, Record<string, unknown>, string]>([
+    ["a trace exporter that throws", ENABLED, "proto.OTLPTraceExporter"],
+    ["a metric exporter that throws", ENABLED, "proto.OTLPMetricExporter"],
+    [
+      "a grpc exporter that throws",
+      { ...ENABLED, OTEL_EXPORTER_OTLP_PROTOCOL: "grpc" },
+      "grpc.OTLPTraceExporter",
+    ],
+    ["an SDK that does not start", ENABLED, "NodeSDK.start"],
+  ])("loads and says so for %s", async (_name, config, failing) => {
+    otel.failing = failing;
+
+    const log = await load(config);
+
+    expect(otel.started).toBe(0);
+    expect(onceSpy).not.toHaveBeenCalled();
+    expect(log.error).toHaveBeenCalledWith(
+      expect.stringMatching(
+        new RegExp(
+          `^OpenTelemetry disabled: it could not be started \\(protocol=.+\\): ${failing.replace(".", "\\.")} refused its configuration$`,
+        ),
+      ),
+    );
+    expect(log.info).not.toHaveBeenCalledWith(expect.stringMatching(/^OpenTelemetry enabled/));
   });
 });
 

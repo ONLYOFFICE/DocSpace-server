@@ -127,25 +127,32 @@ function withRequestSignal<T>(res: Response, body: T): T {
   };
 }
 
+// The most knowledge bases one round takes, as many as it takes context folders
+// (`CONTEXT_FOLDERS_LIMIT`): every id goes to the AI service with each tool list of the round.
+export const KNOWLEDGE_ROOMS_LIMIT = 20;
+
 // `actionArgs.knowledgeRooms[].id` as the room ids the .NET side expects —
-// each a DocSpace room id, once, in the order sent. An older widget sends a
-// single `actionArgs.knowledgeRoom`; it is read the same way.
+// each a DocSpace room id, once, in the order sent, cut at
+// `KNOWLEDGE_ROOMS_LIMIT` like the context folders (`contextFolderIdsOf`). An
+// older widget sends a single `actionArgs.knowledgeRoom`; it is read the same way.
 function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
   const rooms = actionArgs["knowledgeRooms"];
   const list: unknown[] = Array.isArray(rooms) ? rooms : [actionArgs["knowledgeRoom"]];
-  const ids: number[] = [];
+  const ids = new Set<number>();
   for (const room of list) {
     if (!isObject(room)) {
       continue;
     }
-    const id = room["id"];
     // The whole value has to be an integer: "9abc" names no room, it is not room 9.
-    const parsed = parseInteger(id);
-    if (parsed !== undefined && parsed > 0 && !ids.includes(parsed)) {
-      ids.push(parsed);
+    const parsed = parseInteger(room["id"]);
+    if (parsed !== undefined && parsed > 0) {
+      ids.add(parsed);
+    }
+    if (ids.size === KNOWLEDGE_ROOMS_LIMIT) {
+      break;
     }
   }
-  return ids;
+  return [...ids];
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt

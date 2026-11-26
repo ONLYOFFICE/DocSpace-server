@@ -351,7 +351,9 @@ export const toolsController = {
     const entityId = optionalString(args.entityId, "entityId");
     await assertEntityAccessible(entityId);
     const map = args.map;
-    const stored = await storage.mcpServers.readAll(undefined);
+    // The complete registry, or a 502: a stored server the read cannot make out is not "no
+    // such server", and the map written below would lose its headers.
+    const stored = await storage.mcpServers.readAllForWrite();
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
       assertRoutableServerName(name);

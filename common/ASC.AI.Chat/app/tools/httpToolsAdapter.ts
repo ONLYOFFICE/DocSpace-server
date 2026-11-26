@@ -45,6 +45,7 @@ import { getArray, getString, isObject, parseInt10 } from "../narrow.js";
 import logger from "../log.js";
 import { UpstreamShapeError } from "../storage/upstreamShape.js";
 import type { ToolsAdapter, TMCPItem } from "@onlyoffice/ai-chat/core";
+import { toolErrorForLog } from "./toolErrorLog.js";
 
 const LIST_PATH = "/tools/list";
 const CALL_PATH = "/tools/call";
@@ -406,8 +407,10 @@ export class HttpToolsAdapter implements ToolsAdapter {
         typeof errorValue === "string" && errorValue !== "" ? errorValue : UNDESCRIBED_ERROR;
       // Contract: stringify failures into the result so the model can
       // react instead of aborting the stream.
+      // The text is the AI service's and can quote what the tool was given; the log line keeps
+      // its last line, cut (`toolErrorForLog`). The model gets the whole text below.
       logger.warn(
-        `docspaceTools.callTool name=${toolName} failed after ${Date.now() - started}ms: ${error}`,
+        `docspaceTools.callTool name=${toolName} failed after ${Date.now() - started}ms: ${toolErrorForLog(error)}`,
       );
       return `Tool "${toolName}" failed: ${error}`;
     }

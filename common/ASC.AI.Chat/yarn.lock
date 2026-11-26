@@ -2209,21 +2209,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=13.7.0":
-  version: 26.1.0
-  resolution: "@types/node@npm:26.1.0"
+"@types/node@npm:*, @types/node@npm:>=13.7.0, @types/node@npm:^24":
+  version: 24.19.4
+  resolution: "@types/node@npm:24.19.4"
   dependencies:
-    undici-types: "npm:~8.3.0"
-  checksum: 10/fee720e8ddf8aa66a22bc5cf3209347f8dcc07cbf7475f966761684f04fb34b819739a311edbf87271d6c7f9f50b1f015d3ff9e36d67d04264aafe18ac9a3796
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^20.12.0":
-  version: 20.19.43
-  resolution: "@types/node@npm:20.19.43"
-  dependencies:
-    undici-types: "npm:~6.21.0"
-  checksum: 10/cb060ea17ef9f1fc9d47cfb00098175b25fc6f6bae3c08a89ec7ba1be3353445ccf8af62d88c591e6413c09713f7705a71684a27ef01d2bccac4be96b00cacac
+    undici-types: "npm:>=7.24.0 <7.24.7"
+  checksum: 10/90981db59db96ea77cddcbd044de244e17f5c063e32ee303d396ae0af48c8e69a4004711b337f611ad9f47937b59fa5efe3130c94a7d9d3f58b5193f4889b66f
   languageName: node
   linkType: hard
 
@@ -2746,7 +2737,7 @@ __metadata:
     "@types/express": "npm:^4.17.21"
     "@types/morgan": "npm:^1.9.9"
     "@types/nconf": "npm:^0.10.6"
-    "@types/node": "npm:^20.12.0"
+    "@types/node": "npm:^24"
     "@types/supertest": "npm:^7.2.1"
     "@vitest/coverage-v8": "npm:^3"
     ajv: "npm:^8"
@@ -6621,17 +6612,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.21.0":
-  version: 6.21.0
-  resolution: "undici-types@npm:6.21.0"
-  checksum: 10/ec8f41aa4359d50f9b59fa61fe3efce3477cc681908c8f84354d8567bb3701fafdddf36ef6bff307024d3feb42c837cf6f670314ba37fc8145e219560e473d14
-  languageName: node
-  linkType: hard
-
-"undici-types@npm:~8.3.0":
-  version: 8.3.0
-  resolution: "undici-types@npm:8.3.0"
-  checksum: 10/6681d2837ac75a75ac1cc46090aa2b8ddc7c6b8ecc295a6cdb06838752a730da3d8afeecf05e5ab7903160eafad3a8b6ffa1927e5ded260590f4d4fef18646d5
+"undici-types@npm:>=7.24.0 <7.24.7":
+  version: 7.24.6
+  resolution: "undici-types@npm:7.24.6"
+  checksum: 10/defc9538b952e3c15b8526596c591f7c1f0c7605ad27a2b7feddbea7ef2e3003f3eda2cdb051a3cb1a2185e3893100fd9cb925c799db99d48131ea63b5233d10
   languageName: node
   linkType: hard
 

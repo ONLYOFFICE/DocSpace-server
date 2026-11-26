@@ -77,6 +77,7 @@ import { FileTooLargeError, readFileBytes } from "../storage/roomSkills.js";
 import { authorizationValue } from "./systemTools.js";
 import logger from "../log.js";
 import { readProp } from "../narrow.js";
+import { writeWasRefused } from "../storage/writeOutcome.js";
 
 /** The server's name in the agent's `mcpServers`: its tools reach the model as `workspace_*`. */
 export const DOCUMENT_AGENT_FILES_SERVER = "workspace";
@@ -311,20 +312,30 @@ async function receive(req: Request, res: Response): Promise<void> {
     res.end();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    logger.warn(`documentAgentFiles: ${name} not saved into folder ${folderId}: ${message}`);
+    // Only a refusal (a 4xx) says that no file was made. After a 5xx, a timeout, a dropped
+    // connection or an answer that names no file it may exist, and the agent is told so: a
+    // second save would make a numbered copy beside it (ts-ai-failure-paths.md §6).
+    const unknown = writeWasRefused(err) ? "" : `; ${MAY_BE_SAVED}`;
+    logger.warn(
+      `documentAgentFiles: ${name} ${unknown ? "may have been saved into" : "not saved into"} folder ${folderId}: ${message}`,
+    );
     // The Files API refuses the upload into a folder, the AI service the one into a thread.
     if (err instanceof DocspaceApiHttpError || err instanceof AiServiceHttpError) {
       res.status(err.status === 403 ? 403 : 502).json({
         error:
           err.status === 403
             ? "the current user may not save into that folder"
-            : `the workspace answered ${err.status}`,
+            : `the workspace answered ${err.status}${unknown}`,
       });
       return;
     }
-    res.status(502).json({ error: "the file could not be saved" });
+    res.status(502).json({ error: `the workspace gave no usable answer${unknown}` });
   }
 }
+
+/** What the agent is told when a save got no answer that says whether the file was made. */
+const MAY_BE_SAVED =
+  "the file may have been saved all the same, so do not save it again before checking the folder";
 
 class BodyTooLargeError extends Error {}
 

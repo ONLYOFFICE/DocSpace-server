@@ -56,7 +56,10 @@ vi.mock("../../tools/customTools.js", () => ({
   resolveCustomServers: vi.fn(),
 }));
 vi.mock("../../storage/index.js", () => ({
-  storage: { mcpServers: { readByName, readAll }, toolPrefs: { readDisabled: vi.fn() } },
+  storage: {
+    mcpServers: { readByName, readAll, readAllForWrite: readAll },
+    toolPrefs: { readDisabled: vi.fn() },
+  },
 }));
 const getSystemServerConfig = vi.fn();
 vi.mock("../../tools/systemTools.js", () => ({ systemToolsSource: {}, getSystemServerConfig }));

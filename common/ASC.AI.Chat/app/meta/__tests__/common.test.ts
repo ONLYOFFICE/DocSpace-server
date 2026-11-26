@@ -57,6 +57,8 @@ vi.mock("../portalFiles.js", () => ({
     readFileAsText = readFileAsText;
   },
   UnsupportedFileError: class UnsupportedFileError extends Error {},
+  ConversionFailedError: class ConversionFailedError extends Error {},
+  ConversionTimeoutError: class ConversionTimeoutError extends Error {},
 }));
 
 const portalFiles = await import("../portalFiles.js");
@@ -152,7 +154,7 @@ describe("readDocuments", () => {
       if (id === "empty") return "  \n ";
       if (id === "img") throw new portalFiles.UnsupportedFileError(file("img") as never, "no");
       if (id === "secret") throw new FakeDocspaceApiHttpError(403, "Forbidden", "u");
-      if (id === "boom") throw new Error("socket hang up");
+      if (id === "boom") throw new portalFiles.ConversionFailedError("broken file");
       if (id === "long") return "x".repeat(50_000);
       return `text of ${id}`;
     });

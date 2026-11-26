@@ -43,6 +43,8 @@ import { storage } from "../storage/index.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 import logger from "../log.js";
 import {
+  ConversionFailedError,
+  ConversionTimeoutError,
   getPortalFile,
   listFolderFiles,
   PortalTextReader,
@@ -213,14 +215,12 @@ function providerMessageOf(err: unknown): string | undefined {
     : message;
 }
 
+const FILES_TIMEOUT_MESSAGE = "Reading the files did not finish within the time budget";
+
 /** Thrown when the budget ran out while the files were still being read. */
 export function assertNotTimedOut(signal: AbortSignal): void {
   if (signal.aborted) {
-    throw new ModelCallError(
-      504,
-      "timeout",
-      "Reading the files did not finish within the time budget",
-    );
+    throw new ModelCallError(504, "timeout", FILES_TIMEOUT_MESSAGE);
   }
 }
 
@@ -335,8 +335,13 @@ export async function readDocuments(
   const reader = new PortalTextReader(signal);
   // One iterator for every worker: each takes the next file nobody has taken yet.
   const queue = files.entries();
+  // Set by the read that fails the request: the other workers take no further file.
+  let failed = false;
   const worker = async (): Promise<void> => {
     for (const [index, file] of queue) {
+      if (failed) {
+        return;
+      }
       try {
         const raw = await reader.readFileAsText(file);
         const text = raw.trim();
@@ -350,13 +355,20 @@ export async function readDocuments(
           truncated: text.length > MAX_CHARS_PER_FILE,
         };
       } catch (err) {
-        // An expired session or a portal outage is the request's failure,
-        // not this file's: relay it instead of reporting every file as
-        // unreadable and answering 422.
-        if (err instanceof DocspaceApiHttpError && (err.status === 401 || err.status >= 500)) {
+        // Only a refusal of the file itself leaves it out. Anything else - an expired
+        // session, a 5xx, a timeout, a dropped connection, an answer of an unknown shape - is
+        // the request's failure: relayed, so the caller gets a 5xx and can retry, instead of
+        // every file reported as unreadable and a 422 (ts-ai-failure-paths.md §1).
+        const reason = skipReasonOf(err);
+        if (reason === undefined) {
+          failed = true;
+          // The request's own budget ran out under the read: the 504 of that budget.
+          assertNotTimedOut(signal);
+          if (err instanceof ConversionTimeoutError) {
+            throw new ModelCallError(504, "timeout", FILES_TIMEOUT_MESSAGE, undefined, err);
+          }
           throw err;
         }
-        const reason = skipReasonOf(err);
         logger.warn(
           `meta: file ${file.id} "${file.title}" skipped (${reason}): ${
             err instanceof Error ? err.message : String(err)
@@ -372,9 +384,13 @@ export async function readDocuments(
   return documents;
 }
 
-function skipReasonOf(err: unknown): SkipReason {
+/** Why a file is left out, or `undefined` when the failure is not a refusal of that file. */
+function skipReasonOf(err: unknown): SkipReason | undefined {
   if (err instanceof UnsupportedFileError) {
     return "unsupported";
+  }
+  if (err instanceof ConversionFailedError) {
+    return "failed";
   }
   if (err instanceof DocspaceApiHttpError) {
     if (err.status === 403) {
@@ -384,7 +400,7 @@ function skipReasonOf(err: unknown): SkipReason {
       return "not_found";
     }
   }
-  return "failed";
+  return undefined;
 }
 
 // Spread the shared budget over the documents: each gets its own cap, and

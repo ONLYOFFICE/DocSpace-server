@@ -420,6 +420,9 @@ export const threadsController = {
   }),
 
   list: asyncHandler(async (req, res) => {
+    // The access gate before the query: the storage reads the folder named by `entityId` from
+    // the Files API ahead of its first call to the AI service (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const entityId = asString(req.query["entityId"]);
     // A `count` that is not a whole integer ("20abc", "1.5") is left out like an
     // absent one, so the service applies its own page size; its bounds are the

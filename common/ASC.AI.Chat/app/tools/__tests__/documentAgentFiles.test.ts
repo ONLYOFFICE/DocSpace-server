@@ -36,6 +36,10 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import request from "supertest";
 import { afterAll, describe, expect, it, vi } from "vitest";
 import { publishedOperations } from "../../__tests__/helpers/schema.js";
+
+// What the agent is told when a save got no answer that says whether the file was made.
+const MAY_BE_SAVED =
+  "; the file may have been saved all the same, so do not save it again before checking the folder";
 import {
   HttpResponse,
   docspace,
@@ -861,7 +865,7 @@ describe("the outputs endpoint", () => {
           http.post("*/internal/ai/threads/:threadId/artifacts", () => docspaceError(500, "inner")),
         ),
       502,
-      { error: "the workspace answered 500" },
+      { error: `the workspace answered 500${MAY_BE_SAVED}` },
     ],
     [
       "the folder refuses the user",
@@ -875,7 +879,7 @@ describe("the outputs endpoint", () => {
       "?folder=5",
       () => inserted(() => docspaceError(500, "inner")),
       502,
-      { error: "the workspace answered 500" },
+      { error: `the workspace answered 500${MAY_BE_SAVED}` },
     ],
     [
       "the Files API answers 404",
@@ -889,21 +893,21 @@ describe("the outputs endpoint", () => {
       "?folder=5",
       () => inserted(() => docspace({ title: "x" })),
       502,
-      { error: "the file could not be saved" },
+      { error: `the workspace gave no usable answer${MAY_BE_SAVED}` },
     ],
     [
       "the insert answers no object",
       "?folder=5",
       () => inserted(() => docspace("x")),
       502,
-      { error: "the file could not be saved" },
+      { error: `the workspace gave no usable answer${MAY_BE_SAVED}` },
     ],
     [
       "the connection drops",
       "?folder=5",
       () => inserted(() => HttpResponse.error()),
       502,
-      { error: "the file could not be saved" },
+      { error: `the workspace gave no usable answer${MAY_BE_SAVED}` },
     ],
   ])("answers when %s", async (_what, query, arrange, status, body) => {
     arrange();
@@ -915,7 +919,12 @@ describe("the outputs endpoint", () => {
     expect(reply.headers["location"]).toBeUndefined();
     expect(reply.text).not.toContain("inner");
     expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
-      expect.stringMatching(/^documentAgentFiles: Report\.docx not saved into folder 5: /),
+      expect.stringMatching(
+        // Only a refusal (a 4xx) says that no file was made.
+        "error" in body && body.error.endsWith(MAY_BE_SAVED)
+          ? /^documentAgentFiles: Report\.docx may have been saved into folder 5: /
+          : /^documentAgentFiles: Report\.docx not saved into folder 5: /,
+      ),
     );
   });
 

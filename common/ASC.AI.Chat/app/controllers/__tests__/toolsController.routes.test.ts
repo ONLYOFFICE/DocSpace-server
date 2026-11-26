@@ -58,7 +58,11 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ...(await original<typeof import("@onlyoffice/ai-chat/core")>()),
   ToolsEngine: engineClass(() => engine),
 }));
-const mcpServers = vi.hoisted(() => ({ readByName: vi.fn(), readAll: vi.fn() }));
+// `readAllForWrite`, the complete read a replace-all builds on, is the same double as `readAll`.
+const mcpServers = vi.hoisted(() => {
+  const readAll = vi.fn();
+  return { readByName: vi.fn(), readAll, readAllForWrite: readAll };
+});
 // The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
 const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
 vi.mock("../../storage/index.js", () => ({ storage: { mcpServers, toolPrefs } }));
@@ -777,7 +781,7 @@ describe("toolsController.replaceAllCustomServers", () => {
       undefined,
     );
     expect(mcpServers.readAll).toHaveBeenCalledTimes(1);
-    expect(mcpServers.readAll).toHaveBeenCalledWith(undefined);
+    expect(mcpServers.readAllForWrite).toHaveBeenCalledWith();
     expect(mcpServers.readByName).not.toHaveBeenCalled();
     expect(responseViolations(operationId, 200, reply.body)).toEqual([]);
   });

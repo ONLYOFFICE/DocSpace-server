@@ -53,6 +53,7 @@ const upstream = useUpstream();
 const { default: logger } = await import("../../log.js");
 const { createApp } = await import("../../createApp.js");
 const { aiServiceBaseUrl } = await import("../../storage/httpClient.js");
+const { MAX_CONTENT_URLS } = await import("../webSearchPassthroughController.js");
 
 let server: { port: number; close: () => Promise<void> };
 beforeAll(async () => {
@@ -507,6 +508,11 @@ describe("the request body", () => {
     ["a url that is a number", { urls: [1] }, urlsError],
     ["an empty url", { urls: ["https://a.test", ""] }, urlsError],
     ["a blank url", { urls: ["  "] }, urlsError],
+    [
+      "one url over the limit",
+      { urls: Array.from({ length: MAX_CONTENT_URLS + 1 }, (_, i) => `https://a.test/${i}`) },
+      { error: `urls must name at most ${MAX_CONTENT_URLS} addresses`, field: "urls" },
+    ],
   ])("answers 400 to a contents body that is %s", async (_what, body, error) => {
     useConfig();
 
@@ -516,6 +522,17 @@ describe("the request body", () => {
     expect(json(reply)).toEqual(error);
     expect(responseViolations("aiWebSearchPassthroughContents", 400, json(reply))).toEqual([]);
     expect(upstream.seen).toHaveLength(1);
+  });
+
+  it("sends as many urls as the limit allows, each once", async () => {
+    useConfig();
+    const calls = useSearch(`${EXA}/contents`, () => HttpResponse.json(results));
+    const urls = Array.from({ length: MAX_CONTENT_URLS }, (_, i) => `https://a.test/${i}`);
+
+    const reply = await post(CONTENTS, { urls: [...urls, ...urls] });
+
+    expect(reply.status).toBe(200);
+    expect(calls[0]?.body).toEqual({ urls, text: true });
   });
 
   it("accepts null for the optional engine and numResults", async () => {

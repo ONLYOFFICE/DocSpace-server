@@ -738,7 +738,10 @@ describe("PortalTextReader download of the text", () => {
     const read = readFileAsText(DOCX).catch((err: unknown) => err);
     await vi.advanceTimersByTimeAsync(90_000);
 
-    expect(await read).toMatchObject({ message: "upstream timeout after 90000ms" });
+    expect(await read).toMatchObject({
+      message: "file 10 was not read as text within 90000ms",
+      cause: { message: "upstream timeout after 90000ms" },
+    });
     vi.useRealTimers();
   });
 });
@@ -814,7 +817,10 @@ describe("PortalTextReader when the reader is aborted", () => {
     await vi.advanceTimersByTimeAsync(500);
     await vi.waitFor(() => expect(release).toBeDefined(), { interval: 1 });
     await vi.advanceTimersByTimeAsync(90_000);
-    expect(await read).toMatchObject({ message: "upstream timeout after 90000ms" });
+    expect(await read).toMatchObject({
+      message: "file 10 was not read as text within 90000ms",
+      cause: { message: "upstream timeout after 90000ms" },
+    });
     release?.();
     await vi.advanceTimersByTimeAsync(1_000);
 

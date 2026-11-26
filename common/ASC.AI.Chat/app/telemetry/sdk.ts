@@ -70,8 +70,9 @@ async function createExporters(protocol: string, endpoint: string) {
 
 const { enabled, otlpEndpoint, otlpProtocol: protocol, serviceName } = getTelemetrySettings();
 
-if (enabled && otlpEndpoint) {
-  const { traceExporter, metricExporter } = await createExporters(protocol, otlpEndpoint);
+/** Starts the SDK; throws what an exporter or the SDK refuses its configuration with. */
+async function start(endpoint: string): Promise<NodeSDK> {
+  const { traceExporter, metricExporter } = await createExporters(protocol, endpoint);
 
   const sdk = new NodeSDK({
     serviceName,
@@ -90,6 +91,27 @@ if (enabled && otlpEndpoint) {
   });
 
   sdk.start();
+  return sdk;
+}
+
+// Telemetry is optional, and this module is the first import of app.ts: whatever the exporters
+// or the SDK throw for their configuration is logged, and the service starts without telemetry
+// (ts-ai-style.md, "Config").
+let sdk: NodeSDK | undefined;
+if (enabled && otlpEndpoint) {
+  try {
+    sdk = await start(otlpEndpoint);
+  } catch (err) {
+    logger.error(
+      `OpenTelemetry disabled: it could not be started (protocol=${protocol}): ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+}
+
+if (sdk) {
+  const started = sdk;
   logger.info(
     `OpenTelemetry enabled: service=${serviceName} endpoint=${otlpEndpoint} protocol=${protocol}`,
   );
@@ -99,9 +121,9 @@ if (enabled && otlpEndpoint) {
   // by the signal itself, so the exit is made here.)
   process.once("SIGTERM", () => {
     const exit = (): never => process.exit(0);
-    sdk.shutdown().then(exit, exit);
+    started.shutdown().then(exit, exit);
   });
-} else {
+} else if (!enabled || !otlpEndpoint) {
   logger.info(
     "OpenTelemetry disabled (openTelemetry.enable is off or OTEL_EXPORTER_OTLP_ENDPOINT is not set)",
   );

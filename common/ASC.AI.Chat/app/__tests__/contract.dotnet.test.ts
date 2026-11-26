@@ -159,7 +159,7 @@ const CONTRACTS: Contract[] = [
   },
   {
     cs: [[AI + "ResponseDto/McpServerDto.cs", "McpServerDto"]],
-    node: ["app/storage/mcpServersStorage.ts", "readAll"],
+    node: ["app/storage/mcpServersStorage.ts", "readRegistry"],
     unread: {},
   },
   {

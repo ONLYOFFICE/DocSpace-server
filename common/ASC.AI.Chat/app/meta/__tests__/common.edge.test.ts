@@ -36,6 +36,7 @@
 // portal reads and the model call are stubbed at the module boundary, as in `common.test.ts`.
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { UpstreamShapeError } from "../../storage/upstreamShape.js";
 import { FakeDocspaceApiHttpError, logger } from "./mocks.js";
 
 vi.mock("../../storage/docspaceFilesApi.js", () => ({
@@ -60,6 +61,8 @@ vi.mock("../portalFiles.js", () => ({
     readFileAsText = readFileAsText;
   },
   UnsupportedFileError: class UnsupportedFileError extends Error {},
+  ConversionFailedError: class ConversionFailedError extends Error {},
+  ConversionTimeoutError: class ConversionTimeoutError extends Error {},
 }));
 
 const portalFiles = await import("../portalFiles.js");
@@ -235,17 +238,80 @@ describe("collectFiles reading the file ids in parallel", () => {
 describe("readDocuments skip reasons", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("reports a 404 as not_found, another 4xx and a non-Error as failed, and logs each", async () => {
-    // The four workers each take one file, in order, so the answers go out in that order too.
+  // Only a refusal of the file itself leaves it out; what the portal holds is unknown after any
+  // other failure, so the request fails and can be retried (ts-ai-failure-paths.md §1).
+  it.each<[string, () => unknown, object]>([
+    [
+      "a 409 of the Files API",
+      () => new FakeDocspaceApiHttpError(409, "Conflict", "u"),
+      { status: 409 },
+    ],
+    [
+      "a 429 of the Files API",
+      () => new FakeDocspaceApiHttpError(429, "Too Many", "u"),
+      { status: 429 },
+    ],
+    ["a dropped connection", () => new TypeError("fetch failed"), { message: "fetch failed" }],
+    [
+      "an answer of an unknown shape",
+      () => new UpstreamShapeError("files/fileops"),
+      { status: 502 },
+    ],
+    [
+      "a file whose own budget ran out",
+      () => new portalFiles.ConversionTimeoutError("slow" as never, undefined),
+      {
+        status: 504,
+        code: "timeout",
+        message: "Reading the files did not finish within the time budget",
+      },
+    ],
+  ])("fails the request on %s instead of skipping the file", async (_what, failure, expected) => {
+    readFileAsText.mockRejectedValueOnce(failure()).mockResolvedValue("text");
+    const skipped: MetaSkipped[] = [];
+
+    await expect(
+      readDocuments(["bad", "ok"].map(file), skipped, new AbortController().signal),
+    ).rejects.toMatchObject(expected);
+    expect(skipped).toEqual([]);
+  });
+
+  it("answers the 504 of the request's budget when it ran out under a read", async () => {
+    const controller = new AbortController();
+    readFileAsText.mockImplementation(async () => {
+      controller.abort();
+      throw new Error("aborted");
+    });
+
+    await expect(readDocuments([file("a")], [], controller.signal)).rejects.toMatchObject({
+      status: 504,
+      code: "timeout",
+    });
+  });
+
+  it("takes no further file after the read that failed the request", async () => {
+    readFileAsText.mockImplementation(async ({ id }: { id: string }) => {
+      if (id === "1") throw new TypeError("fetch failed");
+      return "text";
+    });
+    const files = Array.from({ length: 12 }, (_, i) => file(String(i + 1)));
+
+    await expect(readDocuments(files, [], new AbortController().signal)).rejects.toThrow(
+      "fetch failed",
+    );
+    expect(readFileAsText.mock.calls.length).toBeLessThanOrEqual(4);
+  });
+
+  it("reports a 404 as not_found and a conversion the portal failed as failed, and logs each", async () => {
+    // The workers each take one file, in order, so the answers go out in that order too.
     readFileAsText
       .mockRejectedValueOnce(new FakeDocspaceApiHttpError(404, "Not Found", "u"))
-      .mockRejectedValueOnce(new FakeDocspaceApiHttpError(409, "Conflict", "u"))
-      .mockRejectedValueOnce("a string")
+      .mockRejectedValueOnce(new portalFiles.ConversionFailedError("conversion failed: broken"))
       .mockResolvedValueOnce("text");
     const skipped: MetaSkipped[] = [];
 
     const documents = await readDocuments(
-      ["gone", "conflict", "odd", "ok"].map(file),
+      ["gone", "broken", "ok"].map(file),
       skipped,
       new AbortController().signal,
     );
@@ -253,11 +319,10 @@ describe("readDocuments skip reasons", () => {
     expect(documents.map((d) => d.file.id)).toEqual(["ok"]);
     expect(skipped).toEqual([
       { id: "gone", title: "gone.docx", reason: "not_found" },
-      { id: "conflict", title: "conflict.docx", reason: "failed" },
-      { id: "odd", title: "odd.docx", reason: "failed" },
+      { id: "broken", title: "broken.docx", reason: "failed" },
     ]);
     expect(logger.warn).toHaveBeenCalledWith(
-      'meta: file odd "odd.docx" skipped (failed): a string',
+      'meta: file broken "broken.docx" skipped (failed): conversion failed: broken',
     );
     expect(logger.warn).toHaveBeenCalledWith(
       'meta: file gone "gone.docx" skipped (not_found): DocSpace API 404 Not Found for u',

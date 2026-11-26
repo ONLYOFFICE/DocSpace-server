@@ -1431,7 +1431,7 @@ without the provider's body or URL.
 
 `aiOpenaiChatCompletions` and `aiOpenaiImagesGenerations` SHALL relay the request for the profile named in
 the path to its provider and answer verbatim to DocSpace admins, Room admins and Users (Guest 403,
-anonymous 401, AI off 403). A malformed or unknown `profileId` SHALL answer 400; `stream` true streams
+anonymous 401, AI off 403). A malformed `profileId` SHALL answer 400 and an unknown one 404; `stream` true streams
 chunks; an image generation on a text-only model is refused (400). The gateway proxy exposes only models,
 chat completions, image generation, search and contents (others 404).
 
