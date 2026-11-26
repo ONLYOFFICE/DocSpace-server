@@ -119,6 +119,16 @@ without a file of the right extension SHALL fail the job and list the uploaded f
 - **WHEN** a user id or a file path read from the Nextcloud dump leads outside the user's folder of the backup
 - **THEN** that user or file is left out and the parse goes on
 
+#### Scenario: Nextcloud dump with one row per line
+
+- **WHEN** the dump of a Nextcloud backup writes an `INSERT` over several lines — a line break after `VALUES` and one row per line, the form mariadb-dump of MariaDB 10.11 writes
+- **THEN** the parse lists the same users with the same files as for a dump that keeps the rows on the line of the `INSERT`
+
+#### Scenario: Nextcloud dump of a PostgreSQL database
+
+- **WHEN** the dump of a Nextcloud backup was written by pg_dump, which lists the rows of a table after a `COPY … FROM stdin;` line instead of in an `INSERT`
+- **THEN** the parse lists the same users with the same files as for a MySQL dump of the same data
+
 #### Scenario: Nextcloud archive without a database dump
 
 - **WHEN** the uploaded `.zip` holds no `.bak` or `.sql` file
