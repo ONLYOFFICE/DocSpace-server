@@ -1064,7 +1064,7 @@ public sealed class OFormRequestManagerTests : IDisposable
         await refreshFailed.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
         gallery.CallCount.Should().Be(2);
 
-        // The fail-safe throttles the failed check: the next call does not ask the gallery again
+        // The failed check is kept for a minute: the next call does not ask the gallery again
         (await manager.IsAvailableAsync()).Should().BeTrue();
         gallery.CallCount.Should().Be(2);
     }

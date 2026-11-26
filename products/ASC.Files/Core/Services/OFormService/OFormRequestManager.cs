@@ -469,7 +469,7 @@ public class OFormRequestManager(
         catch (Exception e)
         {
             // Not a failure of the gallery, yet the check has to answer: with nothing known, a 500 of the endpoint would
-            // replace "unavailable", and a known "available" is kept by the fail-safe either way
+            // replace "unavailable", and a known "available" is kept by the check either way
             logger.ErrorOFormGalleryProbeError(e);
 
             return false;
