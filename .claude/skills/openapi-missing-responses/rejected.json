@@ -3,301 +3,308 @@
     "id": "products/ASC.AI/Server/Api/AgentsController.cs::GetAgents",
     "code": 403,
     "reason": "Unreachable: the parent is the AI agents root (GlobalFolderHelper.GetFolderAiAgentsAsync), and FileSecurity lets any signed-in caller read that root (the root branch of FilterEntryAsync returns true for Read on FolderType.AiAgents); the trash check of FileStorageService.cs:377 never applies to it",
-    "fingerprint": "249adab6870964b5",
+    "fingerprint": "da970d9732c6c65e",
     "date": "2026-11-20"
   },
   {
     "id": "products/ASC.Files/Server/Api/FilesController.cs::CheckConversionStatus",
     "code": 400,
     "reason": "Unreachable from GET checkconversion: the action builds CheckConversionRequestDto without OutputType (FilesController.CheckConversionStatus), so OutputType is null and the format check in FileStorageService.CheckConversionAsync (!string.IsNullOrEmpty(fileInfo.OutputType) && ...) never throws; only PUT checkconversion passes an output type",
-    "fingerprint": "209fa62a1f2160f5",
+    "fingerprint": "655adffe5c1566b0",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.Files/Server/Api/FilesController.cs::CreateHtmlFile",
     "code": 415,
     "reason": "Unreachable: FilesControllerHelper.CreateHtmlFileAsync always appends .html to the title, Global.ReplaceInvalidCharsAndTruncate keeps the extension when it truncates, and the upload filter of FileUploader.VerifyFileUploadAsync (off by default, files:upload-filter) refuses only extensions outside FileUtility.ExtsUploadable, which includes the web-previewed .html",
-    "fingerprint": "2e36356403af32c6",
+    "fingerprint": "75a104976e3baf8c",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.Files/Server/Api/FilesController.cs::CreateHtmlFileInMyDocuments",
     "code": 415,
     "reason": "Unreachable: FilesControllerHelper.CreateHtmlFileAsync always appends .html to the title, Global.ReplaceInvalidCharsAndTruncate keeps the extension when it truncates, and the upload filter of FileUploader.VerifyFileUploadAsync (off by default, files:upload-filter) refuses only extensions outside FileUtility.ExtsUploadable, which includes the web-previewed .html",
-    "fingerprint": "58d89e03aeb16a76",
+    "fingerprint": "1591fdd965147446",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.Files/Server/Api/FilesController.cs::CreateTextFile",
     "code": 415,
     "reason": "Unreachable: FilesControllerHelper.CreateTextFileAsync always appends .txt or .html to the title, Global.ReplaceInvalidCharsAndTruncate keeps the extension when it truncates, and the upload filter of FileUploader.VerifyFileUploadAsync (off by default, files:upload-filter) refuses only extensions outside FileUtility.ExtsUploadable, which includes the web-previewed .txt and .html",
-    "fingerprint": "5f6bc4f8021ef313",
+    "fingerprint": "f09e6dbe0d9954e1",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.Files/Server/Api/FilesController.cs::CreateTextFileInMyDocuments",
     "code": 415,
     "reason": "Unreachable: FilesControllerHelper.CreateTextFileAsync always appends .txt or .html to the title, Global.ReplaceInvalidCharsAndTruncate keeps the extension when it truncates, and the upload filter of FileUploader.VerifyFileUploadAsync (off by default, files:upload-filter) refuses only extensions outside FileUtility.ExtsUploadable, which includes the web-previewed .txt and .html",
-    "fingerprint": "359751c9549dfca6",
+    "fingerprint": "cb979fa0099f5ac9",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.Files/Server/Api/FilesController.cs::LockFile",
     "code": 400,
     "reason": "Unreachable: unlocking calls FileStorageService.UpdateCommentAsync(file.Id, file.Version, ...) with the version of the file it has just loaded, so GetFileAsync(fileId, version) finds it and the 'missing version' ArgumentException (FileStorageService.cs:2542) is not thrown",
-    "fingerprint": "3ccd086d7c885b44",
+    "fingerprint": "2c0631617a2f4e1e",
     "date": "2026-11-20"
   },
   {
     "id": "products/ASC.Files/Server/Api/PrivacyRoomController.cs::GetUserKeys",
     "code": 403,
     "reason": "Demand on the caller's own id (authContext.CurrentAccount.ID): role Self always passes Action_EditUser",
-    "fingerprint": "4d0c54a1d29a200e",
+    "fingerprint": "0aa89faa1b513476",
     "date": "2026-10-01"
   },
   {
     "id": "products/ASC.Files/Server/Api/SettingsController.cs::DisplayRecent",
     "code": 403,
     "reason": "Pipeline-owned: FilesSettingsHelper.SetRecentSection throws SecurityException only when !authContext.IsAuthenticated, and the action has no AllowAnonymous, so AuthorizeFilter has already answered 401 for an anonymous caller (conventions §1: a callee repeating the authentication check)",
-    "fingerprint": "fbb14a18f8f15368",
+    "fingerprint": "4456a096bbb690d2",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.Files/Server/Api/SettingsController.cs::ResetDefaultTemplate",
     "code": 404,
     "reason": "Unreachable: the action calls DefaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, null); with fileId null the branch that calls CheckAndCopyFile (DefaultTemplateSettings.cs:98-108), where the ItemNotFoundException of :213 lives, is skipped",
-    "fingerprint": "5b612219ecae8b1a",
+    "fingerprint": "bff6b4e369d3e2e5",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.Files/Server/Api/ThirdpartyController.cs::GetCommonThirdPartyFolders",
     "code": 403,
     "reason": "Unreachable: GetFolderAsync refuses only a caller who cannot read the Common root (FileStorageService.cs:183), and that root is readable by everyone by default (FileSecurity.DefaultCommonShare = Read, subject Everyone); DocSpace creates no access record on a section root that could take this away; a call without signing in ends earlier with the pipeline's 401",
-    "fingerprint": "ffb66cf00766be00",
+    "fingerprint": "cad7f322c7ba8a7d",
     "date": "2026-11-20"
   },
   {
     "id": "products/ASC.Files/Server/Api/ThirdpartyController.cs::GetCommonThirdPartyFolders",
     "code": 404,
     "reason": "Unreachable: globalFolderHelper.FolderCommonAsync resolves the Common folder through FolderDao.GetFolderIdCommonWithCreateInfoAsync(true) (Global.cs GetFolderIdAndProcessFirstVisitAsync), which creates it when missing, so FileStorageService.GetFolderAsync never gets an unknown id and its ItemNotFoundException (FileStorageService.cs:174) is not thrown",
-    "fingerprint": "ce42fde5c375403e",
+    "fingerprint": "e8fd46b6fc32ebbe",
     "date": "2026-11-20"
   },
   {
     "id": "products/ASC.People/Server/Api/GroupsController.cs::MoveMembersTo",
     "code": 400,
     "reason": "Not from the request: the action saves a stored user whose user name it does not change (group membership, photo or profile status), and stored user names are already unique in the tenant, so the duplicate check of DbUserService.cs:609 does not fail",
-    "fingerprint": "f50e342444c75c7d",
+    "fingerprint": "de953a0a631aea97",
     "date": "2026-11-20"
   },
   {
     "id": "products/ASC.People/Server/Api/GroupsController.cs::RemoveMembersFrom",
     "code": 400,
     "reason": "Not from the request: the action saves a stored user whose user name it does not change (group membership, photo or profile status), and stored user names are already unique in the tenant, so the duplicate check of DbUserService.cs:609 does not fail",
-    "fingerprint": "cbf38f471de42a30",
+    "fingerprint": "27d33ba98334d2e8",
     "date": "2026-11-20"
   },
   {
     "id": "products/ASC.People/Server/Api/PhotoController.cs::DeleteMemberPhoto",
     "code": 400,
     "reason": "Not from the request: the action saves a stored user whose user name it does not change (group membership, photo or profile status), and stored user names are already unique in the tenant, so the duplicate check of DbUserService.cs:609 does not fail",
-    "fingerprint": "88a2dab4b93996ee",
+    "fingerprint": "026fdd94d56cf4dd",
     "date": "2026-11-20"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::ApproveGuestShareLink",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "337f87573a985be0",
+    "fingerprint": "11268800402c2784",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::ChangeUserEmail",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "26c25a2d5522cfa6",
+    "fingerprint": "19240f10f25ac58d",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::ChangeUserPassword",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "9eede59787674bf8",
+    "fingerprint": "cc86ba4c0e7de627",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::DeleteProfile",
     "code": 400,
     "reason": "Not from the request: the action saves a stored user whose user name it does not change (group membership, photo or profile status), and stored user names are already unique in the tenant, so the duplicate check of DbUserService.cs:609 does not fail",
-    "fingerprint": "f0d9c08a3bebde9f",
+    "fingerprint": "a8ef50c9fda0db3f",
     "date": "2026-11-20"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::DeleteProfile",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "b2db3d24b332a9e0",
+    "fingerprint": "b3d135c4c9ed9899",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::DeleteProfile",
     "code": 404,
     "reason": "Unreachable: the action loads the caller of the request (GetUserInfoAsync on securityContext.CurrentAccount.ID, PeopleControllerBase.cs:72); the confirm handler has authenticated that existing account, and the second check (UserController.cs:849) repeats the first",
-    "fingerprint": "6292df5bf9beda19",
+    "fingerprint": "aa4224fa4a7f0aa8",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::GetProfileByUserId",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "36ad211283212a13",
+    "fingerprint": "3e6723e31a233273",
     "date": "2026-11-19"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/UserController.cs::SearchUsersByQuery",
+    "code": 400,
+    "reason": "GetSearch is called with a request built from query alone (new GetMemberByQueryRequestDto { Query = inDto.Query }), so FilterBy is null and ParseGroupFilterValue never runs; the search has no group filter",
+    "fingerprint": "14e1d0e082f876fd",
+    "date": "2026-11-24"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::SendEmailChangeInstructions",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "394b58841b479e39",
+    "fingerprint": "88a928efb7317d4c",
     "date": "2026-11-19"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::UpdateUserActivationStatus",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "1edcc840e0f59459",
+    "fingerprint": "736d1ae754f16269",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/AuthenticationController.cs::AuthenticateMe",
     "code": 405,
     "reason": "Unreachable: AuthenticateMe calls SmsManager.PutAuthCodeAsync only inside if (IsVisibleAndAvailableSettingsAsync() && TfaEnabledForUserAsync(user.Id)) (AuthenticationController.cs:291), the very condition whose negation throws the 405 in PutAuthCodeAsync (SmsManager.cs:109)",
-    "fingerprint": "be6c4d3c82bb2312",
+    "fingerprint": "7f67eb11bc8532d4",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/AuthenticationController.cs::CheckConfirm",
     "code": 402,
     "reason": "Unreachable in practice: the 402 is the LDAP tariff check of SecurityContext.cs:236 on a PasswordChange link of a not activated account (EmailValidationKeyModelHelper.cs:194); such links are sent only by UserManagerWrapper.SendUserPasswordAsync, which refuses LDAP accounts, and by SignupThirdPartyAccount for a new account without Sid; only a link issued before the account was bound to LDAP, used on a plan without LDAP, would reach it",
-    "fingerprint": "2121664b7605cd7b",
+    "fingerprint": "1eb71fa3f55245bf",
     "date": "2026-11-20"
   },
   {
     "id": "web/ASC.Web.Api/Api/AuthenticationController.cs::SaveMobilePhone",
     "code": 402,
     "reason": "Pipeline-owned: SecurityContext.AuthByClaimAsync re-authenticates the account the confirm handler has just authenticated in the same request (ConfirmAuthHandler -> AuthenticateMeWithoutCookieAsync); the LDAP tariff check of SecurityContext.cs:236 cannot fail where the first one passed (conventions §1)",
-    "fingerprint": "0187d54367c3ed7c",
+    "fingerprint": "843f5583f425f79b",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/AuthenticationController.cs::SaveMobilePhone",
     "code": 404,
     "reason": "Unreachable: the confirm handler authenticates the account of the link first; an unknown or deleted account becomes Constants.Guest and AuthenticateMeWithoutCookieAsync throws InvalidCredentialException (401) there, so SmsManager.SaveMobilePhoneAsync always gets an existing user (SmsManager.cs:57), and PutAuthCodeAsync (:103) is called with that same user",
-    "fingerprint": "ad19703334554951",
+    "fingerprint": "b8dfa662e3b3eaee",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/ConnectionsController.cs::LogOutAllActiveConnectionsForUser",
     "code": 402,
     "reason": "Pipeline-owned: CookiesManager.ResetUserCookieAsync re-authenticates only when the target is the caller (CookiesManager.cs:301), i.e. it repeats the authentication of the current request; the LDAP tariff check of SecurityContext.cs:236 cannot fail where the first one passed (conventions §1)",
-    "fingerprint": "9d70f4719acf04fe",
+    "fingerprint": "85afcbe16346ceb9",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/PortalController.cs::ContinuePortal",
     "code": 403,
     "reason": "Not from the request: the action re-saves the CSP domains already stored in CspSettings (PortalController.cs:1064-1065); they passed the same header size check (CspSettingsHelper.cs:123) when PUT security/csp saved them, and no request value enters the header here",
-    "fingerprint": "f6543c7edbdc56bb",
+    "fingerprint": "5df5338a98e7f17a",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/SecurityController.cs::GetCspSettings",
     "code": 403,
     "reason": "Not from the request: the action only re-saves the stored CSP domains when the cache misses them (SecurityController.cs:728-731); they passed the same header size check (CspSettingsHelper.cs:123) when PUT security/csp saved them, and no request value enters the header here",
-    "fingerprint": "37ee4ecd73917dae",
+    "fingerprint": "c6376400a9e478e5",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/SettingsController.cs::CompleteWizard",
     "code": 402,
     "reason": "Pipeline-owned: the only 402 left is the BillingException of SecurityContext.cs:236, which AuthByClaimAsync throws while re-authenticating the account the confirm handler has just authenticated (conventions §1); the license exceptions of FirstTimeTenantSettings.SaveDataAsync are caught there and rethrown as ArgumentException (400)",
-    "fingerprint": "3065bf541bb19ab5",
+    "fingerprint": "ea773f47294369ba",
     "date": "2026-11-20"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/SettingsController.cs::GetTimeZones",
     "code": 402,
     "reason": "Pipeline-owned: SecurityContext.AuthByClaimAsync re-authenticates the account the request is already authenticated as; the LDAP tariff check of SecurityContext.cs:236 cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "0732704db8ef80f5",
+    "fingerprint": "209343747133e66a",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/SsoController.cs::ResetSsoSettingsV2",
     "code": 400,
     "reason": "Not from the request: ConverSsoUsersToOrdinaryAsync (SsoController.cs:300-317) only clears the SSO fields of stored users and keeps their user names, which are already unique in the tenant, so the duplicate user name check of DbUserService.cs:609 does not fail",
-    "fingerprint": "d390061bac604785",
+    "fingerprint": "4ba187310db21cf6",
     "date": "2026-11-20"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/StorageController.cs::StartStorageEncryption",
     "code": 400,
     "reason": "Not from the request: StartEncryptionAsync calls EncryptionSettingsHelper.GeneratePassword(32, 16) with constants (StorageController.cs:234), which pass the length checks of EncryptionSettings.cs:156, 161",
-    "fingerprint": "772ae8db37549bc8",
+    "fingerprint": "6146cc16eb46088c",
     "date": "2026-11-20"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::GetTfaAppCodes",
     "code": 403,
     "reason": "IsOutsiderAsync branch: only the system OutsideUser, which never authenticates",
-    "fingerprint": "af057bb320953d98",
+    "fingerprint": "60295bf095404735",
     "date": "2026-10-01"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::TfaAppGenerateSetupCode",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "2e4fad5bd22e24ae",
+    "fingerprint": "879abf93b2e71f23",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::TfaValidateAuthCode",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "387fd030d676b3dc",
+    "fingerprint": "acee2ead4bd18adb",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::TfaValidateAuthCode",
     "code": 404,
     "reason": "Unreachable: the action passes the account the request is authenticated as (userManager.GetUsersAsync(authContext.CurrentAccount.ID) after AuthByClaimAsync); an authenticated account exists, so TfaManager.ValidateAuthCodeAsync never sees LostUser (TfaManager.cs:95)",
-    "fingerprint": "a5478ca53a6905d5",
+    "fingerprint": "af95f570ea70c38e",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::UnlinkTfaApp",
     "code": 402,
     "reason": "Pipeline-owned: the BillingException of SecurityContext.cs:236 (LDAP account on a plan without LDAP) comes from re-authenticating the caller of this same request (AuthByClaimAsync, AuthenticateMeWithoutCookieAsync or CookiesManager.ResetUserCookieAsync for the caller itself), so it cannot fail where the authentication handler passed it (conventions §1)",
-    "fingerprint": "4c7067c81551e2fb",
+    "fingerprint": "a2529627a8dbb529",
     "date": "2026-11-19"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::UpdateTfaAppCodes",
     "code": 403,
     "reason": "IsOutsiderAsync branch: only the system OutsideUser, which never authenticates",
-    "fingerprint": "6550927455e7c6c0",
+    "fingerprint": "1fbcfe333f278056",
     "date": "2026-10-01"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/WhitelabelController.cs::RestoreWhiteLabelLogos",
     "code": 400,
     "reason": "Not from the request: the module name is the constant \"static_partnerdata\" (WhitelabelController.cs:201, 410), a module the storage configuration defines, so StorageFactory.GetStorageAsync never throws 'no such module' (StorageFactory.cs:184)",
-    "fingerprint": "89a71483d3c83f3f",
+    "fingerprint": "3d5647582bc91e39",
     "date": "2026-11-20"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/WhitelabelController.cs::SaveWhiteLabelSettingsFromFiles",
     "code": 400,
     "reason": "Not from the request: the module name is the constant \"static_partnerdata\" (WhitelabelController.cs:201, 410), a module the storage configuration defines, so StorageFactory.GetStorageAsync never throws 'no such module' (StorageFactory.cs:184)",
-    "fingerprint": "09840d116f91f044",
+    "fingerprint": "8376e406b9d0c658",
     "date": "2026-11-20"
   }
 ]

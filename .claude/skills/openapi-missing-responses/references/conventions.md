@@ -126,7 +126,7 @@ relying on this list.
 | a branch for a system account that never authenticates | no request can carry that identity | read how the account is created and whether authentication accepts it |
 | `default:` / `_ =>` throw behind a route enum | binding already answered 400 | not for a query or body enum: an undefined number reaches the arm |
 | an argument guard on an internal value | its input never comes from the request | trace the argument back to the request |
-| an exception caught by a caller outside the class chain, or converted by a `catch` | the scanner checks `try/catch` at every call it followed, not in callers it did not follow (a local, a lambda) | read the callers on the `via` path |
+| an exception caught by a caller outside the class chain, or converted by a `catch` | the scanner checks `try/catch` at every call it followed (with a CodeGraph index, also the calls through a local or a lambda the index links), not in callers it did not follow | read the callers on the `via` path |
 | `catch (...) when (...)` | the scanner treats a filtered catch as not catching | read the filter |
 | a check that an earlier step of the same request already enforced | the earlier step answers first, with its own code | follow the action from its first line and see which check fails first |
 | a `[service hop N]` finding | the declared type was followed, not the object that runs, and the arguments of each hop were not | confirm every hop of `via`: the implementation registered for the interface, the overload the arguments pick, and that the value checked comes from the request |

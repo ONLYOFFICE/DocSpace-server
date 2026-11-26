@@ -3,7 +3,8 @@
 
 The queue keeps no state: it is the set of actions whose evidence codes minus declared codes is not empty,
 computed from the sources on every run, so an action added or changed since the last run is in it automatically.
-A 500 (an exception no case of the host's handler maps) is never part of the gap: it is printed apart, marked `*`.
+A 500 (an exception no case of the host's handler maps, or a 500 result the action sets itself) is never part of the
+gap: it is printed apart, marked `*`.
 The only file it writes is rejected.json, next to this script: "this finding was analysed and is not a response".
 Each rejection is keyed on a fingerprint of the code it was decided on and expires by itself when that code changes.
 
@@ -29,8 +30,9 @@ that registers them (AddExceptionHandler<T>, Filters.Add), so a service with its
 Services are followed SERVICE_HOPS calls deep by the declared type of the field or parameter called (every
 implementation of an interface). A finding in a service counts like one in the action unless the rules of
 Analyzer.service_note (a null guard, the fallback arm of a switch, a framework exception two or more services deep, a
-sign-in 401) or the agreement rule (a call that resolves to several bodies) make it a hint. A CodeGraph index, when the
-repository has one, adds the calls the text cannot resolve, as hints only: the scan never depends on it.
+sign-in 401; a 503 of a busy lock at any depth) or the agreement rule (a call that resolves to several bodies) make it a
+hint. A CodeGraph index, when the repository has one, adds the calls the text cannot resolve, as hints only: the scan
+never depends on it.
 """
 import argparse
 import difflib
@@ -588,29 +590,6 @@ class Index:
             self._impls[type_name] = out
         return self._impls[type_name]
 
-    def service_calls(self, method):
-        """[(position, [target methods])] for each `member.Name(...)` in the body whose member's declared type is
-        known. Calls through a local variable, a chained expression, a static or an extension method are not
-        resolved."""
-        f, (a, b) = method.f, method.body
-        members = {}
-        for c in self.class_chain(method.cls):
-            for k, v in self.members(c).items():
-                members.setdefault(k, v)
-        out = []
-        for m in re.finditer(r"(?<![\w.])(?:this\s*\.\s*)?(_?\w+)\s*\.\s*([A-Z]\w*)\s*(?:" + GENERIC + r")?\s*\(", f.bl[a:b]):
-            type_name = members.get(m.group(1))
-            if not type_name:
-                continue
-            targets = [mt for cls in self.implementations(type_name) for c in self.class_chain(cls)
-                       for mt in c.methods if mt.name == m.group(2) and mt.body]
-            if targets:
-                close = match_close(f.bl, a + m.end() - 1, "(", ")")
-                argc = len(split_top(f.bl[a + m.end():close]))
-                fitting = [t for t in targets if arity(t)[0] <= argc <= arity(t)[1]]
-                out.append((a + m.start(2), fitting or targets))
-        return out
-
 
 # The status a type the handler maps itself answers with when its constructor names none.
 DEFAULT_STATUS = {"BadHttpRequestException": 400}
@@ -674,7 +653,7 @@ def parse_exception_table(handler):
 def condition_holds(cond, init):
     """True / False / None (undecided) for a handler case condition against the text that creates the exception
     (`new X(...) { P = v }`): a property pattern `{ P: v }` is decided when the initializer or a named argument sets
-    every P; a `when` clause never is."""
+    every P, and both values are literals; a `when` clause never is."""
     if not cond or "when " in cond:
         return None if cond else True
     pairs = re.findall(r"(\w+)\s*:\s*([^,{}]+)", cond)
@@ -685,9 +664,16 @@ def condition_holds(cond, init):
             re.search(rf"\b{prop[:1].lower() + prop[1:]}\s*:\s*([^,;{{}})]+)", init)
         if not sm:
             return None
+        # only a literal against a literal is decided: `{ Status: >= 500 }` or `{ ServiceFailed = code >= 500 }` is not
+        if not (LITERAL.fullmatch(value.strip()) and LITERAL.fullmatch(sm.group(1).strip())):
+            return None
         if sm.group(1).strip() != value.strip():
             return False
     return True
+
+
+# a value condition_holds can compare as text: a number, true/false/null, a string, an enum member
+LITERAL = re.compile(r'-?\d+|true|false|null|"[^"\\]*"|[A-Z]\w*(\.[A-Z]\w*)+')
 
 
 # ---------------------------------------------------------------- evidence
@@ -1341,10 +1327,12 @@ def print_foreign_hosts(ix, actions):
 
 
 def fingerprint(a, code):
-    # evidence only CodeGraph links stays out: a rejection must read the same with and without the index
+    # The action's body and the counted evidence of the code: its kind, its text and the file it is thrown in. Hints and
+    # the path (`via`) stay out: a walk cut on a cycle is cached, so the path, and whether a finding is a hint, can
+    # depend on the order the actions are analysed in. Evidence only CodeGraph links stays out as well.
     h = hashlib.sha1(norm(a.m.body_text()).encode())
-    parts = sorted({f"{e.kind}|{norm(e.text())}|{'>'.join(v.split('@')[0] for v in e.via)}"
-                    for e in a.evs if e.code == code and not e.graph})
+    parts = sorted({f"{e.kind}|{norm(e.text())}|{e.f.rel}"
+                    for e in a.evs if e.code == code and e.strong and not e.note and not e.graph})
     for p in parts:
         h.update(p.encode())
     return h.hexdigest()[:16]
@@ -1374,7 +1362,7 @@ def gaps(a):
 
 def server_errors(a):
     """Counted evidence of a 500. Kept out of the gap: the skill neither documents nor fixes it, it reports it.
-    A throw site of this action alone comes first; one that many actions reach (tenant resolution, a lock) last."""
+    A throw site of this action alone comes first; one that many actions reach (tenant resolution) last."""
     return sorted((e for e in a.evs if e.code == SERVER_ERROR and e.strong), key=lambda e: SITE_FANIN.get(e.where(), 0))
 
 
@@ -1450,10 +1438,16 @@ def print_action(a, valid, expired, dirty, detail):
     if unbacked and not detail:
         print(f"    no evidence in the action or the services followed for declared: {' '.join(map(str, unbacked))}")
     if detail:
-        for e in [e for e in a.evs if not e.strong and e.code not in a.declared][:10]:
+        hints = [e for e in a.evs if not e.strong and e.code not in a.declared]
+        for e in hints[:10]:
             print(fmt_ev(e, "?", a.proj))
-        for e in [e for e in a.evs if e.code in a.declared and e.code != SERVER_ERROR][:12]:
+        if len(hints) > 10:
+            print(f"    ? ... and {len(hints) - 10} more")
+        backed = [e for e in a.evs if e.code in a.declared and e.code != SERVER_ERROR]
+        for e in backed[:12]:
             print(fmt_ev(e, "=", a.proj))
+        if len(backed) > 12:
+            print(f"    = ... and {len(backed) - 12} more")
         for c in unbacked:
             print(f"    - {c} declared, nothing found behind it in the action or the services followed: "
                   f"\"{a.declared[c][:120]}\"")
@@ -1628,13 +1622,17 @@ def cmd_audit_catches(ix, actions, refs):
             print(f"    {c} declared, every producer found is caught: \"{a.declared[c][:110]}\"")
             for e in without[c][:4]:
                 print(f"        {e.exc or e.kind}  {e.where()}")
+    unresolved = ("calls through locals, chained expressions and extension methods are followed only as far as the "
+                  "CodeGraph index links them" if ix.graph else
+                  "calls through locals, chained expressions and extension methods are not followed")
     print(f"\n{len(targets)} action(s) audited, {flagged} with a declared code that only a caught path produces. "
-          f"A lead, not a verdict: calls through locals, chained expressions and extension methods are not "
-          f"followed, nor services more than {Analyzer.SERVICE_HOPS} calls deep, and a producer that throws no "
-          f"`throw new` of its own (a BCL call) is not seen.")
+          f"A lead, not a verdict: {unresolved}, nor services more than {Analyzer.SERVICE_HOPS} calls deep, and a "
+          f"producer that throws no `throw new` of its own (a BCL call) is not seen.")
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--batch", type=int, default=5)
     ap.add_argument("--all", action="store_true")
@@ -1738,10 +1736,11 @@ def main():
             if (a.id, c) not in valid:
                 h = min(e.hops for e in a.evs if e.code == c and e.strong)
                 depth[h] = depth.get(h, 0) + 1
-    print("Gap codes by where their nearest evidence is: " +
-          ", ".join(f"{'own code' if h == 0 else f'service hop {h}'} {n}" for h, n in sorted(depth.items())))
+    if depth:
+        print("Gap codes by where their nearest evidence is: " +
+              ", ".join(f"{'own code' if h == 0 else f'service hop {h}'} {n}" for h, n in sorted(depth.items())))
     errors = [a for a in actions if server_errors(a)]
-    # one throw site reached from many actions (tenant resolution, a lock provider) is one finding, not many
+    # one throw site reached from many actions (tenant resolution) is one finding, not many
     sites = {}
     for a in errors:
         for e in server_errors(a):

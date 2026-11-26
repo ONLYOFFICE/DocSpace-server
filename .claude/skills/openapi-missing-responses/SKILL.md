@@ -12,7 +12,8 @@ changes what the code does.
 
 **500 is the exception.** A 500 is an exception no case of the host's handler maps — a server defect, never a
 response to document. The skill neither documents it nor fixes its cause: it reports it to the user, who decides.
-No `[SwaggerResponse(500)]` is added, extended or removed, and no 500 is rejected.
+A 500 result the action sets itself (`StatusCode(500, …)`) is reported the same way. No `[SwaggerResponse(500)]` is
+added, extended or removed, and no 500 is rejected.
 
 A run takes **a batch of up to N actions** from the queue (N from the user's request, 5 if none was given),
 settles every gap code of each, verifies, reports, and stops. The user reviews each batch before the next one.
@@ -48,12 +49,13 @@ counts such actions and `--all` lists them):
   left out) switches off the callee's `if (flag)` / `if (!flag)` block — `DemandRebrandingPermissionAsync(false)`;
 - services: a call `member.X(...)` on a field, property or constructor parameter goes into `X` of its declared type
   (every implementation of an interface), a static `Class.X(...)` into that class, as deep as the `Calls followed:` line of the output says. A class
-  of the action's own project (`FilesControllerHelper`) is the controller's layer and costs no hop. Each line says
+  of the calling method's own project, called before any service hop (`FilesControllerHelper` from a controller), is the
+  controller's layer and costs no hop. Each line says
   how far: `[service hop N]`. A service finding counts like one in the action, except these, which stay hints
   with the reason in `[hint: …]`: a null guard, a throw that is itself the `_ =>` or `default:` arm of a switch, a
   framework (non-repository) exception two or more services deep, a 401 (conventions §1), and a code that only
-  some of the bodies a call resolves to produce (implementations of an interface, overloads with the same number
-  of parameters). A 503 of a busy lock is a hint at any depth, in the action's own code too (conventions §1);
+  some of the bodies a call resolves to produce (implementations of an interface, the overloads the number of the
+  call's arguments fits, a base method and its override). A 503 of a busy lock is a hint at any depth, in the action's own code too (conventions §1);
 - a `throw` inside a `try` whose `catch` takes it without rethrowing is not counted, at every call on the path;
 - `TryGetFromCache` → 304, `NotFound()`/`StatusCode(…)` results, `Response.StatusCode = …`;
 - DTO validation → 400: validation attributes on bound properties and parameters, `required` members of the JSON
@@ -107,7 +109,7 @@ as a reason (the size and format checks in `FileSecurity.FilterEntryAsync` are u
 python .claude/skills/openapi-missing-responses/scan.py --batch <N>
 ```
 
-One run indexes the whole tree and walks the services of every action (tens of seconds); do not repeat calls whose output
+One run indexes the whole tree and walks the services of every action; do not repeat calls whose output
 you already have. The output: per host, the exception table and the global filters; which calls were followed; the
 scope and queue counts, with the gap codes by the depth of their nearest evidence; then the batch — per action its
 id, verb and route, document, declared codes, gap, and the evidence per gap code with the call path (`via`).
@@ -246,11 +248,11 @@ the diff; say so. Do not commit — git is the user's. Stop and wait for the nex
   check, and stop. Checking is not a licence to take the next batch.
 - Progress, how much is left — `scan.py --batch 0` (counts only) or `scan.py --all` (the whole queue).
 - Which endpoints return 500 — `scan.py --all`, its `Reachable 500` block, one line per throw site with the
-  actions that reach it. A site many actions reach (tenant resolution, a distributed lock) is one finding. List
+  actions that reach it. A site many actions reach (tenant resolution) is one finding. List
   them for the user; do not document, reject or fix them. The block shows only what the scanner sees (step 3
   limits).
 - Declared codes a `catch` may make unreachable, typed or catch-all, in the action or in a service it calls —
-  `scan.py --audit-catches` (all actions, tens of seconds) or with ids/files; settle every line it prints by conventions §7
+  `scan.py --audit-catches` (all actions) or with ids/files; settle every line it prints by conventions §7
   and report it like a batch: removed, kept with the path that produces the code, or not traced to the end.
 - Rejections — `scan.py --rejected` lists them with their state (`valid`, `expired`, `orphaned`);
   `scan.py --unreject "<id>" [code]` drops one, and the code is back in the queue on the next run.
