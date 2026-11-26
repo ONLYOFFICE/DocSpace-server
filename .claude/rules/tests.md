@@ -13,6 +13,17 @@ Applies to `products/*/Tests/`, `products/ASC.AI/ASC.AI.Tests/`, `web/ASC.Web.Ap
 (`csharp-style.md`) apply here too — including the mandatory `dotnet format style` check
 after editing any `.cs` file.
 
+## Checklist
+
+- Proven red with `prove-red.sh`, its last line in the commit; if impossible here, "not proven red" and why (Able to fail)
+- It asserts the effect (letters, rows, stored state), not that nothing threw or an empty snapshot (Able to fail)
+- Only what lies outside the process is stubbed, at the HTTP boundary, as the real contract says (Able to fail)
+- A right is checked with the lowest role holding it; routes, counts and messages compared exactly (Able to fail)
+- A decision the stand cannot reach has a unit test of its own (`failure-paths.md` §11)
+- Async writes are polled on a deadline, returning the last state, no timeout token on the call (Has to be polled)
+- A failure is asserted on the `ApiException`'s `ErrorCode` and `ErrorContent!`, never `?.` (Asserting failures)
+- Calls go through the SDK; raw HTTP only for the listed carve-outs (Endpoints the SDK does not expose)
+
 ## The shared harness lives in `common/Tests/ASC.Tests.Common`
 
 Everything that is not specific to one product is there, and every suite references it:
@@ -183,23 +194,8 @@ The test also has to fail only for a reason:
 
 ### A decision the stand cannot reach
 
-"Not proven red: needs an Enterprise stack" is where later reviews kept finding the bugs: in one
-branch three fix commits wrote it, and the next reviews found the decisions behind it wrong (a
-wizard's fallback, an expired-trial check). A stand that cannot reach the path does not excuse the
-decision from a test:
-
-- Move the decision into a function of its inputs — the quota, the tariff end, the last answer
-  known, now — with no I/O, and call it where the decision was. The unit-test projects are
-  `common/Tests/ASC.Core.Common.Tests`, `common/Tests/ASC.Data.Backup.Core.Tests` and
-  `common/Tests/ASC.Site.Core.Tests` (the Site.Core host only, which no AppHost profile starts); the
-  product and Web suites are Aspire integration suites. So the function goes into a library a unit-test
-  project references (`ASC.Core.Common`, `ASC.Files.Core` or `ASC.Api.Core` for `ASC.Core.Common.Tests`),
-  also when the decision is made in Web.Api or Web.Studio, which no unit-test project reaches.
-  The integration test stays for the wiring; the unit test covers the decision with its boundaries:
-  the end yesterday, today and later (`failure-paths.md` §9), an unknown answer next to a refusal
-  (§4), each cell of a multi-step table the stand cannot reach (§10).
-- Prove that unit test red with `prove-red.sh` like any other.
-- "Not proven" is left for what remains after that — the wiring itself — and the commit names it.
+It gets a unit test of its own: `failure-paths.md` §11, which loads with the product code where the
+decision is written.
 
 ## Endpoints the SDK does not expose
 

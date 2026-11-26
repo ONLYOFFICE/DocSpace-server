@@ -13,8 +13,9 @@ Usage (from the repo root, server/):
 --worktree  compare the base against the working tree (uncommitted changes included); only for the
             checked-out branch, so with a --head that names another ref (another branch, even at the same
             commit) it exits 2; with a detached HEAD a --head at that commit is accepted
---full      print the long hint lists (claims with numbers, stale verification.md rows) whole instead of
-            their first rows and a count
+--full      print the long hint lists (claims with numbers, stale verification.md rows, the texts the diff
+            writes, removed response codes, fix commits without a proof) whole instead of their first rows
+            and a count
 --gate      exit with 1 when the "Gate" section lists a hard failure: AI attribution in a commit; a
             change of the base, since the merge-base, to rules or review tooling that apply to the
             branch; an untracked file (--worktree; the branch's own saved review at the root
@@ -232,6 +233,15 @@ LINE_CHECKS = [
      re.compile(r"\.Log\w*\(\s*\$\""), is_cs),
     ("logging.md", "[LoggerMessage] outside a dedicated *Logger class file",
      re.compile(r"\[LoggerMessage\b"), lambda p: is_cs(p) and not p.endswith("Logger.cs")),
+    ("logging.md", "exception message logged instead of the exception (stack trace and inner exceptions lost)",
+     re.compile(r"\b_?[lL]ogger\??\.\w+\((?!.*\b(?:e|ex|exc|exception|err|error)\s*[,)])"
+                r".*\b(?:e|ex|exc|exception|err|error)\.Message\b"), is_cs),
+    # TimeSpan reads "24:00:00" as 24 days (configuration.md §3); a value of 24 hours or more is written d.hh:mm:ss
+    ("configuration.md", "interval of 24 hours or more without a day part (\"24:00:00\" is 24 days) - write d.hh:mm:ss",
+     re.compile(r'"(?:2[4-9]|[3-9]\d|\d{3,}):[0-5]\d(?::[0-5]\d)?"'),
+     lambda p: p.endswith((".cs", ".json")) and not p.startswith(("sdk/", "migrations/")) and not p.endswith("_2.0.json")),
+    ("dto-mapping.md", "* DTO built inline in a controller - a Mapperly mapper, or only server-owned fields set here?",
+     re.compile(r"\bnew\s+\w+Dto\s*[({]"), lambda p: p.endswith("Controller.cs") and is_cs(p) and not is_test(p)),
     ("configuration.md", "* configuration value read - through ConfigurationValueExtensions (a list or a bound section: configuration.md §1), both bounds, 0 / negative / huge?",
      re.compile(r"\.GetValue<\s*(int|long|double|bool|TimeSpan|int\[\])|configuration\[\s*\"|\.GetSection\(\s*\"[^\"]*\"\s*\)\s*\.Get<"),
      lambda p: is_cs(p) and not is_test(p)),
@@ -267,6 +277,8 @@ LINE_CHECKS = [
      re.compile(r"RawApiClient|\.(Get|Post|Put|Delete|Send)Async\(\s*\$?\"api/"), lambda p: is_cs(p) and is_test(p)),
     ("tests.md", "CancellationToken.None in a test (TestContext.Current.CancellationToken required)",
      re.compile(r"CancellationToken\.None"), lambda p: is_cs(p) and is_test(p)),
+    ("tests.md", "`ErrorContent?.` - read it with `!`: with `?.` an empty body skips the assertion",
+     re.compile(r"\bErrorContent\s*\?\."), lambda p: is_cs(p) and is_test(p)),
     ("openapi-endpoint-docs.md", "* <summary>/<remarks> on actions - check against the rule",
      re.compile(r"///\s*<(summary|remarks)>"), lambda p: p.endswith("Controller.cs")),
     ("openapi-endpoint-docs.md", "requiresAuthorization=false - only together with [AllowAnonymous]",
@@ -457,8 +469,9 @@ def method_end(lines: list[str], start: int) -> int:
     return len(lines)
 
 
-def print_endpoints_section(files, added, read_head) -> list[str]:
-    """Prints the changed actions and returns their names, for the OpenSpec section."""
+def print_endpoints_section(files, added, read_head) -> list[tuple[str, str, int]]:
+    """Prints the changed actions and returns (name, file, first line of its doc comment and attributes) of each,
+    for the OpenSpec section and the texts the diff reaches."""
     print("## Changed endpoints (one row each in the cross-cutting matrix, SKILL.md §3 A0)")
     rows, names = [], []
     for st, p in files:
@@ -488,7 +501,7 @@ def print_endpoints_section(files, added, read_head) -> list[str]:
             if n:
                 mark = "new" if attr in changed else f"{n} changed line(s)"
                 rows.append(f"  {verb:6} {prefix}/{route}".rstrip("/") + f"  {name}  [{p}:{attr}]  ({mark})")
-                names.append(name)
+                names.append((name, p, lo))
     print("\n".join(rows) if rows else "  none")
     print()
     return names
@@ -557,14 +570,41 @@ def print_openspec_section(files, endpoint_names, head: str, merge_base: str, ol
     for t in tracked.splitlines():
         name_count[t.rsplit("/", 1)[-1]] += 1
     stale = []
+    # A row that cites a member by name (`File.cs::Method`) survives a moved line: it is stale when the file in the
+    # reviewed tree no longer has that name in its code (comments left out; a renamed file is read at its new path),
+    # and otherwise listed to re-read, since the member's behaviour may have changed (claims.md §4).
+    renamed_to = {old: new for new, old in (renames or {}).items()}
+    members: dict[str, str] = {}
+
+    def has_member(f: str, member: str) -> bool:
+        if f not in members:
+            text = (git_bytes("show", f"{head}:{renamed_to.get(f, f)}") or b"").decode("utf-8", "replace")
+            code = []
+            for line in text.splitlines():
+                comment = comment_part(line)
+                stripped = line.strip()
+                code.append(stripped[:len(stripped) - len(comment)] if comment else stripped)
+            members[f] = "\n".join(code)
+        return re.search(rf"\b{re.escape(member)}\b", members[f]) is not None
+
+    def shown_rows(rows) -> str:
+        keys = sorted(rows)
+        listed = keys if full else keys[:8]
+        text = "; ".join(f"{i}: {', '.join(rows[i])}" for i in listed) if isinstance(rows, dict) \
+            else ", ".join(str(i) for i in listed)
+        return text + (f" (+{len(keys) - len(listed)})" if len(keys) > len(listed) else "")
+
     for p in spec_paths:
         if not p.endswith("/verification.md"):
             continue
         lines = texts[p]
         cited: dict[str, set[int]] = defaultdict(set)
+        by_name: dict[str, list[tuple[int, list[str]]]] = defaultdict(list)
         for i, line in enumerate(lines, 1):
             for m in CITATION.finditer(line):
                 cited[m.group(1)].add(i)
+            for m in NAME_CITATION.finditer(line):
+                by_name[m.group(1)].append((i, [n.strip() for n in m.group(2).split(",")]))
         aliases = re.findall(r"`([A-Za-z][\w./-]*)`\s+(?:is|=)\s+`([^`]+)`", "\n".join(lines))
         for f in changed:
             name = f.rsplit("/", 1)[-1]
@@ -586,11 +626,31 @@ def print_openspec_section(files, endpoint_names, head: str, merge_base: str, ol
             matched = [t for t in forms if t in cited]
             rows = sorted({r for t in matched for r in cited[t]})
             if rows:
-                listed = rows if full else rows[:8]
-                shown = ", ".join(str(r) for r in listed) + (f" (+{len(rows) - 8})" if len(rows) > len(listed) else "")
-                stale.append(f"    {p}: {len(rows)} row(s) cite {f} (as {', '.join(sorted(forms[t] for t in matched))}) - lines {shown}")
-    print("  verification.md rows citing changed files (a moved line or a changed behaviour makes the row stale;")
-    print("  a citation in another form than path, alias, file name or folder alias is not found):")
+                stale.append(f"    {p}: {len(rows)} row(s) cite {f} (as {', '.join(sorted(forms[t] for t in matched))}) "
+                             f"- lines {shown_rows(rows)}")
+            missing: dict[int, list[str]] = {}
+            present: set[int] = set()
+            gone_as: set[str] = set()
+            read_as: set[str] = set()
+            for t in forms:
+                for i, names in by_name.get(t, []):
+                    absent = [n for n in names if not has_member(f, n) and n not in missing.get(i, [])]
+                    if absent:
+                        missing.setdefault(i, []).extend(absent)
+                        gone_as.add(forms[t])
+                    elif names:
+                        present.add(i)
+                        read_as.add(forms[t])
+            if missing:
+                stale.append(f"    {p}: {len(missing)} row(s) cite {f} (as {', '.join(sorted(gone_as))}) by a name "
+                             f"its code no longer has - stale - lines {shown_rows(missing)}")
+            present -= set(missing)
+            if present:
+                stale.append(f"    {p}: {len(present)} row(s) cite {f} (as {', '.join(sorted(read_as))}) by a name it "
+                             f"still has - re-read if its behaviour changed - lines {shown_rows(sorted(present))}")
+    print("  verification.md rows citing changed files (by line: a moved line or a changed behaviour makes the row")
+    print("  stale; by `::Name`: stale when the code no longer has the name, otherwise to re-read; a citation in")
+    print("  another form than path, alias, file name or folder alias is not found):")
     print_capped(stale, STALE_ROWS_SHOWN, full, "    none")
 
     # An untracked proposal is the branch's change to openspec/ too (--worktree).
@@ -745,6 +805,11 @@ def says_not_done(line: str) -> bool:
     return bool(_STATUS_LATER.search(text))
 # A citation `token:line`: a full path (also one starting with a dot, `.claude/...`), an alias, a file name.
 CITATION = re.compile(r"(?<![\w/.-])(\.?\w[\w./-]*):\d")
+# A citation by name, `token::Member` or `token::A, B` (claims.md §4). A further name after a comma starts with a
+# capital or an underscore, as C# members do, is not the file of the next citation (`B.cs::X`), and ends the item
+# (a comma, a backtick, `;`, `)`, `|` or the end follows), so that the prose after a citation is not read as a name.
+NAME_CITATION = re.compile(r"(?<![\w/.-])(\.?\w[\w./-]*)::([A-Za-z_]\w*"
+                           r"(?:\s*,\s*[A-Z_]\w*(?![\w.]*::|\.\w)(?=\s*(?:[,`;)|]|$)))*)")
 
 
 def renamed_requirements(lines: list[str]) -> dict[str, str]:
@@ -817,12 +882,12 @@ def comment_part(text: str) -> str | None:
     while i < len(s) - 1:
         c = s[i]
         if quote:
-            if c == "\\" and quote == '"':
+            if c == "\\" and quote in '"`':
                 i += 2
                 continue
             if c == quote:
                 quote = None
-        elif c in "\"'":
+        elif c in "\"'`":
             quote = c
         elif s.startswith(("//", "/*"), i):
             return s[i:]
@@ -848,6 +913,107 @@ def print_claims_section(added, commit_bodies: list[tuple[str, str]], full: bool
     if rows:
         print(f"  {len(rows)} line(s) in commit messages, C# comments and spec texts")
     print_capped(rows, CLAIMS_SHOWN, full, "  none")
+    print()
+
+
+def openapi_responses(ref: str, path: str) -> dict[str, set[str]] | None:
+    """`METHOD /path` -> its documented response codes, from an OpenAPI document as `ref` holds it; None when the file
+    is missing, not JSON, or not an object with a `paths` object. A path item or a `responses` value of another shape is
+    left out."""
+    import json
+
+    blob = git_bytes("show", f"{ref}:{path}")
+    try:
+        doc = json.loads(blob.decode("utf-8-sig")) if blob else None
+    except ValueError:
+        return None
+    if not isinstance(doc, dict) or not isinstance(doc.get("paths"), dict):
+        return None
+    result = {}
+    for route, item in doc["paths"].items():
+        if not isinstance(item, dict):
+            continue
+        for method, op in item.items():
+            if isinstance(op, dict) and isinstance(op.get("responses"), dict):
+                result[f"{method.upper()} {route}"] = set(op["responses"].keys())
+    return result
+
+
+TEXTS_SHOWN = 60
+
+
+def print_texts_section(added, endpoints, files, untracked, commit_bodies, unpushed: set[str], full: bool) -> None:
+    """claims.md §3: the texts a fix batch wrote or reached, for the author to re-read against the code after it
+    (fixing-findings.md §6, the batch check). A text the diff does not touch and whose behaviour changed - the remarks
+    of an action in an unchanged controller that calls a changed service - is still the author's to find."""
+    print("## Texts the diff writes or reaches (claims.md §3 - re-read each against the code after every fix batch)")
+    rows = []
+    for path, lines in sorted(added.items()):
+        if not path.endswith((".cs", ".ts", ".py", ".sh")) or path.startswith(("sdk/", "migrations/")) \
+                or path.endswith((".Designer.cs", "ModelSnapshot.cs")):
+            continue
+        script = path.endswith((".py", ".sh"))
+        comment_of = (lambda t: t.strip() if t.strip().startswith("#") and not t.strip().startswith("#!") else None) \
+            if script else comment_part
+        # the license header of a new file is no claim about the code
+        header, k = set(), 0
+        while k < len(lines) and lines[k][0] == k + 1 and lines[k][1].strip() and comment_of(lines[k][1]):
+            k += 1
+        if any(mark in t for _, t in lines[:k] for mark in LICENSE_MARKS):
+            header = {n for n, _ in lines[:k]}
+        nums = [n for n, t in lines if comment_of(t) and n not in header]
+        if nums:
+            doc = sum(1 for n, t in lines if t.strip().startswith("///") and n not in header)
+            listed = nums if full else nums[:8]
+            shown = ", ".join(map(str, listed)) + (f" (+{len(nums) - len(listed)})" if len(nums) > len(listed) else "")
+            rows.append(f"    {path}: {len(nums)} comment line(s), {doc} of them doc comments - lines {shown}")
+    print("  comments and doc comments the diff writes (.cs, .ts, .py and .sh outside sdk/ and migrations/, generated "
+          "files and a new file's license header left out):")
+    print_capped(rows, TEXTS_SHOWN, full, "    none")
+    print("  doc comments of the actions whose lines the diff changes (<summary>, <remarks>, [SwaggerResponse]); an "
+          "action that reaches changed code from elsewhere is not listed:")
+    print_capped([f"    {name}  [{path}:{lo}]" for name, path, lo in endpoints], TEXTS_SHOWN, full, "    none")
+    document = lambda p: (p.endswith(".md") and not p.startswith("sdk/")) or p == "openspec/config.yaml"
+    specs = [f"    {p}  (+{len(added.get(p, []))} line(s))" for st, p in files if document(p) and not st.startswith("D")]
+    specs += [f"    {p}  (untracked)" for p in untracked if document(p)]
+    print("  documents the diff writes - specs, proposals, task lists, verification.md, rules, skills, any other "
+          "Markdown outside sdk/, openspec/config.yaml (files, with the added line count):")
+    print_capped(specs, TEXTS_SHOWN, full, "    none")
+    print("  verification.md rows that cite changed files: the OpenSpec section above (by line, and by a name that is "
+          "gone or still there)")
+    pushed = [sha for sha, _ in commit_bodies if sha not in unpushed]
+    still = [sha for sha, _ in commit_bodies if sha in unpushed]
+    print(f"  commit messages: {len(commit_bodies)}; not pushed yet, still editable: {len(still)}"
+          + (f" ({', '.join(still if full else still[:12])}{' ...' if len(still) > 12 and not full else ''})"
+             if still else "")
+          + f"; pushed: {len(pushed)} - a wrong claim in a pushed one is corrected in the PR description (claims.md §4)")
+    print("  the PR description, and the Hand-over block in it and in the last commit's body: re-read them too")
+    print()
+
+
+# The section is headed exactly `## Checklist`; a longer heading ("## Checklist for any change that ...") is a part of
+# the rule's body, not its short list.
+CHECKLIST = re.compile(r"^## Checklist[ \t]*\n(.*?)(?=^## |\Z)", re.S | re.M)
+
+
+def print_checklists_section(view: str, names: list[str]) -> None:
+    """The `## Checklist` section of each applicable rule, as the tree `view` holds it: the short list the author walks
+    through the batch diff (fixing-findings.md §6, the batch check, point 3)."""
+    print("## Checklists of the applicable rules (fixing-findings.md §6, the batch check - walk each over the batch diff)")
+    without = []
+    for name in names:
+        text = (git_bytes("show", f"{view}:{RULES_DIR.as_posix()}/{name}") or b"").decode("utf-8", "replace")
+        m = CHECKLIST.search(text.replace("\r\n", "\n"))
+        if not m or not m.group(1).strip():
+            without.append(name)
+            continue
+        print(f"  [{name}]")
+        for line in m.group(1).strip().splitlines():
+            print(f"    {line}" if line.strip() else "")
+    if without:
+        print(f"  no checklist: {', '.join(without)}")
+    if not names:
+        print("  none")
     print()
 
 
@@ -1101,6 +1267,21 @@ def main() -> None:
             if added_numbers & set(range(line, line + m.group(0).count("\n") + 1)):
                 hits[("correctness", "* empty catch / swallowed failure - logged, and is the primary action still right?")].append(f"{path}:{line}")
 
+    # ef-compiled-queries.md "Exceptions": an ExecuteUpdate cannot be precompiled, and its method says so in a comment
+    # that starts "Not precompiled on purpose:"; the comment sits above the method, so the lines above the call count.
+    for path, lines in added.items():
+        if not is_cs(path) or is_test(path):
+            continue
+        calls = [(n, t) for n, t in lines if re.search(r"\.ExecuteUpdate(?:Async)?\s*\(", t)
+                 and not t.strip().startswith(("//", "/*", "*"))]
+        if not calls:
+            continue
+        source = (git_bytes("show", f"{view}:{path}") or b"").decode("utf-8", "replace").splitlines()
+        for n, t in calls:
+            if "Not precompiled on purpose:" not in "\n".join(source[max(0, n - 31):n]):
+                hits[("ef-compiled-queries.md", "ExecuteUpdate with no \"Not precompiled on purpose:\" comment in the "
+                      "30 lines above")].append(f"{path}:{n}  {t.strip()[:140]}")
+
     # license header on new source files - not on generated files (a `*.Designer.cs`, an `<auto-generated>` header)
     # and not on vendored code under thirdparty/, which carry no header of ours by design
     for st, p in files:
@@ -1192,14 +1373,38 @@ def main() -> None:
     sub = [l for l in git("submodule", "status").splitlines() if l[:1] in "+-U"] if checked_out else []
     for l in sub:
         print(f"  !! submodule checkout differs from the recorded pointer: {l.strip()}")
+    # A documented response code or operation the branch removes from a service's OpenAPI document is a change of
+    # the contract the SDKs and agents read: is it one the endpoint really cannot return any more?
+    removed = []
+    for ns in name_status:
+        st, p = ns[0], ns[-1]
+        if not re.search(r"/json/\w+_2\.0\.json$", p) or st.startswith("A"):
+            continue
+        old_doc, new_doc = openapi_responses(merge_base, ns[1]), ({} if st.startswith("D") else openapi_responses(view, p))
+        if old_doc is None or new_doc is None:
+            removed.append(f"    {p}: not compared (not an OpenAPI document with a `paths` object on "
+                           f"{'the merge-base' if old_doc is None else 'the reviewed tree'})")
+            continue
+        for op, codes in sorted(old_doc.items()):
+            if op not in new_doc:
+                removed.append(f"    {p}: operation {op} removed")
+            elif codes - new_doc[op]:
+                removed.append(f"    {p}: {op}: {', '.join(sorted(codes - new_doc[op]))} removed")
+    print("  response codes and operations removed from the OpenAPI documents (json/*_2.0.json):")
+    print_capped(removed, 30, a.full, "    none")
     print()
 
     read_head = lambda p: git_bytes("show", f"{view}:{p}")
-    endpoint_names = print_endpoints_section(files, added, read_head)
+    endpoints = print_endpoints_section(files, added, read_head)
+    endpoint_names = [name for name, _, _ in endpoints]
     old_paths = [ns[1] for ns in name_status if ns[0].startswith(("R", "D")) and len(ns) > 1]
     renames = {ns[-1]: ns[1] for ns in name_status if ns[0].startswith("R") and len(ns) > 2}
     print_openspec_section(files, endpoint_names, view, merge_base, old_paths, untracked, a.full, renames)
     print_claims_section(added, commit_bodies, a.full)
+    # A commit no remote-tracking ref reaches is not pushed yet: its message can still be fixed (claims.md §4).
+    unpushed = set(git("log", "--no-merges", "--format=%h", f"{merge_base}..{a.head}", "--not", "--remotes",
+                       check=False).split())
+    print_texts_section(added, endpoints, files, untracked, commit_bodies, unpushed, a.full)
     print_stateful_section(added)
     print_size_section(added)
 
@@ -1216,6 +1421,24 @@ def main() -> None:
         print(f"  new [Trait(\"Bug\")]: {', '.join(bugs)}")
     for p in test_files[:20]:
         print(f"    {p}")
+    # fixing-findings.md §6, the batch check, point 4: a behavioural fix is proven red, or its commit says it is not
+    # proven and why. A fix commit is told by its subject (`fix:`, `fix(area):`, "Fix ..."); a fix committed under
+    # another subject is not seen.
+    unproven = []
+    files_of: dict[str, list[str]] = {}
+    for block in git("log", "--no-merges", "--name-only", "--format=%x1e%h", f"{merge_base}..{a.head}").split("\x1e"):
+        parts = [x for x in block.strip().splitlines() if x]
+        if parts:
+            files_of[parts[0]] = parts[1:]
+    for sha, body in commit_bodies:
+        if not re.match(r"\s*fix\b", body, re.I):
+            continue
+        if re.search(r"\bRED as expected\b", body) or re.search(r"\bnot proven\b", body, re.I):
+            continue
+        if any(is_cs(p) and not is_test(p) for p in files_of.get(sha, [])):
+            unproven.append(f"    {sha} {body.strip().splitlines()[0][:100]}")
+    print("  fix commits that change product .cs with no prove-red result and no \"not proven\" line:")
+    print_capped(unproven, 20, a.full, "    none")
     print()
 
     # --- new projects --------------------------------------------------------------------------
@@ -1247,6 +1470,12 @@ def main() -> None:
     print("## Possibly committed by accident")
     print("\n".join(f"  {p}" for p in junk) if junk else "  none")
     print()
+
+    # --- checklists of the applicable rules -------------------------------------------------------
+    applicable = [name for name, pats in rules.items()
+                  if f"{RULES_DIR.as_posix()}/{name}" not in NOT_A_REVIEW_CRITERION
+                  and (not pats or applies.get(name) or f"{RULES_DIR.as_posix()}/{name}" in ALWAYS_APPLIES)]
+    print_checklists_section(view, applicable)
 
     # --- gate ----------------------------------------------------------------------------------
     # Only what stops a hand-over whatever the branch is, so a script stops it, not a reader (SKILL.md §8 "Hand-over

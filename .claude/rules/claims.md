@@ -8,6 +8,17 @@ were written from the design, and later fix rounds changed the code under them. 
 `paths:`: commit messages and PR descriptions belong to every branch, whatever files it changes. Reviewers check the same points (`review-branch` §3 B
 "claims the branch writes", §3 S) and cite them as `[claims.md §N]`.
 
+## Checklist
+
+- Every number, absolute word ("never", `SHALL`) and promised outcome has its constant, line or test (§1)
+- A number is the value the code really hits, including a dependency's own limit or a fail-safe copy (§1)
+- A claim true only within a window (until a pass, while a dependency answers) names it in the sentence (§1)
+- A scenario's value (date, status, count) is the one a test asserts; text and code do not disagree (§2)
+- After each fix round, every text it reaches (remarks, comments, specs, tasks, PR, commits) is re-checked (§3)
+- A task is ticked only when done; a blocked one stays unticked with its reason or moves to a follow-up (§4)
+- A commit message says "updated" only for what it updated, and is checked before it is pushed (§4)
+- A `verification.md` row cites by name, `File.cs::Method`; a row the branch touches is rewritten so (§4)
+
 ## 1. A claim points at the code or the test that makes it true
 
 - A number (a duration, a count, a limit, a date such as "yesterday"), an absolute word ("never",
@@ -51,8 +62,13 @@ were written from the design, and later fix rounds changed the code under them. 
   one is archived as done.
 - A commit message says "updated" only for what it updated. "Line references updated" covers all of
   them, or names which ones; seen in review, three citations in a `verification.md` were still stale.
-- A `verification.md` row cites lines of a file: when the branch moves those lines, the row is
-  updated in the same branch.
+- A `verification.md` row cites a test or a code member by name — `File.cs::Method`, not
+  `File.cs:120-140`. Line citations moved with every edit above them: one review found 121 of a spec's
+  378 stale, and stale citations were 8 findings of ten reviews. A row the branch touches is rewritten
+  to the name form; one that still cites lines of a file the branch moves is updated in the same branch.
+- A commit message is checked before it is pushed: once pushed it cannot change, so a review that
+  finds it wrong can only ask for the PR description to say it right. The scan lists the claims of the
+  branch's commit messages ("Claims with numbers").
 
 ## 5. What the scan gives
 
@@ -68,5 +84,12 @@ source, not a finding by itself, and a claim worded otherwise is still the write
   capability's spec; a requirement moved to another spec file counts as new), ticked tasks that say
   they are blocked or not done (untracked files included with
   `--worktree`), and the `verification.md` rows that cite a changed file by its path, an alias, its
-  file name (marked when several files share it) or a folder alias. Only that last list is capped: its
-  first 100 entries and 8 line numbers each, all with `--full`.
+  file name (marked when several files share it) or a folder alias — by line; by a member name, as
+  stale when the file's code no longer has the name, and as a row to re-read while it has. Only that
+  last list is capped: its first 100 entries and 8 line numbers each, all with `--full`;
+- "Texts the diff writes or reaches": the comments and doc comments the diff writes in `.cs`, `.ts`,
+  `.py` and `.sh` files (outside `sdk/` and `migrations/`; generated files and a new file's license
+  header left out), the doc comments of the actions whose lines it changes, the Markdown files it
+  writes outside `sdk/` and `openspec/config.yaml`, with their added line counts, and which of the branch's commits are not pushed yet — the list §3 has the
+  author re-read after a fix round (`fixing-findings.md` §6). Each list shows its first 60 entries,
+  all with `--full`; a text whose behaviour changed outside the diff is still the writer's to find.

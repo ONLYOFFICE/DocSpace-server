@@ -19,6 +19,17 @@ says what that guidance asks, how it applies to a JSON API that sits behind the 
 what a change to `app/createApp.ts`, `routes.ts` or a controller has to keep. §8 lists where the code does not
 meet it yet. Cite this file as `[ts-ai-express.md §N]`.
 
+## Checklist
+
+- Every async handler and middleware is in `asyncHandler`; no `uncaughtException` listener keeps it alive (§1)
+- After the headers are sent, a stream writes its error frame and anything else calls `next(err)` (§1)
+- Middleware and routes are added in `createApp`, in the contract order from parsers to the error handler (§2)
+- A body parser is chosen per route with its limit stated there; the 100 kB default is not raised (§2)
+- No sync `fs`/`child_process` or CPU-heavy loop in a request; streams wait for `drain` and stop on close (§3)
+- The caller's address comes through Express `trust proxy`, never from `Origin`/`X-Forwarded-*` by hand (§4)
+- `/isLife` and `/health` call no upstream; no secret goes into a query parameter (§5, §6)
+- A `package.json` change ran `yarn npm audit --environment production`; a new middleware says why (§7)
+
 ## 1. Errors reach one place
 
 - The service runs Express 4 (`package.json`). Express 4 does not pass a rejected promise of an

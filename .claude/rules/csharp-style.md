@@ -5,6 +5,17 @@ paths:
 
 # C# Conventions
 
+## Checklist
+
+- `dotnet format style <csproj> --include <edited files> --verify-no-changes` passes (Style Verification 1)
+- A `-p:EnforceCodeStyleInBuild=true` build adds no warning; the flag is never committed (Style Verification 2-3)
+- Parameters of `[LoggerMessage]` methods in touched `*Logger.cs` files are camelCase (Style Verification 5)
+- Every `using` directive is in the project's `GlobalUsings.cs`, none in the edited file (Style)
+- A new file has the AGPL 3.0 header, a file-scoped namespace and explicit access modifiers (Style)
+- Route segments are camelCase, never snake_case or kebab-case (Naming)
+- Known JSON shapes use `Deserialize<T>`; `JsonSerializerOptions` is a `private static readonly` field (JSON)
+- Hot-path performance work ran `dotnet-diag`, or says it was unavailable and walked by hand (Performance work)
+
 ## Naming
 - **Namespaces**: `ASC.<Module>[.<Feature>][.<Layer>]` (e.g., `ASC.Files.Core.ApiModels.RequestDto`)
 - **Controllers**: `*Controller`

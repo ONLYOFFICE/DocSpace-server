@@ -5,6 +5,12 @@ paths:
   - "common/ASC.Core.Common/**/*.cs"
   - "common/ASC.Api.Core/**/*.cs"
   - "common/ASC.MessagingSystem/**/*.cs"
+  - "common/ASC.Data.Reassigns/**/*.cs"
+  - "common/ASC.Data.Backup.Core/**/*.cs"
+  - "common/ASC.Migration/**/*.cs"
+  - "common/ASC.AI.Integration/**/*.cs"
+  - "common/ASC.Webhooks.Core/**/*.cs"
+  - "common/services/**/*.cs"
   - "common/ASC.Socket.IO/**/*.js"
 ---
 
@@ -16,6 +22,17 @@ tags (recent, favorites, "new" marks), finishes a long operation, or changes quo
 ask **which data a client could be showing goes stale**, and send the event. Past omissions of
 exactly this kind: tags, sharing, recent/favorites, vectorization start/end, a form becoming ready,
 external sharing / apps / AI / wallet settings, metadata values.
+
+## Checklist
+
+- Each change the API exposes that can leave client data stale sends its event in that change (Server goes first)
+- A new event is a method on the matching notifier, never a hand-made `HttpClient` POST (Existing notifiers)
+- Recipients of a delete are captured before `files_security` rows go; other objects go to readers (Semantics)
+- The payload holds ids, title and parent only: no content, access rights or personal data (Semantics)
+- The event is sent after the commit, awaited (no `_ =`), and its failure cannot fail the operation (Semantics)
+- Bulk work notifies top-level entries only, batches recipients by 1000 and carries the tenant (Semantics)
+- The C# call ships with its Node route in `controllers/files.js` and emit in `hubs/files.js` (Both server halves)
+- The PR names the event and room to subscribe to; no event is renamed or removed alone (Contract with the frontend)
 
 ## The server goes first, the client catches up
 
@@ -40,6 +57,8 @@ All derive from `SocketServiceClient` (`common/ASC.Core.Common/Notify/Signalr/`)
 | `QuotaSocketManager` | quota, tariff, wallet, sessions, AI and external-sharing settings |
 | `UserSocketManager` | users, groups, guests, user type |
 | `AppsSocketManager`, `HistorySocketManager`, `AiSocketManager` | apps toggle, entry history, AI form analysis |
+| `WebhookSocketManager` (`common/ASC.Webhooks.Core/`) | webhooks added, updated, deleted, and their delivery log |
+| `PluginSocketManager` | events of server plugins (`plugin-event`) |
 
 A new kind of event is a new method on the matching notifier. Never create an `HttpClient` for the
 hub or POST to `web:hub:internal` yourself (`http-clients.md`).

@@ -24,7 +24,7 @@ paths around it. Before a fix is handed back:
    that it fails: run `.claude/scripts/prove-red.sh` (`tests.md`, "A test has to be able to fail") and
    put its result line in the commit message. A finding that cannot be tested or proven here
    (environment, timing, cost) says so in the commit message — after the decision behind it has been
-   moved where a unit test reaches it (`tests.md`, "A decision the stand cannot reach").
+   moved where a unit test reaches it (`failure-paths.md` §11).
 4. **Close the class where it can be enumerated.** When the finding's `guard` names a test that
    walks every instance (every property of the webhook DTOs is filled by some fixture, every
    out-of-controller publish is listed in the contract, every backed-up column is declared), add
@@ -33,50 +33,54 @@ paths around it. Before a fix is handed back:
 5. **Fix a review in one batch.** Take all findings of one review (one sha) in one round and only
    then ask for the next review. Fixing between review runs moves the sha under the review, and
    each run then finds the bugs of the previous round's fixes mixed with what it missed before.
-6. **Offer to check your own work on what goes to review.** This item is the one schedule of
+6. **Check your own work; a review round ends at its fixes.** This item is the one schedule of
    self-reviews, hand-over checks and re-checks; `CLAUDE.md` (Git Workflow) and `review-branch` (§0,
-   §8 "Self-review", "Hand-over block") point here. Each run costs passes of the skill with its
-   reviewer agents, so it is offered and the user decides; the reviewer uses the same skill, so what
-   the run finds would otherwise cost a review round. The reviewer checks the Hand-over block first:
-   a block whose checks fail sends the branch back unread, and a branch without a block, or with a
-   declined check, is reviewed with "no hand-over check" in the report header (`review-branch` §1
-   lists the checks).
-   "§7" below is `review-branch` §7, the re-check with its fresh reviewer (its point 3).
-   - **While working (on request):** a self-review (`review-branch` §0) is a one-pass check, cheaper
-     than the hand-over check, run when the user asks for it; it is not offered. Its fix batch gets §7
-     once, one more only when that found a blocker.
-   - **Before the first hand-over:** offer the hand-over check (`review-branch` §0 "Hand-over") on the
-     state that goes to review: the whole first review once and two independent passes of the deep
-     lenses with the estimate of what is still unfound, the fixes in one batch, §7 on that batch once
-     (one more only when it found a blocker; the fixes of the last one are part of the check),
-     `scan.py --gate` on the final tree, and the Hand-over block in the PR description.
-   - **After a review round:** offer the §7 re-check of your fixes however small the round is. On a
-     yes, fix what it finds in the same round; one more §7 only when it found a blocker. Then run
-     `scan.py --gate`, write the Hand-over block for the new tree, and the branch goes back to the
-     reviewer: the next check is theirs.
-   - **The hand-over check again, instead of §7:** when, since the last hand-over check, the branch
-     gained a new kind of state or a new artifact (a cache, a lock, a fallback, a new class, an
-     OpenSpec change, a refactoring that moves or rewrites code) in a round other than the own batch of a self-review or a hand-over check, whose
-     §7 reads the new artifact whole: §7 reads only the round's diff. Seen in review: one
-     self-review ran before four fix rounds and a spec change; about 14 of the 20 later findings sat in
-     that later code, and the fresh full pass at the end found 12 after a re-check that had found 1.
+   §7, §8) point here. Ten reviews of seven branches after the rules of 2026-11-17 found 3 blockers
+   in 133 findings; the rounds came from remarks, and a fix batch brought about 7 new findings to its
+   next check (four checks: 7, 7, 7, 7; one: 14), many of them texts the batch had made untrue. So the
+   author checks every batch cheaply, and a review round no longer starts another one for remarks.
+   - **The batch check — every fix batch, run, not offered.** Minutes, no reviewer agents, after
+     every batch: the hand-over check's, a self-review's and each review round's.
+     1. `scan.py --worktree --gate --base <commit before the batch>` (`HEAD` while the batch is not
+        committed): exit 0, and each hint line of the scan answered — fixed, or "not a defect: why" in
+        the commit message or the block.
+     2. Its "Texts the diff writes or reaches" section: re-read each text against the code
+        (`claims.md` §3) — remarks, comments, spec deltas, `verification.md` rows, the PR description.
+     3. The checklists the scan prints for the applicable rules, and the class matrices over the batch
+        diff: each mark, lock, fallback, catch, loop, state that ends and multi-step operation the
+        batch adds walked through `failure-paths.md`.
+     4. A behavioural fix proven red (`prove-red.sh`), or its commit says "not proven" and why.
+   - **Before the first hand-over:** offer the hand-over check (`review-branch` §0 "Hand-over"). The
+     light one is the default: the whole first review once, the fixes in one batch, the batch check,
+     the gate, the Hand-over block (in the PR description and the body of the last commit,
+     `review-branch` §8). The full one adds a second independent pass and the estimate of
+     what is still unfound; offer it for a branch of more than ~1 500 added product lines or one with a
+     multi-step operation (`failure-paths.md` §10), or when the user asks. One pass finds about 55–60%
+     of what is there (two passes on one branch: 22 and 20 findings, 12 in common).
+   - **A review round ends at its fixes.** Fix every finding of the review in one batch, run the batch
+     check, write the Hand-over block for the new tree, and hand the branch back. The reviewer's next
+     look is the re-check of that batch (`review-branch` §7). When a review or re-check reports no
+     blocker and no rule violation, the review ends there: its remarks and questions are fixed with the
+     batch check, or written under Known limitations (point 11), and no further review round runs for
+     them.
+   - **After a batch that fixed a blocker** — a review round's, a self-review's or a hand-over check's —
+     offer the §7 re-check with its fresh reviewer (`review-branch` §7).
+   - **A new kind of state in a batch** — a cache, a lock, a fallback, a new class, an OpenSpec change, a
+     refactoring that moves or rewrites code: the batch check runs as always and reads that code whole,
+     since a diff shows it only in part. After a review round's batch, also offer the light hand-over
+     check again; the batch of a hand-over check or a self-review gets the batch check only, so one
+     check never starts the next.
    - **The base first:** when the scan reports that the base changed rules or review tooling that apply
-     to the branch (`review-branch` §1), bring the base in before the check: the reviewer judges by
-     those. With uncommitted work, commit or stash it first, or ask whoever commits the branch to
-     merge. Afterwards check the branch against what changed, not again in full: lens A with each
-     changed rule over the branch; for a changed skill, every lens, matrix or step whose section the
-     base changed, run over the whole branch (a lens S the base added means a pass of S); the scan
-     re-run for a changed scan; §3 S for changed spec rules; and §7 on the merge's own conflict
-     resolutions (`git show --remerge-diff <merge>`). Then the gate and a new block. Until that has
-     run, no earlier check covers the branch for what the merge changed; the scan lists such merges
-     with the commits before and after each ("Review tooling brought in by the branch"), and the
-     reviewer, given earlier checks and no block, counts what they missed by that cause
-     (`review-branch` §4 "missed by earlier checks").
-   - **Every commit before the hand-over is in a check.** A commit made after the last check (a
-     refactoring after the last re-check, a small fix after the hand-over check) is in none of them:
-     the branch goes to review with a check that covers its final tree, or with no block and nothing
-     claimed. Seen in review: a branch was handed over with a re-check on a sha three commits back,
-     one of them a 1 300-line refactoring; four of the next review's 13 items were in those commits.
+     to the branch (`review-branch` §1), bring the base in before the check — with uncommitted work,
+     commit or stash it first, or ask whoever commits the branch to merge — and check the branch
+     against what changed, not again in full: lens A with each changed rule; each lens, matrix or step
+     whose section the base's skill changed or added, over the whole branch; §3 S for changed spec
+     rules; the scan re-run; the batch check of the merge's own conflict resolutions
+     (`git show --remerge-diff <merge>`); then the gate and a new block.
+   - **Every commit is in a check.** A commit made after the last check (a refactoring after the last
+     re-check, a small fix after the hand-over check) needs at least the batch check before the branch
+     goes to review. Seen in review: a branch was handed over with a re-check three commits back, one
+     of them a 1 300-line refactoring; four of the next review's 13 items were in those commits.
 
 7. **Reject a finding only with the same evidence a fix needs.** Read the code for every caller, entry
    kind and path the finding names, not for the one you know best. An argument that covers part of the
@@ -88,7 +92,8 @@ paths around it. Before a fix is handed back:
    The code is yours whether it follows the suggestion or not. Seen in review: "keep the claim" closed
    one cell of a wallet renewal and opened a path where another instance pays a second time; "write
    the known answer instead of removing it" polished a cache whose instance was the real defect
-   (`caching.md`, "Which instance").
+   (`caching.md`, "Which instance"). Later reviews counted three more next-round findings that came
+   from following the previous round's suggested fix, one of them the only blocker a fix round made.
 9. **Re-read the texts the round reaches** (`claims.md` §3): remarks, comments, spec deltas, task
    lists, the PR description and the claims of earlier commit messages.
 10. **A miss of the hand-over check is a gap in the tooling.** When a review lists findings under
@@ -96,7 +101,8 @@ paths around it. Before a fix is handed back:
     gap. The review offers the user the tooling change it names (a rule section, a matrix row, a scan
     check) as a change of its own to `.claude/`; when you fix the branch, check that the offer was
     taken up or declined, and make it once more if it was lost. A miss the review marks "within the
-    estimate" needs no change.
+    estimate" (a full check) or "one pass" (a light check, whose one pass finds about 55–60%) needs no
+    change, unless the review names a rule, matrix row or scan check that would have caught the class.
 11. **What is not fixed is a decision, written down.** A remark or a question you decide not to fix
     goes into the PR description's "Known limitations", with the decision, the reason and who
     decided; the entry states the effect as it is (`claims.md`). The reviewer does not raise it again
@@ -107,3 +113,14 @@ A fix that adds state — a mark, an "accepted" flag, a lock, a retry, a fallbac
 goes through `failure-paths.md` like any other: in past rounds most new findings were in exactly
 that code. The same rule covers writing new code of the kinds that are easy to get wrong: side
 effects after the primary action, external calls, background loops, queues, retries and leases.
+
+## Checklist
+
+- The class is fixed, not the cited line; an enumerable class is closed by a guard test (§1, §4)
+- The other paths are walked: create and update, the old lookup, old rows and archives, the other DB (§2)
+- Each behavioural fix has a test proven red, or its commit says why it cannot be proven here (§3)
+- All findings of one review are fixed in one batch, and the batch check ran on it (§5, §6)
+- The batch check: scan gate exit 0, hints answered, texts re-read, checklists walked, prove-red (§6)
+- A rejected finding has the evidence a fix needs, for every caller and entry kind it names (§7)
+- A suggested fix was derived from its class and walked through `failure-paths.md` before it was taken (§8)
+- A remark or question not fixed is under Known limitations, with the decision and the reason (§11)

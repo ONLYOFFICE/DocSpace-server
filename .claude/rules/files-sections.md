@@ -13,6 +13,17 @@ done with it there. A change that works in "My documents" can be invisible, unfi
 permitted in Recent, Favorites, Shared with me, Trash or Forms. Most section bugs in this repo were
 exactly that.
 
+## Checklist
+
+- A new field, flag or filter reaches every `GetEntriesAsync` branch it applies to, or is refused (Any change 1)
+- An explicit `folderType` beats a `searchArea` default; tests use the shape the client sends (Any change 1)
+- An entry's or a group's section is stored, never derived from its members (Any change 2)
+- Trash allows only Read, Delete and Move, in the caller's own trash; special folders lose behaviour (Any change 3)
+- Per-room data puts a form room in Forms, not Rooms, by `SearchArea.MatchesRoom` (Section map; Any change 4)
+- A third-party DAO applies the new filter or refuses it, never accepts and ignores it (Any change 5)
+- A mark on one entry is cleared by removing its `files_tag_link`, never by deleting the tag row (Any change 6)
+- Each section the change reaches has its own test case besides the home section (Tests)
+
 ## Section map
 
 `FolderType` (`Core/Entries/Folder.cs`) selects the root; `SearchArea`

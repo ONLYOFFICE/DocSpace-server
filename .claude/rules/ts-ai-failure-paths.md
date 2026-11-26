@@ -12,6 +12,17 @@ names the commits it comes from and the test that proves it; ESLint (`eslint.con
 ones a machine can see. It is the TypeScript counterpart of `failure-paths.md`, which loads for C#
 only. Cite it as `[ts-ai-failure-paths.md §N]`.
 
+## Checklist
+
+- Only a 404 (or the AI's 400 for a bad id) reads as absent; a timeout, 5xx or unreadable 200 is rethrown (§1)
+- An engine refusal `{ success: false }` is sent as 400/404/409, unless its 200 is pinned as contract (§2)
+- The AI access gate runs before body or query checks, calls, tools and writes, except the `NOT_GATED_FIRST` routes (§3)
+- Each body field is narrowed through `app/narrow.ts` with a 400 naming it; input arrays have a named limit (§4)
+- Answers list named fields; no key, headers or upstream 5xx body leaves, on any route returning the object (§5)
+- Refusing checks run first; a later failure undoes or names what exists; an unknown answer deletes nothing (§6)
+- A timed call is `return await`ed inside its `try`; a body from outside is read with a byte limit (§7)
+- Module state is keyed, bounded, drops failures; a .NET route's path and limits are read from C# (§8, §9)
+
 ## 1. A failed read is not "absent"
 
 - An upstream read turns into "none", "empty" or "no access" only for the status that means it: 404,

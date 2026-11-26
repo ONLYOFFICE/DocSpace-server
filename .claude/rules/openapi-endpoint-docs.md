@@ -10,6 +10,17 @@ parameters and reads the answer from this text alone. Goal: the fewest words wit
 that a reader with basic English can follow. Parameters, DTO properties and enum members are
 `.claude/rules/openapi-dto-docs.md`.
 
+## Checklist
+
+- `<summary>` is a unique 2-6 word title; `<remarks>` holds the description; they are not swapped (§0, §1)
+- Every fact is checked in the branch's code; behaviour is in the description, value facts on the property (§2)
+- Access, then its refusal code; a change says if it can be repeated; queued work names the call to poll (§2)
+- One paragraph, 3+ sentences, none over 20 words by tool count, average at most 12, shortening pass run (§2.2)
+- One `[SwaggerResponse]` per code the operation can return, with a specific text; the prose's codes among them (§3.6)
+- Every declared code is reachable in the handler; no old 4xx/5xx code left the text without a reason (§3.6)
+- Every webhook the action causes has `[RaisesWebhook]` per condition, and `<remarks>` does not repeat it (§2.1)
+- Terms of §2.3, no internal names, true `<path>`/`<requiresAuthorization>` (§2.3, §0); well-formed tags (Definition of done)
+
 ## 0. Where the text comes from
 
 | OpenAPI field | Source in C# |

@@ -4,8 +4,9 @@ Usage (from the repository root):
     python -I -X utf8 .claude/skills/openspec-maintain/scripts/apply_run_marks.py <out-dir> [--ru <dir>] [--dry-run]
 
 <out-dir> is the folder run_full.sh wrote: results/*.trx (the full run), optional rerun/**/*.trx (failed classes
-re-run alone), commit.txt and date.txt. Each TEST-CONFIRMED row gets one mark from the tests its `File.cs:line`
-citations resolve to; the run legend under the title is replaced. Idempotent.
+re-run alone), commit.txt and date.txt. Each TEST-CONFIRMED row gets one mark from the tests its
+`File.cs::Method` citations (or, in older rows, `File.cs:line`) resolve to; the run legend under the title is
+replaced. Idempotent.
 
 --ru <dir>: also mark translated copies at <dir>/<spec>/verification.md when they hold the same number of
 TEST-CONFIRMED rows. The legend text comes from <dir>/run-legend.txt ({commit} and {date} are filled in); the
@@ -36,7 +37,12 @@ LEGEND_EN = (
     "PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately."
 )
 MARK = re.compile(r" \[run: [A-Z-]+\]")
-CITE = re.compile(r"([A-Za-z_0-9]+\.cs)(?::([0-9][0-9,\s\-]*))?")
+# A test is cited by name, `File.cs::Method` (several: `File.cs::A, B`), which survives every edit of the file, or,
+# in older rows, by lines, `File.cs:12-40`, which moves with every edit above it.
+# A further name after a comma is not the file of the next citation (`B.cs::X`) and ends the item (a comma, a
+# backtick, `;`, `)`, `|` or the end follows), so that the prose after a citation is not read as a name.
+CITE = re.compile(r"([A-Za-z_0-9]+\.cs)(?:::([A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*(?![\w.]*::|\.\w)(?=\s*(?:[,`;)|]|$)))*)"
+                  r"|:([0-9][0-9,\s\-]*))?")
 METHOD = re.compile(r"^\s*(?:public|internal)\s+(?:async\s+)?(?:Task|ValueTask|void)\s+(\w+)\s*\(")
 
 parser = argparse.ArgumentParser()
@@ -90,13 +96,19 @@ for path in glob.glob("**/*Tests*/**/*.cs", recursive=True):
 
 def classify(row):
     found, linked = [], False
-    for fn, rng in CITE.findall(row):
+    for fn, names, rng in CITE.findall(row):
         tests = sources.get(fn)
         if not tests:
             continue
-        linked = True
         chosen = tests
-        if rng.strip():
+        if names.strip():
+            wanted_names = {n.strip() for n in names.split(",")}
+            chosen = [t for t in tests if t[1] in wanted_names]
+            if not chosen:
+                # a name no test method of the file has: the citation does not resolve, the same as no citation
+                continue
+        linked = True
+        if not names.strip() and rng.strip():
             wanted = []
             for part in re.split(r",\s*", rng.strip()):
                 p = part.strip().split("-")
