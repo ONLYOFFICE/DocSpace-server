@@ -31,15 +31,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { aiService, AiServiceHttpError, aiServiceBaseUrl, withTimeout } from "./httpClient.js";
+import { aiService, AiServiceHttpError, aiServiceBaseUrl, aiServiceRootGet } from "./httpClient.js";
 import { isObject, getString, getNumber, getBoolean, getArray } from "../narrow.js";
 import logger from "../log.js";
-import {
-  countUpstreamCall,
-  countUpstreamRead,
-  getForwardedHeaders,
-  shouldForwardHeadersToProvider,
-} from "../requestContext.js";
+import { getForwardedHeaders, shouldForwardHeadersToProvider } from "../requestContext.js";
 import { CapabilitiesUI, getReasoningSupport } from "@onlyoffice/ai-chat/core";
 import type { Model, ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
 import {
@@ -53,6 +48,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { listAnswer, mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
@@ -102,12 +98,12 @@ export function dtoToProfile(raw: unknown): DocspaceProfile | undefined {
   const modelId = getString(raw, "modelId");
   const createdAt = getNumber(raw, "createdAt");
   if (
-    id === undefined
-    || name === undefined
-    || providerType === undefined
-    || baseUrl === undefined
-    || modelId === undefined
-    || createdAt === undefined
+    id === undefined ||
+    name === undefined ||
+    providerType === undefined ||
+    baseUrl === undefined ||
+    modelId === undefined ||
+    createdAt === undefined
   ) {
     return undefined;
   }
@@ -225,8 +221,10 @@ function describeReasoningSupport(profile: Profile): string {
   if (!support) {
     return profile.reasoning === undefined ? "-" : String(profile.reasoning);
   }
-  return `${support.thinks ? "thinks" : "no"}/${support.canDisable ? "off" : "always"}/` +
-    `[${support.depths.join(",")}]`;
+  return (
+    `${support.thinks ? "thinks" : "no"}/${support.canDisable ? "off" : "always"}/` +
+    `[${support.depths.join(",")}]`
+  );
 }
 
 function logResolvedProfile(id: string, profile: Profile | undefined, source: unknown): void {
@@ -238,11 +236,13 @@ function logResolvedProfile(id: string, profile: Profile | undefined, source: un
           `capabilities=${profile.capabilities ?? "-"} canUseTool=${profile.canUseTool ?? "-"} ` +
           `reasoning=${describeReasoningSupport(profile)} ` +
           `useProxy=${profile.useProxy ?? "-"} isCloud=${profile.isCloudProvider ?? "-"} ` +
-          `headers=[${Object.keys(profile.headers ?? {}).sort().join(",")}]`
+          `headers=[${Object.keys(profile.headers ?? {})
+            .sort()
+            .join(",")}]`
       : source === "chat-context"
         ? `HttpProfilesStorage.readById(${id}) via chat-context -> NOT FOUND`
         : `HttpProfilesStorage.readById(${id}) -> UNUSABLE payload (a required field is missing): ` +
-            `fields=[${isObject(source) ? Object.keys(source).sort().join(",") : typeof source}]`,
+          `fields=[${isObject(source) ? Object.keys(source).sort().join(",") : typeof source}]`,
   );
 }
 
@@ -254,12 +254,9 @@ function logResolvedProfile(id: string, profile: Profile | undefined, source: un
 // Every other read goes without the flag and keeps the secrets.
 const CLIENT_READ = { query: { forClient: true } };
 
-function parseProfileList(raw: unknown): Profile[] {
-  if (!Array.isArray(raw)) {
-    return [];
-  }
+function parseProfileList(raw: unknown, call: string): Profile[] {
   const result: Profile[] = [];
-  for (const item of raw) {
+  for (const item of listAnswer(raw, call)) {
     const profile = dtoToProfile(item);
     if (profile) {
       result.push(profile);
@@ -272,11 +269,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
   async create(profile: Omit<Profile, "id" | "createdAt">): Promise<Profile> {
     const raw = await aiService.post(PATH, toCreateBody(profile));
     invalidateChatContext("profiles");
-    const result = dtoToProfile(raw);
-    if (!result) {
-      throw new Error("ai service returned invalid profile");
-    }
-    return result;
+    return mapped(dtoToProfile(raw), "POST profiles");
   }
 
   async createMany(profiles: Omit<Profile, "id" | "createdAt">[]): Promise<Profile[]> {
@@ -284,11 +277,8 @@ export class HttpProfilesStorage implements ProfilesStorage {
       profiles: profiles.map(toCreateBody),
     });
     invalidateChatContext("profiles");
-    if (!Array.isArray(raw)) {
-      return [];
-    }
     const result: Profile[] = [];
-    for (const item of raw) {
+    for (const item of listAnswer(raw, "POST profiles/batch")) {
       const profile = dtoToProfile(item);
       if (profile) {
         result.push(profile);
@@ -298,13 +288,14 @@ export class HttpProfilesStorage implements ProfilesStorage {
   }
 
   async readById(id: string): Promise<Profile | undefined> {
+    if (namesNoEntity(id)) {
+      return undefined;
+    }
     // A primed round holds the portal's full profile list — the id either
     // resolves there or does not exist for this user.
     const snapshot = readChatContext("profiles");
     if (snapshot) {
-      const profile = withOnlyofficeProviderOverrides(
-        snapshot.profiles.find((p) => p.id === id),
-      );
+      const profile = withOnlyofficeProviderOverrides(snapshot.profiles.find((p) => p.id === id));
       logResolvedProfile(id, profile, "chat-context");
       return profile;
     }
@@ -313,7 +304,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       const profile = withOnlyofficeProviderOverrides(dtoToProfile(raw));
       logResolvedProfile(id, profile, raw);
-      return profile;
+      return mapped(profile, "GET profiles/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         logger.warn(`HttpProfilesStorage.readById(${id}) -> 404 NOT FOUND`);
@@ -331,13 +322,16 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // `forClient=true` like `readAllForClient`; get-by-id drops `key` and
   // `headers` on top for every caller.
   async readByIdRaw(id: string): Promise<DocspaceProfile | undefined> {
+    if (namesNoEntity(id)) {
+      return undefined;
+    }
     const snapshot = readChatContext("profiles");
     if (snapshot) {
       return snapshot.profiles.find((p) => p.id === id);
     }
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`, CLIENT_READ);
-      return dtoToProfile(raw);
+      return mapped(dtoToProfile(raw), "GET profiles/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         logger.warn(`HttpProfilesStorage.readByIdRaw(${id}) -> 404 NOT FOUND`);
@@ -354,7 +348,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // from the round snapshot, which carries the secrets for in-process use.
   // An AI service that predates the flag ignores it and answers in full.
   async readAllForClient(): Promise<Profile[]> {
-    return parseProfileList(await aiService.get(PATH, CLIENT_READ));
+    return parseProfileList(await aiService.get(PATH, CLIENT_READ), "GET profiles");
   }
 
   async readAll(): Promise<Profile[]> {
@@ -363,7 +357,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
       return snapshot.profiles;
     }
     reportChatContextMiss("profiles.readAll");
-    return parseProfileList(await aiService.get(PATH));
+    return parseProfileList(await aiService.get(PATH), "GET profiles");
   }
 
   async update(profile: Profile): Promise<void> {
@@ -468,7 +462,10 @@ function mapGatewayModel(raw: unknown): Model | undefined {
 //
 // The result is the C# wire shape, so it goes through the same
 // `reasoningConfigToSupport` as a profile read from the C# storage.
-function mapGatewayReasoning(raw: unknown, hasReasoningCapability: boolean): Record<string, unknown> {
+function mapGatewayReasoning(
+  raw: unknown,
+  hasReasoningCapability: boolean,
+): Record<string, unknown> {
   const reasoning = isObject(raw) ? raw : null;
   const depths: string[] = [];
   for (const effort of getArray(reasoning ?? {}, "supported_efforts") ?? []) {
@@ -504,28 +501,11 @@ function mapGatewayReasoning(raw: unknown, hasReasoningCapability: boolean): Rec
  * catalog keeps the two methods consistent (Bug 83113).
  */
 export async function listOnlyofficeGatewayModels(signal?: AbortSignal): Promise<Model[]> {
-  const url = `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}/models`;
-  countUpstreamRead();
-  countUpstreamCall("GET");
-  const { signal: reqSignal, cancel } = withTimeout(signal);
-  try {
-    const res = await fetch(url, {
-      headers: { ...getForwardedHeaders() },
-      signal: reqSignal,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new AiServiceHttpError(res.status, res.statusText, text, url);
-    }
-    const json: unknown = await res.json();
-    const data = isObject(json) ? getArray(json, "data") : undefined;
-    if (!data) {
-      throw new Error(`gateway models listing returned no data array (${url})`);
-    }
-    return data
-      .map(mapGatewayModel)
-      .filter((m): m is Model => m !== undefined);
-  } finally {
-    cancel();
+  // `raw`: the catalogue is OpenRouter's `{ data }`, never the DocSpace envelope.
+  const json = await aiServiceRootGet(`${ONLYOFFICE_GATEWAY_PATH}/models`, { signal, raw: true });
+  const data = isObject(json) ? getArray(json, "data") : undefined;
+  if (!data) {
+    throw new UpstreamShapeError("GET ai/gateway/models");
   }
+  return data.map(mapGatewayModel).filter((m): m is Model => m !== undefined);
 }

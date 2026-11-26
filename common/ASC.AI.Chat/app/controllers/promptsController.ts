@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { PromptsEngine } from "@onlyoffice/ai-chat/core";
@@ -43,25 +43,24 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import type { Response } from "express";
 import { storage } from "../storage/index.js";
+import { assertAiAccess } from "./aiAccess.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString, isObject } from "../narrow.js";
+import { asString, isObject, readProp } from "../narrow.js";
 
 const engine = new PromptsEngine({ storage });
 
 // A refusal as the engine reports it: `{ success: false, error }` with the
 // field named. The engine returns these instead of throwing, so the HTTP
-// status is the controller's to pick (Bugs 84307-84311): `code` says why
-// when the library sets it, and the message wording is the fallback for a
-// library that predates the field.
+// status is the controller's to pick (Bugs 84307-84311): `code` says why.
+// Every refusal of the library the service is built on carries it; its
+// message is text for a person, never read to pick a status
+// (ts-ai-failure-paths.md §1).
 type RefusalError = ImportError["error"];
 
 function refusalStatus(error: RefusalError): number {
-  const code = (error as { code?: string }).code;
+  const code = readProp(error, "code");
   if (code === "not_found") return 404;
   if (code === "conflict") return 409;
-  if (code !== undefined) return 400;
-  if (/not found/i.test(error.message)) return 404;
-  if (/already exists/i.test(error.message)) return 409;
   return 400;
 }
 
@@ -101,7 +100,11 @@ function bundleTwinErrors(bundle: PromptBundle): ImportError[] {
       errors.push({
         kind: "folder",
         ref: folder.name.trim(),
-        error: { field: "name", message: "The bundle holds two folders of this name", code: "invalid" },
+        error: {
+          field: "name",
+          message: "The bundle holds two folders of this name",
+          code: "invalid",
+        },
       });
       continue;
     }
@@ -149,17 +152,28 @@ function isFolderRef(v: unknown): v is string | null | undefined {
 // which dereferences `bundle.version` / `.folders` / `.prompts` unguarded
 // and answered 500 (Bug 84423). Returns the refusals, empty when the
 // bundle is well-formed.
+//
+// The check covers the fields the engine reads (the version, the ids, names,
+// texts and folder references); the engine reads no timestamp of an entry,
+// so one that is missing is not refused.
+function isPromptBundle(bundle: unknown, errors: ImportError[]): bundle is PromptBundle {
+  errors.push(...bundleShapeErrors(bundle));
+  return errors.length === 0;
+}
+
 function bundleShapeErrors(bundle: unknown): ImportError[] {
   const refuse = (kind: ImportError["kind"], ref: string, message: string): ImportError => ({
     kind,
     ref,
-    error: { field: "name", message, code: "invalid" } as ImportError["error"],
+    error: { field: "name", message, code: "invalid" },
   });
   if (!isObject(bundle)) {
     return [refuse("folder", "<bundle>", "bundle is required and must be an object")];
   }
   if (bundle["version"] !== 1) {
-    return [refuse("folder", "<bundle>", `Unsupported bundle version: ${String(bundle["version"])}`)];
+    return [
+      refuse("folder", "<bundle>", `Unsupported bundle version: ${String(bundle["version"])}`),
+    ];
   }
   const errors: ImportError[] = [];
   const folders = bundle["folders"];
@@ -178,14 +192,18 @@ function bundleShapeErrors(bundle: unknown): ImportError[] {
   } else {
     prompts.forEach((p, i) => {
       if (
-        !isObject(p)
-        || typeof p["id"] !== "string"
-        || typeof p["name"] !== "string"
-        || typeof p["text"] !== "string"
-        || !isFolderRef(p["folderId"])
+        !isObject(p) ||
+        typeof p["id"] !== "string" ||
+        typeof p["name"] !== "string" ||
+        typeof p["text"] !== "string" ||
+        !isFolderRef(p["folderId"])
       ) {
         errors.push(
-          refuse("prompt", `prompts[${i}]`, "a prompt needs string id, name and text, and a string or null folderId"),
+          refuse(
+            "prompt",
+            `prompts[${i}]`,
+            "a prompt needs string id, name and text, and a string or null folderId",
+          ),
         );
       }
     });
@@ -194,6 +212,9 @@ function bundleShapeErrors(bundle: unknown): ImportError[] {
 }
 
 const IMPORT_MODES: ReadonlySet<string> = new Set(["merge", "replace"]);
+
+const isImportMode = (value: unknown): value is ImportMode =>
+  typeof value === "string" && IMPORT_MODES.has(value);
 
 interface UpdateBody {
   id: string;
@@ -223,6 +244,7 @@ interface ImportBody {
 
 export const promptsController = {
   create: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const body: unknown = req.body;
     if (!isObject(body)) {
       shapeRefusal(res, "name", "the request body must be an object");
@@ -249,6 +271,7 @@ export const promptsController = {
   }),
 
   update: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id", "updates"] as const);
     if (typeof args.id !== "string" || args.id.length === 0) {
       shapeRefusal(res, "name", "id is required and must be a string");
@@ -279,6 +302,7 @@ export const promptsController = {
   }),
 
   move: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id", "folderId"] as const);
     if (typeof args.id !== "string" || args.id.length === 0) {
       shapeRefusal(res, "name", "id is required and must be a string");
@@ -293,6 +317,7 @@ export const promptsController = {
   }),
 
   delete: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const { id } = unpackPositional(req.body, ["id"] as const);
     const idStr = typeof id === "string" ? id : asString(req.query["id"]);
     if (!idStr) {
@@ -304,18 +329,23 @@ export const promptsController = {
   }),
 
   list: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     // ApiProvider's fetcher drops both `null` and `undefined` folderId
     // values from the URL, so the backend cannot distinguish them.
     // Per spec, treat key-absent as `null` (root-level prompts).
     const folderIdRaw = req.query["folderId"];
-    const folderId = folderIdRaw === undefined || folderIdRaw === ""
-      ? null
-      : asString(folderIdRaw) ?? null;
+    // A parameter given twice is a list: it names no folder, and it is not the root either.
+    if (folderIdRaw !== undefined && typeof folderIdRaw !== "string") {
+      res.status(400).json({ error: "folderId must be a single value" });
+      return;
+    }
+    const folderId = folderIdRaw === undefined || folderIdRaw === "" ? null : folderIdRaw;
     const result = await engine.list(folderId);
     res.json(result);
   }),
 
   createFolder: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["name"] as const);
     if (typeof args.name !== "string") {
       shapeRefusal(res, "name", "name is required and must be a string");
@@ -325,6 +355,7 @@ export const promptsController = {
   }),
 
   renameFolder: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id", "name"] as const);
     if (typeof args.id !== "string" || args.id.length === 0) {
       shapeRefusal(res, "name", "id is required and must be a string");
@@ -338,6 +369,7 @@ export const promptsController = {
   }),
 
   deleteFolder: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const { id } = unpackPositional(req.body, ["id"] as const);
     const idStr = typeof id === "string" ? id : asString(req.query["id"]);
     if (!idStr) {
@@ -368,31 +400,36 @@ export const promptsController = {
   }),
 
   importBundle: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["bundle", "options"] as const);
-    const shapeErrors = bundleShapeErrors(args.bundle);
-    if (shapeErrors.length > 0) {
+    const bundle = args.bundle;
+    const shapeErrors: ImportError[] = [];
+    if (!isPromptBundle(bundle, shapeErrors)) {
       res.status(400).json({ success: false, errors: shapeErrors });
       return;
     }
-    const bundle = args.bundle as PromptBundle;
     const options: unknown = args.options;
     let mode: ImportMode | undefined;
     if (options !== undefined && options !== null) {
       const rawMode = isObject(options) ? options["mode"] : options;
-      if (rawMode !== undefined && (typeof rawMode !== "string" || !IMPORT_MODES.has(rawMode))) {
+      if (rawMode !== undefined && !isImportMode(rawMode)) {
         res.status(400).json({
           success: false,
           errors: [
             {
               kind: "folder",
               ref: "<options>",
-              error: { field: "name", message: "options.mode must be merge or replace", code: "invalid" },
+              error: {
+                field: "name",
+                message: "options.mode must be merge or replace",
+                code: "invalid",
+              },
             },
           ],
         });
         return;
       }
-      mode = rawMode as ImportMode | undefined;
+      mode = rawMode;
     }
     const twinErrors = bundleTwinErrors(bundle);
     if (twinErrors.length > 0) {
@@ -407,6 +444,7 @@ export const promptsController = {
   }),
 
   getById: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const id = asString(req.query["id"]);
     if (!id) {
       res.status(400).json({ error: "id required" });
@@ -417,6 +455,7 @@ export const promptsController = {
   }),
 
   getFolderById: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const id = asString(req.query["id"]);
     if (!id) {
       res.status(400).json({ error: "id required" });

@@ -119,7 +119,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return result.Distinct();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetAiProjectsVisibleToAsync(IEnumerable<string> projectsIds, int aiHubRootId, Guid userId, bool isAdmin)
+    public IAsyncEnumerable<Folder<string>> GetAiHubRootProjectsAsync(IEnumerable<string> pinnedIds, int aiHubRootId, Guid userId, int count)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }

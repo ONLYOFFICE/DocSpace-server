@@ -198,9 +198,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbFolderQuery> AiProjectsWithOwnRecordAsync(int tenantId, IEnumerable<int> ids, int parentId, Guid userId, bool isAdmin)
+    public IAsyncEnumerable<DbFolderQuery> AiHubRootProjectsAsync(int tenantId, IEnumerable<int> pinnedIds, int parentId, Guid userId, int count)
     {
-        return FolderQueries.AiProjectsWithOwnRecordAsync(this, tenantId, ids, parentId, userId, isAdmin);
+        return FolderQueries.AiHubRootProjectsAsync(this, tenantId, pinnedIds, parentId, userId, count);
     }
 
     [PreCompileQuery]
@@ -411,11 +411,11 @@ public partial class FilesDbContext
 
 static file class FolderQueries
 {
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, int, Guid, bool, IAsyncEnumerable<DbFolderQuery>> AiProjectsWithOwnRecordAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, int, Guid, int, IAsyncEnumerable<DbFolderQuery>> AiHubRootProjectsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> ids, int parentId, Guid userId, bool isAdmin) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> pinnedIds, int parentId, Guid userId, int count) =>
                 ctx.Folders
-                    .Where(f => f.TenantId == tenantId && ids.Contains(f.Id) && f.FolderType == FolderType.AiProjectRoom && f.ParentId == parentId)
+                    .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.AiProjectRoom && f.ParentId == parentId)
                     .Join(ctx.Folders,
                         f => new { f.TenantId, Id = f.ParentId },
                         root => new { root.TenantId, root.Id },
@@ -433,7 +433,11 @@ static file class FolderQueries
                         s => new { s.TenantId, Id = s.InternalEntryId },
                         (x, records) => new { x.Folder, x.Root, x.Settings, records })
                     .SelectMany(x => x.records.DefaultIfEmpty(), (x, s) => new { x.Folder, x.Root, x.Settings, Record = s })
-                    .Where(x => isAdmin || x.Folder.CreateBy == userId || x.Record != null)
+                    .Where(x => x.Folder.CreateBy == userId || x.Record != null)
+                    .OrderByDescending(x => pinnedIds.Contains(x.Folder.Id))
+                    .ThenByDescending(x => x.Folder.ModifiedOn)
+                    .ThenByDescending(x => x.Folder.Id)
+                    .Take(count)
                     .Select(x => new DbFolderQuery
                     {
                         Folder = x.Folder,

@@ -78,8 +78,8 @@ function rewriteRefs(node: unknown, rename: (name: string) => string): unknown {
     const out: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(node)) {
       if (key === "$ref" && typeof value === "string") {
-        const match = value.match(/^#\/components\/schemas\/(.+)$/);
-        out[key] = match ? `#/components/schemas/${rename(match[1]!)}` : value;
+        const name = value.match(/^#\/components\/schemas\/(.+)$/)?.[1];
+        out[key] = name === undefined ? value : `#/components/schemas/${rename(name)}`;
       } else {
         out[key] = rewriteRefs(value, rename);
       }

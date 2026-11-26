@@ -34,8 +34,12 @@
 import { randomUUID } from "node:crypto";
 
 import date from "date-and-time";
-import { aiService, AiServiceHttpError, proxyBaseUrl, withTimeout } from "./httpClient.js";
+import { aiService, AiServiceHttpError, proxyBaseUrl } from "./httpClient.js";
 import {
+  DocspaceApiHttpError,
+  envelopeResponse,
+  filesApiDownload,
+  filesApiRequest,
   getFolderInfo,
   getMyDocumentsFolderId,
   canTakeUpload,
@@ -44,13 +48,17 @@ import {
 import { getForwardedHeaders, getAnalyzeEntryIds } from "../requestContext.js";
 import { getMaxImageSize } from "../../config/index.js";
 import { downloadHeaders, readBodyCapped } from "./roomSkills.js";
-import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
+import { getBoolean, getNumber, getString, isObject, readProp } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
 import { uploadThreadArtifact } from "./threadFiles.js";
 import { copyManyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
+import { clientFault } from "../httpErrors.js";
+import { listAnswer, mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
+import { pooled, UPSTREAM_CONCURRENCY } from "./pooled.js";
+import { writeWasRefused } from "./writeOutcome.js";
 
 const PATH = "/attachments";
 
@@ -143,7 +151,10 @@ function generatedImageName(mime: string): string {
 }
 
 /** The generated image as an artifact of its conversation; `undefined` when the conversation takes none. */
-async function insertThreadArtifactImage(threadId: string, base64: string): Promise<string | undefined> {
+async function insertThreadArtifactImage(
+  threadId: string,
+  base64: string,
+): Promise<string | undefined> {
   const { bytes, mime } = decodeImagePayload(base64);
   const artifact = await uploadThreadArtifact(threadId, generatedImageName(mime), bytes, mime);
   return artifact?.id;
@@ -165,9 +176,8 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
   form.append("createNewIfExist", "true");
   form.append("file", new Blob([bytes], { type: mime }), fileName);
 
-  const url = `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(folderId)}/insert`;
-  // Don't set Content-Type — `fetch` derives the multipart boundary from the
-  // FormData body, and `getForwardedHeaders` strips content-type anyway.
+  const path = `${encodeURIComponent(folderId)}/insert`;
+  const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
   const headers = getForwardedHeaders();
   // Diagnostics for a failing generated-image upload: the request as it
   // actually goes out. Header NAMES only (a value would leak the session
@@ -175,48 +185,87 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
   // all, since a lost request context uploads anonymously and answers 401.
   logger.info(
     `insertGeneratedImage: POST ${url} title=${fileName} mime=${mime} bytes=${bytes.length} ` +
-      `auth=[${Object.keys(headers).filter((h) => h === "cookie" || h === "authorization").join(",") || "NONE"}] ` +
+      `auth=[${
+        Object.keys(headers)
+          .filter((h) => h === "cookie" || h === "authorization")
+          .join(",") || "NONE"
+      }] ` +
       `forwarded=[${Object.keys(headers).sort().join(",")}]`,
   );
-  const { signal, cancel } = withTimeout(undefined);
+  let json: unknown;
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers,
-      body: form,
-      signal,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      logger.error(
-        `insertGeneratedImage: POST ${url} -> ${res.status} ${res.statusText}; ` +
-          `body=${text.slice(0, 1000)}`,
-      );
-      throw new AiServiceHttpError(res.status, res.statusText, text, url);
+    json = await filesApiRequest("POST", path, { form });
+  } catch (err) {
+    if (err instanceof DocspaceApiHttpError) {
+      logger.error(`insertGeneratedImage: POST ${url} -> ${err.status} ${err.statusText}`);
     }
-    const json: unknown = await res.json();
-    const file = isObject(json) && "response" in json ? json.response : json;
-    if (!isObject(file)) {
-      logger.error(
-        `insertGeneratedImage: POST ${url} -> 200 but unexpected payload=${JSON.stringify(json).slice(0, 1000)}`,
-      );
-      throw new Error("DocSpace insert returned an unexpected payload");
-    }
-    const numId = getNumber(file, "id");
-    const id = numId !== undefined ? String(numId) : getString(file, "id");
-    if (id === undefined) {
-      logger.error(
-        `insertGeneratedImage: POST ${url} -> 200 but no file id in payload=${JSON.stringify(file).slice(0, 1000)}`,
-      );
-      throw new Error("DocSpace insert returned a file without an id");
-    }
-    logger.info(
-      `insertGeneratedImage: POST ${url} -> 200 entryId=${id} title=${getString(file, "title") ?? "?"} ` +
-        `folderId=${String(getNumber(file, "folderId") ?? getString(file, "folderId") ?? "?")}`,
+    throw err;
+  }
+  const file = envelopeResponse(json);
+  if (!isObject(file)) {
+    logger.error(`insertGeneratedImage: POST ${url} -> 200 but its answer carries no file object`);
+    throw new UpstreamShapeError("POST files/{folderId}/insert");
+  }
+  const numId = getNumber(file, "id");
+  const id = numId !== undefined ? String(numId) : getString(file, "id");
+  if (id === undefined) {
+    logger.error(`insertGeneratedImage: POST ${url} -> 200 but the file object carries no id`);
+    throw new UpstreamShapeError("POST files/{folderId}/insert");
+  }
+  logger.info(
+    `insertGeneratedImage: POST ${url} -> 200 entryId=${id} title=${getString(file, "title") ?? "?"} ` +
+      `folderId=${String(getNumber(file, "folderId") ?? getString(file, "folderId") ?? "?")}`,
+  );
+  return id;
+}
+
+/**
+ * Whether a failed write of an attachment record says that no record was stored: the AI service
+ * refused it (a 4xx), or answered a list without the file (it drops an entry it cannot resolve,
+ * which `createMany` words as a 404 for the caller). A timeout, a dropped connection, a 5xx and a
+ * 2xx whose body cannot be read are unknown: the record may be stored.
+ */
+function recordWasRefused(err: unknown): boolean {
+  const status =
+    err instanceof AiServiceHttpError || readProp(err, "expose") === true
+      ? readProp(err, "status")
+      : undefined;
+  return typeof status === "number" && status >= 400 && status < 500;
+}
+
+/**
+ * Removes a generated image whose attachment record was refused, so no file
+ * is left in the folder that no message names
+ * (`DELETE api/2.0/files/file/{fileId}`, FilesController.DeleteFile; it
+ * starts a file operation and answers at once). Only a refusal
+ * ({@link recordWasRefused}) removes it: after an answer that leaves the
+ * write unknown the file stays, as a record that was stored after all would
+ * name a file that is gone. The file was made by this
+ * request seconds before, so it skips the trash. `returnSingleOperation`
+ * (a query parameter of this route) makes the answer this operation only:
+ * without it the portal lists every operation of the user and drops the
+ * finished ones from its queue, so the user's own delete or move in the web
+ * client would lose its result. Best effort: a failure is logged with the
+ * file's id and does not replace the error that caused it.
+ */
+async function removeOrphanImage(entryId: string): Promise<void> {
+  try {
+    await filesApiRequest(
+      "DELETE",
+      `file/${encodeURIComponent(entryId)}?returnSingleOperation=true`,
+      {
+        json: { deleteAfter: false, immediately: true },
+      },
     );
-    return id;
-  } finally {
-    cancel();
+    logger.warn(
+      `uploadToolImage: asked to delete file ${entryId} (a file operation), its attachment record was refused`,
+    );
+  } catch (err) {
+    logger.error(
+      `uploadToolImage: file ${entryId} is left without an attachment record, its removal failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
   }
 }
 
@@ -224,36 +273,36 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   // Named in the log without its query: the signature there downloads the
   // file until it expires.
   let where = "the image";
-  const { signal, cancel } = withTimeout(undefined);
+  const limit = getMaxImageSize();
   try {
     const target = imageTarget(url);
     where = target.href.split("?", 1)[0] ?? where;
-    const res = await fetch(target.href, {
-      headers: target.portal ? downloadHeaders() : {},
-      signal,
-    });
-    if (!res.ok) {
-      logger.warn(`fetchImageAsDataUrl: ${where} → ${res.status} ${res.statusText}`);
-      return null;
-    }
-    // Read here, inside the timeout, and no further than the size a chat
-    // takes an image up to: the bytes are held whole and again as base64.
-    const limit = getMaxImageSize();
-    const buf = await readBodyCapped(res, limit);
-    if (buf === null) {
+    // Read inside the timeout, and no further than the size a chat takes an
+    // image up to: the bytes are held whole and again as base64.
+    const image = await filesApiDownload(
+      target.href,
+      target.portal ? downloadHeaders() : {},
+      async (res) => ({
+        bytes: await readBodyCapped(res, limit),
+        contentType: res.headers.get("content-type"),
+      }),
+    );
+    if (image.bytes === null) {
       logger.warn(`fetchImageAsDataUrl: ${where} is over ${limit} bytes, not inlined`);
       return null;
     }
-    const mime = detectImageMime(buf, res.headers.get("content-type"));
-    const b64 = Buffer.from(buf).toString("base64");
+    const mime = detectImageMime(image.bytes, image.contentType);
+    const b64 = Buffer.from(image.bytes).toString("base64");
     return `data:${mime};base64,${b64}`;
   } catch (err) {
+    if (err instanceof DocspaceApiHttpError) {
+      logger.warn(`fetchImageAsDataUrl: ${where} → ${err.status} ${err.statusText}`);
+      return null;
+    }
     logger.error(
       `fetchImageAsDataUrl: ${where} failed: ${err instanceof Error ? err.message : String(err)}`,
     );
     return null;
-  } finally {
-    cancel();
   }
 }
 
@@ -279,7 +328,7 @@ async function projectOf(entityId: string | undefined): Promise<string | undefin
 }
 
 async function inlineImagesAsync(attachments: (Attachment | null)[]): Promise<void> {
-  const tasks: Promise<void>[] = [];
+  const images: { record: Attachment; src: string }[] = [];
   // A record named twice in one read is one object in two places: it is
   // downloaded once.
   const seen = new Set<Attachment>();
@@ -292,18 +341,16 @@ async function inlineImagesAsync(attachments: (Attachment | null)[]): Promise<vo
     if (!src || src.startsWith("data:")) {
       continue;
     }
-    tasks.push(
-      (async () => {
-        const dataUrl = await fetchImageAsDataUrl(src);
-        if (dataUrl) {
-          a.base64 = dataUrl;
-        }
-      })(),
-    );
+    images.push({ record: a, src });
   }
-  if (tasks.length > 0) {
-    await Promise.all(tasks);
-  }
+  // A few at a time: each download holds an image of up to `getMaxImageSize()` bytes and its
+  // base64 copy, so a history of sixty images started at once held sixty of them.
+  await pooled(images, UPSTREAM_CONCURRENCY, async ({ record, src }) => {
+    const dataUrl = await fetchImageAsDataUrl(src);
+    if (dataUrl) {
+      record.base64 = dataUrl;
+    }
+  });
 }
 
 // The C# `AttachmentsStorageController` exposes a DocSpace-specific shape
@@ -413,18 +460,10 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // with `source === "tool"` and no DocSpace entry. Upload the bytes as a
     // real file into the round's folder so they're persisted (and reclaimed
     // by the message/thread cascade), rather than cached in-memory.
-    const toolTasks: Promise<void>[] = [];
-    inputs.forEach((input, i) => {
-      if (input.source !== "tool") return;
-      toolTasks.push(
-        (async () => {
-          result[i] = await this.uploadToolImage(input);
-        })(),
-      );
+    const toolInputs = inputs.flatMap((input, i) => (input.source === "tool" ? [i] : []));
+    await pooled(toolInputs, UPSTREAM_CONCURRENCY, async (i) => {
+      result[i] = await this.uploadToolImage(inputs[i] as (typeof inputs)[number]);
     });
-    if (toolTasks.length > 0) {
-      await Promise.all(toolTasks);
-    }
 
     // Raw-payload drafts (device upload, dnd — no `input.path`, not a tool
     // upload) are rejected: the C# backend has no endpoint for raw content,
@@ -438,11 +477,11 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       );
     });
 
-    const docspaceIndices: number[] = [];
+    const docspace: Array<{ index: number; input: (typeof inputs)[number] }> = [];
     const sourceIds: string[] = [];
     inputs.forEach((input, i) => {
       if (result[i]) return;
-      docspaceIndices.push(i);
+      docspace.push({ index: i, input });
       sourceIds.push(input.path ?? "");
     });
 
@@ -474,57 +513,56 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     const copies = new Map(sourceIds.map((id, i) => [id, entryIds[i] ?? id]));
     const analyzeEntryIds = getAnalyzeEntryIds()?.map((id) => copies.get(String(id)) ?? id);
     const raw = await aiService.post(PATH, { entryIds, analyzeEntryIds });
+    // The answer is attachment DTOs: `content` is the text read from the user's file and
+    // `dataUrl` an address whose signature downloads it. The log names ids and counts only.
     logger.debug(
       `HttpAttachmentsStorage.createMany: POST ${PATH} entryIds=${JSON.stringify(entryIds)} ` +
-        `analyzeEntryIds=${JSON.stringify(analyzeEntryIds)} raw response=${JSON.stringify(raw)}`,
+        `analyzeEntryIds=${JSON.stringify(analyzeEntryIds)} answered ${
+          Array.isArray(raw) ? `${raw.length} item(s)` : "no list"
+        }`,
     );
     if (!Array.isArray(raw)) {
       logger.error(
         `HttpAttachmentsStorage.createMany: backend returned non-array payload ` +
-          `(type=${raw === null ? "null" : typeof raw}); raw=${JSON.stringify(raw)}`,
+          `(type=${raw === null ? "null" : typeof raw})`,
       );
-      throw new Error("ai service returned a non-array response for attachments createMany");
+      throw new UpstreamShapeError("POST attachments");
     }
     // C# `AttachmentsStorageService` groups output by file kind (internal then
     // thirdparty) and so doesn't preserve input order in mixed-kind batches.
     // `dtoToAttachment` composes `path = "${entryId}/${title}"`; split on the
     // first slash to get the original entry id for the order-aware match.
     const byEntryId = new Map<string, Attachment>();
-    const skipped: unknown[] = [];
+    let skipped = 0;
     for (const item of raw) {
       const a = dtoToAttachment(item);
       if (!a || !a.path) {
-        skipped.push(item);
+        skipped += 1;
         continue;
       }
       const entryIdKey = a.path.split("/", 1)[0] ?? "";
       byEntryId.set(entryIdKey, a);
     }
-    if (skipped.length > 0) {
+    if (skipped > 0) {
       logger.warn(
-        `HttpAttachmentsStorage.createMany: ${skipped.length} item(s) skipped ` +
-          `(missing id/title/kind/entryId); skipped=${JSON.stringify(skipped)}`,
+        `HttpAttachmentsStorage.createMany: ${skipped} of ${raw.length} item(s) skipped ` +
+          `(missing id/title/kind/entryId)`,
       );
     }
-    docspaceIndices.forEach((i, docspaceIdx) => {
-      const input = inputs[i]!;
+    docspace.forEach(({ index, input }, docspaceIdx) => {
       const entryId = entryIds[docspaceIdx] ?? "";
       const matched = byEntryId.get(entryId);
       if (!matched) {
         logger.error(
           `HttpAttachmentsStorage.createMany: no match for entryId=${entryId}. ` +
             `requested=${JSON.stringify(entryIds)} ` +
-            `backend entryIds=${JSON.stringify([...byEntryId.keys()])} ` +
-            `raw=${JSON.stringify(raw)}`,
+            `backend entryIds=${JSON.stringify([...byEntryId.keys()])}`,
         );
         // The C# side silently drops entry ids it cannot resolve (an id that
         // does not exist, or one the caller cannot read), so a missing match
         // is a client error, not a service fault — answer 404 instead of
         // collapsing to a generic 500 (Bug 82893).
-        throw Object.assign(
-          new Error(`attachment entry not found or inaccessible: ${entryId}`),
-          { status: 404, expose: true },
-        );
+        throw clientFault(404, `attachment entry not found or inaccessible: ${entryId}`);
       }
       // The caller's own `type` wins over the title-derived one from
       // `dtoToAttachment`: it comes from the same `c_oAscFileType` table but
@@ -533,7 +571,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       if (input.type !== undefined) {
         matched.type = input.type;
       }
-      result[i] = matched;
+      result[index] = matched;
     });
 
     const finalResult = result.map((rec, i) => {
@@ -586,16 +624,29 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // logger, so without this the file log shows nothing when an upload dies,
     // and a 404 from the folder read reads exactly like a 404 from the insert.
     let stage = "thread-artifact";
+    // The file once it is stored. A refusal of its attachment record asks the
+    // Files API to delete it again (`removeOrphanImage`, best effort: a delete
+    // that fails is logged with the file id and the file stays); after an
+    // answer that leaves the record unknown the file is kept.
+    let stored: string | undefined;
+    // Where a file is being created right now, for the catch below: a creation that got no
+    // usable answer may have stored a file nobody can name.
+    let creating: string | undefined;
     try {
       // A conversation of an AI project keeps what its replies produce in
       // its own folder of artifacts; any other conversation has none, and
       // the image goes to the round's folder as before.
+      creating = input.threadId ? `the artifacts of thread ${input.threadId}` : undefined;
       const artifact = input.threadId
         ? await insertThreadArtifactImage(input.threadId, input.base64)
         : undefined;
+      creating = undefined;
       if (artifact !== undefined) {
         stage = "attachment-record";
-        const [record] = await this.createMany([{ kind: "image", title: input.title, path: artifact }]);
+        stored = artifact;
+        const [record] = await this.createMany([
+          { kind: "image", title: input.title, path: artifact },
+        ]);
         if (!record) {
           throw new Error("failed to create attachment for the thread artifact");
         }
@@ -614,8 +665,8 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
           `uploadToolImage: folder-info entityId=${input.entityId} -> ` +
             (folderInfo
               ? `title=${folderInfo.title ?? "-"} ` +
-                  `folderType=${folderInfo.folderType ?? "?"} canCreate=${folderInfo.canCreate ?? "?"}`
-              : "NOT FOUND (404 or unparseable) — the scope is not a folder this user can read"),
+                `folderType=${folderInfo.folderType ?? "?"} canCreate=${folderInfo.canCreate ?? "?"}`
+              : "NOT FOUND (404) — the scope is not a folder this user can read"),
         );
       }
       if (!targetFolderId || !canTakeUpload(folderInfo)) {
@@ -644,15 +695,17 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       stage = "insert";
       let entryId: string;
       try {
+        creating = `folder ${targetFolderId}`;
         entryId = await insertGeneratedImage(targetFolderId, input.base64);
       } catch (err) {
         // `FolderDto.Security` is computed for the folder view-model while
         // `FileUploader` re-checks the right server-side, so the preflight
         // above can pass on a target the upload still refuses. Give the image
         // the same second chance a refused scope gets.
-        if (!(err instanceof AiServiceHttpError) || err.status !== 403) {
+        if (!(err instanceof DocspaceApiHttpError) || err.status !== 403) {
           throw err;
         }
+        creating = undefined;
         stage = "my-documents";
         const myDocumentsId = await getMyDocumentsFolderId();
         if (!myDocumentsId || myDocumentsId === targetFolderId) {
@@ -663,10 +716,13 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
             `-> retrying into My documents ${myDocumentsId}`,
         );
         stage = "insert-retry";
+        creating = `folder ${myDocumentsId}`;
         entryId = await insertGeneratedImage(myDocumentsId, input.base64);
         targetFolderId = myDocumentsId;
       }
+      creating = undefined;
       stage = "attachment-record";
+      stored = entryId;
 
       // Reuse the entry-based path: `path` routes this back through the
       // DocSpace branch of `createMany` (no `source`, so it won't recurse
@@ -689,6 +745,22 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       );
       return attachment;
     } catch (err) {
+      if (creating !== undefined && !writeWasRefused(err)) {
+        // A timeout, a dropped connection, a 5xx or a 2xx without the file's id: only a
+        // refusal says that nothing was stored (ts-ai-failure-paths.md §6).
+        logger.error(
+          `uploadToolImage: a file may exist in ${creating}, its creation got no usable answer; nothing names it`,
+        );
+      }
+      if (stored !== undefined) {
+        if (recordWasRefused(err)) {
+          await removeOrphanImage(stored);
+        } else {
+          logger.error(
+            `uploadToolImage: file ${stored} is kept, whether its attachment record was stored is unknown`,
+          );
+        }
+      }
       logger.error(
         `uploadToolImage: entityId=${input.entityId ?? "-"} FAILED at stage=${stage}: ${
           err instanceof Error ? `${err.message}${err.stack ? `\n${err.stack}` : ""}` : String(err)
@@ -710,24 +782,21 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       };
       logger.error(
         `uploadToolImage: returning an UNRESOLVABLE placeholder ref=${placeholder.id} — ` +
-          "nothing was persisted, so the stream carries a ref the chat can never hydrate " +
-          "(broken image in the message, no file in DocSpace)",
+          "no attachment record was confirmed, so the stream carries a ref the chat can never " +
+          "hydrate (broken image in the message; whether a file was stored, and whether it was " +
+          "kept or asked to be deleted, is in the lines above)",
       );
       return placeholder;
     }
   }
 
   async readById(id: string): Promise<Attachment | null> {
+    if (namesNoEntity(id)) {
+      return null;
+    }
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
-      const a = dtoToAttachment(raw);
-      if (!a) {
-        logger.warn(
-          `HttpAttachmentsStorage.readById(${id}): unusable payload (missing id/title/kind) ` +
-            `raw=${JSON.stringify(raw).slice(0, 500)}`,
-        );
-        return a;
-      }
+      const a = mapped(dtoToAttachment(raw), "GET attachments/{id}");
       await inlineImagesAsync([a]);
       logger.info(
         `HttpAttachmentsStorage.readById(${id}) -> kind=${a.kind} title=${a.title} ` +
@@ -773,7 +842,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
 
     const byId = new Map<string, Attachment>();
     const raw = await aiService.post(`${PATH}/read`, { ids });
-    const list = Array.isArray(raw) ? raw : [];
+    const list = listAnswer(raw, "POST attachments/read");
     for (const item of list) {
       const a = dtoToAttachment(item);
       if (a) {

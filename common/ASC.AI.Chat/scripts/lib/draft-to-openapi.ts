@@ -189,7 +189,8 @@ function flattenObjectUnion(node: JsonObject): JsonObject {
     for (const member of members as JsonObject[]) {
       const memberProps = member["properties"] as JsonObject;
       for (const [name, schema] of Object.entries(memberProps)) {
-        properties[name] = name in properties ? widen(properties[name]!, schema) : schema;
+        const known = properties[name];
+        properties[name] = known === undefined ? schema : widen(known, schema);
       }
       const memberRequired = Array.isArray(member["required"])
         ? (member["required"] as string[])

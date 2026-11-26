@@ -33,9 +33,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 const engine = {
   saveFilesMany: vi.fn(),
   getMany: vi.fn(),
@@ -59,13 +56,17 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
 const readThreadId = vi.fn();
 const findMissingIds = vi.fn();
 vi.mock("../../storage/index.js", () => ({
-  storage: { messages: { readThreadId }, attachments: { findMissingIds } },
+  storage: {
+    messages: { readThreadId },
+    attachments: { findMissingIds },
+    toolPrefs: { readDisabled: vi.fn() },
+  },
 }));
 vi.mock("../../requestContext.js", () => ({ setAnalyzeEntryIds: vi.fn() }));
 vi.mock("../../forms/suggestedQuestions.js", () => ({ getSuggestedQuestions: vi.fn() }));
 
 const { attachmentsController } = await import("../attachmentsController.js");
-const { MAX_ATTACHMENTS_PER_REQUEST } = await import("../_helpers.js");
+const { MAX_ATTACHMENTS_PER_REQUEST, handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
@@ -73,7 +74,8 @@ const run = async (name: keyof typeof attachmentsController, body: unknown) => {
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (attachmentsController[name] as unknown as Handler)({ body, query: {} }, res, next);
+  (attachmentsController[name] as unknown as Handler)({ body, query: {} }, res, next);
+  await handlerSettled(res);
   const failure = next.mock.calls[0];
   if (failure) throw failure[0];
   return {

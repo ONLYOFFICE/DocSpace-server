@@ -125,7 +125,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 await ReportProgressAsync(50, MigrationResource.UnzippingFinished);
             }
 
-            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
+            var dbFile = Directory.GetFiles(GetBackupRoot()).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
             dbFile ??= Directory.GetFiles(TmpFolder).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
             if (dbFile == null)
             {
@@ -152,7 +152,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 {
                     try
                     {
-                        var rootFolder = Directory.GetDirectories(TmpFolder)[0];
+                        var rootFolder = GetBackupRoot();
                         // the user id comes from the dump, so the folder built from it must stay inside the backup
                         var cachePath = GetSafeExtractPath(Path.Combine(rootFolder, "data"), Path.Combine(user.Key, "cache"));
                         var drivePath = Directory.Exists(cachePath) ? cachePath : null;
@@ -495,7 +495,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
     private void ParseStorage(string key, MigrationUser user, string dbFile)
     {
-        var rootFolder = Directory.GetDirectories(TmpFolder)[0];
+        var rootFolder = GetBackupRoot();
 
         var filesPath = GetSafeExtractPath(Path.Combine(rootFolder, "data"), Path.Combine(key, "files"));
         var drivePath = Directory.Exists(filesPath) ? filesPath : null;
@@ -640,5 +640,21 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
 
         return Array.Exists([1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27], el => el == role) ? ASCShare.Read : ASCShare.Editing; //permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
+    }
+
+    /// <summary>
+    /// The folder that holds the backup's <c>data</c> folder. An archive is packed either with one folder around
+    /// the backup or with the backup's own entries at its top level, and is unpacked into <see cref="Migrator.TmpFolder"/>.
+    /// </summary>
+    private string GetBackupRoot()
+    {
+        var folders = Directory.GetDirectories(TmpFolder);
+        var wrapper = folders.FirstOrDefault(folder => Directory.Exists(Path.Combine(folder, "data")));
+        if (wrapper != null)
+        {
+            return wrapper;
+        }
+
+        return Directory.Exists(Path.Combine(TmpFolder, "data")) ? TmpFolder : folders[0];
     }
 }

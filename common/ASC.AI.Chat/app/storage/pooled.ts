@@ -1,0 +1,75 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+/**
+ * How many calls one request keeps in flight to a service it loops over, where the caller has
+ * no number of its own. A download that holds its file in memory counts the same: the limit
+ * then bounds the memory of the request as well.
+ */
+export const UPSTREAM_CONCURRENCY = 4;
+
+/**
+ * `run` of every item, at most `limit` at a time, answered in the order of `items`. The calls
+ * of one request go to a service with the caller's own session: started all at once, a listing
+ * of a thousand rooms was some sixty requests in flight for a single caller. When a call fails
+ * no further one is started, and the failure is thrown once the calls in flight have ended.
+ */
+export async function pooled<T, R>(
+  items: readonly T[],
+  limit: number,
+  run: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = [];
+  let next = 0;
+  let failed = false;
+  const worker = async (): Promise<void> => {
+    while (!failed && next < items.length) {
+      const index = next++;
+      try {
+        results[index] = await run(items[index] as T);
+      } catch (err) {
+        failed = true;
+        throw err;
+      }
+    }
+  };
+  const settled = await Promise.allSettled(
+    Array.from({ length: Math.min(limit, items.length) }, worker),
+  );
+  for (const outcome of settled) {
+    if (outcome.status === "rejected") {
+      throw outcome.reason;
+    }
+  }
+  return results;
+}

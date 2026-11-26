@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService, AiServiceHttpError } from "./httpClient.js";
@@ -40,6 +40,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 // The action -> profile bindings are one map per portal. The `entityId` the
 // library passes with every call (the folder the chat is opened from) is
@@ -76,6 +77,10 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
   }
 
   async readByType(actionType: ActionType, _entityId?: string): Promise<string | null> {
+    // Nothing is assigned to such a type, and the path would reach the list route.
+    if (namesNoEntity(actionType)) {
+      return null;
+    }
     // The aggregate's global map went through the same resolver as the
     // per-type endpoint (`Default` substitution included), so a key lookup
     // is equivalent to `GET assignments/{type}`.
@@ -90,7 +95,11 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     reportChatContextMiss(`assignments.readByType(${actionType})`);
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(actionType)}`);
-      const profileId = typeof raw === "string" ? raw : null;
+      // A profile id, or nothing assigned; any other shape is unknown (ts-ai-failure-paths.md §1).
+      if (raw !== null && raw !== undefined && typeof raw !== "string") {
+        throw new UpstreamShapeError(`GET assignments/${actionType}`);
+      }
+      const profileId = raw ?? null;
       // The action -> profile routing. `image_generation` is the one the
       // built-in `generate_image` tool resolves: no assignment here and the
       // tool answers "Image generation provider is not configured." without
@@ -101,9 +110,7 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
       return profileId;
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
-        logger.info(
-          `HttpAssignmentsStorage.readByType(${actionType}) -> 404 NO ASSIGNMENT`,
-        );
+        logger.info(`HttpAssignmentsStorage.readByType(${actionType}) -> 404 NO ASSIGNMENT`);
         return null;
       }
       throw err;
@@ -118,7 +125,7 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     reportChatContextMiss("assignments.readAll");
     const raw = await aiService.get(PATH);
     if (!isObject(raw)) {
-      return {};
+      throw new UpstreamShapeError("GET assignments");
     }
     const result: Partial<Record<ActionType, string>> = {};
     for (const [key, value] of Object.entries(raw)) {

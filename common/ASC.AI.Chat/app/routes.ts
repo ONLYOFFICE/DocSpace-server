@@ -234,8 +234,8 @@ export default function registerRoutes(app: Application): void {
 
   // OpenAI-compatible passthrough for the document editor's AI plugin
   // (external-provider transport). Explicit sub-paths only — the allowlist
-  // is the registration itself. The request body is raw here: `app.ts`
-  // skips the JSON body parser for `/openai/*`.
+  // is the registration itself. The request body is raw here: `app/createApp.ts`
+  // runs no body parser for `/openai/*`.
   router.post(
     "/openai/:profileId/v1/chat/completions",
     openaiPassthroughController.chatCompletions,
@@ -274,6 +274,6 @@ export default function registerRoutes(app: Application): void {
 
   app.use((req, res) => {
     logger.warn(`Route not found: ${req.method} ${req.originalUrl}`);
-    res.sendStatus(404);
+    res.status(404).json({ error: "Not Found" });
   });
 }

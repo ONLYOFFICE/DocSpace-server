@@ -129,6 +129,11 @@ without a file of the right extension SHALL fail the job and list the uploaded f
 - **WHEN** the dump of a Nextcloud backup was written by pg_dump, which lists the rows of a table after a `COPY … FROM stdin;` line instead of in an `INSERT`
 - **THEN** the parse lists the same users with the same files as for a MySQL dump of the same data
 
+#### Scenario: Nextcloud archive without a folder around the backup
+
+- **WHEN** a `.zip` or `.tar.gz` Nextcloud backup holds `config/`, `data/` and the dump as its top-level entries instead of one folder that holds them
+- **THEN** the parse lists the same users with the same files as for the backup packed inside a folder
+
 #### Scenario: Nextcloud archive without a database dump
 
 - **WHEN** the uploaded `.zip` holds no `.bak` or `.sql` file

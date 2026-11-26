@@ -32,35 +32,46 @@
 
 import { aiService } from "../storage/httpClient.js";
 import { isObject } from "../narrow.js";
+import { envelopeAnswer } from "../storage/upstreamShape.js";
 import { asyncHandler } from "./_helpers.js";
 
 // Thin proxy for the .NET AI settings endpoints (SettingsController,
 // `internal/ai/config/*`). The body/response are forwarded as-is; `raw: true`
 // keeps the DocSpace `{ response, status, ... }` envelope so the client sees
-// the same shape it did when these were served directly from .NET.
+// the same shape it did when these were served directly from .NET. An answer
+// that is not that envelope is answered 502 (`envelopeAnswer`).
 export const settingsController = {
   // GET config → `GET internal/ai/config`. Reports the combined AI
   // configuration/readiness for the portal.
   getAiSettings: asyncHandler(async (_req, res) => {
-    const settings = await aiService.get("/config", { raw: true });
+    const settings = envelopeAnswer(await aiService.get("/config", { raw: true }), "GET config");
     res.json(settings);
   }),
 
   // GET config/vectorization → `GET internal/ai/config/vectorization`.
   getVectorizationSettings: asyncHandler(async (_req, res) => {
-    const settings = await aiService.get("/config/vectorization", { raw: true });
+    const settings = envelopeAnswer(
+      await aiService.get("/config/vectorization", { raw: true }),
+      "GET config/vectorization",
+    );
     res.json(settings);
   }),
 
   // PUT config/vectorization → `PUT internal/ai/config/vectorization`.
   setVectorizationSettings: asyncHandler(async (req, res) => {
-    const settings = await aiService.put("/config/vectorization", req.body ?? {}, { raw: true });
+    const settings = envelopeAnswer(
+      await aiService.put("/config/vectorization", req.body ?? {}, { raw: true }),
+      "PUT config/vectorization",
+    );
     res.json(settings);
   }),
 
   // GET config/user → `GET internal/ai/config/user`.
   getUserSettings: asyncHandler(async (_req, res) => {
-    const settings = await aiService.get("/config/user", { raw: true });
+    const settings = envelopeAnswer(
+      await aiService.get("/config/user", { raw: true }),
+      "GET config/user",
+    );
     res.json(settings);
   }),
 
@@ -77,7 +88,10 @@ export const settingsController = {
       });
       return;
     }
-    const settings = await aiService.put("/config/user", body, { raw: true });
+    const settings = envelopeAnswer(
+      await aiService.put("/config/user", body, { raw: true }),
+      "PUT config/user",
+    );
     res.json(settings);
   }),
 
@@ -85,13 +99,19 @@ export const settingsController = {
   // user's tool permission mode as the AI service spells it (`{ mode }`, the
   // C# enum). The chat itself reads it through the preferences routes.
   getToolMode: asyncHandler(async (_req, res) => {
-    const settings = await aiService.get("/config/tool-mode", { raw: true });
+    const settings = envelopeAnswer(
+      await aiService.get("/config/tool-mode", { raw: true }),
+      "GET config/tool-mode",
+    );
     res.json(settings);
   }),
 
   // PUT config/tool-mode → `PUT internal/ai/config/tool-mode`.
   setToolMode: asyncHandler(async (req, res) => {
-    const settings = await aiService.put("/config/tool-mode", req.body ?? {}, { raw: true });
+    const settings = envelopeAnswer(
+      await aiService.put("/config/tool-mode", req.body ?? {}, { raw: true }),
+      "PUT config/tool-mode",
+    );
     res.json(settings);
   }),
 };

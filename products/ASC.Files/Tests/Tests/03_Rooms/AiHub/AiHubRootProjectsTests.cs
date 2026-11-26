@@ -32,59 +32,112 @@
 namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
-/// The AI rooms section of the root folders (`GET api/2.0/files/@root`) lists the AI projects the caller pinned and
-/// may see, whatever paging and filters the request carries, sorted as the listing of the section sorts pinned rooms.
+/// The AI rooms section of the root folders (`GET api/2.0/files/@root`) lists at most five AI projects the caller
+/// created or was invited to: the pinned ones first, then the others, each group by the last change, newest first,
+/// whatever paging, filters and order the request carries.
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AiHub")]
-public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
+public class AiHubRootProjectsTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
     [Fact]
-    public async Task GetRootFolders_PinnedProjects_OnlyTheyAreListed()
+    public async Task GetRootFolders_PinnedAndUnpinnedProjects_PinnedFirstThenNewestFirst()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
         var first = await CreateProjectAsync();
         var second = await CreateProjectAsync();
-        var unpinned = await CreateProjectAsync();
+        var third = await CreateProjectAsync();
+        var fourth = await CreateProjectAsync();
         var instructions = await CreateInstructionsRoomAsync();
         await PinRoomAsync(first);
         await PinRoomAsync(second);
         await PinRoomAsync(instructions);
 
         // Act
-        var section = await GetRootAiHubSectionAsync(filterType: FilterType.FoldersOnly, count: 1);
+        var section = await GetRootAiHubSectionAsync(filterType: FilterType.FoldersOnly, count: 1, startIndex: 5, sortBy: "AZ", filterValue: "NoProjectHasThisTitle");
 
         // Assert
-        IdsOf(section).Should().BeEquivalentTo([first, second]);
-        section.Total.Should().Be(2);
-        section.Count.Should().Be(2);
+        IdsOf(section).Should().Equal(second, first, fourth, third);
+        PinnedOf(section).Should().Equal(second, first);
+        section.Total.Should().Be(4);
+        section.Count.Should().Be(4);
         section.StartIndex.Should().Be(0);
-        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain([unpinned, instructions]);
+        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain(instructions);
     }
 
     [Fact]
-    public async Task GetRootFolders_NothingPinned_SectionIsListedEmpty()
+    public async Task GetRootFolders_NothingPinned_FiveNewestProjectsListed()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var project = await CreateProjectAsync();
+        var projects = new List<int>();
+        for (var i = 0; i < 6; i++)
+        {
+            projects.Add(await CreateProjectAsync());
+        }
 
         // Act
         var section = await GetRootAiHubSectionAsync();
 
         // Assert
-        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain(project);
-        IdsOf(section).Should().BeEmpty();
-        section.Total.Should().Be(0);
+        IdsOf(section).Should().Equal(Enumerable.Reverse(projects).Take(5));
+        PinnedOf(section).Should().BeEmpty();
+        section.Total.Should().Be(5);
     }
 
     [Fact]
-    public async Task GetRootFolders_OnlyInstructionsRoomPinned_SectionIsListedEmpty()
+    public async Task GetRootFolders_SixPinnedProjects_FiveNewestPinnedListedWithoutUnpinned()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        await CreateProjectAsync();
+        var pinned = new List<int>();
+        for (var i = 0; i < 6; i++)
+        {
+            pinned.Add(await CreateProjectAsync());
+        }
+
+        var unpinned = await CreateProjectAsync();
+
+        foreach (var project in pinned)
+        {
+            await PinRoomAsync(project);
+        }
+
+        // Act
+        var section = await GetRootAiHubSectionAsync();
+
+        // Assert
+        IdsOf(section).Should().Equal(Enumerable.Reverse(pinned).Take(5));
+        IdsOf(section).Should().NotContain(unpinned);
+        section.Total.Should().Be(5);
+    }
+
+    [Fact]
+    public async Task GetRootFolders_OlderProjectRenamed_MovesToTheTop()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var older = await CreateProjectAsync();
+        var middle = await CreateProjectAsync();
+        var newer = await CreateProjectAsync();
+        IdsOf(await GetRootAiHubSectionAsync()).Should().Equal(newer, middle, older);
+        await Task.Delay(1_100, TestContext.Current.CancellationToken);
+
+        // Act
+        using var response = await UpdateRoomResponseAsync(older, new { title = "Autotest Renamed Project" });
+        response.EnsureSuccessStatusCode();
+        var section = await GetRootAiHubSectionAsync();
+
+        // Assert
+        IdsOf(section).Should().Equal(older, newer, middle);
+    }
+
+    [Fact]
+    public async Task GetRootFolders_OnlyInstructionsRoomInTheSection_SectionIsListedEmpty()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
         var instructions = await CreateInstructionsRoomAsync();
         await PinRoomAsync(instructions);
 
@@ -92,53 +145,28 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         var section = await GetRootAiHubSectionAsync();
 
         // Assert
-        PinnedOf(await GetAiHubFoldersAsync()).Should().Contain(instructions);
+        AiHubPinnedOf(await GetAiHubFoldersAsync()).Should().Contain(instructions);
         IdsOf(section).Should().BeEmpty();
         section.Total.Should().Be(0);
     }
 
     [Fact]
-    public async Task GetRootFolders_TenPinnedProjects_PagingAndFiltersDoNotCutTheListSortedByTitle()
+    public async Task GetRootFolders_UnpinnedProject_MovesBehindThePinnedOnes()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var projects = new List<int>();
-        for (var i = 0; i < 10; i++)
-        {
-            projects.Add(await CreateProjectAsync($"Autotest Pinned Project {i}"));
-        }
-
-        foreach (var project in projects)
-        {
-            await PinRoomAsync(project);
-        }
+        var older = await CreateProjectAsync();
+        var newer = await CreateProjectAsync();
+        await PinRoomAsync(older);
+        IdsOf(await GetRootAiHubSectionAsync()).Should().Equal(older, newer);
 
         // Act
-        var section = await GetRootAiHubSectionAsync(count: 1, startIndex: 5, sortBy: "AZ", filterValue: "NoProjectHasThisTitle");
-
-        // Assert
-        IdsOf(section).Should().Equal(projects);
-        section.Total.Should().Be(10);
-        section.Count.Should().Be(10);
-        section.StartIndex.Should().Be(0);
-    }
-
-    [Fact]
-    public async Task GetRootFolders_UnpinnedProject_LeavesTheListAndStaysInTheSection()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-        var project = await CreateProjectAsync();
-        await PinRoomAsync(project);
-        IdsOf(await GetRootAiHubSectionAsync()).Should().Contain(project);
-
-        // Act
-        await UnpinRoomAsync(project);
+        await UnpinRoomAsync(older);
         var section = await GetRootAiHubSectionAsync();
 
         // Assert
-        IdsOf(section).Should().NotContain(project);
-        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain(project);
+        IdsOf(section).Should().Equal(newer, older);
+        PinnedOf(section).Should().BeEmpty();
     }
 
     [Fact]
@@ -146,12 +174,11 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        await CreateCustomRoom("Autotest Pinned Projects Room 1");
-        await CreateCustomRoom("Autotest Pinned Projects Room 2");
+        await CreateCustomRoom("Autotest Root Projects Room 1");
+        await CreateCustomRoom("Autotest Root Projects Room 2");
         var project = await CreateProjectAsync();
         var otherProject = await CreateProjectAsync();
         await PinRoomAsync(project);
-        await PinRoomAsync(otherProject);
         var roomsRootId = (await _roomsApi.GetRoomsFolderAsync(searchArea: SearchArea.Active, cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
 
         // Act
@@ -161,11 +188,11 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         var rooms = sections.Single(s => s.Current.Id == roomsRootId);
         IdsOf(rooms).Should().HaveCount(1);
         rooms.Total.Should().Be(2);
-        IdsOf(AiHubSectionOf(sections)).Should().BeEquivalentTo([project, otherProject]);
+        IdsOf(AiHubSectionOf(sections)).Should().Equal(project, otherProject);
     }
 
     [Fact]
-    public async Task GetRootFolders_MemberPinsProject_ListedForTheMemberNotForTheOwner()
+    public async Task GetRootFolders_MemberPinsProject_PinnedForTheMemberOnly()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -183,12 +210,13 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
 
         // Assert
         IdsOf(memberSection).Should().Equal(project);
-        IdsOf(ownerSection).Should().NotContain(project);
-        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain(project, "the owner sees the project in the section, only the pin is missing");
+        PinnedOf(memberSection).Should().Equal(project);
+        IdsOf(ownerSection).Should().Equal(project);
+        PinnedOf(ownerSection).Should().BeEmpty();
     }
 
     [Fact]
-    public async Task GetRootFolders_MemberLosesAccessAndRegainsIt_ListedAgainWithoutANewPin()
+    public async Task GetRootFolders_MemberLosesAccessAndRegainsIt_ListedAgainWithThePin()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -200,7 +228,7 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
 
         await _filesClient.Authenticate(member);
         await PinRoomAsync(project);
-        IdsOf(await GetRootAiHubSectionAsync()).Should().Equal(project);
+        IdsOf(await GetRootAiHubSectionAsync()).Should().Equal(project, unpinnedProject);
 
         // Act
         await _filesClient.Authenticate(Owner);
@@ -214,13 +242,14 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         var afterReinvite = await GetRootAiHubSectionAsync();
 
         // Assert
-        IdsOf(whileOut).Should().BeEmpty();
-        whileOut.Total.Should().Be(0);
-        IdsOf(afterReinvite).Should().Equal(project);
+        IdsOf(whileOut).Should().Equal(unpinnedProject);
+        whileOut.Total.Should().Be(1);
+        IdsOf(afterReinvite).Should().Equal(project, unpinnedProject);
+        PinnedOf(afterReinvite).Should().Equal(project);
     }
 
     [Fact]
-    public async Task GetRootFolders_DocSpaceAdminNeverInvited_FindsTheProjectThatAdminPinned()
+    public async Task GetRootFolders_DocSpaceAdminNeverInvited_ProjectsAreNotListedEvenPinned()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -230,17 +259,18 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
 
         await _filesClient.Authenticate(admin);
         await PinRoomAsync(project);
+        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain([project, unpinnedProject], "the listing of the section shows every project to the admin");
 
         // Act
         var section = await GetRootAiHubSectionAsync();
 
         // Assert
-        IdsOf(section).Should().Equal(project);
-        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain([project, unpinnedProject], "the listing of the section shows every project to the admin");
+        IdsOf(section).Should().BeEmpty();
+        section.Total.Should().Be(0);
     }
 
     [Fact]
-    public async Task GetRootFolders_RoomAdminCreatorPinsProject_ListedWithoutShareRecord()
+    public async Task GetRootFolders_RoomAdminCreator_OwnProjectsListedWithoutShareRecord()
     {
         // Arrange
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
@@ -253,9 +283,13 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         var section = await GetRootAiHubSectionAsync();
 
         // Assert
-        IdsOf(section).Should().Equal(project);
-        section.Total.Should().Be(1);
-        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain(unpinnedProject);
+        IdsOf(section).Should().Equal(project, unpinnedProject);
+        section.Total.Should().Be(2);
+    }
+
+    private static List<int> PinnedOf(FolderContentDto section)
+    {
+        return [.. section.Folders.OfType<FolderDto>().Where(f => f.Pinned == true).Select(f => f.Id)];
     }
 
     private static List<int> AiHubIdsOf(List<FolderDto> folders)
@@ -263,7 +297,7 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         return [.. folders.Select(f => f.Id)];
     }
 
-    private static List<int> PinnedOf(List<FolderDto> folders)
+    private static List<int> AiHubPinnedOf(List<FolderDto> folders)
     {
         return [.. folders.Where(f => f.Pinned == true).Select(f => f.Id)];
     }

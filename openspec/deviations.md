@@ -274,7 +274,7 @@ Evidence column:
 | L11 | branding-and-licensing | The licensor flag of the company details is always stored as `false`. | static | OPEN |
 | PR6 | private-rooms | The neutral room title exists in the default culture only, so a letter in another language names the room in that default language. | per commit message | OPEN |
 | T9 | portal-lifecycle | A suspended portal answers 404 to `getPortalInformation`, so a client cannot read `status` to learn why, although the yaml tells it to. | static | OPEN |
-| A13 | ai-agents | `assertAiAccess` borrows the AI-off gate through a throwaway tool-prefs read instead of a gate of its own, now on four routes. | static | OPEN |
+| A13 | ai-agents | `assertAiAccess` borrows the AI-off gate through a throwaway tool-prefs read instead of a gate of its own, on every route that reaches no gated AI endpoint first (`app.aiGate.test.ts`). | static | OPEN |
 | A21 | ai-agents | In an export, `/`, `\` and the other characters the Files API replaces in a title are not replaced the same way (`Notes 12/31` → `31.docx`; bug 82711). Two simultaneous exports with one title now get distinct names (bug 84459). | red test, run 2026-11-18 (bug 82711); the test of bug 84459 is green | OPEN, narrowed |
 | A22 | ai-agents | An export keeps TeX source in the document, and a stored provider failure stays English under any culture. | red test, run 2026-11-18 (bugs 83038, 83046; code not read) | OPEN |
 | A25 | ai-agents | The profile create answer has `createdAt` milliseconds no later read reproduces. | red test, run 2026-11-18 (`ProfileReadTests.cs:47`) | OPEN |
