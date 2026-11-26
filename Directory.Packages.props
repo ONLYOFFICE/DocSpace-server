@@ -160,9 +160,7 @@
     <PackageVersion Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageVersion Include="NLog.Web.AspNetCore" Version="5.5.0" />
     <PackageVersion Include="Novell.Directory.Ldap.NETStandard" Version="3.6.0" />
-    <!-- Pre-release: no stable 11.x yet, and the 10.x provider does not run on EF Core 11. The RC names an exact
-         EF Core 11.0.0-rc.3 dependency, while EF Core is pinned to 11.0.0 above. Move to 11.0.0 once it ships. -->
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0-rc.3" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0" />
     <PackageVersion Include="NUnit" Version="4.2.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="3.3.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
