@@ -42,11 +42,14 @@ internal static partial class OFormRequestManagerLogger
     [LoggerMessage(LogLevel.Warning, "The template gallery answered {uri} without its template list")]
     public static partial void WarningOFormGalleryNoList(this ILogger<OFormRequestManager> logger, Uri uri);
 
-    [LoggerMessage(LogLevel.Warning, "The file from the template gallery lacks the expected format signature: {uri}")]
-    public static partial void WarningOFormGalleryNotForm(this ILogger<OFormRequestManager> logger, Uri uri);
+    [LoggerMessage(LogLevel.Warning, "The template gallery answered {status} for the file {url}")]
+    public static partial void WarningOFormGalleryFileStatus(this ILogger<OFormRequestManager> logger, string url, int status);
 
-    [LoggerMessage(LogLevel.Warning, "The file from the template gallery is larger than {maxSize} bytes: {uri}")]
-    public static partial void WarningOFormGalleryFileTooLarge(this ILogger<OFormRequestManager> logger, Uri uri, long maxSize);
+    [LoggerMessage(LogLevel.Warning, "The file from the template gallery lacks the expected format signature: {url}")]
+    public static partial void WarningOFormGalleryNotForm(this ILogger<OFormRequestManager> logger, string url);
+
+    [LoggerMessage(LogLevel.Warning, "The file from the template gallery is larger than {maxSize} bytes: {url}")]
+    public static partial void WarningOFormGalleryFileTooLarge(this ILogger<OFormRequestManager> logger, string url, long maxSize);
 
     [LoggerMessage(LogLevel.Warning, "The template gallery answered {uri} with more than {maxSize} bytes")]
     public static partial void WarningOFormGalleryAnswerTooLarge(this ILogger<OFormRequestManager> logger, Uri uri, long maxSize);

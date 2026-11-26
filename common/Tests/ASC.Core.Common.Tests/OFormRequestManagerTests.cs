@@ -477,6 +477,74 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task Get_FewerThanFiveFailedRequests_LeaveTheCircuitClosed()
+    {
+        // One failed creation makes 3 requests, fewer than the 5 the breaker needs: the next creation asks again
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.ServiceUnavailable));
+        var manager = CreateManager(gallery.Url);
+
+        await AssertGalleryUnavailableAsync(manager);
+        var asked = gallery.CallCount;
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        asked.Should().Be(3);
+        gallery.CallCount.Should().BeGreaterThan(asked);
+    }
+
+    [Theory]
+    [InlineData(1, true)]
+    [InlineData(2, false)]
+    public async Task Get_AtLeastHalfOfFiveRequestsFailed_OpensTheCircuit(int creations, bool opens)
+    {
+        // Each creation asks the host twice, for the list and the file; then one creation fails with 3 requests.
+        // After one creation 3 of 5 requests failed and the circuit opens; after two, 3 of 7, and it stays closed
+        var failing = false;
+        var gallery = Gallery(request => Volatile.Read(ref failing)
+            ? new StubResponse(HttpStatusCode.ServiceUnavailable)
+            : IsFile(request)
+                ? new StubResponse(HttpStatusCode.OK, Pdf)
+                : StubResponse.Json(HttpStatusCode.OK, ListWithFile()));
+        var manager = CreateManager(gallery.Url);
+
+        for (var i = 0; i < creations; i++)
+        {
+            await using var stream = await manager.Get(1, ".pdf");
+        }
+
+        Volatile.Write(ref failing, true);
+        await AssertGalleryUnavailableAsync(manager);
+        var asked = gallery.CallCount;
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        if (opens)
+        {
+            gallery.CallCount.Should().Be(asked);
+        }
+        else
+        {
+            gallery.CallCount.Should().BeGreaterThan(asked);
+        }
+    }
+
+    [Fact]
+    public async Task Get_ListAnswers4xxEveryTime_LeavesTheCircuitClosed()
+    {
+        // Only a request that cannot connect, times out or gets 5xx, 408 or 429 counts as failed: a 403 of a proxy is
+        // an answer of the host, not retried and not counted
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.Forbidden));
+        var manager = CreateManager(gallery.Url);
+
+        for (var i = 0; i < 6; i++)
+        {
+            await AssertGalleryUnavailableAsync(manager);
+        }
+
+        gallery.CallCount.Should().Be(6);
+    }
+
+    [Fact]
     public async Task Get_RetriesOfTheClient_EndWithTheDownloadDeadline()
     {
         // The deadline of the download is the outer strategy: a retry that would wait past it never starts
@@ -519,6 +587,62 @@ public sealed class OFormRequestManagerTests : IDisposable
         var attempts = logs.Entries.Where(entry => entry.Message.Contains("Execution attempt", StringComparison.Ordinal)).ToList();
         attempts.Should().NotBeEmpty();
         attempts.Should().OnlyContain(entry => entry.Level == LogLevel.Debug);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Forbidden, "", "")]
+    [InlineData(HttpStatusCode.OK, "<html>Access denied</html>", "")]
+    [InlineData(HttpStatusCode.OK, Pdf, "ftp://user:secret@gallery.example")]
+    public async Task Get_FileAtASignedAddressFails_LogsTheAddressWithoutItsSignature(HttpStatusCode status, string body, string fileHost)
+    {
+        // A gallery that keeps its files in a private bucket names them by signed addresses: the warning names the
+        // file, not a working link to it. The cases: an error status, a file without its signature, an address that
+        // cannot be requested, with user info as well
+        var logs = new RecordingLoggerProvider();
+        var gallery = Gallery(request => IsFile(request)
+            ? new StubResponse(status, body)
+            : StubResponse.Json(HttpStatusCode.OK,
+                $$"""{"data":[{"id":1,"file_oform":[{"url":"{{(fileHost == "" ? _fileUrl : fileHost + "/uploads/file")}}.pdf?X-Amz-Signature=secret","name":"form","ext":".pdf"}]}]}"""));
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url, loggerProvider: logs));
+
+        logs.Entries.Should().Contain(entry => entry.Level == LogLevel.Warning && entry.Message.Contains("/uploads/file.pdf", StringComparison.Ordinal));
+        logs.Entries.Should().NotContain(entry => entry.Message.Contains("secret", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Get_FileOverTheLimitAtASignedAddress_LogsTheAddressWithoutItsSignature(bool announced)
+    {
+        // Both checks of the size name the file in their warning: by the announced length and while the file is copied
+        var logs = new RecordingLoggerProvider();
+        var file = announced
+            ? RawFile(head: "", contentLength: OFormRequestManager.MaxTemplateSize + 1, padding: 0, stall: true)
+            : RawFile(head: Pdf, contentLength: null, padding: OFormRequestManager.MaxTemplateSize, stall: false);
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK,
+            $$"""{"data":[{"id":1,"file_oform":[{"url":"{{file.Url}}/file.pdf?X-Amz-Signature=secret","name":"form","ext":".pdf"}]}]}"""));
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url, clientTimeout: Timeout.InfiniteTimeSpan,
+            downloadTimeout: TimeSpan.FromSeconds(20), loggerProvider: logs));
+
+        logs.Entries.Should().Contain(entry => entry.Level == LogLevel.Warning
+            && entry.Message.Contains("larger than", StringComparison.Ordinal) && entry.Message.Contains("/file.pdf", StringComparison.Ordinal));
+        logs.Entries.Should().NotContain(entry => entry.Message.Contains("secret", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task GalleryAddressCannotBeRequested_IsLoggedOnce()
+    {
+        // A bad address in the configuration is logged when the manager is created, not on every creation and check
+        var logs = new RecordingLoggerProvider();
+        var manager = CreateManager("ftp://gallery.example", loggerProvider: logs);
+
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+
+        logs.Entries.Count(entry => entry.Message.Contains("ftp://gallery.example", StringComparison.Ordinal)).Should().Be(1);
     }
 
     [Fact]
@@ -639,6 +763,17 @@ public sealed class OFormRequestManagerTests : IDisposable
         (await manager.IsAvailableAsync()).Should().BeTrue();
 
         gallery.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_AsksWithTheClientWithoutCookies()
+    {
+        // The default client would keep the cookies the gallery sets for every caller of the process. The check asks
+        // with customHttpClientNoCookie, whose handler keeps none (StandardHttpClientsTests.NoCookieClient_KeepsNoCookies)
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List));
+        var manager = CreateManager(gallery.Url, defaultClientHandler: () => new ThrowingHandler(new HttpRequestException("the default client")));
+
+        (await manager.IsAvailableAsync()).Should().BeTrue();
     }
 
     [Theory]
@@ -1072,9 +1207,11 @@ public sealed class OFormRequestManagerTests : IDisposable
     /// </param>
     /// <param name="retryDelay">The first wait before a retry of the download; 50 ms by default, so retries stay quick.</param>
     /// <param name="attemptTimeout">The timeout of one request of the download in place of the manager's 10 seconds.</param>
+    /// <param name="defaultClientHandler">A handler of the default client only, which the manager must not ask with.</param>
     private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null,
         Func<HttpMessageHandler>? primaryHandler = null, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null,
-        ILoggerProvider? loggerProvider = null, bool registerPipelines = true, TimeSpan? retryDelay = null, TimeSpan? attemptTimeout = null)
+        ILoggerProvider? loggerProvider = null, bool registerPipelines = true, TimeSpan? retryDelay = null, TimeSpan? attemptTimeout = null,
+        Func<HttpMessageHandler>? defaultClientHandler = null)
     {
         var services = new ServiceCollection();
 
@@ -1092,8 +1229,8 @@ public sealed class OFormRequestManagerTests : IDisposable
             services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(loggerProvider));
         }
 
-        // The check asks with the default client, the download with the gallery's own
-        foreach (var name in new[] { Options.DefaultName, OFormRequestManager.HttpClientName })
+        // The check asks with the standard client without cookies, the download with the gallery's own
+        foreach (var name in new[] { Options.DefaultName, OFormRequestManager.NoCookieHttpClientName, OFormRequestManager.HttpClientName })
         {
             var builder = services.AddHttpClient(name, client =>
             {
@@ -1103,9 +1240,10 @@ public sealed class OFormRequestManagerTests : IDisposable
                 }
             });
 
-            if (primaryHandler is not null)
+            var handler = name == Options.DefaultName ? defaultClientHandler ?? primaryHandler : primaryHandler;
+            if (handler is not null)
             {
-                builder.ConfigurePrimaryHttpMessageHandler(primaryHandler);
+                builder.ConfigurePrimaryHttpMessageHandler(handler);
             }
         }
 
@@ -1120,7 +1258,9 @@ public sealed class OFormRequestManagerTests : IDisposable
             })
             .Build();
 
-        return new OFormRequestManager(NullLogger<OFormRequestManager>.Instance, configuration, provider.GetRequiredService<IHttpClientFactory>(), cache ?? _cache,
+        var logger = loggerProvider is null ? NullLogger<OFormRequestManager>.Instance : provider.GetRequiredService<ILogger<OFormRequestManager>>();
+
+        return new OFormRequestManager(logger, configuration, provider.GetRequiredService<IHttpClientFactory>(), cache ?? _cache,
             provider.GetRequiredService<ResiliencePipelineRegistry<string>>(), provider.GetRequiredService<IOptions<TelemetryOptions>>());
     }
 

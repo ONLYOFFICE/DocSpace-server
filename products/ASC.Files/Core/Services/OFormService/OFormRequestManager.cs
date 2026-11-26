@@ -50,10 +50,12 @@ public class OFormRequestManager(
     /// breaker per host (<see cref="ConfigureHttpClientPipeline"/>), all inside the download deadline. It is a named
     /// client of its own for that policy of failures, which no standard client has; like customHttpClientNoCookie it
     /// keeps no cookies, so no tenant gets the cookies another tenant's download was given. The availability check uses
-    /// the default client: it is not retried, its answer is cached.
+    /// customHttpClientNoCookie: it is not retried, its answer is cached.
     /// </summary>
     /// <remarks>
-    /// The breaker of a host is shared by every portal of the process. While it is open (30 seconds), every creation
+    /// The breaker of a host is shared by every portal of the process. It opens when at least 5 requests to the host
+    /// were made within 30 seconds and at least half of them failed: could not connect, timed out, or got 5xx, 408 or
+    /// 429. While it is open (30 seconds), every creation
     /// from a template on that host answers 502 at once, while the availability check, which does not go through the
     /// breaker, may still answer a cached <c>true</c>. An error status of a template file does not count towards the
     /// breaker: one broken template must not fail the others on its host.
@@ -61,6 +63,11 @@ public class OFormRequestManager(
     public const string HttpClientName = "templateGallery";
 
     public const string HttpClientPipelineName = "oform-gallery-http";
+
+    /// <summary>
+    /// The standard client the availability check asks with (AddStandardHttpClients): no retries, no cookies.
+    /// </summary>
+    public const string NoCookieHttpClientName = "customHttpClientNoCookie";
 
     /// <summary>
     /// How long one request of the download waits for the headers of its answer before it is retried.
@@ -137,6 +144,9 @@ public class OFormRequestManager(
 
     private readonly OFormSettings _configuration = configuration.GetSection("files:oform").Get<OFormSettings>();
 
+    // Checked once: a bad address is logged when the manager is created, not on every request
+    private readonly Uri _domain = ParseDomain(configuration["files:oform:domain"], logger);
+
     private bool IsConfigured => !string.IsNullOrEmpty(_configuration?.Domain) && !string.IsNullOrEmpty(_configuration.Path);
 
     /// <summary>
@@ -148,7 +158,7 @@ public class OFormRequestManager(
     /// <exception cref="CustomHttpException">
     /// 502: the gallery address is not an http or https address, the gallery cannot be reached, dropped the connection,
     /// did not answer in time, answered with an error status, with a body that is not the template list or with a list
-    /// larger than <see cref="MaxListSize"/>, failed so often lately that its circuit is open, named a file at an
+    /// larger than <see cref="MaxListSize"/>, has an open circuit (<see cref="HttpClientName"/>), named a file at an
     /// address that cannot be requested, or returned a file larger than <see cref="MaxTemplateSize"/>, a PDF without a
     /// PDF header in its first 1024 bytes or a DOCX, XLSX or PPTX file without a ZIP signature.
     /// </exception>
@@ -211,7 +221,7 @@ public class OFormRequestManager(
         // download answers 502
         if (!Uri.TryCreate(domain, file.Url, out var fileUri) || !IsHttp(fileUri))
         {
-            logger.WarningOFormGalleryFileAddress(file.Url);
+            logger.WarningOFormGalleryFileAddress(WithoutQuery(file.Url));
 
             throw GalleryUnavailable();
         }
@@ -222,7 +232,7 @@ public class OFormRequestManager(
         using var streamResponse = await httpClient.SendAsync(fileRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!streamResponse.IsSuccessStatusCode)
         {
-            logger.WarningOFormGalleryStatus(streamResponse.RequestMessage?.RequestUri, (int)streamResponse.StatusCode);
+            logger.WarningOFormGalleryFileStatus(WithoutQuery(streamResponse.RequestMessage?.RequestUri), (int)streamResponse.StatusCode);
 
             throw GalleryUnavailable();
         }
@@ -230,7 +240,7 @@ public class OFormRequestManager(
         var length = streamResponse.Content.Headers.ContentLength;
         if (length > MaxTemplateSize)
         {
-            logger.WarningOFormGalleryFileTooLarge(fileUri, MaxTemplateSize);
+            logger.WarningOFormGalleryFileTooLarge(WithoutQuery(fileUri), MaxTemplateSize);
 
             throw GalleryUnavailable();
         }
@@ -243,7 +253,7 @@ public class OFormRequestManager(
         // a blank editor. The rest of the file is not read when its start is not the format's
         if (!HasFormatSignature(head.AsSpan(0, read), ext))
         {
-            logger.WarningOFormGalleryNotForm(fileUri);
+            logger.WarningOFormGalleryNotForm(WithoutQuery(fileUri));
 
             throw GalleryUnavailable();
         }
@@ -258,7 +268,7 @@ public class OFormRequestManager(
 
             if (!await CopyAtMostAsync(body, stream, MaxTemplateSize - read, cancellationToken))
             {
-                logger.WarningOFormGalleryFileTooLarge(fileUri, MaxTemplateSize);
+                logger.WarningOFormGalleryFileTooLarge(WithoutQuery(fileUri), MaxTemplateSize);
 
                 throw GalleryUnavailable();
             }
@@ -442,8 +452,9 @@ public class OFormRequestManager(
             return false;
         }
 
-        // The default client: the check is not retried, its deadline is short and its answer is cached
-        var httpClient = httpClientFactory.CreateClient();
+        // Not the download client: the check is not retried, its deadline is short and its answer is cached. Without
+        // cookies, as the download: the default client would keep the gallery's cookies for every caller of the process
+        var httpClient = httpClientFactory.CreateClient(NoCookieHttpClientName);
         using var response = await httpClient.GetAsync($"{GetListUrl()}?pagination[pageSize]=1&fields[0]=updatedAt", HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
@@ -458,18 +469,69 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// The configured domain of the gallery, when it is an absolute http or https address; otherwise logs it.
+    /// The configured domain of the gallery, when it is an absolute http or https address.
     /// </summary>
     private bool TryGetDomain(out Uri domain)
     {
-        if (Uri.TryCreate(_configuration.Domain, UriKind.Absolute, out domain) && IsHttp(domain))
+        domain = _domain;
+
+        return domain is not null;
+    }
+
+    /// <summary>
+    /// The configured domain as an absolute http or https address; otherwise logs it, once for the manager.
+    /// </summary>
+    /// <returns><c>null</c> when no domain is configured or it is not such an address.</returns>
+    private static Uri ParseDomain(string value, ILogger<OFormRequestManager> logger)
+    {
+        if (string.IsNullOrEmpty(value))
         {
-            return true;
+            return null;
         }
 
-        logger.WarningOFormGalleryAddress(_configuration.Domain);
+        if (Uri.TryCreate(value, UriKind.Absolute, out var domain) && IsHttp(domain))
+        {
+            return domain;
+        }
 
-        return false;
+        logger.WarningOFormGalleryAddress(value);
+
+        return null;
+    }
+
+    /// <summary>
+    /// The address of a gallery file without its query, fragment and user info, for the log: a file kept in a private
+    /// bucket is named by a signed address whose signature must not stay in the log.
+    /// </summary>
+    private static string WithoutQuery(Uri uri)
+    {
+        return uri?.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.UriEscaped);
+    }
+
+    /// <summary>
+    /// A gallery file address that is not an http or https address, for the log, without its query, fragment and user
+    /// info. It may not parse as a URI, so the parts are cut from the text.
+    /// </summary>
+    private static string WithoutQuery(string url)
+    {
+        if (string.IsNullOrEmpty(url))
+        {
+            return url;
+        }
+
+        var end = url.IndexOfAny(['?', '#']);
+        if (end >= 0)
+        {
+            url = url[..end];
+        }
+
+        var scheme = url.IndexOf("://", StringComparison.Ordinal);
+        var start = scheme < 0 ? 0 : scheme + 3;
+        var slash = url.IndexOf('/', start);
+        var authorityEnd = slash < 0 ? url.Length : slash;
+        var at = authorityEnd > start ? url.LastIndexOf('@', authorityEnd - 1, authorityEnd - start) : -1;
+
+        return at < 0 ? url : url[..start] + url[(at + 1)..];
     }
 
     private static bool IsHttp(Uri uri)
@@ -567,8 +629,8 @@ public class OFormRequestManager(
     /// <see cref="IsAvailableAsync"/> starts without one. So a TimeoutRejectedException is the deadline of the pipeline
     /// or of the last attempt, and a cancellation is the timeout of the client. A connection dropped while the body is
     /// read comes as an IOException (HttpIOException), since the body is read from the stream of the answer; an
-    /// HttpRequestException is a failure before the headers. A JsonException is an answer that is not JSON. A BrokenCircuitException is a gallery that
-    /// failed so often lately that the client does not ask it. The addresses are checked before the requests, so
+    /// HttpRequestException is a failure before the headers. A JsonException is an answer that is not JSON. A BrokenCircuitException is a gallery
+    /// host whose circuit is open, so the client does not ask it. The addresses are checked before the requests, so
     /// anything else, a NotSupportedException of the serializer among them, is a failure of this code.
     /// </summary>
     private static bool IsGalleryFailure(Exception e)
