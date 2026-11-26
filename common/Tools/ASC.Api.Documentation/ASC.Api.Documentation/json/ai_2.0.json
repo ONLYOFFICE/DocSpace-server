@@ -200,10 +200,7 @@
             }
           },
           "400": {
-            "description": "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative"
-          },
-          "500": {
-            "description": "`tags` is not a JSON array of strings"
+            "description": "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or `tags` is not a JSON array of strings"
           },
           "401": {
             "description": "Unauthorized",
@@ -230,11 +227,21 @@
               }
             }
           },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -312,9 +319,6 @@
           "404": {
             "description": "`logo.tmpFile` names no uploaded picture, or one already used"
           },
-          "500": {
-            "description": "`logo.width` or `logo.height` is larger than 2147483647"
-          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -340,11 +344,21 @@
               }
             }
           },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -422,6 +436,9 @@
               }
             }
           },
+          "403": {
+            "description": "The caller cannot read the AI agent"
+          },
           "404": {
             "description": "The AI agent is not found"
           },
@@ -471,10 +488,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -569,9 +586,6 @@
           "404": {
             "description": "The AI agent is not found, or the uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists"
           },
-          "500": {
-            "description": "`logo.width` or `logo.height` is larger than 2147483647"
-          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -597,11 +611,21 @@
               }
             }
           },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -742,10 +766,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -819,6 +843,12 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, or a number in `roomIds` is not a 32-bit integer"
+          },
+          "403": {
+            "description": "The storage quota for AI agents is turned off, `quota` exceeds the storage limit of the portal, or the caller may not edit a listed agent"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -854,21 +884,11 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -950,6 +970,12 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, or a number in `roomIds` is not a 32-bit integer"
+          },
+          "403": {
+            "description": "The storage quota for AI agents is turned off, or the caller may not edit a listed agent"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -985,21 +1011,11 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1107,10 +1123,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1180,6 +1196,15 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, `type` is not a known provider type, `key` is empty for a provider, or the provider rejects `key`"
+          },
+          "403": {
+            "description": "The installation has an AI gateway configured, which manages these settings, or the caller is not a DocSpace administrator"
+          },
+          "502": {
+            "description": "The embedding provider did not answer or answered with an error status (a server error, a limit of the requests, or any other refusal)"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -1215,21 +1240,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1285,6 +1297,9 @@
               }
             }
           },
+          "403": {
+            "description": "The installation has an AI gateway configured, which manages these settings, or the caller is not a DocSpace administrator"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -1321,10 +1336,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1418,10 +1433,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1515,10 +1530,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1630,10 +1645,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1730,10 +1745,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1843,10 +1858,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1954,10 +1969,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [

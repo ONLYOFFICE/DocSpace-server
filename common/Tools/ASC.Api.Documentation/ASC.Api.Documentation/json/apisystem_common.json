@@ -92,10 +92,10 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, the password does not meet the password policy, the first and last name are both empty or not a valid user name, no free portal address could be generated, too many registrations came from this network address, or the reCAPTCHA response is invalid"
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty, the password does not meet the password policy, the first name is empty or the first and last names do not form a valid user name, the portal address is already taken, no free portal address could be generated, too many registrations came from this network address, or the reCAPTCHA response is invalid"
           },
           "500": {
-            "description": "The portal could not be registered, as when `email` is empty or the `portalName` requested on a server installation is already taken"
+            "description": "A server failure while saving the portal or in a step after it, such as sending the welcome email; a portal saved before the failure stays registered"
           },
           "401": {
             "description": "Unauthorized",
@@ -108,10 +108,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -187,10 +187,10 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty and no third-party profile supplied one, `password` does not meet the password policy, no free portal address could be generated, or too many registrations came from this network address"
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty and no third-party profile supplied one, `password` does not meet the password policy, the portal address is already taken, no free portal address could be generated, or too many registrations came from this network address"
           },
           "500": {
-            "description": "The portal could not be registered"
+            "description": "A server failure while saving the portal or in a step after it, such as sending the welcome email; a portal saved before the failure stays registered"
           },
           "401": {
             "description": "Unauthorized",
@@ -203,10 +203,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -282,10 +282,10 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provider` is empty, `accessToken` and `codeOAuth` are both empty, the provider returned no profile or no email address, `password` does not meet the password policy, no free portal address could be generated, or too many registrations came from this network address"
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provider` is empty, `accessToken` and `codeOAuth` are both empty, the provider returned no profile or no email address, `password` does not meet the password policy, the portal address is already taken, no free portal address could be generated, or too many registrations came from this network address"
           },
           "500": {
-            "description": "The portal could not be registered"
+            "description": "A server failure while saving the portal or in a step after it, such as sending the welcome email; a portal saved before the failure stays registered"
           },
           "401": {
             "description": "Unauthorized",
@@ -298,10 +298,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -377,10 +377,10 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provisionProvider` or its `name`, `clientId` or `clientSecret` is missing, `email` is empty, the provider is not a known sign-in provider, no free portal address could be generated, too many registrations came from this network address, the reCAPTCHA response is invalid, or `password` does not meet the password policy"
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provisionProvider` or its `name`, `clientId` or `clientSecret` is missing, `email` is empty, the provider is not a known sign-in provider, the first or last name is not a valid user name, the portal address is already taken, no free portal address could be generated, too many registrations came from this network address, the reCAPTCHA response is invalid, or `password` does not meet the password policy"
           },
           "500": {
-            "description": "The portal could not be registered"
+            "description": "A server failure while saving the portal or in a step after it, such as sending the welcome email; a portal saved before the failure stays registered"
           },
           "401": {
             "description": "Unauthorized",
@@ -393,10 +393,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "deprecated": true,
@@ -813,10 +813,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -918,10 +918,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1010,10 +1010,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1417,7 +1417,7 @@
             "description": "The method is available on a server installation only"
           },
           "500": {
-            "description": "The portals or their statistics could not be read"
+            "description": "A server failure while reading the portals or their statistics"
           },
           "401": {
             "description": "Unauthorized",
@@ -1430,10 +1430,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1512,19 +1512,19 @@
             "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, or no third-party profile was resolved and `email` or `passwordHash` is empty"
           },
           "401": {
-            "description": "Too many attempts came from this network address and the reCAPTCHA response is invalid"
+            "description": "No portal has an account with this email address and password hash, or too many attempts came from this network address and the reCAPTCHA response is invalid"
           },
           "403": {
             "description": "Too many attempts came from this network address and no reCAPTCHA response was sent"
           },
           "500": {
-            "description": "No portal has an account with this email address and password hash, or the lookup failed"
+            "description": "A server failure while looking up the portals"
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1616,10 +1616,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1710,10 +1710,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1844,10 +1844,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1949,10 +1949,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -2054,10 +2054,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [

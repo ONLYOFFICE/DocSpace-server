@@ -161,10 +161,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -259,10 +259,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -359,10 +359,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -459,10 +459,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -592,10 +592,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -718,10 +718,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -903,10 +903,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1014,10 +1014,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1159,10 +1159,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1290,10 +1290,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1404,10 +1404,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1535,10 +1535,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1676,10 +1676,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1819,10 +1819,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1963,10 +1963,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -2107,10 +2107,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -2246,10 +2246,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -2421,10 +2421,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -2606,10 +2606,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -2791,10 +2791,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -2975,10 +2975,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -3126,10 +3126,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -3268,10 +3268,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -3374,10 +3374,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -3490,10 +3490,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -3605,7 +3605,7 @@
             }
           },
           "400": {
-            "description": "The user ID is empty, no password was sent, or the password does not meet the portal policy"
+            "description": "The user ID is empty, no password was sent or it has only spaces, the password does not meet the portal policy, or it is the current password"
           },
           "403": {
             "description": "The account is not active, or only its owner may change this password"
@@ -3658,10 +3658,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -3796,10 +3796,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -3884,6 +3884,9 @@
               }
             }
           },
+          "400": {
+            "description": "`tmpFile` names an empty file or a file that is not an image, or the image is too large to process"
+          },
           "403": {
             "description": "The ID in the route is not the calling account, the account may not edit its own profile, or `x` equals the width of the image or `y` its height"
           },
@@ -3925,21 +3928,11 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -4063,10 +4056,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -4194,10 +4187,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -4280,13 +4273,16 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, or the files field is empty"
+            "description": "The request body cannot be read, the files field is empty, or the image at `files` is empty, too large or not an image"
           },
           "403": {
             "description": "The ID in the route is not the calling account, the account may not edit its own profile, the URL was refused, or the server behind it answered with an error status"
           },
           "404": {
             "description": "No user has the specified ID"
+          },
+          "502": {
+            "description": "The address in `files` did not answer or timed out"
           },
           "401": {
             "description": "Unauthorized",
@@ -4323,11 +4319,8 @@
               }
             }
           },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -4485,10 +4478,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -4588,10 +4581,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -4660,10 +4653,16 @@
             }
           },
           "400": {
-            "description": "The password does not meet the portal password policy"
+            "description": "The email is already used or the names are not valid, the password does not meet the portal password policy, or the image at `files` is empty, too large or not an image; for the image the account has already been created"
+          },
+          "402": {
+            "description": "The account joins a room through the invitation link, but the portal already has as many room members as its plan allows, or the portal has as many users as its plan allows"
           },
           "403": {
             "description": "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created"
+          },
+          "502": {
+            "description": "The address in `files` did not answer or timed out; the account has already been created"
           },
           "401": {
             "description": "Unauthorized",
@@ -4700,11 +4699,8 @@
               }
             }
           },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -4889,10 +4885,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -4926,7 +4922,7 @@
           "People / Profiles"
         ],
         "summary": "Invite users",
-        "description": "Invites people to the portal by email. For each new address, the call creates a pending account and emails it\r\nan invitation link. Requires a room admin or a DocSpace admin. Other callers get 403. Only a DocSpace admin\r\ncan invite a room admin, and only the portal owner can invite a DocSpace admin. The `Guest` type and a portal\r\nthat does not allow inviting members also return 403. For an address that already has an account, the call\r\nsends no email. It links that account to the caller and raises its type if needed. The call changes data. A\r\nrepeated call sends no new emails, since the accounts then exist. Its seat check still counts each room admin\r\nand DocSpace admin in the body. So a repeat can return 402. If the pending account was deleted, a new invitation\r\nto its address soon after the first sends no email. The first link still works. If the invitations need more\r\npaid seats than the tariff has left, the call returns 402 and sends nothing. The call returns 400 for a\r\nmalformed or punycode address, or for the address of a disabled account. The call handles the addresses in\r\norder. So a 400 or 403 in the middle leaves the earlier invitations sent. The call returns every pending account\r\nthat the caller can see, not only the new ones. The portal limits the rate of these calls. To send an invitation\r\nagain, use `PUT api/2.0/people/invite`.\n\nRaises the `user.invited` webhook for every address without an account, not for an existing account whose type it raises.",
+        "description": "Invites people to the portal by email. For each new address, the call creates a pending account and emails it\r\nan invitation link. Requires a room admin or a DocSpace admin. Other callers get 403. Only a DocSpace admin\r\ncan invite a room admin, and only the portal owner can invite a DocSpace admin. The `Guest` type and a portal\r\nthat does not allow inviting members also return 403. For an address that already has an account, the call\r\nsends no email. It links that account to the caller and raises its type if needed. The call changes data. A\r\nrepeated call sends no new emails, since the accounts then exist. Its seat check still counts each room admin\r\nand DocSpace admin in the body. So a repeat can return 402. If the pending account was deleted, a new invitation\r\nto its address soon after the first sends no email. The first link still works. If the invitations need more\r\npaid seats than the tariff has left, the call returns 402 and sends nothing. The call returns 400 for a\r\nmalformed or punycode address, for the address of a disabled account, or for an address linked to a\r\nthird-party profile of another account. The call handles the addresses in\r\norder. So a 400 or 403 in the middle leaves the earlier invitations sent. The call returns every pending account\r\nthat the caller can see, not only the new ones. The portal limits the rate of these calls. To send an invitation\r\nagain, use `PUT api/2.0/people/invite`.\n\nRaises the `user.invited` webhook for every address without an account, not for an existing account whose type it raises.",
         "operationId": "inviteUsers",
         "requestBody": {
           "content": {
@@ -4987,7 +4983,7 @@
             }
           },
           "400": {
-            "description": "An address is malformed or written in punycode, or it belongs to a disabled account"
+            "description": "An address is malformed or written in punycode, it belongs to a disabled account, or it is linked to a third-party profile of another account"
           },
           "402": {
             "description": "The invitations would need more paid seats than the tariff has left"
@@ -5040,10 +5036,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -5157,10 +5153,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -5194,7 +5190,7 @@
           "People / Profiles"
         ],
         "summary": "Delete a user",
-        "description": "Deletes an account and queues the deletion of its data. First disable the account with the `Terminated` status\r\nof `PUT api/2.0/people/status/{status}`. Otherwise the call returns 403. Requires a DocSpace admin. Other\r\ncallers get 403. Only the portal owner can delete a DocSpace admin. The call also returns 403 for a system\r\naccount or an LDAP account. If no account has the ID, the call returns 404. The call cannot be undone, and a\r\nrepeated call returns 404. The account disappears immediately, with its avatar, group memberships, file shares,\r\nand OAuth apps. A queued job then deletes its data, including its chat threads in AI projects with their files.\r\nTo track the job, use\r\n`GET api/2.0/people/remove/progress/{userId}`. If the account shared files from its own section, the job moves\r\nthem to a new folder of the caller. To move rooms and shared files to another user first, use\r\n`POST api/2.0/people/reassign/start`. The call returns the profile as it was before the deletion. To delete\r\nseveral accounts, use `PUT api/2.0/people/delete`.\n\nRaises the `user.deleted` webhook. Raises the `folder.created` webhook once the data deletion job creates a folder for the files that the account shared.",
+        "description": "Deletes an account and queues the deletion of its data. First disable the account with the `Terminated` status\r\nof `PUT api/2.0/people/status/{status}`. Otherwise the call returns 403. Requires a DocSpace admin. Other\r\ncallers get 403. Only the portal owner can delete a DocSpace admin. The call also returns 403 for a system\r\naccount or an LDAP account. If no account has the ID, the call returns 404. The call cannot be undone, and a\r\nrepeated call returns 404. The account disappears immediately, with its avatar, group memberships, file shares,\r\nand OAuth apps. A queued job then deletes its data, including its chat threads in AI projects with their files.\r\nTo track the job, use\r\n`GET api/2.0/people/remove/progress/{userId}`. If the account shared files from its own section, the job moves\r\nthem to a new folder of the caller. To move rooms and shared files to another user first, use\r\n`POST api/2.0/people/reassign/start`. While a reassignment of the account's data runs, the call returns 409.\r\nIf the OAuth service does not answer, the call returns 502 and deletes nothing. The call returns the profile as\r\nit was before the deletion. To delete several accounts, use `PUT api/2.0/people/delete`.\n\nRaises the `user.deleted` webhook. Raises the `folder.created` webhook once the data deletion job creates a folder for the files that the account shared.",
         "operationId": "deleteMember",
         "parameters": [
           {
@@ -5237,6 +5233,12 @@
           },
           "404": {
             "description": "No user has the specified ID"
+          },
+          "409": {
+            "description": "Data of the user is still being reassigned to another user"
+          },
+          "502": {
+            "description": "The OAuth service did not answer when the OAuth apps of the user were deleted; the user is not deleted"
           },
           "401": {
             "description": "Unauthorized",
@@ -5283,11 +5285,8 @@
               }
             }
           },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -5418,10 +5417,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -5504,7 +5503,7 @@
             }
           },
           "400": {
-            "description": "The first and last name pair is not a valid user name"
+            "description": "The first and last name pair is not a valid user name, or the image at `files` is empty, too large or not an image"
           },
           "402": {
             "description": "The tariff or the user quota does not allow the requested guest or member seat"
@@ -5514,6 +5513,9 @@
           },
           "404": {
             "description": "No user has the specified ID"
+          },
+          "502": {
+            "description": "The address in `files` did not answer or timed out"
           },
           "401": {
             "description": "Unauthorized",
@@ -5550,11 +5552,8 @@
               }
             }
           },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -5654,10 +5653,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -5755,10 +5754,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -5893,10 +5892,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -5930,7 +5929,7 @@
           "People / Profiles"
         ],
         "summary": "Delete users",
-        "description": "Deletes several accounts and queues the deletion of their data. First disable each account with the `Terminated`\r\nstatus of `PUT api/2.0/people/status/{status}`. If any listed account is still active, the call returns 403 and\r\ndeletes nothing. Requires a DocSpace admin. Other callers get 403. Only the portal owner can delete a DocSpace\r\nadmin. The call skips the others without an error. It ignores system and LDAP accounts and leaves them out of\r\nthe response. It does the same with the IDs of deleted and unknown accounts. The call cannot be undone. A\r\nrepeat deletes nothing more and returns only the listed accounts that still exist. The call returns the listed\r\naccounts, including the skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`.\r\nA queued job deletes the data of each account, including its chat threads in AI projects. To track it, use\r\n`GET api/2.0/people/remove/progress/{userId}`.\r\nIf an account shared files from its own section, the job moves them to a new folder of the caller. To move rooms\r\nand shared files to another user first, use `POST api/2.0/people/reassign/start`. If `userIds` is missing, the\r\ncall returns 400.\n\nRaises the `user.deleted` webhook for every account it deletes, not for a skipped one. Raises the `folder.created` webhook for every deleted account that shared files, once the job creates a folder for them.",
+        "description": "Deletes several accounts and queues the deletion of their data. First disable each account with the `Terminated`\r\nstatus of `PUT api/2.0/people/status/{status}`. If any listed account is still active, the call returns 403 and\r\ndeletes nothing. Requires a DocSpace admin. Other callers get 403. Only the portal owner can delete a DocSpace\r\nadmin. The call skips the others without an error. It ignores system and LDAP accounts and leaves them out of\r\nthe response. It does the same with the IDs of deleted and unknown accounts. The call cannot be undone. A\r\nrepeat deletes nothing more and returns only the listed accounts that still exist. The call returns the listed\r\naccounts, including the skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`.\r\nA queued job deletes the data of each account, including its chat threads in AI projects. To track it, use\r\n`GET api/2.0/people/remove/progress/{userId}`.\r\nIf an account shared files from its own section, the job moves them to a new folder of the caller. To move rooms\r\nand shared files to another user first, use `POST api/2.0/people/reassign/start`. While a reassignment of the\r\ndata of a listed account runs, the call returns 409. If `userIds` is missing, the call returns 400. The call\r\ndeletes the accounts one by one. If the OAuth service refuses or does not answer, the call stops with 403 or 502.\r\nThe accounts before that one in the list stay deleted.\n\nRaises the `user.deleted` webhook for every account it deletes, not for a skipped one. Raises the `folder.created` webhook for every deleted account that shared files, once the job creates a folder for them.",
         "operationId": "removeUsers",
         "requestBody": {
           "content": {
@@ -5968,7 +5967,13 @@
             "description": "The userIds field is missing"
           },
           "403": {
-            "description": "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account"
+            "description": "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account; the accounts before that one in the list stay deleted"
+          },
+          "409": {
+            "description": "Data of the user is still being reassigned to another user"
+          },
+          "502": {
+            "description": "The OAuth service did not answer when the OAuth apps of an account were deleted; that account is not deleted, the accounts before it in the list stay deleted"
           },
           "401": {
             "description": "Unauthorized",
@@ -6005,11 +6010,8 @@
               }
             }
           },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -6147,10 +6149,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -6266,10 +6268,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -6389,10 +6391,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -6648,10 +6650,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -6923,10 +6925,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -7198,10 +7200,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -7251,7 +7253,7 @@
           "People / Search"
         ],
         "summary": "Search users by status filter",
-        "description": "Searches the accounts with the status from the route. The term in `query` must be in the name, user name, email,\r\nor contacts. Requires a DocSpace admin. Other callers get 403, including a room admin. The call is read-only. It\r\nmatches the term as a substring and ignores case. If `query` is missing, the call returns 400. With `filterBy`\r\nset to `group`, `filterValue` is a group ID. The call then keeps only the members of that group. The list has no\r\npaging, no total, and no fixed order. For a page with a total, use `GET api/2.0/people/filter`.",
+        "description": "Searches the accounts with the status from the route. The term in `query` must be in the name, user name, email,\r\nor contacts. Requires a DocSpace admin. Other callers get 403, including a room admin. The call is read-only. It\r\nmatches the term as a substring and ignores case. If `query` is missing, the call returns 400. With `filterBy`\r\nset to `group`, `filterValue` is a group ID. The call then keeps only the members of that group. If it is not a\r\ngroup ID, the call returns 400. The list has no paging, no total, and no fixed order. For a page with a total,\r\nuse `GET api/2.0/people/filter`.",
         "operationId": "searchUsersByStatus",
         "parameters": [
           {
@@ -7321,7 +7323,7 @@
             }
           },
           "400": {
-            "description": "A parameter has the wrong type, or `query` is missing"
+            "description": "A parameter has the wrong type, `query` is missing, or `filterValue` is not a group ID while `filterBy` is `group`"
           },
           "403": {
             "description": "The caller is not a DocSpace administrator"
@@ -7362,10 +7364,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -7719,10 +7721,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -7842,10 +7844,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -7879,7 +7881,7 @@
           "People / Search"
         ],
         "summary": "Search users",
-        "description": "Searches the active accounts of the portal by the term in the path. Requires a DocSpace admin. Other callers get\r\n403, including a room admin. The call skips pending and disabled accounts. The call is read-only. It returns all\r\nmatches with full profiles, without paging or a total. With `filterBy` set to `group`, `filterValue` is a group\r\nID. The call then keeps only the members of that group. To search in all states, use\r\n`GET api/2.0/people/filter`.",
+        "description": "Searches the active accounts of the portal by the term in the path. Requires a DocSpace admin. Other callers get\r\n403, including a room admin. The call skips pending and disabled accounts. The call is read-only. It returns all\r\nmatches with full profiles, without paging or a total. With `filterBy` set to `group`, `filterValue` is a group\r\nID. The call then keeps only the members of that group. If it is not a group ID, the call returns 400. To\r\nsearch in all states, use `GET api/2.0/people/filter`.",
         "operationId": "getSearch",
         "parameters": [
           {
@@ -7939,6 +7941,9 @@
               }
             }
           },
+          "400": {
+            "description": "`filterValue` is not a group ID while `filterBy` is `group`"
+          },
           "403": {
             "description": "The caller is not a DocSpace administrator"
           },
@@ -7977,21 +7982,11 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -8345,10 +8340,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -8604,10 +8599,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -8879,10 +8874,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -9154,10 +9149,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -9267,10 +9262,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -9375,10 +9370,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -9518,10 +9513,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -9556,7 +9551,7 @@
           "People / Third-party accounts"
         ],
         "summary": "Link a third-party account",
-        "description": "Links a third-party identity to the account of the caller. After this call, the account can sign in through\r\nthat provider. First, complete the sign-in that a URL of `GET api/2.0/people/thirdparty/providers` starts.\r\nThen pass the `serializedProfile` that this sign-in returns. Any signed-in user can call it. If the portal\r\ntariff does not include third-party sign-in, the call returns 403. A standalone installation always includes\r\nit. The call changes data and returns no body. The call returns 400 if `serializedProfile` is empty, comes\r\nfrom another portal, or is already linked to an account. So a repeated call returns 400. If the user\r\ncancelled the sign-in at the provider, the call returns 200 and links nothing. To check the link, read\r\n`linked` in `GET api/2.0/people/thirdparty/providers`. To delete a link, use\r\n`DELETE api/2.0/people/thirdparty/unlinkaccount`.",
+        "description": "Links a third-party identity to the account of the caller. After this call, the account can sign in through\r\nthat provider. First, complete the sign-in that a URL of `GET api/2.0/people/thirdparty/providers` starts.\r\nThen pass the `serializedProfile` that this sign-in returns. Any signed-in user can call it. If the portal\r\ntariff does not include third-party sign-in, the call returns 403. A standalone installation always includes\r\nit. The call changes data and returns no body. The call returns 400 if `serializedProfile` is empty, comes\r\nfrom another portal, or is already linked to an account. It also returns 400 if the sign-in at the provider\r\nended with an error. So a repeated call returns 400. If the user\r\ncancelled the sign-in at the provider, the call returns 200 and links nothing. To check the link, read\r\n`linked` in `GET api/2.0/people/thirdparty/providers`. To delete a link, use\r\n`DELETE api/2.0/people/thirdparty/unlinkaccount`.",
         "operationId": "linkThirdPartyAccount",
         "requestBody": {
           "content": {
@@ -9584,7 +9579,7 @@
             }
           },
           "400": {
-            "description": "The third-party identity is already linked to a portal profile, or `serializedProfile` is missing, empty or was issued by another portal"
+            "description": "The third-party identity is already linked to a portal profile, `serializedProfile` is missing, empty or was issued by another portal, or the sign-in at the provider ended with an error"
           },
           "403": {
             "description": "The portal tariff does not include third-party authorization"
@@ -9625,10 +9620,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -9662,7 +9657,7 @@
           "People / Third-party accounts"
         ],
         "summary": "Sign up with a provider",
-        "description": "Creates an account from a third-party identity and accepts the invitation of `key`. So a person can join by\r\nsigning in with a provider instead of a password. Pass the `serializedProfile` that the provider sign-in\r\nreturns. Anyone can call it without signing in. Instead, the call needs the key of a valid invitation link. If\r\nthe link is invalid or expired, the call returns 403. The invitation link sets the user type of the new\r\naccount. The value of `employeeType` only selects the kind of link to check. The call changes data. If an\r\naccount already has this identity or its email, the call links the provider to that account. It then returns that\r\naccount and creates no second one. So a repeated call with a valid key returns the same profile and sends no\r\nemails. If that account is not activated yet, the call returns 403. For a room invitation link, the call also\r\nadds the account to the room. A repeat gives the account the room role of the link again. Each call with a room\r\nlink counts as one use of the link. So after the last allowed use of the link, a repeat returns 403. The call\r\nreturns 200 with an empty body if the user cancelled the sign-in. The body is also empty if the portal fails to\r\ncreate the account. So check the body, not only the status. A `weixin` or `nextcloud` identity has no email. For\r\nit, the portal generates an email, and the account stays in the `AutoGenerated` activation state. The call\r\nreturns 400 if `key` or `serializedProfile` is missing, or `serializedProfile` is from another portal.\n\nRaises the `user.created` webhook only when the call creates a new account.",
+        "description": "Creates an account from a third-party identity and accepts the invitation of `key`. So a person can join by\r\nsigning in with a provider instead of a password. Pass the `serializedProfile` that the provider sign-in\r\nreturns. Anyone can call it without signing in. Instead, the call needs the key of a valid invitation link. If\r\nthe link is invalid or expired, the call returns 403. The invitation link sets the user type of the new\r\naccount. The value of `employeeType` only selects the kind of link to check. The call changes data. If an\r\naccount already has this identity or its email, the call links the provider to that account. It then returns that\r\naccount and creates no second one. So a repeated call with a valid key returns the same profile and sends no\r\nemails. If that account is not activated yet, the call returns 403. For a room invitation link, the call also\r\nadds the account to the room. A repeat gives the account the room role of the link again. Each call with a room\r\nlink counts as one use of the link. So after the last allowed use of the link, a repeat returns 403. The call\r\nreturns 200 with an empty body if the user cancelled the sign-in. The body is also empty if the portal fails to\r\ncreate the account. So check the body, not only the status. A `weixin` or `nextcloud` identity has no email. For\r\nit, the portal generates an email, and the account stays in the `AutoGenerated` activation state. The call\r\nreturns 400 if `key` or `serializedProfile` is missing, or `serializedProfile` is from another portal. It also\r\nreturns 400 if the sign-in at the provider ended with an error, or the identity has no email the portal can\r\nuse. If the room of the invitation link has as many members as the plan allows, the call returns 402.\n\nRaises the `user.created` webhook only when the call creates a new account.",
         "operationId": "signupThirdPartyAccount",
         "requestBody": {
           "content": {
@@ -9697,7 +9692,10 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `key` or `serializedProfile`, or `serializedProfile` is empty or was issued by another portal"
+            "description": "The request body cannot be read or has no `key` or `serializedProfile`, `serializedProfile` is empty or was issued by another portal, the sign-in at the provider ended with an error, or the identity has no email the portal can use"
+          },
+          "402": {
+            "description": "The account joins a room through the invitation link, but the portal already has as many room members as its plan allows"
           },
           "403": {
             "description": "The invitation link is invalid, has expired or has no uses left, or the email already belongs to a profile that has not been activated yet"
@@ -9728,10 +9726,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -9848,10 +9846,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -9973,10 +9971,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -10086,10 +10084,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -10209,10 +10207,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -10342,10 +10340,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -10467,10 +10465,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -10567,10 +10565,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -10680,10 +10678,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -10792,10 +10790,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -10892,10 +10890,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -10995,10 +10993,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -11032,7 +11030,7 @@
           "People / User status"
         ],
         "summary": "Get profiles by status",
-        "description": "Returns a page of the accounts with the status from the route, with full profiles. Requires a room admin, a\r\nDocSpace admin, or an admin of the People module. Other callers get 403. The call is read-only. The response has\r\nthe total number of matches. If `count` is out of range, the call returns 400. The call filters the accounts by\r\nname and email with `filterValue`. With `filterBy` set to `group`, `filterValue` is also a group ID. The call\r\nthen matches that ID against names and emails too, so it usually finds nothing. To filter by group, use\r\n`GET api/2.0/people/filter` with `groupId`. For active accounts only, the same call is `GET api/2.0/people`.",
+        "description": "Returns a page of the accounts with the status from the route, with full profiles. Requires a room admin, a\r\nDocSpace admin, or an admin of the People module. Other callers get 403. The call is read-only. The response\r\nhas the total number of matches. If `count` is out of range, the call returns 400. The call filters the\r\naccounts by name and email with `filterValue`. With `filterBy` set to `group`, `filterValue` must be a group\r\nID, or the call returns 400. The call keeps the members of that group and also matches the ID against names\r\nand emails. So it usually finds nothing. To filter by group, use `GET api/2.0/people/filter` with `groupId`.\r\nFor active accounts only, the same call is `GET api/2.0/people`.",
         "operationId": "getByStatus",
         "parameters": [
           {
@@ -11148,7 +11146,7 @@
             }
           },
           "400": {
-            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+            "description": "A parameter has the wrong type, the `count` is outside its allowed range, or `filterValue` is not a group ID while `filterBy` is `group`"
           },
           "403": {
             "description": "The caller is a member or a guest"
@@ -11189,10 +11187,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -11317,10 +11315,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -11443,10 +11441,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -11579,10 +11577,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -11698,10 +11696,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -11837,10 +11835,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -11950,10 +11948,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -12071,10 +12069,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [

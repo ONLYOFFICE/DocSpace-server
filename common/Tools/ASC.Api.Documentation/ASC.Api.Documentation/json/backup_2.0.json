@@ -139,10 +139,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -176,7 +176,7 @@
           "Backup"
         ],
         "summary": "Create the backup schedule",
-        "description": "Creates the backup schedule of the portal, or replaces the current one. A portal has at most one\r\nschedule. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.\r\nOther callers get 403. With `dump`, a caller without the space access permission also gets 403. The call\r\nchanges data. You can repeat it with the same body. It returns `true`. If the free backups of the month\r\nare spent and the paid service is off, the scheduler deletes the schedule. It then sends a notice that\r\nthe scheduled backup failed. The call returns 400 if `cronParams` is missing or a value is out of range.\r\nA weekly or monthly schedule without `day` also returns 400. It also returns 400 if `storageParams` has\r\nno key that the storage needs, or repeats a key. It also returns 400 for an unknown `module` or a\r\n`Documents` folder ID that is not a number. If the target folder does not exist, the call returns 404.\r\nIt returns 403 if you cannot create files in the folder. The root folders of rooms, the archive, and\r\nroom templates also return 403. If the plan has no free backups and the paid backup service is off, the\r\ncall returns 402. It also returns 402 if the portal subscription has expired or is not paid.",
+        "description": "Creates the backup schedule of the portal, or replaces the current one. A portal has at most one\r\nschedule. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.\r\nOther callers get 403. With `dump`, a caller without the space access permission also gets 403. The call\r\nchanges data. You can repeat it with the same body. It returns `true`. If the free backups of the month\r\nare spent and the paid service is off, the scheduler deletes the schedule. It then sends a notice that\r\nthe scheduled backup failed. The call returns 400 if `cronParams` is missing or a value is out of range.\r\nA weekly or monthly schedule without `day` also returns 400. It also returns 400 if `storageParams` has\r\nno key that the storage needs, or repeats a key. An item of `storageParams` without a key or a value also\r\nreturns 400. So does `Local` storage on a portal that is not a standalone installation. It also returns 400\r\nfor an unknown `module` or a `Documents` folder ID that is not a number. If the target folder does not exist,\r\nthe call returns 404.\r\nIt returns 403 if you cannot create files in the folder. The root folders of rooms, the archive, and\r\nroom templates also return 403. If the plan has no free backups and the paid backup service is off, the\r\ncall returns 402. It also returns 402 if the portal subscription has expired or is not paid.",
         "operationId": "createBackupSchedule",
         "requestBody": {
           "content": {
@@ -211,7 +211,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, `cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, the number of the stored copies is outside 1-30, `storageType` is not a storage the backups can be written to, a `ThirdPartyConsumer` schedule has no known `module`, the `folderId` or `filePath` key the storage type needs is missing, the `folderId` of a `Documents` schedule is not a number, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`"
+            "description": "The request body cannot be read, `cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, the number of the stored copies is outside 1-30, `storageType` is not a storage the backups can be written to, a `ThirdPartyConsumer` schedule has no known `module`, the `folderId` or `filePath` key the storage type needs is missing, the `folderId` of a `Documents` schedule is not a number, a dump or `Local` storage was requested on a portal that is not a standalone installation, an item of `storageParams` is null, has no key or no value, or `storageParams` repeats a key or, on a dump, contains `tenantId`"
           },
           "402": {
             "description": "The portal subscription does not cover scheduled backups, has expired or has not been paid"
@@ -258,10 +258,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -384,10 +384,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -421,7 +421,7 @@
           "Backup"
         ],
         "summary": "Start the backup",
-        "description": "Starts a backup of the portal and returns the queued job. Requires the EditPortalSettings permission, which the\r\nportal owner and DocSpace admins have. Other callers get 403. With `dump`, a caller without the space access\r\npermission also gets 403. The call queues work. To follow the job, poll `GET api/2.0/backup/getbackupprogress`\r\nuntil `isCompleted` is true. Do not repeat it while a backup runs. A repeat returns the running job. But after\r\nthe free backups of the month, it opens another payment session in the wallet. Once the job ends, a repeated\r\ncall makes another backup. After the portal spends its free backups of the month, the call charges each backup\r\nto the portal wallet. It then also turns on the paid backup service. If the wallet cannot pay for the backup,\r\nthe call returns 402. It also returns 402 for a `Documents` backup if the portal is over its storage quota. The\r\ncall returns 400 if `folderId` is missing or does not match `storageType`. It also returns 400 if an item of\r\n`storageParams` has no key or value, or repeats a key. If the target folder does not exist, the call returns\r\n404. It returns 403 if you cannot create files in the folder. The root folders of rooms, the archive, and room\r\ntemplates also return 403.",
+        "description": "Starts a backup of the portal and returns the queued job. Requires the EditPortalSettings permission, which the\r\nportal owner and DocSpace admins have. Other callers get 403. With `dump`, a caller without the space access\r\npermission also gets 403. The call queues work. To follow the job, poll `GET api/2.0/backup/getbackupprogress`\r\nuntil `isCompleted` is true. Do not repeat it while a backup runs. A repeat returns the running job. But after\r\nthe free backups of the month, it opens another payment session in the wallet. Once the job ends, a repeated\r\ncall makes another backup. After the portal spends its free backups of the month, the call charges each backup\r\nto the portal wallet. It then also turns on the paid backup service. If the wallet cannot pay for the backup,\r\nthe call returns 402. It also returns 402 for a `Documents` backup if the portal is over its storage quota. The\r\ncall returns 400 if `folderId` is missing or does not match `storageType`. It also returns 400 if an item of\r\n`storageParams` has no key or value, or repeats a key. `Local` storage without `filePath` also returns 400. So\r\ndoes `Local` storage on a portal that is not a standalone installation. If the target folder does not exist,\r\nthe call returns 404. It returns 403 if you cannot create files in the folder. The root folders of rooms, the\r\narchive, and room\r\ntemplates also return 403.",
         "operationId": "startBackup",
         "requestBody": {
           "content": {
@@ -456,7 +456,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, the folder ID does not match the storage type or is missing, an item of `storageParams` is null, has no key or no value, or repeats a key, or a dump was requested on a portal that is not a standalone installation"
+            "description": "The request body cannot be read, the folder ID does not match the storage type or is missing, an item of `storageParams` is null, has no key or no value, or repeats a key, `Local` storage has no `filePath`, or a dump or `Local` storage was requested on a portal that is not a standalone installation"
           },
           "402": {
             "description": "The portal already uses more storage than its plan allows and the backup goes to `Documents`, or the free backups of the current month are used up and the paid backup service is not available to this portal or cannot be charged"
@@ -503,10 +503,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -603,10 +603,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -726,10 +726,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -852,10 +852,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -983,10 +983,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1109,10 +1109,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1228,10 +1228,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1338,10 +1338,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1479,10 +1479,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1619,10 +1619,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
@@ -1719,10 +1719,10 @@
             }
           },
           "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Bad Gateway. Returned by the server when a service it depends on fails, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           },
           "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+            "description": "Service Unavailable. Returned by the server, with a Retry-After header, when another request holds the same data, or by the reverse proxy; a response from the proxy may have an HTML body and not JSON."
           }
         },
         "security": [
