@@ -1063,12 +1063,6 @@ public class ServicePriceInfo
     public decimal ServicePrice { get; init; }
 
     /// <summary>
-    /// The quota the price is set for.
-    /// </summary>
-    /// <example>100</example>
-    public double? Quota { get; init; }
-
-    /// <summary>
     /// The period the price is effective in.
     /// </summary>
     public TimeBound TimeBound { get; init; }
