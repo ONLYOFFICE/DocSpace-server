@@ -43,10 +43,7 @@ import {
 import type { GenerateSkillInput } from "../skills/generateSkill.js";
 import { createSkill, MAX_TITLE_LENGTH } from "../skills/createSkill.js";
 import type { CreateSkillInput } from "../skills/createSkill.js";
-
-function badRequest(message: string): never {
-  throw Object.assign(new Error(message), { status: 400, expose: true });
-}
+import { badRequest } from "../httpErrors.js";
 
 // Skills live in Instructions rooms, which are internal folders: a
 // positive integer id.

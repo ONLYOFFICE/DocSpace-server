@@ -43,6 +43,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 // A thread belongs to the AI project it was started in (`entityId`, the
 // project's id) or to none. The C# storage keeps the two apart: a list asked
@@ -57,8 +58,12 @@ type WireThreadsCursor = { lastEditDate: number; id: string };
 
 type ThreadsPage = { items: Thread[]; next: WireThreadsCursor | null };
 
+/** A page of `GET threads` (ThreadsPageDto, or a bare list). */
 function parseThreadsPage(raw: unknown): ThreadsPage {
-  const rawItems = Array.isArray(raw) ? raw : isObject(raw) ? (getArray(raw, "items") ?? []) : [];
+  const rawItems = Array.isArray(raw) ? raw : isObject(raw) ? getArray(raw, "items") : undefined;
+  if (rawItems === undefined) {
+    throw new UpstreamShapeError("GET threads");
+  }
   const items: Thread[] = [];
   for (const item of rawItems) {
     const thread = dtoToThread(item);
@@ -141,16 +146,16 @@ export class HttpThreadsStorage implements ThreadsStorage {
       profileId: profileId ?? null,
       entityId: await toProjectId(entityId),
     });
-    const thread = dtoToThread(raw);
-    if (!thread) {
-      throw new Error("ai service returned invalid thread");
-    }
+    const thread = mapped(dtoToThread(raw), "POST threads");
     // A round that started without a thread runs in this one from here on.
     setRoundThreadId(thread.threadId);
     return thread;
   }
 
   async readById(threadId: string): Promise<Thread | null> {
+    if (namesNoEntity(threadId)) {
+      return null;
+    }
     // The aggregate carries exactly the round's thread; `null` there means
     // the thread is absent or foreign, the same answer the 404 path gives.
     const snapshot = readChatContext("thread");
@@ -160,7 +165,7 @@ export class HttpThreadsStorage implements ThreadsStorage {
     reportChatContextMiss(`threads.readById(${threadId})`);
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(threadId)}`);
-      return dtoToThread(raw);
+      return mapped(dtoToThread(raw), "GET threads/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;

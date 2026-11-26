@@ -52,6 +52,7 @@ import type { Client } from "@a2a-js/sdk/client";
 import { Agent, fetch as undiciFetch } from "undici";
 import type { DocumentAgentConfig } from "../../config/index.js";
 import logger from "../log.js";
+import { readProp } from "../narrow.js";
 
 /** The `metadata.docagent` block of a request, as the agent's settings schema reads it. */
 export interface DocumentAgentSettings {
@@ -109,6 +110,20 @@ export class DocumentAgentError extends Error {
     super(message, options);
     this.name = "DocumentAgentError";
   }
+}
+
+/**
+ * A failed call in a log line: its message and, when it has one, the code or the message of its
+ * cause. A network failure is worded `fetch failed` and names the reason (ECONNREFUSED,
+ * ENOTFOUND, a TLS code) in the cause only.
+ */
+export function failureText(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  const cause = readProp(err, "cause");
+  const code = readProp(cause, "code");
+  const detail =
+    typeof code === "string" ? code : cause instanceof Error ? cause.message : undefined;
+  return detail ? `${message} (${detail})` : message;
 }
 
 let cached: { url: string; token: string; client: Promise<Client> } | undefined;
@@ -214,7 +229,11 @@ function stateOf(state: TaskState | undefined): DocumentTaskOutput["state"] {
       return "input-required";
     case TaskState.TASK_STATE_AUTH_REQUIRED:
       return "auth-required";
-    default:
+    case TaskState.TASK_STATE_SUBMITTED:
+    case TaskState.TASK_STATE_WORKING:
+    case TaskState.TASK_STATE_UNSPECIFIED:
+    case TaskState.UNRECOGNIZED:
+    case undefined:
       return "unknown";
   }
 }
@@ -355,7 +374,10 @@ export async function runDocumentTask(
   try {
     client = await clientFor(config);
   } catch (err) {
-    throw new DocumentAgentError(`document agent at ${config.url} is unreachable`, { cause: err });
+    // The address and the reason (a refused connection, a 401 or a 404 of the agent card) stay
+    // in the log: the error's message is read by the model.
+    logger.warn(`documentAgent: the agent at ${config.url} is unreachable: ${failureText(err)}`);
+    throw new DocumentAgentError("the document agent is unreachable", { cause: err });
   }
 
   let taskId: string | undefined;
@@ -421,7 +443,9 @@ export async function runDocumentTask(
         }
         break;
       }
-      default:
+      // A reply message of its own carries no task state: the task's status says how it ends.
+      case "message":
+      case undefined:
         break;
     }
   };
@@ -447,10 +471,15 @@ export async function runDocumentTask(
       throw abortError(input.signal);
     }
     if (taskId === undefined) {
-      throw new DocumentAgentError(
-        `document agent request failed: ${err instanceof Error ? err.message : String(err)}`,
-        { cause: err },
+      // The SDK words a refused request with the status and the whole body of the answer (a
+      // proxy's error page, an internal host). That stays in the log: the error's message is
+      // read by the model, its provider and the stored history.
+      logger.warn(
+        `documentAgent: the request failed before a task was made: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
       );
+      throw new DocumentAgentError("the document agent request failed", { cause: err });
     }
     // The task was accepted and the stream broke under it: re-attached below.
     logger.warn(

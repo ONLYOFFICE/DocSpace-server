@@ -36,9 +36,8 @@
  * client's info panel makes. Shapes mirror `MetadataController` DTOs.
  */
 
-import { withTimeout, proxyBaseUrl } from "../storage/httpClient.js";
-import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
-import { getForwardedHeaders } from "../requestContext.js";
+import { filesApiGet, filesApiSend } from "../storage/docspaceFilesApi.js";
+import { UpstreamShapeError } from "../storage/upstreamShape.js";
 import { getNumber, getObject, getObjectArray, getString, isObject } from "../narrow.js";
 
 export type EntryKind = "file" | "folder";
@@ -106,30 +105,9 @@ export function hasValue(value: FieldValue | undefined): boolean {
   );
 }
 
-function metadataUrl(kind: EntryKind, id: string, suffix = ""): string {
-  return `${proxyBaseUrl}/api/2.0/files/metadata/${kind}/${encodeURIComponent(id)}${suffix}`;
-}
-
-async function call(url: string, init?: RequestInit): Promise<unknown> {
-  const { signal, cancel } = withTimeout(undefined);
-  try {
-    const res = await fetch(url, {
-      ...init,
-      headers: {
-        ...getForwardedHeaders(),
-        ...(init?.body ? { "content-type": "application/json" } : {}),
-        ...(init?.headers ?? {}),
-      },
-      signal,
-    });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
-    }
-    const raw: unknown = await res.json();
-    return isObject(raw) ? raw["response"] : undefined;
-  } finally {
-    cancel();
-  }
+// Relative to `api/2.0/files/`, as the Files API clients take it.
+function metadataPath(kind: EntryKind, id: string, suffix = ""): string {
+  return `metadata/${kind}/${encodeURIComponent(id)}${suffix}`;
 }
 
 function toValue(raw: Record<string, unknown> | undefined): FieldValue | undefined {
@@ -235,7 +213,17 @@ export function parseEntryMetadata(raw: unknown): EntryMetadata {
 
 /** `GET metadata/{kind}/{id}`: the entry's templates with values and its custom fields. */
 export async function getEntryMetadata(kind: EntryKind, id: string): Promise<EntryMetadata> {
-  return parseEntryMetadata(await call(metadataUrl(kind, id)));
+  const path = metadataPath(kind, id);
+  return parseEntryMetadata(metadataAnswer(await filesApiGet(path), `GET files/${path}`));
+}
+
+// The metadata of an entry is always an object, its lists empty when it has none: a body of
+// another shape is unknown, not "no fields to fill" (ts-ai-failure-paths.md §1).
+function metadataAnswer(raw: unknown, call: string): unknown {
+  if (!isObject(raw)) {
+    throw new UpstreamShapeError(call);
+  }
+  return raw;
 }
 
 /** `PUT metadata/{kind}/{id}/values`; answers the whole metadata after the write. */
@@ -244,11 +232,9 @@ export async function setValues(
   id: string,
   values: ValueRequest[],
 ): Promise<EntryMetadata> {
+  const path = metadataPath(kind, id, "/values");
   return parseEntryMetadata(
-    await call(metadataUrl(kind, id, "/values"), {
-      method: "PUT",
-      body: JSON.stringify({ values }),
-    }),
+    metadataAnswer(await filesApiSend("PUT", path, { values }), `PUT files/${path}`),
   );
 }
 
@@ -258,8 +244,5 @@ export async function setCustomFields(
   id: string,
   fields: { name: string; value: string | null }[],
 ): Promise<void> {
-  await call(metadataUrl(kind, id, "/customFields"), {
-    method: "PUT",
-    body: JSON.stringify({ fields }),
-  });
+  await filesApiSend("PUT", metadataPath(kind, id, "/customFields"), { fields });
 }

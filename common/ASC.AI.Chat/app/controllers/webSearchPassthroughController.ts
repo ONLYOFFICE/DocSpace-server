@@ -37,9 +37,11 @@ import logger from "../log.js";
 import { isObject } from "../narrow.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { safeResolveSource } from "../storage/docspaceFilesApi.js";
-import type { SourceKind, SourceMeta } from "../storage/docspaceFilesApi.js";
+import type { SourceMeta } from "../storage/docspaceFilesApi.js";
 import { storage } from "../storage/index.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, ENTITY_ID_PARAM, ENTITY_KIND_PARAM, sourceKindOf } from "./_helpers.js";
+import { refusalForLog } from "../storage/errorBody.js";
+import { providerFetch, readBodyCapped, withTimeout } from "../storage/httpClient.js";
 
 // Web-search passthrough for the document editor's AI plugin.
 //
@@ -65,12 +67,15 @@ import { asyncHandler } from "./_helpers.js";
 // sends no entry, or names one the caller cannot see, yields no metadata.
 
 const EXA_BASE_URL = "https://api.exa.ai";
-const ENTITY_ID_PARAM = "entityId";
-const ENTITY_KIND_PARAM = "entityKind";
 
-function sourceKindOf(value: string | null): SourceKind {
-  return value === "file" ? "file" : "folder";
-}
+// The largest answer of a search provider that is relayed. A page of results with their
+// texts is far below it; the provider is another party's server, so its answer is not read
+// without a bound.
+const MAX_ANSWER_BYTES = 10 * 1024 * 1024;
+
+// The most pages one `contents` request names. Every address is fetched by the portal's search
+// provider on the portal's key, so the count is bounded here and not left to the provider.
+export const MAX_CONTENT_URLS = 20;
 
 function queryParam(originalUrl: string, name: string): string | undefined {
   const queryIndex = originalUrl.indexOf("?");
@@ -111,8 +116,7 @@ function buildUpstream(
   source: SourceMeta | undefined,
 ): UpstreamRequest | undefined {
   if (usesOnlyofficeBranch(config)) {
-    const baseUrl =
-      config.baseUrl || (config.isCloudProvider ? config.provider : "");
+    const baseUrl = config.baseUrl || (config.isCloudProvider ? config.provider : "");
     if (!baseUrl) {
       return undefined;
     }
@@ -167,9 +171,9 @@ function bodyError(
     }
     const numResults = body["numResults"];
     if (
-      numResults !== undefined
-      && numResults !== null
-      && (!Number.isInteger(numResults) || (numResults as number) < 1)
+      numResults !== undefined &&
+      numResults !== null &&
+      (typeof numResults !== "number" || !Number.isInteger(numResults) || numResults < 1)
     ) {
       return { error: "numResults must be a positive integer", field: "numResults" };
     }
@@ -177,11 +181,15 @@ function bodyError(
   }
   const urls = body["urls"];
   if (
-    !Array.isArray(urls)
-    || urls.length === 0
-    || !urls.every((u) => typeof u === "string" && u.trim().length > 0)
+    !Array.isArray(urls) ||
+    urls.length === 0 ||
+    !urls.every((u) => typeof u === "string" && u.trim().length > 0)
   ) {
     return { error: "urls is required and must be a non-empty array of strings", field: "urls" };
+  }
+  // Counted as they are sent on: a page named twice is one address.
+  if (new Set<unknown>(urls).size > MAX_CONTENT_URLS) {
+    return { error: `urls must name at most ${MAX_CONTENT_URLS} addresses`, field: "urls" };
   }
   return undefined;
 }
@@ -213,7 +221,13 @@ function passthrough(subPath: "search" | "contents") {
       res.status(400).json(problem);
       return;
     }
-    const upstream = buildUpstream(config, subPath, incoming, source);
+    // A page named twice is fetched once (ts-ai-failure-paths.md §4).
+    const urls = incoming["urls"];
+    const request =
+      subPath === "contents" && Array.isArray(urls)
+        ? { ...incoming, urls: [...new Set<unknown>(urls)] }
+        : incoming;
+    const upstream = buildUpstream(config, subPath, request, source);
     if (!upstream) {
       res.status(404).json({ error: "Web search is not configured" });
       return;
@@ -226,44 +240,70 @@ function passthrough(subPath: "search" | "contents") {
       }
     });
 
-    let response: globalThis.Response;
+    // One bound for the call and for the reading of its answer: a provider that stalls would
+    // otherwise hold the request until the client gives up.
+    const { signal, cancel } = withTimeout(controller.signal);
     try {
-      response = await fetch(upstream.url, {
-        method: "POST",
-        headers: upstream.headers,
-        body: upstream.body,
-        signal: controller.signal,
-      });
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
+      let response: globalThis.Response;
+      try {
+        // Bounded by the signal above, which covers the reading of the answer too.
+        response = await providerFetch(
+          upstream.url,
+          { method: "POST", headers: upstream.headers, body: upstream.body, signal },
+          "none",
+        );
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+        // Detail stays in the log — the error can carry the provider URL.
+        logger.error(`web-search passthrough: upstream fetch failed: ${err}`);
+        res.status(502).json({ error: "Upstream request failed" });
         return;
       }
-      // Detail stays in the log — the error can carry the provider URL.
-      logger.error(`web-search passthrough: upstream fetch failed: ${err}`);
-      res.status(502).json({ error: "Upstream request failed" });
-      return;
-    }
 
-    // A 5xx from the gateway, or from the AI service in front of it, is not
-    // relayed: its body carries internals (a stack trace, Go type names). The
-    // detail goes to the log and the client gets a fixed 502; 4xx answers
-    // still pass through for the plugin's `formatResponse`.
-    if (response.status >= 500) {
-      const detail = await response.text().catch(() => "");
-      logger.error(
-        `web-search passthrough ${subPath}: upstream answered ${response.status}: ${detail.slice(0, 1000)}`,
-      );
-      res.status(502).json({ error: "Upstream request failed" });
-      return;
-    }
+      // A 5xx from the gateway, or from the AI service in front of it, is not
+      // relayed: its body carries internals (a stack trace, Go type names). The
+      // log names the status and the size of that body, not the body, and the
+      // client gets a fixed 502; 4xx answers still pass through for the
+      // plugin's `formatResponse`.
+      if (response.status >= 500) {
+        logger.error(
+          `web-search passthrough ${subPath}: upstream answered ${await refusalForLog(response)}`,
+        );
+        res.status(502).json({ error: "Upstream request failed" });
+        return;
+      }
 
-    res.status(response.status);
-    const contentType = response.headers.get("content-type");
-    if (contentType) {
-      res.setHeader("Content-Type", contentType);
+      let answer: Uint8Array | null;
+      try {
+        answer = await readBodyCapped(response, MAX_ANSWER_BYTES);
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+        logger.error(`web-search passthrough ${subPath}: reading the answer failed: ${err}`);
+        res.status(502).json({ error: "Upstream request failed" });
+        return;
+      }
+      if (answer === null) {
+        logger.error(
+          `web-search passthrough ${subPath}: the answer is over ${MAX_ANSWER_BYTES} bytes`,
+        );
+        res.status(502).json({ error: "Upstream request failed" });
+        return;
+      }
+
+      res.status(response.status);
+      const contentType = response.headers.get("content-type");
+      if (contentType) {
+        res.setHeader("Content-Type", contentType);
+      }
+      res.setHeader("Cache-Control", "no-cache, no-transform");
+      res.send(Buffer.from(answer));
+    } finally {
+      cancel();
     }
-    res.setHeader("Cache-Control", "no-cache, no-transform");
-    res.send(Buffer.from(await response.arrayBuffer()));
   });
 }
 

@@ -1,41 +1,43 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { Request, Response, NextFunction, RequestHandler } from "express";
+import type { ErrorRequestHandler, Request, Response, NextFunction, RequestHandler } from "express";
 import logger from "../log.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
-import { isObject } from "../narrow.js";
+import { isObject, readProp } from "../narrow.js";
+import type { SourceKind } from "../storage/docspaceFilesApi.js";
+import { UpstreamShapeError } from "../storage/upstreamShape.js";
 
 // Mirror of the widget composer's per-kind attachment cap (ATTACHMENT_LIMIT
 // in the chat library's attachments store): at most 5 file parts and 5
@@ -149,6 +151,16 @@ export type TypedRequest<ReqBody = unknown, ReqQuery = Record<string, unknown>> 
   ReqQuery
 >;
 
+// The query parameters by which a passthrough route (OpenAI, web search) names the entry the
+// call is made for. They are read here and stripped from what goes to the provider.
+export const ENTITY_ID_PARAM = "entityId";
+export const ENTITY_KIND_PARAM = "entityKind";
+
+/** `entityKind` as sent: `file` for a file, a folder (or room) for anything else. */
+export function sourceKindOf(value: string | null): SourceKind {
+  return value === "file" ? "file" : "folder";
+}
+
 type AsyncHandler<ReqBody, ReqQuery> = (
   req: TypedRequest<ReqBody, ReqQuery>,
   res: Response,
@@ -162,7 +174,7 @@ type AsyncHandler<ReqBody, ReqQuery> = (
 // and `statusText`. Errors that opt in via `expose` (e.g. request
 // validation) get their message through under a 4xx status; everything
 // else collapses to a generic 500.
-function clientError(err: unknown): { status: number; message: string } {
+export function clientError(err: unknown): { status: number; message: string } {
   if (err instanceof AiServiceHttpError) {
     return { status: err.status, message: err.statusText || "Upstream error" };
   }
@@ -175,8 +187,12 @@ function clientError(err: unknown): { status: number; message: string } {
   if (err instanceof DocspaceApiHttpError) {
     return { status: err.status, message: err.statusText || "Upstream error" };
   }
-  const status = (err as { status?: unknown })?.status;
-  const expose = (err as { expose?: unknown })?.expose === true;
+  // The message names the upstream call: it goes to the log, like any other 5xx detail.
+  if (err instanceof UpstreamShapeError) {
+    return { status: err.status, message: "Bad Gateway" };
+  }
+  const status = readProp(err, "status");
+  const expose = readProp(err, "expose") === true;
   if (expose && typeof status === "number" && status >= 400 && status < 500) {
     return { status, message: err instanceof Error ? err.message : "Bad request" };
   }
@@ -194,22 +210,17 @@ export function unpackPositional<T extends string>(
   body: unknown,
   names: readonly T[],
 ): Partial<Record<T, unknown>> {
-  if (names.length === 0) {
+  const [first, ...rest] = names;
+  if (first === undefined) {
     return {};
   }
   // Single-arg routes: ApiProvider sends the value directly as the body
   // (no wrapping), so `body` IS the arg — be it a string, array, or
   // object. Wrap it under the single name. Legacy callers that send
   // `{name: value}` are detected via the `name in body` check.
-  if (names.length === 1) {
-    const first = names[0] as T;
-    if (
-      typeof body === "object"
-      && body !== null
-      && !Array.isArray(body)
-      && first in body
-    ) {
-      return body as Partial<Record<T, unknown>>;
+  if (rest.length === 0) {
+    if (isObject(body) && first in body) {
+      return namedFields(body);
     }
     if (body === undefined || body === null) {
       return {};
@@ -227,10 +238,27 @@ export function unpackPositional<T extends string>(
     });
     return out;
   }
-  if (typeof body === "object" && body !== null) {
-    return body as Partial<Record<T, unknown>>;
+  if (isObject(body)) {
+    return namedFields(body);
   }
   return {};
+}
+
+// A shallow copy of a named body, every key kept: a caller may read a second name for a field
+// (`config` beside `body` in the web search routes). Each key is defined, not assigned, so a
+// `__proto__` key that JSON.parse made an own property stays one instead of replacing the
+// copy's prototype.
+function namedFields<T extends string>(body: Record<string, unknown>): Partial<Record<T, unknown>> {
+  const out: Partial<Record<T, unknown>> = {};
+  for (const [key, value] of Object.entries(body)) {
+    Object.defineProperty(out, key, {
+      value,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  }
+  return out;
 }
 
 function errorDetails(err: unknown): string {
@@ -239,7 +267,7 @@ function errorDetails(err: unknown): string {
     if (err.stack) {
       parts.push(err.stack);
     }
-    const cause = (err as { cause?: unknown }).cause;
+    const cause = err.cause;
     if (cause !== undefined) {
       parts.push(`cause: ${errorDetails(cause)}`);
     }
@@ -252,24 +280,128 @@ function errorDetails(err: unknown): string {
   }
 }
 
+/**
+ * The application's error handler, registered after the routes: it answers what was raised
+ * before a handler ran (by a body parser) in the `{ error }` JSON of every other refusal, except
+ * a body over the limit, which is refused in plain text.
+ */
+export const errorHandler: ErrorRequestHandler = (err: unknown, req, res, next) => {
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
+  // The parser's own message quotes the text it could not parse.
+  if (readProp(err, "type") === "entity.parse.failed") {
+    res.status(400).json({ error: "The request body is not valid JSON" });
+    return;
+  }
+  // A body over the parser's limit is refused in plain text. A stream client reads every JSON
+  // line of an answer as a frame of the stream, and `ASC.AI.Tests` pins that the refusal of
+  // `send-with-stream` carries none (ChatHiddenFailureTests).
+  if (readProp(err, "type") === "entity.too.large") {
+    res.status(413).type("text/plain").send("Payload Too Large");
+    return;
+  }
+  sendError(req, res, err);
+};
+
+/**
+ * Answers `err` as the error boundary of every handler does: the status and the text
+ * `clientError` lets through, a 5xx logged with its details. `fields` are added to the
+ * `{ error }` body, for a refusal that has to say more than its text (what a failed install
+ * already made). The headers must not have been sent yet.
+ */
+export function sendError(
+  req: Pick<Request, "method" | "originalUrl">,
+  res: Response,
+  err: unknown,
+  fields: Readonly<Record<string, unknown>> = {},
+): void {
+  const { status, message } = clientError(err);
+  logServerError(req, err, status);
+  res.status(status).json({ ...fields, error: message });
+}
+
+function logServerError(
+  req: Pick<Request, "method" | "originalUrl">,
+  err: unknown,
+  status: number,
+): void {
+  if (status >= 500) {
+    logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
+  }
+}
+
+// The work each wrapped handler started, by its response. Express 4 ignores what a handler
+// returns, so the work is not returned; a test that calls a handler without a server waits
+// for it through `handlerSettled`. A WeakMap keeps no response alive after its request.
+const handlerWork = new WeakMap<object, Promise<void>>();
+
+/**
+ * Settles when the work a handler wrapped by `asyncHandler` started for this response is done,
+ * its error answered or passed on included; at once for a response no such handler was given.
+ */
+export function handlerSettled(res: object): Promise<void> {
+  return handlerWork.get(res) ?? Promise.resolve();
+}
+
+async function runHandler<ReqBody, ReqQuery>(
+  handler: AsyncHandler<ReqBody, ReqQuery>,
+  req: TypedRequest<ReqBody, ReqQuery>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    await handler(req, res, next);
+  } catch (err) {
+    if (!res.headersSent) {
+      sendError(req, res, err);
+      return;
+    }
+    logServerError(req, err, clientError(err).status);
+    // A status can no longer say that the answer failed. Ending the response here would make
+    // a cut answer look complete, so the error goes on to Express, which drops the connection
+    // and the client sees a failed transfer. An answer already ended (a stream that wrote its
+    // own error frame) is left as it is: dropping the connection then could cut bytes that
+    // are still on their way.
+    if (!res.writableEnded) {
+      next(err);
+    }
+  }
+}
+
+/**
+ * Wraps a handler for Express 4, which neither awaits a handler nor passes a rejected promise
+ * to `next`: the returned handler starts the work and returns nothing, and an error of the
+ * work is answered here (`sendError`) or, after the headers are sent, passed to `next`.
+ */
 export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknown>>(
   handler: AsyncHandler<ReqBody, ReqQuery>,
 ): RequestHandler<Record<string, string>, unknown, ReqBody, ReqQuery> {
-  return async (req, res, next) => {
-    try {
-      await handler(req, res, next);
-    } catch (err) {
-      const { status, message } = clientError(err);
-      if (status >= 500) {
-        logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
-      }
-      if (!res.headersSent) {
-        res.status(status).json({ error: message });
-      } else {
-        res.end();
-      }
-    }
+  return (req, res, next) => {
+    handlerWork.set(res, runHandler(handler, req, res, next));
   };
+}
+
+/**
+ * Writes one chunk of a stream and, when the response says its buffer is full, waits until it
+ * has drained before the next chunk is pulled: a client that reads slowly then slows the
+ * stream down instead of having all of it buffered in memory. A response that is closed has
+ * nothing to drain.
+ */
+async function writeAndDrain(res: Response, chunk: string): Promise<void> {
+  if (res.write(chunk) !== false || res.destroyed || res.writableEnded) {
+    return;
+  }
+  await new Promise<void>((resolve) => {
+    const done = (): void => {
+      res.off("drain", done);
+      res.off("close", done);
+      resolve();
+    };
+    res.once("drain", done);
+    res.once("close", done);
+  });
 }
 
 // Idle interval after which a keep-alive frame is emitted on an otherwise
@@ -314,7 +446,9 @@ export function startStreamHeartbeat(
   }, STREAM_HEARTBEAT_CHECK_MS);
   timer.unref?.();
   return {
-    touch: () => { lastActivity = Date.now(); },
+    touch: () => {
+      lastActivity = Date.now();
+    },
     stop: () => clearInterval(timer),
   };
 }
@@ -338,7 +472,7 @@ export async function streamNdjson(
     let current = first;
     while (!current.done) {
       const event = current.value;
-      res.write(`${JSON.stringify(event)}\n`);
+      await writeAndDrain(res, `${JSON.stringify(event)}\n`);
       heartbeat.touch();
       current = await iterator.next();
     }
@@ -378,7 +512,7 @@ export async function streamOpenAiSse(
     let current = first;
     while (!current.done) {
       const chunk = current.value;
-      res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+      await writeAndDrain(res, `data: ${JSON.stringify(chunk)}\n\n`);
       heartbeat.touch();
       current = await iterator.next();
     }
@@ -388,7 +522,7 @@ export async function streamOpenAiSse(
     // Generic message only — detail stays in the server log.
     res.write(
       `data: ${JSON.stringify({
-        error: { message: "stream error", type: "server_error" },
+        error: { message: "stream error", type: "server_error", code: null, param: null },
       })}\n\n`,
     );
   } finally {

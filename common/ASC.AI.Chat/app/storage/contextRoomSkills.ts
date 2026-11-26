@@ -84,7 +84,14 @@ export async function refreshContextRoomSkills(body: unknown): Promise<void> {
     }
     const skills = catalog.get(id);
     return skills
-      ? { ...room, skills: skills.map(({ id: skillId, name, description }) => ({ id: skillId, name, description })) }
+      ? {
+          ...room,
+          skills: skills.map(({ id: skillId, name, description }) => ({
+            id: skillId,
+            name,
+            description,
+          })),
+        }
       : room;
   });
 }

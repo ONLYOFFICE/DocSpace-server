@@ -41,6 +41,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 const THREADS_PATH = "/threads";
 const MESSAGES_PATH = "/messages";
@@ -69,8 +70,12 @@ function toWireCursor(cursor: MessagesCursor | undefined): WireMessagesCursor | 
   return undefined;
 }
 
+/** A page of `GET threads/{id}/messages` (MessagesPageDto, or a bare list). */
 function parseMessagesPage(raw: unknown): MessagesPage {
-  const rawItems = Array.isArray(raw) ? raw : isObject(raw) ? (getArray(raw, "items") ?? []) : [];
+  const rawItems = Array.isArray(raw) ? raw : isObject(raw) ? getArray(raw, "items") : undefined;
+  if (rawItems === undefined) {
+    throw new UpstreamShapeError("GET threads/{id}/messages");
+  }
   const items: ThreadMessageLike[] = [];
   for (const item of rawItems) {
     const message = dtoToMessage(item);
@@ -146,17 +151,16 @@ export class HttpMessagesStorage implements MessagesStorage {
       contents: serializeContents(message),
     });
     invalidateChatContext("messages");
-    const result = dtoToMessage(raw);
-    if (!result) {
-      throw new Error("ai service returned invalid message");
-    }
-    return result;
+    return mapped(dtoToMessage(raw), "POST threads/{id}/messages");
   }
 
   async readById(messageId: string): Promise<ThreadMessageLike | null> {
+    if (namesNoEntity(messageId)) {
+      return null;
+    }
     try {
       const raw = await aiService.get(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
-      return dtoToMessage(raw);
+      return mapped(dtoToMessage(raw), "GET messages/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;
@@ -170,9 +174,12 @@ export class HttpMessagesStorage implements MessagesStorage {
   // C# DTO's `threadId`; attachments/link-to-message needs it to verify the
   // caller-supplied pair (Bug 82771 reopen).
   async readThreadId(messageId: string): Promise<string | null> {
+    if (namesNoEntity(messageId)) {
+      return null;
+    }
     try {
       const raw = await aiService.get(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
-      return (isObject(raw) ? getString(raw, "threadId") : undefined) ?? null;
+      return mapped(isObject(raw) ? getString(raw, "threadId") : undefined, "GET messages/{id}");
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;
@@ -201,10 +208,10 @@ export class HttpMessagesStorage implements MessagesStorage {
     // service — they are never part of a round.
     const snapshot = readChatContext("messages");
     if (
-      snapshot
-      && snapshot.messages !== null
-      && wireCursor === undefined
-      && threadId === snapshot.requested.threadId
+      snapshot &&
+      snapshot.messages !== null &&
+      wireCursor === undefined &&
+      threadId === snapshot.requested.threadId
     ) {
       return [...snapshot.messages];
     }

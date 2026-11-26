@@ -36,9 +36,10 @@
 // they may create rooms.
 
 import { getForwardedHeaders } from "../requestContext.js";
-import { DocspaceApiHttpError } from "./docspaceFilesApi.js";
+import { refusedAnswer } from "./docspaceFilesApi.js";
 import { proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { getBoolean, getObject, isObject } from "../narrow.js";
+import { jsonAnswer, mapped } from "./upstreamShape.js";
 
 export interface DocspaceSelf {
   /** A DocSpace admin other than the owner. */
@@ -54,13 +55,10 @@ export async function getSelf(): Promise<DocspaceSelf> {
   try {
     const res = await fetch(url, { headers: getForwardedHeaders(), signal });
     if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      throw await refusedAnswer(res, url);
     }
-    const raw: unknown = await res.json();
-    const self = isObject(raw) ? getObject(raw, "response") : undefined;
-    if (!self) {
-      throw new Error(`DocSpace API: unparseable response from ${url}`);
-    }
+    const raw = await jsonAnswer(res, "GET people/@self");
+    const self = mapped(isObject(raw) ? getObject(raw, "response") : undefined, "GET people/@self");
     return {
       isAdmin: getBoolean(self, "isAdmin") === true,
       isOwner: getBoolean(self, "isOwner") === true,

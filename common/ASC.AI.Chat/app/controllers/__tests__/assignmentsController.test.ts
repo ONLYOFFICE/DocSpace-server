@@ -1,8 +1,38 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 const getAllAssignments = vi.fn();
 const tryResolveForAction = vi.fn();
 const cascadeProfileDelete = vi.fn();
@@ -19,13 +49,17 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
 });
 const readAllForClient = vi.fn();
 const readByIdRaw = vi.fn();
-vi.mock("../../storage/index.js", () => ({
-  storage: { profiles: { readAllForClient, readByIdRaw } },
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
+vi.mock("../../storage/index.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../storage/index.js")>()),
+  storage: { profiles: { readAllForClient, readByIdRaw }, toolPrefs },
 }));
 const assertEntityAccessible = vi.fn(async () => {});
 vi.mock("../../storage/docspaceFilesApi.js", () => ({ assertEntityAccessible }));
 
 const { assignmentsController } = await import("../assignmentsController.js");
+const { handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
@@ -33,7 +67,8 @@ const call = async (query: Record<string, string>) => {
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (assignmentsController.getAllAssignments as unknown as Handler)({ query }, res, next);
+  (assignmentsController.getAllAssignments as unknown as Handler)({ query }, res, next);
+  await handlerSettled(res);
   const failure = next.mock.calls[0];
   if (failure) throw failure[0];
   return res.json.mock.calls[0]?.[0];
@@ -80,10 +115,14 @@ const run = async (name: keyof typeof assignmentsController, req: Record<string,
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (assignmentsController[name] as unknown as Handler)({ query: {}, ...req }, res, next);
+  (assignmentsController[name] as unknown as Handler)({ query: {}, ...req }, res, next);
+  await handlerSettled(res);
   const failure = next.mock.calls[0];
   if (failure) throw failure[0];
-  return { status: res.status.mock.calls[0]?.[0] as number | undefined, body: res.json.mock.calls[0]?.[0] };
+  return {
+    status: res.status.mock.calls[0]?.[0] as number | undefined,
+    body: res.json.mock.calls[0]?.[0],
+  };
 };
 
 describe("assignmentsController resolve operations", () => {

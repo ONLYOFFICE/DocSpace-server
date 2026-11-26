@@ -294,7 +294,7 @@ public class FileStorageService //: IFileStorageService
         List<FolderType> folderType = null,
         bool withAiFolder = false,
         MetadataFilter metadataFilter = null,
-        bool pinnedAiProjects = false)
+        bool aiHubRootProjects = false)
     {
         var subjectId = subject ?? Guid.Empty;
         var subjectOwnerIdGuid = subjectOwnerId ?? Guid.Empty;
@@ -466,7 +466,7 @@ public class FileStorageService //: IFileStorageService
                 groupId,
                 privacyFilter,
                 folderType,
-                withAiFolder, metadataFilter, pinnedAiProjects);
+                withAiFolder, metadataFilter, aiHubRootProjects);
         }
         catch (Exception e)
         {

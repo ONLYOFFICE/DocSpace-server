@@ -37,10 +37,11 @@
 // agent cannot save. The agent reads its inputs itself, through the portal's
 // MCP server, by the ids it is handed.
 
-import { proxyBaseUrl, withTimeout, AiServiceHttpError } from "./httpClient.js";
-import { getForwardedHeaders } from "../requestContext.js";
+import { envelopeResponse, filesApiRequest } from "./docspaceFilesApi.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { mapped, UpstreamShapeError } from "./upstreamShape.js";
+import { writeWasRefused } from "./writeOutcome.js";
 
 export interface UploadedFile {
   /** The new DocSpace entry id (internal int or thirdparty string, as a string). */
@@ -65,7 +66,11 @@ const MEDIA_TYPES: Record<string, string> = {
 /** The media type a file name implies, or octet-stream. */
 export function mediaTypeOf(title: string): string {
   const ext = title.includes(".") ? title.split(".").pop()?.toLowerCase() : undefined;
-  return (ext === undefined ? undefined : MEDIA_TYPES[ext]) ?? "application/octet-stream";
+  // An own entry only: "notes.constructor" must not answer a member of Object.prototype.
+  return (
+    (ext !== undefined && Object.hasOwn(MEDIA_TYPES, ext) ? MEDIA_TYPES[ext] : undefined) ??
+    "application/octet-stream"
+  );
 }
 
 /**
@@ -84,31 +89,28 @@ export async function uploadFile(
   form.append("createNewIfExist", "true");
   form.append("file", new Blob([bytes], { type: mediaType }), title);
 
-  const url = `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(folderId)}/insert`;
-  // No Content-Type: `fetch` derives the multipart boundary from the body.
-  const headers = getForwardedHeaders();
-  const { signal, cancel } = withTimeout(undefined);
+  // A refusal is a DocspaceApiHttpError with its status (its message carries no body).
+  let id: string;
+  let saved: string;
   try {
-    const res = await fetch(url, { method: "POST", headers, body: form, signal });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new AiServiceHttpError(res.status, res.statusText, text, url);
-    }
-    const json: unknown = await res.json();
-    const file = isObject(json) && "response" in json ? json["response"] : json;
-    if (!isObject(file)) {
-      throw new Error("DocSpace insert returned an unexpected payload");
-    }
-    const id = getEntityId(file, "id");
-    if (id === undefined) {
-      throw new Error("DocSpace insert returned a file without an id");
-    }
-    const saved = getString(file, "title") ?? title;
-    logger.info(
-      `uploadFile: ${title} -> folder ${folderId} as entry ${id} (${bytes.length} bytes)`,
+    const file = envelopeResponse(
+      await filesApiRequest("POST", `${encodeURIComponent(folderId)}/insert`, { form }),
     );
-    return { id, title: saved };
-  } finally {
-    cancel();
+    if (!isObject(file)) {
+      throw new UpstreamShapeError("POST files/{folderId}/insert");
+    }
+    id = mapped(getEntityId(file, "id"), "POST files/{folderId}/insert");
+    saved = getString(file, "title") ?? title;
+  } catch (err) {
+    // Only a refusal says that no file was made. The callers answer the failure; the line says
+    // where a file nobody can name may lie (ts-ai-failure-paths.md §6).
+    if (!writeWasRefused(err)) {
+      logger.warn(
+        `uploadFile: ${title} may exist in folder ${folderId}, the upload got no usable answer`,
+      );
+    }
+    throw err;
   }
+  logger.info(`uploadFile: ${title} -> folder ${folderId} as entry ${id} (${bytes.length} bytes)`);
+  return { id, title: saved };
 }

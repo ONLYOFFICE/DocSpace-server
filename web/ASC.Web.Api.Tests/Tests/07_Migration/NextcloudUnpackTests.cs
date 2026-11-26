@@ -176,4 +176,37 @@ public class NextcloudUnpackTests(
         status.Error.Should().Contain("Couldn't parse");
         status.ParseResult.FailedArchives.Should().Equal(fileName);
     }
+
+    /// <summary>
+    /// A backup may be packed without a folder around it - <c>tar -czf b.tar.gz -C backup .</c> - so
+    /// <c>config/</c>, <c>data/</c> and the dump are the top-level entries. The parse used to take the
+    /// first folder of the unpacked archive for the backup, here <c>config</c>: it looked for the users'
+    /// folders in <c>config/data</c>, failed on every user and ended without an error and without users.
+    /// It now takes the folder that holds <c>data</c>.
+    /// </summary>
+    [Theory]
+    [Trait("Bug", "85248")]
+    [InlineData("backup.zip", "")]
+    [InlineData("backup.tar.gz", "")]
+    [InlineData("backup.tar.gz", "./")]
+    public async Task Parse_ArchiveWithoutRootFolder_ReadsUsersAndFiles(string fileName, string prefix)
+    {
+        // Arrange
+        await UploadBackupAsync(fileName, BuildArchive(fileName,
+            ($"{prefix}config/config.php", "<?php"),
+            ($"{prefix}data/{Uid}/files/hello.txt", FileContent),
+            ($"{prefix}nextcloud.sql", Dump)));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        var user = status.ParseResult.Users.Should().ContainSingle().Which;
+        user.Email.Should().Be(Email);
+        user.MigratingFiles.FilesCount.Should().Be(1);
+        user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
+    }
 }
