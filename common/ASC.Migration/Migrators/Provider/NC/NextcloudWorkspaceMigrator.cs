@@ -295,7 +295,9 @@ public class NextcloudWorkspaceMigrator : Migrator
 
     private IEnumerable<string> GetDumpChunk(string tableName, string dump)
     {
-        var regex = new Regex($"INSERT INTO `{tableName}` VALUES (.*);");
+        // A dump writes the rows of an INSERT either on its line or one per line after VALUES. A line break inside
+        // a value is escaped in a dump, so the statement ends at the first ";" that ends a line.
+        var regex = new Regex($@"INSERT INTO `{tableName}` VALUES\s*(.*?);[ \t]*(\r?\n|\z)", RegexOptions.Singleline);
         var match = regex.Match(dump);
         if (!match.Success)
         {

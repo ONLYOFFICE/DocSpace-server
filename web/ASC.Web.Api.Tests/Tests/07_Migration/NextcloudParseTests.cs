@@ -330,4 +330,38 @@ public class NextcloudParseTests(
         status.IsCompleted.Should().BeTrue();
         status.Error.Should().Contain(".zip, .tar.gz or .tgz");
     }
+
+    /// <summary>
+    /// A dump may write an INSERT over several lines - a line break after <c>VALUES</c> and one row
+    /// per line, as mariadb-dump of MariaDB 10.11 does. The parse used to expect the rows on the line
+    /// of the INSERT: it found no table in such a dump and ended without an error and without users.
+    /// It now reads the statement up to the ";" that ends a line.
+    /// </summary>
+    [Theory]
+    [Trait("Bug", "85259")]
+    [InlineData("\n")]
+    [InlineData("\r\n")]
+    public async Task Parse_DumpWithRowPerLine_ReadsUsersAndFiles(string lineBreak)
+    {
+        // Arrange
+        var dump = Dump
+            .Replace(" VALUES ", " VALUES\n", StringComparison.Ordinal)
+            .Replace("),(", "),\n(", StringComparison.Ordinal)
+            .Replace("\n", lineBreak, StringComparison.Ordinal);
+        await UploadBackupAsync("backup.zip", BuildZip(dump));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        var user = status.ParseResult.Users.Should().ContainSingle().Which;
+        user.Email.Should().Be(Email);
+        user.FirstName.Should().Be("Alice");
+        user.LastName.Should().Be("Smith");
+        user.MigratingFiles.FilesCount.Should().Be(1);
+        user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
+    }
 }
