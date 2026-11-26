@@ -52,16 +52,30 @@ public class TemplateGalleryAvailableTests(AspireAppFixture fixture) : BaseTest(
     [Fact]
     public async Task GetTemplateGalleryAvailable_SignedInUser_ReturnsABoolean()
     {
-        var user = await InviteContact(EmployeeType.User);
-        await _filesClient.Authenticate(user);
+        await _filesClient.Authenticate(await InviteContact(EmployeeType.User));
 
+        await AssertReturnsABooleanAsync();
+    }
+
+    [Fact]
+    public async Task GetTemplateGalleryAvailable_Guest_ReturnsABoolean()
+    {
+        // "Any signed-in user" includes a guest: the call has no check of the user type
+        await _filesClient.Authenticate(await InviteGuest());
+
+        await AssertReturnsABooleanAsync();
+    }
+
+    private async Task AssertReturnsABooleanAsync()
+    {
         var files = new RawApiClient(_filesClient);
         using var response = await files.GetAsync(Route, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // A missing or null `response` reads as null, any other value fails the read
-        (await files.ReadAsync<bool?>(response, TestContext.Current.CancellationToken)).Should().NotBeNull();
+        // The value is read as it came: a `response` that is null, a string or a number is not a boolean
+        var value = await files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+        value.ValueKind.Should().BeOneOf(JsonValueKind.True, JsonValueKind.False);
     }
 
     [Fact]

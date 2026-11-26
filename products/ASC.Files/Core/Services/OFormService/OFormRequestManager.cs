@@ -47,9 +47,17 @@ public class OFormRequestManager(
 
     /// <summary>
     /// The client the download asks the gallery with: every request of it gets an attempt timeout, retries and a circuit
-    /// breaker per host (<see cref="ConfigureHttpClientPipeline"/>), all inside the download deadline. The availability
-    /// check uses the default client: it is not retried, its answer is cached.
+    /// breaker per host (<see cref="ConfigureHttpClientPipeline"/>), all inside the download deadline. It is a named
+    /// client of its own for that policy of failures, which no standard client has; like customHttpClientNoCookie it
+    /// keeps no cookies, so no tenant gets the cookies another tenant's download was given. The availability check uses
+    /// the default client: it is not retried, its answer is cached.
     /// </summary>
+    /// <remarks>
+    /// The breaker of a host is shared by every portal of the process. While it is open (30 seconds), every creation
+    /// from a template on that host answers 502 at once, while the availability check, which does not go through the
+    /// breaker, may still answer a cached <c>true</c>. An error status of a template file does not count towards the
+    /// breaker: one broken template must not fail the others on its host.
+    /// </remarks>
     public const string HttpClientName = "templateGallery";
 
     public const string HttpClientPipelineName = "oform-gallery-http";
@@ -102,6 +110,10 @@ public class OFormRequestManager(
     private const string TimeoutEventName = "OnTimeout";
     private const string RetryEventName = "OnRetry";
     private const string CircuitOpenedEventName = "OnCircuitOpened";
+    private const string ExecutionAttemptEventName = "ExecutionAttempt";
+
+    // Marks the request for a template file, whose error status the breaker does not count
+    private static readonly HttpRequestOptionsKey<bool> _fileRequestKey = new("ASC.Files.TemplateGallery.FileRequest");
 
     private static readonly TimeSpan _availableDuration = TimeSpan.FromMinutes(10);
 
@@ -193,7 +205,10 @@ public class OFormRequestManager(
 
         var file = GetFile(data, ext) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
 
-        // A gallery that keeps its files itself (the local upload provider of Strapi) names them by a path on its host
+        // A gallery that keeps its files itself (the local upload provider of Strapi) names them by a path from the root
+        // of its host, where Strapi serves /uploads; the configured path of the list is not part of it. A gallery behind
+        // a path prefix of a proxy must name its files by full addresses: a path from the root does not reach them and the
+        // download answers 502
         if (!Uri.TryCreate(domain, file.Url, out var fileUri) || !IsHttp(fileUri))
         {
             logger.WarningOFormGalleryFileAddress(file.Url);
@@ -201,7 +216,10 @@ public class OFormRequestManager(
             throw GalleryUnavailable();
         }
 
-        using var streamResponse = await httpClient.GetAsync(fileUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        using var fileRequest = new HttpRequestMessage(HttpMethod.Get, fileUri);
+        fileRequest.Options.Set(_fileRequestKey, true);
+
+        using var streamResponse = await httpClient.SendAsync(fileRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!streamResponse.IsSuccessStatusCode)
         {
             logger.WarningOFormGalleryStatus(streamResponse.RequestMessage?.RequestUri, (int)streamResponse.StatusCode);
@@ -334,7 +352,9 @@ public class OFormRequestManager(
     /// in the background; the check then caches what it gets, or, when it fails with "available" known, the fail-safe
     /// keeps that answer. A check past the cache's 5-second hard timeout with nothing known answers "unavailable" after
     /// that timeout, and its late answer still goes into the cache. The CMS probe times out after
-    /// <see cref="ProbeTimeout"/>. Distributed cache access and waiting for its local lock can add to the time.
+    /// <see cref="ProbeTimeout"/>. Distributed cache access and waiting for its local lock can add to the time. The check
+    /// does not go through the circuit breaker of the download client (<see cref="HttpClientName"/>), so it may answer
+    /// a cached "available" while the downloads fail at once on an open circuit.
     /// </summary>
     public async Task<bool> IsAvailableAsync()
     {
@@ -481,11 +501,15 @@ public class OFormRequestManager(
 
     /// <summary>
     /// The strategies of every request of the download client, the outer one first: retries of a transient failure
-    /// (an exception of the network, a 5xx, 408 or 429, an attempt past <see cref="AttemptTimeout"/>), a circuit
-    /// breaker that fails the requests at once while the gallery keeps failing, and the timeout of one attempt. They all
-    /// run inside the download deadline, which ends the retries with the download.
+    /// (an exception of the network before the headers of the answer, a 5xx, 408 or 429, an attempt past
+    /// <paramref name="attemptTimeout"/>), a circuit breaker that fails the requests at once while the gallery keeps
+    /// failing, and the timeout of one attempt. The answers are read by their headers, so a connection dropped while the
+    /// body is read is past these strategies: it is not retried and fails the download at once. A <c>Retry-After</c> of
+    /// the answer is ignored: a proxy or a rate limiter asking for a minute would hold the editor until the download
+    /// deadline. They all run inside the download deadline, which ends the retries with the download.
     /// </summary>
-    internal static void ConfigureHttpClientPipeline(ResiliencePipelineBuilder<HttpResponseMessage> builder, TelemetryOptions telemetry, TimeSpan retryDelay)
+    internal static void ConfigureHttpClientPipeline(ResiliencePipelineBuilder<HttpResponseMessage> builder, TelemetryOptions telemetry, TimeSpan retryDelay,
+        TimeSpan attemptTimeout)
     {
         ConfigureTelemetry(builder, telemetry);
         builder.AddRetry(new HttpRetryStrategyOptions
@@ -493,22 +517,33 @@ public class OFormRequestManager(
             MaxRetryAttempts = MaxRetryAttempts,
             Delay = retryDelay,
             BackoffType = DelayBackoffType.Exponential,
-            UseJitter = true
+            UseJitter = true,
+            ShouldRetryAfterHeader = false
         });
         builder.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
         {
             FailureRatio = 0.5,
             MinimumThroughput = 5,
             SamplingDuration = TimeSpan.FromSeconds(30),
-            BreakDuration = TimeSpan.FromSeconds(30)
+            BreakDuration = TimeSpan.FromSeconds(30),
+            ShouldHandle = args => ValueTask.FromResult(HttpClientResiliencePredicates.IsTransient(args.Outcome) && !IsFileAnswer(args.Outcome.Result))
         });
-        builder.AddTimeout(AttemptTimeout);
+        builder.AddTimeout(attemptTimeout);
+    }
+
+    /// <summary>
+    /// Whether this is an answer, with whatever status, to the request for a template file: the host answered, so the
+    /// error is of that one file, not of the host.
+    /// </summary>
+    private static bool IsFileAnswer(HttpResponseMessage response)
+    {
+        return response?.RequestMessage?.Options.TryGetValue(_fileRequestKey, out var isFile) == true && isFile;
     }
 
     /// <summary>
     /// The levels the telemetry of Polly reports the gallery's events at, set here for all of its pipelines: a timeout
-    /// at Debug and a retry at Information, not at Error and Warning, since the manager logs the failure of the gallery
-    /// itself, as a warning; an opened circuit at Warning, not at Error.
+    /// and a failed attempt at Debug and a retry at Information, not at Error and Warning, since the manager logs the
+    /// failure of the gallery itself, as a warning; an opened circuit at Warning, not at Error.
     /// </summary>
     private static void ConfigureTelemetry<TBuilder>(TBuilder builder, TelemetryOptions telemetry) where TBuilder : ResiliencePipelineBuilderBase
     {
@@ -518,7 +553,7 @@ public class OFormRequestManager(
         {
             SeverityProvider = args => args.Event.EventName switch
             {
-                TimeoutEventName => ResilienceEventSeverity.Debug,
+                TimeoutEventName or ExecutionAttemptEventName => ResilienceEventSeverity.Debug,
                 RetryEventName => ResilienceEventSeverity.Information,
                 CircuitOpenedEventName => ResilienceEventSeverity.Warning,
                 _ => severityProvider?.Invoke(args) ?? args.Event.Severity
@@ -531,8 +566,8 @@ public class OFormRequestManager(
     /// no token of an HTTP request: the download passes none, and the check passes the token of the cache factory, which
     /// <see cref="IsAvailableAsync"/> starts without one. So a TimeoutRejectedException is the deadline of the pipeline
     /// or of the last attempt, and a cancellation is the timeout of the client. A connection dropped while the body is
-    /// read comes as an HttpRequestException from HttpContent; IOException covers a read the runtime does not wrap
-    /// (HttpIOException). A JsonException is an answer that is not JSON. A BrokenCircuitException is a gallery that
+    /// read comes as an IOException (HttpIOException), since the body is read from the stream of the answer; an
+    /// HttpRequestException is a failure before the headers. A JsonException is an answer that is not JSON. A BrokenCircuitException is a gallery that
     /// failed so often lately that the client does not ask it. The addresses are checked before the requests, so
     /// anything else, a NotSupportedException of the serializer among them, is a failure of this code.
     /// </summary>
@@ -594,17 +629,20 @@ public static class OFormRequestManagerExtension
     /// parameters are for tests, which cannot wait that long.
     /// </summary>
     public static IServiceCollection AddTemplateGalleryPipelines(this IServiceCollection services, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null,
-        TimeSpan? retryDelay = null)
+        TimeSpan? retryDelay = null, TimeSpan? attemptTimeout = null)
     {
         services.AddResiliencePipeline(OFormRequestManager.DownloadPipelineName, (builder, context) =>
             OFormRequestManager.ConfigurePipeline(builder, GetTelemetryOptions(context.ServiceProvider), downloadTimeout ?? OFormRequestManager.DownloadTimeout));
         services.AddResiliencePipeline(OFormRequestManager.ProbePipelineName, (builder, context) =>
             OFormRequestManager.ConfigurePipeline(builder, GetTelemetryOptions(context.ServiceProvider), probeTimeout ?? OFormRequestManager.ProbeTimeout));
 
-        // A list and its files may come from different hosts (a CDN): each host gets a breaker of its own
+        // A list and its files may come from different hosts (a CDN): each host gets a breaker of its own. The cookies a
+        // gallery sets would otherwise be shared by all tenants for the life of the handler (bug 83399)
         services.AddHttpClient(OFormRequestManager.HttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler { UseCookies = false })
             .AddResilienceHandler(OFormRequestManager.HttpClientPipelineName, (builder, context) =>
-                OFormRequestManager.ConfigureHttpClientPipeline(builder, GetTelemetryOptions(context.ServiceProvider), retryDelay ?? OFormRequestManager.RetryDelay))
+                OFormRequestManager.ConfigureHttpClientPipeline(builder, GetTelemetryOptions(context.ServiceProvider), retryDelay ?? OFormRequestManager.RetryDelay,
+                    attemptTimeout ?? OFormRequestManager.AttemptTimeout))
             .SelectPipelineByAuthority();
 
         return services;

@@ -45,8 +45,10 @@ namespace ASC.Core.Common.Tests;
 /// factory hard timeout), without the distributed level and the backplane of the services; the test of two nodes
 /// shares a distributed cache in memory between two of them. The deadlines of the download and of the check come from
 /// the pipelines the manager registers (AddTemplateGalleryPipelines), which the tests register with shorter values and
-/// the HTTP client without its timeout: a test of a deadline fails when the manager stops using its pipeline. The
-/// 30-second and 4-second values themselves are constants that no test waits for.
+/// the HTTP client without its timeout: a test of a deadline fails when the manager stops using its pipeline. No test
+/// waits for the 30-second download deadline. The 4-second deadline of the check is waited for once, by the test of a
+/// host that registers no pipeline (IsAvailableAsync_DeadlineOfTheCheck_IsNotLoggedAsAnErrorByPolly): it pins only
+/// that this deadline ends the check before the 5-second hard timeout of the cache, not its exact value.
 /// </remarks>
 [Trait("Bug", "78009")]
 public sealed class OFormRequestManagerTests : IDisposable
@@ -479,13 +481,152 @@ public sealed class OFormRequestManagerTests : IDisposable
     {
         // The deadline of the download is the outer strategy: a retry that would wait past it never starts
         var gallery = Gallery(_ => new StubResponse(HttpStatusCode.ServiceUnavailable));
-        var manager = CreateManager(gallery.Url, downloadTimeout: TimeSpan.FromMilliseconds(500), retryDelay: TimeSpan.FromSeconds(10));
+        // A delay far past the deadline: the jitter never brings the first retry under it
+        var manager = CreateManager(gallery.Url, downloadTimeout: TimeSpan.FromMilliseconds(500), retryDelay: TimeSpan.FromHours(1));
 
         var watch = Stopwatch.StartNew();
         await AssertGalleryUnavailableAsync(manager);
 
         watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(3));
         gallery.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Get_GalleryAsksToRetryAfterAMinute_Answers502WithoutWaiting()
+    {
+        // A proxy of a closed network or the rate limiter of the gallery answers 503 with Retry-After: 60. The retries
+        // keep their own short waits instead of holding the editor until the download deadline
+        var gallery = RetryAfter(seconds: 60);
+        var manager = CreateManager(gallery.Url, downloadTimeout: TimeSpan.FromSeconds(10));
+
+        var watch = Stopwatch.StartNew();
+        await AssertGalleryUnavailableAsync(manager);
+
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(3));
+        gallery.CallCount.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task Get_FailedAttempts_AreNotLoggedAsWarningsByPolly()
+    {
+        // The manager logs a gallery that fails as a warning of its own: each failed attempt goes to the Debug level,
+        // not one warning of Polly per attempt
+        var logs = new RecordingLoggerProvider();
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.ServiceUnavailable));
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url, loggerProvider: logs));
+
+        var attempts = logs.Entries.Where(entry => entry.Message.Contains("Execution attempt", StringComparison.Ordinal)).ToList();
+        attempts.Should().NotBeEmpty();
+        attempts.Should().OnlyContain(entry => entry.Level == LogLevel.Debug);
+    }
+
+    [Fact]
+    public async Task Get_FileOfOneTemplateKeepsFailing_DoesNotOpenTheCircuitOfItsHost()
+    {
+        // The breaker of a host is shared by every portal of the process: one template whose file answers 5xx must not
+        // make every template of that host answer 502 for 30 seconds
+        var fileFails = true;
+        var gallery = Gallery(request => IsFile(request)
+            ? fileFails ? new StubResponse(HttpStatusCode.ServiceUnavailable) : new StubResponse(HttpStatusCode.OK, Pdf)
+            : StubResponse.Json(HttpStatusCode.OK, ListWithFile()));
+        var manager = CreateManager(gallery.Url);
+
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+
+        fileFails = false;
+        await using var stream = await manager.Get(1, ".pdf");
+
+        using var reader = new StreamReader(stream);
+        (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(Pdf);
+    }
+
+    [Fact]
+    public async Task Get_FileHostKeepsFailing_LeavesTheCircuitOfTheListHostClosed()
+    {
+        // The list and its files may come from different hosts: a file host that is down opens the circuit of that host
+        // only, and the list is still asked
+        var fileHost = Unreachable();
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK,
+            $$"""{"data":[{"id":1,"file_oform":[{"url":"{{fileHost.Url}}/file.pdf","name":"form","ext":".pdf"}]}]}"""));
+        var manager = CreateManager(gallery.Url);
+
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+
+        gallery.CallCount.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task Get_AttemptOutlastsItsTimeout_IsAskedAgain()
+    {
+        // The first answer of the list comes after the attempt timeout: that attempt is given up and the next one gets
+        // the list, well inside the download deadline
+        var answered = 0;
+        var gallery = Gallery(request => IsFile(request)
+            ? new StubResponse(HttpStatusCode.OK, Pdf)
+            : Interlocked.Exchange(ref answered, 1) == 0
+                ? StubResponse.Json(HttpStatusCode.OK, ListWithFile()).After(TimeSpan.FromSeconds(5))
+                : StubResponse.Json(HttpStatusCode.OK, ListWithFile()));
+        var manager = CreateManager(gallery.Url, clientTimeout: Timeout.InfiniteTimeSpan, downloadTimeout: TimeSpan.FromSeconds(10),
+            attemptTimeout: TimeSpan.FromMilliseconds(300));
+
+        await using var stream = await manager.Get(1, ".pdf");
+
+        using var reader = new StreamReader(stream);
+        (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(Pdf);
+        gallery.Requests.Count(request => !IsFile(request)).Should().Be(2);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Get_FileOfExactlyTheLimit_ReturnsIt(bool announced)
+    {
+        // "Of at most 50 MB": a file of the limit itself is accepted, by its announced length and by the copy
+        var file = RawFile(head: Pdf, contentLength: announced ? OFormRequestManager.MaxTemplateSize : null,
+            padding: OFormRequestManager.MaxTemplateSize - Pdf.Length, stall: false);
+
+        await using var stream = await CreateManager(GalleryWithFileAt(file.Url), downloadTimeout: TimeSpan.FromSeconds(20)).Get(1, ".pdf");
+
+        stream.Length.Should().Be(OFormRequestManager.MaxTemplateSize);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Get_ListOfExactlyItsLimit_ReturnsTheFile(bool announced)
+    {
+        var files = Gallery(request => IsFile(request)
+            ? new StubResponse(HttpStatusCode.OK, Pdf)
+            : StubResponse.Json(HttpStatusCode.OK, ListWithFile()));
+        var list = ListWithFile();
+        var gallery = RawFile(head: list, contentLength: announced ? OFormRequestManager.MaxListSize : null,
+            padding: OFormRequestManager.MaxListSize - list.Length, stall: false, paddingByte: (byte)' ');
+
+        await using var stream = await CreateManager(gallery.Url).Get(1, ".pdf");
+
+        using var reader = new StreamReader(stream);
+        (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(Pdf);
+        files.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Get_FormatWithoutASignatureCheck_ReturnsTheFileAsSent()
+    {
+        // Only a PDF and the Office formats have their signature checked: a file of another format is returned as sent
+        const string file = "<html>not checked</html>";
+        var gallery = Gallery(request => request.Path.EndsWith("/file.oform", StringComparison.Ordinal)
+            ? new StubResponse(HttpStatusCode.OK, file)
+            : StubResponse.Json(HttpStatusCode.OK, ListWithFile(".oform")));
+
+        await using var stream = await CreateManager(gallery.Url).Get(1, ".oform");
+
+        using var reader = new StreamReader(stream);
+        (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(file);
     }
 
     [Fact]
@@ -553,11 +694,17 @@ public sealed class OFormRequestManagerTests : IDisposable
         });
         var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List).After(TimeSpan.FromSeconds(5)));
         var manager = CreateManager(gallery.Url, clientTimeout: Timeout.InfiniteTimeSpan, cache: cache, probeTimeout: TimeSpan.FromSeconds(10));
+        var checkEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        cache.Events.BackgroundFactorySuccess += (_, _) => checkEnded.TrySetResult();
+        cache.Events.BackgroundFactoryError += (_, _) => checkEnded.TrySetResult();
 
         var watch = Stopwatch.StartNew();
         (await manager.IsAvailableAsync()).Should().BeFalse();
 
         watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(3));
+
+        // The check goes on in the background: the test ends after it, not under it with the cache disposed
+        await checkEnded.Task.WaitAsync(TimeSpan.FromSeconds(15), TestContext.Current.CancellationToken);
     }
 
     [Theory]
@@ -566,12 +713,13 @@ public sealed class OFormRequestManagerTests : IDisposable
     public async Task IsAvailableAsync_DeadlineOfTheCheck_IsNotLoggedAsAnErrorByPolly(bool registered)
     {
         // The manager logs a gallery that does not answer as a warning of its own; the timeout event of Polly goes to the
-        // Debug level, both through the registered pipeline and through the one the manager adds in a host without it
-        // (its 4-second deadline, under the 5-second hard timeout of the cache)
+        // Debug level, both through the registered pipeline and through the one the manager adds in a host without it.
+        // That one has the manager's own 4-second deadline: the test pins that it ends the check before the 5-second
+        // hard timeout of the cache, which would answer without a timeout of Polly
         var logs = new RecordingLoggerProvider();
         var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List).After(TimeSpan.FromSeconds(10)));
         var manager = CreateManager(gallery.Url, clientTimeout: Timeout.InfiniteTimeSpan,
-            probeTimeout: TimeSpan.FromMilliseconds(500), loggerProvider: logs, registerPipelines: registered);
+            probeTimeout: registered ? TimeSpan.FromMilliseconds(500) : null, loggerProvider: logs, registerPipelines: registered);
 
         (await manager.IsAvailableAsync()).Should().BeFalse();
 
@@ -793,7 +941,7 @@ public sealed class OFormRequestManagerTests : IDisposable
         var gallery = Gallery(_ => mode switch
         {
             "fail" => new StubResponse(HttpStatusCode.BadGateway),
-            "slow" => new StubResponse(HttpStatusCode.BadGateway).After(TimeSpan.FromSeconds(1)),
+            "slow" => new StubResponse(HttpStatusCode.BadGateway).After(TimeSpan.FromSeconds(3)),
             _ => StubResponse.Json(HttpStatusCode.OK, List)
         });
         var firstManager = CreateManager(gallery.Url, cache: first);
@@ -804,7 +952,11 @@ public sealed class OFormRequestManagerTests : IDisposable
         var checkEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         first.Events.BackgroundFactorySuccess += (_, _) => checkEnded.TrySetResult();
         await first.ExpireAsync(AvailabilityCacheKey(gallery), token: TestContext.Current.CancellationToken);
+
+        // The expired `false` comes within the wait, well before the slow check could give a new one
+        var watch = Stopwatch.StartNew();
         (await firstManager.IsAvailableAsync()).Should().BeFalse();
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
         await checkEnded.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
         gallery.CallCount.Should().Be(2);
 
@@ -882,6 +1034,14 @@ public sealed class OFormRequestManagerTests : IDisposable
         return server;
     }
 
+    private RetryAfterServer RetryAfter(int seconds)
+    {
+        var server = new RetryAfterServer(seconds);
+        _rawServers.Add(server);
+
+        return server;
+    }
+
     /// <summary>
     /// A gallery whose list names the PDF file of template 1 at <paramref name="fileHost"/>.
     /// </summary>
@@ -911,15 +1071,16 @@ public sealed class OFormRequestManagerTests : IDisposable
     /// retries and no breaker.
     /// </param>
     /// <param name="retryDelay">The first wait before a retry of the download; 50 ms by default, so retries stay quick.</param>
+    /// <param name="attemptTimeout">The timeout of one request of the download in place of the manager's 10 seconds.</param>
     private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null,
         Func<HttpMessageHandler>? primaryHandler = null, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null,
-        ILoggerProvider? loggerProvider = null, bool registerPipelines = true, TimeSpan? retryDelay = null)
+        ILoggerProvider? loggerProvider = null, bool registerPipelines = true, TimeSpan? retryDelay = null, TimeSpan? attemptTimeout = null)
     {
         var services = new ServiceCollection();
 
         if (registerPipelines)
         {
-            services.AddTemplateGalleryPipelines(downloadTimeout, probeTimeout, retryDelay ?? TimeSpan.FromMilliseconds(50));
+            services.AddTemplateGalleryPipelines(downloadTimeout, probeTimeout, retryDelay ?? TimeSpan.FromMilliseconds(50), attemptTimeout);
         }
         else
         {
@@ -1131,6 +1292,19 @@ public sealed class OFormRequestManagerTests : IDisposable
             {
                 await Task.Delay(Timeout.Infinite, stopped);
             }
+        }
+    }
+
+    /// <summary>
+    /// A server that answers every request with 503 and a <c>Retry-After</c> of <paramref name="seconds"/>, a header
+    /// the stubs of WireMock cannot send.
+    /// </summary>
+    private sealed class RetryAfterServer(int seconds) : RawServer
+    {
+        protected override async Task AnswerAsync(Socket connection, CancellationToken stopped)
+        {
+            await connection.SendAsync(Encoding.ASCII.GetBytes(
+                $"HTTP/1.1 503 Service Unavailable\r\nRetry-After: {seconds}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"));
         }
     }
 

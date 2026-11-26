@@ -72,13 +72,15 @@ public sealed class HostHttpClientRegistrationTests
     public void FilesServer_RegistersTheTemplateGalleryClient()
     {
         // Files.Server, and the Monolith through it, run the downloads from the template gallery. Without the
-        // registration the factory hands out the default handler for the name: no retries and no circuit breaker
+        // registration the factory hands out the default handler for the name: no retries and no circuit breaker, and
+        // cookies shared by all tenants (bug 83399)
         var services = new ServiceCollection();
 
         services.AddFilesServerServices(EmptyConfiguration());
 
         using var provider = services.BuildServiceProvider();
         HttpHandlerProbe.ResilienceHandlers(provider, OFormRequestManager.HttpClientName).Should().Be(1);
+        HttpHandlerProbe.Primary(provider, OFormRequestManager.HttpClientName).UseCookies.Should().BeFalse();
     }
 
     private static void AssertDocumentServiceClients(ServiceCollection services)

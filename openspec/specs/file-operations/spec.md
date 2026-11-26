@@ -29,10 +29,10 @@ also where a bug is open, as the full test run of 365d87fe60 showed it.
 ### Requirement: Creating a blank file by title
 
 `createFile` (`POST api/2.0/files/{folderId}/file`) and `createFileInMyDocuments` (`POST
-api/2.0/files/@my/file`) SHALL create a file from the portal's blank template, normalising the requested title
-to a format the portal can create. A title longer than 170 characters SHALL be rejected (400); a section root
-or a folder id the caller cannot resolve SHALL be refused (403). A nonzero `formId` without a `templateId`
-SHALL copy that template from the gallery (502 if the gallery fails; bug 78009).
+api/2.0/files/@my/file`) SHALL create a file from the blank template, normalising its title. A title over 170
+characters SHALL be rejected (400); a section root or a folder id the caller cannot resolve SHALL be refused
+(403). A nonzero `formId` without a `templateId` SHALL copy that template from the gallery: 404 with no
+gallery, template or file of the format, 502 if the gallery fails (bug 78009).
 
 #### Scenario: Title normalisation
 
@@ -66,8 +66,10 @@ SHALL copy that template from the gallery (502 if the gallery fails; bug 78009).
 
 - **WHEN** a file is created with a `formId` and no `templateId`, and the gallery answers its template list with a file of the title's format, a PDF with a PDF header in its first 1024 bytes or a DOCX, XLSX or PPTX with a ZIP signature, of at most 50 MB, at a full address or at a path on the gallery's host
 - **THEN** the gallery file is the content of the new file
+- **AND** a path is resolved from the root of the gallery's host, not from the configured path of the list: a gallery behind a path prefix that names its files by such paths answers 502
 - **AND** the call answers 404 when no gallery is configured, when the list has no such template, or when the template has no file of that format
-- **AND** the call answers 502 when the gallery cannot be reached, does not answer before the download deadline, drops the connection while answering, answers the list or the file with an error status, answers the list without its template list (a page of a proxy), names a file at an address that cannot be requested, or returns a file over 50 MB (announced or read), a PDF without a PDF header in its first 1024 bytes or a DOCX, XLSX or PPTX without a ZIP signature
+- **AND** the call answers 502 when the gallery cannot be reached, does not answer before the download deadline, drops the connection while answering, answers the list or the file with an error status, answers the list without its template list (a page of a proxy), answers the list with more than 1 MB (announced or read), names a file at an address that cannot be requested, or returns a file over 50 MB (announced or read), a PDF without a PDF header in its first 1024 bytes or a DOCX, XLSX or PPTX without a ZIP signature
+- **AND** the call answers 502 when the configured gallery address is not an http or https address, and at once, for 30 seconds, when the requests to the gallery's host failed so often lately that the server opened its circuit; the circuit of a host is shared by all portals of a server process, and an error status of a template file does not count towards it
 
 #### Scenario: Non-PDF file in a Form filling room
 
@@ -78,10 +80,10 @@ SHALL copy that template from the gallery (502 if the gallery fails; bug 78009).
 ### Requirement: Template gallery availability
 
 `getTemplateGalleryAvailable` (`GET api/2.0/files/templateGallery/available`) SHALL tell a signed-in caller
-whether the template gallery answers with its template list, and SHALL refuse an anonymous caller (401). The
-answer SHALL be `false` when no gallery is configured or a check fails with no earlier answer known. A `true`
-is kept for the whole installation, and a failed check SHALL NOT replace a known `true` for a day after the last
-answer while the cache holds it (bug 78009).
+the last answer the server got from its check of the template gallery, kept as the scenarios state, and SHALL
+refuse an anonymous caller (401). It SHALL be `false` when no gallery is configured or a check fails with no
+earlier answer known. A `true` is kept for the installation; a failed check SHALL NOT replace it for a day
+after the last answer while the cache holds it (bug 78009).
 
 #### Scenario: Gallery answers
 
@@ -108,7 +110,7 @@ answer while the cache holds it (bug 78009).
 
 #### Scenario: Caller
 
-- **WHEN** a signed-in user calls it
+- **WHEN** a signed-in user, a guest included, calls it
 - **THEN** the answer is a boolean
 - **AND** an anonymous caller gets 401
 

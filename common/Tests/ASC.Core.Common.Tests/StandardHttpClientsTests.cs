@@ -99,10 +99,11 @@ public sealed class StandardHttpClientsTests : IDisposable
 
     [Fact]
     [Trait("Bug", "78009")]
-    public async Task TemplateGallery_GetsItsDeadlinesWithoutARegistrationOfItsOwn()
+    public async Task TemplateGallery_ResolvesWithTheStandardHttpClientsOnly()
     {
-        // The request manager of the template gallery takes its deadlines from the registry of resilience pipelines in
-        // every host that creates FileStorageService, also in one that registers neither its pipelines nor any other
+        // The request manager of the template gallery needs the registry of resilience pipelines, which every host that
+        // creates FileStorageService gets with the standard clients, also one that registers no pipeline of the gallery.
+        // The refused connection answers 502 at once: this pins that the manager resolves and runs, not its deadlines
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
