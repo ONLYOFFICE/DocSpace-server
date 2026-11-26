@@ -355,22 +355,24 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// Whether the gallery is configured and answers with its template list. "Available" is cached per list URL,
-    /// kept in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" by the
-    /// fail-safe of the cache, so a short failure of the gallery or the network never hides a gallery that answered
-    /// before: for a day after the gallery last answered, then a failed check means "unavailable". The time of that
-    /// answer is kept in the cached value, since every failed check stores the entry again and would otherwise keep it
-    /// for as long as the checks keep failing. Without a distributed cache (Redis off), a restart forgets it. With nothing known, a failed check means "unavailable" for
-    /// up to 1 minute, kept by this process only, so one process that cannot reach the gallery never hides it from the
-    /// others. A "true" another process writes ends it earlier, unless both checked at almost the same moment: the
-    /// backplane drops a notification older than the local entry, and the "unavailable" stays for its minute. When the
-    /// next check takes longer than 200 ms, a reader with an expired answer gets that answer while the check continues
-    /// in the background; the check then caches what it gets, or, when it fails with "available" known, the fail-safe
-    /// keeps that answer. A check past the cache's 5-second hard timeout with nothing known answers "unavailable" after
-    /// that timeout, and its late answer still goes into the cache. The CMS probe times out after
-    /// <see cref="ProbeTimeout"/>. Distributed cache access and waiting for its local lock can add to the time. The check
-    /// does not go through the circuit breaker of the download client (<see cref="HttpClientName"/>), so it may answer
-    /// a cached "available" while the downloads fail at once on an open circuit.
+    /// Whether the gallery is configured and answers with its template list. "Available" is cached per list URL, kept
+    /// in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" by the fail-safe
+    /// of the cache, so a short failure of the gallery or the network never hides a gallery that answered before: for a
+    /// day after the gallery last answered, then a failed check means "unavailable". The time of that answer is kept in
+    /// the cached value, since every failed check stores the entry again and would otherwise keep it for as long as the
+    /// checks keep failing. Without a distributed cache (Redis off), a restart forgets it. With nothing known, a failed
+    /// check means "unavailable" for up to 1 minute, kept by this process only, so one process that cannot reach the
+    /// gallery never hides it from the others. A "true" another process writes ends it earlier, unless both checked at
+    /// almost the same moment: the backplane drops a notification older than the local entry, and the "unavailable"
+    /// stays for its minute. When the next check takes longer than 200 ms, a reader with an expired answer gets that
+    /// answer while the check continues in the background, except an "available" a day after the gallery last answered,
+    /// which that reader gets as "unavailable"; the check then caches what it gets, or, when it fails with "available"
+    /// known for less than a day, the fail-safe keeps that answer. A check past the cache's 5-second hard timeout with
+    /// nothing known answers "unavailable" after that timeout, and its late answer still goes into the cache. The CMS
+    /// probe times out after <see cref="ProbeTimeout"/>. Distributed cache access and waiting for its local lock can
+    /// add to the time. The check does not go through the circuit breaker of the download client (<see
+    /// cref="HttpClientName"/>), so it may answer a cached "available" while the downloads fail at once on an open
+    /// circuit.
     /// </summary>
     public async Task<bool> IsAvailableAsync()
     {
@@ -383,15 +385,16 @@ public class OFormRequestManager(
         {
             var answer = await cache.GetOrSetAsync<AvailabilityAnswer>(GetAvailabilityCacheKey(GetListUrl()), async (context, cancellationToken) =>
             {
+                var answered = await ProbeAsync(cancellationToken);
                 var now = _timeProvider.GetUtcNow();
-                if (await ProbeAsync(cancellationToken))
+                if (answered)
                 {
                     return new AvailabilityAnswer(true, now);
                 }
 
                 // A failed check is no answer: the fail-safe keeps a known "available" and asks again after a minute,
                 // until a day has passed since the gallery last answered
-                if (context.HasStaleValue && context.StaleValue.Value is { Available: true } known && now - known.AnsweredAt < _availabilityFailSafe)
+                if (context.HasStaleValue && context.StaleValue.Value is { Available: true } known && !IsOlderThanTheFailSafe(known, now))
                 {
                     return context.Fail("The template gallery did not answer its check");
                 }
@@ -407,7 +410,9 @@ public class OFormRequestManager(
                 .SetFailSafe(true, _availabilityFailSafe, _unavailableDuration)
                 .SetFactoryTimeouts(TimeSpan.FromMilliseconds(200)));
 
-            return answer.Available;
+            // The cache answers a stale value itself, past the check above, while a slow check runs on: an "available"
+            // a day after the gallery last answered is not one on any path
+            return answer.Available && !IsOlderThanTheFailSafe(answer, _timeProvider.GetUtcNow());
         }
         catch (SyntheticTimeoutException)
         {
@@ -415,6 +420,14 @@ public class OFormRequestManager(
             // reader, while the check completes in the background and caches what it gets
             return false;
         }
+    }
+
+    /// <summary>
+    /// Whether a day has passed since the check got <paramref name="answer"/>: a known "available" is not kept longer.
+    /// </summary>
+    private static bool IsOlderThanTheFailSafe(AvailabilityAnswer answer, DateTimeOffset now)
+    {
+        return now - answer.AnsweredAt >= _availabilityFailSafe;
     }
 
     /// <summary>
@@ -430,7 +443,7 @@ public class OFormRequestManager(
 
     /// <summary>
     /// The cached answer of the availability check: whether the gallery answered with its template list, and when the
-    /// check got this answer. The key holds this record, not the bare flag of the earlier versions, so an entry they
+    /// check got this answer, after the request to the gallery. The key holds this record, not the bare flag of the earlier versions, so an entry they
     /// wrote is never read as one.
     /// </summary>
     public sealed record AvailabilityAnswer(bool Available, DateTimeOffset AnsweredAt);

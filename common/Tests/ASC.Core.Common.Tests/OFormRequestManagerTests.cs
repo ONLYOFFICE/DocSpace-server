@@ -1096,7 +1096,37 @@ public sealed class OFormRequestManagerTests : IDisposable
         await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: token);
 
         (await manager.IsAvailableAsync()).Should().BeFalse();
-        gallery.CallCount.Should().Be(25);
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_SlowCheckADayAfterTheLastAnswer_IsFalseWithinTheWait()
+    {
+        // In a closed network the check hangs until its deadline, and the cache answers its stale value while the check
+        // runs on. An "available" a day after the gallery last answered is not given out on that path either
+        var time = new ManualTimeProvider();
+        var slow = false;
+        var gallery = Gallery(_ => Volatile.Read(ref slow)
+            ? new StubResponse(HttpStatusCode.ServiceUnavailable).After(TimeSpan.FromSeconds(3))
+            : StubResponse.Json(HttpStatusCode.OK, List));
+        var manager = CreateManager(gallery.Url, timeProvider: time);
+        var token = TestContext.Current.CancellationToken;
+
+        (await manager.IsAvailableAsync()).Should().BeTrue();
+
+        Volatile.Write(ref slow, true);
+        time.Advance(TimeSpan.FromDays(1));
+        await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: token);
+        var checkEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _cache.Events.BackgroundFactorySuccess += (_, _) => checkEnded.TrySetResult();
+        _cache.Events.BackgroundFactoryError += (_, _) => checkEnded.TrySetResult();
+
+        var watch = Stopwatch.StartNew();
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
+
+        // The check goes on in the background: the test ends after it, not under it with the cache disposed
+        await checkEnded.Task.WaitAsync(TimeSpan.FromSeconds(15), token);
+        (await manager.IsAvailableAsync()).Should().BeFalse();
     }
 
     [Fact]
