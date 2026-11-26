@@ -56,7 +56,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Share given on a file created inside a shared folder is recorded at the file level | `FileShareTests.cs:1007-1039` (bug 78660) | TEST-CONFIRMED [run: PASS] |
 | In rooms a personal right beats link rights | `04_Security/RoomShareTests.cs:1147-1178` (Viewer of a custom room opening an Editing file link keeps Read); `FileSecurity.cs:3870-3922` | TEST-CONFIRMED [run: PASS] |
 | **The last opened link is remembered** | | |
-| Opening via link + recent records a `RecentByLink` tag; earlier link tags for the entry are removed (only the last link counts) | `products/ASC.Files/Core/Utils/EntryManager.cs:2204-2218` (`MarkAsRecent`), `products/ASC.Files/Core/Utils/FileMarker.cs:1333-1351` (`MarkAsRecentByLink`); `FileSecurity.cs:3900-3909` (remembered links join the subject list) | CODE-ONLY |
+| Opening via link + recent records a `RecentByLink` tag; earlier link tags for the entry are removed (only the last link counts) | `products/ASC.Files/Core/Utils/EntryManager.cs:2204-2218` (`MarkAsRecent`), `products/ASC.Files/Core/Utils/FileMarker.cs:1333-1351` (`MarkAsRecentByLink`); `FileSecurity.cs:3904-3913` (remembered links join the subject list) | CODE-ONLY |
 | Three links in turn → access by id equals the last link | `04_Security/FileShareTests.cs:894-948` | TEST-CONFIRMED [run: PASS] |
 | Unused link deleted → file stays in Shared with me | `04_Security/FileShareTests.cs:951-1003` (bug 77819) | TEST-CONFIRMED [run: PASS] |
 | **The Shared with me section** | | |

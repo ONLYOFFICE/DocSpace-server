@@ -86,7 +86,7 @@ None of those specs was edited.
 | 401 anonymous, 403 guest and read-only, 404 unknown | `T/01_Files/Editing/EditingStartPermissionsTests.cs:46-59,63-80`, 84 by name; `EditingStartTests.cs:92` by name | TEST-CONFIRMED [run: PASS] |
 | **Starting a shared editing session** | | |
 | `{}` or false: 403 "File editing start error" | `T/01_Files/Editing/EditingStartCoAuthoringTests.cs:47-59,65-80` (integration host has no Document Server tracking) | TEST-CONFIRMED [run: PASS] |
-| Key on success | `FSS:2379-2395` | CODE-ONLY (unreachable: needs the Document Server to accept `StartTrackAsync`; the integration host does not) |
+| Key on success | `FSS:2380-2396` | CODE-ONLY (unreachable: needs the Document Server to accept `StartTrackAsync`; the integration host does not) |
 | **Tracking an editing session** | | |
 | `key` true, empty `value` | `T/01_Files/Editing/EditingTrackTests.cs:126-140`; 51,81 | TEST-CONFIRMED [run: PASS] |
 | 401, 403 guest/read, 404, administrator allowed | `T/01_Files/Editing/EditingTrackPermissionsTests.cs:46-117`, 85 by name; `EditingTrackTests.cs:112-122` | TEST-CONFIRMED [run: PASS] |
@@ -105,7 +105,7 @@ None of those specs was edited.
 | Entry fields, count | `T/01_Files/Order/FilesBulkOrderTests.cs:49-65,298-315` | TEST-CONFIRMED [run: PASS] |
 | Reflected in content, equal values | same file 92,122,243 by name | TEST-CONFIRMED [run: NO-LINK] |
 | Empty list, 0 is 400, maximum accepted, 404 unknown and wrong type | same file 172-181,192-205,226-239,264-294 | TEST-CONFIRMED [run: NO-LINK] |
-| Guest and read 403, anonymous 401, room manager allowed | `T/01_Files/Order/FilesBulkOrderPermissionsTests.cs:67-84,117-134`; 47,97 by name; `FSS:2849` | TEST-CONFIRMED [run: PASS] |
+| Guest and read 403, anonymous 401, room manager allowed | `T/01_Files/Order/FilesBulkOrderPermissionsTests.cs:67-84,117-134`; 47,97 by name; `FSS:2850` | TEST-CONFIRMED [run: PASS] |
 | **Saving a file as PDF** | | |
 | Title ends with `.pdf` | `T/01_Files/Forms/IsFormPdfTests.cs:182-191` | TEST-CONFIRMED [run: PASS] |
 | 404, archived 403, nothing created | `T/01_Files/CopySave/SaveFileAsPdfTests.cs:53-107` | TEST-CONFIRMED [run: PASS] |
@@ -118,9 +118,9 @@ None of those specs was edited.
 | Keys returned | `T/08_Private/PrivacyRoomTest.cs:149-159` | TEST-CONFIRMED [run: PASS] |
 | Read access required | `T/08_Private/EncryptionInfoAccessTests.cs:44` (no access 403), 59 (room reader 200, no file keys), 77 (unknown id 403) | TEST-CONFIRMED [run: PASS] |
 | **Primary external link of a file** | | |
-| Shape, lazily created | `T/01_Files/Links/FileLinkPrimaryTests.cs:47-67`; `FSS:4520-4571` | TEST-CONFIRMED [run: PASS] |
+| Shape, lazily created | `T/01_Files/Links/FileLinkPrimaryTests.cs:47-67`; `FSS:4521-4572` | TEST-CONFIRMED [run: PASS] |
 | Same id, roles | same file 89,104-151 by name | TEST-CONFIRMED [run: NO-LINK] |
-| Anonymous 401, no access 403 | same file 174-186,195-209 (the "currently 200" comment at 190 is stale by `FSS:4552`) | TEST-CONFIRMED [run: NO-LINK] |
+| Anonymous 401, no access 403 | same file 174-186,195-209 (the "currently 200" comment at 190 is stale by `FSS:4553`) | TEST-CONFIRMED [run: NO-LINK] |
 | **Primary external link of a folder or room** | | |
 | Shape, `count` 0, `startIndex` | `T/02_Folders/LinksPrimary/FolderLinkPrimaryGetTests.cs:46-66,146-172` | TEST-CONFIRMED [run: PASS] |
 | Same link | `T/02_Folders/Links/FolderLinkCreateTests.cs:255-268` | TEST-CONFIRMED [run: PASS] |
@@ -130,7 +130,7 @@ None of those specs was edited.
 | Folder: 404 after revoke | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:195-214` | TEST-CONFIRMED [run: PASS] |
 | Create after revocation: new primary link with a new id, read answers it (file and folder, 62419af921) | `T/01_Files/Links/FileLinkPrimaryTests.cs:238-242`; `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:242-246` | TEST-CONFIRMED [run: PASS] |
 | File: same path; `primary` true clears the state; replaced in Public rooms | `T/01_Files/Links/FileLinkPrimaryRevocationTests.cs:46,62,81` | TEST-CONFIRMED [run: PASS] |
-| File: replaced in Form filling rooms | `FSS:6756-6765` | CODE-ONLY (reachable, not done: needs a PDF form in a form-filling room, whose read goes through the room-link path `FSS:4516-4529`) |
+| File: replaced in Form filling rooms | `FSS:6757-6766` | CODE-ONLY (reachable, not done: needs a PDF form in a form-filling room, whose read goes through the room-link path `FSS:4517-4530`) |
 | **Setting an external link of a file** | | |
 | Structure and fields | `T/01_Files/Links/FileLinkSetTests.cs:46-197` by name | TEST-CONFIRMED [run: PASS] |
 | ReadWrite 403, unknown id creates, 404, 401, 403 | same file 214-228,237-251,255-268,343-379; 383 by name | TEST-CONFIRMED [run: NO-LINK] |
@@ -200,16 +200,16 @@ owned by this capability. `setDefaultTemplate` on third-party string ids was not
 | # | Where | What the server does | Evidence | Evidence kind |
 |---|---|---|---|---|
 | FX2 | `startEditFile` | A second person refused a claim is told "This document is being edited by you in another tab" | `T/01_Files/Editing/EditingStartTests.cs:116-136` asserts that text for another account | pinned by a test; wording judged by reading |
-| FX3 | `createFilePrimaryExternalLink` (and the folder one, same path) | After a revocation the POST answers 404, because create shares the read path; the UI button cannot share the file again. `setFileExternalLink` with `primary` true still works | `T/01_Files/Links/FileLinkPrimaryTests.cs:212-239` (Bug 84872), `FSS:4525-4532` | FIXED (62419af921): the create request skips the revocation mark, asserted at `FileLinkPrimaryTests.cs:238-242` and `FolderLinkPrimarySetTests.cs:242-246` — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
-| FX4 | `get*PrimaryExternalLink`, `create*PrimaryExternalLink` | The revocation check runs before the sharing right check, so a caller with no access to a revoked entry gets 404 rather than 403, while an unrevoked entry gives 403 | `FSS:4525-4532` before `FSS:4552` | STILL OPEN for `get*`; for `create*` REFUTED since 62419af921 (the create skips the revocation check, so the sharing right check answers 403) |
-| FX6 | `setFilesOrder` | Items are applied one at a time with no transaction, so a later item's 403 or 404 leaves earlier items reordered while the caller sees an error | `FSS:2841-2887` | red by code reading |
+| FX3 | `createFilePrimaryExternalLink` (and the folder one, same path) | After a revocation the POST answers 404, because create shares the read path; the UI button cannot share the file again. `setFileExternalLink` with `primary` true still works | `T/01_Files/Links/FileLinkPrimaryTests.cs:212-239` (Bug 84872), `FSS:4526-4533` | FIXED (62419af921): the create request skips the revocation mark, asserted at `FileLinkPrimaryTests.cs:238-242` and `FolderLinkPrimarySetTests.cs:242-246` — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| FX4 | `get*PrimaryExternalLink`, `create*PrimaryExternalLink` | The revocation check runs before the sharing right check, so a caller with no access to a revoked entry gets 404 rather than 403, while an unrevoked entry gives 403 | `FSS:4526-4533` before `FSS:4553` | STILL OPEN for `get*`; for `create*` REFUTED since 62419af921 (the create skips the revocation check, so the sharing right check answers 403) |
+| FX6 | `setFilesOrder` | Items are applied one at a time with no transaction, so a later item's 403 or 404 leaves earlier items reordered while the caller sees an error | `FSS:2842-2888` | red by code reading |
 | FX7 | `createRoomTag` | A name with a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design | `T/03_Rooms/Tags/RoomTagCreateTests.cs:85-109` | per test comment — per test comment; `CreateRoomTag_NameOutsideBmp_Rejected` passes in run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) but asserts only that the name is refused, not the status code |
 | FX8 | `setDefaultTemplate` | A numeric `selectedFile` that is not a 32-bit integer answers 500 (`GetInt32` in `DefaultTemplateSettings.cs:104`); STILL OPEN after 09d4de0768..6fb6dfb17a, which only removed the documented 500, so the 500 is now undeclared | `DT:105`, yaml `setDefaultTemplate` | FIXED `99da66e1ea`: 400 "Invalid ID: <number>" (`JsonIdNumberRangeTests.cs`, prove-red 2026-11-24) |
 | FX9 | `getGroupsMembersWithFolderSecurity`, `getGroupsMembersWithFileSecurity` | `filterValue` with an uppercase letter matches nothing, per the yaml text | yaml `getGroupsMembersWithFolderSecurity`; not read in code | yaml text only |
 
 Stale test comments seen (assertions cited above are unaffected): `DefaultTemplateTests.cs:90-95,156-162,178-181,197-200`
 say the mismatches answer 403, `DT:131-136,220-223` raise the 400 exception; `FileLinkPrimaryTests.cs:189-192` and
-`FolderLinkCreateTests.cs:271-274` say "currently answers 200", while `FSS:4552` refuses and commits `021004d5bd` and
+`FolderLinkCreateTests.cs:271-274` say "currently answers 200", while `FSS:4553` refuses and commits `021004d5bd` and
 `cdddfed875` are titled as fixing bug 81575. Those tests pass (run 2026-11-18): the fix is `021004d5bd`, R4 of `room-role-permissions`.
 
 ## Revision 2026-11-14 (`09d4de0768..6fb6dfb17a`)

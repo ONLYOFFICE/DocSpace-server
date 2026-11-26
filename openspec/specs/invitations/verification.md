@@ -132,7 +132,7 @@ through its link" is removed.
 | Guest to an AI agent as Room manager / Content creator → 403 | FS:278-283; release notes v3.6 | CODE-ONLY |
 | Guest to an AI project by id (any access) or by the email of a Guest → 403 "The role is not available for this user type", not added; the project accepts Content creator only | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-78 (message asserted); FS:285-291; `products/ASC.Files/Core/Core/Security/FileSecurity.cs:255-261` (`AvailableRoomAccesses`, AI project); Viewer refused (403, not added): FT/03_Rooms/AiHub/AiProjectRolesTests.cs:46-60 | TEST-CONFIRMED [run: PASS] |
 | Invisible subjects and notification: subject the caller cannot see is dropped | VRC `SetRoomSecurity` wrappers filter (`CanUserViewAnotherUserAsync`); yaml `setRoomSecurity` | CODE-ONLY |
-| Group as subject | FS:154-167 (subject type resolved to Group), 460-466 (group members); `products/ASC.People/Tests/Tests/BaseTest.cs:185-199` helper "user or a group"; release notes v2.5; an AI project refuses a group with any access (403): FT/03_Rooms/AiHub/AiProjectRolesTests.cs:65 | CODE-ONLY (the AI project refusal: TEST-CONFIRMED, not run yet) |
+| Group as subject | FS:154-167 (subject type resolved to Group), 460-466 (group members); `products/ASC.People/Tests/Tests/BaseTest.cs:185-199` helper "user or a group"; release notes v2.5; an AI project refuses a group with any access (403): FT/03_Rooms/AiHub/AiProjectRolesTests.cs:64 | CODE-ONLY (the AI project refusal: TEST-CONFIRMED, not run yet) |
 | `notify` emails existing accounts that gained access, with `message` | FS:449-479 (`SendEmailRoomInviteExistingUserAsync`); yaml `RoomInvitationRequest.notify/message` | CODE-ONLY |
 
 ## Everyone system group as a share subject
