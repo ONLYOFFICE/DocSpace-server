@@ -2227,7 +2227,7 @@ public class FileSecurity(
         {
             var cachedRecords = GetCachedRecords<T>();
             if (((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
-                 cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
+                 cachedRecords.TryGetValue(GetUserRecordCacheKey(e.ParentId, userId), out var value)) ||
                 (requestLinkApplies && cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))) &&
                 value != null)
             {
@@ -2244,9 +2244,11 @@ public class FileSecurity(
                     if (e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
                         ace is { SubjectType: SubjectType.User or SubjectType.AiProject or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
                     {
-                        var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
+                        var key = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink
+                            ? GetCacheKey(e.ParentId, ace.Subject)
+                            : GetUserRecordCacheKey(e.ParentId, userId);
 
-                        cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
+                        cachedRecords.TryAdd(key, ace);
                     }
                 }
             }
@@ -4194,6 +4196,17 @@ public class FileSecurity(
         return $"{tenantId}-{userId}-{parentId}";
     }
 
+    /// <summary>
+    /// The key of an account's record under a folder. A record found inside <see cref="ApplyRequestLinkToEveryAccount"/>
+    /// may come from the request's link, so it is kept apart from the record of the same account outside the scope.
+    /// </summary>
+    private string GetUserRecordCacheKey<T>(T parentId, Guid userId)
+    {
+        var key = GetCacheKey(parentId, userId);
+
+        return _requestLinkScopes > 0 ? key + "-request-link" : key;
+    }
+
     private string GetCacheKey<T>(T parentId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -4228,7 +4241,7 @@ public class FileSecurity(
     private async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, EntryShares<T> shares)
     {
         var cachedRecords = GetCachedRecords<T>();
-        var cacheKey = GetCacheKey(room.Id, userId);
+        var cacheKey = GetUserRecordCacheKey(room.Id, userId);
 
         if (!cachedRecords.TryGetValue(cacheKey, out var record))
         {

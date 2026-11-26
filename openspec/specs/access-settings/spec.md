@@ -269,7 +269,12 @@ While `enable` is true and at least one address is stored, the server SHALL answ
 
 ### Requirement: Validation of the two-factor policy
 
-`updateTfaSettings` SHALL answer 400 for a malformed identifier in `mandatoryUsers` or a `trustedIps` entry that is not an address or range, and SHALL store nothing in that case, so later sign-ins keep working. Well-formed identifiers of accounts or groups that do not exist SHALL be accepted. A request naming the owner in `id` or `mandatoryUsers` while `id` is not the caller's own SHALL answer 403.
+`updateTfaSettings` SHALL answer 400 for an unknown `type`, a malformed identifier in `mandatoryUsers` or a `trustedIps` entry that is not an address or range, and SHALL store nothing in that case, so later sign-ins keep working. Well-formed identifiers of accounts or groups that do not exist SHALL be accepted. A request naming the owner in `id` or `mandatoryUsers` while `id` is not the caller's own SHALL answer 403.
+
+#### Scenario: Unknown type
+
+- **WHEN** `type` is a number outside 0, 1 and 2
+- **THEN** the answer is 400 and the stored policy stays as it was
 
 #### Scenario: Malformed list entry
 

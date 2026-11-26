@@ -93,9 +93,10 @@ public class EditingSessionOwnershipTests(
 
         // Act
         await _filesClient.Authenticate(member);
-        await _filesApi.TrackEditFileAsync(file.Id, tabId: ownerTab, docKeyForTrack: docKey, isFinish: true, cancellationToken: TestContext.Current.CancellationToken);
+        var answer = (await _filesApi.TrackEditFileAsync(file.Id, tabId: ownerTab, docKeyForTrack: docKey, isFinish: true, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
+        answer.Key.Should().BeTrue("the call succeeds although it removes nothing");
         (await IsEditingAsync(file.Id)).Should().BeTrue("the tab belongs to the owner");
     }
 

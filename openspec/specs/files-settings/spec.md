@@ -275,14 +275,19 @@ produce 403.
 
 ### Requirement: Tracking an editing session
 
-`trackEditFile` SHALL keep a session alive or, with `isFinish` true, end it for that tab, answering `key` true and an
-empty `value`. It requires an editing right on the file and a `docKeyForTrack` of the current revision; the document is
+`trackEditFile` SHALL keep a session alive or, with `isFinish` true, end the tab when it is the caller's, answering
+`key` true and an empty `value`. It requires an editing right on the file and a `docKeyForTrack` of the current revision; the document is
 never changed.
 
 #### Scenario: Session refreshed
 
 - **WHEN** the owner or a DocSpace administrator calls the operation with the document key, with or without `tabId` or `isFinish`
 - **THEN** the answer is 200 with `key` true
+
+#### Scenario: Tab of another account
+
+- **WHEN** a member with editing access sends `isFinish` true with the `tabId` of another account's session and the document key
+- **THEN** the answer is 200 with `key` true and the other account's session stays
 
 #### Scenario: Refused callers
 

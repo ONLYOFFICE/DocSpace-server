@@ -494,6 +494,11 @@ SHALL do the same.
 - **WHEN** the editing service reports a different customer id or an error for the license
 - **THEN** the answer is 200 "License key is not correct" and the previous license file is back in place
 
+#### Scenario: Caller who is not a DocSpace admin
+
+- **WHEN** a room admin, a user or a guest calls `acceptLicense`
+- **THEN** the answer is 403
+
 ### Requirement: What the license grants
 
 Applying a license SHALL replace the installation's quota with one that has no count limits, keeps the installation's
@@ -533,6 +538,11 @@ uploaded license.
 
 - **WHEN** a license was uploaded with `uploadLicense` and not accepted, and the periodic re-read runs
 - **THEN** the uploaded license stays staged and the tariff is unchanged; only `acceptLicense` or `refreshLicense` puts it in force
+
+#### Scenario: Caller who is not a DocSpace admin
+
+- **WHEN** a room admin, a user or a guest calls `refreshLicense`
+- **THEN** the answer is 403
 
 ### Requirement: Whether a license is still required
 
