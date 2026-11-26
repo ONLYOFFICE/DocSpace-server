@@ -152,7 +152,7 @@ public class CspSettingsHelper(
 
     public static bool PersonalDomainsAdded(IEnumerable<string> before, IEnumerable<string> after)
     {
-        return after.Except(before ?? [], StringComparer.OrdinalIgnoreCase).Any();
+        return before != null && after.Except(before, StringComparer.OrdinalIgnoreCase).Any();
     }
 
     public static bool CanCacheSessionHeader(string authorization, IEnumerable<string> cookieHeaders, string authKey)

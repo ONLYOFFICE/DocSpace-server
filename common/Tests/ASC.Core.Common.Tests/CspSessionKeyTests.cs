@@ -114,11 +114,11 @@ public class CspSessionKeyTests
     }
 
     [Fact]
-    public void PersonalDomains_BeforeUnknown_CountAsChangedAndEveryDomainAsAdded()
+    public void PersonalDomains_BeforeUnknown_CountAsChangedButNoneAsAdded()
     {
         // Act and assert
         CspSettingsHelper.PersonalDomainsChanged(null, []).Should().BeTrue();
-        CspSettingsHelper.PersonalDomainsAdded(null, ["a.example"]).Should().BeTrue();
+        CspSettingsHelper.PersonalDomainsAdded(null, ["a.example"]).Should().BeFalse();
     }
 
     [Fact]

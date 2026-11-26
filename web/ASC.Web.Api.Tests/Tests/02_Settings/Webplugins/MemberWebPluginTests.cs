@@ -36,6 +36,7 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webplugins;
 /// <summary>
 /// An administrator's view of the personal web plugins of members (<c>api/2.0/settings/personalwebplugins/plugins</c>):
 /// the list with the member and without the member's settings, switching a plugin off for its member and deleting it.
+/// The calls are raw HTTP: the pinned SDK package has none of the <c>personalwebplugins</c> operations.
 /// </summary>
 [Trait("Category", "Settings")]
 public class MemberWebPluginTests(
@@ -66,7 +67,7 @@ public class MemberWebPluginTests(
         plugin.GetProperty("createByIsOwner").GetBoolean().Should().BeFalse();
         plugin.GetProperty("enabled").GetBoolean().Should().BeTrue();
         plugin.GetProperty("personal").GetBoolean().Should().BeTrue();
-        (plugin.TryGetProperty("settings", out var settings) ? settings.GetString() : null).Should().BeNullOrEmpty();
+        plugin.TryGetProperty("settings", out _).Should().BeFalse();
     }
 
     [Fact]

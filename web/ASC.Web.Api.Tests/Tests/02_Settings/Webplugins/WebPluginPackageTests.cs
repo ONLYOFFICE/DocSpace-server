@@ -188,7 +188,7 @@ public class WebPluginPackageTests(
         var manifest = WebPluginsTestData.Manifest(pluginName);
         manifest["homePage"] = "javascript:fetch('/api/2.0/people')";
         manifest["image"] = "https://example.com/logo.png";
-        await _webApiClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(personal ? await InviteMember(EmployeeType.User) : Owner);
 
         // Act
         using var response = await WebPluginsTestData.UploadPluginAsync(_webApiClient, manifest, personal, TestContext.Current.CancellationToken);

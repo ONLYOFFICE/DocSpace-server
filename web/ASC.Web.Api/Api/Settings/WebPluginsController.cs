@@ -375,7 +375,7 @@ public class WebPluginsController(
         }
         catch (Exception e)
         {
-            logger.WarningPersonalCspNotUpdated(e);
+            logger.WarningPersonalCspDomainsBeforeNotRead(e);
 
             return null;
         }

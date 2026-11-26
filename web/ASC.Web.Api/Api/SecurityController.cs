@@ -681,9 +681,9 @@ public class SecurityController(
 
     /// <remarks>
     /// Returns the Content Security Policy of the portal, with the allowed external domains and the full header
-    /// value. Anyone can call it without signing in, from any origin. The call is read-only. To skip an
-    /// unchanged policy, send the `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value
-    /// exactly as you got it. If the policy has not changed since then, the call returns 304 with an empty body.
+    /// value. Anyone can call it without signing in, from any origin. The call is read-only. The proxy may reuse a
+    /// member's header for a day. To skip an unchanged policy, send the `Last-Modified` value of an earlier answer in
+    /// `If-Modified-Since`. Send the value exactly as you got it. If the policy has not changed since then, the call returns 304 with an empty body.
     /// With the `asc_personal_csp` cookie, a signed-in member's header also allows their enabled personal plugins'
     /// domains. A personal plugin that a portal or installation-wide plugin shadows adds no domains. A header that
     /// would grow too large keeps the portal's domains only. A member with the cookie and personal domains never
