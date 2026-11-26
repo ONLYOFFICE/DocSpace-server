@@ -42,6 +42,7 @@ import type { SourceMeta } from "../storage/docspaceFilesApi.js";
 import { sourceMetadataFields } from "@onlyoffice/ai-chat/core";
 import {
   asyncHandler,
+  clientError,
   ENTITY_ID_PARAM,
   ENTITY_KIND_PARAM,
   sourceKindOf,
@@ -50,8 +51,7 @@ import {
 import { hasCacheBreakpoints, markCacheBreakpoints } from "./cacheBreakpoints.js";
 import { isObject } from "../narrow.js";
 import { errorBodyText, refusalForLog } from "../storage/errorBody.js";
-import { AiServiceHttpError, providerFetch } from "../storage/httpClient.js";
-import { UpstreamShapeError } from "../storage/upstreamShape.js";
+import { providerFetch } from "../storage/httpClient.js";
 
 // OpenAI-compatible passthrough for the document editor's AI plugin.
 //
@@ -318,22 +318,12 @@ const openAiError = (res: Response, status: number, message: string, type: strin
   res.status(status).json(errorEnvelope(message, type));
 
 // What a failed profile read (a 403 of the AI service for a guest or a portal with AI switched
-// off, its 5xx, its timeout, an answer of the wrong shape) tells the caller. The status is the
-// one the application's error boundary would answer; the body is the OpenAI envelope these
+// off, its 5xx, its timeout, an answer of the wrong shape) tells the caller: the status and the
+// text of the application's error boundary (`clientError`), in the OpenAI envelope these
 // operations publish for every status, since the plugin's SDK reads `error.message` out of it.
 // The upstream error's own message holds the internal URL and stays in the log.
-function failureOf(err: unknown): { status: number; message: string } {
-  if (err instanceof AiServiceHttpError) {
-    return { status: err.status, message: err.statusText || "Upstream error" };
-  }
-  if (err instanceof UpstreamShapeError) {
-    return { status: err.status, message: "Bad Gateway" };
-  }
-  return { status: 500, message: "Internal server error" };
-}
-
 function answerFailure(res: Response, route: string, err: unknown): void {
-  const { status, message } = failureOf(err);
+  const { status, message } = clientError(err);
   if (status >= 500) {
     logger.error(`${route} failed: ${String(err)}`);
   }
@@ -394,11 +384,11 @@ function maxBodyBytes(providerType: string | undefined): number {
 
 class BodyTooLargeError extends Error {}
 
+type UpstreamOutcome = { response: globalThis.Response } | { error: unknown };
+
 // Read the raw request body into a single buffer, rejecting anything over
 // `limit` as it arrives (the declared-length check upstream only catches
 // honest clients).
-type UpstreamOutcome = { response: globalThis.Response } | { error: unknown };
-
 async function readRequestBody(req: Readable, limit: number): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let total = 0;
@@ -414,20 +404,23 @@ async function readRequestBody(req: Readable, limit: number): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-type ShapedBody = { body: Buffer } | { error: string };
+type ShapedBody = { body: Buffer } | { error: string } | { tooLarge: true };
 
 function isJsonContentType(contentType: string | undefined): boolean {
   return (contentType ?? "").toLowerCase().includes("json");
 }
 
 // The one parse this route spends on the plugin's body (only JSON, only up
-// to `MAX_PARSE_BYTES`; a bigger or non-JSON body is forwarded untouched as
-// before), serving two purposes:
+// to `MAX_PARSE_BYTES`; a body of another content type is forwarded
+// untouched, and so is a bigger chat body), serving two purposes:
 //
 // - `images/generations`: check the documented OpenAI fields, so a body the
 //   provider would answer with a 500 is refused here with a 400 (Bug 84414).
 //   Only those fields — the route is a passthrough by contract and a provider
-//   may accept extras of its own.
+//   may accept extras of its own. A JSON body over `MAX_PARSE_BYTES` is
+//   refused as too large instead of forwarded unchecked: the request carries
+//   a prompt and a few options, no image, so the checks cannot be skipped by
+//   padding the body. A body that is not sent as JSON is not checked.
 // - `chat/completions`: fill in `model` from the profile when the body
 //   names none, which is what this route has always documented (Bug 84416).
 //   A `model` the body carries wins, so the plugin's own choice stands.
@@ -437,8 +430,11 @@ function shapeBody(
   subPath: string,
   modelId: string | undefined,
 ): ShapedBody {
-  if (!isJsonContentType(contentType) || body.length > MAX_PARSE_BYTES) {
+  if (!isJsonContentType(contentType)) {
     return { body };
+  }
+  if (body.length > MAX_PARSE_BYTES) {
+    return subPath === "images/generations" ? { tooLarge: true } : { body };
   }
   let parsed: unknown;
   try {
@@ -447,9 +443,9 @@ function shapeBody(
     parsed = undefined;
   }
   if (!isObject(parsed)) {
-    // The image route checks its documented fields before forwarding (Bug 84414), and a body
-    // that is no JSON object has none of them, so it is refused the same way. A chat body is
-    // the provider's to judge, as before.
+    // The image route checks its documented fields before forwarding (Bug 84414), and a JSON
+    // body of up to `MAX_PARSE_BYTES` that is no JSON object has none of them, so it is refused
+    // the same way. A chat body is the provider's to judge, as before.
     return subPath === "images/generations"
       ? { error: "The request body must be a JSON object" }
       : { body };
@@ -560,6 +556,10 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     }
 
     const shaped = shapeBody(body, req.headers["content-type"], subPath, profile.modelId);
+    if ("tooLarge" in shaped) {
+      openAiError(res, 413, "Request body too large", "invalid_request_error");
+      return;
+    }
     if ("error" in shaped) {
       openAiError(res, 400, shaped.error, "invalid_request_error");
       return;

@@ -4,7 +4,13 @@
 # any other file, or a checkout without node_modules, passes silently.
 set -u
 
-file=$(python3 -c 'import json,sys; print(json.load(sys.stdin).get("tool_input",{}).get("file_path",""))' 2>/dev/null) || exit 0
+# The hook input is read with node, which the check itself needs anyway: `python3` on Windows
+# can be the Microsoft Store stub, which fails without a word and let every file pass.
+command -v node >/dev/null 2>&1 || exit 0
+file=$(node -e 'let s="";process.stdin.on("data",(d)=>(s+=d)).on("end",()=>{try{process.stdout.write(String(JSON.parse(s).tool_input?.file_path??""))}catch{}})' 2>/dev/null) || exit 0
+# Windows hands the path over with backslashes (C:\Users\...\common\ASC.AI.Chat\app\x.ts): the
+# patterns below are written with slashes.
+file=${file//\\//}
 case "$file" in
   */common/ASC.AI.Chat/*.ts) ;;
   *) exit 0 ;;

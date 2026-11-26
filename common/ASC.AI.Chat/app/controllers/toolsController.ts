@@ -200,7 +200,7 @@ function readToolNames(value: unknown): string[] | string {
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
-    // off gets 403 for any body, and no Files API read is made on their behalf.
+    // off gets 403 for any body the parser accepted, and no Files API read is made on their behalf.
     await assertAiAccess();
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
@@ -222,7 +222,7 @@ export const toolsController = {
 
   updateCustomServer: asyncHandler(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
-    // off gets 403 for any body, and no Files API read is made on their behalf.
+    // off gets 403 for any body the parser accepted, and no Files API read is made on their behalf.
     await assertAiAccess();
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
@@ -239,7 +239,7 @@ export const toolsController = {
 
   removeCustomServer: asyncHandler(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
-    // off gets 403 for any body, and no Files API read is made on their behalf.
+    // off gets 403 for any body the parser accepted, and no Files API read is made on their behalf.
     await assertAiAccess();
     const args = unpackPositional(req.body, ["name", "entityId"] as const);
     const name = typeof args.name === "string" ? args.name : asString(req.query["name"]);
@@ -335,7 +335,7 @@ export const toolsController = {
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
-    // off gets 403 for any body, and no Files API read is made on their behalf.
+    // off gets 403 for any body the parser accepted, and no Files API read is made on their behalf.
     await assertAiAccess();
     const args = unpackPositional(req.body, ["map", "entityId"] as const);
     // `map` is required. Without it the loop below yields an empty map and
@@ -363,7 +363,7 @@ export const toolsController = {
 
   setDisabled: asyncHandler(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
-    // off gets 403 for any body, and no Files API read is made on their behalf.
+    // off gets 403 for any body the parser accepted, and no Files API read is made on their behalf.
     await assertAiAccess();
     const args = unpackPositional(req.body, [
       "serverType",
@@ -442,7 +442,7 @@ export const toolsController = {
 
   setAllowAlways: asyncHandler(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
-    // off gets 403 for any body, and no Files API read is made on their behalf.
+    // off gets 403 for any body the parser accepted, and no Files API read is made on their behalf.
     await assertAiAccess();
     const args = unpackPositional(req.body, [
       "serverType",

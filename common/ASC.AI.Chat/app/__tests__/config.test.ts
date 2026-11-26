@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { constants as bufferConstants } from "buffer";
 import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -122,7 +123,7 @@ function environmentReadByConfig(): { names: string[]; families: RegExp[]; roots
   const all = (pattern: RegExp) => [...source.matchAll(pattern)].map((m) => m[1] ?? "");
   const names = [
     ...all(/process\.env\["([^"]+)"\]/g),
-    ...all(/(?:baseUrl|envOrSetting)\(\s*"([^"]+)"/g),
+    ...all(/(?:baseUrl|envOrSetting|envInt|envFlag)\(\s*"([^"]+)"/g),
   ];
   const families = [...source.matchAll(/process\.env\[`([^`$]*)\$\{[^}]+\}([^`]*)`\]/g)].map(
     (m) => new RegExp(`^${m[1] ?? ""}\\d+${m[2] ?? ""}$`),
@@ -146,6 +147,9 @@ describe("the environment the tests start in (setup.ts)", () => {
         "AI__DOCUMENT_AGENT__TOKEN",
         "AI__COMPACTION__ENABLED",
         "AI_CHAT_UPSTREAM_TIMEOUT_MS",
+        "AI_CHAT_PERSIST_INTERVAL_MS",
+        "AI__COMPACTION__KEEP_RECENT",
+        "AI__DOCUMENT_AGENT__MAX_TOOL_CALLS",
         "OTEL_METRIC_EXPORT_INTERVAL",
       ]),
     );
@@ -414,13 +418,159 @@ describe("getMaxImageSize", () => {
     ["a fraction of a byte", 0.5, DEFAULT],
     ["a fraction", 1048576.5, DEFAULT],
     ["one byte", 1, 1],
-    ["the upper bound", 1024 ** 3, 1024 ** 3],
-    ["over the upper bound", 1024 ** 3 + 1, DEFAULT],
+    // The image is turned into one base64 string, which V8 cannot make of a gigabyte.
+    ["the upper bound", 256 * 1024 ** 2, 256 * 1024 ** 2],
+    ["over the upper bound", 256 * 1024 ** 2 + 1, DEFAULT],
+    ["the gigabyte allowed before", 1024 ** 3, DEFAULT],
     ["far too large", 1e15, DEFAULT],
   ])("is %s -> as configured or the default", (_what, value, expected) => {
     settings({ ai: { maxImageSize: value } });
 
     expect(config.getMaxImageSize()).toBe(expected);
+  });
+
+  it("makes a base64 string of an image of the upper bound", () => {
+    // V8's limit of a string's length (`buffer.constants.MAX_STRING_LENGTH`).
+    expect(Math.ceil((256 * 1024 ** 2) / 3) * 4).toBeLessThan(bufferConstants.MAX_STRING_LENGTH);
+  });
+});
+
+describe("getPersistIntervalMs", () => {
+  it.each([
+    ["absent", undefined, 10_000],
+    ["empty", "", 10_000],
+    ["non-numeric", "soon", 10_000],
+    ["zero", "0", 10_000],
+    ["negative", "-1", 10_000],
+    ["the 50 ms taken before", "50", 10_000],
+    ["under a second", "999", 10_000],
+    ["a second", "1000", 1_000],
+    ["ten minutes", "600000", 600_000],
+    ["too large", "600001", 10_000],
+  ])("is %s -> as configured or the default", (_what, value, expected) => {
+    if (value !== undefined) {
+      vi.stubEnv("AI_CHAT_PERSIST_INTERVAL_MS", value);
+    }
+
+    expect(config.getPersistIntervalMs()).toBe(expected);
+  });
+});
+
+// A value that was given and is not taken: the operator who set it is told once, with the name,
+// the value and what is used instead. An absent or blank value is no mistake and says nothing.
+describe("a setting that is refused", () => {
+  it.each([
+    [
+      "AI_CHAT_UPSTREAM_TIMEOUT_MS",
+      "7200000",
+      () => config.getUpstreamTimeoutMs(),
+      "config: AI_CHAT_UPSTREAM_TIMEOUT_MS is 7200000, not a whole number from 1000 to 3600000: ignored, 300000 is used",
+    ],
+    [
+      "AI_CHAT_PERSIST_INTERVAL_MS",
+      "50",
+      () => config.getPersistIntervalMs(),
+      "config: AI_CHAT_PERSIST_INTERVAL_MS is 50, not a whole number from 1000 to 600000: ignored, 10000 is used",
+    ],
+    [
+      "OTEL_METRIC_EXPORT_INTERVAL",
+      "15s",
+      () => config.getMetricExportIntervalMs(),
+      "config: OTEL_METRIC_EXPORT_INTERVAL is 15s, not a whole number from 1000 to 3600000: ignored, 15000 is used",
+    ],
+    [
+      "AI__COMPACTION__ENABLED",
+      "yes",
+      () => config.getCompaction(),
+      "config: AI__COMPACTION__ENABLED is yes, not true, 1, false or 0: ignored, the next source of the setting or its default is used",
+    ],
+    [
+      "AI__COMPACTION__THRESHOLD",
+      "80",
+      () => config.getCompaction(),
+      "config: AI__COMPACTION__THRESHOLD is 80, not a number above 0 and up to 1: ignored, the next source of the setting or its default is used",
+    ],
+    [
+      "AI__COMPACTION__KEEP_RECENT",
+      "-1",
+      () => config.getCompaction(),
+      "config: AI__COMPACTION__KEEP_RECENT is -1, not a whole number from 0 to 10000: ignored, the next source of the setting or its default is used",
+    ],
+  ])("says once that %s=%s is ignored", (name, value, read, line) => {
+    vi.stubEnv(name, value);
+
+    read();
+    read();
+
+    expect(warn).toHaveBeenCalledExactlyOnceWith(line);
+  });
+
+  it("says it for a value of the settings file, shortened to 80 characters", () => {
+    settings({ ai: { maxImageSize: "9".repeat(200), compaction: { threshold: 2 } } });
+
+    config.getMaxImageSize();
+    config.getCompaction();
+
+    expect(warn.mock.calls).toEqual([
+      [
+        `config: ai:maxImageSize is ${"9".repeat(80)}, not a whole number from 1 to 268435456: ignored, 20971520 is used`,
+      ],
+      [
+        "config: ai:compaction:threshold is 2, not a number above 0 and up to 1: ignored, the next source of the setting or its default is used",
+      ],
+    ]);
+  });
+
+  it("says it again for another refused value, and after the setting was read well in between", () => {
+    vi.stubEnv("AI_CHAT_UPSTREAM_TIMEOUT_MS", "1");
+    config.getUpstreamTimeoutMs();
+    vi.stubEnv("AI_CHAT_UPSTREAM_TIMEOUT_MS", "2");
+    config.getUpstreamTimeoutMs();
+    vi.stubEnv("AI_CHAT_UPSTREAM_TIMEOUT_MS", "2000");
+    expect(config.getUpstreamTimeoutMs()).toBe(2000);
+    vi.stubEnv("AI_CHAT_UPSTREAM_TIMEOUT_MS", "2");
+    config.getUpstreamTimeoutMs();
+
+    expect(warn.mock.calls.map(([line]) => String(line).slice(0, 44))).toEqual([
+      "config: AI_CHAT_UPSTREAM_TIMEOUT_MS is 1, no",
+      "config: AI_CHAT_UPSTREAM_TIMEOUT_MS is 2, no",
+      "config: AI_CHAT_UPSTREAM_TIMEOUT_MS is 2, no",
+    ]);
+  });
+
+  it.each([
+    ["absent", undefined],
+    ["empty", ""],
+    ["blank", "  "],
+  ])("says nothing for a value that is %s", (_what, value) => {
+    if (value !== undefined) {
+      for (const name of [
+        "AI_CHAT_UPSTREAM_TIMEOUT_MS",
+        "AI__COMPACTION__ENABLED",
+        "AI__COMPACTION__THRESHOLD",
+      ]) {
+        vi.stubEnv(name, value);
+      }
+    }
+    settings({ ai: { maxImageSize: value ?? null } });
+
+    config.getUpstreamTimeoutMs();
+    config.getCompaction();
+    config.getMaxImageSize();
+
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("names a value that is no text without failing on one JSON cannot write", () => {
+    settings({ ai: { maxImageSize: { a: 1 } } });
+    expect(config.getMaxImageSize()).toBe(20 * 1024 * 1024);
+    settings({ ai: { maxImageSize: 10n ** 30n } });
+    expect(config.getMaxImageSize()).toBe(20 * 1024 * 1024);
+
+    expect(warn.mock.calls.map(([line]) => String(line).slice(0, 38))).toEqual([
+      "config: ai:maxImageSize is an object, ",
+      "config: ai:maxImageSize is 10000000000",
+    ]);
   });
 });
 

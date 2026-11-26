@@ -4505,7 +4505,7 @@
             }
           },
           "400": {
-            "description": "`profileId` is missing, or the provider rejected the profile's API key.",
+            "description": "`profileId` is missing, the provider rejected the profile's API key, or the stored key holds characters that cannot be sent in an HTTP header.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12036,7 +12036,7 @@
         ],
         "operationId": "aiTemplatesInstall",
         "summary": "Install a template",
-        "description": "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step that fails before the first room is made answers its status with the plain `{ error }`. A step that fails after it - a room, a file upload or the link to the sources refused by the Files service, a timeout or a dropped connection - answers the same status (500 when the step got no answer) with a body that names what exists: `skillSets` and `knowledgeBases` list the rooms already made, in the shape the success answer uses, `agent` is the agent's room when it was made, and `warning` is `installIncomplete`. Those rooms stay in the portal; nothing is undone. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
+        "description": "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step that fails before the first room is made answers its status with the plain `{ error }`. A step that fails after it - a room, a file upload or the link to the sources refused by the Files service, a timeout or a dropped connection - answers the same status (500 when the step got no answer) with a body that names what exists: `skillSets` and `knowledgeBases` list the rooms already made, in the shape the success answer uses, `agent` is the agent's room when it was made, and `warning` is `installIncomplete`. Those rooms stay in the portal; nothing is undone. The creation of a room that the Files service does not refuse with a 4xx and that still names no room - a timeout, a dropped connection, a 5xx, a 2xx without the room's id - answers that body as well, for the first room too: `unconfirmed` carries the template and the title of the room, which may exist in the portal. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
         "responses": {
           "200": {
             "description": "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",
@@ -12257,9 +12257,28 @@
                           ],
                           "additionalProperties": false
                         },
+                        "unconfirmed": {
+                          "type": "object",
+                          "description": "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The template the room was asked for."
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was asked with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
                         "warning": {
                           "type": "string",
-                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
                           "enum": [
                             "installIncomplete"
                           ]
@@ -12405,9 +12424,28 @@
                           ],
                           "additionalProperties": false
                         },
+                        "unconfirmed": {
+                          "type": "object",
+                          "description": "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The template the room was asked for."
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was asked with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
                         "warning": {
                           "type": "string",
-                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
                           "enum": [
                             "installIncomplete"
                           ]
@@ -12543,9 +12581,28 @@
                           ],
                           "additionalProperties": false
                         },
+                        "unconfirmed": {
+                          "type": "object",
+                          "description": "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The template the room was asked for."
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was asked with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
                         "warning": {
                           "type": "string",
-                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
                           "enum": [
                             "installIncomplete"
                           ]
@@ -12681,9 +12738,28 @@
                           ],
                           "additionalProperties": false
                         },
+                        "unconfirmed": {
+                          "type": "object",
+                          "description": "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The template the room was asked for."
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was asked with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
                         "warning": {
                           "type": "string",
-                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
                           "enum": [
                             "installIncomplete"
                           ]
@@ -12835,9 +12911,28 @@
                           ],
                           "additionalProperties": false
                         },
+                        "unconfirmed": {
+                          "type": "object",
+                          "description": "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The template the room was asked for."
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was asked with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
                         "warning": {
                           "type": "string",
-                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
                           "enum": [
                             "installIncomplete"
                           ]
@@ -12860,7 +12955,7 @@
             }
           },
           "500": {
-            "description": "Unhandled failure, logged server-side and never echoed back. A step after the first room that got no answer (a timeout, a dropped connection) or failed with 500 answers it too, with `warning: installIncomplete` and the rooms made.",
+            "description": "Unhandled failure, logged server-side and never echoed back. A step after the first room that got no answer (a timeout, a dropped connection) or failed with 500 answers it too, with `warning: installIncomplete` and the rooms made; so does the creation of a room, the first included, that got no answer or a 500, with that room as `unconfirmed`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12973,9 +13068,28 @@
                           ],
                           "additionalProperties": false
                         },
+                        "unconfirmed": {
+                          "type": "object",
+                          "description": "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The template the room was asked for."
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was asked with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
                         "warning": {
                           "type": "string",
-                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
                           "enum": [
                             "installIncomplete"
                           ]
@@ -12998,7 +13112,7 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "description": "A DocSpace service answered with a body this service cannot read. When it was the answer to the creation of a room, `warning` is `installIncomplete` and `unconfirmed` names the room, which may exist in the portal.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13111,9 +13225,28 @@
                           ],
                           "additionalProperties": false
                         },
+                        "unconfirmed": {
+                          "type": "object",
+                          "description": "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The template the room was asked for."
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was asked with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
                         "warning": {
                           "type": "string",
-                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
                           "enum": [
                             "installIncomplete"
                           ]
@@ -13249,9 +13382,28 @@
                           ],
                           "additionalProperties": false
                         },
+                        "unconfirmed": {
+                          "type": "object",
+                          "description": "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+                          "properties": {
+                            "templateId": {
+                              "type": "string",
+                              "description": "The template the room was asked for."
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "The title the room was asked with."
+                            }
+                          },
+                          "required": [
+                            "templateId",
+                            "title"
+                          ],
+                          "additionalProperties": false
+                        },
                         "warning": {
                           "type": "string",
-                          "description": "`installIncomplete`: the rooms listed exist and were not undone.",
+                          "description": "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
                           "enum": [
                             "installIncomplete"
                           ]
@@ -15137,7 +15289,7 @@
         ],
         "operationId": "aiOpenaiImagesGenerations",
         "summary": "OpenAI image generation passthrough",
-        "description": "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - a body sent as JSON has to be a JSON object, `prompt` a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with only its status named in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
+        "description": "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - a body sent as JSON has to be a JSON object, `prompt` a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with only its status named in the server log. A body larger than this route accepts is refused before it is forwarded, and so is a body sent as JSON that is larger than 2 MB: the documented fields of such a body are not checked, so it is not relayed either. A client disconnect aborts the provider call.",
         "responses": {
           "200": {
             "description": "The provider's own response, relayed with its status and content type (a 5xx excepted).",
@@ -15315,7 +15467,7 @@
             }
           },
           "413": {
-            "description": "The request body is larger than this route accepts.",
+            "description": "The request body is larger than this route accepts: 100 MB, 28 MB for the ONLYOFFICE provider, and 2 MB for a body sent as JSON, which carries a prompt and its options only.",
             "content": {
               "application/json": {
                 "schema": {

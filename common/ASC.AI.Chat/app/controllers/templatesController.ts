@@ -74,12 +74,14 @@ export const templatesController = {
       }
       // A step failed after rooms were made, and they stay in the portal: the answer keeps the
       // failed step's status and names them, in the fields the success answer uses, so the
-      // caller can find them (ts-ai-failure-paths.md §6).
-      const { skillSets, knowledgeBases, agent } = err.made;
+      // caller can find them (ts-ai-failure-paths.md §6). A room whose creation got no usable
+      // answer may exist too: it is named by its title, as its id is not known.
+      const { skillSets, knowledgeBases, agent, unconfirmed } = err.made;
       sendError(req, res, err.cause, {
         skillSets,
         knowledgeBases,
         ...(agent ? { agent } : {}),
+        ...(unconfirmed ? { unconfirmed } : {}),
         warning: "installIncomplete",
       });
     }

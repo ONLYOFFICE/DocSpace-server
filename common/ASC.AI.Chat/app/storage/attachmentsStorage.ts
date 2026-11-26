@@ -48,7 +48,7 @@ import {
 import { getForwardedHeaders, getAnalyzeEntryIds } from "../requestContext.js";
 import { getMaxImageSize } from "../../config/index.js";
 import { downloadHeaders, readBodyCapped } from "./roomSkills.js";
-import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
+import { getBoolean, getNumber, getString, isObject, readProp } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
@@ -218,13 +218,27 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
 }
 
 /**
- * Removes a generated image whose attachment record was not confirmed, so
- * no file is left in the folder that no message names
+ * Whether a failed write of an attachment record says that no record was stored: the AI service
+ * refused it (a 4xx), or answered a list without the file (it drops an entry it cannot resolve,
+ * which `createMany` words as a 404 for the caller). A timeout, a dropped connection, a 5xx and a
+ * 2xx whose body cannot be read are unknown: the record may be stored.
+ */
+function recordWasRefused(err: unknown): boolean {
+  const status =
+    err instanceof AiServiceHttpError || readProp(err, "expose") === true
+      ? readProp(err, "status")
+      : undefined;
+  return typeof status === "number" && status >= 400 && status < 500;
+}
+
+/**
+ * Removes a generated image whose attachment record was refused, so no file
+ * is left in the folder that no message names
  * (`DELETE api/2.0/files/file/{fileId}`, FilesController.DeleteFile; it
- * starts a file operation and answers at once). "Not confirmed" is a write
- * that was refused, one that got no answer (a timeout, a failure after the
- * row was stored) and one whose answer cannot be read: a row that was stored
- * after all then names a file that is gone. The file was made by this
+ * starts a file operation and answers at once). Only a refusal
+ * ({@link recordWasRefused}) removes it: after an answer that leaves the
+ * write unknown the file stays, as a record that was stored after all would
+ * name a file that is gone. The file was made by this
  * request seconds before, so it skips the trash. `returnSingleOperation`
  * (a query parameter of this route) makes the answer this operation only:
  * without it the portal lists every operation of the user and drops the
@@ -242,7 +256,7 @@ async function removeOrphanImage(entryId: string): Promise<void> {
       },
     );
     logger.warn(
-      `uploadToolImage: asked to delete file ${entryId} (a file operation), its attachment record was not confirmed`,
+      `uploadToolImage: asked to delete file ${entryId} (a file operation), its attachment record was refused`,
     );
   } catch (err) {
     logger.error(
@@ -618,9 +632,10 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // logger, so without this the file log shows nothing when an upload dies,
     // and a 404 from the folder read reads exactly like a 404 from the insert.
     let stage = "thread-artifact";
-    // The file once it is stored: a failure after that point asks the Files
-    // API to delete it again (`removeOrphanImage`, best effort: a delete that
-    // fails is logged with the file id and the file stays).
+    // The file once it is stored. A refusal of its attachment record asks the
+    // Files API to delete it again (`removeOrphanImage`, best effort: a delete
+    // that fails is logged with the file id and the file stays); after an
+    // answer that leaves the record unknown the file is kept.
     let stored: string | undefined;
     try {
       // A conversation of an AI project keeps what its replies produce in
@@ -730,7 +745,13 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       return attachment;
     } catch (err) {
       if (stored !== undefined) {
-        await removeOrphanImage(stored);
+        if (recordWasRefused(err)) {
+          await removeOrphanImage(stored);
+        } else {
+          logger.error(
+            `uploadToolImage: file ${stored} is kept, whether its attachment record was stored is unknown`,
+          );
+        }
       }
       logger.error(
         `uploadToolImage: entityId=${input.entityId ?? "-"} FAILED at stage=${stage}: ${
@@ -754,7 +775,8 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       logger.error(
         `uploadToolImage: returning an UNRESOLVABLE placeholder ref=${placeholder.id} — ` +
           "no attachment record was confirmed, so the stream carries a ref the chat can never " +
-          "hydrate (broken image in the message; a stored file and its removal are in the lines above)",
+          "hydrate (broken image in the message; whether a file was stored, and whether it was " +
+          "kept or asked to be deleted, is in the lines above)",
       );
       return placeholder;
     }

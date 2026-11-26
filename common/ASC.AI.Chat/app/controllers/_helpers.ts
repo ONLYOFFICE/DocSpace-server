@@ -174,7 +174,7 @@ type AsyncHandler<ReqBody, ReqQuery> = (
 // and `statusText`. Errors that opt in via `expose` (e.g. request
 // validation) get their message through under a 4xx status; everything
 // else collapses to a generic 500.
-function clientError(err: unknown): { status: number; message: string } {
+export function clientError(err: unknown): { status: number; message: string } {
   if (err instanceof AiServiceHttpError) {
     return { status: err.status, message: err.statusText || "Upstream error" };
   }

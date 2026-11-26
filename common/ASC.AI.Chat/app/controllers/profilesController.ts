@@ -101,7 +101,9 @@ function rejectExternalProviderType(
 // is not a contract (ts-ai-failure-paths.md §1). The routes decide those
 // before the call instead: the provider type through the library's own
 // registry (`unknownProviderType`, Bug 83117), the profile by reading it
-// (Bug 84426), the key by `headerSafeKeyError` (Bug 84428).
+// (Bug 84426), a key the request carries by `headerSafeKeyError` (Bug 84428).
+// A key that is already stored is checked the same way after `listModels`
+// failed without a status.
 function describeProviderError(err: unknown): { status: number; message: string } {
   // OpenAI-SDK HTTP errors expose a numeric `status`.
   const rawStatus = readProp(err, "status");
@@ -261,7 +263,7 @@ async function unknownProviderType(type: unknown): Promise<string | null> {
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): with AI off, or for a caller
-    // without AI access, 403 for any body, and no outbound request to the sent baseUrl.
+    // without AI access, 403 for any body the parser accepted, and no outbound request to the sent baseUrl.
     await assertAiAccess();
     await assertProfilesWritable();
     // The engine compares the name with the stored ones before anything else: a body without a
@@ -285,7 +287,7 @@ export const profilesController = {
 
   update: asyncHandler<Profile>(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): with AI off, or for a caller
-    // without AI access, 403 for any body, and no outbound request to the sent baseUrl.
+    // without AI access, 403 for any body the parser accepted, and no outbound request to the sent baseUrl.
     await assertAiAccess();
     await assertProfilesWritable();
     // The engine compares the name with the stored ones before anything else: a body without a
@@ -414,6 +416,19 @@ export const profilesController = {
       // forwards the upstream status instead.
       if (err instanceof AiServiceHttpError) {
         throw err;
+      }
+      // A key stored before the routes refused one no header can carry (Bug 84428) makes fetch
+      // throw a bare TypeError, with no status and no class of its own. The failure is not
+      // read from its text: when the provider gave no status, the stored key itself is checked,
+      // so the caller hears which input is wrong instead of a 502 of the provider.
+      if (typeof readProp(err, "status") !== "number") {
+        const keyed = await storage.profiles.readById(profileId);
+        const keyError = headerSafeKeyError(keyed?.key);
+        if (keyError) {
+          logger.warn(`listModels failed (profileId=${profileId}) -> 400: ${keyError}`);
+          res.status(400).json({ error: keyError });
+          return;
+        }
       }
       const { status, message } = describeProviderError(err);
       logger.warn(

@@ -18,7 +18,8 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
 - `yarn check` in `common/ASC.AI.Chat` runs `typecheck`, `lint`, `format:check` and the tests with
   their coverage thresholds (`ts-ai-tests.md` §9); a change
   is handed over with it green. `.github/workflows/ai-chat.yml` runs the same and fails when
-  `yarn openapi` changes `app/generated`.
+  `yarn openapi` changes `app/generated` or the document it writes for the API documentation
+  (`common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/json/aichat_2.0.json`).
 - **ESLint** (`eslint.config.js`) holds one rule per class of defect, no style rule. Code that
   predates it is counted per file and rule in `eslint-suppressions.json`. A new violation is fixed,
   not added to the count: never run `eslint --suppress-all`, and never silence a rule with
@@ -26,8 +27,8 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
   `yarn eslint . --prune-suppressions` and commit the smaller file.
 - **Prettier** owns formatting (`.prettierrc.json`): `yarn prettier --write <the files you changed>`.
   `templates/` is content handed to the model and stays out of it (`.prettierignore`).
-- No build step: the service runs through `tsx`. `app/generated/openapi-schemas.json` is written by
-  `yarn openapi` and committed, never edited by hand.
+- No build step: the service runs through `tsx`. `app/generated/openapi-schemas.json` and
+  `aichat_2.0.json` are written by `yarn openapi` and committed, never edited by hand.
 
 ## Naming
 
@@ -86,7 +87,13 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
 - An error of the Files API is a `DocspaceApiHttpError`, an error of the AI service an
   `AiServiceHttpError`. Code that tells them apart with `instanceof` depends on the right class.
 - Storage adapters map the upstream DTO to the engine type and `encodeURIComponent` every id put
-  into a path.
+  into a path. That leaves `""`, `.` and `..` as they are, and the URL parser then drops them, so
+  the request reaches another route: a read by id answers "absent" for such an id without a
+  request (`namesNoEntity`), and the clients refuse any path with such a segment with 404
+  (`assertEntityPath`, `storage/upstreamShape.ts`).
+- Calls made in a loop for one request go through `pooled(items, limit, run)`
+  (`storage/pooled.ts`), a few at a time, not through a bare `Promise.all` over the list (`meta/common.ts` keeps two
+  older worker pools of its own).
 
 ## State and logging
 
@@ -106,9 +113,11 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
   Env variables are read in bracket notation
   (`process.env["AI_SERVICE_URL"]`) and override the file.
 - A value goes through a reader that knows its bounds and falls back to a default in the code when
-  the value is absent, malformed or out of range: `intWithin(value, min, max)`, `unitFraction`,
-  `flag` in `config/index.ts` are the pattern. A number has a lower and an upper bound; a duration
-  says its unit in the name. An optional value never stops the service.
+  the value is absent, malformed or out of range: `intWithin(name, value, min, max)`, `envInt`,
+  `unitFraction`, `envFlag` in `config/index.ts` are the pattern. A number has a lower and an upper
+  bound; a duration says its unit in the name. An optional value never stops the service. A value
+  that was given and is not taken is reported once per value with `console.warn` (`refuse`), with
+  its name, the value and what is used instead; an absent or blank one is not.
 - Seen in the code: `AI_CHAT_UPSTREAM_TIMEOUT_MS` was read in `storage/httpClient.ts` with
   `parseInt10` and no bounds, so `0` or `30s` (parsed as 30) aborted every call to the AI service;
   it is `getUpstreamTimeoutMs()` now, a second to an hour.

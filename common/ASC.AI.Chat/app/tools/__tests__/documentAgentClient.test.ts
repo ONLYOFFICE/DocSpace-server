@@ -161,10 +161,41 @@ describe("the A2A client of the document agent", () => {
       cause,
     });
     expect(logger.warn).toHaveBeenCalledWith(
-      "documentAgent: the agent at http://agent:9838 is unreachable",
+      "documentAgent: the agent at http://agent:9838 is unreachable: card unreachable",
     );
     await expect(mod.runDocumentTask(config, input())).resolves.toMatchObject({ state: "unknown" });
     expect(sdk.createFromUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    [
+      "the status of a refused agent card",
+      new Error("Failed to fetch Agent Card from http://agent:9838/card: 401"),
+      "Failed to fetch Agent Card from http://agent:9838/card: 401",
+    ],
+    [
+      "the code of a network failure",
+      new TypeError("fetch failed", {
+        cause: Object.assign(new Error("connect"), { code: "ECONNREFUSED" }),
+      }),
+      "fetch failed (ECONNREFUSED)",
+    ],
+    [
+      "the message of a cause without a code",
+      new TypeError("fetch failed", { cause: new Error("self-signed certificate") }),
+      "fetch failed (self-signed certificate)",
+    ],
+    ["a value that is no Error", "boom", "boom"],
+  ])("logs %s when the agent cannot be reached", async (_what, cause, text) => {
+    sdk.createFromUrl.mockImplementationOnce(() => Promise.reject(cause));
+
+    await expect(mod.runDocumentTask(config, input())).rejects.toMatchObject({
+      message: "the document agent is unreachable",
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `documentAgent: the agent at http://agent:9838 is unreachable: ${text}`,
+    );
   });
 
   it("keeps a newer client when an older build fails after it was replaced", async () => {

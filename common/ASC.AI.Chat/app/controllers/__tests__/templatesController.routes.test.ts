@@ -526,7 +526,6 @@ describe("templatesController.install", () => {
   it.each([
     [1, 500, "Internal Server Error"],
     [2, 500, "Internal Server Error"],
-    [3, 500, "Internal Server Error"],
   ])("makes nothing when step %i fails with %i", async (n, status, error) => {
     failAt = n;
 
@@ -551,17 +550,26 @@ describe("templatesController.install", () => {
 
   // A step after the first room keeps its status and names every room made before it
   // (ts-ai-failure-paths.md §6): they stay in the portal, as nothing undoes them.
+  // The room a `POST rooms` was asked for when its answer does not say whether it was made.
+  const unconfirmed = ({ templateId, title }: { templateId: string; title: string }) => ({
+    templateId,
+    title,
+  });
+
+  // A 500 of `POST rooms` (steps 3, 6 and 9) does not say that no room was made: the room is
+  // named as `unconfirmed`, the first one included.
   it.each([
-    [4, [SKILL_ROOM], [], undefined],
-    [5, [SKILL_ROOM], [], undefined],
-    [6, [SKILL_ROOM], [], undefined],
-    [7, [SKILL_ROOM], [KNOWLEDGE_ROOM], undefined],
-    [8, [SKILL_ROOM], [KNOWLEDGE_ROOM], undefined],
-    [9, [SKILL_ROOM], [KNOWLEDGE_ROOM], undefined],
-    [10, [SKILL_ROOM], [KNOWLEDGE_ROOM], AGENT_ROOM],
+    [3, [], [], undefined, unconfirmed(SKILL_ROOM)],
+    [4, [SKILL_ROOM], [], undefined, undefined],
+    [5, [SKILL_ROOM], [], undefined, undefined],
+    [6, [SKILL_ROOM], [], undefined, unconfirmed(KNOWLEDGE_ROOM)],
+    [7, [SKILL_ROOM], [KNOWLEDGE_ROOM], undefined, undefined],
+    [8, [SKILL_ROOM], [KNOWLEDGE_ROOM], undefined, undefined],
+    [9, [SKILL_ROOM], [KNOWLEDGE_ROOM], undefined, unconfirmed(AGENT_ROOM)],
+    [10, [SKILL_ROOM], [KNOWLEDGE_ROOM], AGENT_ROOM, undefined],
   ])(
     "names the rooms already made when step %i fails with 500",
-    async (n, skillSets, knowledgeBases, agent) => {
+    async (n, skillSets, knowledgeBases, agent, maybe) => {
       failAt = n;
 
       const reply = await invoke(templatesController.install, { body: { id: AGENT } });
@@ -572,10 +580,50 @@ describe("templatesController.install", () => {
         skillSets,
         knowledgeBases,
         ...(agent ? { agent } : {}),
+        ...(maybe ? { unconfirmed: maybe } : {}),
         warning: "installIncomplete",
       });
       expect(responseViolations("aiTemplatesInstall", 500, reply.body)).toEqual([]);
       expect(calls.map((c) => c.step)).toEqual(STEPS.slice(0, n));
+    },
+  );
+
+  // Each of these answers leaves a room that may exist in the portal with no id to find it by
+  // (ts-ai-failure-paths.md §6): the answer is never the bare error.
+  it.each([
+    ["an empty 200", () => HttpResponse.text("", { status: 200 }), 502, "Bad Gateway"],
+    ["a dropped connection", () => HttpResponse.error(), 500, "Internal server error"],
+  ])(
+    "names the room as unconfirmed when its creation gets %s, for the first room and a later one",
+    async (_what, answer, status, error) => {
+      failure = answer;
+
+      failAt = 2;
+      const first = await invoke(templatesController.install, {
+        body: { id: "skill-sets/budgeting" },
+      });
+      failAt = 6;
+      calls.length = 0;
+      const later = await invoke(templatesController.install, { body: { id: AGENT } });
+
+      expect(first.status).toBe(status);
+      expect(first.body).toEqual({
+        error,
+        skillSets: [],
+        knowledgeBases: [],
+        unconfirmed: { templateId: "skill-sets/budgeting", title: "Budgeting" },
+        warning: "installIncomplete",
+      });
+      expect(responseViolations("aiTemplatesInstall", status, first.body)).toEqual([]);
+      expect(later.status).toBe(status);
+      expect(later.body).toEqual({
+        error,
+        skillSets: [SKILL_ROOM],
+        knowledgeBases: [],
+        unconfirmed: unconfirmed(KNOWLEDGE_ROOM),
+        warning: "installIncomplete",
+      });
+      expect(responseViolations("aiTemplatesInstall", status, later.body)).toEqual([]);
     },
   );
 
@@ -721,32 +769,52 @@ describe("templatesController.install", () => {
     ["a null id", { id: null }],
     ["an empty id", { id: "" }],
     ["a boolean id", { id: true }],
-  ])("answers 502 for a new room with %s, uploading nothing", async (_what, change) => {
-    answerRoomsWith(change);
+  ])(
+    "answers 502 naming the room as unconfirmed for a new room with %s, uploading nothing",
+    async (_what, change) => {
+      answerRoomsWith(change);
 
-    const reply = await invoke(templatesController.install, {
-      body: { id: "skill-sets/budgeting" },
-    });
+      const reply = await invoke(templatesController.install, {
+        body: { id: "skill-sets/budgeting" },
+      });
 
-    expect(reply.status).toBe(502);
-    expect(reply.body).toEqual({ error: "Bad Gateway" });
-    expect(calls.map((c) => c.step)).toEqual(["GET people/@self", "POST rooms"]);
-  });
+      expect(reply.status).toBe(502);
+      expect(reply.body).toEqual({
+        error: "Bad Gateway",
+        skillSets: [],
+        knowledgeBases: [],
+        unconfirmed: { templateId: "skill-sets/budgeting", title: "Budgeting" },
+        warning: "installIncomplete",
+      });
+      expect(responseViolations("aiTemplatesInstall", 502, reply.body)).toEqual([]);
+      expect(calls.map((c) => c.step)).toEqual(["GET people/@self", "POST rooms"]);
+    },
+  );
 
   it.each([
     ["no envelope", () => HttpResponse.json(roomDto(5, "x", 10))],
     ["a string response", () => docspace("room")],
     ["a body that is not JSON", () => HttpResponse.text("ok")],
-  ])("answers 502 for a new room answered with %s", async (_what, answer) => {
-    upstream.use(http.post("*/api/2.0/files/rooms", () => step("POST rooms", undefined, answer)));
+  ])(
+    "answers 502 naming the room as unconfirmed for a new room answered with %s",
+    async (_what, answer) => {
+      upstream.use(http.post("*/api/2.0/files/rooms", () => step("POST rooms", undefined, answer)));
 
-    const reply = await invoke(templatesController.install, {
-      body: { id: "skill-sets/budgeting" },
-    });
+      const reply = await invoke(templatesController.install, {
+        body: { id: "skill-sets/budgeting" },
+      });
 
-    expect(reply.status).toBe(502);
-    expect(reply.body).toEqual({ error: "Bad Gateway" });
-  });
+      expect(reply.status).toBe(502);
+      expect(reply.body).toEqual({
+        error: "Bad Gateway",
+        skillSets: [],
+        knowledgeBases: [],
+        unconfirmed: { templateId: "skill-sets/budgeting", title: "Budgeting" },
+        warning: "installIncomplete",
+      });
+      expect(responseViolations("aiTemplatesInstall", 502, reply.body)).toEqual([]);
+    },
+  );
 
   it("answers 500 when the vectorization settings read times out, making no room", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });

@@ -150,8 +150,10 @@ describe("the engine the controller builds", () => {
     ["zero", "0", 10_000],
     ["negative", "-5", 10_000],
     ["a positive integer", "2500", 2500],
-    ["the lower bound", "50", 50],
-    ["under the lower bound", "49", 10_000],
+    ["the lower bound", "1000", 1000],
+    ["under the lower bound", "999", 10_000],
+    // 50 ms was taken before: about twenty writes a second for each streaming round.
+    ["the library's own 150 ms", "150", 10_000],
     ["the upper bound", "600000", 600_000],
     ["over the upper bound", "600001", 10_000],
     ["a number with a unit", "30s", 10_000],

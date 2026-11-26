@@ -43,7 +43,13 @@ import { isObject, getNumber, getObject, getString, getEntityId } from "../narro
 import logger from "../log.js";
 import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 import { clientFault } from "../httpErrors.js";
-import { jsonAnswer, mapped, namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
+import {
+  assertEntityPath,
+  jsonAnswer,
+  mapped,
+  namesNoEntity,
+  UpstreamShapeError,
+} from "./upstreamShape.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
@@ -165,6 +171,7 @@ export async function filesApiGet(
   }
   const qs = params.toString();
   const search = qs ? `?${qs}` : "";
+  assertEntityPath(path);
   const url = `${proxyBaseUrl}/api/2.0/files/${path}${search}`;
   const timed = withTimeout(signal);
   countFilesApiRead();
@@ -197,6 +204,7 @@ export async function filesApiSend(
   body: unknown,
   signal?: AbortSignal,
 ): Promise<unknown> {
+  assertEntityPath(path);
   const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
   const timed = withTimeout(signal);
   try {
@@ -248,6 +256,7 @@ export async function filesApiRequest(
   path: string,
   body: FilesApiBody,
 ): Promise<unknown> {
+  assertEntityPath(path);
   const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
   const { signal, cancel } = withTimeout(undefined);
   try {

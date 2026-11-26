@@ -34,7 +34,7 @@
 import { UpstreamShapeError } from "../upstreamShape.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Attachment } from "@onlyoffice/ai-chat/core";
-import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
+import { http, HttpResponse, stalled, useUpstream } from "../../__tests__/helpers/upstream.js";
 import logger from "../../log.js";
 import { setAnalyzeEntryIds } from "../../requestContext.js";
 import { HttpAttachmentsStorage } from "../attachmentsStorage.js";
@@ -916,7 +916,7 @@ describe("createMany of a generated image", () => {
       expect.stringMatching(
         new RegExp(`^uploadToolImage: entityId=${entityId} FAILED at stage=${stage}: `),
       ),
-      `uploadToolImage: returning an UNRESOLVABLE placeholder ref=${result[0]?.id} — no attachment record was confirmed, so the stream carries a ref the chat can never hydrate (broken image in the message; a stored file and its removal are in the lines above)`,
+      `uploadToolImage: returning an UNRESOLVABLE placeholder ref=${result[0]?.id} — no attachment record was confirmed, so the stream carries a ref the chat can never hydrate (broken image in the message; whether a file was stored, and whether it was kept or asked to be deleted, is in the lines above)`,
     ]);
   };
 
@@ -1208,7 +1208,7 @@ describe("createMany of a generated image", () => {
   it("answers a placeholder and removes the inserted file when the record is refused", async () => {
     const inserts = filesApi({});
     const removed = removals();
-    upstream.use(http.post(`${AI}/attachments`, () => HttpResponse.json({}, { status: 500 })));
+    upstream.use(http.post(`${AI}/attachments`, () => HttpResponse.json({}, { status: 400 })));
 
     const result = await new HttpAttachmentsStorage().createMany([tool()]);
 
@@ -1219,7 +1219,7 @@ describe("createMany of a generated image", () => {
       { id: "90", single: "true", body: { deleteAfter: false, immediately: true } },
     ]);
     expect(logged("warn")).toContain(
-      "uploadToolImage: asked to delete file 90 (a file operation), its attachment record was not confirmed",
+      "uploadToolImage: asked to delete file 90 (a file operation), its attachment record was refused",
     );
   });
 
@@ -1229,7 +1229,7 @@ describe("createMany of a generated image", () => {
   ])("answers a placeholder and logs the file's id when its removal %s", async (_case, answer) => {
     filesApi({});
     const removed = removals(answer);
-    upstream.use(http.post(`${AI}/attachments`, () => HttpResponse.json({}, { status: 500 })));
+    upstream.use(http.post(`${AI}/attachments`, () => HttpResponse.json({}, { status: 400 })));
 
     const result = await new HttpAttachmentsStorage().createMany([tool()]);
 
@@ -1237,6 +1237,51 @@ describe("createMany of a generated image", () => {
     expect(removed.map((r) => r.id)).toEqual(["90"]);
     expect(logged("error")[0]).toMatch(
       /^uploadToolImage: file 90 is left without an attachment record, its removal failed: /,
+    );
+  });
+
+  // An answer that does not say whether the record was stored: the file is not removed, as a
+  // record stored after all would name a file that is gone (ts-ai-failure-paths.md §1).
+  it.each([
+    ["answers 500", () => HttpResponse.json({}, { status: 500 })],
+    ["answers a 200 that is no list", () => HttpResponse.json({})],
+    ["drops the connection", () => HttpResponse.error()],
+  ])("keeps the inserted file when the record write %s", async (_case, answer) => {
+    filesApi({});
+    upstream.use(http.post(`${AI}/attachments`, answer));
+
+    const result = await new HttpAttachmentsStorage().createMany([tool()]);
+
+    expectPlaceholder(result, "attachment-record");
+    expect(upstream.seen.some((r) => r.method === "DELETE")).toBe(false);
+    expect(logged("error")).toContain(
+      "uploadToolImage: file 90 is kept, whether its attachment record was stored is unknown",
+    );
+  });
+
+  it("keeps the inserted file when the record write gets no answer", async () => {
+    filesApi({});
+    upstream.use(http.post(`${AI}/attachments`, stalled));
+    // The write is the third request of the upload, so its timeout is armed after the first
+    // ones answered: the clock is moved on until the call ends, as `useFastTimers` does. The
+    // file's own fake clock fakes `Date` only and is replaced for this test.
+    vi.useRealTimers();
+    vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
+    vi.setSystemTime(NOW);
+    const pump = setInterval(() => void vi.advanceTimersByTimeAsync(60_000), 1);
+    try {
+      const result = await new HttpAttachmentsStorage().createMany([tool()]);
+
+      // The clock stands five minutes later, so the placeholder is not compared whole.
+      expect(result).toMatchObject([{ kind: "image", source: "tool" }]);
+      expect(result[0]?.id).not.toBe("ref-90");
+    } finally {
+      clearInterval(pump);
+      vi.useRealTimers();
+    }
+    expect(upstream.seen.some((r) => r.method === "DELETE")).toBe(false);
+    expect(logged("error")).toContain(
+      "uploadToolImage: file 90 is kept, whether its attachment record was stored is unknown",
     );
   });
 
@@ -1339,6 +1384,19 @@ describe("createMany of a generated image", () => {
       const result = await new HttpAttachmentsStorage().createMany([tool({ threadId: "t-1" })]);
 
       expectPlaceholder(result, "thread-artifact");
+    });
+
+    it("keeps the artifact when the answer of its record write cannot be read", async () => {
+      artifacts(() => HttpResponse.json({ response: { id: 55 }, status: 0 }));
+      upstream.use(http.post(`${AI}/attachments`, () => HttpResponse.json({})));
+
+      const result = await new HttpAttachmentsStorage().createMany([tool({ threadId: "t-1" })]);
+
+      expectPlaceholder(result, "attachment-record");
+      expect(upstream.seen.some((r) => r.method === "DELETE")).toBe(false);
+      expect(logged("error")).toContain(
+        "uploadToolImage: file 55 is kept, whether its attachment record was stored is unknown",
+      );
     });
 
     it("answers a placeholder when the artifact's record is refused", async () => {

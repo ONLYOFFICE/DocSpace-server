@@ -65,6 +65,7 @@ import {
 } from "./docspaceFilesApi.js";
 import { clientFault } from "../httpErrors.js";
 import { UpstreamShapeError } from "./upstreamShape.js";
+import { pooled } from "./pooled.js";
 
 // The body readers moved to the clients' module; kept importable from here for their readers.
 export { readBodyCapped } from "./httpClient.js";
@@ -83,6 +84,13 @@ const MAX_PAGES = 10;
 
 /** Rooms per catalog read: `roomIds` takes 1 to 20 ids (`AiHubService.MaxRoomsPerType`). */
 const SKILLS_BATCH_SIZE = 20;
+
+/**
+ * Requests to the Files API in flight for one listing: the pages of the rooms, then the catalog
+ * reads. A portal with a thousand Instructions rooms takes 9 more pages and 50 catalog reads,
+ * which went out all at once with the caller's session.
+ */
+const FILES_API_CONCURRENCY = 4;
 
 /**
  * Bytes of a skill file read at most. The widget cuts a body at 64 K
@@ -175,8 +183,8 @@ export async function getRoomsSkills(roomIds: string[]): Promise<Map<string, Roo
   for (let i = 0; i < ids.length; i += SKILLS_BATCH_SIZE) {
     batches.push(ids.slice(i, i + SKILLS_BATCH_SIZE));
   }
-  const answers = await Promise.all(
-    batches.map((batch) => filesApiGet("rooms/skills", { roomIds: batch })),
+  const answers = await pooled(batches, FILES_API_CONCURRENCY, (batch) =>
+    filesApiGet("rooms/skills", { roomIds: batch }),
   );
   const result = new Map<string, RoomSkill[]>();
   for (const answer of answers) {
@@ -205,13 +213,6 @@ function parseRoomsPage(response: unknown): { rooms: ContextFolder["rooms"]; tot
   return { rooms, total: getNumber(response, "total") ?? rooms.length };
 }
 
-/**
- * The Instructions rooms the caller can read that hold at least one skill
- * file, as one cloud entry — `GET api/2.0/files/rooms?type=10`, paged, then
- * one look into each room. The server already leaves out rooms the caller
- * may not see. Empty when there is none, so the widget shows no picker at
- * all.
- */
 /** The search area of the root that keeps the Instructions and Knowledge rooms. */
 const AI_HUB_SEARCH_AREA = "AiHub";
 
@@ -230,16 +231,26 @@ async function listRoomsOfType(roomType: number): Promise<ContextFolder["rooms"]
       startIndex: page * PAGE_SIZE,
     });
   // The first page tells the total, so the other pages (at most
-  // MAX_PAGES - 1 of them) are read at once; they are joined in page order.
+  // MAX_PAGES - 1 of them) are read FILES_API_CONCURRENCY at a time; they
+  // are joined in page order.
   const first = parseRoomsPage(await readPage(0));
   const pageCount = Math.min(Math.ceil(first.total / PAGE_SIZE), MAX_PAGES);
   const rest = Array.from({ length: Math.max(pageCount - 1, 0) }, (_, i) => i + 1);
   // A page that cannot be read fails the listing: the rooms of the pages
   // before it are not the caller's rooms.
-  const others = await Promise.all(rest.map(async (page) => parseRoomsPage(await readPage(page))));
+  const others = await pooled(rest, FILES_API_CONCURRENCY, async (page) =>
+    parseRoomsPage(await readPage(page)),
+  );
   return [first, ...others].flatMap((page) => page.rooms);
 }
 
+/**
+ * The Instructions rooms the caller can read that hold at least one skill
+ * file, as one cloud entry — `GET api/2.0/files/rooms?type=10`, paged, then
+ * the skills of those rooms, 20 rooms a call (`getRoomsSkills`). The server
+ * already leaves out rooms the caller may not see. Empty when there is none,
+ * so the widget shows no picker at all.
+ */
 export async function getContextFolders(): Promise<ContextFolder[]> {
   const rooms = await listRoomsOfType(INSTRUCTIONS_ROOM_TYPE);
   if (rooms.length === 0) {

@@ -40,28 +40,82 @@ import { HttpProfilesStorage } from "../profilesStorage.js";
 import { HttpPromptFoldersStorage } from "../promptFoldersStorage.js";
 import { HttpPromptsStorage } from "../promptsStorage.js";
 import { HttpThreadsStorage } from "../threadsStorage.js";
+import { filesApiGet, filesApiRequest, filesApiSend } from "../docspaceFilesApi.js";
+import { aiService, aiServiceRootGet } from "../httpClient.js";
+import { assertEntityPath } from "../upstreamShape.js";
 
 // `GET <path>/` with an empty id reaches the list route of the same path, whose array a
 // single-entity read cannot map: `assignments/bulk-assign` answered 502 for `{ Translation: "" }`
 // where ASC.AI.Tests expects a per-item error (AssignmentBulkTests). No handler is registered,
-// so a request that went out fails the test.
+// so a request that went out fails the test. `.` and `..` pass `encodeURIComponent` and are then
+// removed by the URL parser as dot segments, so `threads/.` reached the same list route and
+// `threads/..` the parent path.
 useUpstream();
 
-const reads: [string, () => Promise<unknown>, unknown][] = [
-  ["threads.readById", () => new HttpThreadsStorage().readById(""), null],
-  ["messages.readById", () => new HttpMessagesStorage().readById(""), null],
-  ["messages.readThreadId", () => new HttpMessagesStorage().readThreadId(""), null],
-  ["attachments.readById", () => new HttpAttachmentsStorage().readById(""), null],
-  ["prompts.readById", () => new HttpPromptsStorage().readById(""), null],
-  ["promptFolders.readById", () => new HttpPromptFoldersStorage().readById(""), null],
-  ["profiles.readById", () => new HttpProfilesStorage().readById(""), undefined],
-  ["profiles.readByIdRaw", () => new HttpProfilesStorage().readByIdRaw(""), undefined],
-  ["files.getFolderInfo", () => getFolderInfo(""), undefined],
-  ["files.getFileInfo", () => getFileInfo(""), undefined],
+const NO_ENTITY = ["", ".", ".."];
+
+const reads: [string, (id: string) => Promise<unknown>, unknown][] = [
+  ["threads.readById", (id) => new HttpThreadsStorage().readById(id), null],
+  ["messages.readById", (id) => new HttpMessagesStorage().readById(id), null],
+  ["messages.readThreadId", (id) => new HttpMessagesStorage().readThreadId(id), null],
+  ["attachments.readById", (id) => new HttpAttachmentsStorage().readById(id), null],
+  ["prompts.readById", (id) => new HttpPromptsStorage().readById(id), null],
+  ["promptFolders.readById", (id) => new HttpPromptFoldersStorage().readById(id), null],
+  ["profiles.readById", (id) => new HttpProfilesStorage().readById(id), undefined],
+  ["profiles.readByIdRaw", (id) => new HttpProfilesStorage().readByIdRaw(id), undefined],
+  ["files.getFolderInfo", (id) => getFolderInfo(id), undefined],
+  ["files.getFileInfo", (id) => getFileInfo(id), undefined],
 ];
 
-describe("a read by an empty id", () => {
+describe.each(NO_ENTITY)("a read by the id %j", (id) => {
   it.each(reads)("%s answers absent without calling out", async (_name, read, absent) => {
-    await expect(read()).resolves.toBe(absent);
+    await expect(read(id)).resolves.toBe(absent);
+  });
+});
+
+// Every other call by id - a write, a delete, a read of a sub-resource - goes through one of
+// the clients, which refuse the path before a request: `DELETE threads/.` would be sent as
+// `DELETE threads/`, another route.
+const clients: [string, (path: string) => Promise<unknown>][] = [
+  ["aiService.get", (path) => aiService.get(`/${path}`)],
+  ["aiService.post", (path) => aiService.post(`/${path}`, {})],
+  ["aiService.put", (path) => aiService.put(`/${path}`, {})],
+  ["aiService.delete", (path) => aiService.delete(`/${path}`)],
+  ["aiServiceRootGet", (path) => aiServiceRootGet(`/${path}`)],
+  ["filesApiGet", (path) => filesApiGet(path, { count: 1 })],
+  ["filesApiSend", (path) => filesApiSend("PUT", path, {})],
+  ["filesApiRequest", (path) => filesApiRequest("DELETE", path, { json: {} })],
+];
+
+describe.each(clients)("%s", (_name, call) => {
+  it.each([
+    ["an empty id at the end", "threads/"],
+    ["an empty id in the middle", "threads//messages"],
+    ["a dot at the end", "threads/."],
+    ["a dot in the middle", "threads/./messages"],
+    ["two dots at the end", "threads/.."],
+    ["two dots in the middle", "rooms/../sources"],
+    ["two dots before a query", "file/..?returnSingleOperation=true"],
+  ])("answers 404 for a path with %s, without a request", async (_what, path) => {
+    await expect(call(path)).rejects.toMatchObject({
+      status: 404,
+      expose: true,
+      message: "Not Found",
+    });
+  });
+});
+
+describe("assertEntityPath", () => {
+  it.each([
+    "/threads",
+    "threads/t-1/messages",
+    "/config",
+    "rooms/12/sources?x=..",
+    "file/a.b",
+    "file/...",
+    "file/%2E",
+    "@my?count=1",
+  ])("lets %s through", (path) => {
+    expect(() => assertEntityPath(path)).not.toThrow();
   });
 });

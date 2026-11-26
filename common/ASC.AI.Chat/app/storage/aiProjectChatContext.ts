@@ -54,10 +54,10 @@ import { refreshContextRoomSkills } from "./contextRoomSkills.js";
 import { CONTEXT_CLOUD, parseSkillsCatalog } from "./roomSkills.js";
 import { ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import type { Profile } from "@onlyoffice/ai-chat/core";
-import { getBoolean, getNumber, getObjectArray, getString, isObject } from "../narrow.js";
+import { getArray, getBoolean, getNumber, getObjectArray, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import logger from "../log.js";
-import { UpstreamShapeError } from "./upstreamShape.js";
+import { objectOrNone, UpstreamShapeError } from "./upstreamShape.js";
 
 /** The ids of the rooms linked to a project, by kind, in the order the server lists them. */
 interface AiProjectSources {
@@ -65,10 +65,17 @@ interface AiProjectSources {
   knowledgeRoomIds: number[];
 }
 
+// `AiProjectSourcesDto` always carries both lists, empty for a project that links no room. An
+// answer without one of them is unknown, not "no rooms": read as none, the round would run
+// without the project's instructions and knowledge (ts-ai-failure-paths.md §1). A room of the
+// list that names no numeric id is dropped by itself.
 function roomIdsOf(raw: unknown, key: string): number[] {
-  const rooms = isObject(raw) ? getObjectArray(raw, key) : undefined;
-  return (rooms ?? [])
-    .map((room) => getNumber(room, "id"))
+  const rooms = isObject(raw) ? getArray(raw, key) : undefined;
+  if (rooms === undefined) {
+    throw new UpstreamShapeError("GET files/rooms/{id}/sources");
+  }
+  return rooms
+    .map((room) => (isObject(room) ? getNumber(room, "id") : undefined))
     .filter((id): id is number => id !== undefined);
 }
 
@@ -123,10 +130,20 @@ function canChat(profile: Pick<Profile, "capabilities"> | null | undefined): boo
 }
 
 // The project's own model (`GET files/rooms/{id}/model`, readable by every
-// member), or `null` when none is selected or its profile was removed.
+// member), or `null` when none is selected or its profile was removed: the
+// `AiProjectModelDto` then carries no `profileId`, or a null one. Any other
+// answer (a list, a text, a `profileId` that is not text) is unknown, not
+// "no model of its own": the round would run on the portal's model instead.
 async function readProjectProfileId(projectId: string): Promise<string | null> {
-  const raw = await filesApiGet(`rooms/${encodeURIComponent(projectId)}/model`);
-  const profileId = isObject(raw) ? getString(raw, "profileId") : undefined;
+  const call = "GET files/rooms/{id}/model";
+  const model = objectOrNone(
+    await filesApiGet(`rooms/${encodeURIComponent(projectId)}/model`),
+    call,
+  );
+  const profileId = model?.["profileId"];
+  if (profileId !== undefined && profileId !== null && typeof profileId !== "string") {
+    throw new UpstreamShapeError(call);
+  }
   return profileId || null;
 }
 

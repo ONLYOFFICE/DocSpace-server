@@ -764,20 +764,19 @@ describe("the ONLYOFFICE provider", () => {
     );
   });
 
-  // A body over the 2 MB parse limit is not checked, so only such a body still reaches the splice.
+  // A chat body over the 2 MB parse limit is not parsed, so only such a body reaches the splice
+  // without being a JSON object. (An image body of that size is refused with 413.)
   it.each([
     ["a JSON array", (big: string) => `[{"prompt":"${big}"}]`],
     ["text before the object", (big: string) => `x{"prompt":"${big}"}`],
     ["no object at all", (big: string) => `"${big}"`],
-  ])("splices no metadata into an image body over 2 MB that is %s", async (_what, make) => {
+  ])("splices no metadata into a chat body over 2 MB that is %s", async (_what, make) => {
     const body = make("x".repeat(2 * MB));
     onlyoffice();
     useFolder(upstream, "17", "Contracts");
-    const calls = useProvider(`${GATEWAY}/images/generations`, () =>
-      HttpResponse.json(imageResult),
-    );
+    const calls = useProvider(`${GATEWAY}/chat/completions`, () => HttpResponse.json(completion));
 
-    await post(`${IMAGES}?entityId=17`, body);
+    await post(`${CHAT}?entityId=17`, body);
 
     expect(calls[0]?.body).toBe(body);
   });
@@ -915,6 +914,40 @@ describe("images/generations", () => {
       expect(calls).toEqual([]);
     },
   );
+
+  // The checks of the documented fields run on a parsed body only: padded over the parse limit,
+  // `n: -1` used to reach the provider unchecked.
+  it("answers 413 for a JSON body one byte over 2 MiB, and never calls the provider", async () => {
+    useProfile();
+    const calls = useProvider(`${PROVIDER}/images/generations`, () =>
+      HttpResponse.json(imageResult),
+    );
+    const head = '{"prompt":"x","n":-1,"pad":"';
+    const body = `${head}${"p".repeat(2 * 1024 * 1024 + 1 - head.length - 2)}"}`;
+    expect(Buffer.byteLength(body)).toBe(2 * 1024 * 1024 + 1);
+
+    const reply = await post(IMAGES, body);
+
+    expect(reply.status).toBe(413);
+    expect(json(reply)).toEqual(envelope("Request body too large", "invalid_request_error"));
+    expect(responseViolations("aiOpenaiImagesGenerations", 413, json(reply))).toEqual([]);
+    expect(calls).toEqual([]);
+  });
+
+  it("checks the fields of a JSON body of exactly 2 MiB", async () => {
+    useProfile();
+    const calls = useProvider(`${PROVIDER}/images/generations`, () =>
+      HttpResponse.json(imageResult),
+    );
+    const head = '{"prompt":"x","n":-1,"pad":"';
+    const body = `${head}${"p".repeat(2 * 1024 * 1024 - head.length - 2)}"}`;
+
+    const reply = await post(IMAGES, body);
+
+    expect(reply.status).toBe(400);
+    expect(json(reply)).toEqual(envelope("n must be a positive integer", "invalid_request_error"));
+    expect(calls).toEqual([]);
+  });
 
   it("does not check a body of another content type", async () => {
     useProfile();

@@ -153,11 +153,21 @@ export function allowPrivateBaseUrl(): boolean {
 
 // The largest image an attachment is inlined from, in bytes: `ai:maxImageSize`
 // of appsettings, the size the Files service lets a chat take an image up to.
+// The image is read whole and turned into one base64 string
+// (`fetchImageAsDataUrl` of attachmentsStorage.ts), four characters for three
+// bytes, and V8 makes no string of 2^29 characters or more: 256 MiB of image
+// is about 358 million characters, under that with room to spare, where the
+// 1 GiB allowed before failed with ERR_STRING_TOO_LONG after the bytes were
+// already in memory.
 const DEFAULT_MAX_IMAGE_SIZE = 20 * 1024 * 1024;
-const MAX_IMAGE_SIZE_LIMIT = 1024 * 1024 * 1024;
+const MAX_IMAGE_SIZE_LIMIT = 256 * 1024 * 1024;
 
 export function getMaxImageSize(): number {
-  return intWithin(nconf.get("ai:maxImageSize"), 1, MAX_IMAGE_SIZE_LIMIT) ?? DEFAULT_MAX_IMAGE_SIZE;
+  return (
+    intWithin("ai:maxImageSize", nconf.get("ai:maxImageSize"), 1, MAX_IMAGE_SIZE_LIMIT, {
+      used: DEFAULT_MAX_IMAGE_SIZE,
+    }) ?? DEFAULT_MAX_IMAGE_SIZE
+  );
 }
 
 // Hard ceiling for a single round-trip to the AI service, the Files API or an MCP server, so
@@ -169,20 +179,25 @@ const DEFAULT_UPSTREAM_TIMEOUT_MS = 300_000;
 /** `AI_CHAT_UPSTREAM_TIMEOUT_MS`: a second to an hour, in milliseconds. */
 export function getUpstreamTimeoutMs(): number {
   return (
-    intWithin(process.env["AI_CHAT_UPSTREAM_TIMEOUT_MS"], 1_000, 3_600_000) ??
-    DEFAULT_UPSTREAM_TIMEOUT_MS
+    envInt("AI_CHAT_UPSTREAM_TIMEOUT_MS", 1_000, 3_600_000, {
+      used: DEFAULT_UPSTREAM_TIMEOUT_MS,
+    }) ?? DEFAULT_UPSTREAM_TIMEOUT_MS
   );
 }
 
 // How often a streaming reply is saved while its round is in progress. The library's default
-// (150 ms) is tuned for a local adapter; here every write is an HTTP hop.
+// (150 ms) is tuned for a local adapter; here every write is an HTTP hop (a `PUT` of the
+// message to the AI service), so the shortest interval taken is a second: one write a second
+// for each round that streams.
 const DEFAULT_PERSIST_INTERVAL_MS = 10_000;
+const MIN_PERSIST_INTERVAL_MS = 1_000;
 
-/** `AI_CHAT_PERSIST_INTERVAL_MS`: 50 ms to ten minutes. */
+/** `AI_CHAT_PERSIST_INTERVAL_MS`: a second to ten minutes, in milliseconds. */
 export function getPersistIntervalMs(): number {
   return (
-    intWithin(process.env["AI_CHAT_PERSIST_INTERVAL_MS"], 50, 600_000) ??
-    DEFAULT_PERSIST_INTERVAL_MS
+    envInt("AI_CHAT_PERSIST_INTERVAL_MS", MIN_PERSIST_INTERVAL_MS, 600_000, {
+      used: DEFAULT_PERSIST_INTERVAL_MS,
+    }) ?? DEFAULT_PERSIST_INTERVAL_MS
   );
 }
 
@@ -226,8 +241,9 @@ const DEFAULT_METRIC_EXPORT_INTERVAL_MS = 15_000;
 /** `OTEL_METRIC_EXPORT_INTERVAL`: a second to an hour, in milliseconds. */
 export function getMetricExportIntervalMs(): number {
   return (
-    intWithin(process.env["OTEL_METRIC_EXPORT_INTERVAL"], 1_000, 3_600_000) ??
-    DEFAULT_METRIC_EXPORT_INTERVAL_MS
+    envInt("OTEL_METRIC_EXPORT_INTERVAL", 1_000, 3_600_000, {
+      used: DEFAULT_METRIC_EXPORT_INTERVAL_MS,
+    }) ?? DEFAULT_METRIC_EXPORT_INTERVAL_MS
   );
 }
 
@@ -310,16 +326,17 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
     return undefined;
   }
   const timeout =
+    envInt("AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS", 1, MAX_TASK_TIMEOUT_SECONDS) ??
     intWithin(
-      process.env["AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS"],
+      "ai:documentAgent:taskTimeoutSeconds",
+      setting?.taskTimeoutSeconds,
       1,
       MAX_TASK_TIMEOUT_SECONDS,
     ) ??
-    intWithin(setting?.taskTimeoutSeconds, 1, MAX_TASK_TIMEOUT_SECONDS) ??
     DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS;
   const maxToolCalls =
-    intWithin(process.env["AI__DOCUMENT_AGENT__MAX_TOOL_CALLS"], 1, MAX_TOOL_CALLS_LIMIT) ??
-    intWithin(setting?.maxToolCalls, 1, MAX_TOOL_CALLS_LIMIT);
+    envInt("AI__DOCUMENT_AGENT__MAX_TOOL_CALLS", 1, MAX_TOOL_CALLS_LIMIT) ??
+    intWithin("ai:documentAgent:maxToolCalls", setting?.maxToolCalls, 1, MAX_TOOL_CALLS_LIMIT);
   const share = process.env["AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS"];
   const shareSystemServers =
     share !== undefined && share !== ""
@@ -376,10 +393,69 @@ function numberOf(value: unknown): number {
   return typeof value === "string" && value.trim() !== "" ? Number(value) : NaN;
 }
 
-/** A whole number within `[min, max]`, given as a number or as its text; anything else is not a setting. */
-function intWithin(value: unknown, min: number, max: number): number | undefined {
+// The value a setting was last refused with, by the setting's name: most settings are read on
+// every request, and one line per refused value is enough. It holds one entry per setting this
+// file reads, whatever the portal, and a setting that reads well again is dropped from it.
+const refused = new Map<string, string>();
+const MAX_SHOWN_VALUE_LENGTH = 80;
+
+/** What a refused setting is replaced with, for the warning: a default of this file, or the next source. */
+interface Fallback {
+  used?: number;
+}
+
+/** Whether a setting is given at all: `undefined`, `null` and blank text are not a value. */
+function isGiven(value: unknown): boolean {
+  return value !== undefined && value !== null && !(typeof value === "string" && !value.trim());
+}
+
+/**
+ * Says once that a value that was given is not taken, so that an operator who set it finds out
+ * why the service behaves as if it were not set. The numbers and flags read here are no secrets.
+ */
+function refuse(name: string, value: unknown, expected: string, fallback: Fallback = {}): void {
+  // `String`, not `JSON.stringify`: that one throws for a value it cannot write, and a setting
+  // never stops the service.
+  const text = (typeof value === "object" ? "an object" : String(value)).slice(
+    0,
+    MAX_SHOWN_VALUE_LENGTH,
+  );
+  if (refused.get(name) === text) {
+    return;
+  }
+  refused.set(name, text);
+  const instead =
+    fallback.used !== undefined
+      ? `${fallback.used} is used`
+      : "the next source of the setting or its default is used";
+  console.warn(`config: ${name} is ${text}, not ${expected}: ignored, ${instead}`);
+}
+
+/**
+ * A whole number within `[min, max]`, given as a number or as its text; anything else is not a
+ * setting, and a value that was given and is not one is reported under `name` ({@link refuse}).
+ */
+function intWithin(
+  name: string,
+  value: unknown,
+  min: number,
+  max: number,
+  fallback?: Fallback,
+): number | undefined {
   const n = numberOf(value);
-  return Number.isInteger(n) && n >= min && n <= max ? n : undefined;
+  if (Number.isInteger(n) && n >= min && n <= max) {
+    refused.delete(name);
+    return n;
+  }
+  if (isGiven(value)) {
+    refuse(name, value, `a whole number from ${min} to ${max}`, fallback);
+  }
+  return undefined;
+}
+
+/** {@link intWithin} of the environment variable `name`. */
+function envInt(name: string, min: number, max: number, fallback?: Fallback): number | undefined {
+  return intWithin(name, process.env[name], min, max, fallback);
 }
 
 /** The library's `CompactionOptions`, as the host resolves them. */
@@ -401,15 +477,21 @@ export function getCompaction(): CompactionConfig {
   const ai: RootConfig["ai"] = nconf.get("ai");
   const setting: CompactionSetting | undefined =
     ai?.compaction && typeof ai.compaction === "object" ? ai.compaction : undefined;
-  const enabled = flag(process.env["AI__COMPACTION__ENABLED"]) ?? setting?.enabled !== false;
+  const enabled = envFlag("AI__COMPACTION__ENABLED") ?? setting?.enabled !== false;
   const threshold =
-    unitFraction(process.env["AI__COMPACTION__THRESHOLD"]) ?? unitFraction(setting?.threshold);
+    unitFraction("AI__COMPACTION__THRESHOLD", process.env["AI__COMPACTION__THRESHOLD"]) ??
+    unitFraction("ai:compaction:threshold", setting?.threshold);
   const keepRecent =
-    intWithin(process.env["AI__COMPACTION__KEEP_RECENT"], 0, MAX_KEEP_RECENT) ??
-    intWithin(setting?.keepRecent, 0, MAX_KEEP_RECENT);
+    envInt("AI__COMPACTION__KEEP_RECENT", 0, MAX_KEEP_RECENT) ??
+    intWithin("ai:compaction:keepRecent", setting?.keepRecent, 0, MAX_KEEP_RECENT);
   const defaultContextWindow =
-    intWithin(process.env["AI__COMPACTION__DEFAULT_CONTEXT_WINDOW"], 1, MAX_CONTEXT_WINDOW) ??
-    intWithin(setting?.defaultContextWindow, 1, MAX_CONTEXT_WINDOW);
+    envInt("AI__COMPACTION__DEFAULT_CONTEXT_WINDOW", 1, MAX_CONTEXT_WINDOW) ??
+    intWithin(
+      "ai:compaction:defaultContextWindow",
+      setting?.defaultContextWindow,
+      1,
+      MAX_CONTEXT_WINDOW,
+    );
   return {
     enabled,
     ...(threshold !== undefined ? { threshold } : {}),
@@ -418,18 +500,31 @@ export function getCompaction(): CompactionConfig {
   };
 }
 
-/** `true` / `1` or `false` / `0`, any case; anything else is not a setting. */
-function flag(value: string | undefined): boolean | undefined {
+/** The environment variable `name` as `true` / `1` or `false` / `0`, any case; anything else is not a setting and is reported. */
+function envFlag(name: string): boolean | undefined {
+  const value = process.env[name];
   const v = value?.trim().toLowerCase();
-  if (v === "true" || v === "1") return true;
-  if (v === "false" || v === "0") return false;
+  if (v === "true" || v === "1" || v === "false" || v === "0") {
+    refused.delete(name);
+    return v === "true" || v === "1";
+  }
+  if (isGiven(value)) {
+    refuse(name, value, "true, 1, false or 0");
+  }
   return undefined;
 }
 
-/** A number in (0, 1], from a number or a numeric string. */
-function unitFraction(value: unknown): number | undefined {
+/** A number in (0, 1], from a number or a numeric string; a value given that is not one is reported under `name`. */
+function unitFraction(name: string, value: unknown): number | undefined {
   const n = numberOf(value);
-  return Number.isFinite(n) && n > 0 && n <= 1 ? n : undefined;
+  if (Number.isFinite(n) && n > 0 && n <= 1) {
+    refused.delete(name);
+    return n;
+  }
+  if (isGiven(value)) {
+    refuse(name, value, "a number above 0 and up to 1");
+  }
+  return undefined;
 }
 
 // Group key for the form-analysis sub-agent's single delegating tool

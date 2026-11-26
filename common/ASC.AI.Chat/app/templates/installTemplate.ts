@@ -42,7 +42,10 @@
  * already holds. A step that fails before the first room fails the install
  * as it is; one that fails after it throws `TemplateInstallIncompleteError`,
  * which carries the step's error and the rooms already made, so that the
- * answer can name them (they stay in the portal). The agent's model is the
+ * answer can name them (they stay in the portal). The creation of a room that
+ * is not refused with a 4xx and still names no room - a timeout, a dropped
+ * connection, a 5xx, a 2xx without an id - throws it as well, for the first
+ * room too, with that room as `unconfirmed`: it may exist. The agent's model is the
  * exception: a portal that has no chat model, or does not store it, still
  * gets the agent, and the answer says so in `warnings`. A template that
  * holds a knowledge base is refused with 409 before the first room on a
@@ -95,11 +98,25 @@ export interface InstalledRooms {
   knowledgeBases: InstalledRoom[];
   /** The agent's room, once it is made. */
   agent?: InstalledRoom;
+  /**
+   * The room whose creation got an answer that does not say whether it was made
+   * ({@link roomWasRefused}): it may exist in the portal under this title, and its id is unknown.
+   */
+  unconfirmed?: UnconfirmedRoom;
+}
+
+export interface UnconfirmedRoom {
+  /** The template the room was asked for. */
+  templateId: string;
+  /** The title the room was asked with. */
+  title: string;
 }
 
 /**
- * A step of an installation failed after its first room was made. `cause` is the step's own
- * error, which decides the status of the answer; `made` lists the rooms that exist.
+ * A step of an installation failed after its first room was made, or the creation of a room -
+ * the first one included - got an answer that leaves it unknown. `cause` is the step's own
+ * error, which decides the status of the answer; `made` lists the rooms that exist and the one
+ * that may.
  */
 export class TemplateInstallIncompleteError extends Error {
   constructor(
@@ -111,39 +128,67 @@ export class TemplateInstallIncompleteError extends Error {
   }
 }
 
-/** Whether the installation has made any room yet. */
+/** Whether the installation has made any room yet, or may have. */
 function madeAny(made: InstalledRooms): boolean {
-  return made.skillSets.length + made.knowledgeBases.length > 0 || made.agent !== undefined;
+  return (
+    made.skillSets.length + made.knowledgeBases.length > 0 ||
+    made.agent !== undefined ||
+    made.unconfirmed !== undefined
+  );
 }
 
+/**
+ * Whether a failed `POST files/rooms` says that no room was made: the Files service refused it
+ * with a 4xx. A timeout, a dropped connection, a 5xx and a 2xx that names no room are unknown:
+ * the room may exist (ts-ai-failure-paths.md §1, §6).
+ */
+function roomWasRefused(err: unknown): boolean {
+  return err instanceof DocspaceApiHttpError && err.status >= 400 && err.status < 500;
+}
+
+/**
+ * Makes the room of a template. A failure that leaves the room unknown is noted in `made`
+ * before it is thrown, so that the answer says a room may exist that it cannot name.
+ */
 async function createRoom(
   template: Template,
   roomType: number,
+  made: InstalledRooms,
   tags: string[] = [],
 ): Promise<InstalledRoom> {
   const { id: templateId, name: title, color, cover } = template;
-  const room = await filesApiSend("POST", "rooms", {
-    title,
-    roomType,
-    // The room is drawn as the catalog draws its template.
-    ...(color ? { color } : {}),
-    ...(cover ? { cover } : {}),
-    ...(tags.length > 0 ? { tags } : {}),
-  });
-  if (!isObject(room)) {
-    throw new UpstreamShapeError("POST files/rooms");
+  try {
+    const room = await filesApiSend("POST", "rooms", {
+      title,
+      roomType,
+      // The room is drawn as the catalog draws its template.
+      ...(color ? { color } : {}),
+      ...(cover ? { cover } : {}),
+      ...(tags.length > 0 ? { tags } : {}),
+    });
+    if (!isObject(room)) {
+      throw new UpstreamShapeError("POST files/rooms");
+    }
+    const id = mapped(getEntityId(room, "id"), "POST files/rooms");
+    return { templateId, id, title: getString(room, "title") ?? title };
+  } catch (err) {
+    if (!roomWasRefused(err)) {
+      logger.warn(
+        `installTemplate: ${templateId}: the room "${title}" may exist, its creation got no usable answer`,
+      );
+      made.unconfirmed = { templateId, title };
+    }
+    throw err;
   }
-  const id = mapped(getEntityId(room, "id"), "POST files/rooms");
-  return { templateId, id, title: getString(room, "title") ?? title };
 }
 
 /** Makes the room of a skill set or a knowledge base, adds it to `made` and fills it. */
 async function installSource(
   template: SourceTemplate,
-  made: InstalledRoom[],
+  made: InstalledRooms,
 ): Promise<InstalledRoom> {
-  const room = await createRoom(template, ROOM_TYPES[template.kind]);
-  made.push(room);
+  const room = await createRoom(template, ROOM_TYPES[template.kind], made);
+  (template.kind === "skillSet" ? made.skillSets : made.knowledgeBases).push(room);
   for (const file of template.files) {
     await uploadFile(room.id, file, await readTemplateFile(template, file), mediaTypeOf(file));
   }
@@ -172,12 +217,12 @@ async function installAgent(
   let agent: InstalledRoom;
   try {
     for (const source of skillTemplates) {
-      await installSource(source, made.skillSets);
+      await installSource(source, made);
     }
     for (const source of knowledgeTemplates) {
-      await installSource(source, made.knowledgeBases);
+      await installSource(source, made);
     }
-    agent = await createRoom(template, ROOM_TYPES.agent, [template.category]);
+    agent = await createRoom(template, ROOM_TYPES.agent, made, [template.category]);
     made.agent = agent;
     const roomIds = [...made.skillSets, ...made.knowledgeBases].map((room) => Number(room.id));
     if (roomIds.length > 0) {
@@ -270,10 +315,7 @@ export async function installTemplate(
   }
   const made: InstalledRooms = { skillSets: [], knowledgeBases: [] };
   try {
-    const room = await installSource(
-      template,
-      template.kind === "skillSet" ? made.skillSets : made.knowledgeBases,
-    );
+    const room = await installSource(template, made);
     return { ...room, kind: template.kind, skillSets: [], knowledgeBases: [], warnings: [] };
   } catch (err) {
     if (!madeAny(made)) {

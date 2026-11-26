@@ -47,18 +47,19 @@ import {
   DOCUMENT_AGENT_SETTINGS_PATH,
   documentAgentSettingsSchema,
 } from "../storage/documentAgentSettingsStorage.js";
-import { getObject, isObject } from "../narrow.js";
-import { UpstreamShapeError } from "../storage/upstreamShape.js";
+import { getObject } from "../narrow.js";
+import { envelopeAnswer, UpstreamShapeError } from "../storage/upstreamShape.js";
 
 // Both actions of the AI service (DocumentAgentController.cs) answer a
 // `DocumentAgentSettingsDto` in the portal API's envelope. An answer that is
 // not that envelope (a 204, a text body, an object without `response`) is
 // unknown: answered 502 and never relayed as a 200 (ts-ai-failure-paths.md §1).
 function settingsEnvelope(value: unknown, call: string): Record<string, unknown> {
-  if (!isObject(value) || getObject(value, "response") === undefined) {
+  const envelope = envelopeAnswer(value, call);
+  if (getObject(envelope, "response") === undefined) {
     throw new UpstreamShapeError(call);
   }
-  return value;
+  return envelope;
 }
 
 export const documentAgentController = {

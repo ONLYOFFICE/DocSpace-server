@@ -86,6 +86,22 @@ describe("vectorizationController.startTask", () => {
     expect(reply.body).toEqual({ ...envelope, response: null });
   });
 
+  it.each([
+    ["a page of a proxy", () => HttpResponse.text("<html>proxy</html>")],
+    ["an empty object", () => HttpResponse.json({})],
+    ["an error sent with 200", () => HttpResponse.json({ error: "proxy detail" })],
+    ["a list", () => HttpResponse.json([envelope])],
+  ])("answers 502 when the AI service answers %s, not the envelope", async (_what, answer) => {
+    upstream.use(http.post(TASKS, answer));
+
+    const reply = await startTask({ files: [1] });
+
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
+    expect(JSON.stringify(reply.body)).not.toContain("proxy");
+    expect(responseViolations("aiVectorizationStartTask", 502, reply.body)).toEqual([]);
+  });
+
   // HANDLED DOWNSTREAM passthrough-15: the body is not checked here (`req.body ?? {}` is forwarded whatever it is). In production the AI service binds `files` as a set of integers and refuses anything else, an empty list included, with 400 (VectorizationStartRequestDto, VectorizationTaskPublisher); it shows only with the engine or the service stubbed.
   it.each([
     ["a string", "files"],
@@ -127,20 +143,19 @@ describe("vectorizationController.startTask", () => {
     expect(responseViolations("aiVectorizationStartTask", status, reply.body)).toEqual([]);
   });
 
-  // HANDLED DOWNSTREAM passthrough-17: an AI service that answers 204 or a body that is not JSON is relayed as 200 with `null` or a JSON string, which does not match the published envelope. In production the C# action answers through the response wrapper: always 200 with the envelope, never 204 or text; it shows only with the engine or the service stubbed.
+  // The C# action answers through the response wrapper: always 200 with the envelope. A 204 or
+  // a text body came from something else and is not relayed as a 200.
   it.each([
-    ["204 without a body", () => new HttpResponse(null, { status: 204 }), null],
-    ["a text body", () => new HttpResponse("ok", { status: 200 }), "ok"],
-  ])("relays an answer of %s as 200", async (_what, answer, body) => {
+    ["204 without a body", () => new HttpResponse(null, { status: 204 })],
+    ["a text body", () => new HttpResponse("ok", { status: 200 })],
+  ])("answers 502 for an answer of %s", async (_what, answer) => {
     upstream.use(http.post(TASKS, answer));
 
     const reply = await startTask({ files: [1] });
 
-    expect(reply.status).toBe(200);
-    expect(reply.body).toEqual(body);
-    expect(responseViolations("aiVectorizationStartTask", 200, reply.body)).toEqual([
-      "/ must be object",
-    ]);
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
+    expect(responseViolations("aiVectorizationStartTask", 502, reply.body)).toEqual([]);
   });
 });
 

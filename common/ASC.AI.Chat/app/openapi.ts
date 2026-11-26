@@ -374,13 +374,13 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiTemplatesList:
     "Returns the templates shipped with the service, in three lists: `agents`, `skillSets` and `knowledgeBases`. Every template has an `id` (its path in the catalog), a `name`, a `description` and a `category`, and may have the look of the room it becomes: a `color` (six hexadecimal digits) and a `cover` (the id of a built-in room cover from `GET api/2.0/files/rooms/covers`). A skill set and a knowledge base list the names of their `files`; an agent carries its `instructions` and, in `skills` and `knowledges`, the ids of the skill set and knowledge base templates it is linked to, each of which is a template of its own in the other two lists. The catalog is the same for every portal and every caller. This is a read-only operation.",
   aiTemplatesInstall:
-    "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step that fails before the first room is made answers its status with the plain `{ error }`. A step that fails after it - a room, a file upload or the link to the sources refused by the Files service, a timeout or a dropped connection - answers the same status (500 when the step got no answer) with a body that names what exists: `skillSets` and `knowledgeBases` list the rooms already made, in the shape the success answer uses, `agent` is the agent's room when it was made, and `warning` is `installIncomplete`. Those rooms stay in the portal; nothing is undone. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
+    "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step that fails before the first room is made answers its status with the plain `{ error }`. A step that fails after it - a room, a file upload or the link to the sources refused by the Files service, a timeout or a dropped connection - answers the same status (500 when the step got no answer) with a body that names what exists: `skillSets` and `knowledgeBases` list the rooms already made, in the shape the success answer uses, `agent` is the agent's room when it was made, and `warning` is `installIncomplete`. Those rooms stay in the portal; nothing is undone. The creation of a room that the Files service does not refuse with a 4xx and that still names no room - a timeout, a dropped connection, a 5xx, a 2xx without the room's id - answers that body as well, for the first room too: `unconfirmed` carries the template and the title of the room, which may exist in the portal. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
 
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
     "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - the server log names its status, not its body, and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
   aiOpenaiImagesGenerations:
-    "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - a body sent as JSON has to be a JSON object, `prompt` a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with only its status named in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
+    "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - a body sent as JSON has to be a JSON object, `prompt` a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with only its status named in the server log. A body larger than this route accepts is refused before it is forwarded, and so is a body sent as JSON that is larger than 2 MB: the documented fields of such a body are not checked, so it is not relayed either. A client disconnect aborts the provider call.",
 
   // Preferences - per-scope extended-thinking settings. One value is stored
   // per scope (the depth); deep mode is its on/off view.
@@ -821,7 +821,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "413":
       "The request body is larger than 100 KB, the JSON parser's limit (plain text), or the Files service refused a template file as too large; then `warning` is `installIncomplete` and the body names the rooms made.",
     "500":
-      "Unhandled failure, logged server-side and never echoed back. A step after the first room that got no answer (a timeout, a dropped connection) or failed with 500 answers it too, with `warning: installIncomplete` and the rooms made.",
+      "Unhandled failure, logged server-side and never echoed back. A step after the first room that got no answer (a timeout, a dropped connection) or failed with 500 answers it too, with `warning: installIncomplete` and the rooms made; so does the creation of a room, the first included, that got no answer or a 500, with that room as `unconfirmed`.",
+    "502":
+      "A DocSpace service answered with a body this service cannot read. When it was the answer to the creation of a room, `warning` is `installIncomplete` and `unconfirmed` names the room, which may exist in the portal.",
   },
   aiSkillsGenerate: {
     "400":
@@ -876,7 +878,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "500":
       "The profile could not be read (a timeout, a dropped connection) or another failure occurred; the detail is in the server log.",
     "404": "No profile with this identifier exists for the caller.",
-    "413": "The request body is larger than this route accepts.",
+    "413":
+      "The request body is larger than this route accepts: 100 MB, 28 MB for the ONLYOFFICE provider, and 2 MB for a body sent as JSON, which carries a prompt and its options only.",
     "429": true,
     "502":
       "The provider, or the hop in front of it, failed or answered a 5xx; the failure, or the status of that answer without its body, is in the server log.",
@@ -935,7 +938,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "502": true,
   },
   aiProfilesListModels: {
-    "400": "`profileId` is missing, or the provider rejected the profile's API key.",
+    "400":
+      "`profileId` is missing, the provider rejected the profile's API key, or the stored key holds characters that cannot be sent in an HTTP header.",
     "404": "No profile with this identifier exists for the caller.",
     "502": true,
   },
@@ -2113,9 +2117,10 @@ const INSTALLED_ROOM_SCHEMA: Json = {
   additionalProperties: false,
 };
 
-// A template install whose step failed after the first room was made keeps that step's status
-// and names the rooms that exist (`templatesController.install`); a failure before the first
-// room answers the plain `AiErrorResponse`.
+// A template install whose step failed after the first room was made, or whose creation of a
+// room (the first included) got an answer that leaves the room unknown, keeps that step's status
+// and names the rooms that exist and the one that may (`templatesController.install`); a
+// failure before that answers the plain `AiErrorResponse`.
 const TEMPLATE_INSTALL_INCOMPLETE_SCHEMA: Json = {
   type: "object",
   properties: {
@@ -2138,9 +2143,21 @@ const TEMPLATE_INSTALL_INCOMPLETE_SCHEMA: Json = {
       ...INSTALLED_ROOM_SCHEMA,
       description: "The agent's room, present when it was made and linking it to its rooms failed.",
     },
+    unconfirmed: {
+      type: "object",
+      description:
+        "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+      properties: {
+        templateId: { type: "string", description: "The template the room was asked for." },
+        title: { type: "string", description: "The title the room was asked with." },
+      },
+      required: ["templateId", "title"],
+      additionalProperties: false,
+    },
     warning: {
       type: "string",
-      description: "`installIncomplete`: the rooms listed exist and were not undone.",
+      description:
+        "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
       enum: ["installIncomplete"],
     },
   },

@@ -25,8 +25,9 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
   comment why unknown is safe to read as absent there.
 - A 200 whose body the mapper cannot read is unknown too: a single-entity read passes its result
   through `mapped(value, call)`, a read where nothing stored is a legal answer through
-  `objectOrNone(raw, call)` (an object or `null`), a list read through `listAnswer(raw, call)`, and a body that has to
-  be JSON is read with `jsonAnswer(res, call)` (`storage/upstreamShape.ts`). They throw
+  `objectOrNone(raw, call)` (an object or `null`), a list read through `listAnswer(raw, call)`, a body that has to
+  be JSON is read with `jsonAnswer(res, call)`, and an answer relayed with its envelope (`raw: true`)
+  through `envelopeAnswer(raw, call)` (`storage/upstreamShape.ts`). They throw
   `UpstreamShapeError`, which the error boundary answers
   as `502 { error: "Bad Gateway" }` and logs with the name of the call. Dropping one malformed
   element of a list is fine; reading the whole answer as "none" is not.
@@ -126,6 +127,11 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
   was made or answers with the ids of what exists and a warning. It never answers a bare error that
   leaves rooms or files the caller cannot find.
 - A file that cannot be put in its new place stays attached where it is.
+- A step that creates something and gets an unknown answer (§1: a timeout, a dropped connection, a
+  5xx, a 2xx that cannot be read) may have created it. Nothing is deleted on such an answer, and
+  the answer says that the object may exist: only a refusal (a 4xx) says it does not. A template
+  install names such a room as `unconfirmed`; a generated image whose attachment record got an
+  unknown answer is kept (`recordWasRefused` in `attachmentsStorage.ts`).
 - Seen in review: installing a template left an agent's Instructions rooms behind when the Files
   service refused the Knowledge room (c373d83b5e); a model write that timed out failed the whole
   installation instead of being one of its warnings (9a9cf905cc).

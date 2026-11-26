@@ -227,6 +227,49 @@ describe("the rooms listings", () => {
     ]);
   });
 
+  // A portal with a thousand Instructions rooms: 9 more pages and 50 catalog reads, which went
+  // out all at once with the caller's session. Each answer waits a turn of the event loop, so
+  // every request the code starts together is in flight at the same time.
+  it("keeps at most 4 requests to the Files API in flight for a listing of a thousand rooms", async () => {
+    let inFlight = 0;
+    let most = 0;
+    const answered = async (answer: () => Response): Promise<Response> => {
+      most = Math.max(most, ++inFlight);
+      await new Promise((resolve) => setImmediate(resolve));
+      inFlight--;
+      return answer();
+    };
+    upstream.use(
+      http.get("*/api/2.0/files/rooms", ({ request }) => {
+        const start = Number(new URL(request.url).searchParams.get("startIndex"));
+        return answered(() =>
+          page(
+            Array.from({ length: 100 }, (_, i) => ({ id: start + i + 1, title: `Room ${i}` })),
+            1000,
+          ),
+        );
+      }),
+      http.get("*/api/2.0/files/rooms/skills", ({ request }) => {
+        const ids = new URL(request.url).searchParams.getAll("roomIds");
+        return answered(() =>
+          envelope({
+            rooms: ids.map((id) => ({ id: Number(id), skills: [{ id: "s", name: "n" }] })),
+          }),
+        );
+      }),
+    );
+
+    const folders = await getContextFolders();
+
+    expect(folders[0]?.rooms).toHaveLength(1000);
+    expect(folders[0]?.rooms.slice(0, 2)).toEqual([
+      { id: "1", name: "Room 0" },
+      { id: "2", name: "Room 1" },
+    ]);
+    expect(upstream.seen).toHaveLength(10 + 50);
+    expect(most).toBe(4);
+  });
+
   it("offers nothing and reads no catalog when there is no Instructions room", async () => {
     upstream.use(http.get("*/api/2.0/files/rooms", () => page([], 0)));
     await expect(getContextFolders()).resolves.toEqual([]);

@@ -147,19 +147,29 @@ it.each([
   ["getToolMode", "aiSettingsGetToolMode", "get", "/internal/ai/config/tool-mode", undefined],
   ["setToolMode", "aiSettingsSetToolMode", "put", "/internal/ai/config/tool-mode", { mode: 1 }],
 ] as const)(
-  "%s answers 502 when the AI service answers a body that is not a JSON object",
+  "%s answers 502 when the AI service answers a body that is not the envelope",
   async (method, operationId, verb, path, body) => {
-    upstream.use(http[verb](`*${path}`, () => HttpResponse.text("<html>proxy</html>")));
+    // A page of a proxy, an empty object, an error sent with 200, a list: none carries
+    // `response`, and relayed as a 200 an empty object reads as "AI is not set up".
+    const answers = [
+      () => HttpResponse.text("<html>proxy</html>"),
+      () => HttpResponse.json({}),
+      () => HttpResponse.json({ error: "proxy detail" }),
+      () => HttpResponse.json([{ response: {} }]),
+    ];
+    for (const answer of answers) {
+      upstream.use(http[verb](`*${path}`, answer));
 
-    const reply = await invoke(settingsController[method], {
-      method: verb === "get" ? "GET" : "PUT",
-      body,
-    });
+      const reply = await invoke(settingsController[method], {
+        method: verb === "get" ? "GET" : "PUT",
+        body,
+      });
 
-    expect(reply.status).toBe(502);
-    expect(reply.body).toEqual({ error: "Bad Gateway" });
-    expect(JSON.stringify(reply.body)).not.toContain("proxy");
-    expect(published(operationId, reply)).toEqual([]);
+      expect(reply.status).toBe(502);
+      expect(reply.body).toEqual({ error: "Bad Gateway" });
+      expect(JSON.stringify(reply.body)).not.toContain("proxy");
+      expect(published(operationId, reply)).toEqual([]);
+    }
   },
 );
 

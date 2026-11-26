@@ -199,9 +199,7 @@ describe("readAiProjectChatContext", () => {
   );
 
   it.each([
-    ["no lists", {}, [], []],
-    ["null lists", { instructionsRooms: null, knowledgeRooms: null }, [], []],
-    ["lists that are not lists", { instructionsRooms: { id: 7 }, knowledgeRooms: "9" }, [], []],
+    ["empty lists", { instructionsRooms: [], knowledgeRooms: [] }, [], []],
     [
       "rooms without a numeric id",
       {
@@ -211,7 +209,6 @@ describe("readAiProjectChatContext", () => {
       [8],
       [9.5],
     ],
-    ["an answer that is not an object", null, [], []],
   ])("reads sources with %s", async (_name, sources, instructions, knowledge) => {
     project();
     upstream.use(http.get("*/api/2.0/files/rooms/42/sources", () => files(sources)));
@@ -219,6 +216,23 @@ describe("readAiProjectChatContext", () => {
       instructionsRoomIds: instructions,
       knowledgeRoomIds: knowledge,
     });
+  });
+
+  // `AiProjectSourcesDto` declares both lists as required: an answer without one is not a
+  // project that links no room, and the round must not run without its rooms on that.
+  it.each([
+    ["no lists", {}],
+    ["one list only", { instructionsRooms: [{ id: 8 }] }],
+    ["null lists", { instructionsRooms: null, knowledgeRooms: null }],
+    ["lists that are not lists", { instructionsRooms: { id: 7 }, knowledgeRooms: "9" }],
+    ["an answer that is not an object", null],
+    ["a list", [{ id: 8 }]],
+  ])("rejects sources with %s as an answer of an unknown shape", async (_name, sources) => {
+    project();
+    upstream.use(http.get("*/api/2.0/files/rooms/42/sources", () => files(sources)));
+    await expect(readAiProjectChatContext("42")).rejects.toEqual(
+      new UpstreamShapeError("GET files/rooms/{id}/sources"),
+    );
   });
 
   it("runs on the project's own model ahead of the portal's", async () => {
@@ -232,17 +246,31 @@ describe("readAiProjectChatContext", () => {
     expect(upstream.seen.map((r) => r.path)).toContain("/internal/ai/profiles/own");
   });
 
+  // `AiProjectModelDto.ProfileId` is a nullable Guid: absent or null when no model is selected.
   it.each([
     ["an empty profileId", { profileId: "" }],
-    ["a numeric profileId", { profileId: 5 }],
+    ["a null profileId", { profileId: null }],
     ["no profileId", {}],
-    ["an answer that is not an object", null],
+    ["a null answer", null],
   ])("reads a model with %s as none of its own", async (_name, model) => {
     project({ model });
     await expect(readAiProjectChatContext("42")).resolves.toMatchObject({
       profileId: null,
       effectiveProfileId: PROFILE,
     });
+  });
+
+  // Read as "no model of its own", the round would run on the portal's model instead.
+  it.each([
+    ["a numeric profileId", { profileId: 5 }],
+    ["a profileId that is an object", { profileId: { id: "own" } }],
+    ["a list", [{ profileId: "own" }]],
+    ["a text", "own"],
+  ])("rejects a model with %s as an answer of an unknown shape", async (_name, model) => {
+    project({ model });
+    await expect(readAiProjectChatContext("42")).rejects.toEqual(
+      new UpstreamShapeError("GET files/rooms/{id}/model"),
+    );
   });
 
   it.each([

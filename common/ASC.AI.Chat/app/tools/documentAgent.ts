@@ -94,7 +94,7 @@ import {
   MAX_FILE_BYTES,
 } from "./documentAgentFiles.js";
 import { fileEditorUrl } from "./httpToolsAdapter.js";
-import { runDocumentTask, DocumentAgentError } from "./documentAgentClient.js";
+import { runDocumentTask, DocumentAgentError, failureText } from "./documentAgentClient.js";
 import type { DocumentAgentSettings, DocumentTaskOutput } from "./documentAgentClient.js";
 import { getArray, getString, isObject } from "../narrow.js";
 import { aiServiceBaseUrl } from "../storage/httpClient.js";
@@ -207,7 +207,12 @@ export const documentAgentTools: ToolsAdapter = {
     } catch (err) {
       // Contract: a failure is a result, never a throw — a throw aborts the chat stream.
       const message = err instanceof Error ? err.message : String(err);
-      logger.warn(`${DOCUMENT_AGENT_TOOL_NAME} failed: ${message}`);
+      // A DocumentAgentError was logged with its cause where it was made.
+      logger.warn(
+        `${DOCUMENT_AGENT_TOOL_NAME} failed: ${
+          err instanceof DocumentAgentError ? message : failureText(err)
+        }`,
+      );
       // The message of a Files API error names the internal address it was read from: the
       // model, its provider and the stored history get the status only.
       if (err instanceof DocspaceApiHttpError) {

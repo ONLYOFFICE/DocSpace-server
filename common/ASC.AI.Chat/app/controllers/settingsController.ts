@@ -32,34 +32,25 @@
 
 import { aiService } from "../storage/httpClient.js";
 import { isObject } from "../narrow.js";
-import { UpstreamShapeError } from "../storage/upstreamShape.js";
+import { envelopeAnswer } from "../storage/upstreamShape.js";
 import { asyncHandler } from "./_helpers.js";
-
-// The routes relay the AI service's `{ response, ... }` envelope. An answer that is not a JSON
-// object (an HTML page of a proxy in front of the service, a text body) is not that envelope:
-// it is unknown, answered 502, and never relayed as a 200 (ts-ai-failure-paths.md §1).
-function envelopeOf(value: unknown, call: string): Record<string, unknown> {
-  if (!isObject(value)) {
-    throw new UpstreamShapeError(call);
-  }
-  return value;
-}
 
 // Thin proxy for the .NET AI settings endpoints (SettingsController,
 // `internal/ai/config/*`). The body/response are forwarded as-is; `raw: true`
 // keeps the DocSpace `{ response, status, ... }` envelope so the client sees
-// the same shape it did when these were served directly from .NET.
+// the same shape it did when these were served directly from .NET. An answer
+// that is not that envelope is answered 502 (`envelopeAnswer`).
 export const settingsController = {
   // GET config → `GET internal/ai/config`. Reports the combined AI
   // configuration/readiness for the portal.
   getAiSettings: asyncHandler(async (_req, res) => {
-    const settings = envelopeOf(await aiService.get("/config", { raw: true }), "GET config");
+    const settings = envelopeAnswer(await aiService.get("/config", { raw: true }), "GET config");
     res.json(settings);
   }),
 
   // GET config/vectorization → `GET internal/ai/config/vectorization`.
   getVectorizationSettings: asyncHandler(async (_req, res) => {
-    const settings = envelopeOf(
+    const settings = envelopeAnswer(
       await aiService.get("/config/vectorization", { raw: true }),
       "GET config/vectorization",
     );
@@ -68,7 +59,7 @@ export const settingsController = {
 
   // PUT config/vectorization → `PUT internal/ai/config/vectorization`.
   setVectorizationSettings: asyncHandler(async (req, res) => {
-    const settings = envelopeOf(
+    const settings = envelopeAnswer(
       await aiService.put("/config/vectorization", req.body ?? {}, { raw: true }),
       "PUT config/vectorization",
     );
@@ -77,7 +68,7 @@ export const settingsController = {
 
   // GET config/user → `GET internal/ai/config/user`.
   getUserSettings: asyncHandler(async (_req, res) => {
-    const settings = envelopeOf(
+    const settings = envelopeAnswer(
       await aiService.get("/config/user", { raw: true }),
       "GET config/user",
     );
@@ -97,7 +88,7 @@ export const settingsController = {
       });
       return;
     }
-    const settings = envelopeOf(
+    const settings = envelopeAnswer(
       await aiService.put("/config/user", body, { raw: true }),
       "PUT config/user",
     );
@@ -108,7 +99,7 @@ export const settingsController = {
   // user's tool permission mode as the AI service spells it (`{ mode }`, the
   // C# enum). The chat itself reads it through the preferences routes.
   getToolMode: asyncHandler(async (_req, res) => {
-    const settings = envelopeOf(
+    const settings = envelopeAnswer(
       await aiService.get("/config/tool-mode", { raw: true }),
       "GET config/tool-mode",
     );
@@ -117,7 +108,7 @@ export const settingsController = {
 
   // PUT config/tool-mode → `PUT internal/ai/config/tool-mode`.
   setToolMode: asyncHandler(async (req, res) => {
-    const settings = envelopeOf(
+    const settings = envelopeAnswer(
       await aiService.put("/config/tool-mode", req.body ?? {}, { raw: true }),
       "PUT config/tool-mode",
     );

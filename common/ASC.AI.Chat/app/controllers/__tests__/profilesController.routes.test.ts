@@ -45,10 +45,14 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ProfilesEngine: engineClass(engine),
 }));
 const readByIdRaw = vi.fn<(id: string) => Promise<unknown>>();
+const readById = vi.fn<(id: string) => Promise<unknown>>();
 const readAllForClient = vi.fn<() => Promise<unknown>>();
 const readDisabled = vi.fn<(entityId?: string) => Promise<unknown>>();
 vi.mock("../../storage/index.js", () => ({
-  storage: { profiles: { readByIdRaw, readAllForClient }, toolPrefs: { readDisabled } },
+  storage: {
+    profiles: { readByIdRaw, readById, readAllForClient },
+    toolPrefs: { readDisabled },
+  },
 }));
 const listOnlyofficeGatewayModels = vi.fn<() => Promise<unknown>>();
 vi.mock("../../storage/profilesStorage.js", () => ({ listOnlyofficeGatewayModels }));
@@ -100,7 +104,13 @@ const model = { id: "gpt-4o", name: "GPT-4o", provider: "openai" as const, capab
 
 beforeEach(() => {
   mockReset(engine);
-  for (const spy of [readByIdRaw, readAllForClient, readDisabled, listOnlyofficeGatewayModels]) {
+  for (const spy of [
+    readByIdRaw,
+    readById,
+    readAllForClient,
+    readDisabled,
+    listOnlyofficeGatewayModels,
+  ]) {
     spy.mockReset();
   }
   lookup.mockReset().mockResolvedValue([{ address: "104.18.7.192", family: 4 }]);
@@ -766,6 +776,7 @@ describe("profilesController.listModels", () => {
     ["a thrown string", "weird", 502, "Failed to list provider models"],
   ])("maps %s like the provider listing", async (_what, failure, status, error) => {
     readByIdRaw.mockResolvedValue(stored);
+    readById.mockResolvedValue({ ...stored, key: "sk-plain" });
     engine.listModels.mockRejectedValue(failure);
 
     const reply = await invoke(profilesController.listModels, { method: "GET", query });
@@ -776,6 +787,73 @@ describe("profilesController.listModels", () => {
       expect.stringContaining(`listModels failed (profileId=${stored.id}) -> ${status}: `),
     );
     expect(published("aiProfilesListModels", reply)).toEqual([]);
+  });
+});
+
+describe("profilesController.listModels with a stored key no header can carry (Bug 84428)", () => {
+  const query = { profileId: stored.id };
+  // What fetch throws for such a key: no status, no class of its own.
+  const headerFailure = () => new TypeError("Cannot convert argument to a ByteString");
+
+  it("answers 400 naming the key, not a 502 of the provider, and keeps the key out of the answer and the log", async () => {
+    readByIdRaw.mockResolvedValue(stored);
+    readById.mockResolvedValue({ ...stored, key: "sk-ключ-MARKER" });
+    engine.listModels.mockRejectedValue(headerFailure());
+
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
+
+    expect(reply.status).toBe(400);
+    expect(reply.body).toEqual({
+      error: "the API key contains characters that cannot be sent in an HTTP header",
+    });
+    expect(readById).toHaveBeenCalledExactlyOnceWith(stored.id);
+    expect(JSON.stringify([reply.body, vi.mocked(logger.warn).mock.calls])).not.toContain("MARKER");
+    expect(published("aiProfilesListModels", reply)).toEqual([]);
+  });
+
+  it.each([
+    ["a key a header can carry", { key: "sk-plain" }],
+    ["no key", {}],
+  ])("keeps the 502 for the same failure with %s", async (_what, change) => {
+    readByIdRaw.mockResolvedValue(stored);
+    readById.mockResolvedValue({ ...stored, ...change });
+    engine.listModels.mockRejectedValue(headerFailure());
+
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
+
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Failed to list provider models" });
+  });
+
+  it("keeps the 502 when the profile is gone by the time its key is read", async () => {
+    readByIdRaw.mockResolvedValue(stored);
+    readById.mockResolvedValue(undefined);
+    engine.listModels.mockRejectedValue(headerFailure());
+
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
+
+    expect(reply.status).toBe(502);
+  });
+
+  it("does not read the key again when the provider answered with a status", async () => {
+    readByIdRaw.mockResolvedValue(stored);
+    engine.listModels.mockRejectedValue(Object.assign(new Error("401"), { status: 401 }));
+
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
+
+    expect(reply.status).toBe(400);
+    expect(readById).not.toHaveBeenCalled();
+  });
+
+  it("relays the AI service's status when the read of the key fails", async () => {
+    readByIdRaw.mockResolvedValue(stored);
+    readById.mockRejectedValue(new AiServiceHttpError(503, "Service Unavailable", "x", "u"));
+    engine.listModels.mockRejectedValue(headerFailure());
+
+    const reply = await invoke(profilesController.listModels, { method: "GET", query });
+
+    expect(reply.status).toBe(503);
+    expect(reply.body).toEqual({ error: "Service Unavailable" });
   });
 });
 

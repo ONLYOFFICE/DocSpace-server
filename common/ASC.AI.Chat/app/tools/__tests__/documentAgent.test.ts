@@ -1258,7 +1258,7 @@ describe("documentAgentTools.callTool when the run fails", () => {
     expect(answer).toBe("The document agent is unavailable: the document agent is unreachable.");
     expect(answer).not.toContain("agent-down");
     expect(warnings()).toEqual([
-      "documentAgent: the agent at http://agent-down:9838 is unreachable",
+      "documentAgent: the agent at http://agent-down:9838 is unreachable: ECONNREFUSED",
       "document_agent failed: the document agent is unreachable",
     ]);
   });

@@ -34,10 +34,12 @@ jobs:
       - name: Typecheck, lint, format and tests
         run: yarn check
 
-      - name: The committed OpenAPI schemas are the ones the sources generate
+      # `yarn openapi` writes both: the schemas the service serves and the document the API
+      # documentation is joined from.
+      - name: The committed OpenAPI schemas and document are the ones the sources generate
         run: |
           yarn openapi
-          if ! git diff --exit-code -- app/generated; then
-            echo "::error::app/generated is stale. Run 'yarn openapi' in common/ASC.AI.Chat and commit the result."
+          if ! git diff --exit-code -- app/generated ../Tools/ASC.Api.Documentation/ASC.Api.Documentation/json/aichat_2.0.json; then
+            echo "::error::app/generated or aichat_2.0.json is stale. Run 'yarn openapi' in common/ASC.AI.Chat and commit the result."
             exit 1
           fi

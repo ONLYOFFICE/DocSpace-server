@@ -33,6 +33,7 @@
 
 import type { JsonObject } from "../narrow.js";
 import { isObject } from "../narrow.js";
+import { clientFault } from "../httpErrors.js";
 
 /**
  * An upstream answered 200 with a body the mapper cannot read. That is neither "absent" (the
@@ -80,12 +81,45 @@ export function listAnswer(raw: unknown, call: string): unknown[] {
 }
 
 /**
- * An empty id names no entity. Sent as it is, `GET <path>/` reaches the list route of the same
- * path, whose array the single-entity mapper cannot read: a read by id answers "absent" for it
- * without calling out.
+ * The answer of a call relayed with the portal API's envelope (`raw: true`): a JSON object that
+ * carries `response`. Anything else - a text or HTML body of a proxy in front of the service,
+ * `{}`, an `{ error }` sent with 200 - is not that envelope: it is unknown, answered 502 and
+ * never relayed as a 200 (ts-ai-failure-paths.md §1). Every route that relays an envelope reads
+ * it here. An action that returns nothing is wrapped without `response`
+ * (`{ count, status, statusCode }`): its route passes `emptyResult`, and the envelope is then
+ * known by its `status`.
+ */
+export function envelopeAnswer(raw: unknown, call: string, emptyResult = false): JsonObject {
+  if (!isObject(raw) || !("response" in raw || (emptyResult && "status" in raw))) {
+    throw new UpstreamShapeError(call);
+  }
+  return raw;
+}
+
+/**
+ * An id that names no entity once it stands in a path. Empty, `GET <path>/` reaches the list
+ * route of the same path, whose array the single-entity mapper cannot read. `.` and `..` pass
+ * `encodeURIComponent` unchanged, and the URL parser then removes them as dot segments:
+ * `threads/.` is requested as `threads/`, `threads/..` as the parent. A read by id answers
+ * "absent" for such an id without calling out.
  */
 export function namesNoEntity(id: string): boolean {
-  return id === "";
+  return id === "" || id === "." || id === "..";
+}
+
+/**
+ * Refuses an upstream path one of whose segments {@link namesNoEntity}: the request would reach
+ * another route than the one written (a list, a bulk write or delete, the parent path). The
+ * three clients call it for every path they are given, so a write or a delete by such an id
+ * answers 404 like any id the upstream does not know, without a request. `path` is the encoded
+ * path, with or without a leading slash and a query string.
+ */
+export function assertEntityPath(path: string): void {
+  const [pathname = ""] = path.split("?", 1);
+  const segments = pathname.replace(/^\//, "").split("/");
+  if (segments.some(namesNoEntity)) {
+    throw clientFault(404, "Not Found");
+  }
 }
 
 /**

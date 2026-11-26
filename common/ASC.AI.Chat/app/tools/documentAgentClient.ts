@@ -52,6 +52,7 @@ import type { Client } from "@a2a-js/sdk/client";
 import { Agent, fetch as undiciFetch } from "undici";
 import type { DocumentAgentConfig } from "../../config/index.js";
 import logger from "../log.js";
+import { readProp } from "../narrow.js";
 
 /** The `metadata.docagent` block of a request, as the agent's settings schema reads it. */
 export interface DocumentAgentSettings {
@@ -109,6 +110,20 @@ export class DocumentAgentError extends Error {
     super(message, options);
     this.name = "DocumentAgentError";
   }
+}
+
+/**
+ * A failed call in a log line: its message and, when it has one, the code or the message of its
+ * cause. A network failure is worded `fetch failed` and names the reason (ECONNREFUSED,
+ * ENOTFOUND, a TLS code) in the cause only.
+ */
+export function failureText(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  const cause = readProp(err, "cause");
+  const code = readProp(cause, "code");
+  const detail =
+    typeof code === "string" ? code : cause instanceof Error ? cause.message : undefined;
+  return detail ? `${message} (${detail})` : message;
 }
 
 let cached: { url: string; token: string; client: Promise<Client> } | undefined;
@@ -359,8 +374,9 @@ export async function runDocumentTask(
   try {
     client = await clientFor(config);
   } catch (err) {
-    // The address stays in the log: the error's message is read by the model.
-    logger.warn(`documentAgent: the agent at ${config.url} is unreachable`);
+    // The address and the reason (a refused connection, a 401 or a 404 of the agent card) stay
+    // in the log: the error's message is read by the model.
+    logger.warn(`documentAgent: the agent at ${config.url} is unreachable: ${failureText(err)}`);
     throw new DocumentAgentError("the document agent is unreachable", { cause: err });
   }
 

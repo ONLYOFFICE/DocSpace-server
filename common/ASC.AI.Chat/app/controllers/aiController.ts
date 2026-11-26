@@ -507,7 +507,7 @@ function customScopeOf(body: unknown): string | undefined {
 // terminal write are unconditional; this only paces the intermediate ones,
 // and the library salvages the staged text if the stream dies early.
 // Override with `AI_CHAT_PERSIST_INTERVAL_MS`, a whole number of
-// milliseconds from 50 to ten minutes (`getPersistIntervalMs`); anything
+// milliseconds from a second to ten minutes (`getPersistIntervalMs`); anything
 // else keeps the default here rather than falling through to the library's
 // 150 ms fallback.
 const PERSIST_INTERVAL_MS = getPersistIntervalMs();
@@ -922,7 +922,7 @@ async function aiToolsUnpaidError(providerType: string | undefined): Promise<str
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
     // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
-    // off gets 403 for any body.
+    // off gets 403 for any body the parser accepted.
     await assertAiAccess();
     // The body used to reach the engine unchecked: an unknown or missing
     // actionType died in the assignment resolver and a missing userMessage

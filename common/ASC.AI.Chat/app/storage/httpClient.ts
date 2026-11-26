@@ -37,7 +37,7 @@ import { isObject } from "../narrow.js";
 import { cancelReader, errorBodyText, readTextCapped } from "./errorBody.js";
 
 export { readTextCapped };
-import { jsonAnswer } from "./upstreamShape.js";
+import { assertEntityPath, jsonAnswer } from "./upstreamShape.js";
 
 // Hard ceiling for a single upstream round-trip so a hung AI service / MCP
 // server can't pin a Node socket (and the caller's request) indefinitely.
@@ -125,6 +125,7 @@ async function jsonRequest(
   options: RequestOptions = {},
 ): Promise<unknown> {
   const { body, query, signal, raw } = options;
+  assertEntityPath(path);
   let url = `${baseUrl}${path}`;
   if (query && Object.keys(query).length > 0) {
     const params = new URLSearchParams();
