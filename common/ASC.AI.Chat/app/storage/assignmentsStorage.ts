@@ -40,7 +40,7 @@ import {
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
-import { UpstreamShapeError } from "./upstreamShape.js";
+import { namesNoEntity, UpstreamShapeError } from "./upstreamShape.js";
 
 // The action -> profile bindings are one map per portal. The `entityId` the
 // library passes with every call (the folder the chat is opened from) is
@@ -77,6 +77,10 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
   }
 
   async readByType(actionType: ActionType, _entityId?: string): Promise<string | null> {
+    // Nothing is assigned to such a type, and the path would reach the list route.
+    if (namesNoEntity(actionType)) {
+      return null;
+    }
     // The aggregate's global map went through the same resolver as the
     // per-type endpoint (`Default` substitution included), so a key lookup
     // is equivalent to `GET assignments/{type}`.

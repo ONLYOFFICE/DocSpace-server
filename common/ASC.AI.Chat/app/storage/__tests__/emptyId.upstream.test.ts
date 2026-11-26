@@ -33,8 +33,10 @@
 
 import { describe, expect, it } from "vitest";
 import { useUpstream } from "../../__tests__/helpers/upstream.js";
+import { HttpAssignmentsStorage } from "../assignmentsStorage.js";
 import { HttpAttachmentsStorage } from "../attachmentsStorage.js";
 import { getFileInfo, getFolderInfo } from "../docspaceFilesApi.js";
+import { HttpMcpServersStorage } from "../mcpServersStorage.js";
 import { HttpMessagesStorage } from "../messagesStorage.js";
 import { HttpProfilesStorage } from "../profilesStorage.js";
 import { HttpPromptFoldersStorage } from "../promptFoldersStorage.js";
@@ -63,6 +65,10 @@ const reads: [string, (id: string) => Promise<unknown>, unknown][] = [
   ["promptFolders.readById", (id) => new HttpPromptFoldersStorage().readById(id), null],
   ["profiles.readById", (id) => new HttpProfilesStorage().readById(id), undefined],
   ["profiles.readByIdRaw", (id) => new HttpProfilesStorage().readByIdRaw(id), undefined],
+  // `get-custom-server` answers 200 null for a name nobody registered (openspec ai-agents,
+  // "Custom MCP servers"), and `.` is such a name.
+  ["mcpServers.readByName", (id) => new HttpMcpServersStorage().readByName(id), null],
+  ["assignments.readByType", (id) => new HttpAssignmentsStorage().readByType(id as never), null],
   ["files.getFolderInfo", (id) => getFolderInfo(id), undefined],
   ["files.getFileInfo", (id) => getFileInfo(id), undefined],
 ];

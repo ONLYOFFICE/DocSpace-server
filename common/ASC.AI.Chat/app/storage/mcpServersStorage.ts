@@ -33,7 +33,7 @@
 
 import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString } from "../narrow.js";
-import { listAnswer, objectOrNone } from "./upstreamShape.js";
+import { listAnswer, namesNoEntity, objectOrNone } from "./upstreamShape.js";
 import type { McpServersStorage, McpServerConfig } from "@onlyoffice/ai-chat/core";
 import {
   invalidateChatContext,
@@ -74,6 +74,10 @@ export class HttpMcpServersStorage implements McpServersStorage {
   }
 
   async readByName(name: string, _entityId?: string): Promise<McpServerConfig | null> {
+    // No server is registered under such a name, and the path would reach the list route.
+    if (namesNoEntity(name)) {
+      return null;
+    }
     const snapshot = readChatContext("mcpServers");
     if (snapshot) {
       return snapshot.global.mcpServers[name] ?? null;
