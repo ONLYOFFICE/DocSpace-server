@@ -115,6 +115,12 @@ client's way into and out of filling mode.
 - **THEN** the form leaves filling mode the way Stop does (`startFilling` false, hidden from form fillers, history entry and `form.stopped` webhook when it was started)
 - **AND** the server remembers the version the form is edited from, so that the next Start can detect a changed form
 
+#### Scenario: Edit access
+
+- **WHEN** `Edit` is sent by a caller without editing access to the form, in any room
+- **THEN** the request is refused (403)
+- **AND** outside a Form filling room, `Edit` by a caller with editing access answers 200 and changes no filling state
+
 #### Scenario: Resume action
 
 - **WHEN** `Resume` is applied to a form
@@ -302,6 +308,12 @@ service), the server SHALL store the copy in the form's "Complete" subfolder, nu
 a PDF form and marked completed, and SHALL announce the submission.
 `PUT /api/2.0/files/file/{fileId}/saveediting` with a multipart body (`saveEditingFileFromForm`) instead
 replaces the file's content with the posted binary as a new version — a save, not a submission.
+
+#### Scenario: Save of a file open in an editor
+
+- **WHEN** `saveEditingFileFromForm` is sent without `forcesave`
+- **THEN** a session the caller has open alone is closed and the content is saved
+- **AND** a file another account has open alone is refused (403), and that account's session stays; with `forcesave` the content is saved and no session is closed
 
 #### Scenario: What a submission records
 

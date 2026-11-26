@@ -113,7 +113,7 @@ public class WebPluginManager(
 
     private static readonly TimeSpan _decryptFailureLogInterval = TimeSpan.FromHours(1);
 
-    private static string GetDecryptFailureLoggedKey(int tenantId, string pluginName)
+    private static string GetDecryptFailureLoggedCacheKey(int tenantId, string pluginName)
     {
         return $"{StorageModuleName}:{tenantId}:decrypt-failure-logged:{pluginName}";
     }
@@ -313,10 +313,10 @@ public class WebPluginManager(
                         // every page load of every member reads the plugins, so the failure is logged once an hour
                         // per plugin in each process (the mark is in the local memory cache), until an admin stores new
                         // settings
-                        if (!(await _cache.TryGetAsync<bool>(GetDecryptFailureLoggedKey(tenantId, webPlugin.Name))).HasValue)
+                        if (!(await _cache.TryGetAsync<bool>(GetDecryptFailureLoggedCacheKey(tenantId, webPlugin.Name))).HasValue)
                         {
                             log.ErrorWithException(webPlugin.Name, e);
-                            await _cache.SetAsync(GetDecryptFailureLoggedKey(tenantId, webPlugin.Name), true, _decryptFailureLogInterval);
+                            await _cache.SetAsync(GetDecryptFailureLoggedCacheKey(tenantId, webPlugin.Name), true, _decryptFailureLogInterval);
                         }
 
                         // a read changes nothing: the plugin is shown as disabled in this answer only, and an admin who

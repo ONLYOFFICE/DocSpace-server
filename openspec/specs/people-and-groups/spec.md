@@ -740,6 +740,11 @@ The accounts-and-groups searches SHALL return an empty list with a zero total wh
 - **WHEN** the profile carries the provider's cancellation
 - **THEN** the answer is 200 with an empty body and no profile is created
 
+#### Scenario: Avatar of the provider profile
+
+- **WHEN** the provider's avatar address, or one of its redirects, points to a loopback, link-local or private address, takes more than 3 redirects, answers with an error or sends an image over the image size limit
+- **THEN** the profile is created and linked without a photo, and the sign-up goes on
+
 ### Requirement: Who may manage groups
 
 Creating, updating, deleting and changing the membership of a group SHALL be open to the Owner and DocSpace admins and SHALL answer 403 to a Room admin, a User and a Guest, including a regular User who is that group's manager.

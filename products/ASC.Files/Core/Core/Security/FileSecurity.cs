@@ -1196,8 +1196,8 @@ public class FileSecurity(
     }
 
     /// <summary>
-    /// The access a user has to an entry when the user may read it, or null when the user may not. The entry keeps the
-    /// access it had: a webhook payload cut from one entry for several subscribers reads it afterwards.
+    /// The user's access to an entry the user may read (None when a check allows the read before the share records, as
+    /// for a third-party entry's owner), or null. The entry keeps its access: a webhook payload for several subscribers reads it.
     /// </summary>
     public async Task<FileShare?> GetReadAccessAsync<T>(FileEntry<T> entry, Guid userId)
     {
@@ -1315,9 +1315,9 @@ public class FileSecurity(
         var isRoom = folder is { IsRoom: true };
 
         // What the entry carries (its share record, its access) belongs to the current account; a check of another
-        // account takes neither. The link of the request follows RequestLinkApplies. isAuthenticated is still decided
-        // by the callers from the request (CheckAsync adds the checked account's own flag), so a signed-in caller
-        // checks the guest account as authenticated.
+        // account takes neither. The link of the request follows RequestLinkApplies. The request still decides isAuthenticated
+        // (CheckAsync adds the checked account's own flag, so a signed-in caller checks the guest account as authenticated),
+        // and the current account's notification settings decide Mute of a room (IsAllGeneralNotificationSettingsOffAsync).
         var forCurrentAccount = userId == authContext.CurrentAccount.ID;
         var requestLinkApplies = RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes > 0);
 

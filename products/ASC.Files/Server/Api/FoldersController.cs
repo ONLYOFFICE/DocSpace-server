@@ -728,11 +728,10 @@ public abstract class FoldersController<T>(
 
     /// <remarks>
     /// Returns the primary external link of a folder or a room, and creates it if the folder has none. A new link
-    /// gives read access, with no password and no expiry. Read the address from `sharedTo.shareLink`. Creating the
-    /// link requires the right to manage the links of the folder. Other callers get 403. The room manager has this
-    /// right, but a user with read access does not. In an active room, any reader of the folder gets its existing
-    /// link, password included. Elsewhere, reading the link requires the right to see the links of the folder. A
-    /// caller who is not signed in and has no external link gets 401. The first call
+    /// gives read access, with no password and no expiry. Read the address from `sharedTo.shareLink`. Requires the
+    /// right to manage the links of the folder. Other callers get 403. The room manager has this right, but a user
+    /// with read access does not. A reader of an active room still gets the existing link of the room itself,
+    /// password included. A caller who is not signed in and has no external link gets 401. The first call
     /// can change data. Later calls are read-only and return the same link. If the primary link was revoked, the call
     /// returns 404 and creates no new one. If the folder does not exist, the call also returns 404. If a string `id`
     /// points to a storage account that is not connected, the call returns 400. To list all external links of the
@@ -762,9 +761,9 @@ public abstract class FoldersController<T>(
     /// Creates or changes an external link of a folder or a room, or revokes it. The `linkId` field selects the link. A new
     /// or empty ID creates a link, and an existing ID changes that link. The call applies all fields every time, so a
     /// missing field gets its default value. Requires the right to manage the links of the folder. Other callers
-    /// get 403. The room manager has this right. In a public room, a caller who can read the folder may also create
-    /// its primary link with `access` Read while the folder has none. The call changes data. A repeated call with an existing `linkId`
-    /// changes nothing. A repeated call with an empty `linkId` creates one more link. If `access` grants nothing, the
+    /// get 403. The room manager has this right. In a public room, a reader of the folder may also create its primary
+    /// link. That needs `access` Read and no primary link on the folder yet. The call changes data. A repeated call
+    /// with an existing `linkId` changes nothing. A repeated call with an empty `linkId` creates one more link. If `access` grants nothing, the
     /// call revokes the link and returns an empty response. A later read does not recreate a revoked primary link.
     /// In a public room or a form-filling room, revoking the primary link creates a new one with default settings.
     /// The call then returns the new link. A repeated revocation finds no link and returns an empty response. If the

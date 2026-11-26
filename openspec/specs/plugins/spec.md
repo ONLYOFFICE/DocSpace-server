@@ -259,6 +259,7 @@ value that cannot be decrypted SHALL make the read report the plugin as off with
 
 - **WHEN** the stored settings of a plugin were encrypted by another installation key
 - **THEN** the plugin is listed with `enabled` false and empty `settings`
+- **AND** the read stores nothing, so the stored row keeps its state and settings
 
 ### Requirement: Content Security Policy domains of a plugin
 

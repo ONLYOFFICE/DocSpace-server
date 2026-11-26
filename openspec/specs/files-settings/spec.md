@@ -439,7 +439,7 @@ on the first call if the caller may share the file. Repeated calls SHALL return 
 ### Requirement: Primary external link of a folder or room
 
 `getFolderPrimaryExternalLink` and `createFolderPrimaryExternalLink` SHALL answer with the primary link, creating it on
-the first call for a caller who may manage the links; in an active room any reader gets a link that exists. The parameters apply only when the link is created. `count` 0
+the first call for a caller who may manage the links; a reader of an active room gets the room's own link that exists. The parameters apply only when the link is created. `count` 0
 SHALL be rejected with 400, and `startIndex` has no effect.
 
 #### Scenario: Called twice
@@ -454,7 +454,7 @@ SHALL be rejected with 400, and `startIndex` has no effect.
 
 #### Scenario: Refused callers
 
-- **WHEN** an anonymous caller, a member with read or content-creator access, someone without room access, or any caller on an archived room asks
+- **WHEN** an anonymous caller, a member with read or content-creator access (for a room, while it has no primary link; for a folder inside a room, always), someone without room access, or any caller on an archived room asks
 - **THEN** the answer is 401 for the anonymous caller and 403 for the others
 
 #### Scenario: Unknown folder

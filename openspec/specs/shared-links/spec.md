@@ -242,7 +242,7 @@ create, edit or delete links there.
 
 - **WHEN** a Room manager or a Content creator requests the primary link of a Custom room
 - **THEN** the link is returned
-- **AND** a member with a lower role (Editor, Reviewer, Commentator, Viewer) is refused (403) while the room has no primary link, because the read would create it; a primary link that exists is returned to any caller who can read the room, the folder or the file, its password included; creating the primary link of a file requires the right to manage links
+- **AND** a member with a lower role (Editor, Reviewer, Commentator, Viewer) is refused (403) while the room has no primary link, because the read would create it; the room's own primary link, once it exists, is returned to any caller who can read the room, its password included, while the primary link of a folder or a file inside the room is read only by who may manage its links; creating the primary link of a file requires the right to manage links
 
 #### Scenario: Non-member admin cannot create a link
 
