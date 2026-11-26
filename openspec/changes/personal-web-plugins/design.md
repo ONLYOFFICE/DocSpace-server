@@ -223,9 +223,15 @@ from these settings through a mapper and adds the portal switch.
   cap of one plugin for distinct addresses, so the cap guards the stored manifest and the limit the header;
   follow-up.
 - [A cached member header outlives a change outside the calls that start a new generation: a member made a guest,
-  an installation-wide plugin uploaded or deleted on another portal, a refresh that changes shadowing, a changed
-  configuration re-saved at startup, a member on a host alias of the portal] → the member's next plugin list
+  an installation-wide plugin uploaded or deleted on another portal, a refresh or the hourly expiry of the cached
+  manifests that changes shadowing, a changed configuration re-saved at startup] → the member's next plugin list
   writes the header again, and a header expires after a day.
+- [A call with `asc_personal_csp`, no personal domains and an unchanged `If-Modified-Since` gets 304 before
+  anything is cached; a personal call whose new generation fails leaves the cookie as it was] → the next plugin
+  list or the day-long expiry brings the header and the cookie in line.
+- [A request with an `Authorization` header, such as Basic credentials in front of the proxy, carries a session
+  cookie that may not be what signed it in] → the server caches nothing for it, so with the hint the proxy asks
+  `getCspSettings` on every page; supported, at the cost of one API call per page.
 - [The session cookie is `SameSite=Strict` by default, so a page opened from another site gets the portal policy
   until the next page] → the plugin list of that page writes the header for the next one; follow-up.
 - [A request carrying `asc_auth_key` twice] → the proxy skips the cached member header and asks `getCspSettings`,
@@ -233,6 +239,21 @@ from these settings through a mapper and adds the portal switch.
   pick another session's header.
 - [An administrator's open list of members' plugins is not told about changes] → it is read again when opened;
   follow-up together with live updates in the client.
+- [`plugins:delete` off] → an administrator still deletes a member's plugin: the flag guards the portal's own
+  plugins, and removing a member's plugin is the lever against a harmful one.
+- [A member made a guest keeps their personal plugins in the tabs already open] → no event reaches the member's
+  private room; their next page loads without the plugins; follow-up.
+- [An administrator's delete during the member's upload of the same plugin can leave files without a manifest or
+  the state of a deleted plugin, and no call removes a folder without a readable `config.json`] → rare; a lock per
+  member and plugin is a follow-up together with the count limit.
+- [A re-upload removes the old folder before it writes the new files, so a storage failure midway leaves a partial
+  plugin] → the cache is reset and the failure logged, and the plugin is uploaded again; follow-up.
+- [A `*.` wildcard is checked by its number of labels, not against the public suffix list, which the solution does
+  not carry, so `*.co.uk` passes] → it reaches its owner's pages only, where the plugin already runs its own
+  code; follow-up.
+- [The warning about a missing storage module is written even where plugins or personal plugins are switched off,
+  and a member whose header stays over the limit adds a warning with each plugin list] → log noise only;
+  follow-up.
 - [A member installs a malicious plugin from someone else] → it runs with that member's rights only; personal
   plugins are off on a portal until an administrator switches them on, and the administrator sees and can remove
   every member's plugin.

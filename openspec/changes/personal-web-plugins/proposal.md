@@ -38,9 +38,10 @@ alone, while the administrator keeps control of what runs for the portal.
   `settings` and `cssUrl`, and a read of the storage drops them from a manifest stored earlier. An
   installation-wide plugin (`system=true`) keeps them, so its manifest stays the default state of the other
   portals.
-- A personal plugin's `cspDomains` are checked at upload: every entry has to be an http, https, ws or wss host,
-  with an optional `*.` wildcard below a name of two labels or more, and the value at most 15360 characters (the
-  member's header size limit binds first for distinct addresses); otherwise the upload answers 400 "The cspDomains value lists an invalid address or is too long".
+- A personal plugin's `cspDomains` are checked at upload: every entry has to be an ASCII host with an optional
+  http, https, ws or wss scheme, port and path, an optional `*.` wildcard below a name of two labels or more, and
+  no space, `;` or quote, and the value at most 15360 characters (the member's header size limit binds first for
+  distinct addresses); otherwise the upload answers 400 "The cspDomains value lists an invalid address or is too long".
 - The domains a personal plugin declares in `cspDomains` never reach the portal Content Security Policy. A
   signed-in member whose request carries the `asc_personal_csp` cookie gets them in the `header` that
   `getCspSettings` returns, outside `frame-ancestors`, unless the header would pass its size limit; if reading
@@ -206,8 +207,9 @@ None.
 - **Switching a plugin on or off and storing its settings** (`updateWebPlugin`). With `personal=true`, a member
   switches their own plugin and stores its settings in their own row; before the branch an administrator's call
   with it changed the portal plugin of that name, and anyone else's got 403 "Access denied". A personal call with
-  `enabled` true after which the member's policy header would pass the size limit answers 403 "CSP header size
-  exceeds maximum allowed size of N bytes." with the new state saved; a personal switch-off answers 200. The
+  `enabled` true that adds domains over the size limit of the member's policy header answers 403 "CSP header size
+  exceeds maximum allowed size of N bytes." with the new state saved; a call that adds no domain and a personal
+  switch-off answer 200. The
   answer of a personal call can set or delete the cookie. Calls without `personal=true` answer as before. Affected: the web client (profile tab), the SDKs and
   the OpenAPI document (the new query parameter).
 - **Stored state of a plugin**. A personal plugin's state lives in its owner's settings row. A portal or
@@ -220,8 +222,8 @@ None.
   before the branch an administrator's `personal=true` upload installed a portal plugin whose domains did. A
   personal upload whose `cspDomains` fails the new checks answers 400, and a personal plugin's domains stay out
   of `frame-ancestors`. Portal plugins are unchanged. Affected: the authors of packages whose `cspDomains` hold
-  a bare scheme, a wildcard over a top-level domain or a keyword, which can no longer be installed as personal
-  plugins.
+  a bare scheme, a wildcard over a top-level domain, a keyword, a non-ASCII name or a space, `;` or quote, which
+  can no longer be installed as personal plugins.
 - **Deleting a plugin** (`deleteWebPlugin`). With `personal=true` a member deletes their own plugin, without the
   delete switch; before the branch an administrator's call with it deleted the portal plugin of that name, and
   anyone else's got 403 "Access denied". Calls without `personal=true` answer as before. Affected: the web
@@ -262,7 +264,7 @@ None.
   installation-wide manifest, shipped or uploaded with `system=true`, still carries them, and a shipped
   manifest's `createBy` and `createOn` are still trusted.
 - **P2** (state saved before the CSP save, then 403): kept, and extended to personal plugins. A personal upload,
-  or a personal update with `enabled` true, after which the member's policy header would pass the size limit
+  or a personal update with `enabled` true, that adds domains over the size limit of the member's policy header
   answers 403 after its change was saved, as a portal call does.
 - **P4** (every failure after the size checks becomes 400 "Wrong plugin archive. …"): narrowed. A refusal
   because an installed plugin holds the `name` or `pluginName`, because of the plugin limit or, for a personal
