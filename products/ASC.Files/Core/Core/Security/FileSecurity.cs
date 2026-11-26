@@ -2245,7 +2245,7 @@ public class FileSecurity(
         {
             var cachedRecords = GetCachedRecords<T>();
             if (((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
-                 cachedRecords.TryGetValue(GetUserRecordCacheKey(e.ParentId, userId), out var value)) ||
+                 cachedRecords.TryGetValue(GetUserRecordCacheKey(e.ParentId, userId, requestLinkApplies), out var value)) ||
                 (requestLinkApplies && cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))) &&
                 value != null)
             {
@@ -2264,7 +2264,7 @@ public class FileSecurity(
                     {
                         var key = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink
                             ? GetCacheKey(e.ParentId, ace.Subject)
-                            : GetUserRecordCacheKey(e.ParentId, userId);
+                            : GetUserRecordCacheKey(e.ParentId, userId, requestLinkApplies);
 
                         cachedRecords.TryAdd(key, ace);
                     }
@@ -4215,14 +4215,10 @@ public class FileSecurity(
     }
 
     /// <summary>
-    /// The key of an account's record under a folder. A record found inside <see cref="ApplyRequestLinkToEveryAccount"/>
-    /// may come from the request's link, so it is kept apart from the record of the same account outside the scope.
+    /// The key of an account's record under a folder. A record found while the request's link applies to the check
+    /// (<see cref="RequestLinkApplies"/>) may come from that link, so it is kept apart from the record of the same
+    /// account checked without it.
     /// </summary>
-    private string GetUserRecordCacheKey<T>(T parentId, Guid userId)
-    {
-        return GetUserRecordCacheKey(parentId, userId, _requestLinkScopes > 0);
-    }
-
     private string GetUserRecordCacheKey<T>(T parentId, Guid userId, bool requestLinkApplies)
     {
         var key = GetCacheKey(parentId, userId);
