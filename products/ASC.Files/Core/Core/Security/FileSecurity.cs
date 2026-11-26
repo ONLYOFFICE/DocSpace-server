@@ -4220,9 +4220,14 @@ public class FileSecurity(
     /// </summary>
     private string GetUserRecordCacheKey<T>(T parentId, Guid userId)
     {
+        return GetUserRecordCacheKey(parentId, userId, _requestLinkScopes > 0);
+    }
+
+    private string GetUserRecordCacheKey<T>(T parentId, Guid userId, bool requestLinkApplies)
+    {
         var key = GetCacheKey(parentId, userId);
 
-        return _requestLinkScopes > 0 ? key + "-request-link" : key;
+        return requestLinkApplies ? key + "-request-link" : key;
     }
 
     private string GetCacheKey<T>(T parentId)
@@ -4259,19 +4264,14 @@ public class FileSecurity(
     private async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, EntryShares<T> shares)
     {
         var cachedRecords = GetCachedRecords<T>();
-        var cacheKey = GetUserRecordCacheKey(room.Id, userId);
+        // the record depends on whether the request's link applies to this check, so the key does too: the same
+        // account checked as another account in the same request reads its own key and never gets the link's record
+        var cacheKey = GetUserRecordCacheKey(room.Id, userId, RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes > 0));
 
         if (!cachedRecords.TryGetValue(cacheKey, out var record))
         {
             record = await GetCurrentShareAsync(room, userId, isDocSpaceAdmin, await shares.GetAsync());
-
-            // a record of a link belongs to the link, as in FilterEntryAsync: the account's key is read for the
-            // account checked as another account too, which must not get the request's link
-            var key = record is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink }
-                ? GetCacheKey(room.Id, record.Subject)
-                : cacheKey;
-
-            cachedRecords.TryAdd(key, record);
+            cachedRecords.TryAdd(cacheKey, record);
         }
 
         return record;
