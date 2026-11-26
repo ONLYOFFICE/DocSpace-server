@@ -17,7 +17,8 @@ the method (line of the method head as of 2026-10-14). Paths are relative to the
 
 Until release/v4.1.0 the integration host (`integration-test` launch profile) could not reach a document server.
 The merge `3533ad8a89` (previous state `d58816bece`) pinned the service ports of the test host so that the editors
-and the document builder reach them (`common/ASC.AppHost/Configuration/ProjectConfigurator.cs:94-97`): the
+and the document builder reach them; the endpoints now listen, unproxied, on the run's own ports (`HostPorts`), the
+ones the router's map is built from (`common/ASC.AppHost/Configuration/ProjectConfigurator.cs:97-112`): the
 conversions (`CopyFileAs` with `toForm`, `SaveFileAsPdf`) and the results report (`FormXlsxTests.cs`, formerly
 skipped) now run. Every behaviour that starts with a real editor submission — a submitted copy landing in
 "Complete", the external database export, a VDR step being submitted, the `form.submit`/`form.filled.out`

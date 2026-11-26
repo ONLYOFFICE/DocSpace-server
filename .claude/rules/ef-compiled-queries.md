@@ -92,7 +92,8 @@ collections — inside a transaction it rolls back. So:
 ## Verify
 
 After adding or changing compiled queries, build, start the service (a test run is enough) and read
-its main log — `../Logs/test/<service>.log` after a test run, `../Logs/<service>.log` locally. A query
+its main log — `../Logs/test/<service>.log` after a test run (`../Logs/test/<worktree>/<service>.log` from a git
+worktree), `../Logs/<service>.log` locally. A query
 that fails to translate is written there as a `WARN` line naming the method, followed by the exception:
 
 ```

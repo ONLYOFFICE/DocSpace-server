@@ -94,15 +94,19 @@ public class ProjectConfigurator(
             // worktree (server/.claude/worktrees/<name>/); the AppHost already found it.
             .WithEnvironment("pathToConf", AppPaths.GetConfigDirectory(basePath));
 
-        // The testing builder randomizes every endpoint port, but the router's upstream map (NginxConfiguration)
-        // and the document server reach the services at their fixed ports through host.docker.internal. With
-        // random ports every request through 8092 failed: the editors could not fetch a docbuilder script, a
-        // file to convert or a callback, so no document-server scenario could run in the tests.
+        // The testing builder randomizes every proxied endpoint port, but the router's upstream map
+        // (NginxConfiguration) and the document server reach the services through host.docker.internal at a port
+        // the map names before the stack starts. With random ports every request through the router failed: the
+        // editors could not fetch a docbuilder script, a file to convert or a callback, so no document-server
+        // scenario could run in the tests. So the endpoint is not proxied and listens on the run's own port
+        // (HostPorts), the one the router's map is built from.
         if (isIntegrationTest)
         {
+            var port = HostPorts.Of(projectPort);
+
             project.WithEndpoint("http", e =>
             {
-                e.Port = e.TargetPort = projectPort;
+                e.Port = e.TargetPort = port;
                 e.IsProxied = false;
             });
         }
@@ -119,7 +123,7 @@ public class ProjectConfigurator(
         var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
-            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort, "mcp").Uri.ToString())
+            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", HostPorts.Of(Constants.DocSpaceMcpPort), "mcp").Uri.ToString())
             .WithEnvironment("ai:mcpInternalHost", Constants.HostDockerInternal);
 
         ConfigureForwardedHeadersNetworks(project);
@@ -134,9 +138,12 @@ public class ProjectConfigurator(
         // Applied after AddProject, so it wins over the same keys coming from the launch profile.
         if (isIntegrationTest)
         {
-            project.WithEnvironment("$STORAGE_ROOT", AppPaths.GetTestStorageRoot(basePath))
-                .WithEnvironment("log__dir", AppPaths.GetTestLogsDirectory(basePath))
-                .WithEnvironment("web:temp", AppPaths.GetTestTempDirectory(basePath))
+            project.WithEnvironment("$STORAGE_ROOT", AppPaths.GetTestStorageRoot(builder.AppHostDirectory))
+                .WithEnvironment("log__dir", AppPaths.GetTestLogsDirectory(builder.AppHostDirectory))
+                .WithEnvironment("web:temp", AppPaths.GetTestTempDirectory(builder.AppHostDirectory))
+
+                // The socket service of this run (AddSocketIO): buildtools/config names its fixed port.
+                .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, "localhost", HostPorts.Of(Constants.SocketIoPort)).ToString())
 
                 // Read by HostOptions.Initialize — the generic host's grace period for hosted services
                 // to observe their stopping token. The default is 30 s, and ASC.Files.Worker reaches it
@@ -162,7 +169,7 @@ public class ProjectConfigurator(
                 // localhost and the call reached the calling service itself, whose 404 was ignored, so the
                 // identity service never saw it. The router sends /api/2.0/oauth2/clients to identity. 127.0.0.1, not
                 // localhost: the router's port listens on IPv4 only and Windows would try ::1 first, ~2 s per call.
-                .WithEnvironment("core:oidc:authority", new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), Constants.RestyPort, "api/2.0/oauth2").Uri.ToString());
+                .WithEnvironment("core:oidc:authority", new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), HostPorts.Of(Constants.AppHostPort), "api/2.0/oauth2").Uri.ToString());
 
             // A queue runs as many of its tasks at once as its registration says, one unless stated. Fine for an
             // installation, but here every test class starts its own reports and operations in parallel, so a test
@@ -316,22 +323,27 @@ public class ProjectConfigurator(
         }
         else
         {
+            // The port the service listens on (its config.json `app.port`), this run's own: the services, the router
+            // and the tests' socket clients reach it there, not through the proxy.
+            var listenPort = HostPorts.Of(port);
+
             var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithEnvironment("app:appsettings", AppPaths.GetConfigDirectory(basePath))
-                .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}")
+                .WithEnvironment("app:port", listenPort.ToString(CultureInfo.InvariantCulture))
+                .WithEnvironment("API_HOST", $"http://localhost:{HostPorts.Of(Constants.AppHostPort).ToString(CultureInfo.InvariantCulture)}")
                 .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
                 .WithEnvironment("REDIS_ENABLED", redisEnabled.ToString().ToLower())
-                .WithHttpEndpoint(targetPort: port)
+                .WithHttpEndpoint(targetPort: listenPort)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             if (isIntegrationTest)
             {
                 // Same idea as for the projects, but socket.io reads its own `logPath` key.
-                resourceBuilder.WithEnvironment("logPath", AppPaths.GetTestLogsDirectory(basePath));
+                resourceBuilder.WithEnvironment("logPath", AppPaths.GetTestLogsDirectory(builder.AppHostDirectory));
             }
 
             connectionManager.AddWaitFor(resourceBuilder);
@@ -487,18 +499,25 @@ public class ProjectConfigurator(
         }
         else
         {
+            // The port it listens on (config.json `app.port`) and the router and AI service it calls (config.json
+            // `app.proxy.url`, `app.aiService.url`), all this run's own (HostPorts).
+            var listenPort = HostPorts.Of(port);
+
             var resourceBuilder = builder.AddJavaScriptApp(name, path, "dev")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 .WithEnvironment("app:appsettings", AppPaths.GetConfigDirectory(basePath))
+                .WithEnvironment("app:port", listenPort.ToString(CultureInfo.InvariantCulture))
+                .WithEnvironment("API_HOST", $"http://localhost:{HostPorts.Of(Constants.AppHostPort).ToString(CultureInfo.InvariantCulture)}")
+                .WithEnvironment("AI_SERVICE_URL", $"http://localhost:{HostPorts.Of(Constants.AiPort).ToString(CultureInfo.InvariantCulture)}")
                 // `__` form, not `:` — AI.Chat's nconf would otherwise nest a
                 // `:`-keyed var and turn the `ai.mcp` array into an object.
-                .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp")
+                .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, "localhost", HostPorts.Of(Constants.DocSpaceMcpPort)) + "mcp")
                 .WithEnvironment("AI__DOCUMENT_AGENT__URL", () => _documentAgentUrl ?? builder.Configuration["AI:DOCUMENT_AGENT:URL"] ?? "")
                 .WithEnvironment("AI__DOCUMENT_AGENT__TOKEN", () => _documentAgentToken ?? builder.Configuration["AI:DOCUMENT_AGENT:TOKEN"] ?? "")
                 // The agent runs on the same network as the portal's MCP server, so it gets it too (see ASC.AI.Chat/README.md).
                 .WithEnvironment("AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS", "true")
-                .WithHttpEndpoint(targetPort: port)
+                .WithHttpEndpoint(targetPort: listenPort)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
@@ -573,7 +592,7 @@ public class ProjectConfigurator(
             .WithEnvironment("SPRING_APPLICATION_SIGNATURE_SECRET", builder.Configuration["core:machinekey"])
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
             .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityAuthorizationContainer, 9999).ToString())
-            .WithHttpEndpoint(Constants.IdentityRegistrationPort, Constants.IdentityRegistrationPort, isProxied: false)
+            .WithHttpEndpoint(HostPorts.Of(Constants.IdentityRegistrationPort), Constants.IdentityRegistrationPort, isProxied: false)
             .WithBuildArg("MODULE", "registration/registration-container")
             // Spring boots long after the container reports Running; without this, anything waiting
             // for the resource to go healthy (the integration-test fixtures) starts too early.
@@ -593,7 +612,7 @@ public class ProjectConfigurator(
             .WithEnvironment("SPRING_APPLICATION_SIGNATURE_SECRET", builder.Configuration["core:machinekey"])
             .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
             .WithEnvironment("GRPC_CLIENT_REGISTRATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
-            .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
+            .WithHttpEndpoint(HostPorts.Of(Constants.IdentityAuthorizationPort), Constants.IdentityAuthorizationPort, isProxied: false)
             .WithBuildArg("MODULE", "authorization/authorization-container")
             .WithHttpHealthCheck("/health")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);

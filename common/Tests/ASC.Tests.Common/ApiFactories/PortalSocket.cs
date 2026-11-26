@@ -78,7 +78,7 @@ public sealed class PortalSocket : IAsyncDisposable
         }
 
         _socket = new SocketIO(
-            new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), AppHostConstants.SocketIoPort).Uri,
+            new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), HostPorts.Of(AppHostConstants.SocketIoPort)).Uri,
             new SocketIOOptions
             {
                 Transport = TransportProtocol.WebSocket,

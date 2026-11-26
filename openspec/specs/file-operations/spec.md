@@ -1027,8 +1027,9 @@ error before anything is queued. The call needs the rights that deleting the fil
 
 `lockFile` (`PUT api/2.0/files/file/{fileId}/lock`, `lockFile` true/false) SHALL set or clear the lock and
 answer the file with `locked` true, or without the flag when unlocked. Locking works in My documents (v3.7)
-and in a room, is idempotent and affects only the named file. Another account's lock can only be released
-by someone with manager rights. Unknown file 404, no access 403, anonymous 401. Which roles may lock is in
+and in a room, except an Instructions room: there `security.Lock` is false and `lockFile` answers 403 (v4.1).
+It is idempotent and affects only the named file. Another account's lock can only be released by someone
+with manager rights. Unknown file 404, no access 403, anonymous 401. Which roles may lock is in
 `room-role-permissions`.
 
 #### Scenario: Lock and unlock
