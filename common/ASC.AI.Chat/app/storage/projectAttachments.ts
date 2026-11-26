@@ -43,13 +43,20 @@
 // refuses (a format no text is read from), one over the size held in memory
 // here, a third-party file, or any failure on the way.
 
-import { proxyBaseUrl, withTimeout, AiServiceHttpError } from "./httpClient.js";
-import { DocspaceApiHttpError, filesApiGet } from "./docspaceFilesApi.js";
+import {
+  DocspaceApiHttpError,
+  envelopeResponse,
+  filesApiGet,
+  filesApiRequest,
+} from "./docspaceFilesApi.js";
+import type { FilesApiBody } from "./docspaceFilesApi.js";
 import { mediaTypeOf } from "./docspaceFileTransfer.js";
 import { FileTooLargeError, readFileBytes } from "./roomSkills.js";
-import { getForwardedHeaders } from "../requestContext.js";
 import { getEntityId, getNumber, getObject, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { UpstreamShapeError } from "./upstreamShape.js";
+import { pooled, UPSTREAM_CONCURRENCY } from "./pooled.js";
+import { writeWasRefused } from "./writeOutcome.js";
 
 /** The largest file copied: its bytes are held in memory on the way. */
 export const MAX_COPY_BYTES = 50 * 1024 * 1024;
@@ -90,31 +97,8 @@ async function inTurn<T>(copy: () => Promise<T>): Promise<T> {
   }
 }
 
-async function postFiles(
-  path: string,
-  init: { json?: unknown; form?: FormData },
-): Promise<unknown> {
-  const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
-  const { signal, cancel } = withTimeout(undefined);
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers:
-        init.json === undefined
-          ? getForwardedHeaders()
-          : { ...getForwardedHeaders(), "Content-Type": "application/json" },
-      body: init.json === undefined ? init.form! : JSON.stringify(init.json),
-      signal,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new AiServiceHttpError(res.status, res.statusText, text, url);
-    }
-    const raw: unknown = await res.json();
-    return isObject(raw) && "response" in raw ? raw["response"] : raw;
-  } finally {
-    cancel();
-  }
+async function postFiles(path: string, body: FilesApiBody): Promise<unknown> {
+  return envelopeResponse(await filesApiRequest("POST", path, body));
 }
 
 async function chunkSize(): Promise<number> {
@@ -123,6 +107,9 @@ async function chunkSize(): Promise<number> {
     const size = isObject(settings) ? getNumber(settings, "chunkUploadSize") : undefined;
     return size !== undefined && size > 0 ? size : DEFAULT_CHUNK_BYTES;
   } catch {
+    // The size only tunes the upload: whatever the failure, the default chunk is one every
+    // portal accepts, and a Files API that is down fails the session calls that follow with
+    // their own status (ts-ai-failure-paths.md §1).
     return DEFAULT_CHUNK_BYTES;
   }
 }
@@ -146,27 +133,42 @@ export async function uploadInChunks(
   });
   const sessionId = isObject(session) ? getString(session, "id") : undefined;
   if (sessionId === undefined) {
-    throw new Error("DocSpace opened an upload session without an id");
+    throw new UpstreamShapeError("POST files/{folderId}/session");
   }
 
   const size = await chunkSize();
   const count = Math.max(1, Math.ceil(bytes.byteLength / size));
-  let last: unknown;
-  for (let index = 0; index < count; index++) {
-    const form = new FormData();
-    form.append(
-      "file",
-      new Blob([bytes.subarray(index * size, (index + 1) * size)], { type: mediaType }),
-      name,
-    );
-    last = await postFiles(`${folder}/session/${encodeURIComponent(sessionId)}`, { form });
+  // The session alone makes no file; the chunk that completes it does.
+  let index = 0;
+  try {
+    let last: unknown;
+    for (; index < count; index++) {
+      const form = new FormData();
+      form.append(
+        "file",
+        new Blob([bytes.subarray(index * size, (index + 1) * size)], { type: mediaType }),
+        name,
+      );
+      last = await postFiles(`${folder}/session/${encodeURIComponent(sessionId)}`, { form });
+    }
+    const file = isObject(last) ? (getObject(last, "file") ?? last) : undefined;
+    const id = file ? getEntityId(file, "id") : undefined;
+    if (id === undefined) {
+      throw new UpstreamShapeError("POST files/{folderId}/session/{sessionId}");
+    }
+    return id;
+  } catch (err) {
+    // Only a refusal (a 4xx) says that no file was made. The last chunk completes the file, so
+    // from that chunk on a timeout, a dropped connection, a 5xx or an answer without the
+    // file's id leaves a file that may exist; the callers answer the failure, the line says
+    // where it may lie (ts-ai-failure-paths.md §6).
+    if (index >= count - 1 && !writeWasRefused(err)) {
+      logger.warn(
+        `uploadInChunks: ${name} may exist in folder ${folderId}, its last chunk got no usable answer`,
+      );
+    }
+    throw err;
   }
-  const file = isObject(last) ? (getObject(last, "file") ?? last) : undefined;
-  const id = file ? getEntityId(file, "id") : undefined;
-  if (id === undefined) {
-    throw new Error("DocSpace finished an upload session without a file");
-  }
-  return id;
 }
 
 /**
@@ -204,10 +206,7 @@ export async function copyIntoProject(projectId: string, entryId: string): Promi
     // A refusal is the ordinary case; anything else (a timeout, a dropped
     // connection, an answer that cannot be read) is worth a warning, and
     // still no reason to fail the attachment.
-    const refused =
-      err instanceof FileTooLargeError ||
-      err instanceof AiServiceHttpError ||
-      err instanceof DocspaceApiHttpError;
+    const refused = err instanceof FileTooLargeError || err instanceof DocspaceApiHttpError;
     logger[refused ? "info" : "warn"](
       `copyIntoProject: file ${entryId} not copied into project ${projectId}, attached where it is: ${
         err instanceof Error ? err.message : String(err)
@@ -226,11 +225,10 @@ export async function copyManyIntoProject(
   projectId: string,
   entryIds: readonly string[],
 ): Promise<string[]> {
-  const copies = new Map<string, Promise<string>>();
-  for (const id of entryIds) {
-    if (!copies.has(id)) {
-      copies.set(id, copyIntoProject(projectId, id));
-    }
-  }
-  return Promise.all(entryIds.map((id) => copies.get(id)!));
+  // A few at a time: each file is read from the Files API before its copy waits for its turn,
+  // and a request may name a hundred of them.
+  const unique = [...new Set(entryIds)];
+  const copied = await pooled(unique, UPSTREAM_CONCURRENCY, (id) => copyIntoProject(projectId, id));
+  const copies = new Map(unique.map((id, i) => [id, copied[i] as string]));
+  return entryIds.map((id) => copies.get(id) as string);
 }

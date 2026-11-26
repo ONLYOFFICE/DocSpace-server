@@ -38,11 +38,20 @@ import logger from "../log.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { safeResolveSource } from "../storage/docspaceFilesApi.js";
-import type { SourceKind, SourceMeta } from "../storage/docspaceFilesApi.js";
+import type { SourceMeta } from "../storage/docspaceFilesApi.js";
 import { sourceMetadataFields } from "@onlyoffice/ai-chat/core";
-import { asyncHandler, startStreamHeartbeat } from "./_helpers.js";
+import {
+  asyncHandler,
+  clientError,
+  ENTITY_ID_PARAM,
+  ENTITY_KIND_PARAM,
+  sourceKindOf,
+  startStreamHeartbeat,
+} from "./_helpers.js";
 import { hasCacheBreakpoints, markCacheBreakpoints } from "./cacheBreakpoints.js";
 import { isObject } from "../narrow.js";
+import { errorBodyText, refusalForLog } from "../storage/errorBody.js";
+import { providerFetch } from "../storage/httpClient.js";
 
 // OpenAI-compatible passthrough for the document editor's AI plugin.
 //
@@ -55,7 +64,7 @@ import { isObject } from "../narrow.js";
 // verbatim — the wire format is owned by the plugin's SDK on one end and
 // the provider on the other, so no translation happens here.
 //
-// The request body is intentionally NOT parsed: `app.ts` skips the JSON
+// The request body is intentionally NOT parsed: `app/createApp.ts` runs no
 // body parser for this path so the raw bytes (which can be megabytes for
 // vision/OCR data URLs) pass through untouched.
 
@@ -70,13 +79,7 @@ import { isObject } from "../narrow.js";
 // All are consumed here and never forwarded — the rest of the query string is
 // relayed to the provider verbatim, and an unknown parameter is at best
 // ignored and at worst a 400.
-const ENTITY_ID_PARAM = "entityId";
-const ENTITY_KIND_PARAM = "entityKind";
 const SESSION_ID_PARAM = "sessionId";
-
-function sourceKindOf(value: string | null): SourceKind {
-  return value === "file" ? "file" : "folder";
-}
 
 // The conversation-correlation header the ONLYOFFICE route reads, mirroring
 // `OnlyOfficeProvider` in `@onlyoffice/ai-chat`.
@@ -314,6 +317,19 @@ const errorEnvelope = (message: string, type: string) => ({
 const openAiError = (res: Response, status: number, message: string, type: string) =>
   res.status(status).json(errorEnvelope(message, type));
 
+// What a failed profile read (a 403 of the AI service for a guest or a portal with AI switched
+// off, its 5xx, its timeout, an answer of the wrong shape) tells the caller: the status and the
+// text of the application's error boundary (`clientError`), in the OpenAI envelope these
+// operations publish for every status, since the plugin's SDK reads `error.message` out of it.
+// The upstream error's own message holds the internal URL and stays in the log.
+function answerFailure(res: Response, route: string, err: unknown): void {
+  const { status, message } = clientError(err);
+  if (status >= 500) {
+    logger.error(`${route} failed: ${String(err)}`);
+  }
+  openAiError(res, status, message, status >= 500 ? "server_error" : "invalid_request_error");
+}
+
 // The plugin never sends `Authorization` for external profiles (their key
 // is empty on the client by design); credentials are attached here from
 // the server-side profile, mirroring the ai-chat client factory: profile
@@ -368,6 +384,8 @@ function maxBodyBytes(providerType: string | undefined): number {
 
 class BodyTooLargeError extends Error {}
 
+type UpstreamOutcome = { response: globalThis.Response } | { error: unknown };
+
 // Read the raw request body into a single buffer, rejecting anything over
 // `limit` as it arrives (the declared-length check upstream only catches
 // honest clients).
@@ -375,7 +393,8 @@ async function readRequestBody(req: Readable, limit: number): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let total = 0;
   for await (const chunk of req) {
-    const buf: Buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
+    const piece: Buffer | string = chunk;
+    const buf = Buffer.isBuffer(piece) ? piece : Buffer.from(piece);
     total += buf.length;
     if (total > limit) {
       throw new BodyTooLargeError();
@@ -385,20 +404,23 @@ async function readRequestBody(req: Readable, limit: number): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-type ShapedBody = { body: Buffer } | { error: string };
+type ShapedBody = { body: Buffer } | { error: string } | { tooLarge: true };
 
 function isJsonContentType(contentType: string | undefined): boolean {
   return (contentType ?? "").toLowerCase().includes("json");
 }
 
 // The one parse this route spends on the plugin's body (only JSON, only up
-// to `MAX_PARSE_BYTES`; a bigger or non-JSON body is forwarded untouched as
-// before), serving two purposes:
+// to `MAX_PARSE_BYTES`; a body of another content type is forwarded
+// untouched, and so is a bigger chat body), serving two purposes:
 //
 // - `images/generations`: check the documented OpenAI fields, so a body the
 //   provider would answer with a 500 is refused here with a 400 (Bug 84414).
 //   Only those fields — the route is a passthrough by contract and a provider
-//   may accept extras of its own.
+//   may accept extras of its own. A JSON body over `MAX_PARSE_BYTES` is
+//   refused as too large instead of forwarded unchecked: the request carries
+//   a prompt and a few options, no image, so the checks cannot be skipped by
+//   padding the body. A body that is not sent as JSON is not checked.
 // - `chat/completions`: fill in `model` from the profile when the body
 //   names none, which is what this route has always documented (Bug 84416).
 //   A `model` the body carries wins, so the plugin's own choice stands.
@@ -408,17 +430,25 @@ function shapeBody(
   subPath: string,
   modelId: string | undefined,
 ): ShapedBody {
-  if (!isJsonContentType(contentType) || body.length > MAX_PARSE_BYTES) {
+  if (!isJsonContentType(contentType)) {
     return { body };
+  }
+  if (body.length > MAX_PARSE_BYTES) {
+    return subPath === "images/generations" ? { tooLarge: true } : { body };
   }
   let parsed: unknown;
   try {
     parsed = JSON.parse(body.toString("utf8"));
   } catch {
-    return { body };
+    parsed = undefined;
   }
   if (!isObject(parsed)) {
-    return { body };
+    // The image route checks its documented fields before forwarding (Bug 84414), and a JSON
+    // body of up to `MAX_PARSE_BYTES` that is no JSON object has none of them, so it is refused
+    // the same way. A chat body is the provider's to judge, as before.
+    return subPath === "images/generations"
+      ? { error: "The request body must be a JSON object" }
+      : { body };
   }
   if (subPath === "images/generations") {
     const error = imageRequestError(parsed);
@@ -436,7 +466,7 @@ function imageRequestError(body: Record<string, unknown>): string | undefined {
     return "prompt is required and must be a non-empty string";
   }
   const n = body["n"];
-  if (n !== undefined && n !== null && (!Number.isInteger(n) || (n as number) < 1)) {
+  if (n !== undefined && n !== null && (typeof n !== "number" || !Number.isInteger(n) || n < 1)) {
     return "n must be a positive integer";
   }
   for (const field of ["model", "size", "quality", "style", "response_format"]) {
@@ -451,13 +481,13 @@ function imageRequestError(body: Record<string, unknown>): string | undefined {
 // Everything the provider or the hop in front of it answers with a 5xx is
 // kept out of the reply: the AI service's error envelope carries the
 // exception's stack trace and the gateway's host, and the gateway's own 500
-// names its Go types. The detail goes to the log; the client gets a fixed
+// names its Go types. The log names the status and the size of that body,
+// not the body (it can quote the request and its key); the client gets a fixed
 // 502 envelope (Bugs 84414, 84415, 84433, 84434). 4xx answers keep passing
 // through — the plugin's SDK raises them as APIErrors with the provider's
 // own message.
 async function logUpstreamFailure(route: string, upstream: globalThis.Response): Promise<void> {
-  const detail = await upstream.text().catch(() => "");
-  logger.error(`${route}: upstream answered ${upstream.status}: ${detail.slice(0, 1000)}`);
+  logger.error(`${route}: upstream answered ${await refusalForLog(upstream)}`);
 }
 
 function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = false) {
@@ -470,7 +500,13 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     markForwardHeadersToProvider();
 
     const profileId = req.params["profileId"] ?? "";
-    const profile = await storage.profiles.readById(profileId);
+    let profile: Awaited<ReturnType<typeof storage.profiles.readById>>;
+    try {
+      profile = await storage.profiles.readById(profileId);
+    } catch (err) {
+      answerFailure(res, `openai passthrough ${subPath}`, err);
+      return;
+    }
     if (!profile || !profile.baseUrl) {
       openAiError(res, 404, "Profile not found", "invalid_request_error");
       return;
@@ -520,6 +556,10 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     }
 
     const shaped = shapeBody(body, req.headers["content-type"], subPath, profile.modelId);
+    if ("tooLarge" in shaped) {
+      openAiError(res, 413, "Request body too large", "invalid_request_error");
+      return;
+    }
     if ("error" in shaped) {
       openAiError(res, 400, shaped.error, "invalid_request_error");
       return;
@@ -556,15 +596,21 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     const canPing = () => atFrameBoundary;
 
     // Settled, not awaited: the grace window below races this promise, and a
-    // rejection reaching the race unhandled would take the process down.
-    const upstreamResult = fetch(target, {
-      method: "POST",
-      headers: providerHeaders(req.headers["content-type"], profile, sessionIdParam),
-      body,
-      signal: upstreamAbortSignal(res),
-    }).then(
-      (response) => ({ response }) as { response: globalThis.Response },
-      (error: unknown) => ({ error }) as { error: unknown },
+    // rejection reaching the race unhandled would take the process down. No
+    // timeout of the client's own: the reply is relayed as a stream that may
+    // run for minutes, and ends when the client hangs up.
+    const upstreamResult = providerFetch(
+      target,
+      {
+        method: "POST",
+        headers: providerHeaders(req.headers["content-type"], profile, sessionIdParam),
+        body,
+        signal: upstreamAbortSignal(res),
+      },
+      "none",
+    ).then(
+      (response): UpstreamOutcome => ({ response }),
+      (error: unknown): UpstreamOutcome => ({ error }),
     );
 
     // Keep-alive started before the provider answered. Once it exists the
@@ -678,11 +724,11 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
       // non-stream answer can be relayed as-is: both are re-framed as a
       // single SSE event the plugin's SDK can raise.
       earlyHeartbeat?.stop();
-      const detail = await upstream.text().catch(() => "");
+      const detail = await errorBodyText(upstream);
       logger.warn(
         `openai passthrough ${subPath}: provider answered ${upstream.status} ${
           contentType ?? "no content-type"
-        } after the keep-alive was committed: ${detail.slice(0, 500)}`,
+        }, ${detail.length} characters, after the keep-alive was committed`,
       );
       writeSseError(res, detail, upstream.status);
       res.end();
@@ -734,11 +780,7 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     });
 
     try {
-      await pipeline(
-        Readable.fromWeb(upstream.body as import("node:stream/web").ReadableStream),
-        relay,
-        res,
-      );
+      await pipeline(Readable.fromWeb(upstream.body), relay, res);
     } catch (err) {
       // Aborted mid-stream (client disconnect) or upstream drop; headers
       // are already sent, so just terminate the response.

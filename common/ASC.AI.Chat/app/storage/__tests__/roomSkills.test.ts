@@ -1,8 +1,38 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 vi.mock("../httpClient.js", () => ({
   proxyBaseUrl: "http://portal",
   withTimeout: () => ({ signal: undefined, cancel: () => {} }),
@@ -26,34 +56,24 @@ vi.mock("../../requestContext.js", () => ({
   getForwardedHeaders: () => ({}),
 }));
 
-const { getContextFolders, getKnowledgeFolders, getRoomSkill, getRoomSkills, getRoomsSkills, readBodyCapped } = await import("../roomSkills.js");
+const { getContextFolders, getKnowledgeFolders, getRoomSkill, getRoomSkills, getRoomsSkills } =
+  await import("../roomSkills.js");
 
 const fetchMock = vi.fn();
 
 describe("getKnowledgeFolders", () => {
   beforeEach(() => {
-    fetchMock.mockReset();
-    vi.stubGlobal("fetch", fetchMock);
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
+    filesApiGet.mockReset();
   });
 
   it("lists the Knowledge rooms of the AI rooms root, not of Rooms", async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        response: { folders: [{ id: 7, title: "Docs", roomType: 11 }], total: 1 },
-      }),
-    });
+    filesApiGet.mockResolvedValue({ folders: [{ id: 7, title: "Docs", roomType: 11 }], total: 1 });
 
     const folders = await getKnowledgeFolders();
 
-    const url = new URL(String(fetchMock.mock.calls[0]?.[0]));
-    expect(url.pathname).toBe("/api/2.0/files/rooms");
-    expect(url.searchParams.get("type")).toBe("11");
-    expect(url.searchParams.get("searchArea")).toBe("AiHub");
+    expect(filesApiGet.mock.calls).toEqual([
+      ["rooms", { type: 11, searchArea: "AiHub", count: 100, startIndex: 0 }],
+    ]);
     expect(folders).toHaveLength(1);
   });
 });
@@ -109,42 +129,24 @@ describe("skills catalog", () => {
   });
 
   it("offers only the Instructions rooms that hold a skill", async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        response: {
-          folders: [
-            { id: 7, title: "Brand voice", roomType: 10 },
-            { id: 8, title: "Empty", roomType: 10 },
-          ],
-          total: 2,
-        },
-      }),
-    });
-    filesApiGet.mockResolvedValue(
-      catalog(
-        { id: 7, skills: [{ id: "f1", name: "tone", description: "Tone." }] },
-        { id: 8, skills: [] },
-      ),
+    filesApiGet.mockImplementation(async (path: string) =>
+      path === "rooms"
+        ? {
+            folders: [
+              { id: 7, title: "Brand voice", roomType: 10 },
+              { id: 8, title: "Empty", roomType: 10 },
+            ],
+            total: 2,
+          }
+        : catalog(
+            { id: 7, skills: [{ id: "f1", name: "tone", description: "Tone." }] },
+            { id: 8, skills: [] },
+          ),
     );
 
     const folders = await getContextFolders();
 
     expect(folders).toEqual([{ cloud: "docspace", rooms: [{ id: "7", name: "Brand voice" }] }]);
-    expect(filesApiGet).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("readBodyCapped", () => {
-  const body = (bytes: number[], headers: Record<string, string> = {}) =>
-    new Response(new Uint8Array(bytes), { headers });
-
-  it("answers the bytes of a body within the limit", async () => {
-    expect(Array.from((await readBodyCapped(body([1, 2, 3]), 3)) ?? [])).toEqual([1, 2, 3]);
-  });
-
-  it("answers null for a body that declares more than the limit, or proves larger", async () => {
-    expect(await readBodyCapped(body([1], { "content-length": "9" }), 3)).toBeNull();
-    expect(await readBodyCapped(body([1, 2, 3, 4]), 3)).toBeNull();
+    expect(filesApiGet.mock.calls.map(([path]) => path)).toEqual(["rooms", "rooms/skills"]);
   });
 });

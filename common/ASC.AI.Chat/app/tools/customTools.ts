@@ -1,38 +1,38 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { SystemToolsSource } from "@onlyoffice/ai-chat/core";
-import type { McpHttpServerConfig } from "@onlyoffice/ai-chat/core";
+import type { McpHttpServerConfig, McpServerConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { getSystemServerConfig } from "./systemTools.js";
@@ -70,18 +70,23 @@ export async function resolveCustomServers(
   // set, which turned a refusal (Guest, AI disabled: Bugs 84400, 84401) or a
   // passing upstream outage into a 400 "unknown serverType". Only a 404 —
   // nothing stored for the scope — still reads as an empty map.
-  const tolerate = (what: string) => (err: unknown) => {
-    if (options?.strict && !(err instanceof AiServiceHttpError && err.status === 404)) {
+  let servers: Record<string, McpServerConfig>;
+  try {
+    servers = await storage.mcpServers.readAll(undefined);
+  } catch (err) {
+    const absent = err instanceof AiServiceHttpError && err.status === 404;
+    if (options?.strict && !absent) {
       throw err;
     }
+    // In a round, custom servers are an optional part of it: without them the round runs
+    // on the system tools, and the failure is logged.
     logger.warn(
-      `customTools: ${what} read failed: ${err instanceof Error ? err.message : String(err)}`,
+      `customTools: portal-wide server map read failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
     );
-    return {};
-  };
-  const servers = await storage.mcpServers
-    .readAll(undefined)
-    .catch(tolerate("portal-wide server map"));
+    servers = {};
+  }
   const out: Record<string, McpHttpServerConfig> = {};
   for (const [name, config] of Object.entries(servers)) {
     if (name === PORTAL_MCP_SERVER_NAME) continue;

@@ -44,7 +44,9 @@ export function sanitizeInstruction(text: string): string {
   if (!text) {
     return "";
   }
-  return filterXSS(text, {
+  // A `<` that cannot open a tag is escaped first: the filter would read it as the start of one and
+  // drop the text up to the next `>`, so "x < 2 and y > 3" lost its middle.
+  return filterXSS(text.replace(/<(?![A-Za-z!/?])/g, "&lt;"), {
     whiteList: {},
     stripIgnoreTag: true,
     stripIgnoreTagBody: ["script", "style"],

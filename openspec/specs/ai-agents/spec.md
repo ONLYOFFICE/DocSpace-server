@@ -1023,10 +1023,11 @@ SHALL cancel the generation and leave the thread usable.
 
 ### Requirement: Regenerating a reply
 
-`aiRegenerateStream` SHALL delete the last assistant reply, keep the question and every earlier turn, and
-stream a new reply on the thread's own model (the project's inside a project); a tool chain of the old reply
-SHALL be replaced whole. A thread with nothing to regenerate SHALL answer 200 generating nothing, an unknown
-thread 404 before any stream, another user's thread 403 keeping the reply, AI off 403.
+`aiRegenerateStream` SHALL replace the last assistant reply, keep the question and every earlier turn, and
+stream a new reply on the thread's own model (the project's inside a project). The old tool chain SHALL leave
+the reply's content and the model's history; a finished old reply SHALL stay in `metadata.custom.replyVersions`.
+Nothing to regenerate SHALL answer 200 generating nothing, an unknown thread 404 before any stream, another
+user's thread 403 keeping the reply, AI off 403.
 
 #### Scenario: Multi-turn thread
 
@@ -1037,6 +1038,11 @@ thread 404 before any stream, another user's thread 403 keeping the reply, AI of
 
 - **WHEN** the client hangs up mid-reply and the owner then regenerates
 - **THEN** the abandoned reply is replaced by a whole one
+
+#### Scenario: Earlier version kept
+
+- **WHEN** the owner regenerates a reply whose approved tool call finished it
+- **THEN** the new reply and every streamed model request of the regenerate carry neither the old call nor its result, and the new reply's `replyVersions.others` holds the old reply with both
 
 ### Requirement: Tool calls and the approval pause
 
@@ -1166,7 +1172,7 @@ is replaced whole on update; each change is audited.
 #### Scenario: AI off
 
 - **WHEN** AI is off and a member calls any of these routes
-- **THEN** the system answers 403 while the tools catalogue still answers
+- **THEN** the system answers 403, and so does the tools catalogue
 
 ### Requirement: One registry per portal
 
@@ -1306,9 +1312,14 @@ list under the server-prefixed key, where the read finds it.
 
 `aiToolsListSystemTools` SHALL answer the portal's tools grouped by server type — a registered server's tools
 under its name — the system group keys in `system` and in `errors` the reason a registered server delivered
-none (its credentials never echoed), to every signed-in member, Guests included, with AI on or off, whatever
-`entityId` it carries. The catalogue lists no tool twice, lists a registered server as no system group, and
+none (its credentials never echoed), to every non-guest member, whatever `entityId` it carries; a Guest and
+an AI-off portal get 403. The catalogue lists no tool twice, lists a registered server as no system group, and
 a registered server's tools reach the model in every chat.
+
+#### Scenario: Guest or AI off
+
+- **WHEN** a Guest reads the catalogue, or a member reads it while AI is off
+- **THEN** the system answers 403
 
 #### Scenario: Unreachable registered server
 
@@ -1420,7 +1431,7 @@ without the provider's body or URL.
 
 `aiOpenaiChatCompletions` and `aiOpenaiImagesGenerations` SHALL relay the request for the profile named in
 the path to its provider and answer verbatim to DocSpace admins, Room admins and Users (Guest 403,
-anonymous 401, AI off 403). A malformed or unknown `profileId` SHALL answer 400; `stream` true streams
+anonymous 401, AI off 403). A malformed `profileId` SHALL answer 400 and an unknown one 404; `stream` true streams
 chunks; an image generation on a text-only model is refused (400). The gateway proxy exposes only models,
 chat completions, image generation, search and contents (others 404).
 
@@ -1438,13 +1449,13 @@ chat completions, image generation, search and contents (others 404).
 
 `aiEditorToolsList` SHALL publish the tool catalogue — unique names, a description, an object input schema
 whose required arguments are declared and never also defaulted, `requireApproval` off for read tools and on
-for the ones that change something — identically to every non-guest member and on repeated reads, a Guest
-getting it without the document generators. Anonymous 401; AI off 403.
+for the ones that change something — identically to every non-guest member and on repeated reads.
+Anonymous 401; a Guest 403; AI off 403.
 
-#### Scenario: Guest catalogue
+#### Scenario: Guest refused
 
-- **WHEN** a Guest and a User read the catalogue
-- **THEN** the User's list holds the document generators and the Guest's does not
+- **WHEN** a Guest reads the catalogue
+- **THEN** the system answers 403
 
 ### Requirement: Calling an editor tool
 

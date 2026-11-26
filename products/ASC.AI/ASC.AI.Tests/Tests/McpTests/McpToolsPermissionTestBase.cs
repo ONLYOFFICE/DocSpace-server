@@ -40,7 +40,7 @@ namespace ASC.AI.Tests.Tests.McpTests;
 /// Measured on the portal registry (no entity), for every role:
 /// <code>
 ///                            owner  DSAdmin  RoomAdmin  User  Guest  anon
-///   list-system-tools          200    200      200      200    200   401
+///   list-system-tools          200    200      200      200    403   401
 ///   list-custom-servers        200    200      200      200    403   401
 ///   get-custom-server          200    200      200      200    403   401
 ///   get-disabled               200    200      200      200    403   401

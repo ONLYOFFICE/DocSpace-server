@@ -1,42 +1,44 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { AttachmentsEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, MAX_ATTACHMENTS_PER_REQUEST, unpackPositional } from "./_helpers.js";
-import { isObject, parseInt10 } from "../narrow.js";
+import { asNumber, isObject, parseInteger } from "../narrow.js";
 import { setAnalyzeEntryIds } from "../requestContext.js";
 import { getSuggestedQuestions } from "../forms/suggestedQuestions.js";
+import { nonEmptyStrings, optionalString } from "./requestFields.js";
+import { assertAiAccess } from "./aiAccess.js";
 
 const engine = new AttachmentsEngine({ storage });
 
@@ -56,8 +58,7 @@ type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 // stays in C#, which validates the RESOLVED file title against the
 // vectorization allowlist and cannot be bypassed by a spoofed title
 // (Bug 82893).
-const ARCHIVE_EXTENSION =
-  /\.(zip|rar|7z|tar|gz|tgz|bz2|tbz2?|xz|txz|zst|lz|lzma|cab|iso)$/i;
+const ARCHIVE_EXTENSION = /\.(zip|rar|7z|tar|gz|tgz|bz2|tbz2?|xz|txz|zst|lz|lzma|cab|iso)$/i;
 
 function declaredFileName(title: unknown, path: string): string {
   if (typeof title === "string" && title.length > 0) {
@@ -66,16 +67,19 @@ function declaredFileName(title: unknown, path: string): string {
   return path.split(/[\\/]/).pop() ?? path;
 }
 
-// Coerce a file `type` to a number. Accepts a real number or a numeric string
-// like "1" (Bugs 82745, 82746); anything else (boolean, object, non-numeric
-// string) yields `undefined` so the caller can reject it with a 400. The value
+// Coerce a file `type` to a number. Accepts any finite JSON number as it is (a
+// fraction too: ASC.AI.Tests, AttachmentSaveFileTypeTests, echoes 1.5 back) or
+// a string that is a whole integer, like "1" (Bugs 82745, 82746); anything
+// else (boolean, object, a string with more than the digits such as "65abc",
+// "1.5" or "1e3") yields `undefined` so the caller can reject it with a 400,
+// rather than storing the leading digits of the string. The value
 // is an open-ended ONLYOFFICE `c_oAscFileType` code (e.g. docx=65, pptx=129,
 // xlsx=257, pdf=513, vsd=16385 — see the client's `getOnlyofficeFileType`),
 // NOT the small `ASC.Web.Core` `FileType` category enum, so it is validated as
 // a number only — a closed enum-membership check would reject legitimate
 // attachments (see the Bug 82743 note).
 function normalizeFileType(value: unknown): number | undefined {
-  return parseInt10(value);
+  return typeof value === "number" ? asNumber(value) : parseInteger(value);
 }
 
 // Validate a single file-attachment input up front so a malformed shape returns
@@ -135,6 +139,9 @@ function parseFileInput(raw: unknown): ParseResult<FileInput> {
 // that cannot be read attaches the file itself and fails nothing.
 export const attachmentsController = {
   saveFile: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["input", "entityId"] as const);
     // Validate the required `input` shape up front: without it, an undefined or
     // malformed `input` reaches the engine and throws a TypeError that collapses
@@ -144,20 +151,22 @@ export const attachmentsController = {
       res.status(400).json({ error: parsed.error });
       return;
     }
-    const result = await engine.saveFile(
-      parsed.value,
-      args.entityId as string | undefined,
-    );
+    const entityId = optionalString(args.entityId, "entityId");
+    const result = await engine.saveFile(parsed.value, entityId);
     res.json(result);
   }),
 
   saveFilesMany: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["inputs", "entityId"] as const);
     // Validate each element with the same rules as save-file; a bad element
     // must fail with a clean 400 rather than crash the engine (Bug 82754).
     // `inputs` itself is required: a missing/null value is a malformed
     // request, not an empty batch — only an explicit `[]` means "no files"
     // (Bug 82754 reopen).
+    const entityId = optionalString(args.entityId, "entityId");
     const list = args.inputs;
     if (!Array.isArray(list)) {
       res.status(400).json({ error: "inputs must be an array" });
@@ -190,10 +199,7 @@ export const attachmentsController = {
       }
     }
     setAnalyzeEntryIds(analyzeEntryIds);
-    const result = await engine.saveFilesMany(
-      inputs,
-      args.entityId as string | undefined,
-    );
+    const result = await engine.saveFilesMany(inputs, entityId);
     res.json(result);
   }),
 
@@ -202,6 +208,8 @@ export const attachmentsController = {
   // persist a raw base64 draft — see the comment there.
 
   get: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id"] as const);
     // An empty/absent id reaches the DocSpace storage as a bare route and
     // comes back as a 405; validate it here so the caller gets a clean 400
@@ -215,6 +223,8 @@ export const attachmentsController = {
   }),
 
   getMany: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["ids"] as const);
     // An empty body leaves `ids` unset and the engine batch-scan throws,
     // collapsing to a 500; require a present, non-empty array (Bug 82763).
@@ -231,13 +241,15 @@ export const attachmentsController = {
       });
       return;
     }
-    const result = await engine.getMany(args.ids as string[]);
+    const result = await engine.getMany(nonEmptyStrings(args.ids, "ids"));
     res.json(result);
   }),
 
   // Long-poll for a form's starter questions by the attachment id it was attached under; the client polls
   // on `status` ("ready" | "pending" | "unavailable"). The model call runs here — see forms/suggestedQuestions.
   getSuggestedQuestions: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id"] as const);
     if (typeof args.id !== "string" || args.id.length === 0) {
       res.status(400).json({ error: "id is required" });
@@ -248,6 +260,8 @@ export const attachmentsController = {
   }),
 
   delete: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["id"] as const);
     // Without an id the storage would ask the backend to delete
     // `/attachments/undefined`.
@@ -260,26 +274,41 @@ export const attachmentsController = {
   }),
 
   deleteMany: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["ids"] as const);
-    await engine.deleteMany((args.ids as string[]) ?? []);
+    // No body and an empty list delete nothing and succeed; anything else is a list of ids.
+    const list: unknown = args.ids ?? [];
+    if (!Array.isArray(list)) {
+      res.status(400).json({ error: "ids must be an array" });
+      return;
+    }
+    if (list.length > MAX_ATTACHMENTS_PER_REQUEST) {
+      res.status(400).json({
+        error: `ids may name at most ${MAX_ATTACHMENTS_PER_REQUEST} attachments (got ${list.length})`,
+      });
+      return;
+    }
+    await engine.deleteMany(nonEmptyStrings(list, "ids"));
     res.json({ success: true });
   }),
 
   linkToMessage: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["ids", "messageId", "threadId"] as const);
     // Require every param up front: an empty body would otherwise reach storage
     // as undefined ids/messageId/threadId and fail late (Bug 82771).
     if (
-      !Array.isArray(args.ids)
-      || args.ids.length === 0
-      || typeof args.messageId !== "string"
-      || args.messageId.length === 0
-      || typeof args.threadId !== "string"
-      || args.threadId.length === 0
+      !Array.isArray(args.ids) ||
+      args.ids.length === 0 ||
+      typeof args.messageId !== "string" ||
+      args.messageId.length === 0 ||
+      typeof args.threadId !== "string" ||
+      args.threadId.length === 0
     ) {
       res.status(400).json({
-        error:
-          "ids (non-empty array), messageId (string) and threadId (string) are required",
+        error: "ids (non-empty array), messageId (string) and threadId (string) are required",
       });
       return;
     }
@@ -296,7 +325,7 @@ export const attachmentsController = {
       return;
     }
     // An attachment named twice is bound once.
-    const ids = [...new Set(args.ids as string[])];
+    const ids = [...new Set(nonEmptyStrings(args.ids, "ids"))];
     const messageThreadId = await storage.messages.readThreadId(args.messageId);
     if (messageThreadId === null) {
       res.status(404).json({ error: "message not found" });

@@ -33,9 +33,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 const engine = {
   send: vi.fn(),
   sendCustom: vi.fn(),
@@ -88,7 +85,17 @@ vi.mock("../../tools/customTools.js", () => ({
   primeCustomServers: vi.fn(async () => {}),
 }));
 const readThread = vi.fn();
-vi.mock("../../storage/index.js", () => ({ storage: { threads: { readById: readThread } } }));
+const readHistory = vi.fn();
+// The access gate (aiAccess.ts) reads the tool prefs: `send` and `sendCustom` ask it first, and
+// a round whose aggregate read installed no snapshot (the mock above installs none) asks it after.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn(async () => ({})) }));
+vi.mock("../../storage/index.js", () => ({
+  storage: {
+    threads: { readById: readThread },
+    messages: { readByThread: readHistory },
+    toolPrefs,
+  },
+}));
 vi.mock("../../storage/httpClient.js", () => ({
   AiServiceHttpError: class extends Error {},
   aiService: { get: vi.fn(async () => ({})) },
@@ -114,6 +121,7 @@ vi.mock("../../tools/formAnalysisSubAgent.js", () => ({ formAnalysisSubAgent: {}
 vi.mock("../../tools/documentAgent.js", () => ({ documentAgentTools: {} }));
 
 const { aiController } = await import("../aiController.js");
+const { handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
@@ -125,7 +133,8 @@ const run = async (name: keyof typeof aiController, body: unknown) => {
     writableEnded: false,
   };
   res.status.mockReturnValue(res);
-  await (aiController[name] as unknown as Handler)({ body, query: {} }, res, vi.fn());
+  (aiController[name] as unknown as Handler)({ body, query: {} }, res, vi.fn());
+  await handlerSettled(res);
   return { status: res.status.mock.calls[0]?.[0] as number | undefined, res };
 };
 
@@ -145,6 +154,7 @@ beforeEach(() => {
   assertThreadCreatable.mockReset().mockResolvedValue(undefined);
   readStoredProfile.mockReset().mockResolvedValue({ id: "p1", providerType: "openai" });
   readThread.mockReset().mockResolvedValue({ id: "t1", profileId: "p-thread" });
+  readHistory.mockReset().mockResolvedValue([]);
   setRoundProfileId.mockReset();
   setRoundThreadId.mockReset();
 });
@@ -209,7 +219,8 @@ describe.each(["sendWithStream", "sendWithStreamOpenAI"] as const)("%s of the co
     };
     res.status.mockReturnValue(res);
     const next = vi.fn();
-    await (aiController[name] as unknown as Handler)({ body, query: {}, on: vi.fn() }, res, next);
+    (aiController[name] as unknown as Handler)({ body, query: {}, on: vi.fn() }, res, next);
+    await handlerSettled(res);
     expect(next).not.toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalledWith(400);
     expect(engine[name]).toHaveBeenCalledTimes(1);

@@ -37,7 +37,8 @@ namespace ASC.AI.Tests.Tests.McpTests;
 /// <c>tools/list-system-tools</c>: the catalogue of tools. Since the built-in DocSpace tools were hidden it is the
 /// system groups the host configures plus the LIVE tools of every registered custom server (a server that cannot be
 /// reached is named in <c>errors</c>) — the clause "their tools appear in the common list" has a route behind it now.
-/// It is the one tools route that asks for no membership and stays readable with AI access off.
+/// Every non-guest member reads it; a Guest is refused, and so is every caller while AI access is off
+/// (<see cref="McpToolsAiDisabledTests"/>).
 /// </summary>
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Mcp")]
@@ -116,13 +117,12 @@ public class McpToolsCatalogueTests(AspireAppFixture fixture) : McpTestBase(fixt
         reply.Json!.Value.GetProperty("groups").EnumerateObject().Select(p => p.Name).Except(system).Should().Equal("portal-srv");
     }
 
-    /// <summary>The one route that asks for no membership: every role gets the catalogue, a Guest included.</summary>
+    /// <summary>Every non-guest role gets the catalogue.</summary>
     [Theory]
     [InlineData(McpRole.DocSpaceAdmin)]
     [InlineData(McpRole.RoomAdmin)]
     [InlineData(McpRole.User)]
-    [InlineData(McpRole.Guest)]
-    public async Task ListSystemTools_EveryRoleReadsTheCatalogue(McpRole role)
+    public async Task ListSystemTools_EveryNonGuestRoleReadsTheCatalogue(McpRole role)
     {
         var member = await InviteRoleAsync(role);
         await ActAsAsync(member);
@@ -133,14 +133,18 @@ public class McpToolsCatalogueTests(AspireAppFixture fixture) : McpTestBase(fixt
         reply.Json!.Value.TryGetProperty("groups", out _).Should().BeTrue(reply.ToString());
     }
 
+    /// <summary>A Guest has no access to AI: the catalogue is refused like the registry.</summary>
     [Fact]
-    public async Task ListSystemTools_AGuestGetsTheCatalogueAndNothingElseOnThisSurface()
+    public async Task ListSystemTools_AGuestIsRefused_LikeOnTheRestOfThisSurface()
     {
         await RegisterAsync("owners-server");
         var guest = await InviteRoleAsync(McpRole.Guest);
         await ActAsAsync(guest);
 
         (await GetToolsAsync("list-custom-servers")).Code.Should().Be(403, "the registry stays closed to a Guest");
-        (await GetToolsAsync("list-system-tools")).Code.Should().Be(200);
+        var catalogue = await GetToolsAsync("list-system-tools");
+
+        catalogue.Code.Should().Be(403, catalogue.ToString());
+        catalogue.Error.Should().Be("Forbidden");
     }
 }
