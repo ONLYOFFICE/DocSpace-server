@@ -131,6 +131,14 @@ public partial class BackupPortalTask(
 
     private async Task DoDump(IDataWriteOperator writer)
     {
+        // the statements this dump writes are MySQL's; PostgreSQL writes the rows only (NeutralDump)
+        if (DbFactory.Dialect == BackupSqlDialect.PostgreSql)
+        {
+            await DoNeutralDumpAsync(writer);
+
+            return;
+        }
+
         var databases = new Dictionary<Tuple<string, string>, List<string>>();
 
         await using (var connection = DbFactory.OpenConnection())
@@ -182,11 +190,127 @@ public partial class BackupPortalTask(
         }
     }
 
+    private async Task DoNeutralDumpAsync(IDataWriteOperator writer)
+    {
+        var dialect = DbFactory.Dialect;
+        var excluded = GetExcludedFromDump();
+
+        using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(true.ToString())))
+        {
+            await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream, () => Task.CompletedTask);
+        }
+
+        var manifest = new NeutralDumpManifest { Source = dialect.Name };
+
+        await using var connection = DbFactory.OpenConnection();
+
+        // one snapshot for all tables, so that the rows of one table never refer to a row another one lost meanwhile
+        await using var transaction = await connection.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+
+        var tables = ReadNames(connection, transaction, dialect.ListTablesQuery)
+            .Where(table => !NeutralDump.IsExcluded(table, excluded))
+            .Order(StringComparer.Ordinal)
+            .ToList();
+        manifest.Migrations.AddRange(ReadNames(connection, transaction, dialect.MigrationHistoryQuery));
+
+        List<BackupFileInfo> files = null;
+        var count = tables.Count;
+        var completedCount = 0;
+
+        if (ProcessStorage)
+        {
+            var tenants = (await tenantManager.GetTenantsAsync(false)).Select(r => r.Id);
+            files = await GetFilesTenants(tenants);
+            count += files.Count;
+        }
+
+        SetStepsCount(1);
+
+        foreach (var name in tables)
+        {
+            var table = new TableInfo(name);
+            dialect.ReadColumns(connection, table);
+
+            var dumped = new NeutralDumpTable { Name = name };
+
+            // a cursor in the snapshot reads the table once, page after page
+            await ExecuteAsync(connection, transaction, dialect.DeclareCursor(table));
+
+            while (true)
+            {
+                using var data = new DataTable(name);
+
+                await using (var command = connection.CreateCommand())
+                {
+                    command.Transaction = transaction;
+                    command.CommandText = dialect.FetchCursor(Limit);
+
+                    var dataAdapter = DbFactory.CreateDataAdapter();
+                    dataAdapter.SelectCommand = command.WithTimeout(600);
+                    ((DbDataAdapter)dataAdapter).Fill(data);
+                }
+
+                if (data.Rows.Count == 0)
+                {
+                    break;
+                }
+
+                foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
+                {
+                    col.DateTimeMode = DataSetDateTime.Unspecified;
+                }
+
+                dumped.Pages++;
+                dumped.Rows += data.Rows.Count;
+
+                await using (var file = tempStream.Create())
+                {
+                    data.WriteXml(file, XmlWriteMode.WriteSchema);
+                    await writer.WriteEntryAsync(NeutralDump.PageKey(name, dumped.Pages), file, () => Task.CompletedTask);
+                }
+
+                if (data.Rows.Count < Limit)
+                {
+                    break;
+                }
+            }
+
+            await ExecuteAsync(connection, transaction, dialect.CloseCursor());
+
+            manifest.Tables.Add(dumped);
+            logger.DebugDumpTableDataStop(name);
+            await SetProgress();
+        }
+
+        await transaction.CommitAsync();
+
+        await using (var stream = await NeutralDump.WriteManifestAsync(manifest, tempStream))
+        {
+            await writer.WriteEntryAsync(NeutralDump.ManifestKey, stream, () => Task.CompletedTask);
+        }
+
+        if (ProcessStorage)
+        {
+            await DoBackupStorageAsync(writer, files, SetProgress, true);
+        }
+
+        async Task SetProgress()
+        {
+            await SetCurrentStepProgress((int)(++completedCount * 100 / (double)count));
+        }
+    }
+
+    private static async Task ExecuteAsync(DbConnection connection, DbTransaction transaction, string sql)
+    {
+        await using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = sql;
+        await command.WithTimeout(600).ExecuteNonQueryAsync();
+    }
+
     private async Task DoDump(IDataWriteOperator writer, string dbName, string connectionString, List<string> tables)
     {
-        var excluded = ModuleProvider.AllModules.Where(r => _ignoredModules.Contains(r.ModuleName)).SelectMany(r => r.Tables).Select(r => r.Name).ToList();
-        excluded.AddRange(_ignoredTables);
-        excluded.Add("res_");
+        var excluded = GetExcludedFromDump();
 
         var dir = Path.GetDirectoryName(BackupFilePath);
         var subDir = CrossPlatform.PathCombine(dir, Path.GetFileNameWithoutExtension(BackupFilePath));

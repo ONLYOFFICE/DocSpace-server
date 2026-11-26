@@ -95,7 +95,7 @@ raw JSON because of P8. The TS suite the ported tests come from has the same two
 | **Audit trail of plugin changes** | | |
 | `WebpluginUploaded` / `WebpluginUpdated` / `WebpluginDeleted` with target `pluginName+version` and the plugin name as description; none on reads/refresh | `Controller:90, 188, 252`; yaml audit enum rows 81468-81470 (6085-6087 in the description at 80785); `Tests/WebPluginAuditTests.cs:66-95` (one event each, target `pluginName+version`, none for get/list/refresh) | TEST-CONFIRMED [run: PASS]; CODE-ONLY: the description text (not in `AuditEventDto`) |
 | **Plugins in backup and restore** | | |
-| `webplugins` is in the allowed storage modules of a portal backup; `systemwebplugins` is not, and is `disableMigrate: true` / `visible: false` in storage; states live in the portal settings table | `common/ASC.Data.Backup.Core/Tasks/PortalTaskBase.cs:123-150`; `storage.json:177-185`; `ConfigSettings:79-91` (`ISettings` → `webstudio_settings`) | CODE-ONLY (not done: backup/restore runs in the backup suite, not on this stand) |
+| `webplugins` is in the allowed storage modules of a portal backup; `systemwebplugins` is not, and is `disableMigrate: true` / `visible: false` in storage; states live in the portal settings table | `common/ASC.Data.Backup.Core/Tasks/PortalTaskBase.cs:149-176`; `storage.json:177-185`; `ConfigSettings:79-91` (`ISettings` → `webstudio_settings`) | CODE-ONLY (not done: backup/restore runs in the backup suite, not on this stand) |
 
 ## Where the server differs from the release notes or the OpenAPI document (spec follows the server)
 

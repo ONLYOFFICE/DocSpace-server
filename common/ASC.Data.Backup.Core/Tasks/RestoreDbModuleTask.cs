@@ -238,6 +238,10 @@ public class RestoreDbModuleTask : PortalTaskBase
                 }
             }
 
+            // the sequences are moved past the ids of each batch before it is committed, which narrows, but does not
+            // close, the window in which a service of another portal inserting into the same table meets a restored id
+            await BackupSqlDialect.For(connection).AfterTableRestoredAsync(connection, tableInfo);
+
             await transaction.CommitAsync();
             transactionData.TransactionsCommited++;
             transactionData.RowsInserted += rowsSuccess;
@@ -311,25 +315,9 @@ public class RestoreDbModuleTask : PortalTaskBase
         return result;
     }
 
-    private void SetColumns(DbConnection connection, TableInfo table)
+    private static void SetColumns(DbConnection connection, TableInfo table)
     {
-        var showColumnsCommand = DbFactory.CreateShowColumnsCommand(table.Name);
-        showColumnsCommand.Connection = connection;
-
-        var list = new List<string>();
-        using (var result = showColumnsCommand.ExecuteReader())
-        {
-            while (result.Read())
-            {
-                var extra = result.GetString(5);
-                if (!extra.Contains("GENERATED", StringComparison.OrdinalIgnoreCase))
-                {
-                    list.Add(result.GetString(0));
-                }
-            }
-        }
-
-        table.Columns = list.ToArray();
+        BackupSqlDialect.For(connection).ReadColumns(connection, table);
     }
 
     private class TransactionData

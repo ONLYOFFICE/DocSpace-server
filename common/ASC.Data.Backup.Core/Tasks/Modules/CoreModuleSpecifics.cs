@@ -72,14 +72,14 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         ];
     }
 
-    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
+    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table, BackupSqlDialect dialect)
     {
         if (table.Name == "core_settings")
         {
             return string.Format("where t.{0} = {1} and id not in ('{2}')", table.TenantColumn, tenantId, LicenseReader.CustomerIdKey);
         }
 
-        return base.GetSelectCommandConditionText(tenantId, table);
+        return base.GetSelectCommandConditionText(tenantId, table, dialect);
     }
 
     protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,

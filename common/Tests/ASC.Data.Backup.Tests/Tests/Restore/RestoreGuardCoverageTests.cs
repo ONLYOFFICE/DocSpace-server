@@ -36,8 +36,9 @@ namespace ASC.Data.Backup.Tests.Tests.Restore;
 
 /// <summary>
 /// Nothing goes around the restore guard: the SDK restore call and the raw restore route appear in the
-/// suite's sources only in <c>BackupTestBase</c>, once each, and each inside the delegate handed to
-/// <see cref="RestoreGuard"/>. The sources are scanned as text with their comments blanked out, so a
+/// suite's sources only in <c>BackupTestBase</c>, each inside the delegate handed to <see cref="RestoreGuard"/>:
+/// the raw route and one SDK call behind the guard that lets nothing queue, one SDK call behind the guard that
+/// lets only a restore of the test's own portal through, and one behind the guard of the server-wide restore. The sources are scanned as text with their comments blanked out, so a
 /// comment that names the endpoint is not taken for a call. It needs no portal and sends nothing.
 /// </summary>
 public class RestoreGuardCoverageTests
@@ -85,26 +86,47 @@ public class RestoreGuardCoverageTests
     }
 
     [Fact]
-    public void GuardedHelper_MakesExactlyOneSdkCallAndOneRawCall_EachInsideTheGuard()
+    public void GuardedHelper_MakesThreeSdkCallsAndOneRawCall_EachInsideItsGuard()
     {
         // Arrange
         var helper = ReadSuiteSources().Single(source => source.Name == HelperFile).Code;
 
         // Act
-        var sdkCalls = _sdkCall.Matches(helper);
-        var routes = _rawRoute.Matches(helper);
+        var sdkCalls = _sdkCall.Matches(helper).Select(match => match.Index).ToList();
+        var routes = _rawRoute.Matches(helper).Select(match => match.Index).ToList();
 
-        // Assert
-        sdkCalls.Should().HaveCount(1);
+        // Assert: one SDK call and the raw route behind the guard that lets nothing queue, one SDK call behind
+        // the guard that lets only a restore of the test's own portal through, and one behind the guard of the
+        // server-wide restore, which needs its environment variable
+        sdkCalls.Should().HaveCount(3);
         routes.Should().HaveCount(1);
 
-        foreach (var index in sdkCalls.Select(match => match.Index).Concat(routes.Select(match => match.Index)))
-        {
-            var guard = helper.LastIndexOf("RestoreGuard.SendAsync(", index, StringComparison.Ordinal);
+        GuardsOf(helper, sdkCalls).Should().BeEquivalentTo([CannotQueueGuard, OwnPortalGuard, ServerWideGuard]);
+        GuardsOf(helper, routes).Should().BeEquivalentTo([CannotQueueGuard]);
+    }
 
-            guard.Should().BeGreaterThanOrEqualTo(0);
-            (index - guard).Should().BeLessThan(400, "the call has to sit inside the delegate passed to the guard");
+    private const string CannotQueueGuard = "RestoreGuard.SendAsync(";
+    private const string OwnPortalGuard = "RestoreGuard.SendOwnPortalRestoreAsync(";
+    private const string ServerWideGuard = "RestoreGuard.SendServerWideRestoreAsync(";
+
+    // The guard each call sits in: the nearest guard call before it, within the delegate passed to it.
+    private static List<string> GuardsOf(string helper, IEnumerable<int> calls)
+    {
+        var guards = new List<string>();
+
+        foreach (var index in calls)
+        {
+            var nearest = new[] { CannotQueueGuard, OwnPortalGuard, ServerWideGuard }
+                .Select(guard => (guard, at: helper.LastIndexOf(guard, index, StringComparison.Ordinal)))
+                .MaxBy(found => found.at);
+
+            nearest.at.Should().BeGreaterThanOrEqualTo(0, "every restore call has to go through a guard");
+            (index - nearest.at).Should().BeLessThan(400, "the call has to sit inside the delegate passed to the guard");
+
+            guards.Add(nearest.guard);
         }
+
+        return guards;
     }
 
     // Every .cs file of the suite outside bin and obj, with its comments blanked out.

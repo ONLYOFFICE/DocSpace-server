@@ -53,6 +53,15 @@ public enum IdType
 public class TableInfo(string name, string tenantColumn = null, string idColumn = null, IdType idType = IdType.Autoincrement)
 {
     public string[] Columns { get; set; }
+
+    /// <summary>The PostgreSQL type of each of <see cref="Columns"/> (udt_name), read with them; null on MySQL.</summary>
+    public Dictionary<string, string> ColumnTypes { get; set; }
+
+    /// <summary>The columns of the PostgreSQL table that a sequence fills, read with <see cref="Columns"/>; null on MySQL.</summary>
+    public string[] SequenceColumns { get; set; }
+
+    /// <summary>The primary key of the PostgreSQL table, all its columns when it has none; null on MySQL.</summary>
+    public string[] PrimaryKey { get; set; }
     public string[] UserIDColumns { get; init; } = [];
     public Dictionary<string, bool> DateColumns { get; init; } = new();
     public InsertMethod InsertMethod { get; init; } = InsertMethod.Insert;

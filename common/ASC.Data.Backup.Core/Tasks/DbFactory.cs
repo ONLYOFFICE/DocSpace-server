@@ -48,14 +48,25 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
         return key != null ? configurationExtension.GetConnectionStrings(key, region).ConnectionString : configurationExtension.GetConnectionStrings(DefaultConnectionStringName, region).ConnectionString;
     }
 
+    /// <summary>The SQL dialect of the database the services run on, by the provider of the default connection string.</summary>
+    public BackupSqlDialect Dialect
+        => field ??= BackupSqlDialect.ForProvider(configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName);
+
     private DbProviderFactory DbProviderFactory
     {
         get
         {
             if (field == null)
             {
-                var type = Type.GetType(configuration["DbProviderFactories:mysql:type"], true);
-                field = (DbProviderFactory)Activator.CreateInstance(type, true);
+                if (Dialect == BackupSqlDialect.PostgreSql)
+                {
+                    field = NpgsqlFactory.Instance;
+                }
+                else
+                {
+                    var type = Type.GetType(configuration["DbProviderFactories:mysql:type"], true);
+                    field = (DbProviderFactory)Activator.CreateInstance(type, true);
+                }
             }
 
             return field;
@@ -88,23 +99,26 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
     public DbCommand CreateLastInsertIdCommand()
     {
         var command = DbProviderFactory.CreateCommand();
-        command?.CommandText = configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName.Contains("MySql", StringComparison.OrdinalIgnoreCase)
-            ? "select Last_Insert_Id();"
-            : "select last_insert_rowid();";
+        command?.CommandText = Dialect.LastInsertIdQuery;
 
         return command;
     }
 
-    public DbCommand CreateShowColumnsCommand(string tableName)
+    private string EnsureConnectionTimeout(string connectionString)
     {
-        var command = DbProviderFactory.CreateCommand();
-        command?.CommandText = "show columns from " + tableName + ";";
+        if (Dialect == BackupSqlDialect.PostgreSql)
+        {
+            // Npgsql knows the key as Timeout and refuses Connection Timeout; a substring check would take
+            // Command Timeout for it
+            var builder = new DbConnectionStringBuilder { ConnectionString = connectionString };
+            if (!builder.ContainsKey("Timeout"))
+            {
+                builder["Timeout"] = 90;
+            }
 
-        return command;
-    }
+            return builder.ConnectionString;
+        }
 
-    private static string EnsureConnectionTimeout(string connectionString)
-    {
         if (!connectionString.Contains("Connection Timeout"))
         {
             connectionString = connectionString.TrimEnd(';') + ";Connection Timeout=90";

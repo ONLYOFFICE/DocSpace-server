@@ -52,10 +52,10 @@ public class AuditModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers
         new("audit_events", "id", "files_audit_reference", "audit_event_id")
     ];
 
-    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
+    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table, BackupSqlDialect dialect)
     {
         return table.Name == "files_audit_reference"
             ? $"inner join audit_events as ae on ae.id = t.audit_event_id and ae.tenant_id = {tenantId}"
-            : base.GetSelectCommandConditionText(tenantId, table);
+            : base.GetSelectCommandConditionText(tenantId, table, dialect);
     }
 }

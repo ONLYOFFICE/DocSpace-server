@@ -43,6 +43,13 @@ public class BaseTest(
     // The portal and its owner created for this test, never shared with another one.
     protected User Owner => _clients.Owner;
 
+    // The address of that portal, which a restore carries over to the tenant it creates.
+    protected string PortalName => _clients.PortalName;
+
+    protected int TenantId => _clients.TenantId;
+
+    protected AspireAppFixture Fixture => fixture;
+
     protected HttpClient _backupClient = null!;
     protected HttpClient _peopleClient = null!;
     protected HttpClient _filesClient = null!;

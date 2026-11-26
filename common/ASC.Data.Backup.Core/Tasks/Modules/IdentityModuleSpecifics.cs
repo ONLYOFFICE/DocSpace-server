@@ -63,7 +63,7 @@ public class IdentityModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(help
         new("identity_clients", "client_id", "identity_consent_scopes", "registered_client_id")
     ];
 
-    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
+    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table, BackupSqlDialect dialect)
     {
         if (table.Name is "identity_client_allowed_origins" or "identity_client_authentication_methods" or "identity_client_redirect_uris" or "identity_client_scopes")
         {
@@ -75,6 +75,6 @@ public class IdentityModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(help
             return "inner join identity_clients as t1 on t1.client_id = t.registered_client_id where t1.tenant_id = " + tenantId;
         }
 
-        return base.GetSelectCommandConditionText(tenantId, table);
+        return base.GetSelectCommandConditionText(tenantId, table, dialect);
     }
 }

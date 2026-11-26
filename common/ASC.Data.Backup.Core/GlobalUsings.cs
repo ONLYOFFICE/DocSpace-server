@@ -112,6 +112,8 @@ global using Microsoft.Extensions.Logging;
 
 global using MySql.Data.MySqlClient;
 
+global using Npgsql;
+
 global using ProtoBuf;
 
 global using ZiggyCreatures.Caching.Fusion;

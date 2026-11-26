@@ -70,6 +70,30 @@ internal static partial class RestorePortalTaskLogger
     [LoggerMessage(LogLevel.Warning, "can't unschedule the webhook deliveries after the dump restore")]
     public static partial void WarningCantClearWebhookSchedule(this ILogger<RestorePortalTask> logger, Exception exception);
 
+    [LoggerMessage(LogLevel.Error, "the dump holds MySQL statements, which PostgreSQL cannot run; a dump taken on PostgreSQL restores on PostgreSQL")]
+    public static partial void ErrorMySqlDumpOnPostgreSql(this ILogger<RestorePortalTask> logger);
+
+    [LoggerMessage(LogLevel.Error, "the dump holds rows, which only PostgreSQL restores")]
+    public static partial void ErrorDumpOfRowsOnMySql(this ILogger<RestorePortalTask> logger);
+
+    [LoggerMessage(LogLevel.Error, "the dump was taken on {source} and restores only on a database of that kind, not on {target}")]
+    public static partial void ErrorDumpOfOtherDatabase(this ILogger<RestorePortalTask> logger, string source, string target);
+
+    [LoggerMessage(LogLevel.Error, "the archive lacks page {page} of the table {table} that its manifest names")]
+    public static partial void ErrorDumpPageMissing(this ILogger<RestorePortalTask> logger, string table, int page);
+
+    [LoggerMessage(LogLevel.Error, "the dump was taken after migrations this database has not applied: {migrations}")]
+    public static partial void ErrorDumpOfNewerVersion(this ILogger<RestorePortalTask> logger, string migrations);
+
+    [LoggerMessage(LogLevel.Warning, "the dump holds the table {table}, which this database does not have; its rows are left out")]
+    public static partial void WarningDumpTableNotInDatabase(this ILogger<RestorePortalTask> logger, string table);
+
+    [LoggerMessage(LogLevel.Debug, "restoring a dump of rows taken on {source}: {count} tables")]
+    public static partial void DebugRestoreNeutralDump(this ILogger<RestorePortalTask> logger, string source, int count);
+
+    [LoggerMessage(LogLevel.Warning, "the restored rows break the foreign key {key}; it stays in place unchecked")]
+    public static partial void WarningDumpBreaksForeignKey(this ILogger<RestorePortalTask> logger, string key);
+
     [LoggerMessage(LogLevel.Warning, "can't restore file ({module}:{path})")]
     public static partial void WarningCantRestoreFile(this ILogger<RestorePortalTask> logger, string module, string path, Exception exception);
 }

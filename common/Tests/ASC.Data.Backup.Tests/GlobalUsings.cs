@@ -34,8 +34,10 @@
 global using System.Text.Json;
 global using System.Text.RegularExpressions;
 
+global using ASC.Core.Common.EF.Context;
 global using ASC.Data.Backup.Tests.ApiFactories;
 global using ASC.Data.Backup.Tests.Tests.Restore;
+global using ASC.Files.Core.EF;
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
 
@@ -47,6 +49,8 @@ global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
+
+global using Microsoft.EntityFrameworkCore;
 
 global using Xunit;
 

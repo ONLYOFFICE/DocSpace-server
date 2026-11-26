@@ -40,8 +40,11 @@ namespace ASC.Data.Backup.Tests.Tests.Restore;
 /// test stack is a standalone installation. A body whose <c>backupId</c> is a GUID is looked up in the
 /// history and queued, and so is one whose <c>storageParams</c> carry a <c>filePath</c>: even an
 /// all-zero GUID was seen to be accepted with 200 and to queue a restore. Every request this suite
-/// sends is therefore built so that it cannot reach the queue, and the guard throws before anything is
-/// sent when a body is not provably of that kind.
+/// sends through <see cref="SendAsync{T}(string, Func{Task{T}})"/> is therefore built so that it cannot reach the queue,
+/// and the guard throws before anything is sent when a body is not provably of that kind. Two entry points let a
+/// real restore through: <see cref="SendOwnPortalRestoreAsync{T}"/> (the test's own portal) and
+/// <see cref="SendServerWideRestoreAsync{T}(StartBackupRestoreRequestDto, IReadOnlyCollection{string}, Func{Task{T}})"/>
+/// (a server dump, only with <see cref="ServerWideRestoreVariable"/> set).
 /// </summary>
 /// <remarks>
 /// It is an allow-list over the JSON of the body, not a list of known bad shapes, so a form of the GUID
@@ -122,6 +125,85 @@ public static class RestoreGuard
     public static async Task<T> SendAsync<T>(StartBackupRestoreRequestDto? dto, Func<Task<T>> send)
     {
         AssertCannotQueue(dto);
+
+        return await send();
+    }
+
+    /// <summary>
+    /// The restore of a portal the suite lets through: of the calling test's own portal, from a backup in that
+    /// portal's own history, never server-wide. The history is read for the portal the backup client acts
+    /// on, so a record in it is a backup of that portal; the request carries nothing but the backup id, so
+    /// no file and no other portal can be named. Everything else is refused before <paramref name="send"/>.
+    /// </summary>
+    public static async Task<T> SendOwnPortalRestoreAsync<T>(StartBackupRestoreRequestDto dto, IReadOnlyCollection<string> ownHistoryIds, Func<Task<T>> send)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+
+        var json = dto.ToJson();
+
+        if (dto.Dump)
+        {
+            throw Refusal("it asks for a server-wide restore", json);
+        }
+
+        if (dto.StorageParams is { Count: > 0 })
+        {
+            throw Refusal("an own-portal restore names no storage", json);
+        }
+
+        if (!Guid.TryParse(dto.BackupId, out _) || !ownHistoryIds.Contains(dto.BackupId, StringComparer.OrdinalIgnoreCase))
+        {
+            throw Refusal("the backupId is not in the portal's own history", json);
+        }
+
+        return await send();
+    }
+
+    /// <summary>
+    /// The environment variable that lets <see cref="SendServerWideRestoreAsync{T}"/> through. Set it only for a
+    /// run of <c>DumpRoundTripTests</c> alone: the restore replaces the data of every portal of the stack.
+    /// </summary>
+    public const string ServerWideRestoreVariable = "DOCSPACE_TEST_SERVER_WIDE_RESTORE";
+
+    public static bool ServerWideRestoreAllowed =>
+        string.Equals(Environment.GetEnvironmentVariable(ServerWideRestoreVariable), "1", StringComparison.Ordinal);
+
+    /// <summary>
+    /// A server-wide restore, let through only when <see cref="ServerWideRestoreVariable"/> is 1 and the backup is
+    /// in the server's dump history; the request names no storage. Everything else is refused before
+    /// <paramref name="send"/>.
+    /// </summary>
+    public static Task<T> SendServerWideRestoreAsync<T>(StartBackupRestoreRequestDto dto, IReadOnlyCollection<string> dumpHistoryIds, Func<Task<T>> send)
+    {
+        return SendServerWideRestoreAsync(dto, dumpHistoryIds, ServerWideRestoreAllowed, send);
+    }
+
+    // the check with the variable given, so that its other refusals are tested in a run where the variable is not set
+    internal static async Task<T> SendServerWideRestoreAsync<T>(StartBackupRestoreRequestDto dto, IReadOnlyCollection<string> dumpHistoryIds, bool allowed, Func<Task<T>> send)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+
+        var json = dto.ToJson();
+
+        if (!allowed)
+        {
+            throw Refusal($"{ServerWideRestoreVariable} is not 1", json);
+        }
+
+        if (!dto.Dump)
+        {
+            throw Refusal("a server-wide restore asks for the dump", json);
+        }
+
+        if (dto.StorageParams is { Count: > 0 })
+        {
+            throw Refusal("a server-wide restore names no storage", json);
+        }
+
+        if (!Guid.TryParse(dto.BackupId, out _) || !dumpHistoryIds.Contains(dto.BackupId, StringComparer.OrdinalIgnoreCase))
+        {
+            throw Refusal("the backupId is not in the server's dump history", json);
+        }
 
         return await send();
     }

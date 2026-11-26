@@ -84,33 +84,35 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
 
     public DbCommand CreateSelectCommand(DbConnection connection, int tenantId, TableInfo table, int limit, int offset)
     {
+        var dialect = BackupSqlDialect.For(connection);
         var command = connection.CreateCommand();
-        command.CommandText = string.Format("select t.* from {0} as t {1} limit {2},{3};", table.Name, GetSelectCommandConditionText(tenantId, table), offset, limit);
+        command.CommandText = string.Format("select t.* from {0} as t {1} {2};", table.Name, GetSelectCommandConditionText(tenantId, table, dialect), dialect.Page(connection, table, offset, limit));
 
         return command;
     }
 
     public DbCommand CreateSelectCommand(DbConnection connection, int tenantId, TableInfo table, int limit, int offset, Guid id)
     {
+        var dialect = BackupSqlDialect.For(connection);
         var command = connection.CreateCommand();
 
         var conditionUserText = GetContitionUserText(table, id);
 
-        command.CommandText = string.Format("select t.* from {0} as t {1} {2} limit {3},{4};", table.Name, GetSelectCommandConditionText(tenantId, table, id), conditionUserText, offset, limit);
+        command.CommandText = string.Format("select t.* from {0} as t {1} {2} {3};", table.Name, GetSelectCommandConditionText(tenantId, table, id, dialect), conditionUserText, dialect.Page(connection, table, offset, limit));
 
         return command;
     }
 
-    private string GetSelectCommandConditionText(int tenantId, TableInfo table, Guid id)
+    private string GetSelectCommandConditionText(int tenantId, TableInfo table, Guid id, BackupSqlDialect dialect)
     {
-        var conditionText = GetSelectCommandConditionText(tenantId, table);
+        var conditionText = GetSelectCommandConditionText(tenantId, table, dialect);
         switch (table.Name)
         {
             case "files_folder_tree":
                 conditionText += $" and t1.create_by = '{id}'";
                 break;
             case "files_bunch_objects":
-                conditionText = $"inner join files_folder as t1 on t1.id = t.left_node {conditionText} and t1.create_by = '{id}'";
+                conditionText = $"inner join files_folder as t1 on {dialect.AsText("t1.id")} = t.left_node {conditionText} and t1.create_by = '{id}'";
                 break;
         }
 
@@ -129,8 +131,9 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
 
     public DbCommand CreateDeleteCommand(DbConnection connection, int tenantId, TableInfo table)
     {
+        var dialect = BackupSqlDialect.For(connection);
         var command = connection.CreateCommand();
-        command.CommandText = $"delete t.* from {table.Name} as t {GetDeleteCommandConditionText(tenantId, table)};";
+        command.CommandText = dialect.Delete(table, GetDeleteCommandConditionText(tenantId, table, dialect));
 
         return command;
     }
@@ -148,18 +151,16 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
             return null;
         }
 
+        var dialect = BackupSqlDialect.For(connection);
         var columns = valuesForInsert.Keys.Intersect(table.Columns).ToArray();
-        var insert = table.InsertMethod != InsertMethod.Ignore
-                                              ? table.InsertMethod.ToString().ToLower()
-                                                  : "insert ignore";
-        var insertCommantText = $"{insert} into {table.Name}({string.Join(",", columns.Select(c => $"`{c}`"))}) values({string.Join(",", columns.Select(c => "@" + c))});";
 
         var command = connection.CreateCommand();
-        command.CommandText = insertCommantText;
+        command.CommandText = dialect.Insert(table, columns);
 
         foreach (var parameter in valuesForInsert)
         {
             AddParameter(command, parameter.Key, parameter.Value);
+            command.Parameters[^1].Value = dialect.ConvertValue(table, parameter.Key, command.Parameters[^1].Value);
         }
 
         return command;
@@ -215,7 +216,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
         return stream;
     }
 
-    protected virtual string GetSelectCommandConditionText(int tenantId, TableInfo table)
+    protected virtual string GetSelectCommandConditionText(int tenantId, TableInfo table, BackupSqlDialect dialect)
     {
         if (!table.HasTenantColumn())
         {
@@ -225,9 +226,9 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
         return string.Format("where t.{0} = {1}", table.TenantColumn, tenantId);
     }
 
-    protected string GetDeleteCommandConditionText(int tenantId, TableInfo table)
+    protected string GetDeleteCommandConditionText(int tenantId, TableInfo table, BackupSqlDialect dialect)
     {
-        return GetSelectCommandConditionText(tenantId, table);
+        return GetSelectCommandConditionText(tenantId, table, dialect);
     }
 
     protected virtual Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row)

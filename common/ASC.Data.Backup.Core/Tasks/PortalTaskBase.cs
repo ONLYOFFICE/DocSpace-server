@@ -84,6 +84,32 @@ public abstract class PortalTaskBase(
 
     public abstract Task RunJob();
 
+    // the tables whose rows a dump leaves out, matched as prefixes of the table names
+    protected List<string> GetExcludedFromDump()
+    {
+        var excluded = ModuleProvider.AllModules.Where(r => _ignoredModules.Contains(r.ModuleName)).SelectMany(r => r.Tables).Select(r => r.Name).ToList();
+        excluded.AddRange(_ignoredTables);
+        excluded.Add("res_");
+
+        return excluded;
+    }
+
+    protected static List<string> ReadNames(DbConnection connection, DbTransaction transaction, string sql)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = sql;
+
+        var names = new List<string>();
+        using var result = command.ExecuteReader();
+        while (result.Read())
+        {
+            names.Add(result.GetString(0));
+        }
+
+        return names;
+    }
+
     internal IEnumerable<IModuleSpecifics> GetModulesToProcess()
     {
         return ModuleProvider.AllModules.Where(module => !_ignoredModules.Contains(module.ModuleName));

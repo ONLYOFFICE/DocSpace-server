@@ -314,6 +314,33 @@ public abstract class BackupTestBase(AspireAppFixture fixture) : BaseTest(fixtur
     }
 
     /// <summary>
+    /// The restore of a portal that really queues: of this test's own portal, from a backup in its own history,
+    /// never server-wide (<see cref="RestoreGuard.SendOwnPortalRestoreAsync{T}"/>). The restore moves the
+    /// portal to a new tenant under the same address, so the caller signs in again afterwards.
+    /// </summary>
+    protected async Task<BackupProgressWrapper> StartOwnPortalRestoreAsync(string backupId)
+    {
+        var dto = new StartBackupRestoreRequestDto(backupId: backupId) { Dump = false };
+        var ownHistoryIds = await HistoryIdsAsync();
+
+        return await RestoreGuard.SendOwnPortalRestoreAsync(dto, ownHistoryIds, () => _backupApi.StartBackupRestoreAsync(dto, TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>
+    /// The one server-wide restore, from a dump of the server's history
+    /// (<see cref="RestoreGuard.SendServerWideRestoreAsync{T}"/>), sent only when
+    /// <see cref="RestoreGuard.ServerWideRestoreVariable"/> is 1. It replaces the data of every portal of the stack.
+    /// </summary>
+    protected async Task<BackupProgressWrapper> StartServerWideRestoreAsync(string backupId)
+    {
+        var dto = new StartBackupRestoreRequestDto(backupId: backupId, dump: true);
+        var history = await _backupApi.GetBackupHistoryAsync(dump: true, cancellationToken: TestContext.Current.CancellationToken);
+        var dumpHistoryIds = (history.Response ?? []).Select(record => record.Id.ToString()).ToList();
+
+        return await RestoreGuard.SendServerWideRestoreAsync(dto, dumpHistoryIds, () => _backupApi.StartBackupRestoreAsync(dto, TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>
     /// The only raw request to the restore route in the suite, for the bodies a typed DTO cannot carry
     /// (no body, a missing or wrong-typed <c>backupId</c>). It goes through <see cref="RestoreGuard"/> first.
     /// The caller disposes the response.

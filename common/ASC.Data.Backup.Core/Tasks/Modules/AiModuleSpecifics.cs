@@ -90,11 +90,11 @@ public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
         new("ai_providers", "id", "ai_model_settings", "provider_id")
     ];
 
-    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
+    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table, BackupSqlDialect dialect)
     {
         return table.Name == "ai_chats_messages"
             ? $"inner join ai_chats as chat on chat.id = t.chat_id and chat.tenant_id = {tenantId}"
-            : base.GetSelectCommandConditionText(tenantId, table);
+            : base.GetSelectCommandConditionText(tenantId, table, dialect);
     }
 }
 

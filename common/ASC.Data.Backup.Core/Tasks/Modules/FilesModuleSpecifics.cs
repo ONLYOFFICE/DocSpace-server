@@ -306,15 +306,15 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
         }
     }
 
-    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
+    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table, BackupSqlDialect dialect)
     {
         return table.Name switch
         {
             "files_folder_tree" => "inner join files_folder as t1 on t1.id = t.folder_id where t1.tenant_id = " + tenantId,
             "files_file" =>
                 // do not backup previus backup files
-                "where not exists(select 1 from backup_backup b where b.tenant_id = t.tenant_id and b.storage_path = t.id) and t.tenant_id = " + tenantId,
-            _ => base.GetSelectCommandConditionText(tenantId, table)
+                "where not exists(select 1 from backup_backup b where b.tenant_id = t.tenant_id and b.storage_path = " + dialect.AsText("t.id") + ") and t.tenant_id = " + tenantId,
+            _ => base.GetSelectCommandConditionText(tenantId, table, dialect)
         };
     }
 

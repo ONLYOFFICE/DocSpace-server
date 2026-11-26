@@ -166,6 +166,24 @@ public class RestorePortalTask(DbFactory dbFactory,
 
     private async Task RestoreFromDump(IDataReadOperator dataReader)
     {
+        // both checks come before anything of the server is deleted or changed; the portals are already blocked and
+        // told that the restore started (RestoreProgressItem), and a refusal unblocks them again
+        var manifest = await NeutralDump.ReadManifestAsync(dataReader);
+        if (manifest != null)
+        {
+            await RestoreFromNeutralDumpAsync(dataReader, manifest);
+
+            return;
+        }
+
+        if (DbFactory.Dialect == BackupSqlDialect.PostgreSql)
+        {
+            // a dump of MySQL statements (SHOW CREATE TABLE, REPLACE INTO, the mysql client)
+            options.ErrorMySqlDumpOnPostgreSql();
+
+            throw new ArgumentException(BackupResource.BackupInvalid);
+        }
+
         var keyBase = KeyHelper.GetDatabaseSchema();
         var keys = dataReader.GetEntries(keyBase).Select(Path.GetFileName).ToList();
         var dbs = dataReader.GetDirectories("").Where(r => Path.GetFileName(r).StartsWith("mailservice")).Select(Path.GetFileName).ToList();
@@ -233,6 +251,194 @@ public class RestorePortalTask(DbFactory dbFactory,
     }
 
     private const string WebhooksLogsTable = "webhooks_logs";
+
+    // Restores a dump of rows (NeutralDump), which only PostgreSQL writes and restores: MySQL keeps EF migrations with
+    // ids of their own, so whether a dump fits its schema cannot be told from them, and it refuses the dump. The schema
+    // is the restoring database's own, so a dump taken after a migration the database lacks is refused too. These
+    // checks, and the check that the archive holds every page its manifest names, come before anything is changed.
+    // The tables of the dump that the database has are emptied and loaded in one transaction with the foreign keys
+    // dropped and put back at its end; a table the database has and the dump does not keeps its rows (a table of a
+    // later migration, with the rows the migration put there). A load that fails rolls the rows back and leaves the
+    // files as they were: the storage of the portals is deleted only after the commit, without counting against the
+    // quota rows the load restored (the files of the dump are written back without counting either). Between the
+    // commit and the end of the restore the portals carry the statuses of the dump, normally active, so a file
+    // uploaded in that window is deleted with the others.
+    private async Task RestoreFromNeutralDumpAsync(IDataReadOperator dataReader, NeutralDumpManifest manifest)
+    {
+        var dialect = DbFactory.Dialect;
+
+        if (dialect != BackupSqlDialect.PostgreSql)
+        {
+            options.ErrorDumpOfRowsOnMySql();
+
+            throw new ArgumentException(BackupResource.BackupInvalid);
+        }
+
+        if (NeutralDump.IsOfOtherDatabase(manifest, dialect))
+        {
+            options.ErrorDumpOfOtherDatabase(manifest.Source, dialect.Name);
+
+            throw new ArgumentException(BackupResource.BackupInvalid);
+        }
+
+        await using var connection = DbFactory.OpenConnection();
+
+        var missing = NeutralDump.MissingMigrations(manifest.Migrations, ReadNames(connection, null, dialect.MigrationHistoryQuery));
+        if (missing.Count > 0)
+        {
+            options.ErrorDumpOfNewerVersion(string.Join(", ", missing));
+
+            throw new ArgumentException(BackupResource.BackupInvalid);
+        }
+
+        var excluded = GetExcludedFromDump();
+        var target = ReadNames(connection, null, dialect.ListTablesQuery).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var tables = new List<NeutralDumpTable>();
+
+        foreach (var table in manifest.Tables.Where(table => !NeutralDump.IsExcluded(table.Name, excluded)))
+        {
+            if (target.Contains(table.Name))
+            {
+                tables.Add(table);
+            }
+            else
+            {
+                // a table a later migration dropped
+                options.WarningDumpTableNotInDatabase(table.Name);
+            }
+        }
+
+        foreach (var table in tables)
+        {
+            for (var page = 1; page <= table.Pages; page++)
+            {
+                await using var stream = dataReader.GetEntry(NeutralDump.PageKey(table.Name, page));
+                if (stream == null)
+                {
+                    options.ErrorDumpPageMissing(table.Name, page);
+
+                    throw new ArgumentException(BackupResource.BackupInvalid);
+                }
+            }
+        }
+
+        var stepscount = tables.Count;
+        List<string> storageModules = null;
+        List<Tenant> tenants = null;
+
+        if (ProcessStorage)
+        {
+            storageModules = StorageFactoryConfig.GetModuleList(_region).Where(IsStorageModuleAllowed).ToList();
+            tenants = await tenantManager.GetTenantsAsync(false);
+
+            stepscount += storageModules.Count * tenants.Count;
+
+            SetStepsCount(stepscount + 1);
+        }
+        else
+        {
+            SetStepsCount(stepscount);
+        }
+
+        options.DebugRestoreNeutralDump(manifest.Source, tables.Count);
+
+        await using (var transaction = await connection.BeginTransactionAsync(_cancellationToken))
+        {
+            var keys = await dialect.BeginDumpLoadAsync(connection, transaction);
+            await dialect.TruncateAsync(connection, transaction, tables.Select(table => table.Name).ToList());
+
+            foreach (var table in tables)
+            {
+                await LoadDumpTableAsync(dataReader, connection, transaction, dialect, table);
+                await SetStepCompleted();
+
+                _cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            foreach (var key in await dialect.EndDumpLoadAsync(connection, transaction, keys))
+            {
+                options.WarningDumpBreaksForeignKey(key);
+            }
+
+            // not cancelled once it is sent: a commit stopped halfway would leave it unknown whether the rows changed
+            await transaction.CommitAsync(CancellationToken.None);
+        }
+
+        if (ProcessStorage)
+        {
+            await DoDeleteStorageAsync(storageModules, tenants, countQuota: false);
+        }
+
+        await ClearWebhookScheduleAsync();
+    }
+
+    private async Task LoadDumpTableAsync(IDataReadOperator dataReader, DbConnection connection, DbTransaction transaction, BackupSqlDialect dialect, NeutralDumpTable dumped)
+    {
+        options.DebugRestoreFrom(dumped.Name);
+
+        // the dump keeps the ids, so the table is loaded as it is: no id is mapped and a sequence is moved past the
+        // ids afterwards (AfterTableRestoredAsync)
+        var table = new TableInfo(dumped.Name);
+        dialect.ReadColumns(connection, table);
+
+        for (var page = 1; page <= dumped.Pages; page++)
+        {
+            await using var stream = dataReader.GetEntry(NeutralDump.PageKey(dumped.Name, page)) ?? throw new ArgumentException(BackupResource.BackupInvalid);
+
+            List<string> columns = null;
+            var rows = new List<DataRowInfo>();
+
+            foreach (var row in DataRowInfoReader.ReadFromStream(stream))
+            {
+                // every row of a page has the columns of the schema of the page
+                columns ??= row.ColumnNames.Where(column => table.Columns.Contains(column, StringComparer.OrdinalIgnoreCase)).ToList();
+                rows.Add(row);
+
+                if (rows.Count == NeutralDump.RowsPerInsert(columns.Count))
+                {
+                    await InsertRowsAsync(connection, transaction, dialect, table, columns, rows);
+                    rows.Clear();
+                }
+            }
+
+            if (rows.Count > 0)
+            {
+                await InsertRowsAsync(connection, transaction, dialect, table, columns, rows);
+            }
+        }
+
+        // the webhook journal goes in with the schedule of the senders of the source cleared before the load commits,
+        // so no sender sees a restored row with it, as with a dump of statements (RestoreWebhooksLogsFromDumpFileAsync);
+        // a schema before the schedule has nothing to clear
+        if (dumped.Name == WebhooksLogsTable
+            && table.Columns.Contains("next_attempt_on", StringComparer.OrdinalIgnoreCase)
+            && table.Columns.Contains("lease_id", StringComparer.OrdinalIgnoreCase))
+        {
+            await CreateClearWebhookScheduleCommand(connection, transaction, scheduledOnly: true).ExecuteNonQueryAsync(_cancellationToken);
+        }
+
+        await dialect.AfterTableRestoredAsync(connection, table);
+    }
+
+    private async Task InsertRowsAsync(DbConnection connection, DbTransaction transaction, BackupSqlDialect dialect, TableInfo table, List<string> columns, List<DataRowInfo> rows)
+    {
+        await using var insert = connection.CreateCommand().WithTimeout(120);
+        insert.Transaction = transaction;
+        insert.CommandText = dialect.InsertRows(table, columns, rows.Count);
+
+        for (var row = 0; row < rows.Count; row++)
+        {
+            for (var column = 0; column < columns.Count; column++)
+            {
+                var parameter = insert.CreateParameter();
+                parameter.ParameterName = "@" + BackupSqlDialect.RowParameter(row, column);
+                parameter.Value = dialect.ConvertValue(table, columns[column], rows[row][columns[column]] ?? DBNull.Value);
+                insert.Parameters.Add(parameter);
+            }
+        }
+
+        await insert.ExecuteNonQueryAsync(_cancellationToken);
+    }
 
     // The webhook journal of a dump carries the schedule of the source's senders, and the live WorkerService claims
     // every row that is due on an active portal within seconds, while the other tables, the portals among them, are
@@ -558,7 +764,9 @@ public class RestorePortalTask(DbFactory dbFactory,
         options.DebugEndRestoreStorage();
     }
 
-    private async Task DoDeleteStorageAsync(List<string> storageModules, IEnumerable<Tenant> tenants)
+    // countQuota false deletes without lowering the quota rows of the portals: after the load of a dump of rows they
+    // are the rows of the dump, which the deleted files are not part of
+    private async Task DoDeleteStorageAsync(List<string> storageModules, IEnumerable<Tenant> tenants, bool countQuota = true)
     {
         options.DebugBeginDeleteStorage();
 
@@ -568,23 +776,39 @@ public class RestorePortalTask(DbFactory dbFactory,
             {
                 var storage = await StorageFactory.GetStorageAsync(tenant.Id, module, _region);
                 var domains = StorageFactoryConfig.GetDomainList(module, region: _region).ToList();
+                var quotaController = storage.QuotaController;
 
                 domains.Add(string.Empty); //instead storage.DeleteFiles("\\", "*.*", true);
 
-                foreach (var domain in domains)
+                if (!countQuota)
                 {
-                    await ActionInvoker.TryAsync(
-                        async state =>
-                        {
-                            if (await storage.IsDirectoryAsync((string)state))
+                    storage.SetQuotaController(null);
+                }
+
+                try
+                {
+                    foreach (var domain in domains)
+                    {
+                        await ActionInvoker.TryAsync(
+                            async state =>
                             {
-                                await storage.DeleteFilesAsync((string)state, "\\", "*.*", true);
-                            }
-                        },
-                        domain,
-                        5,
-                        onFailure: error => Logger.WarningCanNotDeleteFilesForDomain(domain, error)
-                    );
+                                if (await storage.IsDirectoryAsync((string)state))
+                                {
+                                    await storage.DeleteFilesAsync((string)state, "\\", "*.*", true);
+                                }
+                            },
+                            domain,
+                            5,
+                            onFailure: error => Logger.WarningCanNotDeleteFilesForDomain(domain, error)
+                        );
+                    }
+                }
+                finally
+                {
+                    if (!countQuota && quotaController != null)
+                    {
+                        storage.SetQuotaController(quotaController);
+                    }
                 }
 
                 await SetStepCompleted();

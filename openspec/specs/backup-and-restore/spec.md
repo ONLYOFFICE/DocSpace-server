@@ -12,15 +12,16 @@ does while it is being restored and afterwards), who may do each of these by use
 download link of a backup and the settings the API exposes. Billing and wallet mechanics are out of
 scope except where they decide whether an operation is allowed.
 
-Sources: the integration tests of `common/Tests/ASC.Data.Backup.Tests` (every backup operation except
-the restore itself, on a standalone test stack where no tariff limit applies), the unit tests of
+Sources: the integration tests of `common/Tests/ASC.Data.Backup.Tests` (every backup operation, the restore of
+a portal included, and the restore of a server dump when `DOCSPACE_TEST_SERVER_WIDE_RESTORE` is 1, on a standalone
+test stack where no tariff limit applies), the unit tests of
 `common/Tests/ASC.Data.Backup.Core.Tests` (what the archive covers and how rows are remapped on
 restore), the wallet tests of `web/ASC.Web.Api.Tests/Tests/04_Portal/Payments`, the OpenAPI contract
 `sdk/docspace-api-spec/docspace-backend.yaml` (operations are named by their `operationId`), the
 product code of the backup service and its worker, and the product release notes (v2.5, v3.5, v3.6,
 v3.7, v4.0); revised after the merge of release/v4.1.0, which changed only the restore of the
-webhook journal, the application settings and the AI room tables. The hosted-only rules (402 refusals, the free allowance, the paid service, the restore
-itself) are confirmed from the code; the evidence for every scenario, the places where the release
+webhook journal, the application settings and the AI room tables. The hosted-only rules (402 refusals, the free allowance, the paid service, the hash check
+of a restore) are confirmed from the code; the evidence for every scenario, the places where the release
 notes or the OpenAPI document and the server disagree, and the suspected defects are listed in
 `verification.md` next to this file. HTTP status codes are stated as the code produces them.
 
@@ -756,6 +757,11 @@ on failure the original portal is active again.
 - **WHEN** an archive of a whole server is restored on a hosted portal, or a portal archive is restored with `dump: true`
 - **THEN** the job fails with the invalid-backup message
 
+#### Scenario: Server dump the database cannot take
+
+- **WHEN** a server dump is restored that holds an EF migration the restoring database has not applied, lacks a page its manifest names, holds rows and is restored on MySQL, or holds MySQL statements and is restored on PostgreSQL
+- **THEN** the job fails with the invalid-backup message before any data or file of the server is changed, and the portals are active again
+
 ### Requirement: Webhook journal after a restore
 
 A restore SHALL bring the webhook subscriptions and their delivery journal back under their new ids,
@@ -785,7 +791,7 @@ member.
 #### Scenario: Server-wide dump
 
 - **WHEN** a server-wide archive is restored
-- **THEN** the journal is loaded statement by statement, each committed together with the clearing of its schedule, so that no restored delivery is ever picked up by a running sender; an archive of a version without a delivery schedule loads as it is
+- **THEN** each part of the journal is committed together with the clearing of its schedule (a statement of a dump of statements, the whole load of a dump of rows), so that no restored delivery is ever picked up by a running sender; a journal without a delivery schedule loads as it is
 
 #### Scenario: Portal moved to another region
 
