@@ -29,7 +29,7 @@ also where a bug is open, as the full test run of 365d87fe60 showed it.
 ### Requirement: Creating a blank file by title
 
 `createFile` (`POST api/2.0/files/{folderId}/file`) and `createFileInMyDocuments` (`POST
-api/2.0/files/@my/file`) SHALL create a file from the blank template, normalising its title. A title over 170
+api/2.0/files/@my/file`) SHALL create a file from the blank template, normalising its title. A title over 165
 characters SHALL be rejected (400); a section root or a folder id the caller cannot resolve SHALL be refused
 (403). A nonzero `formId` without a `templateId` SHALL copy that template from the gallery: 404 with no
 gallery, template or file of the format, 502 if the gallery fails (bug 78009).
@@ -69,7 +69,7 @@ gallery, template or file of the format, 502 if the gallery fails (bug 78009).
 - **AND** a path is resolved from the root of the gallery's host, not from the configured path of the list: a gallery behind a path prefix that names its files by such paths answers 502
 - **AND** the call answers 404 when no gallery is configured, when the list has no such template, or when the template has no file of that format
 - **AND** the call answers 502 when the gallery cannot be reached, does not answer before the download deadline, drops the connection while answering, answers the list or the file with an error status, answers the list without its template list (a page of a proxy), answers the list with more than 1 MB (announced or read), names a file at an address that cannot be requested, or returns a file over 50 MB (announced or read), a PDF without a PDF header in its first 1024 bytes or a DOCX, XLSX or PPTX without a ZIP signature
-- **AND** the call answers 502 when the configured gallery address is not an http or https address, and immediately, for 30 seconds, after at least half of 5 or more download requests to the gallery's host within 30 seconds could not connect, timed out, or got 5xx, 408 or 429, which opens its circuit; the circuit of a host is shared by all portals of a server process, and an error status of a template file counts towards it as an answered request, not as a failure
+- **AND** the call answers 502 when the configured gallery address is not an http or https address, and immediately, for 30 seconds, after a failed download request leaves at least half of 5 or more requests to the gallery's host within 30 seconds failed (could not connect, timed out, or got 5xx, 408 or 429), which opens its circuit; the circuit of a host is shared by all portals of a server process, and an error status of a template file counts towards it as an answered request, not as a failure
 
 #### Scenario: Non-PDF file in a Form filling room
 
@@ -177,7 +177,7 @@ room, nor in an Instructions, Knowledge or AI project room (403); a parent that 
 
 `updateFile` SHALL rename a file without changing its format: the original extension is always preserved and
 appended to the requested title. An empty or whitespace-only title SHALL leave the name unchanged (200).
-Characters a file name cannot hold are replaced with `_`. A title longer than 170 characters is rejected
+Characters a file name cannot hold are replaced with `_`. A title longer than 165 characters is rejected
 (400); a file id that does not exist answers 404. A file locked by another account SHALL NOT be renamed (403).
 
 #### Scenario: Extension handling

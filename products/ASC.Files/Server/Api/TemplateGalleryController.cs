@@ -53,9 +53,9 @@ public class TemplateGalleryController(OFormRequestManager oFormRequestManager) 
     /// the gallery times out after 4 seconds. Without a configured gallery, the call returns `false`. The answer is not
     /// a promise that a template can be created. The server counts the requests of the downloads to each gallery host
     /// over 30 seconds. A request fails if it cannot connect or times out. It also fails on a server error, Request
-    /// Timeout, or Too Many Requests. When at least half of 5 or more requests failed, the server stops asking that
-    /// host for 30 seconds. Meanwhile, the creation from a template returns 502, while this call can still return
-    /// `true`.
+    /// Timeout, or Too Many Requests. The server stops asking that host for 30 seconds after a failed request. This
+    /// happens when at least half of 5 or more requests failed. Meanwhile, the creation from a template returns 502,
+    /// while this call can still return `true`.
     /// </remarks>
     /// <summary>
     /// Check the template gallery

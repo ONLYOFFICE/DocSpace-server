@@ -53,9 +53,9 @@ public class OFormRequestManager(
     /// customHttpClientNoCookie: it is not retried, its answer is cached.
     /// </summary>
     /// <remarks>
-    /// The breaker of a host is shared by every portal of the process. It opens when at least 5 requests to the host
-    /// were made within 30 seconds and at least half of them failed: could not connect, timed out, or got 5xx, 408 or
-    /// 429. While it is open (30 seconds), every creation
+    /// The breaker of a host is shared by every portal of the process. It opens on a failed request when at least 5
+    /// requests to the host were made within 30 seconds and at least half of them failed: could not connect, timed
+    /// out, or got 5xx, 408 or 429. While it is open (30 seconds), every creation
     /// from a template on that host answers 502 at once, while the availability check, which does not go through the
     /// breaker, may still answer a cached <c>true</c>. An error status of a template file is not a failure for the
     /// breaker, which counts it as an answered request: one broken template must not fail the others on its host.
@@ -119,7 +119,7 @@ public class OFormRequestManager(
     private const string CircuitOpenedEventName = "OnCircuitOpened";
     private const string ExecutionAttemptEventName = "ExecutionAttempt";
 
-    // Marks the request for a template file, whose error status the breaker does not count
+    // Marks the request for a template file: the breaker takes its error status as an answered request, not a failure
     private static readonly HttpRequestOptionsKey<bool> _fileRequestKey = new("ASC.Files.TemplateGallery.FileRequest");
 
     private static readonly TimeSpan _availableDuration = TimeSpan.FromMinutes(10);

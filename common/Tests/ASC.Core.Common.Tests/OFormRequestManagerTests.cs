@@ -532,7 +532,7 @@ public sealed class OFormRequestManagerTests : IDisposable
     public async Task Get_ListAnswers4xxEveryTime_LeavesTheCircuitClosed()
     {
         // Only a request that cannot connect, times out or gets 5xx, 408 or 429 counts as failed: a 403 of a proxy is
-        // an answer of the host, not retried and not counted
+        // an answer of the host, not retried, and the breaker takes it as an answered request
         var gallery = Gallery(_ => new StubResponse(HttpStatusCode.Forbidden));
         var manager = CreateManager(gallery.Url);
 
@@ -565,7 +565,8 @@ public sealed class OFormRequestManagerTests : IDisposable
     public async Task Get_FourFailedRequests_LeaveTheCircuitClosed()
     {
         // The breaker needs 5 requests: after 4 failed ones the next attempt still reaches the gallery and the
-        // creation gets its file
+        // creation gets its file. Then 4 of 6 requests have failed, yet the circuit stays closed: it opens only on a
+        // failed request, so the next creation asks the gallery and gets its file too
         var failures = 0;
         var gallery = Gallery(request => !IsFile(request) && Interlocked.Increment(ref failures) <= 4
             ? new StubResponse(HttpStatusCode.ServiceUnavailable)
@@ -576,8 +577,18 @@ public sealed class OFormRequestManagerTests : IDisposable
 
         await AssertGalleryUnavailableAsync(manager);
 
-        await using var stream = await manager.Get(1, ".pdf");
-        stream.Length.Should().BeGreaterThan(0);
+        await using (var stream = await manager.Get(1, ".pdf"))
+        {
+            stream.Length.Should().BeGreaterThan(0);
+        }
+
+        var asked = gallery.CallCount;
+        await using (var again = await manager.Get(1, ".pdf"))
+        {
+            again.Length.Should().BeGreaterThan(0);
+        }
+
+        gallery.CallCount.Should().Be(asked + 2);
     }
 
     [Fact]
@@ -860,10 +871,11 @@ public sealed class OFormRequestManagerTests : IDisposable
     [Fact]
     public async Task IsAvailableAsync_AsksWithTheClientWithoutCookies()
     {
-        // The default client would keep the cookies the gallery sets for every caller of the process. The check asks
-        // with customHttpClientNoCookie, whose handler keeps none (StandardHttpClientsTests.NoCookieClient_KeepsNoCookies)
+        // The default client and the other standard ones keep the cookies the gallery sets for every caller of the
+        // process. The check asks with customHttpClientNoCookie, whose handler keeps none
+        // (StandardHttpClientsTests.NoCookieClient_KeepsNoCookies): every other client of this test fails
         var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List));
-        var manager = CreateManager(gallery.Url, defaultClientHandler: () => new ThrowingHandler(new HttpRequestException("the default client")));
+        var manager = CreateManager(gallery.Url, onlyWorkingClient: "customHttpClientNoCookie");
 
         (await manager.IsAvailableAsync()).Should().BeTrue();
     }
@@ -1123,10 +1135,16 @@ public sealed class OFormRequestManagerTests : IDisposable
 
         slow = true;
         await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: TestContext.Current.CancellationToken);
+        var checkEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _cache.Events.BackgroundFactorySuccess += (_, _) => checkEnded.TrySetResult();
+        _cache.Events.BackgroundFactoryError += (_, _) => checkEnded.TrySetResult();
 
         var watch = Stopwatch.StartNew();
         (await manager.IsAvailableAsync()).Should().BeTrue();
         watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
+
+        // The check goes on in the background: the test ends after it, not under it with the cache disposed
+        await checkEnded.Task.WaitAsync(TimeSpan.FromSeconds(15), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -1299,11 +1317,11 @@ public sealed class OFormRequestManagerTests : IDisposable
     /// </param>
     /// <param name="retryDelay">The first wait before a retry of the download; 50 ms by default, so retries stay quick.</param>
     /// <param name="attemptTimeout">The timeout of one request of the download in place of the manager's 10 seconds.</param>
-    /// <param name="defaultClientHandler">A handler of the default client only, which the manager must not ask with.</param>
+    /// <param name="onlyWorkingClient">The only client name that reaches the network; every other client of the factory fails.</param>
     private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null,
         Func<HttpMessageHandler>? primaryHandler = null, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null,
         ILoggerProvider? loggerProvider = null, bool registerPipelines = true, TimeSpan? retryDelay = null, TimeSpan? attemptTimeout = null,
-        Func<HttpMessageHandler>? defaultClientHandler = null)
+        string? onlyWorkingClient = null)
     {
         var services = new ServiceCollection();
 
@@ -1321,6 +1339,12 @@ public sealed class OFormRequestManagerTests : IDisposable
             services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(loggerProvider));
         }
 
+        if (onlyWorkingClient is not null)
+        {
+            services.ConfigureHttpClientDefaults(client => client.ConfigurePrimaryHttpMessageHandler(() =>
+                new ThrowingHandler(new HttpRequestException("not the client the test allows"))));
+        }
+
         // The check asks with the standard client without cookies, the download with the gallery's own
         foreach (var name in new[] { Options.DefaultName, OFormRequestManager.NoCookieHttpClientName, OFormRequestManager.HttpClientName })
         {
@@ -1332,10 +1356,13 @@ public sealed class OFormRequestManagerTests : IDisposable
                 }
             });
 
-            var handler = name == Options.DefaultName ? defaultClientHandler ?? primaryHandler : primaryHandler;
-            if (handler is not null)
+            if (primaryHandler is not null)
             {
-                builder.ConfigurePrimaryHttpMessageHandler(handler);
+                builder.ConfigurePrimaryHttpMessageHandler(primaryHandler);
+            }
+            else if (name == onlyWorkingClient)
+            {
+                builder.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler());
             }
         }
 
