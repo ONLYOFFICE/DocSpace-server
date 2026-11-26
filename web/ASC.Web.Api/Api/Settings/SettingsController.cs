@@ -297,8 +297,8 @@ public partial class SettingsController(
     /// the portal owner and DocSpace admins have. Other callers get 403. If the plan of a SaaS portal lacks the
     /// statistics feature, the call returns 402. The call changes data. You can repeat it with the same body. If
     /// `enableQuota` is false, the portal does not apply the default size. A zero or negative size saves 0. It
-    /// returns the saved settings. The call returns 400 if the size is not a whole number or exceeds the storage
-    /// quota of the portal. It also returns 403 if `defaultQuota` is not a JSON number.
+    /// returns the saved settings. The call returns 400 if the size is not a JSON number, not a whole number, or
+    /// exceeds the storage quota of the portal.
     /// </remarks>
     /// <summary>
     /// Save the user quota settings
@@ -315,10 +315,7 @@ public partial class SettingsController(
     {
         await DemandStatisticPermissionAsync();
 
-        if (!inDto.DefaultQuota.TryGetInt64(out var quota))
-        {
-            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
-        }
+        var quota = ReadDefaultQuota(inDto.DefaultQuota, Resource.UserQuotaGreaterPortalError);
 
         var tenant = tenantManager.GetCurrentTenant();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
@@ -394,8 +391,9 @@ public partial class SettingsController(
     /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. If the
     /// plan of a SaaS portal lacks the statistics feature, the call returns 402. The call changes data. You can
     /// repeat it with the same body. If `enableQuota` is false, the portal does not apply the size to new rooms. A
-    /// zero or negative size saves 0. It returns the saved settings, not the usage of rooms. The call returns 403 if
-    /// `defaultQuota` is not a JSON number.
+    /// zero or negative size saves 0. It returns the saved settings, not the usage of rooms. The call returns 400 if
+    /// `defaultQuota` is not a JSON number or not a whole number of the 64-bit range. It also returns 400 if the size
+    /// exceeds the storage quota of the portal.
     /// </remarks>
     /// <summary>
     /// Save the room quota settings
@@ -403,9 +401,9 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/roomquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Saved default per-room storage quota settings", typeof(EntityQuotaSettingsDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`, or `defaultQuota` is not a JSON number, not a whole number of the 64-bit range, or greater than the storage quota of the portal")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for room quotas")]
-    [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("roomquotasettings")]
     public async Task<EntityQuotaSettingsDto> SaveRoomQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
@@ -413,10 +411,7 @@ public partial class SettingsController(
 
         // A size the portal cannot take is the caller's input: 400, as SaveUserQuotaSettings answers for the same
         // checks. These were plain Exceptions, which nothing maps, so they came back as 500.
-        if (!inDto.DefaultQuota.TryGetInt64(out var quota))
-        {
-            throw new ArgumentException(Resource.RoomQuotaGreaterPortalError);
-        }
+        var quota = ReadDefaultQuota(inDto.DefaultQuota, Resource.RoomQuotaGreaterPortalError);
 
         var tenant = tenantManager.GetCurrentTenant();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
@@ -461,8 +456,9 @@ public partial class SettingsController(
     /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. If the
     /// plan of a SaaS portal lacks the statistics feature, the call returns 402. The call changes data. You can
     /// repeat it with the same body. If `enableQuota` is false, the portal does not apply the size to new agents. A
-    /// zero or negative size saves 0. It returns the saved settings, not the usage of agents. The call returns 403 if
-    /// `defaultQuota` is not a JSON number.
+    /// zero or negative size saves 0. It returns the saved settings, not the usage of agents. The call returns 400 if
+    /// `defaultQuota` is not a JSON number or not a whole number of the 64-bit range. It also returns 400 if the size
+    /// exceeds the storage quota of the portal.
     /// </remarks>
     /// <summary>
     /// Save the AI Agent quota settings
@@ -470,9 +466,9 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/aiagentquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Saved default AI agent storage quota settings", typeof(EntityQuotaSettingsDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`, or `defaultQuota` is not a JSON number, not a whole number of the 64-bit range, or greater than the storage quota of the portal")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for AI agent quotas")]
-    [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("aiagentquotasettings")]
     public async Task<EntityQuotaSettingsDto> SaveAiAgentQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
@@ -480,10 +476,7 @@ public partial class SettingsController(
 
         // 400 for a size the portal cannot take, as in SaveUserQuotaSettings and SaveRoomQuotaSettings; these were
         // plain Exceptions that came back as 500.
-        if (!inDto.DefaultQuota.TryGetInt64(out var quota))
-        {
-            throw new ArgumentException(Resource.AiAgentQuotaGreaterPortalError);
-        }
+        var quota = ReadDefaultQuota(inDto.DefaultQuota, Resource.AiAgentQuotaGreaterPortalError);
 
         var tenant = tenantManager.GetCurrentTenant();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
@@ -525,8 +518,8 @@ public partial class SettingsController(
     /// Sets how mobile devices open portal links: in the browser, in the app, or by asking the user. Requires the
     /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
     /// call changes data. You can repeat it with the same body. It returns the saved settings. To read them without
-    /// signing in, use `GET api/2.0/settings/deeplink`. If the mode is not a defined value, the call returns 400 and
-    /// saves nothing.
+    /// signing in, use `GET api/2.0/settings/deeplink`. Without `deepLinkSettings` or with an undefined mode, the
+    /// call returns 400 and saves nothing.
     /// </remarks>
     /// <summary>
     /// Configure the deep link settings
@@ -534,7 +527,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/deeplink</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Saved deep link handling settings", typeof(TenantDeepLinkSettingsDto))]
-    [SwaggerResponse(400, "The handling mode is not one of the supported deep link handling values")]
+    [SwaggerResponse(400, "The body has no `deepLinkSettings`, or the handling mode is not one of the supported deep link handling values")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("deeplink")]
     public async Task<TenantDeepLinkSettingsDto> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
@@ -733,7 +726,9 @@ public partial class SettingsController(
     /// changes to that domain. If `enable` is false or the name is empty, the call removes the custom domain. On
     /// SaaS, the call returns 415. Requires the EditPortalSettings permission, which the portal owner and DocSpace
     /// admins have. Other callers get 403. The call changes data. Do not repeat it with the same domain. You can repeat
-    /// a removal. After the change, CSP settings that named the old domain name the new one.
+    /// a removal. After the change, CSP settings that named the old domain name the new one. The call returns 400 if
+    /// `dnsName` is not a valid domain name, is too short or too long, or is reserved or used by another portal. If the
+    /// installation hides this section, the call returns 402.
     /// </remarks>
     /// <summary>Save the DNS settings</summary>
     /// <path>api/2.0/settings/dns</path>
@@ -827,14 +822,13 @@ public partial class SettingsController(
     /// `GET api/2.0/settings` before setup is complete. The call changes data, and a repeated call returns 409. If the
     /// email changes, the owner must confirm the new address. It returns the wizard settings with `completed` set. The
     /// call returns 400 if `email` or `passwordHash` is missing, or the email is malformed. It also returns 400 if the
-    /// new password is the owner's current password. A license that is invalid, of the wrong type, or starts later also
-    /// returns 400.
+    /// new password is the owner's current password. A license that is invalid or starts later also returns 400.
     /// </remarks>
     /// <summary>Complete the Wizard settings</summary>
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Resulting wizard settings, including the completed flag", typeof(WizardSettingsDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, the new password is the current password of the owner, or the license is missing, invalid, of the wrong type or starts in the future")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, the new password is the current password of the owner, or the license is missing, invalid or starts in the future")]
     [SwaggerResponse(403, "The account the confirmation link was issued for has no portal-settings right")]
     [SwaggerResponse(409, "The setup wizard has already been completed")]
     [AllowNotPayment]
@@ -1544,6 +1538,22 @@ public partial class SettingsController(
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
+    }
+
+    /// <summary>
+    /// Reads <c>defaultQuota</c> as a whole number of the 64-bit range, or refuses it with <paramref name="error"/> (400).
+    /// A value that is not a JSON number (a string, <c>true</c>, an object) made <c>TryGetInt64</c> throw an
+    /// <see cref="InvalidOperationException"/>, which the handler answers with 403; it is the caller's input, as a
+    /// fraction is.
+    /// </summary>
+    private static long ReadDefaultQuota(JsonElement value, string error)
+    {
+        if (value.ValueKind != JsonValueKind.Number || !value.TryGetInt64(out var quota))
+        {
+            throw new ArgumentException(error);
+        }
+
+        return quota;
     }
 
 

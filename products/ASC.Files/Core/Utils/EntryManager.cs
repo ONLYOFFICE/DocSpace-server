@@ -1656,12 +1656,14 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             else
             {
-                // The content is fetched from the address the document service gave: the converted copy of a
-                // third-party file, the editor's saved revision, or the version a restore names. These failures were
-                // plain exceptions, each a 500. An address that is not one is the caller's input (400); an address
-                // that does not answer, or answers with an error, is a failure of the server behind it, a 502 as in
-                // DocumentServiceConnector.GetConvertedFileAsync.
-                if (!Uri.TryCreate(downloadUri, UriKind.Absolute, out var downloadAddress))
+                // The content is fetched from an address: the converted copy of a third-party file or the editor's
+                // saved revision, which the document service gives, or the address the caller of restoreversion names.
+                // These failures were plain exceptions, each a 500. An address that is not an http or https one is the
+                // caller's input (400): another scheme (ftp:, file:) made SendAsync throw a NotSupportedException, a 415.
+                // An address that does not answer, or answers with an error, is a failure of the server behind it, a
+                // 502 as in DocumentServiceConnector.GetConvertedFileAsync.
+                if (!Uri.TryCreate(downloadUri, UriKind.Absolute, out var downloadAddress)
+                    || (downloadAddress.Scheme != Uri.UriSchemeHttp && downloadAddress.Scheme != Uri.UriSchemeHttps))
                 {
                     throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest);
                 }
@@ -1681,7 +1683,8 @@ public class EntryManager(IDaoFactory daoFactory,
                 catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
                 {
                     // No token is passed, so a cancelled send is the client's timeout, not the caller giving up.
-                    throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {e.Message}");
+                    // The message of the failure names the address the content was fetched from: it stays inside.
+                    throw new CustomHttpException(HttpStatusCode.BadGateway, FilesCommonResource.ErrorMessage_DocServiceException, e);
                 }
 
                 using var response = sent;

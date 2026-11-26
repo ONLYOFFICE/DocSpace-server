@@ -97,6 +97,10 @@ public class FirstTimeTenantSettings(
                 throw new ArgumentException(Resource.ErrorPasswordEmpty);
             }
 
+            // Before the license below is applied and audited: a refused password used to come after them, and a
+            // repeated call wrote the audit record again
+            await securityContext.DemandNewPasswordHashAsync(currentUser.Id, passwordHash);
+
             if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
             {
                 if (await ApplyDocsTrialAsync())

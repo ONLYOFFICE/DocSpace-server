@@ -272,7 +272,8 @@ public class FileConverter(
     TempStream tempStream,
     IHttpContextAccessor httpContextAccessor,
     WebhookManager webhookManager,
-    NotifyClient notifyClient)
+    NotifyClient notifyClient,
+    ILogger<FileConverter> logger)
 {
     public bool EnableAsUploaded => fileUtility.ExtsMustConvert.Count > 0 && !string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl);
 
@@ -371,7 +372,7 @@ public class FileConverter(
         catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
         {
             // No token is passed, so a cancelled send is the client's timeout, not the caller giving up.
-            throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {e.Message}", e);
+            throw new CustomHttpException(HttpStatusCode.BadGateway, FilesCommonResource.ErrorMessage_DocServiceException, e);
         }
 
         if (!response.IsSuccessStatusCode)
@@ -577,31 +578,17 @@ public class FileConverter(
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
             newFile.ContentLength = convertedFileStream.Length;
             newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);
-
-            if (!isNewFile)
-            {
-                await socketManager.UpdateFileAsync(newFile);
-            }
-            else
-            {
-                await socketManager.CreateFileAsync(newFile);
-            }
         }
         catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
         {
             // The converted copy is fetched from the address the document service gave. This failure, and the answer with
             // an error above, were plain exceptions, a 500; they are failures of the document service, a 502, as for the
             // conversion itself. No token is passed, so a cancelled send is the client's timeout.
-            var statusCode = (e as HttpRequestException)?.StatusCode;
-            var errorString = $"{e.GetType().Name}: {statusCode}";
-
-            if (statusCode != HttpStatusCode.NotFound)
-            {
-                errorString += $" Error {e.Message}";
-            }
-
-            throw new CustomHttpException(HttpStatusCode.BadGateway, errorString, e);
+            // The message of the failure names the internal address of the document service: it stays inside.
+            throw new CustomHttpException(HttpStatusCode.BadGateway, FilesCommonResource.ErrorMessage_DocServiceException, e);
         }
+
+        await NotifyConvertedFileAsync(newFile, isNewFile);
 
         await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
 
@@ -705,15 +692,8 @@ public class FileConverter(
             // The converted copy is fetched from the address the document service gave. This failure, and the answer with
             // an error above, were plain exceptions, a 500; they are failures of the document service, a 502, as for the
             // conversion itself. No token is passed, so a cancelled send is the client's timeout.
-            var statusCode = (e as HttpRequestException)?.StatusCode;
-            var errorString = $"{e.GetType().Name}: {statusCode}";
-
-            if (statusCode != HttpStatusCode.NotFound)
-            {
-                errorString += $" Error {e.Message}";
-            }
-
-            throw new CustomHttpException(HttpStatusCode.BadGateway, errorString, e);
+            // The message of the failure names the internal address of the document service: it stays inside.
+            throw new CustomHttpException(HttpStatusCode.BadGateway, FilesCommonResource.ErrorMessage_DocServiceException, e);
         }
 
         return newFile;
@@ -737,14 +717,7 @@ public class FileConverter(
         newFile.ContentLength = convertedFileStream.Length;
         newFile = await daoFactory.GetFileDao<T>().SaveFileAsync(newFile, convertedFileStream);
 
-        if (!isNewFile)
-        {
-            await socketManager.UpdateFileAsync(newFile);
-        }
-        else
-        {
-            await socketManager.CreateFileAsync(newFile);
-        }
+        await NotifyConvertedFileAsync(newFile, isNewFile);
 
         if (headers != null)
         {
@@ -758,6 +731,29 @@ public class FileConverter(
         await fileMarker.MarkAsNewAsync(newFile);
 
         return newFile;
+    }
+
+    /// <summary>
+    /// Tells the open clients about a converted file that is saved. Best effort: a failure of the socket service once
+    /// the file is stored used to fail the conversion as well; it is logged instead.
+    /// </summary>
+    private async Task NotifyConvertedFileAsync<T>(File<T> newFile, bool isNewFile)
+    {
+        try
+        {
+            if (!isNewFile)
+            {
+                await socketManager.UpdateFileAsync(newFile);
+            }
+            else
+            {
+                await socketManager.CreateFileAsync(newFile);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.WarningConvertedFileNotice($"{newFile.Id}", e);
+        }
     }
 
     /// <summary>

@@ -98,14 +98,16 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     /// <summary>
     /// A third-party storage that cannot deliver an entry (unreachable, credentials rejected, an error of its API) makes
     /// its DAO return a placeholder with <see cref="FileEntry.Error"/> set instead of throwing. That is a failure of the
-    /// upstream storage, so it is 502, as a failing document server is; a plain exception was a 500. The text stays the
-    /// storage's own message.
+    /// upstream storage, so it is 502, as a failing document server is; a plain exception was a 500. The check runs
+    /// before any access check (the editor is opened anonymously by a link too), so the answer carries a fixed text and
+    /// the storage's own message, which can name its hosts, stays inside for the log.
     /// </summary>
     private static void ThrowIfThirdPartyFailed<T>(File<T> file)
     {
         if (file != null && !string.IsNullOrEmpty(file.Error))
         {
-            throw new CustomHttpException(HttpStatusCode.BadGateway, file.Error);
+            throw new CustomHttpException(HttpStatusCode.BadGateway, "The third-party storage of the file could not deliver it",
+                new HttpRequestException(file.Error));
         }
     }
 

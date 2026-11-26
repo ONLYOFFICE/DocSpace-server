@@ -755,13 +755,16 @@ public class PortalRegistrationService(
             // Every failure here used to be a 500. Two of them are the caller's: a value RegisterTenantAsync refuses
             // (an ArgumentException, e.g. an empty first name next to a last name), and a name another request took
             // between the check and the insert, which fails on the unique alias. Both get the 400 the checks before
-            // them give. Anything else is a fault of the server and stays a 500.
+            // them give. A portal under the alias whose owner is the one this request asked for stays a 500, as anything
+            // else does: usually it is this request's own portal, saved before a later step failed. A second request of
+            // the same registration that loses the race to the insert also ends here and gets the 500, not the 400:
+            // nothing stored tells it from a repeated commit of this request.
             if (e is ArgumentException)
             {
                 return (null, new PortalRegistrationErrorDto { Error = "registerNewTenantError", Message = e.Message }, StatusCodes.Status400BadRequest);
             }
 
-            if (await IsAliasTakenAfterFailureAsync(info.Address))
+            if (await IsAliasTakenAfterFailureAsync(info))
             {
                 return (null, PortalNameExistError(), StatusCodes.Status400BadRequest);
             }
@@ -797,11 +800,20 @@ public class PortalRegistrationService(
         }
     }
 
-    private async Task<bool> IsAliasTakenAfterFailureAsync(string alias)
+    private async Task<bool> IsAliasTakenAfterFailureAsync(TenantRegistrationInfo info)
     {
         try
         {
-            return await IsAliasTakenAsync(alias);
+            var alias = info.Address.Trim().ToLowerInvariant();
+            var tenant = await hostedSolution.GetTenantAsync(alias);
+            if (tenant == null)
+            {
+                return false;
+            }
+
+            var owner = (await hostedSolution.FindUsersAsync([tenant.OwnerId])).FirstOrDefault();
+
+            return RegistrationAliasCheck.IsTakenByAnother(tenant, alias, owner?.Email, info.Email);
         }
         catch (Exception e)
         {

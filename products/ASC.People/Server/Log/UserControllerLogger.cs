@@ -40,4 +40,7 @@ internal static partial class UserControllerLogger
 
     [LoggerMessage(LogLevel.Error, "Password recovery ({email}): {error}")]
     public static partial void ErrorPasswordRecovery(this ILogger<UserController> logger, string email, string error);
+
+    [LoggerMessage(LogLevel.Error, "The audit record of the accounts deleted before a failed deletion was not written")]
+    public static partial void ErrorAuditAfterPartialDeletion(this ILogger<UserController> logger, Exception exception);
 }

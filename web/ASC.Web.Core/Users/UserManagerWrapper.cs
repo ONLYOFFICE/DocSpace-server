@@ -195,6 +195,8 @@ public sealed class UserManagerWrapper(
         UserInfo newUserInfo;
         if (updateExising)
         {
+            // Before the profile is updated: a refused password used to come after it, and the profile stayed changed
+            await securityContext.DemandNewPasswordHashAsync(userInfo.Id, passwordHash);
             newUserInfo = await userManager.UpdateUserInfoAsync(userInfo, true);
             await securityContext.SetUserPasswordHashAsync(newUserInfo.Id, passwordHash);
         }

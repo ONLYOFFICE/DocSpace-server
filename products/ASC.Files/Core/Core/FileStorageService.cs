@@ -4922,7 +4922,7 @@ public class FileStorageService //: IFileStorageService
             }
             catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
             {
-                throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {e.Message}", e);
+                throw new CustomHttpException(HttpStatusCode.BadGateway, FilesCommonResource.ErrorMessage_DocServiceException, e);
             }
 
             using var response = sent;

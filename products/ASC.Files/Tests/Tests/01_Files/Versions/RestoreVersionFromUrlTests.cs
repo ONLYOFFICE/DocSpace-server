@@ -34,9 +34,9 @@
 namespace ASC.Files.Tests.Tests._01_Files.Versions;
 
 /// <summary>
-/// Restoring a file version from an address through <c>restoreversion</c> with <c>url</c>: an address that is not one
-/// is refused with 400, an address that does not answer or answers with an error is a failure of the server behind
-/// it, a 502. <c>EntryManager.SaveEditingAsync</c> raised plain exceptions for all three, and a 500 came back. A version
+/// Restoring a file version from an address through <c>restoreversion</c> with <c>url</c>: an address that is not an
+/// http or https one is refused with 400, an address that does not answer or answers with an error is a failure of the
+/// server behind it, a 502. <c>EntryManager.SaveEditingAsync</c> raised plain exceptions for all three, and a 500 came back. A version
 /// the file does not have is 404.
 /// </summary>
 [Trait("Category", "Validation")]
@@ -56,6 +56,29 @@ public class RestoreVersionFromUrlTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.RestoreFileVersionAsync(file.Id, version: 1, url: "not an address", cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+        (await CurrentVersion(file.Id)).Should().Be(versionBefore, "a refused restore stores no new version");
+    }
+
+    /// <summary>
+    /// An absolute address of another scheme passed the address check and made the HTTP client throw a
+    /// NotSupportedException, which came back as 415, a code the action does not declare.
+    /// </summary>
+    [Theory]
+    [InlineData("ftp://127.0.0.1/autotest.docx")]
+    [InlineData("file:///etc/hosts")]
+    public async Task RestoreFileVersion_UrlOfAnotherScheme_Returns400(string url)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileWithSecondVersion("Autotest Restore From Other Scheme.docx");
+        var versionBefore = await CurrentVersion(file.Id);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.RestoreFileVersionAsync(file.Id, version: 1, url: url, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);

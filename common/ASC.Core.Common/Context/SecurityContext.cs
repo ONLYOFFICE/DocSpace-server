@@ -289,14 +289,24 @@ public class SecurityContext(
 
     public async Task SetUserPasswordHashAsync(Guid userID, string passwordHash)
     {
+        await DemandNewPasswordHashAsync(userID, passwordHash);
+
+        await authentication.SetUserPasswordHashAsync(userID, passwordHash);
+    }
+
+    /// <summary>
+    /// Refuses a password hash that is the current one of the account with a <see cref="PasswordException"/> (400).
+    /// <see cref="SetUserPasswordHashAsync"/> checks it too; a caller that changes other data before it sets the
+    /// password calls this first, so a refused call changes nothing.
+    /// </summary>
+    public async Task DemandNewPasswordHashAsync(Guid userID, string passwordHash)
+    {
         var tenantid = tenantManager.GetCurrentTenantId();
         var u = await userManager.GetUsersByPasswordHashAsync(tenantid, userID.ToString(), passwordHash);
         if (!Equals(u, Users.Constants.LostUser))
         {
             throw new PasswordException("A new password must be used");
         }
-
-        await authentication.SetUserPasswordHashAsync(userID, passwordHash);
     }
 
     // Derives from ArgumentException so that every caller answers 400 for a new password equal to the current one:

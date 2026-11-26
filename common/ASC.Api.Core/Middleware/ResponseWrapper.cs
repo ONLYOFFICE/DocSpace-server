@@ -37,7 +37,8 @@ namespace ASC.Api.Core.Middleware;
 
 public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IExceptionHandler
 {
-    // Retry-After of a 503 for a lock held by another request: the holder usually finishes within seconds
+    // Retry-After of a 503 for a lock held by another request. An estimate, not a measured wait: no lock provider
+    // tells how long the holder keeps the lock
     private const string LockRetryAfterSeconds = "10";
 
     public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
@@ -143,21 +144,26 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.BadGateway;
                 criticalException = true;
                 break;
+            // A failure of a service behind the portal (502) is ours to look into, as the 502 cases above are, so it is
+            // logged as critical; a refusal of the caller (4xx) is not.
             case CustomHttpException httpException:
                 status = (HttpStatusCode)httpException.StatusCode;
                 withStackTrace = false;
+                criticalException = httpException.StatusCode >= 500;
                 break;
             case NotSupportedException:
                 status = HttpStatusCode.UnsupportedMediaType;
                 withStackTrace = false;
                 break;
             // A distributed lock was not acquired in time: another request holds the same resource. Every provider
-            // throws it while acquiring, before the work the lock guards, so the request did nothing and can be
-            // repeated - 503 with Retry-After rather than a 500. The exception text names the internal lock key, so
-            // the body gets a fixed one.
+            // throws it while acquiring, before the work the lock guards, so that step was not done - 503 with
+            // Retry-After rather than a 500. Steps of the same request before the lock stay done: most actions take
+            // their lock first, but some take it in the middle (deleting a user, marking files new), so the answer does
+            // not promise that nothing changed. The exception text names the internal lock key, so the body gets a
+            // fixed one.
             case DistributedLockException:
                 status = HttpStatusCode.ServiceUnavailable;
-                message = "The server is busy with another request for the same data. Repeat the request later.";
+                message = "The server is busy with another request for the same data, and the step that needs it was not done. Repeat the request later.";
                 withStackTrace = false;
                 context.Response.Headers.RetryAfter = LockRetryAfterSeconds;
                 break;

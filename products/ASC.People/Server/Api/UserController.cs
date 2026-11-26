@@ -252,10 +252,10 @@ public class UserController(
     [RaisesWebhook(WebhookTrigger.UserCreated, When = "after the portal saves the avatar from `files`, if any, but not if the download fails")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The new profile with its detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "The password does not meet the portal password policy, or the image at `files` is empty, too large or not an image")]
-    [SwaggerResponse(402, "The account joins a room through the invitation link, but the portal already has as many room members as its plan allows")]
+    [SwaggerResponse(400, "The email is already used or the names are not valid, the password does not meet the portal password policy, or the image at `files` is empty, too large or not an image; for the image the account has already been created")]
+    [SwaggerResponse(402, "The account joins a room through the invitation link, but the portal already has as many room members as its plan allows, or the portal has as many users as its plan allows")]
     [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created")]
-    [SwaggerResponse(502, "The address in `files` did not answer or timed out")]
+    [SwaggerResponse(502, "The address in `files` did not answer or timed out; the account has already been created")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -442,7 +442,8 @@ public class UserController(
     /// and DocSpace admin in the body. So a repeat can return 402. If the pending account was deleted, a new invitation
     /// to its address soon after the first sends no email. The first link still works. If the invitations need more
     /// paid seats than the tariff has left, the call returns 402 and sends nothing. The call returns 400 for a
-    /// malformed or punycode address, or for the address of a disabled account. The call handles the addresses in
+    /// malformed or punycode address, for the address of a disabled account, or for an address linked to a
+    /// third-party profile of another account. The call handles the addresses in
     /// order. So a 400 or 403 in the middle leaves the earlier invitations sent. The call returns every pending account
     /// that the caller can see, not only the new ones. The portal limits the rate of these calls. To send an invitation
     /// again, use `PUT api/2.0/people/invite`.
@@ -736,8 +737,9 @@ public class UserController(
     /// To track the job, use
     /// `GET api/2.0/people/remove/progress/{userId}`. If the account shared files from its own section, the job moves
     /// them to a new folder of the caller. To move rooms and shared files to another user first, use
-    /// `POST api/2.0/people/reassign/start`. The call returns the profile as it was before the deletion. To delete
-    /// several accounts, use `PUT api/2.0/people/delete`.
+    /// `POST api/2.0/people/reassign/start`. While a reassignment of the account's data runs, the call returns 409.
+    /// If the OAuth service does not answer, the call returns 502 and deletes nothing. The call returns the profile as
+    /// it was before the deletion. To delete several accounts, use `PUT api/2.0/people/delete`.
     /// </remarks>
     /// <summary>
     /// Delete a user
@@ -1039,8 +1041,9 @@ public class UserController(
     /// Searches the accounts with the status from the route. The term in `query` must be in the name, user name, email,
     /// or contacts. Requires a DocSpace admin. Other callers get 403, including a room admin. The call is read-only. It
     /// matches the term as a substring and ignores case. If `query` is missing, the call returns 400. With `filterBy`
-    /// set to `group`, `filterValue` is a group ID. The call then keeps only the members of that group. The list has no
-    /// paging, no total, and no fixed order. For a page with a total, use `GET api/2.0/people/filter`.
+    /// set to `group`, `filterValue` is a group ID. The call then keeps only the members of that group. If it is not a
+    /// group ID, the call returns 400. The list has no paging, no total, and no fixed order. For a page with a total,
+    /// use `GET api/2.0/people/filter`.
     /// </remarks>
     /// <summary>
     /// Search users by status filter
@@ -1049,7 +1052,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The full profiles of the matching accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "A parameter has the wrong type, or `query` is missing")]
+    [SwaggerResponse(400, "A parameter has the wrong type, `query` is missing, or `filterValue` is not a group ID while `filterBy` is `group`")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByStatus(AdvancedSearchDto inDto)
@@ -1254,11 +1257,12 @@ public class UserController(
 
     /// <remarks>
     /// Returns a page of the accounts with the status from the route, with full profiles. Requires a room admin, a
-    /// DocSpace admin, or an admin of the People module. Other callers get 403. The call is read-only. The response has
-    /// the total number of matches. If `count` is out of range, the call returns 400. The call filters the accounts by
-    /// name and email with `filterValue`. With `filterBy` set to `group`, `filterValue` is also a group ID. The call
-    /// then matches that ID against names and emails too, so it usually finds nothing. To filter by group, use
-    /// `GET api/2.0/people/filter` with `groupId`. For active accounts only, the same call is `GET api/2.0/people`.
+    /// DocSpace admin, or an admin of the People module. Other callers get 403. The call is read-only. The response
+    /// has the total number of matches. If `count` is out of range, the call returns 400. The call filters the
+    /// accounts by name and email with `filterValue`. With `filterBy` set to `group`, `filterValue` must be a group
+    /// ID, or the call returns 400. The call keeps the members of that group and also matches the ID against names
+    /// and emails. So it usually finds nothing. To filter by group, use `GET api/2.0/people/filter` with `groupId`.
+    /// For active accounts only, the same call is `GET api/2.0/people`.
     /// </remarks>
     /// <summary>
     /// Get profiles by status
@@ -1267,7 +1271,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / User status")]
     [SwaggerResponse(200, "A page of accounts in the requested state, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or `filterValue` is not a group ID while `filterBy` is `group`")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
@@ -1377,7 +1381,6 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The full profiles of the matching active accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "`filterValue` is not a group ID while the search filters by group")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("search")]
     public IAsyncEnumerable<EmployeeFullDto> SearchUsersByQuery(GetPeopleByQueryRequestDto inDto)
@@ -1390,15 +1393,15 @@ public class UserController(
     /// Searches the active accounts of the portal by the term in the path. Requires a DocSpace admin. Other callers get
     /// 403, including a room admin. The call skips pending and disabled accounts. The call is read-only. It returns all
     /// matches with full profiles, without paging or a total. With `filterBy` set to `group`, `filterValue` is a group
-    /// ID. The call then keeps only the members of that group. To search in all states, use
-    /// `GET api/2.0/people/filter`.
+    /// ID. The call then keeps only the members of that group. If it is not a group ID, the call returns 400. To
+    /// search in all states, use `GET api/2.0/people/filter`.
     /// </remarks>
     /// <summary>Search users</summary>
     /// <path>api/2.0/people/@search/{query}</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The full profiles of the matching active accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "`filterValue` is not a group ID while the search filters by group")]
+    [SwaggerResponse(400, "`filterValue` is not a group ID while `filterBy` is `group`")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(GetMemberByQueryRequestDto inDto)
@@ -1499,8 +1502,10 @@ public class UserController(
     /// A queued job deletes the data of each account, including its chat threads in AI projects. To track it, use
     /// `GET api/2.0/people/remove/progress/{userId}`.
     /// If an account shared files from its own section, the job moves them to a new folder of the caller. To move rooms
-    /// and shared files to another user first, use `POST api/2.0/people/reassign/start`. If `userIds` is missing, the
-    /// call returns 400.
+    /// and shared files to another user first, use `POST api/2.0/people/reassign/start`. While a reassignment of the
+    /// data of a listed account runs, the call returns 409. If `userIds` is missing, the call returns 400. The call
+    /// deletes the accounts one by one. If the OAuth service refuses or does not answer, the call stops with 403 or 502.
+    /// The accounts before that one in the list stay deleted.
     /// </remarks>
     /// <summary>
     /// Delete users
@@ -1512,9 +1517,9 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The listed accounts, including the skipped DocSpace admins; system, LDAP, deleted and unknown accounts are left out", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The userIds field is missing")]
-    [SwaggerResponse(403, "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account")]
+    [SwaggerResponse(403, "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account; the accounts before that one in the list stay deleted")]
     [SwaggerResponse(409, "Data of the user is still being reassigned to another user")]
-    [SwaggerResponse(502, "The OAuth service did not answer when the OAuth apps of the user were deleted; the user is not deleted")]
+    [SwaggerResponse(502, "The OAuth service did not answer when the OAuth apps of an account were deleted; that account is not deleted, the accounts before it in the list stay deleted")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
@@ -1540,30 +1545,54 @@ public class UserController(
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
 
-        foreach (var user in users)
+        // The accounts are deleted one by one, and a failure of the OAuth service (403, 502) stops the loop. The accounts
+        // deleted before it stay deleted, so they get their audit record before the failure reaches the caller.
+        var deleted = new List<UserInfo>();
+
+        try
         {
-            var userType = await _userManager.GetUserTypeAsync(user.Id);
-            switch (userType)
+            foreach (var user in users)
             {
-                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
-                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
-                    continue;
-            }
-
-            var isGuest = userType == EmployeeType.Guest;
-
-            await webhookManager.PublishAfterAsync(WebhookTrigger.UserDeleted, user, async () =>
-            {
-                if (!isGuest)
+                var userType = await _userManager.GetUserTypeAsync(user.Id);
+                switch (userType)
                 {
-                    await client.DeleteClientsAsync(user.Id);
+                    case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                    case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                        continue;
                 }
 
-                await _userPhotoManager.RemovePhotoAsync(user.Id);
-                await _userManager.DeleteUserAsync(user.Id);
-                await fileSecurity.RemoveSubjectAsync(user.Id, true);
-                await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
-            });
+                var isGuest = userType == EmployeeType.Guest;
+
+                await webhookManager.PublishAfterAsync(WebhookTrigger.UserDeleted, user, async () =>
+                {
+                    if (!isGuest)
+                    {
+                        await client.DeleteClientsAsync(user.Id);
+                    }
+
+                    await _userPhotoManager.RemovePhotoAsync(user.Id);
+                    await _userManager.DeleteUserAsync(user.Id);
+                    await fileSecurity.RemoveSubjectAsync(user.Id, true);
+                    await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
+                });
+
+                deleted.Add(user);
+            }
+        }
+        catch (Exception) when (deleted.Count > 0)
+        {
+            try
+            {
+                messageService.Send(MessageAction.UsersDeleted, MessageTarget.Create(deleted.Select(x => x.Id)),
+                    deleted.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList());
+            }
+            catch (Exception auditError)
+            {
+                // the failure of the deletion is the one the caller gets
+                logger.ErrorAuditAfterPartialDeletion(auditError);
+            }
+
+            throw;
         }
 
         messageService.Send(MessageAction.UsersDeleted, MessageTarget.Create(users.Select(x => x.Id)), userNames);

@@ -170,9 +170,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
     /// </summary>
     private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
     {
-#pragma warning disable CA2000
         var httpClient = httpClientFactory.CreateClient();
-#pragma warning restore CA2000
 
         using var cts = new CancellationTokenSource(_requestTimeout);
 
@@ -182,7 +180,8 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         }
         catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
         {
-            throw new CustomHttpException(HttpStatusCode.BadGateway, $"The OAuth service could not be reached: {e.Message}", e);
+            // The message of the failure names the internal host of the service: it stays inside for the log.
+            throw new CustomHttpException(HttpStatusCode.BadGateway, "The OAuth service could not be reached", e);
         }
     }
 }

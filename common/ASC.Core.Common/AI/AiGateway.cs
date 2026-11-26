@@ -236,18 +236,17 @@ public class AiGateway(
             throw new AiGatewayUnavailableException($"AI gateway request {method} {path} failed", e);
         }
 
-        using (response)
+        using var sent = response;
+
+        if ((int)sent.StatusCode >= 500)
         {
-            if ((int)response.StatusCode >= 500)
-            {
-                throw new AiGatewayUnavailableException(
-                    $"AI gateway request {method} {path} failed with status code {response.StatusCode}", statusCode: response.StatusCode);
-            }
-
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadFromJsonAsync<T>();
+            throw new AiGatewayUnavailableException(
+                $"AI gateway request {method} {path} failed with status code {sent.StatusCode}", statusCode: sent.StatusCode);
         }
+
+        sent.EnsureSuccessStatusCode();
+
+        return await sent.Content.ReadFromJsonAsync<T>();
     }
 
     private string GetCustomerModelsCacheKey()

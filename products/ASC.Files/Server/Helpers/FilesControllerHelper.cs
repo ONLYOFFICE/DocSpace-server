@@ -80,8 +80,9 @@ public class FilesControllerHelper(
 
     public async Task<bool> isFormPDF<T>(T fileId)
     {
-        // GetFileAsync returns null for a form a form filler may not see yet (filling not started); read as a file it
-        // was a NullReferenceException (500). Not found, as GetFileInfoAsync answers the same null.
+        // GetFileAsync returns null only to a form filler with a direct FillForms record whose form is not started yet,
+        // and its own CanReadAsync refuses that caller first (403), so this null is not expected here. Should it come,
+        // it is not found, as GetFileInfoAsync answers the same null, rather than read as a file.
         var file = (await _fileStorageService.GetFileAsync(fileId, -1)).NotFoundIfNull("File not found");
         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
@@ -94,8 +95,7 @@ public class FilesControllerHelper(
 
     public async Task<string> GetPresignedUri<T>(T fileId)
     {
-        // A form hidden from a form filler comes back as null; see isFormPDF.
-        var file = (await _fileStorageService.GetFileAsync(fileId, -1)).NotFoundIfNull("File not found");
+        var file = await _fileStorageService.GetFileAsync(fileId, -1);
         return pathProvider.GetFileStreamUrl(file);
     }
 
@@ -270,7 +270,7 @@ public class FilesControllerHelper(
     {
         var service = serviceProvider.GetService<FileStorageService>();
 
-        // A form hidden from a form filler comes back as null; see isFormPDF.
+        // A null from GetFileAsync is not expected here either; see isFormPDF.
         var file = (await _fileStorageService.GetFileAsync(fileId, -1)).NotFoundIfNull("File not found");
 
         // A copy made here is written in the clear: out of a private room it would keep nothing but
