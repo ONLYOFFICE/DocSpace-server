@@ -687,10 +687,11 @@ public class SecurityController(
     /// `asc_personal_csp` cookie, a signed-in member's header also allows their enabled personal plugins' domains.
     /// A personal plugin that a portal or installation-wide plugin shadows adds no domains. A header that would
     /// grow too large keeps the portal's domains only. A member with the cookie and personal domains never gets
-    /// 304. Pages may keep a member's earlier header for up to a day. The `domains` field stays the portal's list.
-    /// The list call `GET api/2.0/settings/webplugins` without `personal` sets or clears the cookie. Calls with
-    /// `personal` to `POST api/2.0/settings/webplugins` and to `PUT` or `DELETE api/2.0/settings/webplugins/{name}`
-    /// do the same. To change the allowed domains, use `POST api/2.0/security/csp`.
+    /// 304. Newly loaded pages may get a member's earlier header for up to a day. A portal header over the size
+    /// limit can give 403. The `domains` field stays the portal's list. The list call
+    /// `GET api/2.0/settings/webplugins` without `personal` sets or clears the cookie. Calls with `personal` to
+    /// `POST api/2.0/settings/webplugins` and to `PUT` or `DELETE api/2.0/settings/webplugins/{name}` do the same.
+    /// To change the allowed domains, use `POST api/2.0/security/csp`.
     /// </remarks>
     /// <summary>
     /// Get CSP settings
@@ -700,6 +701,7 @@ public class SecurityController(
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "The allowed domains of the portal and the full policy header: the portal's, or for a signed-in member with the `asc_personal_csp` cookie, the member's own", typeof(CspDto))]
     [SwaggerResponse(304, "The CSP settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
+    [SwaggerResponse(403, "The portal's own policy header is over the size limit when the call caches it again")]
     [AllowAnonymous]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]
