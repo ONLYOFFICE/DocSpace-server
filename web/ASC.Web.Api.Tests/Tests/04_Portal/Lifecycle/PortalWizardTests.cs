@@ -94,7 +94,7 @@ public class PortalWizardTests(AspireAppFixture fixture) : PortalLifecycleTestBa
         var repeat = await Assert.ThrowsAsync<ApiException>(
             async () => await portal.CommonSettingsApi.CompleteWizardAsync(Wizard(), TestContext.Current.CancellationToken));
 
-        repeat.ErrorCode.Should().Be(500);
+        repeat.ErrorCode.Should().Be(409);
         repeat.ErrorContent!.ToString().Should().Contain("Wizard passed.");
 
         portal.WebApiHttpClient.DefaultRequestHeaders.Remove("confirm");
@@ -139,7 +139,7 @@ public class PortalWizardTests(AspireAppFixture fixture) : PortalLifecycleTestBa
     }
 
     [Fact]
-    public async Task CompleteWizard_EmptyPasswordHash_ReturnsServerError()
+    public async Task CompleteWizard_EmptyPasswordHash_ReturnsBadRequest()
     {
         using var portal = await CreateWizardPortalAsync();
 
@@ -148,6 +148,12 @@ public class PortalWizardTests(AspireAppFixture fixture) : PortalLifecycleTestBa
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await portal.CommonSettingsApi.CompleteWizardAsync(Wizard(passwordHash: ""), TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(500);
+        exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("The password is empty.");
+
+        // The refusal left the wizard pending.
+        portal.WebApiHttpClient.DefaultRequestHeaders.Remove("confirm");
+
+        (await WizardTokenAsync(portal)).Should().NotBeNullOrEmpty();
     }
 }

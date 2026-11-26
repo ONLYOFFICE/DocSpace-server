@@ -79,12 +79,7 @@ public class ChangePasswordBlankTests(AspireAppFixture fixture) : BaseTest(fixtu
     {
         await _webApiClient.Authenticate(member);
 
-        using var response = await _webApiClient.PutAsync(
-            "api/2.0/security/activeconnections/logoutallchangepassword", null, TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        var url = JsonDocument.Parse(body).RootElement.GetProperty("response").GetString()!;
+        var url = (await _activeConnectionsApi.LogOutAllActiveConnectionsChangePasswordAsync(TestContext.Current.CancellationToken)).Response;
 
         url.Should().Contain("type=PasswordChange");
 

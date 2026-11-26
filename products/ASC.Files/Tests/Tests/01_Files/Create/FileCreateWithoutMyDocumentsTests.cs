@@ -102,20 +102,4 @@ public class FileCreateWithoutMyDocumentsTests(
         // Assert
         file.FolderId.Should().Be(my.Id);
     }
-
-    /// <summary>
-    /// <c>error.message</c> of the error body, read after parsing: the serializer escapes characters such as the
-    /// apostrophe, so the raw body is not compared.
-    /// </summary>
-    private static string ErrorMessageOf(string? body)
-    {
-        using var json = JsonDocument.Parse(string.IsNullOrEmpty(body) ? "{}" : body);
-
-        return json.RootElement.TryGetProperty("error", out var error)
-            && error.ValueKind == JsonValueKind.Object
-            && error.TryGetProperty("message", out var message)
-            && message.ValueKind == JsonValueKind.String
-                ? message.GetString() ?? ""
-                : "";
-    }
 }

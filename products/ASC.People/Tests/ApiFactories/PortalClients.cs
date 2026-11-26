@@ -72,6 +72,7 @@ public sealed class PortalClients : PortalClientsBase
     public DocSpace.API.SDK.Api.Settings.QuotaApi SettingsQuotaApi { get; }
     public SettingsApi PortalSettingsApi { get; }
     public WebhooksApi WebhooksApi { get; }
+    public ActiveConnectionsApi ActiveConnectionsApi { get; }
 
     public PortalClients(PortalContext context) : base(context)
     {
@@ -106,6 +107,7 @@ public sealed class PortalClients : PortalClientsBase
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
         SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(WebApiHttpClient, webApiConfig);
         PortalSettingsApi = new SettingsApi(WebApiHttpClient, webApiConfig);
+        ActiveConnectionsApi = new ActiveConnectionsApi(WebApiHttpClient, webApiConfig);
 
         // Webhooks live in ASC.Web.Api (hence webApiConfig, which is what decides the request URI),
         // but the tests drive them with the People client's token — keep it on that client.

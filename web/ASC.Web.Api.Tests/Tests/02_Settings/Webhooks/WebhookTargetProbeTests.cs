@@ -36,9 +36,9 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// <summary>
 /// The checks of the target address on <c>POST</c> and <c>PUT api/2.0/settings/webhook</c>: http or https only, no
 /// address in a blacklisted network, and a HEAD probe that has to answer with a success code itself — a redirect is
-/// not followed, and a target that gives no answer is a 500. On an update the probe is sent only after the
-/// subscription has been found and its owner checked (S5), so nobody can make the portal call an address by naming
-/// another member's subscription. Every address here is the local receiver or is refused before any request.
+/// not followed, and a target that gives no answer is a 400 "Webhook URL is not available.". On an update the probe
+/// is sent only after the subscription has been found and its owner checked (S5), so nobody can make the portal call
+/// an address by naming another member's subscription. Every address here is the local receiver or is refused before any request.
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebhookTargetProbeTests(
@@ -81,7 +81,7 @@ public class WebhookTargetProbeTests(
     }
 
     [Fact]
-    public async Task CreateWebhook_TargetThatDoesNotAnswer_ThrowsServerError()
+    public async Task CreateWebhook_TargetThatDoesNotAnswer_ThrowsBadRequest()
     {
         // Arrange: nothing listens on port 1 of the receiver's address, so the connection is refused at once
         await _webApiClient.Authenticate(Owner);
@@ -93,7 +93,8 @@ public class WebhookTargetProbeTests(
             async () => await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(500);
+        exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("Webhook URL is not available.");
     }
 
     [Fact]

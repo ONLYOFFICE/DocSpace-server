@@ -79,6 +79,7 @@ public class BaseTest(
     protected DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = null!;
     protected SettingsApi _portalSettingsApi = null!;
     protected WebhooksApi _webhooksApi = null!;
+    protected ActiveConnectionsApi _activeConnectionsApi = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -117,6 +118,7 @@ public class BaseTest(
         _settingsQuotaApi = _clients.SettingsQuotaApi;
         _portalSettingsApi = _clients.PortalSettingsApi;
         _webhooksApi = _clients.WebhooksApi;
+        _activeConnectionsApi = _clients.ActiveConnectionsApi;
 
         await _peopleClient.Authenticate(Owner);
 

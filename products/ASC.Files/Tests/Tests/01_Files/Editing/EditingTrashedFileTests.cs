@@ -35,9 +35,11 @@ namespace ASC.Files.Tests.Tests._01_Files.Editing;
 
 /// <summary>
 /// An editing session on a file in Trash - started with <c>editingAlone</c>, or refreshed through
-/// <c>trackeditfile</c> - is refused with 403. <c>EntryManager.TrackEditingAsync</c> raised a plain exception (a 500)
-/// for a file in Trash, but only after the edit right was checked, and Trash grants no edit right, so the refusal
-/// comes from that check first. These cases pin the 403 that callers get.
+/// <c>trackeditfile</c> - is refused with 403. The 403 comes from the edit right, checked by <c>CanEditAsync</c>:
+/// Trash grants no edit right. These are characterization tests of that answer, not guards of the Trash check of
+/// <c>EntryManager.TrackEditingAsync</c>, which raised a plain exception (a 500) and now raises a 403 of its own: a
+/// caller never reaches it, so the tests pass with or without it (not proven red: guard unreachable behind
+/// CanEditAsync).
 /// </summary>
 [Trait("Category", "Permissions")]
 [Trait("Feature", "Files")]

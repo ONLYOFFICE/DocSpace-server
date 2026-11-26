@@ -41,6 +41,8 @@ namespace ASC.Files.Tests.Tests._06_Operations.CheckDestFolder;
 /// </summary>
 [Trait("Category", "Operations")]
 [Trait("Feature", "Files")]
+[Trait("Requires", "Nextcloud")]
+[Collection("Nextcloud")]
 public class CheckDestFolderThirdPartyFileTests(
     AspireAppFixture fixture)
     : ASC.Files.Tests.Tests._03_Rooms.ThirdParty.ThirdPartyTestBase(fixture)

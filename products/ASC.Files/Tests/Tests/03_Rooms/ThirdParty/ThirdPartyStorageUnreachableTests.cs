@@ -94,17 +94,4 @@ public class ThirdPartyStorageUnreachableTests(
         exception.ErrorCode.Should().Be(502);
         ErrorMessageOf(exception.ErrorContent!.ToString()).Should().Contain(UnreachableError);
     }
-
-    /// <summary>The <c>error.message</c> of an error body, or an empty string when it has none.</summary>
-    private static string ErrorMessageOf(string? body)
-    {
-        using var json = JsonDocument.Parse(string.IsNullOrEmpty(body) ? "{}" : body);
-
-        return json.RootElement.TryGetProperty("error", out var error)
-            && error.ValueKind == JsonValueKind.Object
-            && error.TryGetProperty("message", out var message)
-            && message.ValueKind == JsonValueKind.String
-                ? message.GetString() ?? ""
-                : "";
-    }
 }

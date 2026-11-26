@@ -121,13 +121,15 @@ public class SystemApiRegistrationTests(AspireAppFixture fixture) : PortalLifecy
     }
 
     [Fact]
-    public async Task Register_TakenName_ReturnsRegisterNewTenantError()
+    public async Task Register_TakenName_ReturnsPortalNameExist()
     {
-        // A server installation does not check the requested name before it creates the tenant: the tenant service
-        // refuses it, and the answer is the 500 of a failed creation, not a 400 of validateportalname.
+        // A server installation checks the requested name before it creates the tenant and refuses a taken one with
+        // the 400 of validateportalname; before that check the insert failed on the unique alias with a 500. A name
+        // taken between the check and the insert is a race the stand cannot produce: that decision has a unit test.
         var (status, body) = await ApiSystemAsync(HttpMethod.Post, "portal/register", Registration(Clients.PortalName));
 
-        status.Should().Be(HttpStatusCode.InternalServerError);
-        body.GetProperty("error").GetString().Should().Be("registerNewTenantError");
+        status.Should().Be(HttpStatusCode.BadRequest);
+        body.GetProperty("error").GetString().Should().Be("portalNameExist");
+        body.GetProperty("message").GetString().Should().Be("Portal already exists");
     }
 }

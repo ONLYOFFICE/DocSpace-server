@@ -242,8 +242,9 @@ public class MigrationParseTests(
     }
 
     /// <summary>
-    /// With <c>isSendWelcomeEmail</c> after a parse-only job the documented answer is 500 "No migration is in
-    /// progress"; the job has no imported-user list, so the loop throws a NullReferenceException instead (M3).
+    /// With <c>isSendWelcomeEmail</c> after a parse-only job the answer is 404 "No migration is in progress". The job
+    /// has no imported-user list, and the loop over it threw a NullReferenceException, a 500 (M3); the controller now
+    /// refuses a finished job without that list before the loop.
     /// </summary>
     [Fact]
     [Trait("Category", "Bug")]
@@ -258,7 +259,7 @@ public class MigrationParseTests(
             async () => await _migrationApi.FinishMigrationAsync(new FinishDto(true), TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(500);
+        exception.ErrorCode.Should().Be(404);
         exception.ErrorContent!.ToString().Should().Contain("No migration is in progress");
     }
 
@@ -270,7 +271,7 @@ public class MigrationParseTests(
             async () => await _migrationApi.FinishMigrationAsync(new FinishDto(true), TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(500);
+        exception.ErrorCode.Should().Be(404);
         exception.ErrorContent!.ToString().Should().Contain("No migration is in progress");
     }
 }

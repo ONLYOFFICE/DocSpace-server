@@ -249,7 +249,7 @@ public class FormFillingStateTests(
     }
 
     [Fact]
-    public async Task Resume_OfFormThatWasNeverStarted_Returns500()
+    public async Task Resume_OfFormThatWasNeverStarted_Returns403()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -261,7 +261,8 @@ public class FormFillingStateTests(
             async () => await Manage(form.Id, FormFillingManageAction.Resume));
 
         // Assert
-        exception.ErrorCode.Should().Be(500, "a form without filling properties has nothing to resume");
+        exception.ErrorCode.Should().Be(403, "a form without filling properties has nothing to resume");
+        exception.ErrorContent!.ToString().Should().Contain("The form filling has not been set up for this form");
     }
 
     [Fact]
