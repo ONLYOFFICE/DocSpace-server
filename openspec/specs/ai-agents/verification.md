@@ -519,18 +519,19 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Transferring a project deletes its former owner's threads** |  |  |
 | Owner's data transferred; members of the transferred project (scenarios) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:166,190` | TEST-CONFIRMED |
 | Former owner's thread in another project (scenario) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:213` | TEST-CONFIRMED |
-| **Pinned projects in the root folders** |  |  |
-| Only pinned projects are listed, `total`/`count` 2, `startIndex` 0 (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:44` | TEST-CONFIRMED |
-| Nothing pinned; only an Instructions room pinned (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:68,84` | TEST-CONFIRMED |
-| Paging and filters do not cut the list; `sortBy=AZ` orders it by title (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:102` | TEST-CONFIRMED |
-| Unpinned project leaves the list (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:128` | TEST-CONFIRMED |
-| Other sections are not changed (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:146` | TEST-CONFIRMED |
-| **Who finds a pinned project in the root folders** |  |  |
-| Member pins a project; the owner without a pin does not see it (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:169` | TEST-CONFIRMED |
-| Member loses access and regains it (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:192` | TEST-CONFIRMED |
-| DocSpace admin outside the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:224` | TEST-CONFIRMED |
-| Creator of the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:244` | TEST-CONFIRMED |
-| A share held through a group does not count | `products/ASC.Files/Core/Core/EF/Queries/FolderQueries.cs` (`AiProjectsWithOwnRecordAsync`, `s.Subject == userId`); no test: the API refuses a group on a project | CODE-ONLY |
+| **Projects in the root folders** |  |  |
+| Pinned projects come first; paging, filters and `sortBy` ignored; `total`/`count` 4, `startIndex` 0 (scenario) | `Hub/AiHubRootProjectsTests.cs:44` | TEST-CONFIRMED |
+| Nothing pinned; more than five pinned (scenarios) | `Hub/AiHubRootProjectsTests.cs:70,90` | TEST-CONFIRMED |
+| A changed project moves up (scenario) | `Hub/AiHubRootProjectsTests.cs:117` | TEST-CONFIRMED |
+| No project in the section (scenario) | `Hub/AiHubRootProjectsTests.cs:137` | TEST-CONFIRMED |
+| Unpinned project moves behind the pinned ones (scenario) | `Hub/AiHubRootProjectsTests.cs:154` | TEST-CONFIRMED |
+| Other sections are not changed (scenario) | `Hub/AiHubRootProjectsTests.cs:173` | TEST-CONFIRMED |
+| **Who finds a project in the root folders** |  |  |
+| Member pins a project; pinned for the member only (scenario) | `Hub/AiHubRootProjectsTests.cs:195` | TEST-CONFIRMED |
+| Member loses access and regains it (scenario) | `Hub/AiHubRootProjectsTests.cs:219` | TEST-CONFIRMED |
+| DocSpace admin outside the project (scenario) | `Hub/AiHubRootProjectsTests.cs:252` | TEST-CONFIRMED |
+| Creator of the project (scenario) | `Hub/AiHubRootProjectsTests.cs:273` | TEST-CONFIRMED |
+| A share held through a group does not count | `products/ASC.Files/Core/Core/EF/Queries/FolderQueries.cs` (`AiHubRootProjectsAsync`, `s.Subject == userId`); no test: the API refuses a group on a project | CODE-ONLY |
 | **Drafts that are not sent are removed** |  |  |
 | Sent attachment older than the lifetime (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:142` | TEST-CONFIRMED |
 | The pass runs every 15 minutes and a draft lives 2 hours by default | `products/ASC.AI/Worker/BackgroundServices/OrphanAttachmentsCleanerService.cs` (`_defaultPeriod`, `_defaultLifetime`) | CODE-ONLY |
