@@ -40,7 +40,8 @@ public class OFormRequestManager(
     IHttpClientFactory httpClientFactory,
     IFusionCache cache,
     ResiliencePipelineRegistry<string> resiliencePipelineRegistry,
-    TelemetryOptionsAccessor telemetryOptions)
+    TelemetryOptionsAccessor telemetryOptions,
+    TimeProvider timeProvider = null)
 {
     public const string DownloadPipelineName = "oform-gallery-download";
     public const string ProbePipelineName = "oform-gallery-probe";
@@ -58,7 +59,9 @@ public class OFormRequestManager(
     /// out, or got 5xx, 408 or 429. While it is open (30 seconds), every creation
     /// from a template on that host answers 502 at once, while the availability check, which does not go through the
     /// breaker, may still answer a cached <c>true</c>. An error status of a template file is not a failure for the
-    /// breaker, which counts it as an answered request: one broken template must not fail the others on its host.
+    /// breaker, which counts it as an answered request: one broken template file must not fail the others on its host.
+    /// The template list is asked per template too, yet its failures count: they are nearly always failures of the
+    /// gallery itself, and a gallery that answers every list with 503 must open the circuit.
     /// </remarks>
     public const string HttpClientName = "templateGallery";
 
@@ -143,6 +146,9 @@ public class OFormRequestManager(
     };
 
     private readonly OFormSettings _configuration = configuration.GetSection("files:oform").Get<OFormSettings>();
+
+    // The clock of the availability check; a test passes its own
+    private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
 
     // Checked once: a bad address is logged when the manager is created, not on every request
     private readonly Uri _domain = ParseDomain(configuration["files:oform:domain"], logger);
@@ -352,9 +358,9 @@ public class OFormRequestManager(
     /// Whether the gallery is configured and answers with its template list. "Available" is cached per list URL,
     /// kept in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" by the
     /// fail-safe of the cache, so a short failure of the gallery or the network never hides a gallery that answered
-    /// before: for a day after the last answer. Repeated failed checks, or a process that copies the entry from the
-    /// distributed cache to its memory (a restart, an eviction), may keep it longer; no test pins how much. Without a
-    /// distributed cache (Redis off), a restart forgets it. With nothing known, a failed check means "unavailable" for
+    /// before: for a day after the gallery last answered, then a failed check means "unavailable". The time of that
+    /// answer is kept in the cached value, since every failed check stores the entry again and would otherwise keep it
+    /// for as long as the checks keep failing. Without a distributed cache (Redis off), a restart forgets it. With nothing known, a failed check means "unavailable" for
     /// up to 1 minute, kept by this process only, so one process that cannot reach the gallery never hides it from the
     /// others. A "true" another process writes ends it earlier, unless both checked at almost the same moment: the
     /// backplane drops a notification older than the local entry, and the "unavailable" stays for its minute. When the
@@ -375,15 +381,17 @@ public class OFormRequestManager(
 
         try
         {
-            return await cache.GetOrSetAsync<bool>(GetAvailabilityCacheKey(GetListUrl()), async (context, cancellationToken) =>
+            var answer = await cache.GetOrSetAsync<AvailabilityAnswer>(GetAvailabilityCacheKey(GetListUrl()), async (context, cancellationToken) =>
             {
+                var now = _timeProvider.GetUtcNow();
                 if (await ProbeAsync(cancellationToken))
                 {
-                    return true;
+                    return new AvailabilityAnswer(true, now);
                 }
 
-                // A failed check is no answer: the fail-safe keeps a known "available" and asks again after a minute
-                if (context.HasStaleValue && context.StaleValue.Value)
+                // A failed check is no answer: the fail-safe keeps a known "available" and asks again after a minute,
+                // until a day has passed since the gallery last answered
+                if (context.HasStaleValue && context.StaleValue.Value is { Available: true } known && now - known.AnsweredAt < _availabilityFailSafe)
                 {
                     return context.Fail("The template gallery did not answer its check");
                 }
@@ -393,11 +401,13 @@ public class OFormRequestManager(
                 context.Options.SkipDistributedCacheWrite = true;
                 context.Options.SkipBackplaneNotifications = true;
 
-                return false;
+                return new AvailabilityAnswer(false, now);
             }, entry => entry
                 .SetDuration(_availableDuration)
                 .SetFailSafe(true, _availabilityFailSafe, _unavailableDuration)
                 .SetFactoryTimeouts(TimeSpan.FromMilliseconds(200)));
+
+            return answer.Available;
         }
         catch (SyntheticTimeoutException)
         {
@@ -415,8 +425,15 @@ public class OFormRequestManager(
         var normalizedUrl = Uri.TryCreate(listUrl, UriKind.Absolute, out var uri) ? uri.AbsoluteUri : listUrl;
         var urlHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(normalizedUrl)));
 
-        return Tenant.DefaultTenant + "oformgallery" + urlHash;
+        return Tenant.DefaultTenant + "oformgalleryanswer" + urlHash;
     }
+
+    /// <summary>
+    /// The cached answer of the availability check: whether the gallery answered with its template list, and when the
+    /// check got this answer. The key holds this record, not the bare flag of the earlier versions, so an entry they
+    /// wrote is never read as one.
+    /// </summary>
+    public sealed record AvailabilityAnswer(bool Available, DateTimeOffset AnsweredAt);
 
     /// <summary>
     /// Asks the gallery for one template of its list. Never throws: a gallery that does not answer in time, answers

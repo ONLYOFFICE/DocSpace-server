@@ -1068,6 +1068,38 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task IsAvailableAsync_ChecksKeepFailing_KeepTheKnownTrueForADayAfterTheLastAnswer()
+    {
+        // Every failed check stores the entry again, so the fail-safe of the cache alone would keep a known true for as
+        // long as the checks keep failing: a gallery cut off for good would stay "available". The time of the last
+        // answer ends it a day after the gallery last answered, however many checks fail meanwhile
+        var time = new ManualTimeProvider();
+        var failing = false;
+        var gallery = Gallery(_ => Volatile.Read(ref failing)
+            ? new StubResponse(HttpStatusCode.ServiceUnavailable)
+            : StubResponse.Json(HttpStatusCode.OK, List));
+        var manager = CreateManager(gallery.Url, timeProvider: time);
+        var token = TestContext.Current.CancellationToken;
+
+        (await manager.IsAvailableAsync()).Should().BeTrue();
+
+        Volatile.Write(ref failing, true);
+        for (var hour = 1; hour < 24; hour++)
+        {
+            time.Advance(TimeSpan.FromHours(1));
+            await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: token);
+
+            (await manager.IsAvailableAsync()).Should().BeTrue($"the gallery answered {hour} hours ago");
+        }
+
+        time.Advance(TimeSpan.FromHours(1));
+        await _cache.ExpireAsync(AvailabilityCacheKey(gallery), token: token);
+
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+        gallery.CallCount.Should().Be(25);
+    }
+
+    [Fact]
     public async Task IsAvailableAsync_SlowFailedCheckWithAvailableKnown_IsThrottledToo()
     {
         // A failed check slower than the 200 ms the reader waits for ends in the background: the throttle of the
@@ -1220,12 +1252,12 @@ public sealed class OFormRequestManagerTests : IDisposable
     {
         var token = TestContext.Current.CancellationToken;
         var deadline = DateTime.UtcNow.AddSeconds(10);
-        MaybeValue<bool> answer;
+        MaybeValue<OFormRequestManager.AvailabilityAnswer> answer;
 
         do
         {
-            answer = await cache.TryGetAsync<bool>(key, options => options.AllowStaleOnReadOnly = false, token);
-            if (answer.HasValue && answer.Value == expected)
+            answer = await cache.TryGetAsync<OFormRequestManager.AvailabilityAnswer>(key, options => options.AllowStaleOnReadOnly = false, token);
+            if (answer.HasValue && answer.Value.Available == expected)
             {
                 return;
             }
@@ -1234,7 +1266,7 @@ public sealed class OFormRequestManagerTests : IDisposable
         }
         while (DateTime.UtcNow < deadline);
 
-        var seen = answer.HasValue ? answer.Value.ToString() : "nothing";
+        var seen = answer.HasValue ? answer.Value.Available.ToString() : "nothing";
         throw new TimeoutException($"The gallery availability cache did not store {expected}; the last read gave {seen}.");
     }
 
@@ -1318,6 +1350,7 @@ public sealed class OFormRequestManagerTests : IDisposable
     /// </param>
     /// <param name="retryDelay">The first wait before a retry of the download; 50 ms by default, so retries stay quick.</param>
     /// <param name="attemptTimeout">The timeout of one request of the download in place of the manager's 10 seconds.</param>
+    /// <param name="timeProvider">The clock of the availability check in place of the system's.</param>
     /// <param name="onlyWorkingClient">
     /// The only client name that reaches the network; every other client of the factory fails, except the gallery's own
     /// when <paramref name="registerPipelines"/> is <c>true</c>, which keeps the handler AddTemplateGalleryPipelines gives it.
@@ -1325,7 +1358,7 @@ public sealed class OFormRequestManagerTests : IDisposable
     private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null,
         Func<HttpMessageHandler>? primaryHandler = null, TimeSpan? downloadTimeout = null, TimeSpan? probeTimeout = null,
         ILoggerProvider? loggerProvider = null, bool registerPipelines = true, TimeSpan? retryDelay = null, TimeSpan? attemptTimeout = null,
-        string? onlyWorkingClient = null)
+        string? onlyWorkingClient = null, TimeProvider? timeProvider = null)
     {
         var services = new ServiceCollection();
 
@@ -1384,7 +1417,7 @@ public sealed class OFormRequestManagerTests : IDisposable
         var logger = loggerProvider is null ? NullLogger<OFormRequestManager>.Instance : provider.GetRequiredService<ILogger<OFormRequestManager>>();
 
         return new OFormRequestManager(logger, configuration, provider.GetRequiredService<IHttpClientFactory>(), cache ?? _cache,
-            provider.GetRequiredService<ResiliencePipelineRegistry<string>>(), provider.GetRequiredService<IOptions<TelemetryOptions>>());
+            provider.GetRequiredService<ResiliencePipelineRegistry<string>>(), provider.GetRequiredService<IOptions<TelemetryOptions>>(), timeProvider);
     }
 
     private static bool IsFile(StubRequest request)
@@ -1402,6 +1435,24 @@ public sealed class OFormRequestManagerTests : IDisposable
         var exception = await Assert.ThrowsAsync<CustomHttpException>(() => manager.Get(1, ext));
 
         exception.StatusCode.Should().Be((int)HttpStatusCode.BadGateway);
+    }
+
+    /// <summary>
+    /// A clock the test moves by hand.
+    /// </summary>
+    private sealed class ManualTimeProvider : TimeProvider
+    {
+        private DateTimeOffset _now = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+        public override DateTimeOffset GetUtcNow()
+        {
+            return _now;
+        }
+
+        public void Advance(TimeSpan delta)
+        {
+            _now += delta;
+        }
     }
 
     /// <summary>

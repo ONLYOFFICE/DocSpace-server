@@ -84,7 +84,7 @@ public class CreateFileRequestDto<T>
     /// <summary>
     /// The title of the new file and the source of its content.
     /// </summary>
-    /// <example>{"title": "New Document.docx", "templateId": "1", "enableExternalExt": false, "formId": 0}</example>
+    /// <example>{"title": "New Document.docx", "templateId": 1, "enableExternalExt": false}</example>
     [FromBody]
     public required CreateFileRequest<JsonElement> File { get; set; }
 }

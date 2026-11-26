@@ -106,7 +106,8 @@ after the last answer while the cache holds it (bug 78009).
 
 - **WHEN** the call returned `true` and a later check gets an error status or a page that is not the list
 - **THEN** the call still returns `true`
-- **AND** it keeps the `true` for a day after the last answer; repeated failed checks or a process that took it from the distributed cache may keep it longer, and without a distributed cache a restart forgets it
+- **AND** it keeps the `true` for a day after the last answer, however many checks fail meanwhile, and without a distributed cache a restart forgets it
+- **AND** a failed check a day or more after the last answer returns `false`
 
 #### Scenario: Caller
 
