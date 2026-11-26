@@ -44,15 +44,16 @@ alone, while the administrator keeps control of what runs for the portal.
 - The domains a personal plugin declares in `cspDomains` never reach the portal Content Security Policy. A
   signed-in member whose request carries the `asc_personal_csp` cookie gets them in the `header` that
   `getCspSettings` returns, outside `frame-ancestors`, unless the header would pass its size limit; if reading
-  them fails, the portal header is served. A personal upload, or a personal update with `enabled` true, after
-  which the member's header would pass the size limit keeps its change and answers 403 "CSP header size exceeds
-  maximum allowed size of N bytes."; a personal deletion or switch-off, the plugin list and `getCspSettings` fall
-  back to the portal header without an error. The cookie, `1`, is set and cleared by `getWebPlugins` without
+  them fails, the portal header is served. A personal upload, or a personal update with `enabled` true, that
+  adds domains over the size limit of the member's header keeps its change, answers 403 "CSP header size exceeds
+  maximum allowed size of N bytes." and leaves the cookie as it was; a call that adds no domain, a personal
+  deletion or switch-off, the plugin list and `getCspSettings` fall back to the portal header without an error. The cookie, `1`, is set and cleared by `getWebPlugins` without
   `personal` and by the personal uploads, updates and deletions, and every response that clears the session
   cookie, `logout` among them, deletes it too. The member's header is cached for the proxy for a day under a key
-  the proxy derives itself from the session cookie and the portal's generation of member headers; the personal
-  uploads, updates and deletions, portal plugin uploads and deletions, the administrator's member-plugin calls,
-  the personal switch and a save of the portal policy start a new generation, and after any other change the
+  the proxy derives itself from the session cookie and the portal's generation of member headers; a personal
+  upload, update or deletion that changes the caller's domains, a portal plugin upload or deletion, an
+  administrator's call on a member's plugin with domains, the personal switch and a save of the portal policy
+  start a new generation on every host of the portal, and after any other change the
   member's next plugin list writes the header again.
 - `WebPluginDto` carries `cspDomains`, an empty string for a plugin that declares none.
 - A refusal of an upload because an installed plugin holds the `name` or `pluginName`, or because of the plugin
@@ -119,11 +120,28 @@ None.
 "Before the branch" below means `release/v4.1.0`, where the five operations had no `personal` parameter, so a
 `personal=true` in the query was ignored.
 
-- **Plugin configuration** (`plugins` section): a negative `maxCount`, `maxSize` or `assetMaxCount` is raised to
-  its minimum with a warning, where it gave the default before; `0` still gives the default, now with a warning.
-  `assetExtensions` missing, a single value or an empty list gives `.jpg .jpeg .png .svg`, where it allowed every
-  extension before. Affected: installations that set such values; the shipped buildtools `appsettings.json` sets
-  positive values and that same list. Stored data: none.
+- **Plugin configuration** (`plugins` section and `csp:default:maxSize`):
+  - a negative `maxCount`, `maxSize` or `assetMaxCount` is raised to its minimum with a warning, where it gave the
+    default before; `0` still gives the default, now with a warning;
+  - new upper bounds, where any positive value was taken before: `maxCount` 1000, `personalMaxCount` (new) 100,
+    `maxSize` 100 MB, `assetMaxCount` 100; a larger value gives the bound and a warning;
+  - a package keeps at most `assetMaxCount` assets, where it kept one more before;
+  - `enabled`, `upload`, `delete` and `personal` also read `1`, `yes` and `on` as true, and `0`, `no` and `off` as
+    false; another value gives the default and a warning, where it failed the reading of the section before;
+  - `extension` and the elements of `assetExtensions` are read as a lowercase extension with a leading dot
+    (`zip` gives `.zip`, with a warning), and compared with the file's extension in any letter case, where
+    `.ZIP` in the configuration never matched before; a value that is no extension gives the default with a
+    warning, and such an element is skipped with a warning;
+  - `assetExtensions` missing, a single value or an empty list gives `.jpg .jpeg .png .svg`, where it allowed every
+    extension before;
+  - `csp:default:maxSize` is bounded to 1024..65536 bytes, `0` gives the default 15360 with a warning, where `0`
+    refused every header and any value was taken before; an installation that set more than 65536 gets 65536,
+    and `configureCsp` and uploads with domains may then answer 403 where they passed;
+  - personal plugins are unavailable, with a warning at startup, while the storage configuration has no module for
+    them, and an administrator's list of members' plugins is then empty.
+
+  Affected: installations that set such values; the shipped buildtools configuration sets positive values within
+  the bounds, that same list and the module. Stored data: none.
 
 - **Installation-wide plugin switches** (`getPortalSettings`): new `plugins.personalAvailable` and
   `plugins.personal` fields. `personal` is false on every portal until an administrator switches personal
@@ -154,12 +172,18 @@ None.
   plugin, and anyone else's was refused with 403 "Access denied". An uploaded manifest's `enabled`, `settings`
   and `cssUrl` are no longer kept, for portal uploads too, though still for `system=true`: a manifest `cssUrl`
   without a shipped `plugin.css` no longer shows in `cssUrl` (for `enabled` and `settings` see "Stored state of
-  a plugin"). A personal upload after which the member's policy header would pass the size limit answers 403
-  "CSP header size exceeds maximum allowed size of N bytes." with the plugin installed and on. The answer of a
-  personal upload can set or delete the `asc_personal_csp` cookie. Affected: the web client, which uploads
-  personal plugins from the profile's Plugins tab; plugin packages whose manifest carries a `cssUrl`; the SDKs
-  and the OpenAPI document (the new query parameter). A manifest stored before no longer applies these fields
-  either (see "Stored state of a plugin").
+  a plugin"). A personal upload that adds domains over the size limit of the member's policy header answers 403
+  "CSP header size exceeds maximum allowed size of N bytes." with the plugin installed and on, and the cookie
+  left as it was. The answer of a personal upload can set or delete the `asc_personal_csp` cookie. Affected: the
+  web client, which uploads personal plugins from the profile's Plugins tab; plugin packages whose manifest
+  carries a `cssUrl`; the SDKs and the OpenAPI document (the new query parameter). A manifest stored before no
+  longer applies these fields either (see "Stored state of a plugin").
+- **Links of a plugin manifest** (`addWebPluginFromFile`, `getWebPlugins`, `getWebPlugin`). On every level, a
+  manifest `homePage` that is not an absolute http or https address and an `image` that is not a relative path
+  inside the package are dropped, on upload and on every read of a stored manifest, where they were served as
+  declared before. Affected: plugins whose manifest gives `image` as an outside address or `homePage` in another
+  form: they are served without that field. Stored data: none; a manifest stored before keeps the value in
+  storage, and every read drops it.
 - **Plugin name and uniqueness** (`addWebPluginFromFile`). A refusal because an installed plugin holds the
   `name` or `pluginName`, or because of the plugin limit, answers 400 with its reason alone, such as "Plugin
   already exist"; before the branch the reason came after "Wrong plugin archive. ", which a fault of the archive

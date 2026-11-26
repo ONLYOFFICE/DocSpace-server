@@ -79,6 +79,11 @@ plugin, so a manifest stored by an earlier upload applies none of them either: t
 rows, and `cssUrl` is derived on every read from a shipped `plugin.css`. An installation-wide plugin keeps the
 three fields, so its manifest stays the default state of the other portals (P1 stays open for it).
 
+Every level, the installation-wide one included, keeps `homePage` only as an absolute http or https address and
+`image` only as a relative path inside the package, on upload and on every read: a member's manifest now reaches
+an administrator's list, and a client renders both fields as a link and an image source. The read is the same
+`PrepareStoredPlugin` for every list, so a manifest stored before the rule is covered too.
+
 ### Order of the checks
 
 For a personal upload the controller checks the plugin switches, the personal switches and the guest rule before
@@ -142,16 +147,19 @@ its own session's.
 - On a miss the proxy asks `getCspSettings`, which adds the caller's personal domains to `header`, skips 304, and
   caches the header it answers for the session, so the next page of that session needs no API call.
 - The generation, a random value per host key at `csp:{host}:personal`, replaces dropping entries one by one. A
-  change that can alter a member's personal domains starts a new one: a personal upload, switch or deletion, a
+  change that can alter a member header starts a new one on every host of the portal (its domains, its alias and
+  the request host): a personal upload, switch or deletion that changes the domains of the caller's header, a
   portal plugin upload or deletion (it can shadow a personal one), `setPersonalWebPlugins`, an administrator's
-  switch or deletion of a member's plugin, and a save of the portal policy, which every member header repeats.
+  switch or deletion of a member's plugin with domains, and a save of the portal policy, which every member header
+  repeats. A personal change that moves no domain starts none, so it costs the other members nothing.
   The headers under the old generation are no longer found and expire within a day. A re-cache of a missing
   portal header writes the same domains and starts none.
-- When the header would pass `csp:default:maxSize`, the session caches nothing and the hint is not set. A
-  personal POST, and a personal PUT with `enabled` true, then answer 403 "CSP header size exceeds maximum allowed
-  size of N bytes." after the change was saved, as the portal path does (P2); the refusal is recognised by its
-  own exception type. A personal DELETE, a PUT with `enabled` false and the plugin list log a warning and answer
-  as usual.
+- When the header would pass `csp:default:maxSize`, the calls that set the hint cache nothing, and
+  `getCspSettings` answers and caches the portal header for the session. A personal POST, and a personal PUT with
+  `enabled` true, that add domains then answer 403 "CSP header size exceeds maximum allowed size of N bytes."
+  after the change was saved, as the portal path does (P2), and leave the hint as it was; the refusal is
+  recognised by its own exception type. A call that adds no domain, a personal DELETE, a PUT with `enabled` false
+  and the plugin list log a warning without the stack, delete the hint and answer as usual.
 - Every response that clears the session cookie also deletes the hint. The session's header stays until it
   expires, but no request can reach it without that session cookie.
 
@@ -183,8 +191,11 @@ and addressed under the member's new id.
 ### Configuration
 
 The `plugins` section is read once, through the repository's configuration helpers, with a default and bounds
-for every value and a warning for one that cannot be read or lies out of bounds; the list of asset extensions is
-read element by element. `csp:default:maxSize` is read the same way, once. `getPortalSettings` fills `plugins`
+for every value and a warning for one that cannot be read or lies out of bounds; `0` gives the default with a
+warning. The extension and the list of asset extensions are read element by element as lowercase extensions with
+a leading dot. `csp:default:maxSize` is read the same way, once, `0` included. Personal plugins count as off for
+the installation while the storage configuration has no module for them, so the switch cannot reach a storage
+that fails every call. `getPortalSettings` fills `plugins`
 from these settings through a mapper and adds the portal switch.
 
 ## Risks / Trade-offs
@@ -200,15 +211,15 @@ from these settings through a mapper and adds the portal switch.
 - [A browser that sends `asc_personal_csp` with a session cookie the cache holds no header for costs the proxy
   one `getCspSettings` call per page] → the call caches the header for a valid session; a revoked one keeps
   costing until the browser signs in again.
-- [Every personal change starts a new generation for the whole portal, so each member with personal domains
-  costs the proxy one `getCspSettings` call on the next page] → personal changes are rare, and the call caches
-  the header again.
+- [A personal change that moves domains starts a new generation for the whole portal, so each member with
+  personal domains costs the proxy one `getCspSettings` call on the next page] → such changes are rare, a change
+  that moves no domain starts none, and the call caches the header again.
 - [`asc_personal_csp` is `SameSite=Lax`: a frame on another site (an SDK frame) never sends it and runs without
   the personal CSP] → follow-up for frames.
 - [Another device, or a browser without the hint, gets no personal CSP until a page loaded after its first
   plugin list] → that list sets the hint.
-- [A member whose personal header would pass the size limit gets 403 from a personal upload or switch-on and the
-  portal policy on their pages] → the header size limit (15 KB by default) binds long before the 15360-character
+- [A member whose personal header would pass the size limit gets 403 from a personal upload or switch-on that
+  adds domains, and the portal policy on their pages] → the header size limit (15 KB by default) binds long before the 15360-character
   cap of one plugin for distinct addresses, so the cap guards the stored manifest and the limit the header;
   follow-up.
 - [A cached member header outlives a change outside the calls that start a new generation: a member made a guest,
