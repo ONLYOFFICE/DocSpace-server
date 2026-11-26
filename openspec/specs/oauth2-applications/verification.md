@@ -165,7 +165,7 @@ flow, and `authorization.permissions.spec.ts` is empty.
 |---|---|---|
 | Deleting a non-guest member deletes their clients | `CM/ClientWriteAccessTests.cs:305` (User terminated and deleted, client gone from the tenant list) | TEST-CONFIRMED [run: PASS-ON-RERUN] |
 | Reassign operation deletes them | `CM/ClientWriteAccessTests.cs:338` (reassign with `deleteProfile` true, client gone from the tenant list) | TEST-CONFIRMED [run: PASS-ON-RERUN] |
-| Portal removal: tenant clients deleted, failure surfaces unless automatic | `web/ASC.Web.Core/RemovePortal/PortalRemovalService.cs:68-71`, `IdentityClient.cs:155-173` | CODE-ONLY (unreachable: a removed portal's clients cannot be listed afterwards) |
+| Portal removal: tenant clients deleted, failure surfaces unless automatic | `web/ASC.Web.Core/RemovePortal/PortalRemovalService.cs:68-71`, `IdentityClient.cs:150-164` (`DeleteTenantClientsAsync`), `:171-186` (`SendAsync`: no answer → 502) | CODE-ONLY (unreachable: a removed portal's clients cannot be listed afterwards) |
 
 ## Differences between the yaml and the server
 

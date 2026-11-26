@@ -220,7 +220,7 @@ SHALL be refused (403, see `room-types`).
 #### Scenario: Validation of the default room or agent quota
 
 - **WHEN** `defaultQuota` is larger than `maxTotalSize`, or on Standalone larger than the portal-wide quota while that is on
-- **THEN** the system answers 500 (the refusal is a plain error, not a validation answer — see `verification.md`)
+- **THEN** the system answers 400 "Failed to set quota per room. The entered value is greater than the total storage." (for an AI agent "per AI agent"), and so does a `defaultQuota` that is not a JSON number, not a whole number, or above the 64-bit range
 - **AND** a value of 0 or less is stored as 0, and `enableQuota:false` keeps the stored size but enforces nothing
 
 ### Requirement: Portal-wide quota of a Standalone installation

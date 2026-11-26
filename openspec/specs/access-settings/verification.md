@@ -123,17 +123,17 @@ and from the method body where a row needed the request; test line numbers point
 | **Saving third-party service keys** | | |
 | Owner, admin 200 true; roles | `S/Authorization/SaveAuthKeysTests.cs:49,64`; `S/Authorization/SaveAuthKeysPermissionsTests.cs:47,65` | TEST-CONFIRMED [run: PASS] |
 | Clear on all-empty; 403 unknown provider; 402 | `S/Authorization/AuthServiceRulesTests.cs:53,72`; `B/Settings/FreePlanSettingsTests.cs:99` | TEST-CONFIRMED [run: PASS] |
-| Rejected keys cleared and 400; 403 not settable | `Set:1242-1287`; yaml. Rejected keys unreachable: every key-validating provider asks its outside service. Not settable: not attempted, it needs a consumer with preset keys in the installation config | CODE-ONLY |
+| Rejected keys cleared and 400; 403 not settable | `Set:1252-1297`; yaml. Rejected keys unreachable: every key-validating provider asks its outside service. Not settable: not attempted, it needs a consumer with preset keys in the installation config | CODE-ONLY |
 | **Testing an external database connection** | | |
 | Failure answer; roles | `S/Authorization/TestExternalDatabaseConnectionTests.cs:48,63`; `S/Authorization/TestExternalDatabaseConnectionPermissionsTests.cs:47,66` | TEST-CONFIRMED [run: PASS] |
 | SQLite refused on hosted; success path | `B/Settings/FreePlanSettingsTests.cs:115`; `S/Authorization/AuthServiceRulesTests.cs:89` (the stack's MySQL), `:125` (standalone tries SQLite) | TEST-CONFIRMED [run: PASS] |
 | **Sign-in with a second-factor code** | `A/AuthenticateWithCodeTests.cs:49,68,84,101,116,137`; every exception becomes 401 at `Auth:222-228` | TEST-CONFIRMED [run: PASS] |
 | **Registering a mobile phone** | | |
 | Anonymous 401; ordinary token 403, phone unchanged | `A/SaveMobilePhonePermissionsTests.cs:49,67` | TEST-CONFIRMED [run: PASS] |
-| 200 body through the link | `Auth:541-555`. Unreachable: SMS cannot be enabled on a test portal (no provider) | CODE-ONLY |
+| 200 body through the link | `Auth:544-558`. Unreachable: SMS cannot be enabled on a test portal (no provider) | CODE-ONLY |
 | **Resending the SMS code** | | |
 | 401 in the four cases | `A/SendSmsCodeTests.cs:50,68,85,103` | TEST-CONFIRMED [run: PASS] |
-| 200 body with SMS on | `Auth:600-607`. Unreachable: SMS cannot be enabled on a test portal (no provider) | CODE-ONLY |
+| 200 body with SMS on | `Auth:603-610`. Unreachable: SMS cannot be enabled on a test portal (no provider) | CODE-ONLY |
 | 405 for valid credentials with SMS off (f5f2735e30) | `A/SendSmsCodeTests.cs:146` | TEST-CONFIRMED [run: PASS] |
 | **Password reminder for a signed-in caller** | | |
 | Own account and admin for member | `P/PasswordReminderTests.cs:60` with the pairs at :45-55 | TEST-CONFIRMED [run: PASS] |
@@ -142,8 +142,8 @@ and from the method body where a row needed the request; test line numbers point
 | **Password reminder from the sign-in page** | | |
 | Conditional message | `P/PasswordReminderTests.cs:76` | TEST-CONFIRMED [run: PASS] |
 | Same form whether or not the account exists | `P/PasswordReminderRulesTests.cs:61` | TEST-CONFIRMED [run: PASS] |
-| CAPTCHA 403 | `User:1993-2017`. Unreachable: the stand configures no CAPTCHA keys | CODE-ONLY |
-| **Changing a password through a confirmation link** | `User:585-653`; yaml `changeUserPassword`. Unreachable: the `PasswordChange` key exists only in the letter, which the suite cannot read | CODE-ONLY |
+| CAPTCHA 403 | `User:2048-2072`. Unreachable: the stand configures no CAPTCHA keys | CODE-ONLY |
+| **Changing a password through a confirmation link** | `User:588-656`; yaml `changeUserPassword`. Unreachable: the `PasswordChange` key exists only in the letter, which the suite cannot read | CODE-ONLY |
 
 ## Differences between the yaml and the server
 
@@ -177,7 +177,7 @@ No test was run. "Red by code reading" means the code as read would fail that te
 | AC-2 | `saveSsoSettingsV2` | Missing or invalid SSO URL answers 500; the test expects 400 (bug 84686) | `SsoSaveTests.cs:130`; `Sso:214-217` | FIXED (f3a52c35dd): refused as a bad request — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | AC-3 | `saveSsoSettingsV2` | Incomplete field mapping answers 500; the test expects 400 (bug 84687) | `SsoSaveTests.cs:148`; `Sso:224-229` | FIXED (f3a52c35dd): refused as a bad request, missing `fieldMapping` too — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | AC-4 | `saveSsoSettingsV2` | Malformed SLO URL answers 500; the test expects 400 (bug 84688) | `SsoSaveTests.cs:166`; `Sso:219-222` | FIXED (f3a52c35dd): refused as a bad request — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
-| AC-5 | `sendSmsCode` | Valid credentials with SMS off for the account answer 500: the thrown exception type has no mapping; the test requires anything but 500 (bug 84503) | `SendSmsCodeTests.cs:125`; `web/ASC.Web.Core/Sms/SmsManager.cs:101-104`; `Wrap` default branch | FIXED (f5f2735e30): 405 "SMS not available", asserted at `SendSmsCodeTests.cs:146` — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| AC-5 | `sendSmsCode` | Valid credentials with SMS off for the account answer 500: the thrown exception type has no mapping; the test requires anything but 500 (bug 84503) | `SendSmsCodeTests.cs:125`; `web/ASC.Web.Core/Sms/SmsManager.cs:107-110`; `Wrap` default branch | FIXED (f5f2735e30): 405 "SMS not available", asserted at `SendSmsCodeTests.cs:146` — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | AC-8 | `updateTfaSettings` | The 403 for naming the owner depends on the `id` field, not on the caller's role. An owner listing themselves in `mandatoryUsers` with no `id` gets 403 | `Tfa:234-239`; `S/Tfa/TfaOwnerGuardTests.cs:89` | confirmed by test (the spec states this rule) |
 | AC-9 | `unlinkTfaApp` | The branch that treats an empty `id` as the caller is not reached: an empty `id` resolves to no account and answers 403 first | `Tfa:507-515`; `TfaUnlinkAppTests.cs:120` | by code reading |
 | AC-10 | `updateTfaAppCodes` | Does not check that the method is on at portal level, while `getTfaAppCodes` does; with the method off and an application still linked the two disagree | `Tfa:421-423` vs `Tfa:463` | by code reading |
@@ -189,8 +189,8 @@ Login history and active connections (`getIsAuthentificated` aside, the operatio
 
 | Claim | Source | Status |
 |---|---|---|
-| `tfaAppGenerateSetupCode` 403 for an ordinary token and `saveMobilePhone` 401 and 403 now documented; the two rows of "Differences between the yaml and the server" are removed | `web/ASC.Web.Api/Api/Settings/TfaappController.cs:376`; `web/ASC.Web.Api/Api/AuthenticationController.cs:537-538`; yaml at `ce37da4` (`c096f23fa9`, `893c80e16c`) | READ |
-| Documented 500 removed from `tfaValidateAuthCode` (empty code) and `saveSsoSettingsV2`: matches AC-1..AC-4, already FIXED | `c096f23fa9` | READ, no verdict change |
+| `tfaAppGenerateSetupCode` 403 for an ordinary token and `saveMobilePhone` 401 and 403 now documented; the two rows of "Differences between the yaml and the server" are removed | `web/ASC.Web.Api/Api/Settings/TfaappController.cs:376`; `web/ASC.Web.Api/Api/AuthenticationController.cs:539-540`; yaml at `ce37da4` (`c096f23fa9`, `893c80e16c`) | READ |
+| Documented 500 removed from `tfaValidateAuthCode` (empty code) and `saveSsoSettingsV2`: the SSO part matches AC-1..AC-4, already FIXED; an empty code still answered 500 until `488d081cbc`, now 400 "Validation code field cannot be empty" | `c096f23fa9`; `web/ASC.Web.Api.Tests/Tests/02_Settings/Tfa/TfaValidateEmptyCodeTests.cs` | TEST-CONFIRMED (empty code, prove-red 2026-11-24) |
 | **Checking whether a request is signed in**: Owner and each member type `true`, anonymous `false` | `web/ASC.Web.Api.Tests/Tests/03_Authentication/AuthCheckTests.cs:46-95` | TEST-CONFIRMED [run: PASS] |
-| Malformed Basic credentials (not base64, no colon) answer 200 with `false` (bug 84500, was 500) | `web/ASC.Web.Api.Tests/Tests/03_Authentication/AuthCheckInvalidCredentialsTests.cs:57-71`; `common/ASC.Api.Core/Auth/BasicAuthHandler.cs:65-86` | TEST-CONFIRMED |
+| Malformed Basic credentials (not base64, no colon) answer 200 with `false` (bug 84500, was 500) | `web/ASC.Web.Api.Tests/Tests/03_Authentication/AuthCheckInvalidCredentialsTests.cs:57-71`; `common/ASC.Api.Core/Auth/BasicAuthHandler.cs:65-86` | TEST-CONFIRMED [run: PASS] (run 2026-11-20; `bcd633ce64`, prove-red 2026-11-24) |
 | Unpaid portal still answers | `web/ASC.Web.Api/Api/AuthenticationController.cs:97` (`AllowNotPayment`) | CODE-ONLY |

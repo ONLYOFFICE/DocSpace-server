@@ -57,27 +57,27 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | Wrong password 403 "Access denied" | `TP/ThirdPartyCredentialIsolationTests.cs:54` | TEST-CONFIRMED [run: PASS] |
 | No session carried over; title not saved (bug 83399) | `TP/ThirdPartyCredentialIsolationTests.cs:89` | TEST-CONFIRMED [run: PASS] |
 | Invalid Box code below 500 (bug 83265) | `TP/ThirdPartyProviderConnectBugTests.cs:52` | TEST-CONFIRMED [run: PASS] |
-| **Server address of a new connection** (bug 84672) | `TP/ThirdPartyKDriveConnectBugTests.cs:86` (kDrive only; other WebDAV presets by comment `PAD:500`) | TEST-CONFIRMED [run: PASS] |
+| **Server address of a new connection** (bug 84672) | `TP/ThirdPartyKDriveConnectBugTests.cs:86` (kDrive only; other WebDAV presets by comment `PAD:521`) | TEST-CONFIRMED [run: PASS] |
 | **Re-authenticating and renaming** | | |
 | Rename (bug 83303) | `TP/ThirdPartyProviderConnectBugTests.cs:80` | TEST-CONFIRMED [run: PASS] |
-| Another member 403 | `FSS:3111-3115`; needs a connected account | CODE-ONLY |
+| Another member 403 | `FSS:3124-3130`; needs a connected account | CODE-ONLY |
 | Unknown id 404 | `TP/ThirdPartyAccessRefusalTests.cs:185` | TEST-CONFIRMED [run: PASS] |
-| Room account keeps its address | `PAD:201`; needs a connected account | CODE-ONLY |
+| Room account keeps its address | `PAD:222`; needs a connected account | CODE-ONLY |
 | Account without address not refused for the address | `TP/ThirdPartyKDriveConnectBugTests.cs:112` | TEST-CONFIRMED [run: PASS] |
 | **A member's list** | | |
 | No `auth_data` property | `TP/ThirdPartyCredentialIsolationTests.cs:136` | TEST-CONFIRMED [run: PASS] |
 | Own accounts only, no backup account | `products/ASC.Files/Core/Core/EF/Queries/ProviderAccountQueries.cs:115-125`; needs connected accounts | CODE-ONLY |
 | Empty for a user; anonymous 401 | `TP/ThirdPartyAccessRefusalTests.cs:221,234` | TEST-CONFIRMED [run: PASS] |
 | **Disconnecting** | | |
-| Returned folder id, delete rights check, removal of security, tags and group links | `FC:133-144`, `FSS:3245-3280`, `PAD:436-457`; needs a connected account | CODE-ONLY |
-| Unrelated user 403; anonymous 401 | `TP/ThirdPartyAccessRefusalTests.cs:207` (anonymous 401); the unrelated user's 403 needs a connected account and stays CODE-ONLY (`FSS:3257`) | TEST-CONFIRMED [run: PASS] (partly) |
+| Returned folder id, delete rights check, removal of security, tags and group links | `FC:133-144`, `FSS:3262-3297`, `PAD:457-478`; needs a connected account | CODE-ONLY |
+| Unrelated user 403; anonymous 401 | `TP/ThirdPartyAccessRefusalTests.cs:207` (anonymous 401); the unrelated user's 403 needs a connected account and stays CODE-ONLY (`FSS:3274`) | TEST-CONFIRMED [run: PASS] (partly) |
 | Unknown id 404 | `TP/ThirdPartyAccessRefusalTests.cs:196` | TEST-CONFIRMED [run: PASS] |
 | Room group still listed (bug 83264) | `TP/ThirdPartyProviderDeletionBugTests.cs:88` | TEST-CONFIRMED [run: PASS] |
 | **Account behind a room** (bug 83305) | `TP/ThirdPartyProviderDeletionBugTests.cs:54` | TEST-CONFIRMED [run: PASS] |
 | **Legacy Common section** | `TP/ThirdPartyProvidersTests.cs:188` | TEST-CONFIRMED [run: PASS] |
 | **Backup storage account** | | |
 | Admin-only | `TP/ThirdPartyBackupAccessTests.cs:73,88` (room admin, user, guest 403; anonymous 401) | TEST-CONFIRMED [run: PASS] |
-| Switch off 403, single account, update path checks credentials | `TP/ThirdPartyBackupAccessTests.cs:102` (switch off 403); the single account and the update path need a connected account and stay CODE-ONLY (`FSS:3189-3232`, `PAD:369-434`) | TEST-CONFIRMED [run: PASS] (partly) |
+| Switch off 403, single account, update path checks credentials | `TP/ThirdPartyBackupAccessTests.cs:102` (switch off 403); the single account and the update path need a connected account and stay CODE-ONLY (`FSS:3204-3247`, `PAD:390-455`) | TEST-CONFIRMED [run: PASS] (partly) |
 | **Reading the backup account** | `TP/ThirdPartyBackupAccessTests.cs:60` (none connected: empty answer); reading a connected one stays CODE-ONLY (`FSS` `GetBackupThirdPartyAsync`, `FC:226-236`) | TEST-CONFIRMED [run: PASS] (partly) |
 | **Backup account removes its schedule** | `FC:138-141`; needs a connected backup account | CODE-ONLY |
 | **Content of a connected account** | | |
@@ -101,7 +101,7 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | Owner and user 200 with the consent address; anonymous 401 | `OA/ThirdPartyOAuthGetCodeTests.cs:45`, `OA/ThirdPartyOAuthGetCodePermissionsTests.cs:43,57` | TEST-CONFIRMED [run: PASS] |
 | Other provider 200 no URL; out of range 400 | `OA/ThirdPartyOAuthGetCodeTests.cs:60,74` | TEST-CONFIRMED [run: PASS] |
 | `desktop` state | `OA/ThirdPartyOAuthGetCodeTests.cs:87` | TEST-CONFIRMED [run: PASS] |
-| The seven providers | `OA/ThirdPartyOAuthProvidersTests.cs:48` (Google, Dropbox, Box, OneDrive: URL on the service's host); `:68` Docusign, Wordpress, Github answer 500 on the stand (SI11) | TEST-CONFIRMED [run: PASS] (4 of 7 PASS) |
+| The seven providers | `OA/ThirdPartyOAuthProvidersTests.cs:48` (Google, Dropbox, Box, OneDrive: URL on the service's host); `:68` Docusign, Wordpress, Github, which the stand does not register, answered 500 before `488d081cbc` and now 200 without a URL (SI11; `ThirdPartyOAuthUnregisteredProviderTests.cs`, prove-red 2026-11-24) | TEST-CONFIRMED [run: PASS] (4 of 7 PASS) |
 | **Access to the storage settings** | | |
 | Anonymous 401 on all six | `ST/StoragePermissionsTests.cs:145` | TEST-CONFIRMED [run: PASS] |
 | Hosted portal 403 for the owner | `BS/HostedStorageTests.cs:52,64,75` (`getAllStorages`, `getAllCdnStorages`, `updateStorage` before the module check) | TEST-CONFIRMED [run: PASS] |
@@ -113,21 +113,21 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | Not configured 400 | `ST/StorageUpdateTests.cs:43` | TEST-CONFIRMED [run: PASS] |
 | Empty body 400, both routes | `ST/StorageUpdateTests.cs:68` | TEST-CONFIRMED [run: PASS] |
 | A module name that names no storage 400, both routes | `ST/StorageAccessTests.cs:103` | TEST-CONFIRMED [run: PASS] |
-| Same module no-op; other: Migrating and request published | `SC:397-406`, `SC:614-621`; unreachable: no module is configured on the stand, and switching is installation-wide | CODE-ONLY |
-| **Returning to built-in storage** | `SC:432-453`; deliberately not called (it switches the storage) | CODE-ONLY |
+| Same module no-op; other: Migrating and request published | `SC:401-410`, `SC:618-625`; unreachable: no module is configured on the stand, and switching is installation-wide | CODE-ONLY |
+| **Returning to built-in storage** | `SC:436-457`; deliberately not called (it switches the storage) | CODE-ONLY |
 | **Migration progress** | | |
 | User 403, anonymous 401 | `ST/StoragePermissionsTests.cs:111,125` | TEST-CONFIRMED [run: PASS] |
 | Hosted -1; lapsed portals allowed | `BS/HostedStorageTests.cs:89` (-1 on the SaaS stack); lapsed portals stay CODE-ONLY (`SC:120-129`) | TEST-CONFIRMED [run: PASS] (partly) |
 | Server installation, no migration remembered: owner 500 (SI3) | `ST/StorageAccessTests.cs:131` | TEST-CONFIRMED [run: FAIL-BUG] |
-| **CDN storages** | `ST/StorageReadTests.cs:85`; `SC:475-489` | TEST-CONFIRMED [run: PASS] |
+| **CDN storages** | `ST/StorageReadTests.cs:85`; `SC:479-493` | TEST-CONFIRMED [run: PASS] |
 | **Selecting a CDN** | | |
 | Not configured 400 | `ST/StorageUpdateTests.cs:54` | TEST-CONFIRMED [run: PASS] |
 | Empty body 400 | `ST/StorageUpdateTests.cs:68` | TEST-CONFIRMED [run: PASS] |
-| Same module no-op; publish | `SC:522-535`, `MSC:101-112`; unreachable: no module is configured, and switching the CDN is installation-wide | CODE-ONLY |
-| **Clearing CDN** | `SC:563-570`; not called successfully (installation-wide); the user's 403 is in `ST/StorageAccessTests.cs:51` | CODE-ONLY |
+| Same module no-op; publish | `SC:526-539`, `MSC:101-112`; unreachable: no module is configured, and switching the CDN is installation-wide | CODE-ONLY |
+| **Clearing CDN** | `SC:567-574`; not called successfully (installation-wide); the user's 403 is in `ST/StorageAccessTests.cs:51` | CODE-ONLY |
 | **Amazon S3 regions** | `ST/StorageReadTests.cs:42`; `ST/StoragePermissionsTests.cs:43,56` | TEST-CONFIRMED [run: PASS] |
 | **Starting storage encryption** | `ST/EncryptionAccessTests.cs:66,80` (room admin, user, guest 403; anonymous 401), `BS/HostedStorageTests.cs:99` (hosted owner 403); a start by an administrator is never called (it encrypts every portal) | TEST-CONFIRMED [run: PASS] (refusals only) |
-| **What a started encryption does** | `SC:219-274`; never started (installation-wide) | CODE-ONLY |
+| **What a started encryption does** | `SC:223-278`; never started (installation-wide) | CODE-ONLY |
 | **Reading the encryption settings** | | |
 | Owner: empty `password` | `ST/EncryptionSettingsGetTests.cs:46` | TEST-CONFIRMED [run: PASS] |
 | Any failure answers 200 empty | `ST/EncryptionAccessTests.cs:49` (a user gets 200 with an empty body; the test asserts 403, SI10) | TEST-CONFIRMED [run: FAIL-BUG] |
@@ -165,10 +165,10 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 |---|---|---|---|
 | `getThirdPartyAccounts` | `auth_data` comes back empty | the property is absent | `TP/ThirdPartyCredentialIsolationTests.cs:136` |
 | `updateStorage`, `resetStorageToDefault` | "starts an asynchronous migration" | publishes a request nothing in this repository consumes (SI1) | LSP references, `MSC:94` |
-| `updateCdnStorage` | "saved"; upload "handed to the storage service" | not saved, and no consumer (SI2) | `SC:522-545`, `MSC:101-112` |
+| `updateCdnStorage` | "saved"; upload "handed to the storage service" | not saved, and no consumer (SI2) | `SC:526-549`, `MSC:101-112` |
 | `getStorageProgress` | "the call fails" for an unknown migration | yes, by a null dereference: 500 (SI3) | `MSC:114-118`, `MSC` `ServiceClientListener.GetProgress` |
-| `startStorageEncryption` | declares 402 "pricing plan does not include" | no code path answers 402 in the action | `SC:158-252` |
-| `startStorageEncryption` | 403 only for rights | on a hosted portal the answer is 403 before the rights check | `SC:185-188` |
+| `startStorageEncryption` | declares 402 "pricing plan does not include" | no code path answers 402 in the action | `SC:160-256` |
+| `startStorageEncryption` | 403 only for rights | on a hosted portal the answer is 403 before the rights check | `SC:187-190` |
 | `getAllProviders` vs `getCapabilities` | "take `providerKey` from providers" | kDrive and Yandex have key `WebDav` there, own keys in capabilities (SI5) | `TC:107-164`, `TP/ThirdPartyKDriveConnectBugTests.cs` |
 | `getThirdPartyCode` | any other value 200, no URL | a value outside the enumeration is 400 | `OA/ThirdPartyOAuthGetCodeTests.cs:74` |
 
@@ -189,22 +189,22 @@ No operation of the owned tags is left out: all 31 are named in a requirement.
 
 | # | Where | What the server does | Evidence | Evidence kind |
 |---|---|---|---|---|
-| SI1 | `updateStorage`, `resetStorageToDefault` | Puts the portal into Migrating and publishes a request no code in this repository subscribes to. The only code that moves data and restores Active has no caller. The portal looks stuck in Migrating and the settings are never saved. | `SC:614-621`; LSP `findReferences` on the message type: only the class and the publishing client (`MSC:82,87,94,123`); on `StorageUploader.StartAsync`: declaration only. A consumer outside this repository cannot be excluded. | red by code reading |
-| SI2 | `updateCdnStorage` | Answers with the new `module` and `props`, but the action never saves them, the message omits `props`, and nothing subscribes to the message. | `SC:522-545`; `MSC:101-112`; LSP references on the message type | red by code reading |
+| SI1 | `updateStorage`, `resetStorageToDefault` | Puts the portal into Migrating and publishes a request no code in this repository subscribes to. The only code that moves data and restores Active has no caller. The portal looks stuck in Migrating and the settings are never saved. | `SC:618-625`; LSP `findReferences` on the message type: only the class and the publishing client (`MSC:82,87,94,123`); on `StorageUploader.StartAsync`: declaration only. A consumer outside this repository cannot be excluded. | red by code reading |
+| SI2 | `updateCdnStorage` | Answers with the new `module` and `props`, but the action never saves them, the message omits `props`, and nothing subscribes to the message. | `SC:526-549`; `MSC:101-112`; LSP references on the message type | red by code reading |
 | SI3 | `getStorageProgress` on a server installation | With no migration remembered the cache returns null and the value is dereferenced: 500. With SI1 no progress is ever published, so this is every call. | `MSC:114-118`; `ST/StorageAccessTests.cs:131` | red test — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | SI4 | Migration operation, if it were started | On failure the task is marked failed but the portal status stays Migrating. | `common/ASC.Data.Storage/StorageUploader.cs:193-204` | red by code reading |
-| SI5 | `getAllProviders` Yandex entry | Key `WebDav` without `requiredConnectionUrl`, while a WebDAV connection without an address is refused. A client following the document cannot connect Yandex that way. The refusal itself was read only as a comment. | `TC:107-164`; `PAD:500` comment | red by code reading |
-| SI7 | `updateStorage`, `updateCdnStorage` | `props` is not required, but is read unconditionally: a configured module with no `props` gives a null dereference, 500 instead of 400. | `SC:403`, `SC:529`; `web/ASC.Web.Api/ApiModels/RequestsDto/StorageRequestsDto.cs:60` | red by code reading |
-| SI8 | `saveThirdPartyBackup` second call | The new title is stored without the invalid-character cleaning a new account gets. | `PAD:412-415` vs `FSS:3208` | red by code reading |
-| SI9 | `startStorageEncryption` | A running backup is reported by a bare exception: 500 with no message, though the condition is an expected one. STILL OPEN after 09d4de0768..6fb6dfb17a: `StorageController.cs:212-216` still throws `new Exception()`; the range only removed the documented 500, so it is now undeclared. | `SC:216` | red by code reading |
-| SI10 | `getStorageEncryptionSettings` | Catches every exception, so missing rights, a hosted portal and real failures all look like 200 with an empty body. The yaml documents this. | `SC:296-323`; `ST/EncryptionAccessTests.cs:49` | red test — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
-| SI11 | `getThirdPartyCode` for Docusign, Wordpress, Github | On an installation without their OAuth application the consent URL is not built: a null dereference (Wordpress, Github) or an unparsable address (Docusign) answers 500, where a provider outside the seven answers 200 without a URL. It may depend on configuration, but the failure is unhandled. | `OA/ThirdPartyOAuthProvidersTests.cs:68`; `TPC:81-102` | red test — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (`OA/ThirdPartyOAuthProvidersTests.cs:68`) |
+| SI5 | `getAllProviders` Yandex entry | Key `WebDav` without `requiredConnectionUrl`, while a WebDAV connection without an address is refused. A client following the document cannot connect Yandex that way. The refusal itself was read only as a comment. | `TC:107-164`; `PAD:521` comment | red by code reading |
+| SI7 | `updateStorage`, `updateCdnStorage` | `props` is not required, but is read unconditionally: a configured module with no `props` gives a null dereference, 500 instead of 400. | `SC:407`, `SC:533`; `web/ASC.Web.Api/ApiModels/RequestsDto/StorageRequestsDto.cs:60` | red by code reading |
+| SI8 | `saveThirdPartyBackup` second call | The new title is stored without the invalid-character cleaning a new account gets. | `PAD:433-436` vs `FSS:3223` | red by code reading |
+| SI9 | `startStorageEncryption` | A running backup is reported by a bare exception: 500 with no message, though the condition is an expected one. STILL OPEN after 09d4de0768..6fb6dfb17a: `StorageController.cs:212-216` still throws `new Exception()`; the range only removed the documented 500, so it is now undeclared. | `SC:220` | FIXED `488d081cbc`: 409 "A backup of one of the portals is still running" (commit read, not run: a race on the stand would encrypt the installation) |
+| SI10 | `getStorageEncryptionSettings` | Catches every exception, so missing rights, a hosted portal and real failures all look like 200 with an empty body. The yaml documents this. | `SC:300-327`; `ST/EncryptionAccessTests.cs:49` | red test — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| SI11 | `getThirdPartyCode` for Docusign, Wordpress, Github | On an installation without their OAuth application the consent URL is not built: a null dereference (Wordpress, Github) or an unparsable address (Docusign) answers 500, where a provider outside the seven answers 200 without a URL. It may depend on configuration, but the failure is unhandled. | `OA/ThirdPartyOAuthProvidersTests.cs:68`; `TPC:81-101` | FIXED `488d081cbc`: 200 with no URL (`web/ASC.Web.Api.Tests/Tests/03_Authentication/ThirdPartyOAuth/ThirdPartyOAuthUnregisteredProviderTests.cs`, prove-red 2026-11-24) |
 
 ## Not verified
 
 - Apart from the 2026-11-10 run, no test was run for this document; bug-numbered tests were read, not executed.
-- Re-saving an account of another section through `saveThirdParty`, which passes room storage as the folder type (`FSS:3143`, `PAD:281-366` unread).
-- Whether a second DocSpace admin can read the backup folder: if not, `getBackupThirdPartyAccount` answers empty and `saveThirdPartyBackup` would create a second account (`FSS:3207-3223`), and later `SingleOrDefault` calls would fail.
+- Re-saving an account of another section through `saveThirdParty`, which passes room storage as the folder type (`FSS:3158`, `PAD:302-387` unread).
+- Whether a second DocSpace admin can read the backup folder: if not, `getBackupThirdPartyAccount` answers empty and `saveThirdPartyBackup` would create a second account (`FSS:3222-3238`), and later `SingleOrDefault` calls would fail.
 - `DocsCloudClient` itself and its cache times; the 400 without a tenant is now asserted by `BT/DocsCloudTenantTests.cs:104-116`.
 - Rows that need a connected account were left out of the 2026-11-10 run on purpose, although the `integration-test` profile starts a Nextcloud container: another member's 403, the room storage flag, the address kept on re-saving, the list filter, the disconnect details and the backup account's update path.
 - The serialized Dev Pack switches, the `refresh=true` cache times and the audit entry of a configuration update.
@@ -213,6 +213,6 @@ No operation of the owned tags is left out: all 31 are named in a requirement.
 
 | Claim | Source | Status |
 |---|---|---|
-| Documented 500 removed from `saveThirdParty` (`POST files/thirdparty`), `saveThirdPartyBackup` (`POST files/thirdparty/backup`) and `startStorageEncryption`; no other code of these operations changed | `fcd31cbadf`, `0ff3031b59`, `c096f23fa9`; per-action `[SwaggerResponse]` diff | READ; the spec keeps "500 while a portal's backup runs" because the code still answers it (SI9) |
+| Documented 500 removed from `saveThirdParty` (`POST files/thirdparty`), `saveThirdPartyBackup` (`POST files/thirdparty/backup`) and `startStorageEncryption`; no other code of these operations changed | `fcd31cbadf`, `0ff3031b59`, `c096f23fa9`; per-action `[SwaggerResponse]` diff | READ; the spec kept "500 while a portal's backup runs" while the code answered it; since `488d081cbc` it is 409 (SI9) |
 | No behaviour of third-party storage, storage modules or encryption changed in the range | `git log 09d4de0768..6fb6dfb17a` on the controllers: description commits only | READ |
 

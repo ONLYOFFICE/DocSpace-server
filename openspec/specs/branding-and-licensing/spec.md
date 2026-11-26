@@ -448,7 +448,7 @@ SHALL reset it together with the slots.
 `uploadLicense` SHALL be open to a DocSpace admin or to the setup-wizard confirmation link (403 once the wizard is
 completed), only on an Enterprise or Developer installation (415 otherwise), and take `multipart/form-data` with the
 license file in `files` (400 when empty). The file SHALL be parsed as JSON and staged beside the license path, not
-applied: it needs a customer id and a signature (500 "License is not correct") and a start date not in the future
+applied: it needs a customer id and a signature (400 "License is not correct") and a start date not in the future
 (400). It answers a confirmation text.
 
 #### Scenario: Valid license staged

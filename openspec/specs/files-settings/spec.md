@@ -176,7 +176,7 @@ permission.
 #### Scenario: Verification fails
 
 - **WHEN** the Document Server fails the verification
-- **THEN** the previous settings are restored and the answer is 500
+- **THEN** the previous settings are restored and the answer is 502
 
 ### Requirement: Default templates are read with the settings permission
 

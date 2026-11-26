@@ -133,7 +133,7 @@ client's way into and out of filling mode.
 #### Scenario: Resume of a form that was never started
 
 - **WHEN** `Resume` is sent for a PDF in a room that has no filling properties yet
-- **THEN** the server fails with 500, because there is no record to clear
+- **THEN** the request is refused with 403 "The form filling has not been set up for this form"
 
 #### Scenario: Edit through the editor
 

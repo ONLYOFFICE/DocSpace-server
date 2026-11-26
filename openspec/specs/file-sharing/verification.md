@@ -56,7 +56,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Share given on a file created inside a shared folder is recorded at the file level | `FileShareTests.cs:1007-1039` (bug 78660) | TEST-CONFIRMED [run: PASS] |
 | In rooms a personal right beats link rights | `04_Security/RoomShareTests.cs:1147-1178` (Viewer of a custom room opening an Editing file link keeps Read); `FileSecurity.cs:3870-3922` | TEST-CONFIRMED [run: PASS] |
 | **The last opened link is remembered** | | |
-| Opening via link + recent records a `RecentByLink` tag; earlier link tags for the entry are removed (only the last link counts) | `products/ASC.Files/Core/Utils/EntryManager.cs:2167-2181` (`MarkAsRecent`), `products/ASC.Files/Core/Utils/FileMarker.cs:1333-1351` (`MarkAsRecentByLink`); `FileSecurity.cs:3900-3909` (remembered links join the subject list) | CODE-ONLY |
+| Opening via link + recent records a `RecentByLink` tag; earlier link tags for the entry are removed (only the last link counts) | `products/ASC.Files/Core/Utils/EntryManager.cs:2204-2218` (`MarkAsRecent`), `products/ASC.Files/Core/Utils/FileMarker.cs:1333-1351` (`MarkAsRecentByLink`); `FileSecurity.cs:3900-3909` (remembered links join the subject list) | CODE-ONLY |
 | Three links in turn → access by id equals the last link | `04_Security/FileShareTests.cs:894-948` | TEST-CONFIRMED [run: PASS] |
 | Unused link deleted → file stays in Shared with me | `04_Security/FileShareTests.cs:951-1003` (bug 77819) | TEST-CONFIRMED [run: PASS] |
 | **The Shared with me section** | | |
@@ -224,6 +224,6 @@ link bugs and are to be added to the `shared-links` rows of `deviations.md`, not
 | A group without a record on the file: empty, total 0 (it used to count any portal group) | `04_Security/Sharing/AccessListMembersTests.cs:109-125` | TEST-CONFIRMED [run: PASS] |
 | `filterValue` in upper case: list and count agree | `04_Security/Sharing/GroupAndOwnerSharingTests.cs:96-115` (`2410f9d7fb`; on MySQL proves nothing red, the comparison ignores case anyway) | TEST-CONFIRMED [run: PASS] |
 | Rule: list shown only when `CanSeeSharesAsync` (room → any reader, otherwise manager) | `products/ASC.Files/Core/Utils/FileSharing.cs:1175-1182,906-916` | CODE-ONLY for the room-reader column |
-| **Reading the access list of a room**: order, `filterType` default, links only with the right to see them, 403/404/400 | `products/ASC.Files/Server/Api/VirtualRoomsController.cs:806-827`; yaml `getRoomSecurityInfo` | CODE-ONLY (many room tests call it as a helper, none asserts the order or the refusals here) |
+| **Reading the access list of a room**: order, `filterType` default, links only with the right to see them, 403/404/400 | `products/ASC.Files/Server/Api/VirtualRoomsController.cs:808-829`; yaml `getRoomSecurityInfo` | CODE-ONLY (many room tests call it as a helper, none asserts the order or the refusals here) |
 | A User member reads the room access list without other members' contact details | `04_Security/Sharing/AccessListMembersTests.cs:165-184` | TEST-CONFIRMED [run: PASS] |
 | Documented 500 "An id is a number that is not a 32-bit integer" removed from `getSecurityInfo`, `setSecurityInfo`, `removeSecurityInfo`, `changeFileOwner` | `0ff3031b59` | READ; no requirement cited it |

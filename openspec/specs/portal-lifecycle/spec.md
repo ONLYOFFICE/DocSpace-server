@@ -36,7 +36,8 @@ next to this file.
 `register` SHALL create a portal with its owner from the request body and answer 200 with `reference`
 (a sign-in link for the owner) and `tenant` (`tenantId`, `portalName`, `domain`, `status` "Active",
 `ownerId`, `language`, time zone). The owner is the only member and a DocSpace admin. 400 names the
-failing rule in `error`; 500 "registerNewTenantError" when the portal cannot be created.
+failing rule in `error` (`portalNameExist` for a taken name); 500 "registerNewTenantError" when the server fails
+to create the portal.
 
 #### Scenario: Fields of the registration body
 
@@ -57,6 +58,11 @@ failing rule in `error`; 500 "registerNewTenantError" when the portal cannot be 
 
 - **WHEN** `firstName` and `lastName` are both empty
 - **THEN** the answer is 400 with `error` "error" and the message "name is required"
+
+#### Scenario: Taken name or no e-mail
+
+- **WHEN** `portalName` is the name of an existing portal, or `email` is missing
+- **THEN** the answer is 400 with `error` "portalNameExist" and the message "Portal already exists", or with `error` "emailEmpty", and no portal is created
 
 ### Requirement: Portal name on a hosted and on a server installation
 
@@ -160,12 +166,12 @@ language and time zone, mark the wizard completed, sign the owner in and answer 
 #### Scenario: Wizard already completed
 
 - **WHEN** `completeWizard` is called on a portal whose wizard is completed
-- **THEN** the answer is 500 "Wizard passed." and nothing changes
+- **THEN** the answer is 409 "Wizard passed." and nothing changes
 
 #### Scenario: Empty password or malformed e-mail
 
 - **WHEN** `completeWizard` is called with `passwordHash` set to an empty string
-- **THEN** the answer is 500 with the empty-password message and the wizard stays open
+- **THEN** the answer is 400 "The password is empty." and the wizard stays open
 - **AND** a body whose `email` is malformed or missing, or that has no `passwordHash` at all, is refused with 400
 
 ### Requirement: Portal information
@@ -305,7 +311,7 @@ ordinary sign-in token 403.
 owner: a DocSpace admin, a Room admin, a User or a Guest get 403 "Access denied", anonymous 401. It
 SHALL mail the owner the deactivation letter with the PortalSuspend and PortalContinue links, change
 nothing else and answer 200 without a body. On a server installation the last space with full access
-cannot be suspended (500).
+cannot be suspended (400).
 
 #### Scenario: Owner asks
 
@@ -332,7 +338,7 @@ cannot be suspended (500).
 ### Requirement: Suspending and continuing a portal
 
 `suspendPortal` with the PortalSuspend link SHALL check again that the link's account is the owner
-(403 "Access denied") and that it is not the last full-access space of a server installation (500),
+(403 "Access denied") and that it is not the last full-access space of a server installation (400),
 then set the status to Suspended with the current `statusChangeDate`; content, rooms and accounts
 stay. `continuePortal` with the PortalContinue link SHALL set the status back to Active and answer
 200; an already active portal is left active. Both answer without a body.
@@ -358,7 +364,7 @@ stay. `continuePortal` with the PortalContinue link SHALL set the status back to
 
 `sendDeleteInstructions` SHALL require the portal-settings right and the owner: a DocSpace admin, a
 Room admin, a User or a Guest get 403 "Access denied", anonymous 401; the last full-access space of a
-server installation 500. It SHALL mail the owner the deletion letter with the PortalRemove link,
+server installation 400. It SHALL mail the owner the deletion letter with the PortalRemove link,
 change nothing, write no audit event and answer 200 without a body.
 
 #### Scenario: Owner asks
@@ -380,7 +386,7 @@ change nothing, write no audit event and answer 200 without a body.
 
 ### Requirement: Deleting a portal
 
-`deletePortal` with the PortalRemove link SHALL check the owner (403) and the last-space rule (500),
+`deletePortal` with the PortalRemove link SHALL check the owner (403) and the last-space rule (400),
 rename the alias to `<alias>_deleted` (a number appended while taken), set the status Remove pending
 and queue the purge: every storage module, the database row and the search index of the portal. It
 SHALL answer 200 with the address of the "registration cancelled" feedback page. Nothing can undo it.
@@ -391,6 +397,11 @@ SHALL answer 200 with the address of the "registration cancelled" feedback page.
 - **THEN** its OAuth clients are removed and its domain is dropped from the hosting cache and the CSP cache
 - **AND** the owner is mailed "has been deleted" and, for a paying hosted portal, so is the support address
 - **AND** the audit event "Portal deleted" is written
+
+#### Scenario: OAuth service does not answer
+
+- **WHEN** the OAuth service does not answer while `deletePortal` deletes the portal's OAuth apps
+- **THEN** the answer is 502 and the portal is not deleted
 
 #### Scenario: Owner confirms the deletion
 
@@ -483,7 +494,8 @@ with `status` 0 and the localized refusal.
 `updatePortalOwner` with `ownerId` SHALL be reached with a valid PortalOwnerChange link only (403 with an
 ordinary token, 401 without one); a link whose address is no longer the owner's, or whose new-owner account
 is gone or terminated, is not valid (401, which is what a replayed link gets). The named member SHALL exist,
-be active and not a guest (500). Then the portal's `ownerId` changes and the answer is 200 without a body.
+be active and not a guest, and `encemail` SHALL be the owner's (404 for an unknown `ownerId`, 403 otherwise). Then
+`ownerId` changes and the answer is 200 without a body.
 
 #### Scenario: Promotion, audit and the previous owner
 
@@ -491,6 +503,11 @@ be active and not a guest (500). Then the portal's `ownerId` changes and the ans
 - **THEN** the member is promoted to DocSpace admin first, and 402 is answered when no paid seat is left
 - **AND** once `ownerId` has changed the audit event "Owner updated" is written
 - **AND** the previous owner keeps the account as a DocSpace admin
+
+#### Scenario: New owner refused
+
+- **WHEN** `ownerId` names no account, or names a guest or a disabled member
+- **THEN** the answer is 404 for the unknown id and 403 otherwise, and `ownerId` of the portal does not change
 
 #### Scenario: Room admin, User or Guest with a token
 

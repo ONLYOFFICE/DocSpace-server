@@ -26,8 +26,8 @@ is `web/ASC.Web.Api/ApiModels/RequestsDto/AppRequestsDto.cs` (`SetAppEnabledRequ
 Status: **TEST-CONFIRMED** (an integration test asserts it), **CODE-ONLY** (read from the product code, the
 configuration or the OpenAPI document, no test), **NOTES-ONLY** (only the release notes say it — nothing of that
 kind was written into the spec). Exception → status mapping: `ItemNotFoundException` 404, `ArgumentException`
-400, `SecurityException` 403 "Access denied" (`common/ASC.Api.Core/Middleware/ResponseWrapper.cs:55-74`); 415 and
-400 for an absent or unbindable body come from the MVC pipeline before the action runs.
+400, `SecurityException` 403 "Access denied" (`common/ASC.Api.Core/Middleware/ResponseWrapper.cs:44-199`); 415 and
+400 for an absent or unbindable body come from the MVC pipeline before the action runs. `CustomHttpException` answers the status it carries, 502 among them for a service behind the portal that fails (logged as critical); a failing DocsCloud, accounting service or AI gateway is 502, and `DistributedLockException` (a busy lock) 503 with `Retry-After`.
 
 The .NET suite is 16 files: 14 test classes (`AppsConfiguredDefaultsTests` and `AppsSocketEventsTests` added for the former CODE-ONLY rows, 2026-11-11, run PASS) plus `AppsTestBase` and `AppsTestData` (`SetAppEnabledTests` is the
 bug-84498 regression written before the port, `AppsAuditTrailTests` the bug-84747 one); the TS suite has the same

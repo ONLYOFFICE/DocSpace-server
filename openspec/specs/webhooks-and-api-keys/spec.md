@@ -165,7 +165,7 @@ fails the rules SHALL be refused with 400.
 #### Scenario: Target that does not answer
 
 - **WHEN** the URL does not answer the HEAD request at all (connection failure, timeout, invalid certificate under `ssl`)
-- **THEN** the call answers 500
+- **THEN** the call answers 400 "Webhook URL is not available."
 
 #### Scenario: Target that redirects is refused
 

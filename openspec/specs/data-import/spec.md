@@ -445,7 +445,8 @@ Afterwards `getMigrationStatus` SHALL return an empty result and `getMigrationLo
 
 `finishMigration` SHALL require `isSendWelcomeEmail` (400 when missing). With true it SHALL send the
 activation e-mail to every account the import created that is not yet active, skipping active ones,
-and SHALL answer 500 "No migration is in progress" when the portal holds no job. It SHALL then do what
+and SHALL answer 404 "No migration is in progress" when the portal holds no job or a job that ended before it
+imported users, 409 while the job still runs. It SHALL then do what
 `clearMigration` does. The call is not idempotent: each call sends the e-mails again.
 
 #### Scenario: Welcome e-mails sent
@@ -465,8 +466,13 @@ and SHALL answer 500 "No migration is in progress" when the portal holds no job.
 
 #### Scenario: No job
 
-- **WHEN** the owner calls `finishMigration` with `isSendWelcomeEmail` true on a portal without a job
-- **THEN** the system answers 500 "No migration is in progress"
+- **WHEN** the owner calls `finishMigration` with `isSendWelcomeEmail` true on a portal without a job, or after a parse or a failed import
+- **THEN** the system answers 404 "No migration is in progress" and a job on the portal stays
+
+#### Scenario: Import still running
+
+- **WHEN** the owner calls `finishMigration` with `isSendWelcomeEmail` true while the import job has not finished
+- **THEN** the system answers 409 "The migration job is still running"
 
 ### Requirement: Downloading the log
 

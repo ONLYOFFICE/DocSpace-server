@@ -38,7 +38,7 @@ Room manager access is lowered to Content creator for a User, and Read is refuse
 | Claim | Source | Status |
 |---|---|---|
 | Allowed inviter creates a pending member (display name = email, id, no avatar, not anonymous) | PT/01_Profiles/InviteUsersTests.cs:56-72 | TEST-CONFIRMED [run: PASS] |
-| … with status Pending and activation Pending | PT/01_Profiles/ResendActivationTests.cs:70-71; `web/ASC.Web.Core/Users/UserManagerWrapper.cs:101-130` | TEST-CONFIRMED [run: PASS] |
+| … with status Pending and activation Pending | PT/01_Profiles/ResendActivationTests.cs:70-71; `web/ASC.Web.Core/Users/UserManagerWrapper.cs:101-132` | TEST-CONFIRMED [run: PASS] |
 | Guest type refused for everyone (403 "Access denied") | PT/01_Profiles/InviteUsersTests.cs:81-98 | TEST-CONFIRMED [run: PASS] |
 | Equal or higher privilege refused (403), bug 79500 | PT/01_Profiles/InviteUsersTests.cs:112-124 | TEST-CONFIRMED [run: PASS] |
 | Overlong address 400 "maximum length of '255'", bug 79527 | PT/01_Profiles/InviteUsersTests.cs:129-138 | TEST-CONFIRMED [run: PASS] |
@@ -55,7 +55,7 @@ Room manager access is lowered to Content creator for a User, and Read is refuse
 |---|---|---|
 | Member created with the flags of the requested type | PT/01_Profiles/AddMemberTests.cs:55-85 | TEST-CONFIRMED [run: PASS] |
 | Created-by is the caller, bug 80020 | PT/01_Profiles/AddMemberTests.cs:90-110 | TEST-CONFIRMED [run: PASS] |
-| Directly added member is Active | PT/03_UserStatus/UserStatusGetTests.cs:43-69; `UserManagerWrapper.cs:163-190` (activation Pending, status default Active) | TEST-CONFIRMED [run: PASS] |
+| Directly added member is Active | PT/03_UserStatus/UserStatusGetTests.cs:43-69; `UserManagerWrapper.cs:165-192` (activation Pending, status default Active) | TEST-CONFIRMED [run: PASS] |
 | Guest type refused (403) | PT/01_Profiles/AddMemberTests.cs:290-308 | TEST-CONFIRMED [run: PASS] |
 | Equal or higher type refused (403) | PT/01_Profiles/AddMemberTests.cs:153-216 | TEST-CONFIRMED [run: PASS] |
 | Field length validation 400 | PT/01_Profiles/AddMemberTests.cs:113-150 | TEST-CONFIRMED [run: PASS] |
@@ -128,7 +128,7 @@ Room manager access is lowered to Content creator for a User, and Read is refuse
 | Guest to an AI agent as Room manager / Content creator → 403 | FS:278-283; release notes v3.6 | CODE-ONLY |
 | Guest to an AI project by id (any access) or by the email of a Guest → 403 "The role is not available for this user type", not added; the project accepts Room manager and Content creator only | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-79 (message asserted); FS:285-291; `products/ASC.Files/Core/Core/Security/FileSecurity.cs:255-262` (`AvailableRoomAccesses`, AI project); Viewer refused (403, not added): FT/03_Rooms/AiHub/AiProjectRolesTests.cs:46-60 | TEST-CONFIRMED [run: PASS] |
 | Invisible subjects and notification: subject the caller cannot see is dropped | VRC `SetRoomSecurity` wrappers filter (`CanUserViewAnotherUserAsync`); yaml `setRoomSecurity` | CODE-ONLY |
-| Group as subject | FS:154-167 (subject type resolved to Group), 460-466 (group members); `products/ASC.People/Tests/Tests/BaseTest.cs:183-197` helper "user or a group"; release notes v2.5; an AI project refuses a group with any access (403): FT/03_Rooms/AiHub/AiProjectRolesTests.cs:65 | CODE-ONLY (the AI project refusal: TEST-CONFIRMED, not run yet) |
+| Group as subject | FS:154-167 (subject type resolved to Group), 460-466 (group members); `products/ASC.People/Tests/Tests/BaseTest.cs:185-199` helper "user or a group"; release notes v2.5; an AI project refuses a group with any access (403): FT/03_Rooms/AiHub/AiProjectRolesTests.cs:65 | CODE-ONLY (the AI project refusal: TEST-CONFIRMED, not run yet) |
 | `notify` emails existing accounts that gained access, with `message` | FS:449-479 (`SendEmailRoomInviteExistingUserAsync`); yaml `RoomInvitationRequest.notify/message` | CODE-ONLY |
 
 ## Everyone system group as a share subject
@@ -141,7 +141,7 @@ Room manager access is lowered to Content creator for a User, and Read is refuse
 
 | Claim | Source | Status |
 |---|---|---|
-| Unknown address → pending Guest profile created by caller, share recorded, room invitation email with `roomId` | FS:301-328, 422-436; IS:61-66; `UserManagerWrapper.cs:101-130` ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:52-66 | TEST-CONFIRMED [run: PASS] (pending Guest profile, share recorded) / CODE-ONLY (letter, created by caller) |
+| Unknown address → pending Guest profile created by caller, share recorded, room invitation email with `roomId` | FS:301-328, 422-436; IS:61-66; `UserManagerWrapper.cs:101-132` ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:52-66 | TEST-CONFIRMED [run: PASS] (pending Guest profile, share recorded) / CODE-ONLY (letter, created by caller) |
 | Access of an email-invited address switched back and forth (same account type): one letter, bug 79410 | `products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationResendTests.cs:217-237` | TEST-CONFIRMED [run: PASS] |
 | Existing pending account → related, access set, invitation resent | FS:303-321 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:68-81 | TEST-CONFIRMED [run: PASS] (access set) / CODE-ONLY (relation, resend) |
 | Address of an existing active account → related, access set, no invitation email, existing-user notice when `notify` | FS:315-321, 449-479 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:83-97 | TEST-CONFIRMED [run: PASS] (access set, account stays Active) / CODE-ONLY (relation, letters) |
@@ -214,9 +214,9 @@ itself writes the share (IS:183, `ProcessShare`) and the audit event. The spec f
 | Claim | Source | Status |
 |---|---|---|
 | Defaults both on | WT/02_Settings/Common/InvitationSettingsTests.cs:45-55; `common/ASC.Core.Common/Tenants/TenantUserInvitationSettings.cs:43-50` | TEST-CONFIRMED [run: PASS] |
-| Anonymous read (200), 304 on `If-Modified-Since` | InvitationSettingsTests.cs:57-68 (anonymous 200); `web/ASC.Web.Api/Api/Settings/SettingsController.cs:1544-1553`; yaml | TEST-CONFIRMED [run: PASS] (anonymous read) / CODE-ONLY (304) |
-| Update needs the portal-settings right: Owner and DocSpace admin 200 and the read reflects the values, User 403, anonymous 401 | InvitationSettingsTests.cs:70-83, 109-153; SettingsController.cs:1596-1611 | TEST-CONFIRMED [run: PASS] |
-| Omitted switch is stored as off (a body with `allowInvitingGuests` only resets `allowInvitingMembers` to false) | InvitationSettingsTests.cs:85-107 (raw body); SettingsController.cs:1600-1604 (a new settings object from the two booleans, no merge) | TEST-CONFIRMED [run: PASS] |
+| Anonymous read (200), 304 on `If-Modified-Since` | InvitationSettingsTests.cs:57-68 (anonymous 200); `web/ASC.Web.Api/Api/Settings/SettingsController.cs:1570-1579`; yaml | TEST-CONFIRMED [run: PASS] (anonymous read) / CODE-ONLY (304) |
+| Update needs the portal-settings right: Owner and DocSpace admin 200 and the read reflects the values, User 403, anonymous 401 | InvitationSettingsTests.cs:70-83, 109-153; SettingsController.cs:1594-1609 | TEST-CONFIRMED [run: PASS] |
+| Omitted switch is stored as off (a body with `allowInvitingGuests` only resets `allowInvitingMembers` to false) | InvitationSettingsTests.cs:85-107 (raw body); SettingsController.cs:1598-1602 (a new settings object from the two booleans, no merge) | TEST-CONFIRMED [run: PASS] |
 | Members off blocks invite by email, direct add, invitation links (CRUD), legacy link | UC:467-471, 302-307; PC:188-192, 234-238, 311-315, 366-370, 434-438 ; links create, update, delete: web/ASC.Web.Api.Tests/Tests/04_Portal/Users/InvitationLinkRulesTests.cs:73-105; invite by email: products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:84-95 | TEST-CONFIRMED [run: PASS] (invite by email; link create, update, delete) / CODE-ONLY (direct add, legacy link) |
 | Guests off blocks email entries in a room invitation and guest creation | VRC `SetRoomSecurity`; UC:148-152, 295-300 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:99-123 | TEST-CONFIRMED [run: PASS] (email entries in a room invitation) / CODE-ONLY (guest creation) |
 | Stored link cannot be accepted while its type is blocked | UC:292-312 (settings checked after the link resolved the type) | CODE-ONLY |

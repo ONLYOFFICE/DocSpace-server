@@ -20,8 +20,8 @@ root (`server/`); `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml`; `Mana
 integration test asserts it), **CODE-ONLY** (read from the product code, the configuration or the OpenAPI
 document, no test), **NOTES-ONLY** (only the release notes say it — nothing of that kind was written into the
 spec). Exception → status mapping: `SecurityException` 403, `InvalidOperationException` 403, `ArgumentException`
-400, `ItemNotFoundException` 404 (`common/ASC.Api.Core/Middleware/ResponseWrapper.cs:55-88`); messages are the
-values of the `ErrorWebPlugin*` keys of `web/ASC.Web.Core/PublicResources/Resource.resx:924-953`.
+400, `ItemNotFoundException` 404 (`common/ASC.Api.Core/Middleware/ResponseWrapper.cs:44-199`); messages are the
+values of the `ErrorWebPlugin*` keys of `web/ASC.Web.Core/PublicResources/Resource.resx:924-953`. `CustomHttpException` answers the status it carries, 502 among them for a service behind the portal that fails (logged as critical); a failing DocsCloud, accounting service or AI gateway is 502, and `DistributedLockException` (a busy lock) 503 with `Retry-After`.
 
 The .NET suite for this capability is the two ported tests (both carrying a bug trait) plus the classes
 `WebPluginReadTests`, `WebPluginUploadTests`, `WebPluginPackageTests`, `WebPluginReuploadTests`, `WebPluginStateTests`,

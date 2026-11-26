@@ -46,7 +46,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:309-375 | TEST-CONFIRMED [run: PASS] |
 | Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:381-422 | TEST-CONFIRMED [run: PASS] |
 | File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:279-291 | TEST-CONFIRMED [run: PASS] |
-| New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5533-5541 | TEST-CONFIRMED [run: PASS] |
+| New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5602-5610 | TEST-CONFIRMED [run: PASS] |
 | Reassign of a deleted user | T/PrivateRoomFileKeysTests.cs:127-153 | TEST-CONFIRMED [run: PASS] |
 | Leaving revokes file keys; audit record; access change keeps | T/PrivateRoomFileKeysTests.cs:172-216 | TEST-CONFIRMED [run: PASS] |
 | Revocation does not depend on a client being online: the removal is a server-side API call with no client connected, and the next read already reports the key missing, also in a subfolder (run 2026-11-11) | T/PrivateRoomFileKeysTests.cs:171-204; Sharing:RevokeFileKeysAsync; commit cc60512acd | TEST-CONFIRMED [run: PASS] |

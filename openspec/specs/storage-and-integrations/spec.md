@@ -318,7 +318,7 @@ disappeared from the service MUST NOT fail `deleteRecent` or the opening of anot
 ### Requirement: OAuth consent URL
 
 `getThirdPartyCode` SHALL return as a string the consent URL of Google, Dropbox, Docusign, Box, OneDrive, Wordpress or
-Github to any signed-in member, with `response_type=code` and a `state` pointing at this portal's
+Github that the installation registers to any signed-in member, with `response_type=code` and a `state` pointing at this portal's
 `thirdparty/{provider}/code`. It stores nothing. An anonymous caller gets 401.
 
 #### Scenario: Google for any member
@@ -329,7 +329,7 @@ Github to any signed-in member, with `response_type=code` and a `state` pointing
 
 #### Scenario: Other providers
 
-- **WHEN** the provider is a known one outside these seven
+- **WHEN** the provider is a known one outside these seven, or one of them that the installation does not register (by default Docusign, Wordpress and Github)
 - **THEN** the answer is 200 with no URL
 - **AND** a value outside the provider list is 400
 
@@ -466,7 +466,7 @@ and `props` sent. The portal status does not change.
 
 `startStorageEncryption` SHALL need a server installation, the right to edit portal settings and an unlimited access
 space, or answer 403. It answers false where the build has encryption off, 415 where the feature is not offered or the
-storage or CDN of the portal is third-party, and 500 while a portal's backup runs.
+storage or CDN of the portal is third-party, and 409 while a portal's backup runs.
 
 #### Scenario: Hosted portal
 

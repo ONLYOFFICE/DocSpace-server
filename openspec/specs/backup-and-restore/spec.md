@@ -125,7 +125,7 @@ defaults to `Documents`, and every storage type has the `storageParams` it needs
 or above the integer range for `Documents` (the default type), when it is an integer for
 `ThridpartyDocuments`, when `storageParams` repeats a key, when an item of `storageParams` is null
 or has no key or no value, when the body is empty or `{}`, or when a field has the wrong JSON type
-(the answer then names the field). `Local` without `filePath`, or on a hosted portal, is 500.
+(the answer then names the field), and for `Local` without `filePath` or on a hosted portal.
 
 #### Scenario: Folder id of the wrong kind
 
@@ -144,8 +144,8 @@ or has no key or no value, when the body is empty or `{}`, or when a field has t
 
 #### Scenario: Local storage on a hosted portal
 
-- **WHEN** the owner of a hosted portal calls `startBackup` with `storageType: Local`
-- **THEN** the system answers 500 "Access denied"
+- **WHEN** the owner of a hosted portal calls `startBackup` with `storageType: Local`, or calls it on any installation without `filePath`
+- **THEN** the system answers 400 and nothing is queued
 
 ### Requirement: Storages the job cannot write to
 
@@ -531,6 +531,11 @@ backup or lacks the parameters it needs, or a field has the wrong JSON type. A m
 
 - **WHEN** a `Documents` or `ThridpartyDocuments` schedule has no `storageParams` or none named `folderId`, or a `Documents` schedule has `folderId` "invalid_value", or the body names neither `storageType` nor `folderId`
 - **THEN** the system answers 400; a `folderId` "99999999" that matches no folder answers 404
+
+#### Scenario: Item of storageParams without a key or a value
+
+- **WHEN** an item of `storageParams` is null, or has a null key or a null value
+- **THEN** the system answers 400 and the stored schedule survives
 
 ### Requirement: Scheduled backups require the allowance or the paid service
 
