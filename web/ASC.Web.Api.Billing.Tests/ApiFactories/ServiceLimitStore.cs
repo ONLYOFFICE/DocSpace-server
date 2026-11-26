@@ -106,7 +106,7 @@ internal sealed class ServiceLimitStore
 
             return (call.Method, byCustomer.Groups["kind"].Value) switch
             {
-                ("PUT", "participants/disable") => DisableParticipants(account, group),
+                ("POST", "participants/disable") => DisableParticipants(account, group),
                 ("GET", var kind and not "participants/disable") => ByCustomer(account, group, kind, HttpUtility.ParseQueryString(call.Query)),
                 _ => null
             };

@@ -291,13 +291,13 @@ public class AccountingClientServiceLimitRequestTests
     }
 
     [Fact]
-    public async Task DisableParticipantServiceLimits_PutsToDisablePathAndReturnsCount()
+    public async Task DisableParticipantServiceLimits_PostsToDisablePathAndReturnsCount()
     {
         var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, "5"));
 
         var count = await client.DisableParticipantServiceLimitsAsync("portal-1", "ai-services");
 
-        handler.LastMethod.Should().Be(HttpMethod.Put);
+        handler.LastMethod.Should().Be(HttpMethod.Post);
         handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/by-customer/portal-1/by-group/ai-services/participants/disable");
         count.Should().Be(5);
     }

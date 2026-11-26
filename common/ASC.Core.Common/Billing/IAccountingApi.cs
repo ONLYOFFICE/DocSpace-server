@@ -143,7 +143,7 @@ public interface IAccountingApi
     [Put("/serviceLimit/participants")]
     Task<int> SetParticipantServiceLimitsAsync([Body] ServiceLimitParticipantSetOperation data);
 
-    [Put("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants/disable")]
+    [Post("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants/disable")]
     Task<int> DisableParticipantServiceLimitsAsync(string portalId, string groupName);
 
     [Delete("/serviceLimit/{id}")]
