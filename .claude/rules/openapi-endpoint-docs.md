@@ -19,7 +19,7 @@ that a reader with basic English can follow. Parameters, DTO properties and enum
 - One `[SwaggerResponse]` per code the operation can return, with a specific text; the prose's codes among them (§3.6)
 - Every declared code is reachable in the handler; no old 4xx/5xx code left the text without a reason (§3.6)
 - Every webhook the action causes has `[RaisesWebhook]` per condition, and `<remarks>` does not repeat it (§2.1)
-- Terms of §2.3, no internal names, true `<path>`/`<requiresAuthorization>` (§2.3, §0); well-formed tags (Definition of done)
+- Terms of §2.3, no internal names, true `<path>`/`<requiresAuthorization>` (§2.3, §0); valid XML tags (Definition of done)
 
 ## 0. Where the text comes from
 

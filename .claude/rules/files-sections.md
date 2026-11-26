@@ -15,7 +15,7 @@ exactly that.
 
 ## Checklist
 
-- A new field, flag or filter reaches every `GetEntriesAsync` branch it applies to, or is refused (Any change 1)
+- New fields and filters reach every `GetEntriesAsync` branch or are refused; a new branch is enriched too (Any change 1)
 - An explicit `folderType` beats a `searchArea` default; tests use the shape the client sends (Any change 1)
 - An entry's or a group's section is stored, never derived from its members (Any change 2)
 - Trash allows only Read, Delete and Move, in the caller's own trash; special folders lose behaviour (Any change 3)
@@ -57,6 +57,10 @@ do not re-derive the split. `privacyFilter=Private` on the Rooms area means the 
    An explicit `folderType` wins over a `searchArea` default; on `GET /files/{id}` the
    `searchArea` is not nullable, so "not sent" arrives as `Active` — test the request shape the
    client really sends, not only the one in the bug report.
+   The other direction holds too: a new branch or early return of `GetEntriesAsync` (a section root
+   read by a query of its own) runs the per-entry enrichment the other branches run
+   (`EntryStatusManager.SetFileStatusAsync` / `SetIsFavoriteFoldersAsync`, `FileMarker.SetTagsNewAsync`,
+   the room tags), or the section map says that the section shows none of it.
 2. **Virtual sections.** Recent, Favorites and Shared with me are views: an entry's `ParentId` there
    is its real parent, and the section root itself allows Read only. Never derive an entry's or a
    group's section from its members — store it (room groups keep it in `files_group.folder_type`).

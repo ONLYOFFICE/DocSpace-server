@@ -381,7 +381,8 @@ edit here. Distribute every applicable rule to a reviewer:
 - packages and TFM only in `Directory.Packages.props`; no `EnforceCodeStyleInBuild` committed; new
   projects in `ASC.Web.slnx` / `ASC.Tests.slnx`.
 
-**D. Performance** — always, over the changed product `.cs` files (not tests, not migrations):
+**D. Performance** — always, over the changed product `.cs` files (not tests, not migrations). Its
+author-side part is `csharp-style.md` "Work per listed entry"; cite a per-entry lookup there:
 
 1. Sort the files into **hot path** (runs per request or per listed item: security filters, DAO
    list/search queries, DTO mapping of lists, serialization, per-row loops of reports, exports,
@@ -403,7 +404,9 @@ edit here. Distribute every applicable rule to a reviewer:
    performance finding states the scale it matters at ("5 000 queries per page of 100") and that
    it is static analysis, not a measurement.
 
-**E. Security** — always, over the changed product files (`.cs`, `.ts`, configs, nginx):
+**E. Security** — always, over the changed product files (`.cs`, `.ts`, configs, nginx). Its
+author-side rule is `access-checks.md` (what a caller may do) next to `visibility-filters.md` (what
+it may learn); cite a finding of authorization as `[access-checks.md §N]`:
 
 - **authorization**: every new or changed endpoint and service method checks access on the entry
   it actually acts on (`FileSecurity.Can*Async` / the role check) **before** acting, not on its

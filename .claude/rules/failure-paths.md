@@ -16,12 +16,12 @@ and cite them as `[failure-paths.md §N]`.
 
 ## Checklist
 
-- Checks and rights run before any write; audit rows and "sent" marks come after the action took effect (§1)
+- Checks and rights run before any write; audit rows, events and "sent" marks follow an action that changed something (§1)
 - A mark, lock or reserved quota taken before work that can fail is released on every failure (§2)
 - Each best-effort effect (event, socket, webhook, index) has its own try/catch, placed after the cleanup (§3)
 - A timeout, 5xx or unreadable body is unknown, never a refusal; a 4xx about the caller's input maps to ours (§4)
 - Check-then-act is an upsert, conditional write or lock; an irreversible step comes after its record (§5, §6)
-- No `catch {}` or catch inside a transaction the callee joins; retries end; a lease outlasts its work (§7, §8)
+- No `catch {}` or catch inside a transaction the callee joins; retries and skipped entries end; a lease lasts (§7, §8)
 - Every decision on a state that ends (trial, lease, token) compares the end with now (§9)
 - A multi-step operation has a table of step x interruption, re-checked against each fix (§10)
 - A decision the stand cannot reach is a pure function with a unit test at its boundaries (§11)
@@ -32,6 +32,10 @@ and cite them as `[failure-paths.md §N]`.
   row, a spent invitation, a user update.
 - The audit record, the spent limit and the "sent" mark come after the action took effect. If one
   has to come first, its text says "requested", not "sent".
+- What comes after the action — the audit record first, then the best-effort effects (event, socket,
+  webhook, §3) — follows what changed, not the call. A step that can do nothing (the caller's own
+  entry is absent, nothing matched) returns whether it changed something, and both are sent on that
+  result.
 - Seen in review: the repeat check ran after the confirmation link was built, so every call added a
   `short_links` row and an audit record although the letter itself was suppressed.
 - Guard: call twice and assert that the second call added no rows. Asserting only that no exception
@@ -111,6 +115,12 @@ and cite them as `[failure-paths.md §N]`.
 - A lease is longer than the work it covers. Stop a batch at a deadline shorter than the lease.
 - Two instances run the same loop at the same moment, so claim rows atomically. Details:
   `review-branch` lens G.
+- Work kept for a later run ends too. An entry that no branch of the loop takes (its quota, kind or
+  owner is gone, an older version wrote it), whether in a stored list or a list in memory, is removed
+  with a warning or bounded by its age. A skipped entry rewritten with every save of the list renews
+  its own expiry.
+- Seen in review: an entry of a work list whose kind had left the set the loop handles was skipped by
+  every run and kept alive by every save of the list.
 
 ## 9. A state that ends is checked by its end
 

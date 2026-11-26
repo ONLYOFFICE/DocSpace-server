@@ -21,6 +21,7 @@ as matrix M3 of `review-branch` and cite them as `[configuration.md §N]`.
 - A protective limit has a finite default in the code, not only in `buildtools/config` or the AppHost (§5)
 - Related values are checked together, and each value is read once at startup and kept in a field (§6, §7)
 - A relation or bound section has its own unit test; a value read at registration a broken-section test (§8)
+- Wiring names each mode it runs in; a decided value is read from its owner; an override says so (§9)
 
 ## 1. Read through the helper
 
@@ -111,3 +112,17 @@ as matrix M3 of `review-branch` and cite them as `[configuration.md §N]`.
   except for the missing key, a warning.
 - When the value is read during service registration, add a test that the services still register
   with a broken section.
+
+## 9. Every mode, one source per value
+
+- A change to how a host or a test stack is wired names every mode it runs in (each launch profile,
+  `Docker` true and false, SaaS and Standalone) and says in the commit what the change does in each;
+  a mode not run is "not verified" there.
+- A value one component decides (a port, an address, a base URL) is read by the others from that
+  component (the resource endpoint, the configuration it publishes), never computed again with the
+  same formula: the copy is wrong in the mode where the component decides otherwise.
+- A new source of a value (an argument, an environment variable) that wins over an existing one (a
+  launch profile, a config file) is named where the old source is documented, and a run where the two
+  disagree logs it once.
+- Seen in review: a test client computed a per-run free port for a service whose container, in Docker
+  mode, published its fixed port.
