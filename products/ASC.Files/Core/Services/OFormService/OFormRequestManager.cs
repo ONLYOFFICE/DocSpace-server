@@ -57,8 +57,8 @@ public class OFormRequestManager(
     /// were made within 30 seconds and at least half of them failed: could not connect, timed out, or got 5xx, 408 or
     /// 429. While it is open (30 seconds), every creation
     /// from a template on that host answers 502 at once, while the availability check, which does not go through the
-    /// breaker, may still answer a cached <c>true</c>. An error status of a template file does not count towards the
-    /// breaker: one broken template must not fail the others on its host.
+    /// breaker, may still answer a cached <c>true</c>. An error status of a template file is not a failure for the
+    /// breaker, which counts it as an answered request: one broken template must not fail the others on its host.
     /// </remarks>
     public const string HttpClientName = "templateGallery";
 

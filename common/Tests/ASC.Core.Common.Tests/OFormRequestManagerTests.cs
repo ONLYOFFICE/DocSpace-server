@@ -545,6 +545,98 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task Get_ListAnswersAfterRetriesAndTheFileKeepsFailing_AsksSixTimes()
+    {
+        // A failed creation can make up to 3 list requests and 3 file requests: the list answers on its third
+        // attempt, and the file of the same host fails all three
+        var lists = 0;
+        var gallery = Gallery(request => IsFile(request)
+            ? new StubResponse(HttpStatusCode.ServiceUnavailable)
+            : Interlocked.Increment(ref lists) <= 2
+                ? new StubResponse(HttpStatusCode.ServiceUnavailable)
+                : StubResponse.Json(HttpStatusCode.OK, ListWithFile()));
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url));
+
+        gallery.CallCount.Should().Be(6);
+    }
+
+    [Fact]
+    public async Task Get_FourFailedRequests_LeaveTheCircuitClosed()
+    {
+        // The breaker needs 5 requests: after 4 failed ones the next attempt still reaches the gallery and the
+        // creation gets its file
+        var failures = 0;
+        var gallery = Gallery(request => !IsFile(request) && Interlocked.Increment(ref failures) <= 4
+            ? new StubResponse(HttpStatusCode.ServiceUnavailable)
+            : IsFile(request)
+                ? new StubResponse(HttpStatusCode.OK, Pdf)
+                : StubResponse.Json(HttpStatusCode.OK, ListWithFile()));
+        var manager = CreateManager(gallery.Url);
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        await using var stream = await manager.Get(1, ".pdf");
+        stream.Length.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task Get_ExactlyHalfOfSixRequestsFailed_OpensTheCircuit()
+    {
+        // 3 answered requests (a creation with its file, a list answering 403), then a creation whose 3 requests
+        // fail: 3 of 6 is half, the circuit opens, and the next creation answers 502 without asking
+        var phase = 0;
+        var gallery = Gallery(request => Volatile.Read(ref phase) switch
+        {
+            0 => IsFile(request) ? new StubResponse(HttpStatusCode.OK, Pdf) : StubResponse.Json(HttpStatusCode.OK, ListWithFile()),
+            1 => new StubResponse(HttpStatusCode.Forbidden),
+            _ => new StubResponse(HttpStatusCode.ServiceUnavailable)
+        });
+        var manager = CreateManager(gallery.Url);
+
+        await using (await manager.Get(1, ".pdf"))
+        {
+        }
+
+        Volatile.Write(ref phase, 1);
+        await AssertGalleryUnavailableAsync(manager);
+        Volatile.Write(ref phase, 2);
+        await AssertGalleryUnavailableAsync(manager);
+        var asked = gallery.CallCount;
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        asked.Should().Be(6);
+        gallery.CallCount.Should().Be(asked);
+    }
+
+    [Fact]
+    public async Task Get_ErrorStatusesOfATemplateFile_CountAsAnsweredRequests()
+    {
+        // Two creations of a broken template answer 8 requests (a list and three file attempts each). The breaker takes
+        // them as answered, so 6 failed list requests after them are 6 of 14 and leave the circuit closed
+        var phase = 0;
+        var gallery = Gallery(request => Volatile.Read(ref phase) == 0 && !IsFile(request)
+            ? StubResponse.Json(HttpStatusCode.OK, ListWithFile())
+            : new StubResponse(HttpStatusCode.ServiceUnavailable));
+        var manager = CreateManager(gallery.Url);
+
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+        gallery.CallCount.Should().Be(8);
+
+        Volatile.Write(ref phase, 1);
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+        var asked = gallery.CallCount;
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        asked.Should().Be(14);
+        gallery.CallCount.Should().BeGreaterThan(asked);
+    }
+
+    [Fact]
     public async Task Get_RetriesOfTheClient_EndWithTheDownloadDeadline()
     {
         // The deadline of the download is the outer strategy: a retry that would wait past it never starts

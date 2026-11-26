@@ -332,11 +332,12 @@ public abstract class FilesController<T>(
     /// seconds, or answers with an error. It also returns 502 if the gallery sends no template list or a list over 1 MB.
     /// A gallery or file address the server cannot request also returns 502. A file over 50 MB also returns 502. A PDF
     /// without a PDF header in its first 1024 bytes also returns 502. A DOCX, XLSX, or PPTX without a ZIP signature
-    /// also returns 502. The server counts the download requests to each gallery host over 30 seconds. A request fails
-    /// when it cannot connect, times out, or gets 5xx, 408, or 429. When at least half of 5 or more requests failed, it
-    /// stops asking that host for 30 seconds. A failed creation can make up to 4 requests to one host. Meanwhile, the
-    /// call returns 502 immediately. This holds for all portals of the server process. An error status of a template
-    /// file is not counted. The gallery availability check can still return `true` then. If
+    /// also returns 502. A failed creation can make up to 3 list requests and 3 file requests. The server counts
+    /// download requests per gallery host over 30 seconds. A request fails if it cannot connect or times out. It also
+    /// fails on a server error, Request Timeout, or Too Many Requests. A template file's error status is not a failure.
+    /// When at least half of 5 or more requests failed, the server stops asking that host for 30 seconds. Meanwhile,
+    /// the call returns 502 immediately. This holds for all portals of the server process. The gallery availability
+    /// check can still return `true` then. If
     /// the new file exceeds the storage quota, the call returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own
     /// section, use `POST api/2.0/files/@my/file`.
     /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
@@ -353,7 +354,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the `templateId` file does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
     [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the template gallery has no template with this `formId` or no file of the title's format for it, or a `formId` is given and no template gallery is configured")]
-    [SwaggerResponse(502, "The template gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error, without its template list or with a list over 1 MB, named a file at an address the server cannot request, or returned a file over 50 MB, a PDF without a PDF header in its first 1024 bytes, or a DOCX, XLSX, or PPTX without a ZIP signature; or the configured gallery address is not an http or https address; or at least half of 5 or more download requests to the gallery host could not connect, timed out, or got 5xx, 408 or 429 within 30 seconds, so the server stops asking it for 30 seconds")]
+    [SwaggerResponse(502, "The template gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error, without its template list or with a list over 1 MB, named a file at an address the server cannot request, or returned a file over 50 MB, a PDF without a PDF header in its first 1024 bytes, or a DOCX, XLSX, or PPTX without a ZIP signature; or the configured gallery address is not an http or https address; or at least half of 5 or more download requests to the gallery host within 30 seconds could not connect, timed out, or got a server error, Request Timeout or Too Many Requests, so the server stops asking it for 30 seconds")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -1334,12 +1335,12 @@ public class FilesControllerCommon(
     /// call returns 502 if the template gallery is unreachable, takes over 30 seconds, or answers with an error. It also
     /// returns 502 if the gallery sends no template list or a list over 1 MB. A gallery or file address the server
     /// cannot request also returns 502. A file over 50 MB also returns 502. A PDF without a PDF header in its first
-    /// 1024 bytes also returns 502. A DOCX, XLSX, or PPTX without a ZIP signature also returns 502. The server counts
-    /// the download requests to each gallery host over 30 seconds. A request fails when it cannot connect, times out,
-    /// or gets 5xx, 408, or 429. When at least half of 5 or more requests failed, it stops asking that host for 30
-    /// seconds. A failed creation can make up to 4 requests to one host. Meanwhile, the call returns 502 immediately.
-    /// This holds for all portals of the server process. An error status of a template file is not counted. The gallery
-    /// availability check can still return `true` then.
+    /// 1024 bytes also returns 502. A DOCX, XLSX, or PPTX without a ZIP signature also returns 502. A failed creation
+    /// can make up to 3 list requests and 3 file requests. The server counts download requests per gallery host over 30
+    /// seconds. A request fails if it cannot connect or times out. It also fails on a server error, Request Timeout, or
+    /// Too Many Requests. A template file's error status is not a failure. When at least half of 5 or more requests
+    /// failed, the server stops asking that host for 30 seconds. Meanwhile, the call returns 502 immediately. This
+    /// holds for all portals of the server process. The gallery availability check can still return `true` then.
     /// </remarks>
     /// <summary>
     /// Create a file in My documents
@@ -1352,7 +1353,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller is a guest whose My documents still exists, or the `templateId` file does not exist or cannot be read")]
     [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the template gallery has no template with this `formId` or no file of the title's format for it, or a `formId` is given and no template gallery is configured")]
-    [SwaggerResponse(502, "The template gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error, without its template list or with a list over 1 MB, named a file at an address the server cannot request, or returned a file over 50 MB, a PDF without a PDF header in its first 1024 bytes, or a DOCX, XLSX, or PPTX without a ZIP signature; or the configured gallery address is not an http or https address; or at least half of 5 or more download requests to the gallery host could not connect, timed out, or got 5xx, 408 or 429 within 30 seconds, so the server stops asking it for 30 seconds")]
+    [SwaggerResponse(502, "The template gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error, without its template list or with a list over 1 MB, named a file at an address the server cannot request, or returned a file over 50 MB, a PDF without a PDF header in its first 1024 bytes, or a DOCX, XLSX, or PPTX without a ZIP signature; or the configured gallery address is not an http or https address; or at least half of 5 or more download requests to the gallery host within 30 seconds could not connect, timed out, or got a server error, Request Timeout or Too Many Requests, so the server stops asking it for 30 seconds")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {
