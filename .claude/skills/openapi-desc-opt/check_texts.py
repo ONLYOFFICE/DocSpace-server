@@ -9,8 +9,11 @@ What it checks, per operation:
 - textstat, Vale and vacuum, each only when it is found on this machine. A tool that is missing is
   skipped and named on the last line, `MISSING TOOLS:`.
 
-Which operations: the description sites of the batch in batch-manifest.json, or the ones named with
---op. Where the new text comes from:
+Which operations: the description sites of the batch in batch-manifest.json, the ones named with
+--op, or the C# actions named with --action FILE:METHOD (review-branch scan.py --gate passes the
+changed ones). An action the emitted document does not hold yet is checked from its source alone:
+its `<remarks>` and its [SwaggerResponse] attributes, with no old text and no parameter texts.
+Where the new text comes from:
 - --from source (default): the `<remarks>` in the C# sources, and the declared codes from the
   [SwaggerResponse] attributes of the action; the old text is the description in the document, so
   run it after the edit and before the document is regenerated;
@@ -213,6 +216,64 @@ def targets(args):
     return manifest["doc"], [parse_op(o) for o in ops]
 
 
+def collect_actions(root, specs):
+    """(document key, items) per --action FILE:METHOD, the text always from the source. The document is
+    the one the action's project emits; an action that is not in it yet is checked from the source."""
+    out = []
+    by_doc = {}
+    for spec in specs:
+        file, _, method = spec.replace("\\", "/").rpartition(":")
+        if not file or not method:
+            sys.exit("--action takes FILE:METHOD, got: " + spec)
+        keys = [k for k, meta in scan.projects(root).items() if file.startswith(meta["project"].rstrip("/") + "/")]
+        if not keys:
+            out.append((None, dict(name=spec, error="no project that emits an OpenAPI document holds this file")))
+            continue
+        by_doc.setdefault(keys[0], []).append((file, method, spec))
+    for doc_key, wanted in by_doc.items():
+        meta = scan.projects(root)[doc_key]
+        doc_path = os.path.join(root, scan.JSON_DIR, meta["doc"])
+        doc, operations = {}, []
+        if os.path.isfile(doc_path):
+            with open(doc_path, encoding="utf-8-sig") as f:
+                doc = json.load(f)
+            operations = scan.load_operations(doc_path)
+        components = (doc.get("components") or {}).get("schemas") or {}
+        defaults = scan.default_response_texts(operations, scan.generator_response_texts(root))
+        controllers = scan.index_sources(root, meta["project"])
+        matched, _ = scan.match(operations, controllers)
+        for file, method, spec in wanted:
+            actions = [a for c in controllers.values() for a in c["actions"] if a["file"] == file and a["method"] == method]
+            if not actions:
+                out.append((doc_key, dict(name=spec, error="no published action of that name in the file")))
+                continue
+            action = actions[0]
+            ops = [op for op in operations
+                   if any(c[1]["file"] == file and c[1]["method"] == method for c in matched.get((op["verb"], op["path"]), []))]
+            attrs = source_responses(root, action)
+            where = "{0}:{1} {2}.{3}".format(action["file"], action["line"], action["cls"], action["method"])
+            if ops:
+                op = ops[0]
+                raw = doc["paths"][op["path"]][op["verb"]]
+                item = dict(name="{0} {1}".format(op["verb"].upper(), op["path"].lstrip("/")), verb=op["verb"],
+                            path=op["path"], operation_id=op["operation_id"], params=param_texts(raw, components),
+                            raw=op["description"], old=flatten(op["description"]),
+                            generator={c for c, text in op["responses"].items()
+                                       if c[:1] in "45" and (c, scan.norm(text)) in defaults})
+            else:
+                verb = action["verbs"][0]
+                route = action["path"] or (action["routes"][0] if action["routes"] else "")
+                item = dict(name="{0} {1} (not in {2} yet: counted from the source)".format(verb.upper(), route, meta["doc"]),
+                            verb=verb, path=route, operation_id=method[:1].lower() + method[1:], params="", raw="",
+                            old=None, generator=set())
+            item.update(text=flatten(action["remarks"]), where=where,
+                        declared=sorted(c for c, text in attrs.items()
+                                        if c[:1] in "45" and (c, scan.norm(text)) not in defaults),
+                        declared_all=sorted({c for c in attrs if c[:1] in "45"} | item.pop("generator")))
+            out.append((doc_key, item))
+    return out
+
+
 def param_texts(op, components):
     """Every description an agent sees next to the operation: parameters and the body, nested."""
     out = [p.get("description", "") for p in op.get("parameters", []) if isinstance(p, dict)]
@@ -375,7 +436,8 @@ def own_checks(item, source, words_to_replace, routes):
                                "name it in the text. Unreachable: remove the attribute (§1.5)".format(", ".join(unstated))))
     if undeclared:
         notes.append(("CODES", "named in the text, no response declares it: {0}. Can this operation return it? "
-                               "Reachable: declare it. Unreachable: take it out of the text (§1.5)"
+                               "Reachable: declare it. Unreachable: take it out of the text. Another operation's code: name that "
+                               "operation as `VERB api/2.0/...` (§1.5, endpoint rule §2.2 Notation)"
                       .format(", ".join(undeclared))))
     return notes
 
@@ -574,10 +636,14 @@ def main():
     parser.add_argument("--from", dest="source", choices=["source", "document"], default="source")
     parser.add_argument("--doc", help="document key with --op, as scan.py --diag prints it")
     parser.add_argument("--op", action="append", help='"PUT api/2.0/files/tags"; repeatable')
+    parser.add_argument("--action", action="append",
+                        help="FILE:METHOD of a C# action, the text from the source; repeatable, any document")
     parser.add_argument("--vale")
     parser.add_argument("--vacuum")
     parser.add_argument("--textstat-python")
     parser.add_argument("--work", help="folder for the tool inputs (default: a new temp folder)")
+    parser.add_argument("--no-tools", action="store_true",
+                        help="own checks only: no textstat, Vale or vacuum (review-branch scan.py --gate)")
     parser.add_argument("--check-tools", action="store_true",
                         help="run the tools that are found on two samples with a known verdict and stop")
     args = parser.parse_args()
@@ -585,8 +651,15 @@ def main():
         sys.exit(check_tools(args))
 
     source = args.source == "source"
-    doc_key, wanted = targets(args)
-    items = collect(args.root, doc_key, wanted, source)
+    if args.action:
+        if not source:
+            sys.exit("--action reads the text from the source: leave --from document out")
+        found = collect_actions(args.root, args.action)
+        doc_key = ", ".join(sorted({k for k, _ in found if k})) or "no document"
+        items = [item for _, item in found]
+    else:
+        doc_key, wanted = targets(args)
+        items = collect(args.root, doc_key, wanted, source)
     work = args.work or tempfile.mkdtemp(prefix="desc-opt-check-")
     os.makedirs(work, exist_ok=True)
 
@@ -599,14 +672,14 @@ def main():
 
     ran, missing = [], []
     texts = {str(i["key"]): i["text"] for i in ok}
-    stats, python, problem = run_textstat(texts, args.textstat_python) if ok else (None, None, None)
+    stats, python, problem = run_textstat(texts, args.textstat_python) if ok and not args.no_tools else (None, None, None)
     if problem:
         ran.append("textstat FAILED ({0}): {1}".format(python, problem))
     elif stats is None:
         missing.append("textstat")
     else:
         ran.append("textstat ({0})".format(python))
-    found = readability.discover(args.vale, args.vacuum)
+    found = readability.discover(args.vale, args.vacuum, use_tools=not args.no_tools)
     vale, vale_note = (readability.run_vale(found["vale"], {i["key"]: i["text"] for i in ok}, work)
                        if found["vale"] and ok else (None, None))
     if not found["vale"]:

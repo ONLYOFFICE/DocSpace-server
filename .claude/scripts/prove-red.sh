@@ -8,8 +8,8 @@
 # `.claude/rules/fixing-findings.md` section 3 ask for.
 #
 # Usage (from the repo root, server/):
-#   .claude/scripts/prove-red.sh [--commit SHA | --patch FILE] [--exclude PATH]... [--build PROJECT]...
-#                                --test PROJECT [-- ARGS...]
+#   .claude/scripts/prove-red.sh [--commit SHA | --patch FILE | --mutate FILE:OLD=>NEW...] [--exclude PATH]...
+#                                [--build PROJECT]... --test PROJECT [-- ARGS...]
 #
 #   --test PROJECT   the test project (.csproj) to build and run
 #   -- ARGS...       Microsoft.Testing.Platform arguments, e.g. --filter-class "*LicenseReaderTests"
@@ -17,7 +17,12 @@
 #   --patch FILE     take away only the change in FILE, a diff as `git diff` writes it whose reverse
 #                    gives the code without the behaviour under test. Use it when the test calls what
 #                    the change adds, so taking the whole change away leaves it unable to build (exit 3)
-#   (neither)        take away every uncommitted product change of the working tree
+#   --mutate FILE:OLD=>NEW
+#                    instead of taking a change away, replace the text OLD by NEW in FILE (a path from the
+#                    repo root; OLD must occur exactly once) and expect the test red with the mutation and
+#                    green without it. Repeatable, all mutations in one run. For a test that pins a value:
+#                    one run per side, e.g. 'X.cs:MinimumThroughput = 5=>MinimumThroughput = 4', then `= 6`
+#   (none of them)   take away every uncommitted product change of the working tree
 #   --exclude PATH   a file or directory inside the repo to leave in place although it is product code,
 #                    e.g. a local edit of an appsettings file that is not part of the change
 #   --build PROJECT  one more project to build in both states, for code the test project does not
@@ -62,6 +67,7 @@ usage() {
 
 commit=""
 patch=""
+mutations=()
 test_project=""
 extra_builds=()
 excludes=()
@@ -71,6 +77,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --commit) commit="${2:-}"; shift 2 || usage ;;
         --patch) patch="${2:-}"; shift 2 || usage ;;
+        --mutate) mutations+=("${2:-}"); shift 2 || usage ;;
         --test) test_project="${2:-}"; shift 2 || usage ;;
         --build) extra_builds+=("${2:-}"); shift 2 || usage ;;
         --exclude) excludes+=("${2:-}"); shift 2 || usage ;;
@@ -86,6 +93,7 @@ git rev-parse --git-dir >/dev/null 2>&1 && [ -z "$(git rev-parse --show-prefix)"
 [ -f "$test_project" ] || { echo "Test project not found: $test_project" >&2; exit 2; }
 [ -n "$commit" ] && [ -n "$patch" ] && { echo "--commit and --patch exclude each other." >&2; exit 2; }
 [ -z "$patch" ] || [ -f "$patch" ] || { echo "Patch not found: $patch" >&2; exit 2; }
+[ ${#mutations[@]} -eq 0 ] || [ -z "$commit$patch" ] || { echo "--mutate excludes --commit and --patch." >&2; exit 2; }
 # Written for the bash 3.2 that macOS ships: no mapfile, and an empty array is expanded as
 # ${a[@]+"${a[@]}"}, because "${a[@]}" of an empty array fails under `set -u` before bash 4.4.
 for p in ${extra_builds[@]+"${extra_builds[@]}"}; do
@@ -179,6 +187,43 @@ split_product() {
 }
 
 tmp=$(mktemp -d)
+
+# --mutate is a patch from the mutated text to the current one: taking that patch away applies the mutation,
+# so the rest of the run is the --patch run, with the verdict worded for a mutation.
+without_what=""
+green_label="green with it"
+if [ ${#mutations[@]} -gt 0 ]; then
+    : > "$tmp/mutation.patch"
+    described=()
+    i=0
+    for m in "${mutations[@]}"; do
+        i=$((i + 1))
+        file=${m%%:*}
+        rest=${m#*:}
+        old=${rest%%=>*}
+        new=${rest#*=>}
+        if [ "$file" = "$m" ] || [ "$old" = "$rest" ] || [ -z "$old" ]; then
+            echo "--mutate takes FILE:OLD=>NEW, got: $m" >&2; rm -rf "$tmp"; exit 2
+        fi
+        f=$(repo_path "$file") && [ -f "$f" ] || { echo "--mutate: no such file in the repo: $file" >&2; rm -rf "$tmp"; exit 2; }
+        # Read byte for byte: $(cat) would drop the trailing newlines.
+        content=$(cat -- "$f"; printf x)
+        content=${content%x}
+        n=0
+        s=$content
+        while [[ "$s" == *"$old"* ]]; do n=$((n + 1)); s=${s#*"$old"}; done
+        if [ "$n" -ne 1 ]; then
+            echo "--mutate: \"$old\" occurs $n times in $f; give text that occurs exactly once." >&2; rm -rf "$tmp"; exit 2
+        fi
+        printf '%s' "${content/"$old"/"$new"}" > "$tmp/mutated.$i"
+        diff -u --label "a/$f" --label "b/$f" "$tmp/mutated.$i" "$f" >> "$tmp/mutation.patch"
+        described+=("$f: $old => $new")
+    done
+    patch="$tmp/mutation.patch"
+    without_what="with the mutation ($(IFS=';'; echo "${described[*]}"))"
+    green_label="green without it"
+fi
+
 files=()
 left=()
 other=()
@@ -197,11 +242,12 @@ if [ -n "$commit" ]; then
     what="the product part of $(git rev-parse --short "$commit")"
     none="the commit changes no product file"
 elif [ -n "$patch" ]; then
-    cp -- "$patch" "$tmp/change.patch"
+    [ "$patch" = "$tmp/change.patch" ] || cp -- "$patch" "$tmp/change.patch"
     # A patch is taken away as written, so it may hold product files only: reversing a test file
     # would test the old test, reversing this script would rewrite it while it runs.
     split_product < <(git apply --numstat "$tmp/change.patch" | cut -f3 | sort -u)
     what="the change in $patch"
+    [ ${#mutations[@]} -eq 0 ] || what="the mutated text"
     none="the patch changes no file: it is empty or not a diff"
     if [ $(( ${#left[@]} + ${#other[@]} )) -gt 0 ]; then
         echo "The patch must take away product code only; it also changes:" >&2
@@ -294,6 +340,8 @@ elif [ -n "$patch" ]; then
         exit 5
     fi
     restore_hint="git apply $patch"
+    [ ${#mutations[@]} -eq 0 ] || { cp -- "$tmp/change.patch" "${TMPDIR:-/tmp}/prove-red-mutation.patch"
+        restore_hint="git apply ${TMPDIR:-/tmp}/prove-red-mutation.patch"; }
     echo "If this run is interrupted, put the change back with: $restore_hint"
     git apply -R "$tmp/change.patch"
     taken_away=1
@@ -413,13 +461,14 @@ if [ "$outcome" = failed ]; then
     exit 4
 fi
 
+[ -n "$without_what" ] || without_what="without $what"
 if [ "$red_outcome" = passed ]; then
-    echo "STILL GREEN: $red_total of $red_total passed without $what; the test does not depend on it."
+    echo "STILL GREEN: $red_total of $red_total passed $without_what; the test does not depend on it."
     exit 1
 fi
 
-echo "Failed without the change:"
+echo "Failed $without_what:"
 sed 's/^/  /' "$tmp/failed-without.txt"
 echo
-echo "RED as expected: $red_failed of $red_total failed without $what (${#files[@]} file(s)); green with it: $total of $total passed."
+echo "RED as expected: $red_failed of $red_total failed $without_what (${#files[@]} file(s)); $green_label: $total of $total passed."
 exit 0

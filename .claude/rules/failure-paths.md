@@ -112,8 +112,14 @@ and cite them as `[failure-paths.md §N]`.
 - Seen in review: a setup wizard completed on an installation's own trial after that trial had
   ended. Three places decided on the trial without comparing its end with today; the re-check found
   one of them, the next review all three.
+- The end is enforced by the code on every path that answers: the factory, the stale answer of a
+  soft timeout, a fail-safe copy, an entry another process wrote. A text that discloses "may keep it
+  longer" does not replace the bound, and a review does not drop such a question as disclosed
+  (`review-branch` §4 "Disclosed is not decided"). Seen in bugfix/78009: a known "available" was to
+  end a day after the last answer; rounds disclosed the paths that kept it longer (the fail-safe
+  re-armed, the stale answer of a slow check) until the code bounded each.
 - Guard: a unit test of the decision with the end yesterday (see `tests.md`, "A decision the stand
-  cannot reach").
+  cannot reach"), one per path that answers; for a cache, matrix M13 of `review-branch` lists them.
 
 ## 10. A multi-step operation: one table, every step
 

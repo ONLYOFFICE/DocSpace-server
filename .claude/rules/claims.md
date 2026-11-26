@@ -69,4 +69,24 @@ source, not a finding by itself, and a claim worded otherwise is still the write
   they are blocked or not done (untracked files included with
   `--worktree`), and the `verification.md` rows that cite a changed file by its path, an alias, its
   file name (marked when several files share it) or a folder alias. Only that last list is capped: its
-  first 100 entries and 8 line numbers each, all with `--full`.
+  first 100 entries and 8 line numbers each, all with `--full`;
+- "verification.md line citations": each cited range of a changed C# file checked for where it starts
+  and ends and for the backticked names after it, and the cited blocks of untouched rows that moved;
+  its `!!` lines fail `--gate` (`fixing-findings.md` §12).
+
+## 6. A claim the fix writes is pinned in the same batch
+
+- A number, an absolute word or a statement about how a dependency behaves that a fix round adds to
+  a remark, a comment, a spec, a `verification.md` row or a commit message names, in the same batch,
+  the test that pins it, or is marked CODE-ONLY in `verification.md` (in the commit message when no
+  row covers it). Reasoning about the code is not a source: the claims below were all reasoned.
+- A test pins a value only if a mutation of that value by one step makes it red: a threshold of 5
+  changed to 4 and to 6, a duration a unit shorter and longer (`prove-red.sh --mutate`, `tests.md`
+  "A test has to be able to fail"). A test that stays green under a mutation pins a range; the text
+  then states the range, not the value.
+- Seen in bugfix/78009, each written by a fix round to answer a finding and corrected by the next:
+  "up to 4 requests" where a failed creation sent 6; "5 or more requests failed" written as a state,
+  although the breaker opens only on a failed request after them; "an error status is not counted",
+  although Polly records an outcome its predicate does not handle as a success.
+- Guard: the scan's "Claims with numbers" of the round's commits, each line with its test and
+  mutation or CODE-ONLY (`fixing-findings.md` §9); reviewers build matrix M12 (`review-branch` §3 M).

@@ -186,13 +186,15 @@ is read in context. What each section is for:
 | Tests | §3 A3 and §6 |
 | Changed endpoints | not a finding by itself: the rows of the cross-cutting matrix (§3 A0) |
 | OpenSpec | the requirements reviewer S reads (§3 S). `!! ... openspec/ untouched` is not a finding by itself: it becomes one when a listed requirement no longer holds on the branch. The `!!` format lines are findings once read: a requirement the branch adds at 500 characters or more, one it brings to 500 or more, or one it makes longer while it is already over (`openspec/config.yaml` asks for under 500), and a ticked task that says it is blocked or not done (`claims.md` §4); with `--worktree` they cover untracked spec files too. A requirement is compared with every body it had at the merge-base under its name or the name a RENAMED pair gives — in the same file, its old path and, for a delta (active or archived), its capability's spec; REMOVED sections are not measured. A requirement with no such old body whose body equals that of a requirement gone from the same file is a rename without a pair, so unchanged; a requirement moved to another spec file is measured as new. An edit of a requirement that was already that long and did not grow is a reminder line without `!!`: not a finding, a note the author may act on. `verification.md rows citing changed files` is a list to check: each row whose lines moved or whose behaviour changed is stale. It finds citations by path (a `.claude/` one and a spec file included), alias, file name (marked when several files share it, so the row may cite another one) and folder alias; a row citing a changed file in another form is the reviewer's to find. The first 100 entries (a changed file in one `verification.md`) and 8 line numbers each are printed, all with `--full` |
+| verification.md line citations | each citation of a changed C# file (a path, a file name, `:N` after it, `` `File.cs` `Member` (N) ``): a range that starts on a blank line, a lone brace or inside a statement, or ends on a blank line, an opening brace, the next member's comment or attribute, or inside a statement; a backticked name in the parenthetical right after it that is not in the cited lines; and, for a row the branch left alone, a cited block that moved (with the new lines) or that the branch edited (a hint). What fails the same way at the merge-base is listed as base debt (§4). The `!!` lines are findings once read (`claims.md` §4, `fixing-findings.md` §12) and fail the gate |
+| Texts of the changed operations | with `--gate` only: `openapi-desc-opt/check_texts.py --from source --no-tools` on each changed action, run on a copy of the scanned tree and of the merge-base, so an action not yet in the emitted document is checked from its `<remarks>` and `[SwaggerResponse]`. FORM, STYLE and CODES notes the merge-base does not have fail the gate; the merge-base's own are base debt (§4). Read each like an A2 hint: a code of another operation named in prose reads as this one's code until the text names that operation (`openapi-endpoint-docs.md` §2.2 Notation) |
 | Review tooling brought in by the branch | not a finding: each merge of the base that brought a rule or review-tooling change applying to the branch, with the branch's own commits before and after it, and the date the scanned tree's tooling last changed. A check of the branch older than the newest such merge ran on the older copy (§1 "Earlier checks of the branch"); the author runs what the merge changed over the whole branch (`fixing-findings.md` §6 "The base first"). The tooling line goes into the report header (§8) |
 | Claims with numbers | §3 B "claims the branch writes": each number with a unit, worded duration, limit and date word the scan finds in the branch's commit messages, C# comments and spec texts is checked against the constant, the timeout or the test that makes it true (`claims.md` §1). A hit whose source says otherwise is a finding; a claim worded in a form the scan does not list is still read. The first 200 lines are printed, all with `--full` |
 | Stateful / background processing | the files reviewer G walks (§3 G) |
 | Size | how many chunks reviewers B, D, E and G are split into (§3 Coverage) |
 | New projects | an `!!` line: a project in neither `ASC.Web.slnx` nor `ASC.Tests.slnx` (a tool with a solution of its own is the exception), or a test project outside `products/` that `CLAUDE.md` does not name |
 | Possibly committed by accident | a review `.md`, a `.binlog`, `.env` committed by accident |
-| Gate | what stops a hand-over whatever the branch is: AI attribution in a commit; a base change, since the merge-base, to rules or review tooling that apply to the branch; an untracked file (`--worktree`; the branch's own saved review at the root excepted, §1); a requirement the branch adds at 500 characters or more, brings to 500 or more, or makes longer while over; a whole-file line-ending flip of what git would commit; a conflict marker; a new source file without a license header (generated files and `thirdparty/` excepted). `--gate` exits with 1 on any, 2 when the scan cannot run. In a review of someone else's branch, a gate line is reported as a finding only when it is a defect of the branch: newer base rules are a header note (§1) |
+| Gate | what stops a hand-over whatever the branch is: AI attribution in a commit; a base change, since the merge-base, to rules or review tooling that apply to the branch; an untracked file (`--worktree`; the branch's own saved review at the root excepted, §1); a requirement the branch adds at 500 characters or more, brings to 500 or more, or makes longer while over; a whole-file line-ending flip of what git would commit; a conflict marker; a new source file without a license header (generated files and `thirdparty/` excepted); a `verification.md` citation the branch wrote wrong or moved; a FORM, STYLE or CODES note of a changed operation's text that the merge-base does not have. `--gate` exits with 1 on any, 2 when the scan cannot run. In a review of someone else's branch, a gate line is reported as a finding only when it is a defect of the branch: newer base rules are a header note (§1) |
 
 Things `scan.py` cannot see and you must look for yourself: broken indentation left by a merge,
 `<summary>`/`<remarks>` swapped, a list in `CLAUDE.md` the branch leaves incomplete (services, launch
@@ -268,10 +270,15 @@ count with the search it used, so a short matrix is visible as short.
 | M9 states that end | each place that decides on a state with an end date (a trial, a lease, a grace period, a tariff or quota in force), found by `findReferences` on the end property, and each writer that can move the end into the past | does the decision compare the end with now; what it answers when the end is later, today, yesterday; cite `[failure-paths.md §9]` |
 | M10 interrupted steps | for each multi-step operation with an effect a retry cannot undo (money, an external call, a claim held across steps): every step x (the step throws, the answer is unknown, the process stops after it, another instance takes the item over) | what is on record at that moment and what the next run does; a cell that ends in a repeated payment, a lost record or a wrong letter is a finding; cite `[failure-paths.md §10]`. Built again over the whole operation after each fix of one cell |
 | M11 cache instance | each value put into a FusionCache by the diff | which process obtains it and which reads it; whether a decision falls back on it; whether it must survive a restart. Obtained in one process and read in another, or a fallback for a decision, in the `"memory"` instance is a finding; an unknown answer that removes a known entry is one too; cite `[caching.md]` "Which instance" |
+| M12 claims | each number, absolute word and statement of a dependency's behaviour the branch writes: the scan's "Claims with numbers", the `<remarks>` and `[SwaggerResponse]` texts of the changed actions, the spec scenarios and `verification.md` rows the branch writes, its commit messages | the constant or the test that pins it, and the one-step mutation that turns that test red (`prove-red.sh --mutate`); a library's behaviour, its characterization test. A value with neither and not marked CODE-ONLY, or a test that stays green under the mutation while the text states the exact value, is a finding; cite `[claims.md §6]` |
+| M13 cache answer paths | each `GetOrSet` decision of the diff x the paths that answer it: factory success; factory failure with a stale value, and without; soft timeout with a stale value; hard timeout; an entry written by another process (L2, backplane); a restart with Redis and without | what the caller gets for each state with an end, at three points (the end later, now, past), and the characterization test the cell rests on. An answer past the end, or a cell resting on library behaviour no test shows, is a finding; cite `[failure-paths.md §9]`, `[dependency-behaviour.md §1]` |
 
 M2, M4, M5, M9 and M10 are the reviewer side of `.claude/rules/failure-paths.md` (§3, §8, §7, §9,
 §10); a finding in them, or one of B or G that matches a section of that rule, cites it as
-`[failure-paths.md §N]`, so the author finds the rule behind it. A matrix replaces neither B nor E — it closes the classes it names. When a reviewer's finding turns
+`[failure-paths.md §N]`, so the author finds the rule behind it. M12 is the reviewer side of
+`claims.md` §1 and §6, M13 of `failure-paths.md` §9 and `dependency-behaviour.md`; M12 is built in every
+review that writes texts, also in a re-check over the round's own texts, since fix rounds write most of
+them. A matrix replaces neither B nor E — it closes the classes it names. When a reviewer's finding turns
 out to be a class that has no matrix yet and can be enumerated, say so in the report as a candidate
 row for this table (the review itself edits nothing).
 
@@ -560,6 +567,23 @@ Reviewers over-report. For every finding, open the code at `where` yourself and 
   answer — a scenario it did not consider, a rule it breaks, a statement in the entry that is false
   (`claims.md`) — and the finding quotes the entry. A blocker or a rule violation is never accepted as
   a limitation: an entry that holds one is reported as that finding;
+- **Disclosed is not decided**: a finding or a question is not dropped because a text of the branch
+  discloses it ("may keep it longer", "not verified from source", a Known limitations entry) when the
+  disclosed behaviour defeats the purpose of the fix — the bug's own scenario, a bound the branch
+  states. Report it with the bound the code has to enforce (`failure-paths.md` §9). A question about a
+  library's behaviour is closed by a characterization test, red or green, not by an answer
+  (`dependency-behaviour.md` §2). Seen in bugfix/78009: three such questions about the cache were
+  answered by reasoning or a disclosing sentence for several rounds; each was a real defect;
+- **Base debt, once.** In the first review, and in the first pass of a hand-over check, list the
+  confirmed defects of the base (`introduced_by_branch: no`) in the files the branch touches: untrue
+  DTO or remarks texts, wrong numbers in a spec, stale `verification.md` rows the branch did not
+  write. The author decides each once: fixed in the branch, or noted in one line under "Base debt"
+  of the saved review (§8 Saving) and of the PR description. Every later pass gets that list as
+  exclusions ("known, decided, do not report"): a re-check's fresh reviewer, a second pass, the next
+  review. An exclusion list says what to leave out, not where to look, so it does not anchor a pass
+  the way a findings list does (§3 Coverage). An item comes back only when the branch makes it worse.
+  Seen in bugfix/78009: about five defects of the base came back from fresh passes in later rounds,
+  each costing a round's decision again;
 - **origin**: `git blame` the line (`git log -S` when blame lands on a normalization commit) and
   record the commit that introduced it. When an earlier review of this branch exists, each finding
   is either **new code** (the commit is later than that review) or **missed earlier** (the code was
@@ -645,7 +669,8 @@ conversation). Re-scan (§1) and then:
    - did it fix the **class** or only the cited line — run the finding's `siblings` again;
    - does it come with a test that fails without it; a behavioural fix without one is a remark. Do
      not judge that by reading the test: run `.claude/scripts/prove-red.sh --commit <fix sha>` with
-     the test's filter (`--patch` with the behavioural hunk when the test calls what the fix adds).
+     the test's filter (`--patch` with the behavioural hunk when the test calls what the fix adds;
+     `--mutate` one step on each side when the fix pins a value, `tests.md`).
      STILL GREEN is a finding. A run the stand does not allow goes under "Not verified";
    - run the class matrices (§3 M) over the fix diff: a fix commit adds rows like any other code.
 
@@ -654,7 +679,8 @@ conversation). Re-scan (§1) and then:
    diff shows the move, not what the code does, and blame lands on it, so a defect that moved with the
    code reads as new and one that the move introduced reads as old.
 3. Give the fix commits to one more reviewer **without** the previous findings — the code only,
-   with §3 B and G, and §3 S over the spec texts they change. A reviewer handed the earlier list
+   with §3 B and G, §3 S over the spec texts they change, matrix M12 over the texts the round wrote,
+   and the Base debt list as exclusions (§4). A reviewer handed the earlier list
    checks that list; the fresh one finds what the list did not name. This step is not skipped for a
    small round: seen in review, a re-check without it found 1 new item, and the fresh full pass that
    followed on the same sha found 12. The Coverage line says it ran; when it could not,
@@ -707,6 +733,7 @@ Then, omitting empty sections:
 ## ❓ Questions        — behaviour changes and debatable semantics that need the author's decision
 ## Missed by the hand-over check — only with a Hand-over block (§4): per finding, why, and the tooling change
 ## Missed by earlier checks — no block, but earlier reviews of the branch (§4): counts per cause, the tooling change
+## Base debt          — first review only: defects of the base in the branch's files, to be fixed or noted once (§4)
 ## Not verified       — what stays unverified and what would verify it (a suite, a profile)
 ```
 
@@ -738,7 +765,8 @@ stays untracked; never `git add` it.
 
 End the file with a `Coverage` section the next run reads (§3 Coverage): the reviewed sha and date,
 the tooling line of the header (§8), the matrices built with their row counts, and the files no
-reviewer read in full. Every run of a
+reviewer read in full; and with the `Base debt` list as decided (§4), which the next runs take as
+exclusions. Every run of a
 branch saves one, also when the user did not ask for the findings: offer it in the closing line,
 since without it the next run cannot tell what is new from what was missed.
 
@@ -793,6 +821,9 @@ Hand-over check
 
 Known limitations
 - <what>: <decision, reason, decided by>
+
+Base debt
+- <defect of the base in a file of the branch>: <fixed in <sha> | noted, decided by>
 ```
 
 When the user declines the check, the block says so in one line ("Hand-over check: declined by

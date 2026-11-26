@@ -89,8 +89,19 @@ paths around it. Before a fix is handed back:
    one cell of a wallet renewal and opened a path where another instance pays a second time; "write
    the known answer instead of removing it" polished a cache whose instance was the real defect
    (`caching.md`, "Which instance").
-9. **Re-read the texts the round reaches** (`claims.md` §3): remarks, comments, spec deltas, task
-   lists, the PR description and the claims of earlier commit messages.
+9. **Re-read the texts the round reaches and the ones it wrote, before the re-check** (`claims.md`
+   §3, §6). A checklist step of every round, after the code and before §7:
+   - run `scan.py` and take its "Claims with numbers" lines of the round's commits (or of the
+     uncommitted batch, `--worktree`) as the list; add each absolute word and each sentence about a
+     library's behaviour the round wrote in a remark, a comment, a spec text, a `verification.md` row
+     or the commit message;
+   - per line: the constant or the test that pins it with its one-step mutation (`claims.md` §6), the
+     characterization test for a library's behaviour (`dependency-behaviour.md`), or CODE-ONLY in
+     `verification.md`; a line with none is rewritten or proven before the re-check;
+   - then the texts of earlier rounds the round's behaviour reaches: remarks, comments, spec deltas,
+     task lists, the PR description and the claims of earlier commit messages.
+   Seen in bugfix/78009: about 17 of some 45 findings over nine rounds were texts the previous round
+   had written, most of them numbers and statements about the cache or the circuit breaker.
 10. **A miss of the hand-over check is a gap in the tooling.** When a review lists findings under
     "Missed by the hand-over check" (`review-branch` §4), fixing the code closes the branch, not the
     gap. The review offers the user the tooling change it names (a rule section, a matrix row, a scan
@@ -101,7 +112,17 @@ paths around it. Before a fix is handed back:
     goes into the PR description's "Known limitations", with the decision, the reason and who
     decided; the entry states the effect as it is (`claims.md`). The reviewer does not raise it again
     without an argument it does not answer (`review-branch` §4). A blocker or a rule violation never
-    goes there: it is fixed.
+    goes there: it is fixed. Nor does a disclosure of behaviour that defeats the fix's purpose ("may
+    keep it longer" about the state the fix bounds): that is fixed too (`failure-paths.md` §9).
+12. **Line citations are regenerated, never shifted by hand.** After a fix that moves lines, the
+    `verification.md` rows and other texts that cite them are written again from the code: find each
+    cited member or block in the new file and take its lines, by script or by the editor's symbol
+    search, never by adding an offset to the old numbers. Then run `scan.py`: its "verification.md
+    citations" check (part of `--gate`) reports a range that starts on a blank line, a lone brace or
+    inside a statement, or ends on a blank line, an opening brace, the next member's comment or inside
+    a statement; a backticked name that is not in the cited lines; and a cited block of a row the
+    branch left alone that moved. Seen in bugfix/78009: the citations were wrong or off by one in six
+    rounds; run on the branch's history, the check flags five of those rounds.
 
 A fix that adds state — a mark, an "accepted" flag, a lock, a retry, a fallback — is new code and
 goes through `failure-paths.md` like any other: in past rounds most new findings were in exactly
