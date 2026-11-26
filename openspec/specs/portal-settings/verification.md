@@ -86,19 +86,19 @@ code or the yaml, no test). No row is cited by test name alone. Exception mappin
 | **Addressee of a module event** | `Portal/ModuleEvents/ModuleEventKeyTests.cs:86`; `Module:88,105-134` | TEST-CONFIRMED [run: PASS] for the 413 of a body over 64 KB, refused before the key; the 400 and 404 stay CODE-ONLY (they follow a valid key, which the stand does not configure) |
 | **Delivery of a module event**: needs a configured module key, which the stand does not have | `Module:91-103,136`; `common/ASC.Core.Common/Notify/Signalr/PluginSocketManager.cs:53-57` | CODE-ONLY |
 | **Reading one skill file** | | |
-| Foreign file id: 404, file not fetched | `Unit/storage/__tests__/roomSkills.test.ts:104-110` (unit test) | TEST-CONFIRMED [run: NO-LINK] |
+| Foreign file id: 404, file not fetched | `Unit/storage/__tests__/roomSkills.test.ts:123-129` (unit test) | TEST-CONFIRMED [run: NO-LINK] |
 | 400 for a missing parameter | `AiSkills/SkillReadRulesTests.cs:47` | TEST-CONFIRMED [run: PASS] |
 | 256 KiB cut | `AiSkills/SkillReadRulesTests.cs:61` | TEST-CONFIRMED [run: PASS] |
 | **Requests to generate a skill** | | |
-| Other folder 400 before the model | `Unit/skills/__tests__/generateSkill.test.ts:146-150` | TEST-CONFIRMED [run: NO-LINK] |
-| Control characters only: 400, model not called | `Unit/skills/__tests__/generateSkill.test.ts:138-143` | TEST-CONFIRMED [run: NO-LINK] |
+| Other folder 400 before the model | `Unit/skills/__tests__/generateSkill.test.ts:230-234` | TEST-CONFIRMED [run: NO-LINK] |
+| Control characters only: 400, model not called | `Unit/skills/__tests__/generateSkill.test.ts:222-228` | TEST-CONFIRMED [run: NO-LINK] |
 | Access first; field limits; 404; 403 | `AiSkills/SkillGenerateRulesTests.cs:67,88,104,118` | TEST-CONFIRMED [run: PASS] |
 | **Result of generating a skill** | | |
-| Frontmatter rebuilt, tag dropped, nothing saved | `Unit/skills/__tests__/generateSkill.test.ts:107-118` | TEST-CONFIRMED [run: NO-LINK] |
-| Name folding and 64 characters | `Unit/skills/__tests__/generateSkill.test.ts:41-45` | TEST-CONFIRMED [run: NO-LINK] |
-| Fallback description | `Unit/skills/__tests__/generateSkill.test.ts:120-124` | TEST-CONFIRMED [run: NO-LINK] |
+| Frontmatter rebuilt, tag dropped, nothing saved | `Unit/skills/__tests__/generateSkill.test.ts:154-166` | TEST-CONFIRMED [run: NO-LINK] |
+| Name folding and 64 characters | `Unit/skills/__tests__/generateSkill.test.ts:66-76` | TEST-CONFIRMED [run: NO-LINK] |
+| Fallback description | `Unit/skills/__tests__/generateSkill.test.ts:204-208` | TEST-CONFIRMED [run: NO-LINK] |
 | **Failures of generating a skill** | | |
-| No profile: error type asserted; the 503 comes from that type | `Unit/skills/__tests__/generateSkill.test.ts:152-155`; `Skills:83-84` | TEST-CONFIRMED [run: NO-LINK] |
+| No profile: error type asserted; the 503 comes from that type | `Unit/skills/__tests__/generateSkill.test.ts:236-239`; `Skills:88-89` | TEST-CONFIRMED [run: NO-LINK] |
 | `empty_answer` 502; `providerMessage` filter | `AiSkills/SkillGenerateRulesTests.cs:169,186,205` (a blank answer; a 401 whose text is not relayed; a 429 whose text is) | TEST-CONFIRMED [run: PASS] — the lack-of-credit and spending-limit branches of the filter stay CODE-ONLY |
 
 ## Covered by other specifications
@@ -137,7 +137,7 @@ Node service).
 
 | # | Where | What the server does | Evidence | Evidence kind |
 |---|---|---|---|---|
-| PS-1 | `getSocketSettings`, `Settings:1188` | Reads the configuration key `web:hub`, which in the default configuration is a section holding `url` and `internal`, so it has no value of its own and the answer's `url` is empty. The two reads of the same setting for `getPortalSettings` use `web:hub:url`. The test asserts only that a body came back | `Settings:137,153,1188`; `../buildtools/config/appsettings.json:190-193`; `common/ASC.AppHost/Configuration/ProjectConfigurator.cs:213` sets only `web:hub:internal`; `Common/SocketSettingsTests.cs:55-56`. Deployment environments that set a flat `web:hub` were not checked | red by code reading |
+| PS-1 | `getSocketSettings`, `Settings:1188` | Reads the configuration key `web:hub`, which in the default configuration is a section holding `url` and `internal`, so it has no value of its own and the answer's `url` is empty. The two reads of the same setting for `getPortalSettings` use `web:hub:url`. The test asserts only that a body came back | `Settings:137,153,1188`; `../buildtools/config/appsettings.json:190-193`; `common/ASC.AppHost/Configuration/ProjectConfigurator.cs:146,225` sets only `web:hub:internal`; `Common/SocketSettingsTests.cs:55-56`. Deployment environments that set a flat `web:hub` were not checked | red by code reading |
 | PS-2 | `saveMailDomainSettings`, `Settings:285` | Stores the request's `inviteUsersAsVisitors` in a setting named `InviteAsUsers`, an opposite meaning, and the CodeGraph index shows no reader of that setting (LSP not run) | `Settings:285`; `web/ASC.Web.Core/StudioTrustedDomainSettings.cs:36` | red by code reading |
 | PS-3 | `configureDeepLink`, `Settings:539` | A body without `deepLinkSettings` fails on a null reference: 500 for a request fault. The yaml documented the 500 until `c096f23fa9` removed it; the code is unchanged | `Settings:539,546` | red by code reading |
 | PS-4 | `configureCsp`, `Security:657-658` | A `null` entry in `domains` fails on a null reference: 500 for a request fault. The yaml documented the 500 until `c096f23fa9` removed it; the code is unchanged | `Security:668` | red by code reading |

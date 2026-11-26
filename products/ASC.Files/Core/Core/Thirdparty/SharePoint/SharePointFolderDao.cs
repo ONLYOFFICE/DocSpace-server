@@ -116,7 +116,7 @@ internal class SharePointFolderDao(
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetAiProjectsVisibleToAsync(IEnumerable<string> projectsIds, int aiHubRootId, Guid userId, bool isAdmin)
+    public IAsyncEnumerable<Folder<string>> GetAiHubRootProjectsAsync(IEnumerable<string> pinnedIds, int aiHubRootId, Guid userId, int count)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
@@ -224,6 +224,16 @@ internal class SharePointFolderDao(
     }
 
     public Task<string> SaveThreadFolderAsync(Folder<string> folder, Guid threadId, ThreadFolderKind kind)
+    {
+        throw new NotSupportedException();
+    }
+
+    public Task<AiAgentConversion> ConvertAiAgentAsync(string roomId)
+    {
+        throw new NotSupportedException();
+    }
+
+    public Task<int> MoveFolderAsync(string folderId, int toFolderId, string newTitle, Func<FilesDbContext, Task> inTransaction)
     {
         throw new NotSupportedException();
     }

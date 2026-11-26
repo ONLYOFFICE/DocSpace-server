@@ -33,9 +33,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 const engine = {
   send: vi.fn(),
   sendCustom: vi.fn(),
@@ -88,7 +85,17 @@ vi.mock("../../tools/customTools.js", () => ({
   primeCustomServers: vi.fn(async () => {}),
 }));
 const readThread = vi.fn();
-vi.mock("../../storage/index.js", () => ({ storage: { threads: { readById: readThread } } }));
+const readHistory = vi.fn();
+// The access gate (aiAccess.ts) reads the tool prefs: `send` and `sendCustom` ask it first, and
+// a round whose aggregate read installed no snapshot (the mock above installs none) asks it after.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn(async () => ({})) }));
+vi.mock("../../storage/index.js", () => ({
+  storage: {
+    threads: { readById: readThread },
+    messages: { readByThread: readHistory },
+    toolPrefs,
+  },
+}));
 vi.mock("../../storage/httpClient.js", () => ({
   AiServiceHttpError: class extends Error {},
   aiService: { get: vi.fn(async () => ({})) },
@@ -114,6 +121,7 @@ vi.mock("../../tools/formAnalysisSubAgent.js", () => ({ formAnalysisSubAgent: {}
 vi.mock("../../tools/documentAgent.js", () => ({ documentAgentTools: {} }));
 
 const { aiController } = await import("../aiController.js");
+const { handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
@@ -125,7 +133,8 @@ const run = async (name: keyof typeof aiController, body: unknown) => {
     writableEnded: false,
   };
   res.status.mockReturnValue(res);
-  await (aiController[name] as unknown as Handler)({ body, query: {} }, res, vi.fn());
+  (aiController[name] as unknown as Handler)({ body, query: {} }, res, vi.fn());
+  await handlerSettled(res);
   return { status: res.status.mock.calls[0]?.[0] as number | undefined, res };
 };
 
@@ -145,6 +154,7 @@ beforeEach(() => {
   assertThreadCreatable.mockReset().mockResolvedValue(undefined);
   readStoredProfile.mockReset().mockResolvedValue({ id: "p1", providerType: "openai" });
   readThread.mockReset().mockResolvedValue({ id: "t1", profileId: "p-thread" });
+  readHistory.mockReset().mockResolvedValue([]);
   setRoundProfileId.mockReset();
   setRoundThreadId.mockReset();
 });
@@ -209,7 +219,8 @@ describe.each(["sendWithStream", "sendWithStreamOpenAI"] as const)("%s of the co
     };
     res.status.mockReturnValue(res);
     const next = vi.fn();
-    await (aiController[name] as unknown as Handler)({ body, query: {}, on: vi.fn() }, res, next);
+    (aiController[name] as unknown as Handler)({ body, query: {}, on: vi.fn() }, res, next);
+    await handlerSettled(res);
     expect(next).not.toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalledWith(400);
     expect(engine[name]).toHaveBeenCalledTimes(1);
@@ -247,5 +258,45 @@ describe("regenerateStream", () => {
     await run("regenerateStream", { threadId: "t1", messageId: "m1" });
     expect(setRoundProfileId).toHaveBeenCalledWith("p-thread");
     expect(setRoundThreadId).toHaveBeenCalledWith("t1");
+  });
+});
+
+// The entry a round is billed to: where the user chats. Inside an AI project
+// that is the project, not the folder the project context set as the round's
+// location (the picked folder, else My documents); elsewhere the folder or
+// room the user is in, and a composer-picked context folder only without one.
+const { primeSourceMeta } = await import("../../storage/docspaceFilesApi.js");
+const { contextFolderIdsOf } = await import("../../storage/contextFolders.js");
+
+describe("source attribution", () => {
+  const prime = vi.mocked(primeSourceMeta);
+  const pickedFolders = vi.mocked(contextFolderIdsOf);
+
+  beforeEach(() => {
+    prime.mockClear();
+    pickedFolders.mockReset().mockReturnValue([]);
+  });
+
+  it("bills a round in an AI project to the project, not to its folder", async () => {
+    pickedFolders.mockReturnValue(["555"]);
+    await run("sendWithStream", {
+      threadId: "t1",
+      entityId: "42",
+      contextEntityId: "4",
+      userMessage: text("hi"),
+    });
+    expect(prime).toHaveBeenCalledWith("42");
+  });
+
+  it("bills a round outside a project to the room the user is in", async () => {
+    pickedFolders.mockReturnValue(["555"]);
+    await run("sendWithStream", { threadId: "t1", contextEntityId: "10", userMessage: text("hi") });
+    expect(prime).toHaveBeenCalledWith("10");
+  });
+
+  it("falls back to a picked context folder only when the round has no location", async () => {
+    pickedFolders.mockReturnValue(["555"]);
+    await run("sendWithStream", { threadId: "t1", userMessage: text("hi") });
+    expect(prime).toHaveBeenCalledWith("555");
   });
 });

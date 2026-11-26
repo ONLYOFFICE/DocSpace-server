@@ -34,9 +34,8 @@
 namespace ASC.AI.Tests.Tests.EditorToolTests;
 
 /// <summary>
-/// Who may use <c>list</c> and <c>call</c>, and that <c>call</c> runs as the caller. Every authenticated type gets
-/// <c>list</c>, a Guest without the document generators; <c>call</c> is closed to a Guest by role before any tool
-/// runs; Anonymous is 401.
+/// Who may use <c>list</c> and <c>call</c>, and that <c>call</c> runs as the caller. Every non-guest type gets
+/// <c>list</c>; both routes are closed to a Guest by role, <c>call</c> before any tool runs; Anonymous is 401.
 /// </summary>
 [Trait("Category", "Permissions")]
 [Trait("Feature", "AI/EditorTools")]
@@ -59,19 +58,20 @@ public class EditorToolPermissionTests(AspireAppFixture fixture) : EditorToolTes
         reply.Json.GetProperty("tools").EnumerateArray().Select(t => t.GetProperty("name").GetString()).Should().Equal(ownerNames);
     }
 
+    /// <summary>A Guest has no access to AI: the catalogue is refused by role, like <c>call</c>.</summary>
     [Fact]
-    public async Task List_AGuestGetsTheCatalogueWithoutTheDocumentGenerators()
+    public async Task List_AGuestIsRefused()
     {
-        await RequireGeneratorsAsync();
-        var ownerNames = (await ToolsAsync()).Select(t => t.Name).ToList();
-        ownerNames.Should().Contain(GeneratorTools, "the owner is offered the generators");
+        // The owner's read is the control: the route is not refused for any other reason.
+        (await ListAsync()).Status.Should().Be(200);
         await ActAsAsync(EmployeeType.Guest);
 
-        var reply = await ListAsync();
+        // Through the generated client, as a caller reads it: the refusal is the 403 the document publishes.
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await SdkEditorTools.AiEditorToolsListAsync(TestContext.Current.CancellationToken));
 
-        reply.Status.Should().Be(200, reply.ToString());
-        reply.Json.GetProperty("tools").EnumerateArray().Select(t => t.GetProperty("name").GetString())
-            .Should().Equal(ownerNames.Where(n => !GeneratorTools.Contains(n)));
+        exception.ErrorCode.Should().Be(403, exception.Message);
+        exception.ErrorContent!.ToString().Should().Contain(Forbidden, "the refusal body");
     }
 
     /// <summary>The tool runs as the caller: the generated file lands in the member's own My documents, not the owner's.</summary>
@@ -128,8 +128,8 @@ public class EditorToolPermissionTests(AspireAppFixture fixture) : EditorToolTes
     }
 
     /// <summary>
-    /// The Guest's list has no generators, and the same Guest naming one with the id of a room where they hold Content
-    /// Creator used to get a document written into it. Nothing may be written, and the call is refused by role.
+    /// A Guest naming a generator with the id of a room where they hold Content Creator used to get a document
+    /// written into it. Nothing may be written, and the call is refused by role.
     /// </summary>
     [Theory]
     [MemberData(nameof(Generators))]

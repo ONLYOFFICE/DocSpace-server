@@ -31,132 +31,124 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import {
-    aiService,
-    AiServiceHttpError,
-    aiServiceBaseUrl,
-} from "./httpClient.js";
+import { aiService, AiServiceHttpError, aiServiceBaseUrl } from "./httpClient.js";
 import { isObject, getString, getBoolean } from "../narrow.js";
+import { getForwardedHeaders, shouldForwardHeadersToProvider } from "../requestContext.js";
+import type { WebSearchStorage, WebSearchConfig } from "@onlyoffice/ai-chat/core";
 import {
-    getForwardedHeaders,
-    shouldForwardHeadersToProvider,
-} from "../requestContext.js";
-import type {
-    WebSearchStorage,
-    WebSearchConfig,
-} from "@onlyoffice/ai-chat/core";
-import {
-    invalidateChatContext,
-    readChatContext,
-    reportChatContextMiss,
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
 } from "./chatContextSnapshot.js";
+import { mapped } from "./upstreamShape.js";
 
 const PATH = "/web-search";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
 export function withWebSearchProviderOverrides(
-    config: WebSearchConfig | null,
+  config: WebSearchConfig | null,
 ): WebSearchConfig | null {
-    if (
-        !config
-        || config.provider !== "onlyoffice"
-        || !shouldForwardHeadersToProvider()
-    ) {
-        return config;
-    }
-    return {
-        ...config,
-        isCloudProvider: true,
-        baseUrl: `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}/`,
-        headers: {
-            ...getForwardedHeaders(),
-            ...(config.headers ?? {}),
-        },
-    };
+  if (!config || config.provider !== "onlyoffice" || !shouldForwardHeadersToProvider()) {
+    return config;
+  }
+  return {
+    ...config,
+    isCloudProvider: true,
+    baseUrl: `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}/`,
+    headers: {
+      ...getForwardedHeaders(),
+      ...(config.headers ?? {}),
+    },
+  };
 }
 
 function toBody(config: WebSearchConfig): Record<string, unknown> {
-    const body: Record<string, unknown> = { provider: config.provider };
-    if (config.key !== undefined) {
-        body["key"] = config.key;
-    }
-    if (config.baseUrl !== undefined) {
-        body["baseUrl"] = config.baseUrl;
-    }
-    if (config.isCloudProvider !== undefined) {
-        body["isCloudProvider"] = config.isCloudProvider;
-    }
-    return body;
+  const body: Record<string, unknown> = { provider: config.provider };
+  if (config.key !== undefined) {
+    body["key"] = config.key;
+  }
+  if (config.baseUrl !== undefined) {
+    body["baseUrl"] = config.baseUrl;
+  }
+  if (config.isCloudProvider !== undefined) {
+    body["isCloudProvider"] = config.isCloudProvider;
+  }
+  return body;
 }
 
 export function parseWebSearchConfig(raw: unknown): WebSearchConfig | null {
-    if (!isObject(raw)) {
-        return null;
-    }
-    const provider = getString(raw, "provider");
-    if (!provider) {
-        return null;
-    }
-    const config: WebSearchConfig = { provider };
-    const key = getString(raw, "key");
-    if (key !== undefined) {
-        config.key = key;
-    }
-    const baseUrl = getString(raw, "baseUrl");
-    if (baseUrl !== undefined) {
-        config.baseUrl = baseUrl;
-    }
-    const isCloudProvider = getBoolean(raw, "isCloudProvider");
-    if (isCloudProvider !== undefined) {
-        config.isCloudProvider = isCloudProvider;
-    }
-    return config;
+  if (!isObject(raw)) {
+    return null;
+  }
+  const provider = getString(raw, "provider");
+  if (!provider) {
+    return null;
+  }
+  const config: WebSearchConfig = { provider };
+  const key = getString(raw, "key");
+  if (key !== undefined) {
+    config.key = key;
+  }
+  const baseUrl = getString(raw, "baseUrl");
+  if (baseUrl !== undefined) {
+    config.baseUrl = baseUrl;
+  }
+  const isCloudProvider = getBoolean(raw, "isCloudProvider");
+  if (isCloudProvider !== undefined) {
+    config.isCloudProvider = isCloudProvider;
+  }
+  return config;
 }
 
 export class HttpWebSearchStorage implements WebSearchStorage {
-    // The AI service exposes a single global web-search singleton; entityId
-    // scoping is not supported server-side and is ignored here.
-    async create(config: WebSearchConfig, _entityId?: string): Promise<void> {
-        await aiService.put(PATH, toBody(config));
-        invalidateChatContext("webSearch");
-    }
+  // The AI service exposes a single global web-search singleton; entityId
+  // scoping is not supported server-side and is ignored here.
+  async create(config: WebSearchConfig, _entityId?: string): Promise<void> {
+    await aiService.put(PATH, toBody(config));
+    invalidateChatContext("webSearch");
+  }
 
-    async read(_entityId?: string): Promise<WebSearchConfig | null> {
-        const snapshot = readChatContext("webSearch");
-        if (snapshot) {
-            return withWebSearchProviderOverrides(snapshot.webSearch);
-        }
-        reportChatContextMiss("webSearch.read");
-        try {
-            const raw = await aiService.get(PATH);
-            return withWebSearchProviderOverrides(parseWebSearchConfig(raw));
-        } catch (err) {
-            if (err instanceof AiServiceHttpError && err.status === 404) {
-                return null;
-            }
-            throw err;
-        }
+  async read(_entityId?: string): Promise<WebSearchConfig | null> {
+    const snapshot = readChatContext("webSearch");
+    if (snapshot) {
+      return withWebSearchProviderOverrides(snapshot.webSearch);
     }
+    reportChatContextMiss("webSearch.read");
+    try {
+      const raw = await aiService.get(PATH);
+      // `null` (a 204 or `response: null`) is the AI service's own "not configured"
+      // (WebSearchStorageService.ReadVerifiedAsync); a config it cannot read is unknown.
+      if (raw === null) {
+        return null;
+      }
+      return withWebSearchProviderOverrides(mapped(parseWebSearchConfig(raw), "GET web-search"));
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  }
 
-    async update(config: WebSearchConfig, _entityId?: string): Promise<void> {
-        await aiService.put(PATH, toBody(config));
-        invalidateChatContext("webSearch");
-    }
+  async update(config: WebSearchConfig, _entityId?: string): Promise<void> {
+    await aiService.put(PATH, toBody(config));
+    invalidateChatContext("webSearch");
+  }
 
-    async upsert(config: WebSearchConfig, _entityId?: string): Promise<void> {
-        await aiService.put(PATH, toBody(config));
-        invalidateChatContext("webSearch");
-    }
+  async upsert(config: WebSearchConfig, _entityId?: string): Promise<void> {
+    await aiService.put(PATH, toBody(config));
+    invalidateChatContext("webSearch");
+  }
 
-    async delete(_entityId?: string): Promise<void> {
-        invalidateChatContext("webSearch");
-        try {
-            await aiService.delete(PATH);
-        } catch (err) {
-            if (err instanceof AiServiceHttpError && err.status === 404) {
-                return;
-            }
-            throw err;
-        }
+  async delete(_entityId?: string): Promise<void> {
+    invalidateChatContext("webSearch");
+    try {
+      await aiService.delete(PATH);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return;
+      }
+      throw err;
     }
+  }
 }

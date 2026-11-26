@@ -48,6 +48,8 @@ public class AiHubRoomLinkTests(
 {
     private const string RoleNotAvailable = "The role is not available for this user type";
 
+    protected override bool PlantsAiProfile => true;
+
     public static TheoryData<RoomType> AiHubRoomTypes =>
     [
         RoomType.InstructionsRoom, RoomType.AiProjectRoom

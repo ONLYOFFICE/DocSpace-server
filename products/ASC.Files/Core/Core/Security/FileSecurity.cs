@@ -256,8 +256,7 @@ public class FileSecurity(
                 FolderType.AiProjectRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomManager, FileShare.None] }
+                        { SubjectType.User, [FileShare.ContentCreator, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -1122,7 +1121,7 @@ public class FileSecurity(
 
             var security = new ConcurrentDictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
-            var shares = await PreloadEntrySharesAsync(entry, userId, isDocSpaceAdmin);
+            var shares = new EntryShares<T>(() => PreloadEntrySharesAsync(entry, userId, isDocSpaceAdmin));
 
             foreach (var action in _securityEntries[entry.FileEntryType])
             {
@@ -1201,7 +1200,7 @@ public class FileSecurity(
         var parentFolders = await GetFileParentFolders(entry.ParentId);
         var cachedFileDao = daoFactory.GetCacheFileDao<T>();
 
-        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+        var haveAccess = await FilterEntryAsync(entry, action, userId, new EntryShares<T>(shares), isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
 
         if (!setEntryAccess)
         {
@@ -1226,7 +1225,7 @@ public class FileSecurity(
         await foreach (var entry in entries)
         {
             var parentFolders = await GetFileParentFolders(entry.ParentId);
-            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao));
+            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, new EntryShares<T>(shares: null), isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao));
         }
     }
 
@@ -1234,7 +1233,7 @@ public class FileSecurity(
         FileEntry<T> e,
         FilesSecurityActions action,
         Guid userId,
-        IEnumerable<FileShareRecord<T>> shares,
+        EntryShares<T> shares,
         bool isOutsider,
         bool isGuest,
         bool isAuthenticated,
@@ -1351,6 +1350,12 @@ public class FileSecurity(
                 FilesSecurityActions.MoveTo or
                 FilesSecurityActions.Duplicate
             )
+        {
+            return false;
+        }
+
+        if (file != null && room is { FolderType: FolderType.InstructionsRoom } &&
+            action is FilesSecurityActions.Lock or FilesSecurityActions.Duplicate)
         {
             return false;
         }
@@ -1909,7 +1914,7 @@ public class FileSecurity(
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
 
                         var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
-                        var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, shares);
+                        var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, await shares.GetAsync());
 
                         var hasFullAccessToForm = userHasFullAccess || shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager };
 
@@ -1956,7 +1961,6 @@ public class FileSecurity(
 
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
                         var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
-                        var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, shares);
 
                         var hasFullAccessToForm = userHasFullAccess || shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager };
 
@@ -2177,7 +2181,7 @@ public class FileSecurity(
                 var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
                 if (e.RootFolderType != FolderType.RoomTemplates || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
                 {
-                    ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, shares);
+                    ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, await shares.GetAsync());
 
                     if (e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
                         ace is { SubjectType: SubjectType.User or SubjectType.AiProject or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
@@ -3024,59 +3028,32 @@ public class FileSecurity(
             subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter, withAiFolder, metadataFilter);
     }
 
-    public async Task<List<FileEntry>> GetPinnedAiProjectsAsync()
+    public async Task<List<FileEntry>> GetAiHubRootProjectsAsync()
     {
+        const int projectsCount = 5;
+
         var userId = authContext.CurrentAccount.ID;
 
         var pinnedIds = await daoFactory.GetTagDao<int>().GetTagsAsync(userId, 0, TagType.Pin)
             .Where(t => t.EntryType == FileEntryType.Folder && t.EntryId is int)
             .Select(t => (int)t.EntryId)
-            .Distinct()
-            .ToListAsync();
+            .ToHashSetAsync();
 
-        if (pinnedIds.Count == 0)
-        {
-            return [];
-        }
-
-        var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId);
         var aiHubId = await globalFolder.GetFolderAiHubAsync(daoFactory);
 
         var projects = await daoFactory.GetFolderDao<int>()
-            .GetAiProjectsVisibleToAsync(pinnedIds, aiHubId, userId, isAdmin)
-            .ToDictionaryAsync(p => p.Id);
+            .GetAiHubRootProjectsAsync(pinnedIds, aiHubId, userId, projectsCount)
+            .ToListAsync();
 
-        var ordered = pinnedIds.Where(projects.ContainsKey).Select(id => projects[id]).ToList();
-
-        foreach (var project in ordered)
+        foreach (var project in projects)
         {
-            if (project.ShareRecord != null)
-            {
-                project.Access = project.ShareRecord.Share;
-            }
-            else
-            {
-                project.Access = FileShare.None;
-
-                if (isAdmin)
-                {
-                    project.ShareRecord = new FileShareRecord<int>
-                    {
-                        EntryId = project.Id,
-                        EntryType = FileEntryType.Folder,
-                        Share = FileShare.None,
-                        SubjectType = SubjectType.User,
-                        Subject = userId
-                    };
-                }
-            }
-
-            project.Pinned = true;
+            project.Access = project.ShareRecord?.Share ?? FileShare.None;
+            project.Pinned = pinnedIds.Contains(project.Id);
             project.IsFavorite = false;
             project.Tags = [];
         }
 
-        return [.. ordered];
+        return [.. projects];
     }
 
     // FillingFormsRoom rooms physically live under VirtualRooms but are surfaced in the separate Forms
@@ -4114,18 +4091,39 @@ public class FileSecurity(
         }
     }
 
-    private async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares)
+    private async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, EntryShares<T> shares)
     {
         var cachedRecords = GetCachedRecords<T>();
         var cacheKey = GetCacheKey(room.Id, userId);
 
         if (!cachedRecords.TryGetValue(cacheKey, out var record))
         {
-            record = await GetCurrentShareAsync(room, userId, isDocSpaceAdmin, shares);
+            record = await GetCurrentShareAsync(room, userId, isDocSpaceAdmin, await shares.GetAsync());
             cachedRecords.TryAdd(cacheKey, record);
         }
 
         return record;
+    }
+
+    private sealed class EntryShares<T>
+    {
+        private readonly Func<Task<IEnumerable<FileShareRecord<T>>>> _load;
+        private Task<IEnumerable<FileShareRecord<T>>> _shares;
+
+        public EntryShares(IEnumerable<FileShareRecord<T>> shares)
+        {
+            _shares = Task.FromResult(shares);
+        }
+
+        public EntryShares(Func<Task<IEnumerable<FileShareRecord<T>>>> load)
+        {
+            _load = load;
+        }
+
+        public Task<IEnumerable<FileShareRecord<T>>> GetAsync()
+        {
+            return _shares ??= _load();
+        }
     }
 
     /// <summary>

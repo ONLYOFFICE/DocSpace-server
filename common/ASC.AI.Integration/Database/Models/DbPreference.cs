@@ -98,6 +98,9 @@ public static class DbPreferencesExtension
 
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.EntryId })
                 .HasDatabaseName("IX_tenant_id_created_by_entry_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("IX_tenant_id_entry_id");
         });
     }
 
@@ -132,6 +135,9 @@ public static class DbPreferencesExtension
 
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.EntryId })
                 .HasDatabaseName("ix_ai_integration_preferences_tenant_id_created_by_entry_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.EntryId })
+                .HasDatabaseName("ix_ai_integration_preferences_tenant_id_entry_id");
         });
     }
 }

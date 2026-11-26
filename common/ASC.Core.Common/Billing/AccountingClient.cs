@@ -620,7 +620,10 @@ public class OperationFilter : PagedFilter
 /// </summary>
 public class MonthlyUsageFilter : DateRangeFilter
 {
-    public string TimeZome { get; init; }
+    /// <summary>
+    /// The time zone the accounting service splits the usage into months by, sent as the timeZone query parameter.
+    /// </summary>
+    public string TimeZone { get; init; }
 }
 
 /// <summary>
@@ -1061,12 +1064,6 @@ public class ServicePriceInfo
     /// </summary>
     /// <example>1500.75</example>
     public decimal ServicePrice { get; init; }
-
-    /// <summary>
-    /// The quota the price is set for.
-    /// </summary>
-    /// <example>100</example>
-    public double? Quota { get; init; }
 
     /// <summary>
     /// The period the price is effective in.

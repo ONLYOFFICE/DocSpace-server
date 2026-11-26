@@ -34,10 +34,9 @@
 namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
-/// The roles of an AI project: Project manager is <c>RoomManager</c>, member is <c>ContentCreator</c> - the role that
-/// may use AI in a room - and <c>Read</c> is not a project role at all. A group cannot be a member of a project, with
-/// any role: only users are invited. A room admin demoted to a user keeps the
-/// member role in the projects they managed or owned.
+/// The roles of an AI project: the only role a member is invited with is <c>ContentCreator</c> - the role that may use
+/// AI in a room; <c>RoomManager</c> and <c>Read</c> are not project roles. A group cannot be a member of a project, with
+/// any role: only users are invited. A room admin demoted to a user keeps the member role in the projects they owned.
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AiHub")]
@@ -96,20 +95,19 @@ public class AiProjectRolesTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
     }
 
     [Fact]
-    public async Task DemoteRoomAdminToUser_ProjectManager_BecomesMember()
+    public async Task Share_RoomAdminAtRoomManager_Returns403AndRoomAdminIsNotAdded()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        await ShareRoomAsync(projectId, roomAdmin.Id, FileShare.RoomManager);
 
         // Act
-        var progress = await DemoteToUserAsync(roomAdmin.Id);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await ShareRoomAsync(projectId, roomAdmin.Id, FileShare.RoomManager));
 
         // Assert
-        progress.Error.Should().BeEmpty();
-        progress.IsCompleted.Should().BeTrue();
-        (await GetUserAccessAsync(projectId, roomAdmin.Id)).Should().Be(FileShare.ContentCreator);
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("The role is not available for this user type");
+        (await GetUserAccessAsync(projectId, roomAdmin.Id)).Should().BeNull();
     }
 
     [Fact]

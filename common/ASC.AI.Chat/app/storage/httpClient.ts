@@ -31,10 +31,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import nconf from "../../config/index.js";
+import { getAiServiceUrl, getProxyUrl, getUpstreamTimeoutMs } from "../../config/index.js";
 import { countUpstreamCall, countUpstreamRead, getForwardedHeaders } from "../requestContext.js";
-import { isObject, parseInt10 } from "../narrow.js";
-import type { AppConfig } from "../types.js";
+import { isObject } from "../narrow.js";
+import { cancelReader, errorBodyText, readTextCapped } from "./errorBody.js";
+
+export { readTextCapped };
+import { assertEntityPath, jsonAnswer, UpstreamShapeError } from "./upstreamShape.js";
 
 // Hard ceiling for a single upstream round-trip so a hung AI service / MCP
 // server can't pin a Node socket (and the caller's request) indefinitely.
@@ -42,7 +45,7 @@ import type { AppConfig } from "../types.js";
 // can be slow; override with `AI_CHAT_UPSTREAM_TIMEOUT_MS`. Note this guards
 // request/response calls only — long-lived chat *streams* are bounded by
 // the client-driven abort signal, not by this timeout.
-const UPSTREAM_TIMEOUT_MS = parseInt10(process.env["AI_CHAT_UPSTREAM_TIMEOUT_MS"], 300_000) ?? 300_000;
+const UPSTREAM_TIMEOUT_MS = getUpstreamTimeoutMs();
 
 /**
  * Build an {@link AbortSignal} that fires on a timeout, on an upstream
@@ -55,10 +58,7 @@ export function withTimeout(
   ms: number = UPSTREAM_TIMEOUT_MS,
 ): { signal: AbortSignal; cancel: () => void } {
   const controller = new AbortController();
-  const timer = setTimeout(
-    () => controller.abort(new Error(`upstream timeout after ${ms}ms`)),
-    ms,
-  );
+  const timer = setTimeout(() => controller.abort(new Error(`upstream timeout after ${ms}ms`)), ms);
   const onAbort = (): void => controller.abort((external as { reason?: unknown })?.reason);
   if (external) {
     if (external.aborted) {
@@ -89,34 +89,8 @@ export class AiServiceHttpError extends Error {
   }
 }
 
-function resolveProxyUrl(): string {
-  const fromEnv = process.env["API_HOST"];
-  if (fromEnv) {
-    return fromEnv.replace(/\/+$/, "");
-  }
-  const app: AppConfig | undefined = nconf.get("app");
-  const fromConfig = app?.proxy?.url;
-  if (fromConfig) {
-    return fromConfig.replace(/\/+$/, "");
-  }
-  return "http://localhost:8092";
-}
-
-function resolveAiServiceUrl(): string {
-  const fromEnv = process.env["AI_SERVICE_URL"];
-  if (fromEnv) {
-    return fromEnv.replace(/\/+$/, "");
-  }
-  const app: AppConfig | undefined = nconf.get("app");
-  const fromConfig = app?.aiService?.url;
-  if (fromConfig) {
-    return fromConfig.replace(/\/+$/, "");
-  }
-  return "http://localhost:5157";
-}
-
-const PROXY_BASE_URL = resolveProxyUrl();
-const AI_BASE_URL = resolveAiServiceUrl();
+const PROXY_BASE_URL = getProxyUrl();
+const AI_BASE_URL = getAiServiceUrl();
 const API_PREFIX = "/internal/ai";
 
 // A string array is sent as a repeated parameter (`tags=a&tags=b`), the
@@ -125,6 +99,7 @@ export type QueryValue =
   string | number | boolean | null | undefined | readonly (string | number | boolean)[];
 
 export interface RequestOptions {
+  // A `FormData` goes out as multipart (an upload), anything else as JSON.
   body?: unknown;
   query?: Record<string, QueryValue>;
   signal?: AbortSignal;
@@ -136,11 +111,26 @@ export interface RequestOptions {
   raw?: boolean;
 }
 
-function unwrapDocSpaceEnvelope(json: unknown): unknown {
-  if (isObject(json) && "response" in json && "status" in json) {
+function unwrapDocSpaceEnvelope(json: unknown, call: string): unknown {
+  if (!isObject(json) || !("status" in json)) {
+    return json;
+  }
+  if ("response" in json) {
     return json.response;
   }
-  return json;
+  if (typeof json["status"] !== "number" || typeof json["statusCode"] !== "number") {
+    return json;
+  }
+  // An envelope without `response`. The portal API leaves null properties out of its JSON, so
+  // an action that returned null is wrapped as `{ count, status, statusCode }` with `status: 0`
+  // (`SuccessApiResponse`): the same answer as `response: null`. The envelope of a failure
+  // (`ErrorApiResponse`: `status: 1` and `error`) has no `response` either; sent with a 200 by
+  // a hop in between, it is not "nothing stored" but an answer of an unknown shape
+  // (ts-ai-failure-paths.md §1).
+  if (json["status"] === 0 && !("error" in json)) {
+    return null;
+  }
+  throw new UpstreamShapeError(call);
 }
 
 async function jsonRequest(
@@ -150,6 +140,7 @@ async function jsonRequest(
   options: RequestOptions = {},
 ): Promise<unknown> {
   const { body, query, signal, raw } = options;
+  assertEntityPath(path);
   let url = `${baseUrl}${path}`;
   if (query && Object.keys(query).length > 0) {
     const params = new URLSearchParams();
@@ -170,7 +161,10 @@ async function jsonRequest(
 
   const headers: Record<string, string> = { ...getForwardedHeaders() };
   const init: RequestInit = { method, headers };
-  if (body !== undefined) {
+  if (body instanceof FormData) {
+    // No Content-Type: `fetch` derives the multipart boundary from the body.
+    init.body = body;
+  } else if (body !== undefined) {
     headers["Content-Type"] = "application/json";
     init.body = JSON.stringify(body);
   }
@@ -180,7 +174,7 @@ async function jsonRequest(
   try {
     const res = await fetch(url, init);
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
+      const text = await errorBodyText(res);
       throw new AiServiceHttpError(res.status, res.statusText, text, url);
     }
     if (res.status === 204) {
@@ -188,8 +182,8 @@ async function jsonRequest(
     }
     const contentType = res.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
-      const json: unknown = await res.json();
-      return raw ? json : unwrapDocSpaceEnvelope(json);
+      const json = await jsonAnswer(res, `${method} ${path}`);
+      return raw ? json : unwrapDocSpaceEnvelope(json, `${method} ${path}`);
     }
     // Awaited here, not returned as a promise: the finally below cancels the
     // timeout signal, and that must happen after the body has been read.
@@ -224,6 +218,133 @@ export const aiService = {
     aiServiceRequest("DELETE", path, opts),
 };
 
+/**
+ * A `GET` of a route the AI service serves outside `internal/ai`: the portal's
+ * own `api/2.0/ai/...` routes, such as the model gateway it proxies. `path`
+ * starts at the service's root. Same contract as {@link aiService}.
+ */
+export async function aiServiceRootGet(
+  path: string,
+  options: RequestOptions = {},
+): Promise<unknown> {
+  countUpstreamRead();
+  countUpstreamCall("GET");
+  return jsonRequest(AI_BASE_URL, "GET", path, options);
+}
+
 export const proxyBaseUrl = PROXY_BASE_URL;
 
 export const aiServiceBaseUrl = AI_BASE_URL;
+
+/**
+ * How {@link providerFetch} bounds a call:
+ * - `"body"`: the upstream timeout bounds the call and the reading of its body; the timer is
+ *   cleared when the body has been read to its end, has failed or was cancelled, and the caller's
+ *   `signal`, when it sends one, ends both earlier. For a caller that reads the answer through code
+ *   that passes no signal of its own: the MCP client of `@onlyoffice/ai-chat` reads each answer to
+ *   its end with a plain `fetch(url, { method, headers, body })`.
+ * - `"none"`: no timeout of its own; the caller's `signal` alone ends the call and the body. For a
+ *   relayed stream, ended by the client hanging up, and for a caller that bounds the call and the
+ *   reading of its answer with its own {@link withTimeout}.
+ */
+export type ProviderTimeout = "body" | "none";
+
+/**
+ * A request to a third-party address: an OpenAI-compatible provider, a web search provider, an
+ * MCP server. The URL is the caller's to check (`assertSafeBaseUrl`) and the headers its to
+ * choose: nothing of the caller's session is added here. Answers the `Response` as it came, a
+ * non-2xx included, and rejects only when no answer arrived (a refused connection, an abort).
+ */
+export async function providerFetch(
+  url: string | URL,
+  init: RequestInit,
+  timeout: ProviderTimeout,
+): Promise<Response> {
+  if (timeout === "none") {
+    return fetch(url, init);
+  }
+  // `AbortSignal.any` rather than `withTimeout`: its `cancel()` would detach the caller's signal
+  // along with the timer, and a body the caller can no longer end outlives the caller. The
+  // combined signal holds the caller's weakly, so a long-lived transport signal shared by many
+  // calls collects no listeners.
+  const timer = new AbortController();
+  const handle = setTimeout(
+    () => timer.abort(new Error(`upstream timeout after ${UPSTREAM_TIMEOUT_MS}ms`)),
+    UPSTREAM_TIMEOUT_MS,
+  );
+  const signal = init.signal ? AbortSignal.any([init.signal, timer.signal]) : timer.signal;
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, signal });
+  } catch (err) {
+    clearTimeout(handle);
+    throw err;
+  }
+  if (!res.body) {
+    clearTimeout(handle);
+    return res;
+  }
+  // The body is read through a stream of our own, so that the timer ends with it. The abort of the
+  // signal errors the body of the fetch, and with it this stream.
+  const reader = res.body.getReader();
+  const body = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        const { done, value } = await reader.read();
+        if (done) {
+          clearTimeout(handle);
+          controller.close();
+        } else {
+          controller.enqueue(value);
+        }
+      } catch (err) {
+        clearTimeout(handle);
+        controller.error(err);
+      }
+    },
+    cancel(reason) {
+      clearTimeout(handle);
+      return reader.cancel(reason);
+    },
+  });
+  return new Response(body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: res.headers,
+  });
+}
+
+/**
+ * The body of a response, or `null` once it proves larger than `limit`
+ * bytes: by its declared length, or by what has arrived when it declares
+ * none. The rest of an oversized body is not read.
+ */
+export async function readBodyCapped(res: Response, limit: number): Promise<Uint8Array | null> {
+  const declared = Number(res.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > limit) {
+    await res.body?.cancel();
+    return null;
+  }
+  if (!res.body) {
+    return new Uint8Array(0);
+  }
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      received += value.byteLength;
+      if (received > limit) {
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    await cancelReader(reader);
+  }
+  return Buffer.concat(chunks, received);
+}

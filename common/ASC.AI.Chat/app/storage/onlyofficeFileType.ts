@@ -112,5 +112,7 @@ function extensionOf(titleOrExt: string): string {
  * code; `0` ("unknown") for anything not in the table.
  */
 export function getOnlyofficeFileType(titleOrExt: string): number {
-  return EXT_TO_CODE[extensionOf(titleOrExt)] ?? 0;
+  // An own entry only: "notes.constructor" must not answer a member of Object.prototype.
+  const ext = extensionOf(titleOrExt);
+  return Object.hasOwn(EXT_TO_CODE, ext) ? (EXT_TO_CODE[ext] ?? 0) : 0;
 }

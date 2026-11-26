@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import {
@@ -38,6 +38,7 @@ import {
 } from "../../config/index.js";
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject } from "../narrow.js";
+import { objectOrNone } from "./upstreamShape.js";
 import type { ToolPrefsScope, ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
 import {
   invalidateChatContext,
@@ -58,9 +59,7 @@ const ALLOW_ALWAYS_PATH = `${BASE_PATH}/allow-always`;
 // the wire: a request without a scope is the user's effective list, which
 // is what every reader expected before scopes existed, so an AI service that
 // predates them keeps answering exactly as it did.
-function scopeQuery(
-  scope: ToolPrefsScope | undefined,
-): Record<string, QueryValue> | undefined {
+function scopeQuery(scope: ToolPrefsScope | undefined): Record<string, QueryValue> | undefined {
   return scope === TENANT_SCOPE ? { scope } : undefined;
 }
 
@@ -84,7 +83,13 @@ async function fetchToolPrefs(scope?: ToolPrefsScope): Promise<unknown> {
     reportChatContextMiss("toolPrefs.read");
   }
   const query = scopeQuery(scope);
-  return aiService.get(BASE_PATH, query ? { query } : undefined);
+  // Nothing stored is no body; a body of another shape is unknown. Read as "nothing disabled",
+  // it switched back on every tool the administrator had switched off, and a write built on it
+  // cleared none of the stored keys (ts-ai-failure-paths.md §1).
+  return objectOrNone(
+    await aiService.get(BASE_PATH, query ? { query } : undefined),
+    "GET tool-prefs",
+  );
 }
 
 // Same fetch, but a missing prefs row (404) reads as "nothing stored".
@@ -197,9 +202,7 @@ function withClearedKeys(
 // and never persisted on write. Enforced here, at the single storage
 // chokepoint every consumer (engine tool context, UI permission cards)
 // goes through.
-function withoutPortalServer(
-  disabled: Record<string, string[]>,
-): Record<string, string[]> {
+function withoutPortalServer(disabled: Record<string, string[]>): Record<string, string[]> {
   if (!(PORTAL_MCP_SERVER_NAME in disabled)) {
     return disabled;
   }
@@ -216,9 +219,7 @@ function withoutPortalServer(
 // under either takes effect regardless of the group the tool is emitted in
 // (Bug 83013). The filter matches names within a group, so an unrelated
 // name in the merged list is inert.
-function aliasIntegrationGroups(
-  disabled: Record<string, string[]>,
-): Record<string, string[]> {
+function aliasIntegrationGroups(disabled: Record<string, string[]>): Record<string, string[]> {
   const base = disabled[DOCSPACE_INTEGRATION_SERVER_TYPE] ?? [];
   const approval = disabled[DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE] ?? [];
   if (base.length === 0 && approval.length === 0) {

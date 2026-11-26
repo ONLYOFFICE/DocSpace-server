@@ -105,6 +105,21 @@ released version carries the fix; tell the user so. Its test follows the rule of
 a test already in the repository stays and turns green with the fix; a test for a hole not yet published is
 committed with the release, not before.
 
+## A bug of the AI chat service
+
+When the defect is in `common/ASC.AI.Chat` (the Node service behind `/api/2.0/ai/*`), the steps are
+the same and the tools differ:
+
+- **Find the test** (step 1) in both suites: the .NET trait in `products/ASC.AI/ASC.AI.Tests`, and
+  the number in a vitest name, `grep -rn "Bug 12345" common/ASC.AI.Chat/app --include="*.test.ts"`.
+- **Which suite gets the new test**: `.claude/rules/ts-ai-tests.md` §1. A decision the service makes
+  by itself (a status mapping, a refused body, a field left out) is a vitest test named with
+  `(Bug 12345)`; a defect that shows only against the real services is a .NET test with the trait.
+- **Red and green** (steps 3 and 5): `cd common/ASC.AI.Chat && yarn vitest run <file> -t "Bug 12345"`,
+  then the file, then `yarn check`.
+- **Fix** (step 4) by `.claude/rules/ts-ai-style.md` and `ts-ai-failure-paths.md`; the section of
+  the latter that names the defect also names its sibling paths to check.
+
 ## Build notes
 
 A locally running DocSpace locks the shared DLLs, which breaks a full build. Build narrowly:

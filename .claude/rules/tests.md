@@ -1,6 +1,7 @@
 ---
 paths:
   - "products/*/Tests/**/*.cs"
+  - "products/*/*.Tests/**/*.cs"
   - "common/Tests/**/*.cs"
   - "web/ASC.Web.Api.Tests/**/*.cs"
   - "web/ASC.Web.Api.Billing.Tests/**/*.cs"
@@ -8,7 +9,7 @@ paths:
 
 # Integration Tests
 
-Applies to `products/*/Tests/`, `web/ASC.Web.Api.Tests/`, `web/ASC.Web.Api.Billing.Tests/` and `common/Tests/`. Style rules
+Applies to `products/*/Tests/`, `products/ASC.AI/ASC.AI.Tests/`, `web/ASC.Web.Api.Tests/`, `web/ASC.Web.Api.Billing.Tests/` and `common/Tests/`. Style rules
 (`csharp-style.md`) apply here too — including the mandatory `dotnet format style` check
 after editing any `.cs` file.
 
@@ -285,7 +286,7 @@ that table fails in Arrange and the test is simply wrong. For `SubjectType.User`
 | EditingRoom | RoomManager, ContentCreator, Editing, Read |
 | VirtualDataRoom | RoomManager, ContentCreator, Editing, Read, FillForms |
 | AiRoom | RoomManager, ContentCreator, Read |
-| AiProjectRoom | RoomManager, ContentCreator — no Read; never a Guest; no `SubjectType.Group` at all (403) |
+| AiProjectRoom | ContentCreator only — no RoomManager, no Read; never a Guest; no `SubjectType.Group` and no invitation link at all (403) |
 
 Plus one rule that is not in that table: **`RoomManager` can only be granted to a
 `RoomAdmin`** — the API rejects it for a `User` or a `Guest`.
@@ -371,9 +372,9 @@ Filters use **Microsoft.Testing.Platform** syntax and go after `--`: `--filter-c
 `--filter-method`. VSTest's `--filter Name~...` does not apply.
 
 The webhook tests of `ASC.Web.Api.Tests` (the `Webhooks` folder) subscribe to `WebhookReceiver`, a
-WireMock.Net server in the test process, started on first use on the loopback alias `127.0.0.2:18089`
-(`WebhookReceiverHost`/`WebhookReceiverPort` in `common/ASC.AppHost/Configuration/Constants.cs`;
-`127.0.0.1` stays blocked by the webhook blacklist). Windows and Linux answer on all of
+WireMock.Net server in the test process, started on first use on the loopback alias `127.0.0.2`
+(`WebhookReceiverHost` in `common/ASC.AppHost/Configuration/Constants.cs`; `127.0.0.1` stays blocked by
+the webhook blacklist), on the run's free port for `WebhookReceiverPort` (`HostPorts.Of`). Windows and Linux answer on all of
 `127.0.0.0/8`; macOS does not, and without `sudo ifconfig lo0 alias 127.0.0.2` (lost on reboot)
 the server cannot bind. The rest of the suite still runs, but every test that creates a
 subscription fails on starting it — an environment problem, not a product regression.

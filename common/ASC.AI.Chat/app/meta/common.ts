@@ -43,6 +43,8 @@ import { storage } from "../storage/index.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 import logger from "../log.js";
 import {
+  ConversionFailedError,
+  ConversionTimeoutError,
   getPortalFile,
   listFolderFiles,
   PortalTextReader,
@@ -60,6 +62,8 @@ const MAX_CHARS_PER_FILE = 40_000;
 const MAX_TOTAL_CHARS = 240_000;
 /** Conversions running at the same time. */
 const READ_CONCURRENCY = 4;
+/** File-info reads of the selected file ids running at the same time. */
+const FILE_INFO_CONCURRENCY = 4;
 /** Length of the user's refinement prompt that is passed on. */
 export const MAX_PROMPT_CHARS = 2_000;
 
@@ -211,14 +215,12 @@ function providerMessageOf(err: unknown): string | undefined {
     : message;
 }
 
+const FILES_TIMEOUT_MESSAGE = "Reading the files did not finish within the time budget";
+
 /** Thrown when the budget ran out while the files were still being read. */
 export function assertNotTimedOut(signal: AbortSignal): void {
   if (signal.aborted) {
-    throw new ModelCallError(
-      504,
-      "timeout",
-      "Reading the files did not finish within the time budget",
-    );
+    throw new ModelCallError(504, "timeout", FILES_TIMEOUT_MESSAGE);
   }
 }
 
@@ -235,6 +237,36 @@ export async function resolveMetaProfile(): Promise<Profile | undefined> {
 
 function dedupeIds(ids: string[]): string[] {
   return [...new Set(ids.map((id) => id.trim()).filter((id) => id.length > 0))];
+}
+
+type FileInfoOutcome = { id: string } & ({ file: PortalFile | undefined } | { error: unknown });
+
+// The file info of each id, {@link FILE_INFO_CONCURRENCY} at a time, in the
+// order of the ids. After a read fails no new one starts: the ids after it
+// are never used, as the failure ends the request. The outcomes stop at the
+// first failure (or one of the reads already running beside it).
+async function readFileInfos(ids: readonly string[]): Promise<FileInfoOutcome[]> {
+  const outcomes: FileInfoOutcome[] = [];
+  let failed = false;
+  // One iterator for every worker: each takes the next id nobody has taken yet.
+  const queue = ids.entries();
+  const worker = async (): Promise<void> => {
+    for (const [index, id] of queue) {
+      if (failed) {
+        return;
+      }
+      try {
+        outcomes[index] = { id, file: await getPortalFile(id) };
+      } catch (error) {
+        outcomes[index] = { id, error };
+        if (!(error instanceof DocspaceApiHttpError && error.status === 403)) {
+          failed = true;
+        }
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(FILE_INFO_CONCURRENCY, ids.length) }, worker));
+  return outcomes;
 }
 
 /**
@@ -262,21 +294,23 @@ export async function collectFiles(
     files.push(file);
   };
 
-  for (const id of dedupeIds(fileIds)) {
-    try {
-      const file = await getPortalFile(id);
-      if (!file) {
-        skipped.push({ id, reason: "not_found" });
-        continue;
-      }
-      take(file);
-    } catch (err) {
-      if (err instanceof DocspaceApiHttpError && err.status === 403) {
+  // The reads overlap, the outcomes are applied in the order of the ids: the
+  // files, the skipped entries and the first failure are the ones a reading
+  // one after another would give.
+  for (const outcome of await readFileInfos(dedupeIds(fileIds))) {
+    const { id } = outcome;
+    if ("error" in outcome) {
+      if (outcome.error instanceof DocspaceApiHttpError && outcome.error.status === 403) {
         skipped.push({ id, reason: "forbidden" });
         continue;
       }
-      throw err;
+      throw outcome.error;
     }
+    if (!outcome.file) {
+      skipped.push({ id, reason: "not_found" });
+      continue;
+    }
+    take(outcome.file);
   }
 
   for (const folderId of dedupeIds(folderIds)) {
@@ -299,12 +333,15 @@ export async function readDocuments(
 ): Promise<Document[]> {
   const results: (Document | undefined)[] = new Array(files.length);
   const reader = new PortalTextReader(signal);
-  let next = 0;
+  // One iterator for every worker: each takes the next file nobody has taken yet.
+  const queue = files.entries();
+  // Set by the read that fails the request: the other workers take no further file.
+  let failed = false;
   const worker = async (): Promise<void> => {
-    while (next < files.length) {
-      const index = next;
-      next += 1;
-      const file = files[index]!;
+    for (const [index, file] of queue) {
+      if (failed) {
+        return;
+      }
       try {
         const raw = await reader.readFileAsText(file);
         const text = raw.trim();
@@ -318,13 +355,20 @@ export async function readDocuments(
           truncated: text.length > MAX_CHARS_PER_FILE,
         };
       } catch (err) {
-        // An expired session or a portal outage is the request's failure,
-        // not this file's: relay it instead of reporting every file as
-        // unreadable and answering 422.
-        if (err instanceof DocspaceApiHttpError && (err.status === 401 || err.status >= 500)) {
+        // Only a refusal of the file itself leaves it out. Anything else - an expired
+        // session, a 5xx, a timeout, a dropped connection, an answer of an unknown shape - is
+        // the request's failure: relayed, so the caller gets a 5xx and can retry, instead of
+        // every file reported as unreadable and a 422 (ts-ai-failure-paths.md §1).
+        const reason = skipReasonOf(err);
+        if (reason === undefined) {
+          failed = true;
+          // The request's own budget ran out under the read: the 504 of that budget.
+          assertNotTimedOut(signal);
+          if (err instanceof ConversionTimeoutError) {
+            throw new ModelCallError(504, "timeout", FILES_TIMEOUT_MESSAGE, undefined, err);
+          }
           throw err;
         }
-        const reason = skipReasonOf(err);
         logger.warn(
           `meta: file ${file.id} "${file.title}" skipped (${reason}): ${
             err instanceof Error ? err.message : String(err)
@@ -340,9 +384,13 @@ export async function readDocuments(
   return documents;
 }
 
-function skipReasonOf(err: unknown): SkipReason {
+/** Why a file is left out, or `undefined` when the failure is not a refusal of that file. */
+function skipReasonOf(err: unknown): SkipReason | undefined {
   if (err instanceof UnsupportedFileError) {
     return "unsupported";
+  }
+  if (err instanceof ConversionFailedError) {
+    return "failed";
   }
   if (err instanceof DocspaceApiHttpError) {
     if (err.status === 403) {
@@ -352,7 +400,7 @@ function skipReasonOf(err: unknown): SkipReason {
       return "not_found";
     }
   }
-  return "failed";
+  return undefined;
 }
 
 // Spread the shared budget over the documents: each gets its own cap, and

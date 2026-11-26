@@ -34,9 +34,11 @@
 namespace ASC.AI.Tests.Tests.McpTests;
 
 /// <summary>
-/// <c>regenerate-stream</c> over a resolved tool-call history. The operation's contract: every message after the last
-/// user message (the previous reply plus any tool-call hops) is dropped and a fresh reply is streamed against the
-/// unchanged prompt; no title is generated. A caller controls whether the model has a tool to call again by re-sending
+/// <c>regenerate-stream</c> over a resolved tool-call history. The operation's contract: the previous reply, tool-call
+/// hops included, is replaced by a fresh reply streamed against the unchanged prompt; no title is generated. The chat
+/// library keeps a finished replaced reply as an earlier version in <c>metadata.custom.replyVersions.others</c> of the
+/// new one, so the user can switch back to it; only the message's own content is the active reply and the history the
+/// model gets on the next round. A caller controls whether the model has a tool to call again by re-sending
 /// <c>tools</c> on the regenerate call itself.
 /// </summary>
 [Trait("Category", "Chat")]
@@ -67,6 +69,34 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
         }
     }
 
+    /// <summary>The earlier versions a regenerated reply keeps in <c>metadata.custom.replyVersions.others</c>, oldest first.</summary>
+    private static List<JsonElement> EarlierVersionsOf(JsonElement reply)
+    {
+        if (reply.TryGetProperty("metadata", out var metadata) && metadata.ValueKind == JsonValueKind.Object
+            && metadata.TryGetProperty("custom", out var custom) && custom.ValueKind == JsonValueKind.Object
+            && custom.TryGetProperty("replyVersions", out var versions) && versions.ValueKind == JsonValueKind.Object
+            && versions.TryGetProperty("others", out var others) && others.ValueKind == JsonValueKind.Array)
+        {
+            return [.. others.EnumerateArray()];
+        }
+
+        return [];
+    }
+
+    /// <summary>The stored thread with the earlier reply versions taken out: what the user sees as the thread.</summary>
+    private static string WithoutVersions(IEnumerable<JsonElement> messages) =>
+        string.Join("\n", messages.Select(message =>
+        {
+            var node = System.Text.Json.Nodes.JsonNode.Parse(message.GetRawText())!;
+            (node["metadata"]?["custom"] as System.Text.Json.Nodes.JsonObject)?.Remove("replyVersions");
+
+            return node.ToJsonString();
+        }));
+
+    /// <summary>The streamed chat requests the model received after the first <paramref name="skip"/> requests.</summary>
+    private static List<string> StreamedRequestsAfter(StubModelProvider provider, int skip) =>
+        [.. provider.CompletionRequestBodies.Skip(skip).Where(StubModelProvider.IsStreamed)];
+
     [Fact]
     public async Task Regenerate_TheOldToolCallAndItsResultAreReplacedWhole_NotOrphanedOrDuplicated()
     {
@@ -83,6 +113,7 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
 
         // No tools re-offered: the model cannot redo the call at all, the cleanest way to see whether the OLD call and
         // result survive anywhere they should not.
+        var requestsBefore = chat.Provider.CompletionRequestBodies.Count();
         var regen = await RegenerateAsync(chat);
 
         regen.StatusCode.Should().Be(HttpStatusCode.OK, regen.ToString());
@@ -97,9 +128,20 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
         StatusOf(replies[0]).Reason.Should().NotBe("error", replies[0].ToString());
         ToolCallParts(replies[0]).Should().BeEmpty();
 
-        var serialized = string.Join("\n", after);
-        serialized.Should().NotContain(oldToolCallId!, "the old tool call's id does not survive the regenerate");
-        serialized.Should().NotContain("14C and sunny", "the old tool call's result does not survive the regenerate");
+        var shown = WithoutVersions(after);
+        shown.Should().NotContain(oldToolCallId!, "the old tool call's id is not part of the thread any more");
+        shown.Should().NotContain("14C and sunny", "the old tool call's result is not part of the thread any more");
+        var toModel = StreamedRequestsAfter(chat.Provider, requestsBefore);
+        toModel.Should().NotBeEmpty("the regenerate asked the model");
+        toModel.Should().OnlyContain(
+            body => !body.Contains(oldToolCallId!, StringComparison.Ordinal) && !body.Contains("14C and sunny", StringComparison.Ordinal),
+            "the model's history does not carry the replaced chain");
+
+        var earlier = EarlierVersionsOf(replies[0]);
+        earlier.Should().ContainSingle("the replaced reply is kept as the one earlier version: {0}", replies[0]);
+        var keptCall = ToolCallParts(earlier[0]).Should().ContainSingle().Which;
+        Str(keptCall, "toolCallId").Should().Be(oldToolCallId);
+        ResultOf(keptCall).Should().Be("14C and sunny");
     }
 
     /// <summary>This is the case that would catch a regenerate that only rewinds as far as the LAST tool call.</summary>
@@ -122,6 +164,7 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
         oldCalls.Should().HaveCount(2, "both hops resolved before the regenerate");
         var oldIds = oldCalls.Select(c => Str(c, "toolCallId")!).ToList();
 
+        var requestsBefore = chat.Provider.CompletionRequestBodies.Count();
         var regen = await RegenerateAsync(chat);
 
         regen.StatusCode.Should().Be(HttpStatusCode.OK, regen.ToString());
@@ -131,8 +174,15 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
         replies.Should().ContainSingle();
         Str(replies[0], "id").Should().NotBe(Str(oldReply, "id"));
         ToolCallParts(replies[0]).Should().BeEmpty("neither hop survives");
-        var serialized = string.Join("\n", after);
-        oldIds.Should().OnlyContain(id => !serialized.Contains(id, StringComparison.Ordinal));
+        var shown = WithoutVersions(after);
+        oldIds.Should().OnlyContain(id => !shown.Contains(id, StringComparison.Ordinal));
+        var toModel = StreamedRequestsAfter(chat.Provider, requestsBefore);
+        toModel.Should().NotBeEmpty("the regenerate asked the model");
+        toModel.Should().OnlyContain(body => oldIds.All(id => !body.Contains(id, StringComparison.Ordinal)), "neither hop reaches the model's history");
+
+        var earlier = EarlierVersionsOf(replies[0]);
+        earlier.Should().ContainSingle("the replaced reply is kept as the one earlier version: {0}", replies[0]);
+        ToolCallParts(earlier[0]).Select(c => Str(c, "toolCallId")).Should().Equal(oldIds, "the earlier version keeps both hops in order");
     }
 
     [Fact]
@@ -150,6 +200,7 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
         var oldToolCallId = Str(ToolCallParts(oldReply)[0], "toolCallId");
 
         // `tools` IS re-offered this time, so the model can redo the call.
+        var requestsBefore = chat.Provider.CompletionRequestBodies.Count();
         var regen = await RegenerateAsync(chat, _tools);
 
         regen.StatusCode.Should().Be(HttpStatusCode.OK, regen.ToString());
@@ -172,9 +223,20 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
         Str(calls[0], "toolCallId").Should().Be(newToolCallId);
         ResultOf(calls[0]).Should().Be("NEW RESULT 20C and windy");
 
-        var serialized = string.Join("\n", final);
-        serialized.Should().NotContain(oldToolCallId!, "the old chain's call id does not leak into the new one");
-        serialized.Should().NotContain("OLD RESULT 14C and sunny", "the old chain's result does not leak into the new one");
+        var shown = WithoutVersions(final);
+        shown.Should().NotContain(oldToolCallId!, "the old chain's call id does not leak into the new one");
+        shown.Should().NotContain("OLD RESULT 14C and sunny", "the old chain's result does not leak into the new one");
+        var toModel = StreamedRequestsAfter(chat.Provider, requestsBefore);
+        toModel.Should().HaveCountGreaterThanOrEqualTo(2, "the regenerate and the approval each asked the model");
+        toModel.Should().OnlyContain(
+            body => !body.Contains(oldToolCallId!, StringComparison.Ordinal) && !body.Contains("OLD RESULT 14C and sunny", StringComparison.Ordinal),
+            "the old chain does not reach the model while the new one runs");
+
+        var earlier = EarlierVersionsOf(replies[0]);
+        earlier.Should().ContainSingle("the replaced reply is kept as the one earlier version through the new chain's approval: {0}", replies[0]);
+        var keptCall = ToolCallParts(earlier[0]).Should().ContainSingle().Which;
+        Str(keptCall, "toolCallId").Should().Be(oldToolCallId);
+        ResultOf(keptCall).Should().Be("OLD RESULT 14C and sunny");
     }
 
     /// <summary>

@@ -1,58 +1,93 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { AssignmentsEngine, ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
-import { storage } from "../storage/index.js";
+import type { ActionType, Profile } from "@onlyoffice/ai-chat/core";
+import { AssignmentsEngine, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
+import { HttpStorageAdapter, storage } from "../storage/index.js";
+import { HttpProfilesStorage } from "../storage/profilesStorage.js";
+import { assertAiAccess } from "./aiAccess.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asActionType, asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
+import { profileForResponse } from "./profilesController.js";
+import type { ProfileAnswer } from "./profilesController.js";
 
 const engine = new AssignmentsEngine({ storage });
 
-// The engine's lenient lookup still throws a plain Error when the slot
-// names a profile that can no longer be loaded - deleted without the
-// assignment cascade, or one the caller cannot see. For the caller that is
-// the same as an empty slot, not a server failure, so both resolve
-// operations answer it as one (404 and an empty result respectively)
-// instead of a 500.
-async function resolveOrNull(
+// The engine resolves a slot by reading its profile, and throws a plain
+// Error, told apart from any other only by its wording, when that read finds
+// nothing: a profile deleted without the assignment cascade, or one the
+// caller cannot see. For the caller that is the same as an empty slot, not a
+// server failure. The resolve operations therefore run on an engine whose
+// profile read throws this error itself for a profile that is absent, so it is
+// recognised by its class (ts-ai-failure-paths.md §1); a read that fails stays
+// the failure it is.
+export class AssignedProfileGoneError extends Error {
+  readonly status = 404;
+
+  constructor(profileId: string) {
+    super(`the assigned profile ${profileId} does not exist`);
+    this.name = "AssignedProfileGoneError";
+  }
+}
+
+class GoneAwareProfiles extends HttpProfilesStorage {
+  override async readById(id: string): Promise<Profile | undefined> {
+    const profile = await super.readById(id);
+    if (profile === undefined) {
+      throw new AssignedProfileGoneError(id);
+    }
+    return profile;
+  }
+}
+
+class ResolveStorage extends HttpStorageAdapter {
+  override profiles = new GoneAwareProfiles();
+}
+
+const resolveEngine = new AssignmentsEngine({ storage: new ResolveStorage() });
+
+// Both resolve operations answer the gone profile as an empty slot (404 and
+// an empty result respectively) instead of a 500, and so does the gate of a
+// new thread (`assertThreadCreatable`).
+export async function resolveOrNull(
   actionType: ActionType,
   entityId: string | undefined,
 ): Promise<Awaited<ReturnType<AssignmentsEngine["tryResolveForAction"]>>> {
   try {
-    return await engine.tryResolveForAction(actionType, entityId);
+    return await resolveEngine.tryResolveForAction(actionType, entityId);
   } catch (err) {
-    if (err instanceof Error && err.message.startsWith("Assigned profile not found")) {
+    if (err instanceof AssignedProfileGoneError) {
       return null;
     }
     throw err;
@@ -63,12 +98,12 @@ async function resolveOrNull(
 // the read in-process provider calls use: the provider key and, for an
 // `onlyoffice` profile, the internal gateway address and the caller's
 // forwarded auth headers (Bug 82821). The profile is read again as
-// `profiles/get-by-id` answers it, without the override, and `key` and
-// `headers` are dropped: the callers of these routes read the profile's
-// name and model, and a round names its profile by id.
+// `profiles/get-by-id` answers it, without the override, and answered by its
+// named fields, without `key` and `headers`: the callers of these routes read
+// the profile's name and model, and a round names its profile by id.
 async function resolvedForResponse(
   resolved: Awaited<ReturnType<typeof resolveOrNull>>,
-): Promise<{ profileId: string; profile: object } | null> {
+): Promise<{ profileId: string; profile: ProfileAnswer } | null> {
   if (resolved === null) {
     return null;
   }
@@ -76,8 +111,7 @@ async function resolvedForResponse(
   if (!stored) {
     return null;
   }
-  const { key: _key, headers: _headers, ...profile } = stored;
-  return { profileId: resolved.profileId, profile };
+  return { profileId: resolved.profileId, profile: profileForResponse(stored) };
 }
 
 interface AssignBody {
@@ -95,6 +129,7 @@ interface BulkAssignBody {
 
 export const assignmentsController = {
   resolveForAction: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const actionType = asActionType(req.query["actionType"]);
     if (!actionType) {
       res.status(400).json({ error: "actionType required" });
@@ -120,6 +155,7 @@ export const assignmentsController = {
   }),
 
   tryResolveForAction: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const actionType = asActionType(req.query["actionType"]);
     if (!actionType) {
       res.status(400).json({ error: "actionType required" });
@@ -132,6 +168,7 @@ export const assignmentsController = {
   }),
 
   assign: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["actionType", "profileId"] as const);
     const actionType = asActionType(args.actionType);
     const profileId = typeof args.profileId === "string" ? args.profileId : undefined;
@@ -144,8 +181,13 @@ export const assignmentsController = {
   }),
 
   unassign: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["actionType"] as const);
-    const raw = args.actionType ?? asString(req.query["actionType"]);
+    // A request without a body reaches here as `{}`, which is no action type: the query
+    // parameter the document promises is read then.
+    const sent: unknown = args.actionType;
+    const noBody = sent === undefined || (isObject(sent) && Object.keys(sent).length === 0);
+    const raw = noBody ? asString(req.query["actionType"]) : sent;
     const actionType = asActionType(raw);
     if (!actionType) {
       res.status(400).json({ error: "actionType required" });
@@ -156,6 +198,7 @@ export const assignmentsController = {
   }),
 
   bulkAssign: asyncHandler<BulkAssignBody>(async (req, res) => {
+    await assertAiAccess();
     // Validate the whole body up front: an unknown ActionType key or a
     // non-string value used to be silently dropped, so a caller that mistyped
     // an action or sent a bad profileId got a partial (or empty) assignment
@@ -188,6 +231,7 @@ export const assignmentsController = {
   }),
 
   getAssignment: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const actionType = asActionType(req.query["actionType"]);
     if (!actionType) {
       res.status(400).json({ error: "actionType required" });
@@ -198,6 +242,7 @@ export const assignmentsController = {
   }),
 
   getAllAssignments: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const entityId = asString(req.query["entityId"]);
     // Read-side gating (Bug 82832): a supplied entityId must reference a folder
     // the caller can access — a nonexistent/no-access id 404s. A valid folder
@@ -216,10 +261,14 @@ export const assignmentsController = {
     if (asString(req.query["expand"]) === "profile") {
       const profiles = await storage.profiles.readAllForClient();
       const byId = new Map(profiles.map((profile) => [profile.id, profile]));
-      const assignments: Record<string, (typeof profiles)[number]> = {};
+      // Each profile by its named fields, as profiles/get-by-id answers it: the
+      // list is read for a client, which still hands an administrator the key
+      // and headers the settings cards edit, and none of that is this
+      // answer's to carry (ts-ai-failure-paths.md §5).
+      const assignments: Record<string, ProfileAnswer> = {};
       for (const [actionType, profileId] of Object.entries(result)) {
         const profile = profileId ? byId.get(profileId) : undefined;
-        if (profile) assignments[actionType] = profile;
+        if (profile) assignments[actionType] = profileForResponse(profile);
       }
       // A profile without known capabilities may chat, as the widget's
       // model picker assumes (`CapabilitiesUI.Chat`).
@@ -236,6 +285,7 @@ export const assignmentsController = {
   }),
 
   cascadeProfileDelete: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     // The id as the widget's ApiProvider sends a single argument (the bare
     // string as the body), as a named field, or in the query.
     const args = unpackPositional(req.body, ["profileId"] as const);

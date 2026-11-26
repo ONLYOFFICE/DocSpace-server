@@ -32,9 +32,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 vi.mock("../../storage/docspaceFileTransfer.js", () => ({
   uploadFile: vi.fn(),
   mediaTypeOf: () => "application/octet-stream",
@@ -151,5 +148,59 @@ describe("the files a document task names in its result", () => {
       { name: "Report.docx", mediaType: "application/docx", url: editorLink("41") },
     ]);
     expect(files.map((file) => file.id)).toEqual(["41"]);
+  });
+});
+
+describe("the files a document task names, read back or not", () => {
+  const editorLink = (id: string) => `https://agent.local/doceditor?fileId=${id}`;
+
+  beforeEach(() => {
+    getFileInfo.mockReset();
+  });
+
+  it.each([
+    ["no extension", "README"],
+    ["a leading dot only", ".env"],
+    ["a trailing dot", "draft."],
+  ])("gives a file that is not found and whose name has %s no extension", async (_what, name) => {
+    getFileInfo.mockResolvedValue(undefined);
+
+    expect(await savedFilesOf([{ name, mediaType: "text/plain", url: editorLink("50") }])).toEqual([
+      { id: "50", title: name, url: "/doceditor?fileId=50" },
+    ]);
+  });
+
+  it("keeps the read-back title and takes the extension from it when the Files API gives none", async () => {
+    getFileInfo.mockResolvedValue({ title: "Plan (2).PPTX" });
+
+    expect(
+      await savedFilesOf([{ name: "Plan.pptx", mediaType: "x", url: editorLink("51") }]),
+    ).toEqual([
+      { id: "51", title: "Plan (2).PPTX", url: "/doceditor?fileId=51", fileExst: ".pptx" },
+    ]);
+  });
+
+  it.each([
+    ["not a URL", "not a url"],
+    ["another path", "https://agent.local/files?fileId=52"],
+    ["no file id", "https://agent.local/doceditor"],
+    ["an empty file id", "https://agent.local/doceditor?fileId="],
+  ])("leaves out an artifact whose link is %s, and says so", async (_what, url) => {
+    const { default: logger } = await import("../../log.js");
+
+    expect(await savedFilesOf([{ name: "x.docx", mediaType: "x", url }])).toEqual([]);
+    expect(getFileInfo).not.toHaveBeenCalled();
+    expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
+      "document_agent: artifact x.docx names no file of ours",
+    );
+  });
+
+  // The outputs endpoint answers a host-relative Location, which the agent resolves against
+  // the endpoint's address; one left relative does not parse.
+  it("leaves out an editor link the agent did not resolve to an absolute one", async () => {
+    expect(
+      await savedFilesOf([{ name: "a.docx", mediaType: "x", url: "/doceditor?fileId=53" }]),
+    ).toEqual([]);
+    expect(getFileInfo).not.toHaveBeenCalled();
   });
 });

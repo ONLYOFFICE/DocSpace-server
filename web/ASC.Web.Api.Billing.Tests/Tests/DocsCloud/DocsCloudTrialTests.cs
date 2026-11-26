@@ -34,10 +34,80 @@
 namespace ASC.Web.Api.Billing.Tests.Tests.DocsCloud;
 
 /// <summary>
-/// The Docs Connect trial is refused to a portal that already pays for Docs Connect.
+/// POST /api/2.0/settings/docscloud/trial: the trial is refused to a portal that already pays for Docs Connect, and a
+/// trial billing grants is answered with true whatever Docs Connect then says about the portal's tenant.
 /// </summary>
 public class DocsCloudTrialTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    private const string TrialRoute = "/billing/getwdocstrial";
+    private const string ServerAddress = "https://docs-portal.example.com";
+
+    [Fact]
+    public async Task StartDocsCloudTrial_GrantedWithoutDocsCloudTenant_ReturnsTrue()
+    {
+        // Arrange: billing grants the trial; Docs Connect answers 404 for the portal's tenant, as for a portal it does
+        // not know.
+        Payments.On(PaymentService.Billing, "POST", TrialRoute, "\"ok\"");
+
+        // Act
+        var result = (await _docsCloudApi.StartDocsCloudTrialAsync(TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        result.Should().BeTrue();
+        PaymentCalls.Should().ContainSingle(call => call.Service == PaymentService.Billing && call.Route == TrialRoute);
+        PaymentCalls.Should().Contain(call => call.Service == PaymentService.DocsCloud && call.Route == "/tenant");
+    }
+
+    [Fact]
+    public async Task StartDocsCloudTrial_GrantedButDocsCloudFails_ReturnsTrue()
+    {
+        // Arrange
+        Payments
+            .On(PaymentService.Billing, "POST", TrialRoute, "\"ok\"")
+            .On(PaymentService.DocsCloud, "GET", "/tenant", """{"title":"Internal Server Error","status":500}""", HttpStatusCode.InternalServerError);
+
+        // Act
+        var result = (await _docsCloudApi.StartDocsCloudTrialAsync(TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        result.Should().BeTrue();
+        PaymentCalls.Should().Contain(call => call.Service == PaymentService.DocsCloud && call.Route == "/tenant");
+    }
+
+    [Fact]
+    public async Task StartDocsCloudTrial_GrantedWithDocsCloudTenant_AddsServerToCsp()
+    {
+        // Arrange
+        Payments
+            .On(PaymentService.Billing, "POST", TrialRoute, "\"ok\"")
+            .On(PaymentService.DocsCloud, "GET", "/tenant",
+                $$"""{"dedicatedResourceExId":7,"alias":"docs-portal","name":"Docs portal","isActive":true,"address":"{{ServerAddress}}","endDate":"2027-01-01T00:00:00Z"}""");
+
+        // Act
+        var result = (await _docsCloudApi.StartDocsCloudTrialAsync(TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        result.Should().BeTrue();
+
+        var csp = (await _cspApi.GetCspSettingsAsync(TestContext.Current.CancellationToken)).Response;
+        csp.Domains.Should().Contain(ServerAddress);
+    }
+
+    [Fact]
+    public async Task StartDocsCloudTrial_BillingDeclines_ReturnsFalseWithoutAskingDocsCloud()
+    {
+        // Arrange
+        Payments.On(PaymentService.Billing, "POST", TrialRoute, "\"declined\"");
+
+        // Act
+        var result = (await _docsCloudApi.StartDocsCloudTrialAsync(TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        result.Should().BeFalse();
+        PaymentCalls.Should().ContainSingle(call => call.Service == PaymentService.Billing && call.Route == TrialRoute);
+        PaymentCalls.Should().NotContain(call => call.Service == PaymentService.DocsCloud);
+    }
+
     [Fact]
     public async Task StartDocsCloudTrial_PortalPaysForDocsCloud_ThrowsQuotaAlreadySet()
     {
