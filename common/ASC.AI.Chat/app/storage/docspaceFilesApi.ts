@@ -325,13 +325,14 @@ export type SourceKind = "folder" | "file";
 
 /**
  * The DocSpace entry a model request is attributed to, as the billing
- * backend classifies it. Rooms split by the section they belong to: a
+ * backend classifies it. An AI project is an `Agent` (the backend's name for
+ * it, shown as "AI agent"). Rooms split by the section they belong to: a
  * `Form` is a room of the "Forms" section, a `Room` one of the "Rooms"
  * section. Every other folder — a plain folder in any room or in "My
- * documents", the system subfolders of a form room, the section roots, an
- * AI project — is a `Folder`; every file is a `File`.
+ * documents", the system subfolders of a form room, the section roots — is a
+ * `Folder`; every file is a `File`.
  */
-export type SourceType = "File" | "Folder" | "Room" | "Form";
+export type SourceType = "File" | "Folder" | "Room" | "Form" | "Agent";
 
 /**
  * The resolved source of a round, sent by the ONLYOFFICE provider (and the
@@ -348,10 +349,13 @@ export interface SourceMeta {
 /**
  * Classify a folder by the DTO's `type` (`FolderType`) and `roomType`
  * (`RoomType`); either spelling suffices. Mirrors `DocSpaceHelper.RoomTypes`
- * on the C# side, split by section.
+ * on the C# side, split by section, with an AI project set apart.
  */
 export function folderSourceType(info: DocspaceFolderInfo): SourceType {
   const { folderType, roomType } = info;
+  if (folderType === AI_PROJECT_FOLDER_TYPE || roomType === AI_PROJECT_ROOM_TYPE) {
+    return "Agent";
+  }
   if (folderType === FOLDER_TYPE_FORM_ROOM || roomType === ROOM_TYPE_FORM_ROOM) {
     return "Form";
   }

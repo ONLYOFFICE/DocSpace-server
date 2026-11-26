@@ -41,7 +41,7 @@ public class AiHubController(
     AiProjectSourcesDtoMapper aiProjectSourcesDtoMapper,
     AiSkillsDtoMapper aiSkillsDtoMapper,
     AiRoomProjectDtoMapper aiRoomProjectDtoMapper,
-    FolderContentDtoHelper folderContentDtoHelper,
+    AiAccessibility aiAccessibility,
     ApiContext apiContext,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper)
@@ -280,7 +280,7 @@ public class AiHubController(
     /// The call is read-only.
     /// The total in the answer counts the files of all pages.
     /// A thread with no artifacts yet gives an empty list.
-    /// A valid `sortBy` also becomes the saved default order of the account.
+    /// Without a valid `sortBy`, the call uses the saved default order of the account.
     /// The call returns 404 for an unknown AI project or thread.
     /// A thread of another user also returns 404, even to the project owner or a DocSpace admin.
     /// The call returns 400 if `count` or `startIndex` is out of range.
@@ -298,9 +298,7 @@ public class AiHubController(
     [HttpGet("{id}/threads/{threadId:guid}/artifacts")]
     public async Task<IEnumerable<FileDto<int>>> GetThreadArtifacts(GetAiThreadFilesRequestDto inDto)
     {
-        var folderId = await aiHubService.GetThreadArtifactsFolderIdAsync(inDto.Id, inDto.ThreadId);
-
-        return await GetThreadFilesAsync(folderId, inDto);
+        return await GetThreadFilesAsync(ThreadFolderKind.Artifacts, inDto);
     }
 
     /// <remarks>
@@ -311,7 +309,7 @@ public class AiHubController(
     /// The call is read-only.
     /// The total in the answer counts the files of all pages.
     /// A thread with no attachments yet gives an empty list.
-    /// A valid `sortBy` also becomes the saved default order of the account.
+    /// Without a valid `sortBy`, the call uses the saved default order of the account.
     /// The call returns 404 for an unknown AI project or thread.
     /// A thread of another user also returns 404, even to the project owner or a DocSpace admin.
     /// The call returns 400 if `count` or `startIndex` is out of range.
@@ -329,40 +327,25 @@ public class AiHubController(
     [HttpGet("{id}/threads/{threadId:guid}/attachments")]
     public async Task<IEnumerable<FileDto<int>>> GetThreadAttachments(GetAiThreadFilesRequestDto inDto)
     {
-        var folderId = await aiHubService.GetThreadAttachmentsFolderIdAsync(inDto.Id, inDto.ThreadId);
-
-        return await GetThreadFilesAsync(folderId, inDto);
+        return await GetThreadFilesAsync(ThreadFolderKind.Attachments, inDto);
     }
 
-    private async Task<IEnumerable<FileDto<int>>> GetThreadFilesAsync(int? folderId, GetAiThreadFilesRequestDto inDto)
+    private async Task<IEnumerable<FileDto<int>>> GetThreadFilesAsync(ThreadFolderKind kind, GetAiThreadFilesRequestDto inDto)
     {
-        if (folderId is null)
-        {
-            apiContext.SetCount(0).SetTotalCount(0);
+        var orderBy = SortedByTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy)
+            ? new OrderBy(sortBy, inDto.SortOrder == SortOrder.Ascending)
+            : null;
 
-            return [];
+        var threadFiles = await aiHubService.GetThreadFilesAsync(inDto.Id, inDto.ThreadId, kind, orderBy, inDto.Text, inDto.StartIndex, inDto.Count);
+
+        var aiStatus = await aiAccessibility.GetStatusAsync();
+        var files = new List<FileDto<int>>(threadFiles.Files.Count);
+        foreach (var file in threadFiles.Files)
+        {
+            files.Add(await _fileDtoHelper.GetAsync(file, contextFolder: threadFiles.Folder, aiStatus: aiStatus));
         }
 
-        var content = await folderContentDtoHelper.GetAsync(
-            folderId.Value,
-            null,
-            null,
-            null,
-            0,
-            false,
-            false,
-            false,
-            ApplyFilterOption.All,
-            SearchArea.Active,
-            inDto.SortBy,
-            inDto.SortOrder,
-            inDto.StartIndex,
-            inDto.Count,
-            inDto.Text);
-
-        var files = content.Files.OfType<FileDto<int>>().ToList();
-
-        apiContext.SetCount(files.Count).SetTotalCount(content.Total);
+        apiContext.SetCount(files.Count).SetTotalCount(threadFiles.Total);
 
         return files;
     }

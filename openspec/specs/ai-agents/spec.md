@@ -423,7 +423,8 @@ every binding of one profile.
 
 Instructions rooms, Knowledge rooms and AI projects SHALL be rooms created through `createRoom` with their
 `roomType`, by the owner, a DocSpace admin or a Room admin (User, Guest 403), landing in the AI rooms section
-and never in Rooms; a Knowledge room needs vectorization enabled (403). Settings that do not apply to the
+and never in Rooms; a Knowledge room needs vectorization enabled (403), an AI project needs the AI gateway or an
+AI model profile of the portal (403). Settings that do not apply to the
 type SHALL be refused on create and update (400). They are never archived (403), make no template (403),
 take no folder in the section root (403) and are deleted outright.
 
@@ -445,11 +446,11 @@ take no folder in the section root (403) and are deleted outright.
 ### Requirement: Members of the AI rooms
 
 An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
-the same without Editor, an AI project only Room manager and Content creator. Every member reads the project;
-only a Room manager edits it; a non-member other than a DocSpace admin SHALL NOT read its model, sources or
-skills (403).
+the same without Editor, an AI project only Content creator. Every member reads the project; a member SHALL NOT
+edit it, its owner does; a non-member other than a DocSpace admin SHALL NOT read its model, sources or skills
+(403).
 
-#### Scenario: Content creator reads, Room manager writes
+#### Scenario: Content creator reads, does not write
 
 - **WHEN** a Content creator of the project reads the project model and then sets it
 - **THEN** the read answers 200 and the write 403
@@ -463,11 +464,12 @@ skills (403).
 
 The members of an AI project SHALL be users only: a group SHALL NOT be invited to a project with any role
 (403, "The role is not available for this user type"). A Guest SHALL NOT hold any role in a project (403,
-nobody added), while a User joins through an invitation link as Content creator.
+nobody added), while a User is invited by id or by email as Content creator. A project SHALL have no invitation
+link: `setRoomLink` with the invitation type answers 403 and creates no link.
 
 #### Scenario: Guest invited to a project
 
-- **WHEN** the owner invites a Guest to a project as Content creator by id, by email or through an invitation link
+- **WHEN** the owner invites a Guest to a project as Content creator by id or by email
 - **THEN** the system answers 403 and the Guest is not a member
 
 #### Scenario: Group invited to a project
@@ -478,14 +480,14 @@ nobody added), while a User joins through an invitation link as Content creator.
 ### Requirement: The model of an AI project
 
 `getProjectModel` SHALL answer the project's own chat model as a profile id, null while none is selected or
-the profile is gone (the portal's Chat binding then answers); `setProjectModel` SHALL need a project
-manager (403) and a `profileId` naming a catalogue profile that can chat (missing, unknown or image-only
+the profile is gone (the portal's Chat binding then answers); `setProjectModel` SHALL refuse a member of the
+project (403) and a `profileId` naming a catalogue profile that can chat (missing, unknown or image-only
 400, the project keeping its model), replace the previous choice, be audited and pushed to clients. An
 Instructions room or an unknown id answers 404 on either route.
 
 #### Scenario: Image profile refused
 
-- **WHEN** a Room manager of the project sets an image-only profile on a project that runs on a chat profile
+- **WHEN** the owner of the project sets an image-only profile on a project that runs on a chat profile
 - **THEN** the system answers 400 and the project keeps its model
 
 #### Scenario: Content creator reads the fixed model
@@ -495,12 +497,12 @@ Instructions room or an unknown id answers 404 on either route.
 
 #### Scenario: Model moved
 
-- **WHEN** a Room manager of the project sets another chat profile on a project with an open thread
+- **WHEN** the owner of the project sets another chat profile on a project with an open thread
 - **THEN** new rounds run on the new profile and the existing thread keeps its model
 
 #### Scenario: Selection cannot be cleared
 
-- **WHEN** a manager sends `setProjectModel` without a `profileId`
+- **WHEN** the owner sends `setProjectModel` without a `profileId`
 - **THEN** the system answers 400 and the selection stays: a selected model is replaced, never cleared
 
 ### Requirement: Sources of an AI project
@@ -509,16 +511,16 @@ Instructions room or an unknown id answers 404 on either route.
 `linkProjectSources` SHALL link active rooms of those two types that the caller manages and refuse the whole
 call (400, linking nothing) for any other room id, an empty list, over 40 ids or more than 20 rooms of one
 kind; `unlinkProjectSources` SHALL remove the listed links without checking rights on the rooms. Both writes
-need a Room manager of the project (403) and are audited.
+refuse a member of the project (403) and are audited.
 
 #### Scenario: Over the limit
 
-- **WHEN** a manager links a 21st Knowledge room
+- **WHEN** the owner of the project links a 21st Knowledge room
 - **THEN** the system answers 400 and the existing links stay
 
 #### Scenario: Room not linkable
 
-- **WHEN** a manager links an unknown room, a deleted one, a Custom room, another project or an Instructions room where they are only a Viewer
+- **WHEN** the owner of the project links an unknown room, a deleted one, a Custom room, another project or an Instructions room where they are only a Viewer
 - **THEN** the system answers 400 and nothing is linked
 
 #### Scenario: Deleted room
@@ -528,7 +530,7 @@ need a Room manager of the project (403) and are audited.
 
 #### Scenario: Duplicates and pushed changes
 
-- **WHEN** a manager links a room twice, or one already linked
+- **WHEN** the owner of the project links a room twice, or one already linked
 - **THEN** the room is linked once, and clients are told of the change
 
 ### Requirement: Access through a project
@@ -541,7 +543,7 @@ the skills of its linked Instructions rooms to any member.
 
 #### Scenario: Access ends with the link
 
-- **WHEN** a Content creator of the project reads a file of a linked Knowledge room and a Room manager of the project then unlinks the room
+- **WHEN** a Content creator of the project reads a file of a linked Knowledge room and the owner of the project then unlinks the room
 - **THEN** the read answers 200 before and 403 after
 
 ### Requirement: Skills of an Instructions room
@@ -939,12 +941,12 @@ neither the question nor an answer.
 
 #### Scenario: Project without a usable model
 
-- **WHEN** the owner or a manager sends into an AI project whose model is gone or cannot chat
+- **WHEN** the owner sends into an AI project whose model is gone or cannot chat
 - **THEN** the system answers 409 with `code` `projectModelUnavailable` before any stream
 
 ### Requirement: The model of a chat
 
-A round that the owner or a manager of an AI project sends with the project as `entityId` SHALL run on the
+A round that the owner or a member of an AI project sends with the project as `entityId` SHALL run on the
 project's model — its own, else the portal's Chat binding — whatever `profileId` it carries (blank or unknown
 included), never moving the thread. Outside a project a send with no `profileId` runs on the thread's own
 model, else on Chat, else on Default; a `profileId` sent becomes the thread's model; rebinding Chat moves no
@@ -952,7 +954,7 @@ thread.
 
 #### Scenario: Project answers on its model
 
-- **WHEN** a Room manager of the project sends into a project thread naming another profile
+- **WHEN** the owner of the project sends into a project thread naming another profile
 - **THEN** the reply runs on the project's model and the thread still reports that model
 - **AND** when a read member sends the same, the request does not reach the project's model (bug 82914)
 
@@ -2327,8 +2329,8 @@ threads of the project SHALL keep their files.
 
 ### Requirement: Losing access to a project deletes the member's threads
 
-When a member's own access to an AI project is removed (by `setRoomSecurity` with no access, sent by a manager
-or by the member, or by `removeSecurityInfo` sent by the project's owner), the threads that member created in
+When a member's own access to an AI project is removed (by `setRoomSecurity` with no access, sent by the
+project's owner or by the member, or by `removeSecurityInfo` sent by the project's owner), the threads that member created in
 the project SHALL be deleted as by `aiThreadsDelete`, with their files. Threads of other members SHALL stay, a
 later invitation SHALL NOT bring the threads back, and a change of the project's owner SHALL delete nothing.
 
@@ -2613,7 +2615,7 @@ an AI project included, SHALL NOT carry the field.
 
 #### Scenario: Number follows the links
 
-- **WHEN** a room is linked to two projects, a Room manager of the first unlinks it with `unlinkProjectSources`, and the second project is then deleted with `deleteRoom`
+- **WHEN** a room is linked to two projects, the owner of the first unlinks it with `unlinkProjectSources`, and the second project is then deleted with `deleteRoom`
 - **THEN** `getRoomInfo` of the room carries `linkedProjectsCount` 1 after the unlink and 0 after the deletion has completed
 
 ### Requirement: Listing the projects that use a room
@@ -2729,12 +2731,12 @@ SHALL send no such event for a room.
 
 #### Scenario: Room linked
 
-- **WHEN** a Room manager of a project links a Knowledge room while the owner of the portal listens to the AI rooms section
+- **WHEN** a Room admin who owns a project links a Knowledge room while the owner of the portal listens to the AI rooms section
 - **THEN** the owner's client receives the updated-folder event for the room
 
 #### Scenario: Room unlinked
 
-- **WHEN** a Room manager of a project unlinks a linked Instructions room while the owner of the portal listens to the AI rooms section
+- **WHEN** a Room admin who owns a project unlinks a linked Instructions room while the owner of the portal listens to the AI rooms section
 - **THEN** the owner's client receives the updated-folder event for the room
 
 #### Scenario: Project deleted
@@ -2744,7 +2746,7 @@ SHALL send no such event for a room.
 
 #### Scenario: Nothing linked anew
 
-- **WHEN** a Room manager links a room the project already links, after a first link whose event the owner's client received
+- **WHEN** a Room admin who owns a project links a room the project already links, after a first link whose event the owner's client received
 - **THEN** the owner's client receives no second updated-folder event for the room
 
 ### Requirement: Conversion of an AI agent into an AI project
@@ -2851,20 +2853,19 @@ profile the agent was bound to, and null when the agent had no assignment of its
 
 ### Requirement: Members of a converted agent
 
-The project SHALL take the agent's members as users only: a Room manager stays Room manager, a Content creator
-stays Content creator, a Viewer becomes Content creator. Each member of a group invited to the agent, as the
-group is at the conversion, SHALL become a Content creator unless the user holds a role of their own in the
-agent. A Guest and an invitation link SHALL NOT be carried over.
+The project SHALL take the agent's members as users only, each as Content creator, the only role of a project:
+a Room manager, a Content creator and a Viewer of the agent, and each member of a group invited to the agent as
+the group is at the conversion. A Guest and an invitation link SHALL NOT be carried over.
 
 #### Scenario: Roles carried over
 
 - **WHEN** an agent with a Room manager, a Content creator and a Viewer is converted
-- **THEN** `getRoomSecurityInfo` of the project lists the first as Room manager and the other two as Content creator
+- **THEN** `getRoomSecurityInfo` of the project lists all three as Content creator
 
 #### Scenario: Group invited to the agent
 
 - **WHEN** a group of two Users was invited to the agent as Viewer, one of the two being also a Room manager of the agent by their own role
-- **THEN** `getRoomSecurityInfo` of the project lists no group, the first User as Content creator and the second as Room manager
+- **THEN** `getRoomSecurityInfo` of the project lists no group and both Users as Content creator
 
 #### Scenario: Joining the group later
 

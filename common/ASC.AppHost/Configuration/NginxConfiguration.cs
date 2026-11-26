@@ -63,6 +63,16 @@ public static class NginxConfiguration
             + (otel ? "-alpine-fat" : "-alpine")
             + (isArm64 ? "-arm64" : "");
 
+        // APPHOST_HTTPS=false keeps the router off host port 443, so another local stack that needs it can run next
+        // to this one. The SSL vhost still listens inside the container; only https://docspace.dev.localhost is lost,
+        // http://localhost:8092 works as before.
+        var publishHttps = !string.Equals(builder.Configuration["APPHOST_HTTPS"], "false", StringComparison.OrdinalIgnoreCase);
+
+        string[] publishedPorts = publishHttps
+            ? ["-p", $"0.0.0.0:{HostPorts.Of(Constants.AppHostPort)}:{Constants.RestyPort}",
+               "-p", $"0.0.0.0:{HostPorts.Of(Constants.AppHostHttpsPort)}:{Constants.RestyHttpsPort}"]
+            : ["-p", $"0.0.0.0:{HostPorts.Of(Constants.AppHostPort)}:{Constants.RestyPort}"];
+
         var certDir = DevCertificateGenerator.EnsureCertificate(basePath);
         var sslConfPath = Path.Combine(builder.AppHostDirectory, "nginx", "docspace-ssl.conf.template");
         var otelConfPath = Path.Combine(builder.AppHostDirectory, "nginx", "otel.conf");
@@ -80,9 +90,7 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
             .WithBindMount(certDir, "/etc/nginx/certs/", isReadOnly: true)
             .WithBindMount(sslConfPath, "/etc/nginx/dev-templates/docspace-ssl.conf.template", isReadOnly: true)
-            .WithContainerRuntimeArgs(
-                "-p", $"0.0.0.0:{HostPorts.Of(Constants.AppHostPort)}:{Constants.RestyPort}",
-                "-p", $"0.0.0.0:{HostPorts.Of(Constants.AppHostHttpsPort)}:{Constants.RestyHttpsPort}");
+            .WithContainerRuntimeArgs(publishedPorts);
 
         if (otel)
         {

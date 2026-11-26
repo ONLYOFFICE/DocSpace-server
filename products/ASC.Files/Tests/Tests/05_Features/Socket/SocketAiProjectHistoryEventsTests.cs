@@ -44,6 +44,8 @@ public class SocketAiProjectHistoryEventsTests(AspireAppFixture fixture) : Socke
 {
     private const string UpdateHistory = "s:update-history";
 
+    protected override bool PlantsAiProfile => true;
+
     [Fact]
     public async Task RenameAndCopyIntoAProject_SendNoUpdateHistoryToTheProject()
     {
