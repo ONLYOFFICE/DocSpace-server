@@ -40,6 +40,8 @@ const otel = vi.hoisted(() => ({
   created: [] as [string, unknown][],
   started: 0,
   shutdown: { calls: 0, fail: false },
+  /** The instrumentations disabled and the global APIs reset, in order. */
+  disabled: [] as string[],
   /** The kind whose constructor (or, for `NodeSDK.start`, whose start) throws. */
   failing: undefined as string | undefined,
 }));
@@ -52,7 +54,14 @@ function recorder(kind: string) {
       }
       otel.created.push([kind, options]);
     }
+    disable(): void {
+      otel.disabled.push(kind);
+    }
   };
+}
+
+function globalApi(name: string) {
+  return { disable: () => otel.disabled.push(name) };
 }
 
 // nconf, the boundary of config/index.ts, answers from `otel.config` (the environment and the
@@ -84,6 +93,12 @@ vi.mock("@opentelemetry/sdk-node", () => ({
       return otel.shutdown.fail ? Promise.reject(new Error("flush failed")) : Promise.resolve();
     }
   },
+}));
+vi.mock("@opentelemetry/api", () => ({
+  trace: globalApi("trace"),
+  metrics: globalApi("metrics"),
+  propagation: globalApi("propagation"),
+  context: globalApi("context"),
 }));
 vi.mock("@opentelemetry/sdk-metrics", () => ({
   PeriodicExportingMetricReader: recorder("PeriodicExportingMetricReader"),
@@ -148,6 +163,7 @@ beforeEach(() => {
   otel.created = [];
   otel.started = 0;
   otel.shutdown = { calls: 0, fail: false };
+  otel.disabled = [];
   otel.failing = undefined;
   onceSpy = spyOnce();
   exitSpy = spyExit();
@@ -211,6 +227,48 @@ describe("telemetry that cannot be started", () => {
   });
 });
 
+// NodeSDK.start patches http and undici before it registers the global providers, and its
+// shutdown() stops the providers only: a start that throws is taken back in full.
+describe("an SDK start that throws", () => {
+  it("disables both instrumentations, resets the global APIs and shuts the SDK down", async () => {
+    otel.failing = "NodeSDK.start";
+
+    const log = await load(ENABLED);
+
+    expect(otel.disabled).toEqual([
+      "HttpInstrumentation",
+      "UndiciInstrumentation",
+      "trace",
+      "metrics",
+      "propagation",
+      "context",
+    ]);
+    expect(otel.shutdown.calls).toBe(1);
+    expect(log.warn).not.toHaveBeenCalled();
+  });
+
+  it("logs a shutdown that fails too and reports the error of the start", async () => {
+    otel.failing = "NodeSDK.start";
+    otel.shutdown.fail = true;
+
+    const log = await load(ENABLED);
+
+    expect(log.warn).toHaveBeenCalledWith(
+      "OpenTelemetry: the shutdown after a failed start failed too: flush failed",
+    );
+    expect(log.error).toHaveBeenCalledWith(
+      expect.stringMatching(/NodeSDK\.start refused its configuration$/),
+    );
+  });
+
+  it("takes nothing back when the start works", async () => {
+    await load(ENABLED);
+
+    expect(otel.disabled).toEqual([]);
+    expect(otel.shutdown.calls).toBe(0);
+  });
+});
+
 describe("telemetry switched on", () => {
   it("starts the SDK with http/protobuf exporters, the metric reader and both instrumentations", async () => {
     const log = await load({ ...ENABLED, "openTelemetry:enable": "true" });
@@ -218,9 +276,9 @@ describe("telemetry switched on", () => {
     expect(otel.created.map(([kind]) => kind)).toEqual([
       "proto.OTLPTraceExporter",
       "proto.OTLPMetricExporter",
-      "PeriodicExportingMetricReader",
       "HttpInstrumentation",
       "UndiciInstrumentation",
+      "PeriodicExportingMetricReader",
       "NodeSDK",
     ]);
     expect(created("proto.OTLPTraceExporter")).toEqual([

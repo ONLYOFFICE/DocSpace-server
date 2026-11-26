@@ -163,6 +163,7 @@ export type AiActionArgs = {
   /**
    * Knowledge rooms connected to the chat; the knowledge search tool of
    * the round is limited to them. Each `id` has to be a DocSpace room id.
+   * The first 20 distinct ids are used and any further entry is ignored.
    */
   knowledgeRooms?: KnowledgeRoomRef[];
   /**

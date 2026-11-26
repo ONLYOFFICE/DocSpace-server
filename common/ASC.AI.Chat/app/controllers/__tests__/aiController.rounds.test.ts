@@ -446,6 +446,18 @@ describe("the knowledge rooms of a round", () => {
     const rooms = await roomsOf({ knowledgeRooms: [{ id: 1 }, { id: 1 }, ...sent] });
 
     expect(rooms).toEqual(sent.slice(0, KNOWLEDGE_ROOMS_LIMIT).map((room) => room.id));
+    expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
+      `knowledgeRoomIdsOf: 5 entries of actionArgs.knowledgeRooms after the first ${KNOWLEDGE_ROOMS_LIMIT} room ids are ignored`,
+    );
+  });
+
+  it("says nothing when the list ends at the limit", async () => {
+    const sent = Array.from({ length: KNOWLEDGE_ROOMS_LIMIT }, (_, i) => ({ id: i + 1 }));
+
+    expect(await roomsOf({ knowledgeRooms: sent })).toHaveLength(KNOWLEDGE_ROOMS_LIMIT);
+    expect(vi.mocked(logger.warn)).not.toHaveBeenCalledWith(
+      expect.stringContaining("knowledgeRoomIdsOf"),
+    );
   });
 
   it("reads the single knowledgeRoom of an older widget", async () => {

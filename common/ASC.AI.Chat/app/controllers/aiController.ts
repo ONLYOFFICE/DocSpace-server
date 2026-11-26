@@ -139,7 +139,7 @@ function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
   const rooms = actionArgs["knowledgeRooms"];
   const list: unknown[] = Array.isArray(rooms) ? rooms : [actionArgs["knowledgeRoom"]];
   const ids = new Set<number>();
-  for (const room of list) {
+  for (const [index, room] of list.entries()) {
     if (!isObject(room)) {
       continue;
     }
@@ -149,6 +149,14 @@ function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
       ids.add(parsed);
     }
     if (ids.size === KNOWLEDGE_ROOMS_LIMIT) {
+      // The knowledge search of the round leaves the rest out; the log is the one place
+      // that says so (the limit is published on `actionArgs.knowledgeRooms`).
+      const unread = list.length - index - 1;
+      if (unread > 0) {
+        logger.warn(
+          `knowledgeRoomIdsOf: ${unread} entries of actionArgs.knowledgeRooms after the first ${KNOWLEDGE_ROOMS_LIMIT} room ids are ignored`,
+        );
+      }
       break;
     }
   }

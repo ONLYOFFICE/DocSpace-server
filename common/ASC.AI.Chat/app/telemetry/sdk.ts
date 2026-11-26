@@ -40,6 +40,7 @@ import { NodeSDK } from "@opentelemetry/sdk-node";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { UndiciInstrumentation } from "@opentelemetry/instrumentation-undici";
+import { context, metrics, propagation, trace } from "@opentelemetry/api";
 import { getMetricExportIntervalMs, getTelemetrySettings } from "../../config/index.js";
 import logger from "../log.js";
 
@@ -70,10 +71,45 @@ async function createExporters(protocol: string, endpoint: string) {
 
 const { enabled, otlpEndpoint, otlpProtocol: protocol, serviceName } = getTelemetrySettings();
 
+/**
+ * Takes back what a `start()` that threw may have set up: it patches http and undici first and
+ * registers the global providers after, and `NodeSDK.shutdown()` stops the providers only, so the
+ * instrumentations are disabled and the globals reset here. A failure of the shutdown is logged;
+ * the error of `start()` is the one the caller reports.
+ */
+async function undoStart(
+  sdk: NodeSDK,
+  instrumentations: readonly { disable(): void }[],
+): Promise<void> {
+  for (const instrumentation of instrumentations) {
+    instrumentation.disable();
+  }
+  trace.disable();
+  metrics.disable();
+  propagation.disable();
+  context.disable();
+  try {
+    await sdk.shutdown();
+  } catch (shutdownErr) {
+    logger.warn(
+      `OpenTelemetry: the shutdown after a failed start failed too: ${
+        shutdownErr instanceof Error ? shutdownErr.message : String(shutdownErr)
+      }`,
+    );
+  }
+}
+
 /** Starts the SDK; throws what an exporter or the SDK refuses its configuration with. */
 async function start(endpoint: string): Promise<NodeSDK> {
   const { traceExporter, metricExporter } = await createExporters(protocol, endpoint);
 
+  const instrumentations = [
+    new HttpInstrumentation({
+      // Health checks are polled every few seconds — pure noise in traces.
+      ignoreIncomingRequestHook: (req) => req.url?.endsWith("/health") ?? false,
+    }),
+    new UndiciInstrumentation(),
+  ];
   const sdk = new NodeSDK({
     serviceName,
     traceExporter,
@@ -81,16 +117,15 @@ async function start(endpoint: string): Promise<NodeSDK> {
       exporter: metricExporter,
       exportIntervalMillis: getMetricExportIntervalMs(),
     }),
-    instrumentations: [
-      new HttpInstrumentation({
-        // Health checks are polled every few seconds — pure noise in traces.
-        ignoreIncomingRequestHook: (req) => req.url?.endsWith("/health") ?? false,
-      }),
-      new UndiciInstrumentation(),
-    ],
+    instrumentations,
   });
 
-  sdk.start();
+  try {
+    sdk.start();
+  } catch (err) {
+    await undoStart(sdk, instrumentations);
+    throw err;
+  }
   return sdk;
 }
 

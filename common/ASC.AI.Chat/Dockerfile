@@ -8,10 +8,16 @@ WORKDIR /app
 COPY package.json yarn.lock .yarnrc.yml *.tgz ./
 COPY .yarn ./.yarn
 
+# A yarn.lock that no longer matches package.json fails the build here instead of being
+# resolved again: `focus` below neither takes `--immutable` nor reads
+# YARN_ENABLE_IMMUTABLE_INSTALLS (yarn 4 reads it in `yarn install` only), so the lock file is
+# checked by an install of its own. It links the dev dependencies too and builds nothing; the
+# `focus` that follows takes them out again.
+RUN yarn install --immutable --mode=skip-build
+
 # Install the runtime dependencies only (`tsx` is one of them): the tools of `yarn check` -
-# eslint, vitest, msw, supertest, typescript - stay out of the image. `focus` takes no
-# `--immutable`; it installs what yarn.lock names. Drop the fetch cache so the archives do
-# not stay in the layer
+# eslint, vitest, msw, supertest, typescript - stay out of the image. Drop the fetch cache so
+# the archives do not stay in the layer
 RUN yarn workspaces focus --production && yarn cache clean --all
 
 # Copy application code (node_modules, local state, the tests and the tools of `yarn check`

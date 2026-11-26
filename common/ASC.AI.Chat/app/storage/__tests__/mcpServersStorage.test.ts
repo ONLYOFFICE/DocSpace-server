@@ -41,7 +41,12 @@ import {
   useUpstream,
 } from "../../__tests__/helpers/upstream.js";
 import { getChatContextMisses } from "../../requestContext.js";
-import { HttpMcpServersStorage, parseMcpServerConfig } from "../mcpServersStorage.js";
+import {
+  HttpMcpServersStorage,
+  isUnreadableMcpServerConfig,
+  parseMcpServerConfig,
+  UNREADABLE_MCP_SERVER_CONFIG,
+} from "../mcpServersStorage.js";
 import { inRound, scopeOf, snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 
 // products/ASC.AI/Server/Api/McpServerStorageController.cs: POST mcp-servers,
@@ -98,22 +103,35 @@ describe("readByName", () => {
     await expect(storage.readByName("jira")).resolves.toBeNull();
   });
 
-  // A stored server whose config cannot be read is not "no such server": read as none, an
-  // update wrote it without its stored headers.
   it.each([
     ["a list", [serverDto()]],
     ["a string", "jira"],
-    ["no config", { name: "jira" }],
-    ["config null", { name: "jira", config: null }],
-    ["config an object", { name: "jira", config: { url: "u" } }],
-    ["config not JSON", { name: "jira", config: "{" }],
-    ["config a JSON list", { name: "jira", config: "[]" }],
   ])("rejects an answer with %s as of an unknown shape, not as none", async (_name, body) => {
     upstream.use(http.get("*/internal/ai/mcp-servers/:name", () => docspace(body)));
     await expect(storage.readByName("jira")).rejects.toMatchObject({
       name: "UpstreamShapeError",
       status: 502,
     });
+  });
+
+  // A stored server whose config cannot be read is neither "no such server" (an update wrote it
+  // without its stored headers) nor unknown (a 502 left only a delete able to reach it): it is
+  // the stand-in, which the engine finds taken and a write recognizes.
+  it.each([
+    ["no config", { name: "jira" }],
+    ["config null", { name: "jira", config: null }],
+    ["config an object", { name: "jira", config: { url: "u" } }],
+    ["config not JSON", { name: "jira", config: "{" }],
+    ["config a JSON list", { name: "jira", config: "[]" }],
+  ])("reads an answer with %s as the stand-in of an unreadable config", async (_name, body) => {
+    upstream.use(http.get("*/internal/ai/mcp-servers/:name", () => docspace(body)));
+    const config = await storage.readByName("jira");
+    expect(config).toBe(UNREADABLE_MCP_SERVER_CONFIG);
+    expect(isUnreadableMcpServerConfig(config)).toBe(true);
+    expect(Object.isFrozen(config)).toBe(true);
+    expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
+      "HttpMcpServersStorage: an entry of the registry cannot be read, its config (server jira)",
+    );
   });
 
   it("reads a 404 as none and rethrows a 500", async () => {
@@ -171,15 +189,15 @@ describe("readAll", () => {
     });
     expect(upstream.seen).toMatchObject([{ method: "GET", path: "/internal/ai/mcp-servers" }]);
     // Each entry left out is named: nothing else shows that the server is stored.
-    const left = "HttpMcpServersStorage.readAll: an entry of the registry is left out, its";
+    const left = "HttpMcpServersStorage: an entry of the registry cannot be read, its";
     expect(vi.mocked(logger.warn).mock.calls.map(([line]) => line)).toEqual([
-      `${left} name cannot be read`,
-      `${left} name cannot be read`,
-      `${left} name cannot be read`,
-      `${left} name cannot be read`,
-      `${left} config (server object) cannot be read`,
-      `${left} config (server broken) cannot be read`,
-      `${left} config (server list) cannot be read`,
+      `${left} name`,
+      `${left} name`,
+      `${left} name`,
+      `${left} name`,
+      `${left} config (server object)`,
+      `${left} config (server broken)`,
+      `${left} config (server list)`,
     ]);
   });
 
@@ -195,22 +213,26 @@ describe("readAll", () => {
       });
     });
 
-    it.each([
-      ["an entry that is null", null],
-      ["an entry without a name", { config: '{"url":"n"}' }],
-      ["an entry without a config", { name: "jira" }],
-      ["an entry whose config is not JSON", { name: "jira", config: "not json" }],
-    ])("rejects %s as an answer of an unknown shape, not as no such server", async (_w, entry) => {
+    it("keeps an entry whose config cannot be read as the stand-in and leaves out a nameless one", async () => {
       upstream.use(
         http.get("*/internal/ai/mcp-servers", () =>
-          docspace([serverDto("github", '{"url":"g"}'), entry]),
+          docspace([
+            serverDto("github", '{"url":"g"}'),
+            null,
+            { config: '{"url":"n"}' },
+            { name: "jira" },
+            { name: "broken", config: "not json" },
+          ]),
         ),
       );
 
-      await expect(storage.readAllForWrite()).rejects.toMatchObject({
-        name: "UpstreamShapeError",
-        status: 502,
-      });
+      const registry = await storage.readAllForWrite();
+
+      expect(registry).toEqual({ github: { url: "g" }, jira: {}, broken: {} });
+      expect(registry["jira"]).toBe(UNREADABLE_MCP_SERVER_CONFIG);
+      expect(registry["broken"]).toBe(UNREADABLE_MCP_SERVER_CONFIG);
+      expect(isUnreadableMcpServerConfig(registry["github"])).toBe(false);
+      expect(vi.mocked(logger.warn)).toHaveBeenCalledTimes(4);
     });
   });
 
