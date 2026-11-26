@@ -83,22 +83,22 @@ public class VirtualRoomsInternalController(
     /// <remarks>
     /// Creates a room in the Rooms section and returns it. The call creates an Instructions room, a Knowledge room, or
     /// an AI project in the AI rooms section instead. You cannot change `roomType` after this call. Requires a DocSpace
-    /// admin or a room admin. Other callers get 403. A user or a guest gets 402 instead of 403 while the room limit is
-    /// reached or the tariff is restricted. This does not apply to a room of the AI rooms section. The call changes
-    /// data. Do not repeat it. Each call creates another room. A repeat with the same `logo` returns 404 but still
-    /// creates a room. That room has no logo, tags, or primary external link. The call adds the tag names that the
-    /// portal does not have yet. A public room and a form filling room get a primary external link. To invite members,
-    /// use `PUT api/2.0/files/rooms/{id}/share` after this call. The call returns 400 if `title` is blank, `cover` is
-    /// unknown, or `share` is not empty. It also returns 400 if `private` is set together with `indexing`, a lifetime,
-    /// or a watermark. A room of the AI rooms section also returns 400 with settings that do not apply to its type. The
-    /// call returns 402 if the portal reached the room limit of its plan. It also returns 402 if the tariff is
-    /// restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. A room of the AI rooms section passes both
-    /// checks. A logo that does not fit into the storage quota also returns 402. The call returns 403 if `quota` is set
-    /// while room quotas are turned off, or is over the portal limit. It also returns 403 for a public room while the
-    /// portal forbids external sharing. A private room also returns 403 if the caller has no encryption keys. A
-    /// Knowledge room returns 403 while vectorization is turned off. An AI project returns 403 while the portal has no
-    /// AI service and no AI provider. If `logo.tmpFile` names no uploaded picture, or one already used, the call
-    /// returns 404.
+    /// admin or a room admin. Other callers get 403. At the room limit or on a restricted tariff, a user or a guest
+    /// gets 402. It comes instead of the 403 for the user type, not of the other 403s. This does not apply to a room of
+    /// the AI rooms section. The call changes data. Do not repeat it. Each call creates another room. A repeat with the
+    /// same `logo` returns 404 but still creates a room. That room has no logo, tags, or primary external link. The
+    /// call adds the tag names that the portal does not have yet. A public room and a form filling room get a primary
+    /// external link. To invite members, use `PUT api/2.0/files/rooms/{id}/share` after this call. The call returns 400
+    /// if `title` is blank, `cover` is unknown, or `share` is not empty. It also returns 400 if `private` is set
+    /// together with `indexing`, a lifetime, or a watermark. A room of the AI rooms section also returns 400 with
+    /// settings that do not apply to its type. The call returns 402 if the portal reached the room limit of its plan.
+    /// It also returns 402 if the tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows. A room of
+    /// the AI rooms section passes both checks. A logo that does not fit into the storage quota also returns 402. The
+    /// call returns 403 if `quota` is set while room quotas are turned off, or is over the portal limit. It also
+    /// returns 403 for a public room while the portal forbids external sharing. A private room also returns 403 if the
+    /// caller has no encryption keys. A Knowledge room returns 403 while vectorization is turned off. An AI project
+    /// returns 403 while the portal has no AI service and no AI provider. It also returns 403 while AI features are
+    /// turned off. If `logo.tmpFile` names no uploaded picture, or one already used, the call returns 404.
     /// </remarks>
     /// <summary>Create a room</summary>
     /// <path>api/2.0/files/rooms</path>
@@ -108,7 +108,7 @@ public class VirtualRoomsInternalController(
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set together with `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan, its tariff is restricted, as `restricted` of `GET api/2.0/portal/tariff` shows, or the logo does not fit into the portal storage quota")]
-    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, `roomType` is a Knowledge room while vectorization is turned off, `roomType` is an AI project while the portal has no AI service and no AI provider, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, `roomType` is a Knowledge room while vectorization is turned off, `roomType` is an AI project while the portal has no AI service and no AI provider or while AI features are turned off, or `logo.tmpFile` is not a picture the caller uploaded")]
     [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoom(CreateRoomRequestDto inDto)
