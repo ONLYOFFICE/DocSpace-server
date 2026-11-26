@@ -86,7 +86,8 @@ public class FileSharingAceHelper(
         var selfLeave = aceWrappers.Count > 0 && aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None);
 
         if (!selfLeave &&
-            !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r, _) =>
+            // the reader's exception covers a request that holds that first primary link and nothing else
+            !(aceWrappers.Count == 1 && await aceWrappers.ToAsyncEnumerable().AllAsync(async (r, _) =>
             {
                 var roomType = room?.FolderType;
 
@@ -106,7 +107,7 @@ public class FileSharingAceHelper(
                 return !await fileSecurity.GetPureSharesAsync(entry, [r.Id]).AnyAsync(_)
                        && !await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).AnyAsync(_)
                        && await fileSecurity.CanReadAsync(entry);
-            }) &&
+            })) &&
             !beforeOwnerChange &&
             !await fileSharingHelper.CanSetAccessAsync(entry))
         {

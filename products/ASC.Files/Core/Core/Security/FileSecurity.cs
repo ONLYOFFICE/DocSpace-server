@@ -1242,13 +1242,22 @@ public class FileSecurity(
         var parentFolders = await GetFileParentFolders(entry.ParentId);
         var cachedFileDao = daoFactory.GetCacheFileDao<T>();
 
-        var allowed = await FilterEntryAsync(entry, action, userId, new EntryShares<T>(shares), isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
-        var access = entry.Access;
+        bool allowed;
+        FileShare access;
 
-        // the access on the entry is the current account's, which the response is built from
-        if (userId != authContext.CurrentAccount.ID)
+        try
         {
-            entry.Access = accessSnapshot;
+            allowed = await FilterEntryAsync(entry, action, userId, new EntryShares<T>(shares), isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+            access = entry.Access;
+        }
+        finally
+        {
+            // the access on the entry is the current account's, which the response is built from; a check of another
+            // account that throws halfway leaves it too
+            if (userId != authContext.CurrentAccount.ID)
+            {
+                entry.Access = accessSnapshot;
+            }
         }
 
         return (allowed, access);
@@ -1270,11 +1279,18 @@ public class FileSecurity(
         {
             var parentFolders = await GetFileParentFolders(entry.ParentId);
             var accessSnapshot = entry.Access;
-            var allowed = await FilterEntryAsync(entry, action, userId, new EntryShares<T>(shares: null), isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+            bool allowed;
 
-            if (!forCurrentAccount)
+            try
             {
-                entry.Access = accessSnapshot;
+                allowed = await FilterEntryAsync(entry, action, userId, new EntryShares<T>(shares: null), isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
+            }
+            finally
+            {
+                if (!forCurrentAccount)
+                {
+                    entry.Access = accessSnapshot;
+                }
             }
 
             yield return new Tuple<FileEntry<T>, bool>(entry, allowed);
@@ -1299,7 +1315,9 @@ public class FileSecurity(
         var isRoom = folder is { IsRoom: true };
 
         // What the entry carries (its share record, its access) belongs to the current account; a check of another
-        // account takes none of it. The link of the request follows RequestLinkApplies.
+        // account takes neither. The link of the request follows RequestLinkApplies. isAuthenticated is still decided
+        // by the callers from the request (CheckAsync adds the checked account's own flag), so a signed-in caller
+        // checks the guest account as authenticated.
         var forCurrentAccount = userId == authContext.CurrentAccount.ID;
         var requestLinkApplies = RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes > 0);
 
@@ -4246,7 +4264,14 @@ public class FileSecurity(
         if (!cachedRecords.TryGetValue(cacheKey, out var record))
         {
             record = await GetCurrentShareAsync(room, userId, isDocSpaceAdmin, await shares.GetAsync());
-            cachedRecords.TryAdd(cacheKey, record);
+
+            // a record of a link belongs to the link, as in FilterEntryAsync: the account's key is read for the
+            // account checked as another account too, which must not get the request's link
+            var key = record is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink }
+                ? GetCacheKey(room.Id, record.Subject)
+                : cacheKey;
+
+            cachedRecords.TryAdd(key, record);
         }
 
         return record;
