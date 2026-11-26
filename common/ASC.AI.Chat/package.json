@@ -75,7 +75,7 @@
     "vitest-mock-extended": "^3"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=24.22.1",
     "yarn": ">=4"
   },
   "packageManager": "yarn@4.1.0"
