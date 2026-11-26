@@ -47,7 +47,7 @@ vi.mock("../../requestContext.js", () => ({
 }));
 vi.mock("../chatContextSnapshot.js", () => ({ lookupChatContextFolder: () => ({ hit: false }) }));
 
-const { filesApiGet, DocspaceApiHttpError } = await import("../docspaceFilesApi.js");
+const { filesApiGet, DocspaceApiHttpError, folderSourceType } = await import("../docspaceFilesApi.js");
 
 const fetchMock = vi.fn();
 
@@ -79,5 +79,22 @@ describe("filesApiGet", () => {
     expect(err).toBeInstanceOf(DocspaceApiHttpError);
     expect(err).toMatchObject({ status: 404 });
     expect(fetchMock.mock.calls[0]?.[0]).toBe("http://portal/api/2.0/files/rooms/42/sources");
+  });
+});
+
+// The type a folder is billed under. An AI project is an Agent whichever of
+// its two type spellings the DTO carries.
+describe("folderSourceType", () => {
+  it.each([
+    [{ roomType: 12 }, "Agent"],
+    [{ folderType: 40 }, "Agent"],
+    [{ roomType: 1 }, "Form"],
+    [{ folderType: 15 }, "Form"],
+    [{ roomType: 2 }, "Room"],
+    [{ folderType: 22 }, "Room"],
+    [{ folderType: 2 }, "Folder"],
+    [{}, "Folder"],
+  ])("classifies %o as %s", (info, type) => {
+    expect(folderSourceType(info)).toBe(type);
   });
 });

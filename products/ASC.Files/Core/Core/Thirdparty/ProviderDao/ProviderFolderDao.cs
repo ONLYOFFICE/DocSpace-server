@@ -342,6 +342,16 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         throw new NotSupportedException();
     }
 
+    public Task<AiAgentConversion> ConvertAiAgentAsync(string roomId)
+    {
+        throw new NotSupportedException();
+    }
+
+    public Task<int> MoveFolderAsync(string folderId, int toFolderId, string newTitle, Func<FilesDbContext, Task> inTransaction)
+    {
+        throw new NotSupportedException();
+    }
+
     public async Task<string> SaveFolderAsync(Folder<string> folder)
     {
         ArgumentNullException.ThrowIfNull(folder);

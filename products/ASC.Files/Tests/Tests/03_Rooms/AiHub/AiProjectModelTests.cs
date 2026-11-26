@@ -35,8 +35,8 @@ namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
 /// The AI model of an AI project: `GET` and `PUT api/2.0/files/rooms/{id}/model`. The Files suite starts neither the
-/// AI service nor an AI gateway, so the portal has no AI model profile to select and a successful `PUT` cannot be
-/// reached here; the tests cover reading, access and the refusals.
+/// AI service nor an AI gateway; the portal's only profile is the one planted in the database so that it may create
+/// projects. The tests cover reading, access and the refusals.
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AiHub")]
@@ -147,14 +147,12 @@ public class AiProjectModelTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
     }
 
     [Fact]
-    public async Task SetModel_ProjectManagerWithUnknownProfile_PassesAccessCheckAndReturns400()
+    public async Task SetModel_RoomAdminOwnerWithUnknownProfile_PassesAccessCheckAndReturns400()
     {
         // Arrange
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin);
         var projectId = await CreateProjectAsync();
-        var manager = await InviteContact(EmployeeType.RoomAdmin);
-        await ShareRoomAsync(projectId, manager.Id, FileShare.RoomManager);
-
-        await _filesClient.Authenticate(manager);
 
         // Act
         using var response = await SetModelResponseAsync(projectId, Guid.NewGuid());

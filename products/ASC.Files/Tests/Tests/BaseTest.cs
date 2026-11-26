@@ -150,9 +150,41 @@ public class BaseTest(
 
         await _filesClient.Authenticate(Owner);
 
+        if (PlantsAiProfile)
+        {
+            await PlantAiProfileAsync();
+        }
+
         // NOTE: the owner's root folder tree is provisioned lazily on first access. We intentionally
         // do NOT warm it up here — tests that never touch the owner's folders should not pay for it.
         Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
+    }
+
+    /// <summary>
+    /// Whether the portal gets an AI model profile before the test runs. The integration-test stack has neither an AI
+    /// gateway nor the AI service, and without a profile the portal refuses to create an AI project.
+    /// </summary>
+    protected virtual bool PlantsAiProfile => false;
+
+    /// <summary>
+    /// Writes one AI model profile of the portal straight into <c>ai_integration_profiles</c>. Runs before anything
+    /// asks whether the portal has a profile: that answer is cached for three minutes.
+    /// </summary>
+    private async Task PlantAiProfileAsync()
+    {
+        await using var connection = await fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText =
+            """
+            INSERT INTO ai_integration_profiles (id, tenant_id, name, provider_type, base_url, model_id, created_at)
+            VALUES (@id, @tenantId, 'test', 'openai', 'http://localhost', 'test-model', UTC_TIMESTAMP());
+            """;
+
+        command.Parameters.AddWithValue("@id", Guid.NewGuid().ToString());
+        command.Parameters.AddWithValue("@tenantId", TenantId);
+
+        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
     }
 
     public virtual ValueTask DisposeAsync()

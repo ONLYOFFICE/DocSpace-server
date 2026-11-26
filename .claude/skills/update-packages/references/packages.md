@@ -75,7 +75,7 @@ skill re-checks usage through LSP on every run anyway.
 - **Release notes:** for a major the project page is the authority (NLog 6:
   `https://nlog-project.org/2025/04/29/nlog-6-0-major-changes.html`).
 - **Verification:** smoke app loading a copy of `nlog.config` with the new versions and every extension
-  package; after tests check `../Logs/test/` — fresh timestamps, `*.sql.log` format, archive names and compression.
+  package; after tests check `../Logs/test/` (`../Logs/test/<worktree>/` from a git worktree) — fresh timestamps, `*.sql.log` format, archive names and compression.
 - **Traps:** the effective config is `../buildtools/config/nlog.config`, loaded with `throwConfigExceptions="true"`:
   one unknown attribute stops logging in every service.
 - **Blockers for the next attempt (NLog 6):** the config does not load (`enableArchiveFileCompression`

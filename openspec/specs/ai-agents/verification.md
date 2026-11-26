@@ -122,16 +122,17 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,82,93,106,119`; a private project 400: `Hub/AiHubRoomSettingsTests.cs:69` (not run yet) | TEST-CONFIRMED [run: PASS] |
 | Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED [run: PASS] |
 | Knowledge room needs vectorization 403 | `Security:1424,1443`; `AI/Core/Settings` | CODE-ONLY |
+| AI project needs the AI gateway or a profile 403 | `Hub/AiHubNoAiProviderTests.cs:47,59` | TEST-CONFIRMED [run: PASS] |
 | **Members of the AI rooms** | | |
-| Content creator reads, Room manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
+| Content creator reads, does not write (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
 | DocSpace admin outside the project reads its model, sources and skills (scenario) | `Hub/AiRoomOutsiderAccessTests.cs:55` | TEST-CONFIRMED (not run yet) |
 | Role sets of Instructions and Knowledge rooms | `Security` (`GetAccesses`); `products/ASC.Files/Core/Helpers` | CODE-ONLY |
 | **Users only in an AI project** | | |
-| Guest not in a project (scenario); User joins through a link as Content creator | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
-| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED (not run yet) |
+| Guest not in a project (scenario); no invitation link | `Hub/AiProjectGuestInviteTests.cs:45,61`; `Hub/AiProjectInvitationLinkTests.cs:47` | TEST-CONFIRMED [run: PASS] |
+| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED [run: PASS] |
 | **The model of an AI project** | | |
-| Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,93,167` | TEST-CONFIRMED [run: PASS] |
-| Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:106,123,137,150` | TEST-CONFIRMED [run: PASS] |
+| Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,93,165` | TEST-CONFIRMED [run: PASS] |
+| Member refused; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:106,123,137,150` | TEST-CONFIRMED [run: PASS] |
 | Image profile refused (scenario) | `T/ChatTests/ChatProjectModelTests.cs:238,255` | TEST-CONFIRMED [run: PASS] |
 | Content creator reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60` | TEST-CONFIRMED [run: PASS] (`ChatProjectModelTests.GetModel_ProjectMember_…` fails later, at the round on the project's model: A16, not this claim) |
 | Model moved (scenario) | `T/ChatTests/ChatProjectModelTests.cs:94` | TEST-CONFIRMED [run: PASS] |
@@ -171,10 +172,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | DocSpace admin outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:98` | TEST-CONFIRMED (not run yet) |
 | Creator of a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:111` | TEST-CONFIRMED (not run yet) |
 | **Clients are told when the number of projects of a room changes** | | |
-| Room linked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:46` | TEST-CONFIRMED (not run yet) |
-| Room unlinked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:63` | TEST-CONFIRMED (not run yet) |
-| Project deleted (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:81` | TEST-CONFIRMED (not run yet) |
-| Nothing linked anew (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:100` | TEST-CONFIRMED (not run yet) |
+| Room linked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:46` | TEST-CONFIRMED [run: PASS] |
+| Room unlinked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:62` | TEST-CONFIRMED [run: PASS] |
+| Project deleted (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:81` | TEST-CONFIRMED [run: PASS] |
+| Nothing linked anew (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:100` | TEST-CONFIRMED [run: PASS] |
 | **Skills of an Instructions room** | | |
 | Front matter rules, upload, chunked, new version (scenario "Invalid name") | `Instr/SkillUploadTests.cs:41-221` | TEST-CONFIRMED [run: PASS] |
 | Copy and move refused; no folder | `Instr/SkillMoveCopyTests.cs:58,90,107`; `Instr/InstructionsRoomFolderTests.cs:41,56,75,91` | TEST-CONFIRMED [run: PASS] |
@@ -537,6 +538,50 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **The file of a removed draft** |  |  |
 | Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:50,104` | TEST-CONFIRMED |
 | Abandoned draft of a file outside a project (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:126` | TEST-CONFIRMED |
+| **Conversion of an AI agent into an AI project** (change `migrate-ai-agents-to-projects`; its tests passed on 2026-11-22 against the working tree, `--filter-namespace "*AgentMigrationTests*"`: 48 of 48, the unit classes `AiAgentsMigrationPlanTests`, `AiAgentMigrationTitleTests` and `AiAgentsMigrationConfigurationTests` 21 of 21, `TenantsModuleSpecificsTests` 4 of 4; proven red with mutation patches on the same day: the integration tests except `AgentMigrationRouteTests` `Migrate_PortalWithoutAgents_ReturnsZeros` and `Migrate_RepeatedCall_ReturnsZeros`, which no single removal turns red, and the unit classes except `AiAgentsMigrationConfigurationTests`, which was not tried; the agent tests of the Files suite, 219 of 219, passed with the pass off in the test profile) |  |  |
+| Agent converted; conversion run twice (scenarios); an agent under the 4.0 agents root | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:55,97,79` | TEST-CONFIRMED |
+| Pinned agent (scenario) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:248` | TEST-CONFIRMED |
+| The logo of the agent is copied to the project; the logo files of the room of an agent without knowledge are deleted with the room, the copy made for the project stays | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:298,315` | TEST-CONFIRMED |
+| The colour, the cover and the custom tags of the agent go to the project, the custom tags leave the Knowledge room | `T/AgentMigrationTests/AgentMigrationSettingsTests.cs:131` | TEST-CONFIRMED |
+| The tool preferences, MCP servers and chat preferences scoped to the agent move to the project; the ones without an entity stay. Arranged and read through the internal storage API: the chat service stores them under no entity | `T/AgentMigrationTests/AgentMigrationSettingsTests.cs:56,83,107` | TEST-CONFIRMED |
+| The New and Recent marks of the agent are dropped: none is left on the Knowledge room, none is moved to the project. No route marks a room as recent, so the test writes that mark by SQL | `T/AgentMigrationTests/AgentMigrationSettingsTests.cs:203` | TEST-CONFIRMED |
+| **The room of a converted agent becomes a Knowledge room** |  |  |
+| Knowledge kept; title at the limit; vectorization off (scenarios). The stand has no embedding provider, so a knowledge file is put into the Knowledge folder by SQL (`T/AgentMigrationTests/AgentMigrationTestBase.cs`, `AddKnowledgeFileAsync`) and every case runs with vectorization off | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:117,221,244`; the cut of the title: `CoreTests/AiAgentMigrationTitleTests.cs:42,48,56,64,75,86` | TEST-CONFIRMED |
+| A folder inside the Knowledge folder is deleted with its files, the files lying directly in the Knowledge folder stay in the room. The test moves a folder of Chat outputs into the Knowledge folder by SQL (`T/AgentMigrationTests/AgentMigrationRoomTests.cs`, `MoveFolderToKnowledgeAsync`) | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:345` | TEST-CONFIRMED |
+| A knowledge file is found by its title in the Knowledge room after the conversion: the index gets the change through an event or through its periodic pass, which reads the file by its new `modified_on`, so the test polls for 30 s and does not tell the two apart; the move sets `modified_on` of the current and the first version of a knowledge file to the time of the conversion (the pass finds a file by its first version), so the periodic pass of the index picks the file up when the event is lost; the conversion publishes the deletion of the Knowledge folder from the index (read off the event bus) | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:414,146,200` | TEST-CONFIRMED |
+| **The Knowledge room of a converted agent drops the settings it refuses** |  |  |
+| Restricted agent converted (scenario). `updateRoom` answers 403 when it turns indexing on for an agent (the reordering it starts walks into the Knowledge and Chat outputs folders, which are not rooms), so the test writes that flag by SQL, together with privacy and the two form settings, and reads the form settings by SQL | `T/AgentMigrationTests/AgentMigrationSettingsTests.cs:163` | TEST-CONFIRMED |
+| **An agent without knowledge leaves no room** |  |  |
+| Empty Knowledge folder (scenario) | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:275` | TEST-CONFIRMED |
+| **Threads of an agent become threads of the project** |  |  |
+| Thread follows the agent; thread started elsewhere (scenarios). The thread of the agent is created through the internal storage route with the agent as `entityId`: the public chat route stores an entity only for an AI project (`common/ASC.AI.Chat/app/storage/threadsStorage.ts:111`) | `T/AgentMigrationTests/AgentMigrationThreadsTests.cs:53,86`; thread of a Guest (scenario): `:165` | TEST-CONFIRMED |
+| **The model of an agent becomes the model of the project** |  |  |
+| Agent bound to a profile; agent without an assignment (scenarios) | `T/AgentMigrationTests/AgentMigrationThreadsTests.cs:111,138` | TEST-CONFIRMED |
+| **Members of a converted agent** |  |  |
+| Roles carried over; group invited to the agent; joining the group later (scenarios) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:51,72,98` | TEST-CONFIRMED |
+| Guest of the agent (scenario) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:122` | TEST-CONFIRMED |
+| A Guest among the members of an invited group is left out too: a group takes no Guest through the API, so no test builds the case | `products/ASC.Files/Core/Core/Dao/TeamlabDao/FolderDao.cs:851` (the local function `GetProjectMembersAsync` of `ConvertAiAgentAsync`, the Guest check on a member of a group) | CODE-ONLY |
+| **Access to the Knowledge room of a converted agent** |  |  |
+| Content creator keeps the room (scenario). That such a member can still upload is not asserted: the stand refuses every create in a Knowledge room while vectorization is off. A group that keeps the room is not built either: the API refuses a group as a Content creator of an agent (`products/ASC.Files/Core/Utils/FileSharing.cs:278-299`); the test asserts that a group invited as a Viewer is gone | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:145` | TEST-CONFIRMED |
+| Viewer reads through the project; Guest of the agent; external link of a knowledge file (scenarios) | `T/AgentMigrationTests/AgentMigrationAccessTests.cs:178,197,218` | TEST-CONFIRMED |
+| **Chat outputs of a converted agent move to My documents** |  |  |
+| Outputs moved; empty Chat outputs; owner over the quota; owner disabled (scenarios); a second call moves nothing | `T/AgentMigrationTests/AgentMigrationOutputsTests.cs:47,80,100,134,161` | TEST-CONFIRMED |
+| The files of the moved Chat outputs folder, directly in it and in a folder inside it, get `modified_on` of their current and first version set to the time of the conversion, a version between keeps its date, and the folder inside it gets a new `modified_on` too, so the periodic pass of the full-text index stores their new ancestor chain when an index event is lost | `T/AgentMigrationTests/AgentMigrationOutputsTests.cs:188` | TEST-CONFIRMED |
+| The conversion publishes an `UpdateFolders` index event for every file of the moved Chat outputs folder and for the folder inside it (read off the event bus) | `T/AgentMigrationTests/AgentMigrationOutputsTests.cs:263` | TEST-CONFIRMED |
+| The new parent of the moved Chat outputs folder, the tree rows of its subtree and the `modified_on` of its files and subfolders are committed in one transaction, so a run that stops after the move leaves nothing for a later run to find: the stand cannot stop the process between the statements | `products/ASC.Files/Core/Core/Dao/TeamlabDao/FolderDao.cs` (`MoveFolderCoreAsync`, the `inTransaction` call before the commit); `products/ASC.Files/Core/Core/AI/AiAgentMigrator.cs` (`MoveOutputsAsync`, the delegate) | CODE-ONLY |
+| No user's used space changes when the agent is moved under the AI rooms root | `T/AgentMigrationTests/AgentMigrationRoomTests.cs:451` | TEST-CONFIRMED |
+| **The background pass converts agents by itself** |  |  |
+| Restored archive (scenario): the restore writes the time of the restore into `last_modified` of the portal, which puts it into the window of the next pass. No integration test restores an archive: the backup suite never starts a restore (`common/Tests/ASC.Data.Backup.Tests/Tests/Restore/RestoreGuard.cs`) | `common/Tests/ASC.Data.Backup.Core.Tests/TenantsModuleSpecificsTests.cs:49`; `common/ASC.Data.Backup.Core/Tasks/Modules/AiModuleSpecifics.cs` (the `entry_id` relations) | CODE-ONLY, the time by a unit test |
+| Portal being restored; unchanged portal (scenarios): the window and the candidate list are pure functions, the two queries select active portals only; the periodic loop is run by no integration suite, the pass is off in the test profile | `CoreTests/AiAgentsMigrationPlanTests.cs:44,50,56,86`; `common/ASC.Core.Common/EF/Queries/TenantQueries.cs:138,145`; `products/ASC.AI/Worker/BackgroundServices/AiAgentsMigrationService.cs:72,209` | CODE-ONLY, the decisions by unit tests |
+| A pass stopped halfway (a restart, a deploy) resumes after the last portal it saved: the state is saved every 20 portals and once more when the pass ends by an exception or a cancellation (not when the process is killed), with the start of its first part, which opens the next window once it completes (no scenario; the periodic loop is run by no integration suite) | `CoreTests/AiAgentsMigrationPlanTests.cs:154,162,168,176,190`; `products/ASC.AI/Worker/BackgroundServices/AiAgentsMigrationService.cs:127,140,161` | CODE-ONLY, the decisions by unit tests |
+| A portal whose conversion finds the lock of the legacy AI providers migration held elsewhere is skipped by that pass: no failed pass is counted, and the next pass takes it again whether it changed or not (no scenario; the stand cannot hold that lock from a test) | `CoreTests/AiAgentsMigrationPlanTests.cs:126,135,146`; `CoreTests/LegacyAiProvidersMigrationGateTests.cs:40`; `products/ASC.AI/Core/Migration/AiAgentsPortalMigration.cs:54`; `products/ASC.AI/Worker/BackgroundServices/AiAgentsMigrationService.cs:222` | CODE-ONLY, the decisions by unit tests |
+| **A failed conversion is retried and then left** |  |  |
+| One agent of two fails (scenario): each agent is converted in its own try/catch | `products/ASC.Files/Core/Core/AI/AiAgentMigrator.cs:65,75` | CODE-ONLY |
+| Failure repeated; success after a failure (scenarios) | `CoreTests/AiAgentsMigrationPlanTests.cs:62,70,78,94,105,114`; the loop: `products/ASC.AI/Worker/BackgroundServices/AiAgentsMigrationService.cs:112,118` | CODE-ONLY, the decisions by unit tests |
+| **Starting the conversion by request** |  |  |
+| Owner starts the conversion; portal without agents (scenarios); a DocSpace admin is let in | `T/AgentMigrationTests/AgentMigrationRouteTests.cs:73,42,51,62` | TEST-CONFIRMED |
+| Room admin refused; AI switched off (scenarios); no sign-in answers 401 | `T/AgentMigrationTests/AgentMigrationRouteTests.cs:89,112,102` | TEST-CONFIRMED |
+| The route answers 409 while the lock of the legacy AI providers migration is held elsewhere (no scenario; the stand cannot hold that lock from a test) | `products/ASC.AI/Server/Api/AgentsMigrationController.cs` (`MigrateAgentsAsync`); the Busy decision of the lock: `CoreTests/LegacyAiProvidersMigrationGateTests.cs:40` | CODE-ONLY |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 

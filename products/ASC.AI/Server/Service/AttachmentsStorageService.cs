@@ -248,6 +248,7 @@ public class AttachmentsStorageService(
         foreach (var file in uploaded)
         {
             await fileDao.MoveThreadFileAsync(file.Id, folderId, thread.Id);
+            await projectThreadsService.NotifyFileCreatedAsync(projectId, thread, ThreadFolderKind.Attachments, file.Id);
         }
     }
 
