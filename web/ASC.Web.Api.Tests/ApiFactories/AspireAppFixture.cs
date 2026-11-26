@@ -42,10 +42,8 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
     // Web.Studio hosts the only subscriber that persists audit events published to the event bus,
     // which the Apps audit trail suite reads back.
-    // A PostgreSQL stack has no identity containers (ASC.Identity runs on MySQL only); the OAuth2 classes skip there.
-    protected override IEnumerable<string> Resources => MainDatabaseOnPostgreSql
-        ? [ResourceNames.People, ResourceNames.WebStudio]
-        : [ResourceNames.People, ResourceNames.WebStudio, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization];
+    protected override IEnumerable<string> Resources =>
+        [ResourceNames.People, ResourceNames.WebStudio, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization];
 
     // the webhook tests (NeedsLazyResources) wait for these themselves. Web.Studio runs the sender, and Files publishes
     // the file events of the payload tests; Files is the slowest service to come up, and the rest of the suite does

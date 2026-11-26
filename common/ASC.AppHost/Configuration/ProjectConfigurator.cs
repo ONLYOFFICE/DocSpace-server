@@ -169,13 +169,11 @@ public class ProjectConfigurator(
                 // localhost and the call reached the calling service itself, whose 404 was ignored, so the
                 // identity service never saw it. The router sends /api/2.0/oauth2/clients to identity. 127.0.0.1, not
                 // localhost: the router's port listens on IPv4 only and Windows would try ::1 first, ~2 s per call.
-                // A PostgreSQL stack has no identity service, and the router answers 502 for it, which fails the user
-                // deletion; there the call goes to Web.Api, whose 404 IdentityClient.DeleteClientsAsync ignores, as it
-                // did before the tests had a base domain. A manual portal removal still fails on that 404
-                // (DeleteTenantClientsAsync passes only a success then). The bearer authentication of the services reads
-                // the same key as its OpenID authority, so it asks Web.Api too; without an identity service it fails
-                // either way.
-                .WithEnvironment("core:oidc:authority", connectionManager.MainDatabaseOnPostgreSql
+                // A PostgreSQL stack whose profile starts no identity service (integration-test-billing, notify-test)
+                // sends the call to Web.Api instead, whose 404 IdentityClient.DeleteClientsAsync ignores, as it did
+                // before Identity ran on PostgreSQL (the manual portal removal, DeleteTenantClientsAsync, still fails
+                // on that 404). On MySQL those profiles keep this address, where nothing listens: they start no router.
+                .WithEnvironment("core:oidc:authority", () => connectionManager.MainDatabaseOnPostgreSql && !_identityAdded
                     ? new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), HostPorts.Of(Constants.WebApiPort), "api/2.0/oauth2").Uri.ToString()
                     : new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), HostPorts.Of(Constants.AppHostPort), "api/2.0/oauth2").Uri.ToString());
 
@@ -586,8 +584,12 @@ public class ProjectConfigurator(
         return this;
     }
 
+    // Read when the services start, after every AddIdentity of the profile ran.
+    private bool _identityAdded;
+
     public ProjectConfigurator AddIdentity()
     {
+        _identityAdded = true;
         var path = Path.Combine("..", "ASC.Identity");
 
         var registrationBuilder = builder
@@ -608,6 +610,8 @@ public class ProjectConfigurator(
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(registrationBuilder);
+        // Identity reads the database while it starts (DatabaseDialectConfiguration, Hibernate's dialect).
+        connectionManager.AddWaitFor(registrationBuilder, includeOpensearch: false, includeFormsPostgres: false);
         ApplyServiceName(registrationBuilder);
 
         var authorizationBuilder = builder
@@ -626,6 +630,7 @@ public class ProjectConfigurator(
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(authorizationBuilder);
+        connectionManager.AddWaitFor(authorizationBuilder, includeOpensearch: false, includeFormsPostgres: false);
         ApplyServiceName(authorizationBuilder);
 
         return this;

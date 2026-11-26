@@ -49,7 +49,8 @@ import org.springframework.data.repository.query.Param;
  * Extends {@link JpaRepository} to leverage Spring Data JPA functionality.
  */
 public interface JpaAuthorizationRepository
-    extends JpaRepository<AuthorizationEntity, AuthorizationEntity.AuthorizationId> {
+    extends JpaRepository<AuthorizationEntity, AuthorizationEntity.AuthorizationId>,
+        AuthorizationLimitedDeletes {
   /**
    * Restricts a cleanup to the authorizations granted up to {@code :cutoff}. An authorization is
    * dated by its authorization code, which a refresh keeps and a new sign-in replaces, so that an
@@ -126,108 +127,6 @@ public interface JpaAuthorizationRepository
       @Param("registeredClientId") String registeredClientId);
 
   /**
-   * Deletes up to {@code limit} authorizations associated with a specific registered client.
-   *
-   * <p>Bulk removals call this repeatedly until it returns fewer rows than {@code limit}, each call
-   * in its own short transaction, so that no single transaction grows with the number of rows.
-   *
-   * @param clientId the ID of the registered client whose authorizations are to be deleted.
-   * @param limit the maximum number of rows to delete.
-   * @return the number of rows deleted.
-   */
-  @Modifying
-  @Query(
-      value =
-          "DELETE FROM identity_authorizations WHERE registered_client_id = :clientId LIMIT :limit",
-      nativeQuery = true)
-  int deleteAuthorizationsByClientId(@Param("clientId") String clientId, @Param("limit") int limit);
-
-  /**
-   * Deletes up to {@code limit} authorizations associated with a specific principal (user).
-   *
-   * @param principalId the ID of the principal (user) whose authorizations are to be deleted.
-   * @param cutoff only authorizations granted up to this moment are deleted.
-   * @param limit the maximum number of rows to delete.
-   * @return the number of rows deleted.
-   */
-  @Modifying
-  @Query(
-      value =
-          "DELETE FROM identity_authorizations WHERE principal_id = :principalId"
-              + GRANTED_BY_CUTOFF
-              + " LIMIT :limit",
-      nativeQuery = true)
-  int deleteAuthorizationsByPrincipalId(
-      @Param("principalId") String principalId,
-      @Param("cutoff") ZonedDateTime cutoff,
-      @Param("limit") int limit);
-
-  /**
-   * Deletes up to {@code limit} authorizations associated with a specific tenant.
-   *
-   * @param tenantId the ID of the tenant whose authorizations are to be deleted.
-   * @param cutoff only authorizations granted up to this moment are deleted.
-   * @param limit the maximum number of rows to delete.
-   * @return the number of rows deleted.
-   */
-  @Modifying
-  @Query(
-      value =
-          "DELETE FROM identity_authorizations WHERE tenant_id = :tenantId"
-              + GRANTED_BY_CUTOFF
-              + " LIMIT :limit",
-      nativeQuery = true)
-  int deleteAuthorizationsByTenantId(
-      @Param("tenantId") long tenantId,
-      @Param("cutoff") ZonedDateTime cutoff,
-      @Param("limit") int limit);
-
-  /**
-   * Deletes up to {@code limit} authorizations granted to a client owned by a specific tenant,
-   * whichever tenant the authorizing user belonged to.
-   *
-   * @param ownerTenantId the ID of the tenant owning the clients.
-   * @param cutoff only authorizations granted up to this moment are deleted.
-   * @param limit the maximum number of rows to delete.
-   * @return the number of rows deleted.
-   */
-  @Modifying
-  @Query(
-      value =
-          "DELETE FROM identity_authorizations WHERE owner_tenant_id = :ownerTenantId"
-              + GRANTED_BY_CUTOFF
-              + " LIMIT :limit",
-      nativeQuery = true)
-  int deleteAuthorizationsByOwnerTenantId(
-      @Param("ownerTenantId") long ownerTenantId,
-      @Param("cutoff") ZonedDateTime cutoff,
-      @Param("limit") int limit);
-
-  /**
-   * Deletes up to {@code limit} authorizations granted to a client created by a specific user,
-   * whichever tenant the authorizing user belonged to.
-   *
-   * @param ownerTenantId the ID of the tenant owning the clients.
-   * @param ownerUserId the ID of the user who created the clients.
-   * @param cutoff only authorizations granted up to this moment are deleted.
-   * @param limit the maximum number of rows to delete.
-   * @return the number of rows deleted.
-   */
-  @Modifying
-  @Query(
-      value =
-          "DELETE FROM identity_authorizations"
-              + " WHERE owner_tenant_id = :ownerTenantId AND owner_user_id = :ownerUserId"
-              + GRANTED_BY_CUTOFF
-              + " LIMIT :limit",
-      nativeQuery = true)
-  int deleteAuthorizationsByOwner(
-      @Param("ownerTenantId") long ownerTenantId,
-      @Param("ownerUserId") String ownerUserId,
-      @Param("cutoff") ZonedDateTime cutoff,
-      @Param("limit") int limit);
-
-  /**
    * Retrieves a list of authorizations for a specific principal, optionally filtered by a last
    * modified date. The query limits results to valid consents (non-empty token fields) and orders
    * them by the most recent modification date.
@@ -238,13 +137,29 @@ public interface JpaAuthorizationRepository
    * @param limit the maximum number of authorizations to retrieve.
    * @return a {@link List} of {@link AuthorizationEntity} objects matching the query criteria.
    */
+  default List<AuthorizationEntity> findConsentedAuthorizationsByPrincipalId(
+      String principalId, ZonedDateTime lastModifiedAt, int limit) {
+    return lastModifiedAt == null
+        ? findFirstConsentedAuthorizationsByPrincipalId(principalId, limit)
+        : findConsentedAuthorizationsByPrincipalIdBefore(principalId, lastModifiedAt, limit);
+  }
+
+  /**
+   * The first page of {@link #findConsentedAuthorizationsByPrincipalId}.
+   *
+   * <p>The first page and the next ones are two queries: PostgreSQL cannot type a parameter that a
+   * query only compares with {@code NULL}, so {@code (:lastModifiedAt IS NULL OR ...)} fails there.
+   *
+   * @param principalId the ID of the principal (user) whose authorizations are to be retrieved.
+   * @param limit the maximum number of authorizations to retrieve.
+   * @return the most recently modified consented authorizations of the principal.
+   */
   @Query(
       value =
           """
                 SELECT *
                 FROM identity_authorizations
                 WHERE principal_id = :principalId
-                  AND (:lastModifiedAt IS NULL OR modified_at < :lastModifiedAt)
                   AND (
                     (authorization_code_value IS NOT NULL AND authorization_code_value <> '')
                     OR (access_token_value IS NOT NULL AND access_token_value <> '')
@@ -255,7 +170,35 @@ public interface JpaAuthorizationRepository
                 LIMIT :limit
                 """,
       nativeQuery = true)
-  List<AuthorizationEntity> findConsentedAuthorizationsByPrincipalId(
+  List<AuthorizationEntity> findFirstConsentedAuthorizationsByPrincipalId(
+      @Param("principalId") String principalId, @Param("limit") int limit);
+
+  /**
+   * A page of {@link #findConsentedAuthorizationsByPrincipalId} after the first one.
+   *
+   * @param principalId the ID of the principal (user) whose authorizations are to be retrieved.
+   * @param lastModifiedAt the modification time of the last authorization of the previous page.
+   * @param limit the maximum number of authorizations to retrieve.
+   * @return the consented authorizations of the principal modified before {@code lastModifiedAt}.
+   */
+  @Query(
+      value =
+          """
+                SELECT *
+                FROM identity_authorizations
+                WHERE principal_id = :principalId
+                  AND modified_at < :lastModifiedAt
+                  AND (
+                    (authorization_code_value IS NOT NULL AND authorization_code_value <> '')
+                    OR (access_token_value IS NOT NULL AND access_token_value <> '')
+                    OR (refresh_token_value IS NOT NULL AND refresh_token_value <> '')
+                  )
+                  AND authorization_grant_type = 'authorization_code'
+                ORDER BY modified_at DESC
+                LIMIT :limit
+                """,
+      nativeQuery = true)
+  List<AuthorizationEntity> findConsentedAuthorizationsByPrincipalIdBefore(
       @Param("principalId") String principalId,
       @Param("lastModifiedAt") ZonedDateTime lastModifiedAt,
       @Param("limit") int limit);

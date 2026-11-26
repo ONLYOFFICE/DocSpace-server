@@ -117,19 +117,8 @@ public class BaseTest(
     /// </summary>
     protected virtual bool NeedsLazyResources => false;
 
-    /// <summary>
-    /// True for a test class that talks to the identity service. A PostgreSQL stack has none (ASC.Identity runs on
-    /// MySQL only), so such a class is skipped there.
-    /// </summary>
-    protected virtual bool NeedsIdentity => false;
-
     public async ValueTask InitializeAsync()
     {
-        if (NeedsIdentity && fixture.MainDatabaseOnPostgreSql)
-        {
-            Assert.Skip("The class talks to the identity service, which a PostgreSQL stack does not start.");
-        }
-
         var setupSw = Stopwatch.StartNew();
 
         if (NeedsLazyResources)
@@ -207,8 +196,7 @@ public class BaseTest(
 
     public ValueTask DisposeAsync()
     {
-        // Each test owns its portal and clients; nothing is shared, so just dispose the clients. A class skipped in
-        // InitializeAsync (the identity classes on a PostgreSQL stack) has none.
+        // Each test owns its portal and clients; nothing is shared, so just dispose the clients.
         _clients?.Dispose();
         return ValueTask.CompletedTask;
     }

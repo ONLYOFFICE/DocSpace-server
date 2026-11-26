@@ -43,8 +43,6 @@ public abstract class OAuth2TestBase(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    protected override bool NeedsIdentity => true;
-
     /// <summary>A minimal valid PNG data URI — the identity service validates the logo format.</summary>
     protected const string OAuthLogo =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";

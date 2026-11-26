@@ -121,10 +121,9 @@ switch (launchProfile)
             .AddProject<ASC_Data_Backup>(Constants.BackupPort)
             .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
             .AddSocketIO()
+            .AddIdentity()
             // The chat surface (/api/2.0/ai) for the AI chat tests, which stand in for the model with a WireMock.
             .AddAiChat();
-
-        AddIdentity();
 
         break;
     case "integration-test-billing":
@@ -252,9 +251,8 @@ switch (launchProfile)
             .AddSsoAuth()
             .AddDocumentAgent()
             .AddAiChat()
-            .AddWebDav();
-
-        AddIdentity();
+            .AddWebDav()
+            .AddIdentity();
 
         break;
 }
@@ -301,12 +299,3 @@ if (HostPorts.FreePorts)
 }
 
 await builder.Build().RunAsync();
-
-// ASC.Identity (Java, Flyway) has schemas for MySQL and DynamoDB only, and reads the MySQL settings of the stack.
-void AddIdentity()
-{
-    if (!mainDbOnPostgres)
-    {
-        configurator.AddIdentity();
-    }
-}

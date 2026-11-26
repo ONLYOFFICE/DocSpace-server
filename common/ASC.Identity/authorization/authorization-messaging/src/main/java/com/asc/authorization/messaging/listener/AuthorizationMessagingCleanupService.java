@@ -26,6 +26,12 @@ public class AuthorizationMessagingCleanupService {
   private final JpaAuthorizationRepository jpaAuthorizationRepository;
   private final JpaConsentRepository jpaConsentRepository;
 
+  /**
+   * Deletes in chunks of {@code chunkSize}, each in its own short transaction, until a chunk
+   * deletes nothing. A chunk can delete fewer rows than its size while matching rows are left: on
+   * PostgreSQL its rows are picked before they are locked, and rows another instance deletes in the
+   * meantime are not replaced by others, so a short chunk does not end the removal.
+   */
   private void handleChunkedDelete(IntUnaryOperator chunk, int chunkSize) {
     var template = new TransactionTemplate(transactionManager);
     template.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
@@ -36,7 +42,7 @@ public class AuthorizationMessagingCleanupService {
     do {
       deleted = Objects.requireNonNullElse(template.execute(_ -> chunk.applyAsInt(chunkSize)), 0);
       total += deleted;
-    } while (deleted >= chunkSize);
+    } while (deleted > 0);
 
     if (total > 0) log.info("Chunked removal of {} items", total);
   }

@@ -60,6 +60,10 @@ mysql-connector-j   - MySQL Connector/J. (https://github.com/mysql/mysql-connect
 License:              GPL 2
 License File:         mysql-connector-j.license
 
+postgresql          - PostgreSQL JDBC Driver. (https://github.com/pgjdbc/pgjdbc)
+License:              BSD 2-Clause
+License File:         postgresql.license
+
 resilience4j-spring-boot3 - Resilience4j is a fault tolerance library designed for Java8 and functional programming. (https://github.com/resilience4j/resilience4j)
 License:              Apache 2.0
 License File:         resilience4j.license

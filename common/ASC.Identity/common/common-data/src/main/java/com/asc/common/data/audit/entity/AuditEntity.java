@@ -51,7 +51,9 @@ import lombok.NoArgsConstructor;
 public class AuditEntity {
 
   /** The unique identifier for the audit event. */
-  @Id private long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id;
 
   /** The initiator of the audit event. */
   private String initiator;

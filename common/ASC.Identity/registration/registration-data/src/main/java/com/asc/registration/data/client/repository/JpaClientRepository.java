@@ -149,17 +149,54 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
    * @param limit the maximum number of client entities to return
    * @return a list of matching {@link ClientCursor} rows
    */
+  default List<ClientCursor> findAllByTenantIdWithCursor(
+      long tenantId, ZonedDateTime lastCreatedOn, int limit) {
+    return lastCreatedOn == null
+        ? findFirstPageByTenantId(tenantId, limit)
+        : findPageByTenantIdBefore(tenantId, lastCreatedOn, limit);
+  }
+
+  /**
+   * The first page of {@link #findAllByTenantIdWithCursor}.
+   *
+   * <p>The first page and the next ones are two queries: PostgreSQL cannot type a parameter that a
+   * query only compares with {@code NULL}, so {@code (:cursor IS NULL OR ...)} fails there.
+   *
+   * @param tenantId the tenant identifier
+   * @param limit the maximum number of client entities to return
+   * @return the most recent clients of the tenant
+   */
   @Query(
       """
       SELECT c.clientId AS clientId, c.createdOn AS createdOn
       FROM ClientEntity c
       WHERE c.tenantId = :tenantId
         AND c.invalidated = false
-        AND (:lastCreatedOn IS NULL OR c.createdOn < :lastCreatedOn)
       ORDER BY c.createdOn DESC
       LIMIT :limit
       """)
-  List<ClientCursor> findAllByTenantIdWithCursor(
+  List<ClientCursor> findFirstPageByTenantId(
+      @Param("tenantId") long tenantId, @Param("limit") int limit);
+
+  /**
+   * A page of {@link #findAllByTenantIdWithCursor} after the first one.
+   *
+   * @param tenantId the tenant identifier
+   * @param lastCreatedOn the creation time of the last client of the previous page
+   * @param limit the maximum number of client entities to return
+   * @return the clients of the tenant created before {@code lastCreatedOn}, newest first
+   */
+  @Query(
+      """
+      SELECT c.clientId AS clientId, c.createdOn AS createdOn
+      FROM ClientEntity c
+      WHERE c.tenantId = :tenantId
+        AND c.invalidated = false
+        AND c.createdOn < :lastCreatedOn
+      ORDER BY c.createdOn DESC
+      LIMIT :limit
+      """)
+  List<ClientCursor> findPageByTenantIdBefore(
       @Param("tenantId") long tenantId,
       @Param("lastCreatedOn") ZonedDateTime lastCreatedOn,
       @Param("limit") int limit);
@@ -178,18 +215,60 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
    * @param limit the maximum number of client entities to return
    * @return a list of matching {@link ClientCursor} rows
    */
+  default List<ClientCursor> findAllByTenantIdAndCreatedByWithCursor(
+      long tenantId, String createdBy, ZonedDateTime lastCreatedOn, int limit) {
+    return lastCreatedOn == null
+        ? findFirstPageByTenantIdAndCreatedBy(tenantId, createdBy, limit)
+        : findPageByTenantIdAndCreatedByBefore(tenantId, createdBy, lastCreatedOn, limit);
+  }
+
+  /**
+   * The first page of {@link #findAllByTenantIdAndCreatedByWithCursor}.
+   *
+   * <p>The first page and the next ones are two queries: PostgreSQL cannot type a parameter that a
+   * query only compares with {@code NULL}, so {@code (:cursor IS NULL OR ...)} fails there.
+   *
+   * @param tenantId the tenant identifier
+   * @param createdBy the identifier of the creator of the client entities
+   * @param limit the maximum number of client entities to return
+   * @return the most recent clients the user created in the tenant
+   */
   @Query(
       """
       SELECT c.clientId AS clientId, c.createdOn AS createdOn
       FROM ClientEntity c
       WHERE c.tenantId = :tenantId
         AND c.invalidated = false
-        AND (:lastCreatedOn IS NULL OR c.createdOn < :lastCreatedOn)
         AND c.createdBy = :createdBy
       ORDER BY c.createdOn DESC
       LIMIT :limit
       """)
-  List<ClientCursor> findAllByTenantIdAndCreatedByWithCursor(
+  List<ClientCursor> findFirstPageByTenantIdAndCreatedBy(
+      @Param("tenantId") long tenantId,
+      @Param("createdBy") String createdBy,
+      @Param("limit") int limit);
+
+  /**
+   * A page of {@link #findAllByTenantIdAndCreatedByWithCursor} after the first one.
+   *
+   * @param tenantId the tenant identifier
+   * @param createdBy the identifier of the creator of the client entities
+   * @param lastCreatedOn the creation time of the last client of the previous page
+   * @param limit the maximum number of client entities to return
+   * @return the clients the user created in the tenant before {@code lastCreatedOn}, newest first
+   */
+  @Query(
+      """
+      SELECT c.clientId AS clientId, c.createdOn AS createdOn
+      FROM ClientEntity c
+      WHERE c.tenantId = :tenantId
+        AND c.invalidated = false
+        AND c.createdOn < :lastCreatedOn
+        AND c.createdBy = :createdBy
+      ORDER BY c.createdOn DESC
+      LIMIT :limit
+      """)
+  List<ClientCursor> findPageByTenantIdAndCreatedByBefore(
       @Param("tenantId") long tenantId,
       @Param("createdBy") String createdBy,
       @Param("lastCreatedOn") ZonedDateTime lastCreatedOn,

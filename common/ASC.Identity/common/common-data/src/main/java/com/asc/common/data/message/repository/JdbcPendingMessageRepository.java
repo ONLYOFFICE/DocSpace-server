@@ -33,6 +33,7 @@
 
 package com.asc.common.data.message.repository;
 
+import com.asc.common.data.dialect.DatabaseDialect;
 import com.asc.common.service.ports.output.repository.PendingMessageRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -42,20 +43,65 @@ import org.springframework.stereotype.Repository;
 /**
  * Keeps messages the broker could not take in {@code identity_pending_messages} until the relay
  * sends them again.
+ *
+ * <p>The times are the database's own, in UTC: {@code UTC_TIMESTAMP(6)} on MySQL, whose {@code
+ * datetime(6)} columns carry no zone, and the statement's start on PostgreSQL, whose {@code
+ * timestamptz} columns do.
  */
 @Repository
 @RequiredArgsConstructor
 public class JdbcPendingMessageRepository implements PendingMessageRepository {
+  private static final String MYSQL_SAVE =
+      """
+      INSERT INTO identity_pending_messages
+          (exchange_name, routing_key, headers, body, attempts, deliver_at, created_at)
+      VALUES (?, ?, ?, ?, 0, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6))
+      """;
+  private static final String POSTGRESQL_SAVE =
+      """
+      INSERT INTO identity_pending_messages
+          (exchange_name, routing_key, headers, body, attempts, deliver_at, created_at)
+      VALUES (?, ?, ?, ?, 0, statement_timestamp(), statement_timestamp())
+      """;
+  private static final String MYSQL_FIND_DUE =
+      """
+      SELECT id, exchange_name, routing_key, headers, body, attempts,
+             TIMESTAMPDIFF(SECOND, created_at, UTC_TIMESTAMP(6)) AS age_seconds
+      FROM identity_pending_messages
+      WHERE deliver_at <= UTC_TIMESTAMP(6)
+      ORDER BY id
+      LIMIT ?
+      """;
+  private static final String POSTGRESQL_FIND_DUE =
+      """
+      SELECT id, exchange_name, routing_key, headers, body, attempts,
+             CAST(FLOOR(EXTRACT(EPOCH FROM statement_timestamp() - created_at)) AS bigint)
+                 AS age_seconds
+      FROM identity_pending_messages
+      WHERE deliver_at <= statement_timestamp()
+      ORDER BY id
+      LIMIT ?
+      """;
+  private static final String MYSQL_POSTPONE =
+      """
+      UPDATE identity_pending_messages
+      SET attempts = attempts + 1, deliver_at = UTC_TIMESTAMP(6) + INTERVAL ? SECOND
+      WHERE id = ?
+      """;
+  private static final String POSTGRESQL_POSTPONE =
+      """
+      UPDATE identity_pending_messages
+      SET attempts = attempts + 1, deliver_at = statement_timestamp() + ? * INTERVAL '1 second'
+      WHERE id = ?
+      """;
+
   private final JdbcTemplate jdbcTemplate;
+  private final DatabaseDialect dialect;
 
   @Override
   public void save(String exchange, String routingKey, String headers, byte[] body) {
     jdbcTemplate.update(
-        """
-        INSERT INTO identity_pending_messages
-            (exchange_name, routing_key, headers, body, attempts, deliver_at, created_at)
-        VALUES (?, ?, ?, ?, 0, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6))
-        """,
+        dialect == DatabaseDialect.POSTGRESQL ? POSTGRESQL_SAVE : MYSQL_SAVE,
         exchange,
         routingKey,
         headers,
@@ -65,14 +111,7 @@ public class JdbcPendingMessageRepository implements PendingMessageRepository {
   @Override
   public List<PendingMessage> findDue(int limit) {
     return jdbcTemplate.query(
-        """
-        SELECT id, exchange_name, routing_key, headers, body, attempts,
-               TIMESTAMPDIFF(SECOND, created_at, UTC_TIMESTAMP(6)) AS age_seconds
-        FROM identity_pending_messages
-        WHERE deliver_at <= UTC_TIMESTAMP(6)
-        ORDER BY id
-        LIMIT ?
-        """,
+        dialect == DatabaseDialect.POSTGRESQL ? POSTGRESQL_FIND_DUE : MYSQL_FIND_DUE,
         (rs, row) ->
             new PendingMessage(
                 rs.getLong("id"),
@@ -93,11 +132,7 @@ public class JdbcPendingMessageRepository implements PendingMessageRepository {
   @Override
   public void postpone(long id, long delaySeconds) {
     jdbcTemplate.update(
-        """
-        UPDATE identity_pending_messages
-        SET attempts = attempts + 1, deliver_at = UTC_TIMESTAMP(6) + INTERVAL ? SECOND
-        WHERE id = ?
-        """,
+        dialect == DatabaseDialect.POSTGRESQL ? POSTGRESQL_POSTPONE : MYSQL_POSTPONE,
         delaySeconds,
         id);
   }

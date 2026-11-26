@@ -7,9 +7,10 @@ spring:
       dynamodb:
         enabled: false
   datasource:
-    driver-class-name: ${JDBC_DRIVER:com.mysql.cj.jdbc.Driver}
+    # Left empty, the driver follows the protocol of the URL (MySQL or PostgreSQL).
+    driver-class-name: ${JDBC_DRIVER:}
     password: ${JDBC_PASSWORD:dev}
-    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
+    url: jdbc:${JDBC_PROTOCOL:mysql}://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
     username: ${JDBC_USER_NAME:dev}
     hikari:
       maximum-pool-size: ${JDBC_POOL_MAX_SIZE:20}
@@ -22,7 +23,6 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
         generate_statistics: ${JPA_HIBERNATE_GENERATE_STATS:false}
         jdbc:
           batch_size: ${JDBC_BATCH_SIZE:100}

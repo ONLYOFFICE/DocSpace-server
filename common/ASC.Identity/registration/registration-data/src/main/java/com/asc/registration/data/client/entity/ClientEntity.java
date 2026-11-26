@@ -43,6 +43,8 @@ import java.util.Set;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -72,8 +74,15 @@ public class ClientEntity implements Serializable {
   /** The name of the client. */
   private String name;
 
-  /** The description of the client. */
-  @Lob private String description;
+  /**
+   * The description of the client.
+   *
+   * <p>The long texts are bound as plain strings, not as {@code @Lob}: Hibernate's PostgreSQL
+   * dialect binds a {@code @Lob} string as a CLOB, which the PostgreSQL driver keeps as a large
+   * object, while these columns are {@code citext} there ({@code longtext} on MySQL).
+   */
+  @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+  private String description;
 
   /** The logo for the client. */
   @Column(name = "logo", columnDefinition = "LONGTEXT")
@@ -89,17 +98,17 @@ public class ClientEntity implements Serializable {
   private Set<AuthenticationMethod> authenticationMethods;
 
   /** The URL for the client's website. */
-  @Lob
+  @JdbcTypeCode(SqlTypes.LONGVARCHAR)
   @Column(name = "website_url")
   private String websiteUrl;
 
   /** The URL for the client's terms. */
-  @Lob
+  @JdbcTypeCode(SqlTypes.LONGVARCHAR)
   @Column(name = "terms_url")
   private String termsUrl;
 
   /** The URL for the client's policy. */
-  @Lob
+  @JdbcTypeCode(SqlTypes.LONGVARCHAR)
   @Column(name = "policy_url")
   private String policyUrl;
 
@@ -122,7 +131,7 @@ public class ClientEntity implements Serializable {
   private Set<String> allowedOrigins;
 
   /** The logout redirect URI for the client. */
-  @Lob
+  @JdbcTypeCode(SqlTypes.LONGVARCHAR)
   @Column(name = "logout_redirect_uri")
   private String logoutRedirectUri;
 

@@ -52,6 +52,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private const string PostgresPoolOptions = "Pooling=true;Maximum Pool Size=300;Timeout=30";
 
     private MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; set; }
+
+    // The main PostgreSQL database as Aspire hands it out (Host, Port, Username, Password, Database), for Identity.
+    private DbConnectionStringBuilder? MainPostgresConnectionStringBuilder { get; set; }
     public Uri? RabbitMqUri { get; private set; }
     public RedisConfig? Redis { get; private set; }
 
@@ -82,7 +85,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public bool HasOtelCollector => OtelCollectorResource != null;
 
-    /// <summary>Whether the main database was added on PostgreSQL (AddMainPostgres), which leaves Identity out of the graph.</summary>
+    /// <summary>Whether the main database was added on PostgreSQL (AddMainPostgres).</summary>
     public bool MainDatabaseOnPostgreSql => MainPostgresDatabaseResource != null;
 
     /// <summary>
@@ -184,9 +187,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     /// The main database on PostgreSQL, a server of its own next to the forms one: the forms server is set up for the
     /// read-only roles of the portals (AddFormsPostgres), and the main schema would share its limits. The migration
     /// runner applies migrations/postgre; the services get the provider name with the connection string, over the
-    /// MySQL entry of buildtools/config. The editors keep their bundled database and Identity is left out of the graph
-    /// (both read only MySQL settings from here); IdentityClient is pointed elsewhere in ProjectConfigurator. Code of the
-    /// services that is written for MySQL only fails on this stack (CLAUDE.md, Testing, lists what is known).
+    /// MySQL entry of buildtools/config. The editors keep their bundled database (they read only MySQL settings from
+    /// here); Identity gets this database through AddIdentityEnv. Code of the services that is written for MySQL only
+    /// fails on this stack (CLAUDE.md, Testing, lists what is known).
     /// </summary>
     public ConnectionStringManager AddMainPostgres(bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false)
     {
@@ -222,6 +225,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         // The same name as the MySQL database: the test fixtures ask for the connection string of "docspace".
         MainPostgresDatabaseResource = postgresResourceBuilder.AddDatabase("docspace");
+
+        builder.Eventing.Subscribe(MainPostgresDatabaseResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
+        {
+            var connectionString = await MainPostgresDatabaseResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
+            if (connectionString != null && MainPostgresConnectionStringBuilder == null)
+            {
+                MainPostgresConnectionStringBuilder = new DbConnectionStringBuilder { ConnectionString = connectionString };
+            }
+        });
 
         AddMigrate(MainPostgresDatabaseResource, "PostgreSql");
 
@@ -1010,11 +1022,30 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithEnvironment("JAVA_TOOL_OPTIONS", ContainerMemoryExtensions.IdentityJavaOptions)
             .WithMemoryLimit(ContainerMemoryExtensions.IdentityLimit);
 
-        resourceBuilder
-            .WithEnvironment("JDBC_URL", () => MySqlConnectionStringBuilder != null ? $"{SubstituteLocalhost(MySqlConnectionStringBuilder.Server)}:{MySqlConnectionStringBuilder.Port}" : string.Empty)
-            .WithEnvironment("JDBC_DATABASE", () => MySqlConnectionStringBuilder?.Database ?? string.Empty)
-            .WithEnvironment("JDBC_USER_NAME", () => MySqlConnectionStringBuilder?.UserID ?? string.Empty)
-            .WithEnvironment("JDBC_PASSWORD", () => MySqlConnectionStringBuilder?.Password ?? string.Empty);
+        if (MainDatabaseOnPostgreSql)
+        {
+            // The driver and the Hibernate dialect follow the URL. stringtype=unspecified lets the server type the
+            // string parameters by their columns: sent as varchar, a comparison with a citext column is resolved as
+            // text = text, which ignores the citext index and the letter case that the MySQL collations ignore, and
+            // a string bound to a uuid column (audit_events.user_id, login_events.user_id) fails.
+            resourceBuilder
+                .WithEnvironment("JDBC_PROTOCOL", "postgresql")
+                .WithEnvironment("JDBC_PARAMETERS", "stringtype=unspecified")
+                .WithEnvironment("JDBC_URL", () => MainPostgresConnectionStringBuilder != null
+                    ? $"{SubstituteLocalhost(PostgresValue("Host"))}:{PostgresValue("Port")}"
+                    : string.Empty)
+                .WithEnvironment("JDBC_DATABASE", () => PostgresValue("Database"))
+                .WithEnvironment("JDBC_USER_NAME", () => PostgresValue("Username"))
+                .WithEnvironment("JDBC_PASSWORD", () => PostgresValue("Password"));
+        }
+        else
+        {
+            resourceBuilder
+                .WithEnvironment("JDBC_URL", () => MySqlConnectionStringBuilder != null ? $"{SubstituteLocalhost(MySqlConnectionStringBuilder.Server)}:{MySqlConnectionStringBuilder.Port}" : string.Empty)
+                .WithEnvironment("JDBC_DATABASE", () => MySqlConnectionStringBuilder?.Database ?? string.Empty)
+                .WithEnvironment("JDBC_USER_NAME", () => MySqlConnectionStringBuilder?.UserID ?? string.Empty)
+                .WithEnvironment("JDBC_PASSWORD", () => MySqlConnectionStringBuilder?.Password ?? string.Empty);
+        }
 
         resourceBuilder
             .WithEnvironment("RABBIT_HOST", () => RabbitMqUri != null ? $"{SubstituteLocalhost(RabbitMqUri.Host)}" : string.Empty)
@@ -1031,6 +1062,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         AddWaitFor(resourceBuilder, includeFormsPostgres: false);
     }
+
+    private string PostgresValue(string key) =>
+        MainPostgresConnectionStringBuilder != null && MainPostgresConnectionStringBuilder.TryGetValue(key, out var value)
+            ? Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty
+            : string.Empty;
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
 }
