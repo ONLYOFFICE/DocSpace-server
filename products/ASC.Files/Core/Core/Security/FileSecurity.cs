@@ -1254,7 +1254,8 @@ public class FileSecurity(
         if (e.RootFolderType == FolderType.AiHub &&
             parentFolders.Exists(f => f.FolderType == FolderType.AiProjectRoom) &&
             (e.CreateBy != userId ||
-             action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy)))
+             (action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy) &&
+              (file == null || action != FilesSecurityActions.ReadHistory))))
         {
             return false;
         }
