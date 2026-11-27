@@ -17,7 +17,7 @@ result to the user, without a second model and without a task that takes minutes
 - A caller has one sandbox, shared by all their conversations: a call that is not refused before the
   gateway asks it for the sandbox of the session that is the caller's user id, and the gateway answers the
   one that runs or starts one. Each conversation works in a directory of its own, `/workspace/{threadId}`.
-- The sandbox is kept by use alone: every call the gateway answers a sandbox for moves its expiry to the
+- The sandbox is kept by use alone: every call whose renewal the gateway takes moves its expiry to the
   idle lifetime of the installation's configuration plus 600 seconds, the longest command timeout, from
   now, and nothing renews it between calls. ASC.AI.Chat never deletes it, not when a thread is deleted
   either: a sandbox nobody calls expires at the gateway, and the next call starts an empty one.

@@ -27,8 +27,9 @@ See proposal.md for the motivation. What shapes the approach:
 
 - No sandbox outlives its last call by more than the idle lifetime and 600 seconds, the longest command
   timeout, with no timer and no background pass.
-- No call moves the expiry of the sandbox back: not under a command another conversation of the user runs,
-  and not into the idle time that follows a command.
+- No call moves the expiry of the sandbox back, while the instances that serve a user read one idle
+  lifetime: not under a command another conversation of the user runs, and not into the idle time that
+  follows a command.
 - At most one chat sandbox per user, however many conversations they have.
 - Any instance of ASC.AI.Chat serves any call, with nothing stored about a sandbox.
 - The sandbox never holds a credential of the portal.
@@ -59,9 +60,11 @@ hidden from the conversation.
 ### 2. The user's sandbox, found by the user's id
 
 A call that is not refused before the gateway acquires the sandbox in `app/sandbox/userSandbox.ts`. The
-refusals before it: no configuration, a call outside a thread or with a thread id that is no directory
-name, arguments that are not taken and, for a save, no folder to save into or one that cannot be read. The
-acquisition:
+refusals before it: no configuration, a tool name the adapter does not know, a call outside a thread or with a thread id that is no directory name,
+arguments that are not taken, a portal that does not say who the caller is and, for a save, no folder to save into or one that cannot be read. The last
+but one is the first step below: the caller's id is asked of the portal before anything is asked of the
+gateway. A step the gateway refuses or fails ends the call there, with the steps after it not made
+(the requirement "A failed sandbox call is a text for the model"). The acquisition:
 
 1. `GET people/@self` under the caller's session: the caller's id. The read ends with the round's signal.
 2. `Create` with that id as the session: the gateway answers the sandbox that runs for it, or starts one.
@@ -84,9 +87,11 @@ module-level map (per instance, see Context).
 The lifetime asked for and renewed is the idle lifetime plus 600 seconds, the longest timeout a command may
 ask for, and it is the same for every call, a file call too. A lifetime that added only the timeout of its
 own call was written first and dropped: a file call made ten seconds after a ten-minute command had started
-moved the expiry back by those ten minutes, under the command or into the idle time promised after it. With
-one lifetime the expiry only moves forward. The idle lifetime is 60 seconds, the gateway's shortest lifetime,
-to 3000, its longest less the 600. Nothing runs between calls, and no code path of the
+moved the expiry back by 590 seconds, under the command or into the idle time that follows it. With one
+lifetime a call moves the expiry forward, as long as the calls read one idle lifetime (Known limitations).
+The idle lifetime is 60 to 3000 seconds. The upper bound is the gateway's longest lifetime less the 600.
+The lower one is this service's choice: the gateway's shortest lifetime, a minute, is never reached by a
+lifetime with 600 seconds added. Nothing runs between calls, and no code path of the
 chat calls `Delete`: the gateway removes a sandbox whose lifetime ended. Deleting a thread is not hooked: the
 sandbox belongs to the user and serves their other conversations.
 
@@ -106,9 +111,10 @@ answers for itself (`ts-ai-failure-paths.md` §6): a 4xx says "not saved", anyth
 saved". The result names where the file went, since the three places are not the model's to guess. An
 empty file is refused: the artifacts route answers it 400, the status that also says "this conversation
 takes none", and the file would land in a folder. A title takes no path separator, no line break, no control
-character, no character that takes no room and none that turns the direction of the text: the model picks
-the title, and with U+202E a file `…fdp.html` is listed as a PDF. The joiners U+200C and U+200D are taken:
-Persian and Indic names are written with them.
+character and no character that is not displayed: Unicode's Default_Ignorable_Code_Point, which holds the
+marks that turn the direction of a text and the zero-width ones, and the three interlinear annotation
+marks. The model picks the title, and with U+202E a file `…fdp.html` is listed as a PDF. The joiners
+U+200C and U+200D are taken: Persian and Indic names are written with them.
 
 ### 6. Configuration
 
@@ -139,8 +145,8 @@ Read from the gateway's source (`document-agent`, `gateway/internal/session/serv
   calls of one session share one creation.
 - **Profile:** a session is the token's profile's own, so a chat sandbox is never a plugin task's.
 - **Lifetime:** a `ttl` of a minute to the gateway's maximum, an hour by default; outside it the call is
-  refused. The idle lifetime ends at 3000 seconds so that it and the 600 added to it stay within the hour,
-  and starts at that minute.
+  refused. The idle lifetime ends at 3000 seconds so that it and the 600 added to it stay within the hour;
+  the minute is never reached (decision 3).
   `Renew` of a sandbox that does not run is refused as `FAILED_PRECONDITION`, read here as "gone".
 - **Image:** a shell and a writable `/workspace` at least. The description of `sandbox_exec` tells the model
   to expect the gateway's example chat image (python3 with libraries for data and office files) and to
@@ -183,18 +189,23 @@ ordinary workspace files only.
 - **A command that starts very late can be cut.** One the gateway starts later than the idle lifetime after
   its renewal, and that then runs to a timeout of 600 seconds, can outlast the sandbox when no other call
   renews it: the lifetime counts from the renewal, not from the command's start.
+- **Two idle lifetimes can move the expiry back.** The idle lifetime is read by each instance at each call:
+  when two instances that serve a user read different ones, or the setting is lowered while a sandbox runs,
+  a call renews the sandbox to an earlier expiry than the call before it.
 - **A refusal of a directory reads as a sandbox that is gone.** The gateway's `not_found` and
   `failed_precondition` are read as "gone" for every call; whether it answers one of them to a `MakeDir`
   whose path it refuses (a parent that is a file) is not known until task 4.1.
-- **A name that looks like another is not caught.** A title is refused its invisible and text-direction
-  characters, not a letter of another script that looks the same.
+- **A name that looks like another is not caught.** A title is refused the characters Unicode lists as not
+  displayed, the joiners U+200C and U+200D excepted; a letter of another script that looks the same, and a
+  joiner put where no script wants one, are taken.
 - **A stopped reply does not stop a save.** The folder lookup and the upload take no signal: a reply stopped
   after the file was read from the sandbox still saves it.
 - **A project conversation still needs a folder.** The folder is resolved before the save, so a caller with
   no folder to create in and no My documents is refused although the artifacts would take the file.
 - **No test drives a round**: that the default permission mode does not pause a call rests on
   `requireApproval: false` and the library's rule, and that deleting a thread deletes no sandbox on there
-  being no call of `Delete` in the chat's code.
+  being no call of `Delete` in the chat's code. The suite of the AI service can script a model's tool call;
+  the tests it would take are group 6 of tasks.md, not written.
 - **A deleted thread's directory stays** until the sandbox expires.
 - **Not run against a real gateway**: tested against the fake gateway of the plugin agent's tests (task 4.1).
 

@@ -12,7 +12,7 @@ reach no sandbox.
 
 #### Scenario: Call outside a thread
 
-- **WHEN** the model calls a sandbox tool in a round that names no thread, or an empty thread id
+- **WHEN** the model calls a sandbox tool in a round that names no thread and whose request names none, or that names an empty thread id
 - **THEN** the model is told that a sandbox belongs to a conversation, and no request is made
 
 #### Scenario: Configured installation
@@ -34,9 +34,9 @@ reach no sandbox.
 
 A sandbox tool call that is not refused before the gateway SHALL ask it for the sandbox of the session that
 is the caller's user id, renew the sandbox it answers, and make the directory `/workspace/{threadId}` in
-it. Calls of different threads of one user SHALL reach the same sandbox, each in its own directory. A thread
-id that is not a name of ASCII letters, digits, `-` and `_`, 100 characters at most, SHALL answer an error
-and reach nobody.
+it; a step the gateway refuses or fails SHALL end the call. Calls of different threads of one user SHALL
+reach the same sandbox. A thread id that is not a name of ASCII letters, digits, `-` and `_`, 1 to 100
+characters, SHALL answer an error and reach nobody.
 
 #### Scenario: Call in a thread
 
@@ -53,15 +53,15 @@ and reach nobody.
 - **WHEN** the thread id contains `/` or a space, is `..`, or has 101 characters
 - **THEN** the model is told that the conversation cannot have a directory and no request is made
 
-#### Scenario: Thread id of the longest length
+#### Scenario: Thread id of the shortest and the longest length
 
-- **WHEN** the thread id has 100 characters
+- **WHEN** the thread id has 1 character or 100 characters
 - **THEN** the command runs in `/workspace/{threadId}`
 
 ### Requirement: The sandbox is kept by use and never deleted by the chat
 
-A sandbox tool call SHALL ask for the sandbox, and renew the one it is answered, with one lifetime
-whatever the call: the installation's idle lifetime, a whole number of 60 to 3000 seconds and 900 by
+A sandbox tool call that is not refused before the gateway SHALL ask for the sandbox, and renew the one it
+is answered, with one lifetime whatever the call: the installation's idle lifetime, a whole number of 60 to 3000 seconds and 900 by
 default, plus 600 seconds, the longest command timeout. Nothing else SHALL renew it, and the chat SHALL NOT
 ask the gateway to delete it, on a failed call and on thread deletion alike.
 
@@ -229,11 +229,11 @@ replace the file. Other arguments SHALL answer an error before any sandbox is re
 
 ### Requirement: Saving a file of the sandbox into the workspace
 
-`sandbox_save_file` SHALL take `path` and an optional `title` of 1 to 165 characters, not `.` or `..` and
-without `/`, `\`, line breaks, control, invisible or text-direction characters, the last name of `path` by
-default. It SHALL save the file, of 1 to 33554432 bytes, as a new file under the caller's session where a
-result of `document_agent` goes, and answer its id, title, size and place. A refused upload SHALL be
-answered as "not saved"; any other failed upload as "may have been saved".
+`sandbox_save_file` SHALL take `path` and an optional `title`, the name in `path` by default: 1 to 165
+characters, not `.` or `..`, without `/`, `\`, line breaks, control characters and undisplayed ones but
+U+200C and U+200D. It SHALL save the file, of 1 to 33554432 bytes, as a new file under the caller's session
+where a result of `document_agent` goes, and answer its id, title, size and place. A refused upload SHALL be
+answered as "not saved", any other failed one as "may have been saved".
 
 #### Scenario: Saved
 
@@ -262,12 +262,12 @@ answered as "not saved"; any other failed upload as "may have been saved".
 
 #### Scenario: Title with a joiner
 
-- **WHEN** `title` contains U+200C, as a Persian name does
+- **WHEN** `title` contains U+200C, as a Persian name does, or U+200D, as a Malayalam one does
 - **THEN** the file is saved under that title
 
 #### Scenario: Bad title
 
-- **WHEN** `title` is blank, `.`, `..`, has 166 characters, or contains `/`, `\`, a line break, U+007F, U+0085, U+2028, U+202E, U+2066, U+200B, U+00AD, U+FEFF or U+E0041
+- **WHEN** `title` is blank, `.`, `..`, has 166 characters, or contains `/`, `\`, a line break, U+007F, U+0085, U+2028, U+202E, U+2066, U+061C, U+200E, U+200F, U+200B, U+00AD, U+FEFF, U+2060, U+2062, U+FE0F, U+3164, U+FFF9 or U+E0041
 - **THEN** the model is told what a title is, and neither a folder nor a sandbox is asked for
 
 #### Scenario: No folder to save into
@@ -285,10 +285,20 @@ answered as "not saved"; any other failed upload as "may have been saved".
 - **WHEN** the file has 0 bytes
 - **THEN** the result says that it is empty and that no file was saved, and nothing is uploaded
 
-#### Scenario: File absent or too large
+#### Scenario: File absent
 
-- **WHEN** the path does not exist in the sandbox, or the file is over 33554432 bytes
-- **THEN** the result says so and that no file was saved
+- **WHEN** the path does not exist in the sandbox
+- **THEN** the result says that it does not exist and that no file was saved
+
+#### Scenario: File over the size limit
+
+- **WHEN** the file has 33554433 bytes
+- **THEN** the result says that it is over 33554432 bytes and that no file was saved
+
+#### Scenario: File of one byte
+
+- **WHEN** the file has 1 byte
+- **THEN** it is saved and the result names 1 byte
 
 #### Scenario: Workspace refuses
 
