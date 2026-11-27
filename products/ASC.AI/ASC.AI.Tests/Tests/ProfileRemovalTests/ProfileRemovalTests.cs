@@ -239,7 +239,7 @@ public class ProfileRemovalTests(AspireAppFixture fixture) : ThreadFilesTestBase
     private async Task<int> CreateProjectAsAsync(User projectOwner)
     {
         await FilesHttpClient.Authenticate(projectOwner);
-        var projectId = await AgentsTests.AiProjects.CreateAsync(RoomsApi);
+        var projectId = await CreateAiProjectAsync();
         await FilesHttpClient.Authenticate(Owner);
 
         return projectId;

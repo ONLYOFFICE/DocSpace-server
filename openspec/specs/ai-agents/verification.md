@@ -473,9 +473,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Linked file is listed; copy outlives the original; two messages of one thread; threads of one project; thread outside a project (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:239,258,283,298,315` | TEST-CONFIRMED |
 | Deleted draft in a project (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:333` | TEST-CONFIRMED |
 | **Privacy of the contents of a project** |  |  |
-| Artifact, thread folder and file not sent of another member 403 to a member, the owner and a DocSpace admin (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesStrangerAccessTests.cs:51,67,83,100,116,132` | TEST-CONFIRMED |
+| Artifact, thread folder and file not sent of another member 403 to a member, the owner and a DocSpace admin (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesStrangerAccessTests.cs:51,67,83,99,116,132,148` | TEST-CONFIRMED |
 | Creator reads, downloads and copies (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:41,52,63` | TEST-CONFIRMED |
-| Creator cannot change the file (scenario); creator opens the editor (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:78,92,107,132,146`; `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:121` | TEST-CONFIRMED |
+| Creator cannot change the file (scenario); creator opens the editor (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:78,92,107,154,168`; `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:121,143` | TEST-CONFIRMED |
+| Version list of an artifact (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:132`; `T/ThreadFilesAccessTests/ThreadFilesStrangerAccessTests.cs:83` | TEST-CONFIRMED |
 | **Used space of a project** |  |  |
 | Used space of a project (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:51`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:371-374` | TEST-CONFIRMED |
 | Used space in a room webhook (scenario) | `web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/WebhookEntryContextTests.cs:255`; `products/ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDtoHelper.cs` (`RestrictForSubscriberAsync`) | TEST-CONFIRMED [run: PASS] |

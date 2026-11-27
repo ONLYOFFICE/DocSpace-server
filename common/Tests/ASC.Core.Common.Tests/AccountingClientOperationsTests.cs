@@ -81,6 +81,30 @@ public class AccountingClientOperationsTests
         query["serviceName"].Should().Be("backup");
     }
 
+    // The accounting service reads the zone from timeZone; under any other name it splits the months in its own zone.
+    [Fact]
+    public async Task GetCustomerMonthlyUsage_SendsTheTimeZoneQueryParameter()
+    {
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, "[]"));
+
+        var filter = new MonthlyUsageFilter
+        {
+            UtcStartDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            UtcEndDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+            TimeZone = "Europe/Riga"
+        };
+
+        await client.GetCustomerMonthlyUsageAsync("portal-1", filter);
+
+        handler.LastMethod.Should().Be(HttpMethod.Get);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-1/usage/monthly");
+
+        var query = ParseQuery(handler.LastUri);
+        query["timeZone"].Should().Be("Europe/Riga");
+        query["startDate"].Should().Be("2026-01-01T00:00:00.0000000Z");
+        query["endDate"].Should().Be("2026-03-01T00:00:00.0000000Z");
+    }
+
     [Fact]
     public async Task GetCustomerOperationPages_AdvancesOffsetByItemsUntilTotalQuantity()
     {

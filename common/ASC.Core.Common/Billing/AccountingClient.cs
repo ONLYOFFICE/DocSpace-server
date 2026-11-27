@@ -620,7 +620,10 @@ public class OperationFilter : PagedFilter
 /// </summary>
 public class MonthlyUsageFilter : DateRangeFilter
 {
-    public string TimeZome { get; init; }
+    /// <summary>
+    /// The time zone the accounting service splits the usage into months by, sent as the timeZone query parameter.
+    /// </summary>
+    public string TimeZone { get; init; }
 }
 
 /// <summary>
