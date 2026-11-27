@@ -21,7 +21,7 @@ describe a plugin in the chat and get it built, checked and installed without le
   configuration and uses it through its existing API (design.md, "What the sandbox is expected to give"). Its texts are read by the model from the service; its scripts and
   templates are copied into the sandbox when a task starts.
 - A package is taken from the sandbox only after the project built, passed its type check and passed the
-  skill's validator. The task leaves two new files in the user's My documents, the plugin package and an archive
+  skill's validator. The task leaves two new files in the user's workspace, the plugin package and an archive
   of its sources, and installs nothing.
 - A follow-up request ("add a button", "fix this") is a new task that starts from a sources archive of an
   earlier one, named by its file id.

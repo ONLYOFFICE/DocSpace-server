@@ -147,11 +147,9 @@ our own, two more dependencies and a generated file to keep in step with another
    bounded and checked for its shape, since they go into the result the chat model reads); read
    `dist/plugin.zip`; archive the project without `node_modules`, `dist` and `.git` inside the sandbox and
    read that. Either file over 32 MiB fails the gate.
-4. Save both files under the caller's session into the caller's My documents, always: a plugin is asked
-   for from the plugins page of the settings as well, where no folder is open, and its package is the
-   admin's own file until it is installed, so it follows neither the folder the chat is opened in nor the
-   artifacts of an AI project's conversation, as a result of `document_agent` does. The section is looked
-   up before the sandbox exists. Each save answers for itself: a refusal says "not saved", an unknown answer "may have been
+4. Save both files under the caller's session where `document_agent` would (among the artifacts of a
+   conversation of an AI project, else the current folder when the caller may create there, else My
+   documents). Each save answers for itself: a refusal says "not saved", an unknown answer "may have been
    saved", and the package alone is returned with a warning when only the sources fail.
 
 What the gate is not: a defence against the model. The commands run in the sandbox, where the model can
