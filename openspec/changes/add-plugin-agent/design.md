@@ -149,7 +149,8 @@ our own, two more dependencies and a generated file to keep in step with another
    read that. Either file over 32 MiB fails the gate.
 4. Save both files under the caller's session where `document_agent` would (among the artifacts of a
    conversation of an AI project, else the current folder when the caller may create there, else My
-   documents). Each save answers for itself: a refusal says "not saved", an unknown answer "may have been
+   documents; the chat beside the plugins page of the settings sends no folder, so a plugin asked for
+   there lands in My documents). Each save answers for itself: a refusal says "not saved", an unknown answer "may have been
    saved", and the package alone is returned with a warning when only the sources fail.
 
 What the gate is not: a defence against the model. The commands run in the sandbox, where the model can

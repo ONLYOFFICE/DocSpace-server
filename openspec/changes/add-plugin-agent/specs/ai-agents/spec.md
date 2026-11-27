@@ -125,6 +125,11 @@ warning.
 - **WHEN** the task runs in a conversation of an AI project
 - **THEN** both files are saved among that conversation's artifacts
 
+#### Scenario: Chat opened where no folder is open
+
+- **WHEN** the round names no folder (the chat beside the plugins page of the settings) and the conversation belongs to no AI project
+- **THEN** the two files are saved in the caller's My documents
+
 #### Scenario: Folder the caller cannot write to
 
 - **WHEN** the chat is opened in a folder where the caller may not create files and the conversation belongs to no AI project

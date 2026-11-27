@@ -532,6 +532,17 @@ describe("a plugin task", () => {
     ]);
   });
 
+  it("asks for the folder of a round that names none, which is My documents (the chat beside the plugins page)", async () => {
+    ready();
+    scriptModel([DELIVER]);
+    await inRequestContext({ authorization: "Bearer user" }, () =>
+      pluginAgentTools.callTool("plugin_agent", { task: "x" }, undefined),
+    );
+    // `resolveUploadTarget` answers My documents for no folder; tested with `document_agent`.
+    expect(vi.mocked(resolveUploadTarget)).toHaveBeenLastCalledWith(undefined);
+    expect(saveResult).toHaveBeenCalledTimes(2);
+  });
+
   it("runs on the round's own model, read with the caller's session for the portal's own provider", async () => {
     ready();
     scriptModel([DELIVER]);
