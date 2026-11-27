@@ -200,6 +200,12 @@ describe("who is offered the plugin agent", () => {
     );
     expect(description).toContain("ask_user_question");
     expect(description).toContain("need no questions");
+    // What a plugin can be and cannot do, so that the questions come with options and a
+    // request no plugin can serve is answered before a task is spent on it.
+    expect(description).toContain("a page of its own in the left sidebar");
+    expect(description).toContain("a handler of a file extension");
+    expect(description).toContain("It cannot: change anything inside an open document");
+    expect(description).toContain("offer the closest thing above instead of calling this tool");
   });
 
   it.each([

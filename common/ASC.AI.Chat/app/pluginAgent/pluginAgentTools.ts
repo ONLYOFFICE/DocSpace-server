@@ -99,17 +99,37 @@ const MAX_LAST_WORDS_CHARS = 500;
 /** A zip archive starts with the signature of its first entry, or of its end when it is empty. */
 const ZIP_SIGNATURES = ["PK\u0003\u0004", "PK\u0005\u0006"];
 
-// The agent that builds the plugin works alone and cannot ask anybody, and a task takes many
-// minutes: what the request leaves open is asked of the user by the chat's model, before the call.
+// What the chat's model has to know to talk a request through before the call: the agent that
+// builds the plugin works alone and cannot ask anybody, and a task takes many minutes. The three
+// texts retell the plugin skill (`SKILL.md` "Pick scopes", `references/plugins/scopes.md`,
+// `references/portal.md` "Limits", `references/items/event-listener-item.md`) in the words of the
+// product, not of the SDK: read them again when the skill's submodule is moved.
+const PLUGIN_CAN =
+  "A plugin runs in the user's browser inside the portal, with that user's rights. It can add: an " +
+  "action on a selected file, folder or room (context menu, also for a multi-selection); a " +
+  "'create new' entry in the main button; a profile menu entry; a tab in the info panel about the " +
+  "selected file or room; a page of its own in the left sidebar (the place for a list, a table or " +
+  "a large form); a small button in the sidebar; a handler of a file extension (its icon and what " +
+  "opening it does); a reaction to the user starting an action; a settings form for admins. A " +
+  "click can open a small dialog, a side panel, a file, room or people picker, a viewer or the " +
+  "plugin's page. It can read and write files and call the portal's API, and call external " +
+  "services by named domains.";
+const PLUGIN_CANNOT =
+  "It cannot: change anything inside an open document (that is an editor plugin, another " +
+  "product); run without a user's open tab - on a schedule, on the server, or when an operation " +
+  "finishes; keep more than 255 characters of settings; exceed a 5 MB package. When the request " +
+  "needs one of these, say so and offer the closest thing above instead of calling this tool.";
 const CLARIFY_FIRST =
   "Do not call this tool on a request that leaves the plugin unclear. First ask the user what is " +
-  "missing, with the ask_user_question tool when it is offered and in plain text otherwise: what " +
-  "the plugin does and for whom, where it appears in the interface (a context menu item, a main " +
-  "button item, a profile menu item, an info panel tab, a page of its own, a handler of a file " +
-  "type), which external services or data it uses, and which settings an admin fills in. Ask " +
-  "only what the user has not said, a few questions at a time, and call the tool once the " +
-  "answers are in, with everything the user said written into 'task'. A request that already " +
-  "says all of it, and a specific change to a plugin built earlier, need no questions.";
+  "open, with the ask_user_question tool when it is offered and in plain text otherwise, two or " +
+  "three questions at a time, with options taken from the list above: where the user starts the " +
+  "feature; what it shows or does and on what (one item or a selection, which file types); who " +
+  "sees it (everyone, admins, which roles); for an external service, its exact domains and how it " +
+  "signs in; what an admin configures. Do not ask what the user has already said, nor about " +
+  "scopes, React, versions or languages: a plugin is in English unless the user names others. " +
+  "Call the tool once the answers are in, with everything the user said written into 'task'. A " +
+  "request that already says all of it, and a specific change to a plugin built earlier, need no " +
+  "questions.";
 
 const PLUGIN_AGENT_TOOL: TMCPItem = {
   name: PLUGIN_AGENT_TOOL_NAME,
@@ -120,7 +140,7 @@ const PLUGIN_AGENT_TOOL: TMCPItem = {
     "of its sources (-src.zip). Nothing is installed. To change a plugin built earlier, pass the id of " +
     "its sources archive in 'sourcesFileId' and describe the change in 'task'. The result names both " +
     `file ids; install the package with ${INSTALL_PLUGIN_TOOL_NAME} only when the user asks for it. ` +
-    CLARIFY_FIRST,
+    `${PLUGIN_CAN} ${PLUGIN_CANNOT} ${CLARIFY_FIRST}`,
   inputSchema: {
     type: "object",
     properties: {

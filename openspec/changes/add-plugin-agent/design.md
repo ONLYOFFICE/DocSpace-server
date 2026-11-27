@@ -83,11 +83,20 @@ The model's tools:
 | `read_skill` | a file of the skill's `SKILL.md` and `references/`, read from the service's own disk |
 | `deliver_plugin` | runs the gate of decision 5 and ends the task when it passes |
 
-The sub-agent can ask nobody (the nudge above), so questions belong before the call: the description of
-`plugin_agent` tells the chat's model to ask the user what a request leaves open (what the plugin does and
-for whom, where it appears, which services and settings it needs), with the chat's own `ask_user_question`
-tool when the client offers it, and to call the tool once the answers are in. This is guidance to a model,
-not a check of the service: a call with a short `task` still starts a task.
+The sub-agent can ask nobody (the nudge above), so questions belong before the call. The description of
+`plugin_agent` gives the chat's model three things: what a plugin can add to the portal (the entry points and
+surfaces of the skill's scopes, in the product's words), what it cannot do (anything inside an open
+document, work without a user's open tab, settings over 255 characters, a package over 5 MB), and what to
+ask the user before the call - where the feature starts, what it shows or does and on what, who sees it,
+the domains of an external service, what an admin configures - with the chat's own `ask_user_question`
+tool when the client offers it. A request no plugin can serve is to be answered with the closest thing
+that can be built, not with a task. This is guidance to a model, not a check of the service: a call with a
+short `task` still starts a task. The text retells the skill and is not derived from it, so a move of the
+submodule is the moment to read it again.
+
+*Alternatives:* hand the chat's model the skill's own texts through a reading tool (an extra round and
+the SDK's vocabulary for a handful of questions); build the list from the skill's "Pick scopes" table at
+run time (a parser of somebody else's Markdown, and the limits are not in that table).
 
 *Alternative:* copy the document agent's loop, client and tools. Rejected by the user in favour of code
 written for this task; the copy would also bring the generated protobuf client and its two dependencies.
