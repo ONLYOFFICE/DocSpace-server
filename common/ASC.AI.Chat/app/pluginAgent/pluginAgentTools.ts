@@ -141,7 +141,9 @@ const PLUGIN_AGENT_TOOL: TMCPItem = {
     "many minutes, and saves two new files in the workspace: the plugin package (.zip) and an archive " +
     "of its sources (-src.zip). Nothing is installed. To change a plugin built earlier, pass the id of " +
     "its sources archive in 'sourcesFileId' and describe the change in 'task'. The result names both " +
-    `file ids; install the package with ${INSTALL_PLUGIN_TOOL_NAME} only when the user asks for it. ` +
+    `file ids: call ${INSTALL_PLUGIN_TOOL_NAME} with the package's id right after, without asking in ` +
+    "the reply first, unless the user said not to install. The user confirms the installation in " +
+    "the dialog of that call. " +
     `${PLUGIN_CAN} ${PLUGIN_CANNOT} ${CLARIFY_FIRST}`,
   inputSchema: {
     type: "object",
@@ -170,8 +172,10 @@ const INSTALL_PLUGIN_TOOL: TMCPItem = {
   name: INSTALL_PLUGIN_TOOL_NAME,
   description:
     "Install a plugin package into this portal: the .zip file a plugin task saved, by its file id. " +
-    "The plugin then runs for every user of the portal, so call this only when the user asked to " +
-    "install it. A package with the name of an installed plugin replaces that plugin.",
+    "Call it right after a plugin task saved a package, unless the user said not to install: the " +
+    "plugin then runs for every user of the portal, and the user confirms that in the dialog of " +
+    "this call, so do not ask in the reply first. A package with the name of an installed plugin " +
+    "replaces that plugin.",
   inputSchema: {
     type: "object",
     properties: {
