@@ -5,11 +5,13 @@ Everything here is a cheap, deterministic signal read from `git diff` — a HINT
 reviewer, never a verdict. Each hit still has to be read in context before it becomes a finding.
 
 Usage (from the repo root, server/):
-    python .claude/skills/review-branch/scan.py [--base <ref>] [--head <ref>] [--worktree] [--full] [--gate]
+    python .claude/skills/review-branch/scan.py [--base <ref>] [--head <ref>] [--worktree] [--since-review <sha>] [--full] [--gate]
 
 --base      ref to compare against; default: the candidate with the fewest commits ahead of it
             (origin/release/* newest first, origin/develop, origin/master)
 --head      default HEAD
+--since-review  also list file changes from the previous reviewed commit to the scanned tree.
+            The commit must be an ancestor of the selected head (or the head itself).
 --worktree  compare the base against the working tree (uncommitted changes included); only for the
             checked-out branch, so with a --head that names another ref (another branch, even at the same
             commit) it exits 2; with a detached HEAD a --head at that commit is accepted
@@ -21,8 +23,11 @@ Usage (from the repo root, server/):
             branch; an untracked file (--worktree; the branch's own saved review at the root
             excepted); a requirement the branch adds at 500 characters or more, brings to 500 or
             more, or makes longer while over; a whole-file line-ending flip; a conflict marker; a new source file
-            without a license header (generated files and thirdparty/ excepted). Exit 0 otherwise; 2
-            when the scan itself cannot run (git, the arguments, an error of the script)
+            without a license header (generated files and thirdparty/ excepted); a verification.md line
+            citation of a changed C# file that the branch wrote wrong or moved; a FORM, STYLE or CODES finding
+            of openapi-desc-opt/check_texts.py on a changed operation that the merge-base does not have (also
+            for an operation not in the emitted document yet). Exit 0 otherwise; 2 when the scan itself
+            cannot run (git, the arguments, an error of the script)
 
 With --worktree the scan reads a commit of what `git commit -a` would record (clean filters applied,
 intent-to-add files and moved submodule pointers included), built in a temporary copy of the index; the
@@ -51,7 +56,8 @@ RULES_DIR = Path(".claude/rules")
 GATE: list[str] = []
 # What a review runs: a base change to one of these that applies to the branch makes a check on the branch's older
 # copy see less. CLAUDE.md is left out: its frequent edits are lists, and the rules it points to are covered here.
-REVIEW_TOOLING = (".claude/rules", ".claude/skills/review-branch", ".claude/scripts/prove-red.sh", "openspec/config.yaml")
+REVIEW_TOOLING = (".claude/rules", ".claude/skills/review-branch", ".claude/scripts/prove-red.sh", "openspec/config.yaml",
+                  ".claude/skills/openapi-desc-opt/check_texts.py")
 # Rules whose `paths:` say less than where they apply: CLAUDE.md (Git Workflow) has every branch follow
 # fixing-findings.md §6 and §9-§11, whatever files the branch changes.
 ALWAYS_APPLIES = {".claude/rules/fixing-findings.md"}
@@ -77,6 +83,9 @@ def tooling_applies(path: str, ref: str, branch_paths: list[str]) -> bool:
         return not text or not globs or any(g.match(p) for g in globs for p in branch_paths)
     if path == "openspec/config.yaml":
         return any(p.startswith("openspec/") for p in branch_paths)
+    if path.endswith("/check_texts.py"):
+        # --gate runs it on the changed actions, which live in controllers
+        return any(p.endswith("Controller.cs") for p in branch_paths)
     return path.startswith(REVIEW_TOOLING)
 
 
@@ -478,11 +487,16 @@ def method_end(lines: list[str], start: int) -> int:
     return len(lines)
 
 
+# (controller file, action) of each changed action, for the texts check
+CHANGED_ACTIONS: list[tuple[str, str]] = []
+
+
 def print_endpoints_section(files, added, read_head) -> list[tuple[str, str, int]]:
     """Prints the changed actions and returns (name, file, first line of its doc comment and attributes) of each,
     for the OpenSpec section and the texts the diff reaches."""
     print("## Changed endpoints (one row each in the cross-cutting matrix, SKILL.md §3 A0)")
     rows, names = [], []
+    CHANGED_ACTIONS.clear()
     for st, p in files:
         if not p.endswith("Controller.cs") or not is_cs(p) or is_test(p) or st.startswith("D"):
             continue
@@ -511,6 +525,7 @@ def print_endpoints_section(files, added, read_head) -> list[tuple[str, str, int
                 mark = "new" if attr in changed else f"{n} changed line(s)"
                 rows.append(f"  {verb:6} {prefix}/{route}".rstrip("/") + f"  {name}  [{p}:{attr}]  ({mark})")
                 names.append((name, p, lo))
+                CHANGED_ACTIONS.append((p, name))
     print("\n".join(rows) if rows else "  none")
     print()
     return names
@@ -1026,6 +1041,342 @@ def print_checklists_section(view: str, names: list[str]) -> None:
     print()
 
 
+# --- texts of the changed operations ----------------------------------------------------------------
+# openapi-endpoint-docs.md: the `<remarks>` and the declared codes of a changed action are checked by the
+# openapi-desc-opt check, from the source, so an action not in the emitted document yet is checked too. It runs on a
+# copy of the scanned tree (and of the merge-base): what fails the same way at the merge-base is base debt, outside
+# the gate. Only FORM, STYLE and CODES fail the gate; the other kinds and the readability tools are hints.
+
+TEXT_GATE_KINDS = ("FORM", "STYLE", "CODES")
+DOC_TOOL_DIR = "common/Tools/ASC.Api.Documentation/ASC.Api.Documentation"
+
+
+def check_texts_script() -> Path | None:
+    """The openapi-desc-opt check next to this scan, else the one of the checked-out tree (a scan saved elsewhere)."""
+    for candidate in (Path(__file__).resolve().parent.parent / "openapi-desc-opt" / "check_texts.py",
+                      Path(".claude/skills/openapi-desc-opt/check_texts.py").resolve()):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def text_notes(script: Path, ref: str, actions: list[tuple[str, str]]) -> tuple[dict[str, list[str]], list[str]]:
+    """({operation: ["KIND note", ...]}, [problems]) of check_texts.py run on `ref`'s copy of the files it reads."""
+    import tarfile
+    import tempfile
+
+    present = set(git("ls-tree", "-r", "--name-only", ref, check=False).splitlines())
+    wanted = [(f, m) for f, m in actions if f in present]
+    if not wanted:
+        return {}, []
+    with tempfile.TemporaryDirectory() as tmp:
+        project_dirs = {p.rsplit("/", 1)[0] for p in present if p.endswith(".csproj") and "/" in p}
+        projects = set()
+        for f, _ in wanted:
+            d = f.rsplit("/", 1)[0]
+            while d and d not in project_dirs:
+                d = d.rsplit("/", 1)[0] if "/" in d else ""
+            if d:
+                projects.add(d)
+        # what check_texts.py reads: every project file (to find the projects that emit a document), the
+        # documentation tool's folder (the documents, the bundle settings) and the projects of the actions
+        paths = [":(glob)**/*.csproj", DOC_TOOL_DIR, *sorted(projects)]
+        tar_path = os.path.join(tmp, "tree.tar")
+        with open(tar_path, "wb") as out:
+            res = subprocess.run(["git", "archive", "--format=tar", ref, "--", *paths], stdout=out, stderr=subprocess.PIPE)
+        if res.returncode != 0:
+            return {}, [f"git archive {ref} failed: {res.stderr.decode('utf-8', 'replace').strip()[:200]}"]
+        root = os.path.join(tmp, "tree")
+        with tarfile.open(tar_path) as tar:
+            tar.extractall(root, filter="data") if hasattr(tarfile, "data_filter") else tar.extractall(root)
+        args = [sys.executable, str(script), "--root", root, "--work", os.path.join(tmp, "work"), "--no-tools"]
+        for f, m in wanted:
+            args += ["--action", f"{f}:{m}"]
+        res = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                             env=dict(os.environ, PYTHONUTF8="1"))
+    notes: dict[str, list[str]] = defaultdict(list)
+    problems, current = [], None
+    for line in res.stdout.splitlines():
+        if line.startswith(("CHECK:", "TOOLS:", "MISSING TOOLS:", "tool inputs:")) or not line.strip():
+            continue
+        if not line.startswith(" "):
+            # "NAME  (operationId) — where" heads an operation; "NAME — error" is one that could not be checked
+            m = re.match(r"(.*?)  \((\w+)\) — ", line)
+            current = f"{m.group(2)} ({m.group(1)})" if m else None
+            if not m:
+                problems.append(line)
+        elif current and (m := re.match(r"\s+([A-Z]+)\s+(.*)", line)) and m.group(1) in TEXT_GATE_KINDS:
+            notes[current].append(f"{m.group(1)} {m.group(2)}")
+    if res.returncode not in (0, 1) or ("CHECK:" not in res.stdout):
+        problems.append(f"check_texts.py on {ref} ended with {res.returncode}: {(res.stderr or res.stdout).strip()[-300:]}")
+    return notes, problems
+
+
+def print_operation_texts_section(actions: list[tuple[str, str]], view: str, merge_base: str, gate: bool) -> None:
+    print("## Texts of the changed operations (openapi-endpoint-docs.md, check_texts.py --from source)")
+    if not actions:
+        print("  no changed operation")
+        print()
+        return
+    if not gate:
+        print(f"  {len(actions)} changed operation(s); their texts are checked with --gate")
+        print()
+        return
+    script = check_texts_script()
+    if not script:
+        print("  !! not run: .claude/skills/openapi-desc-opt/check_texts.py not found - check the texts by hand (§3 A2)")
+        print()
+        return
+    new, problems = text_notes(script, view, actions)
+    old, _ = text_notes(script, merge_base, actions)
+    # a sentence added above a long one renumbers it: the note is compared without its sentence number
+    unnumbered = lambda n: re.sub(r"\bsentence \d+", "sentence", n)
+    old_notes = {k.split(" ", 1)[0]: {unnumbered(n) for n in v} for k, v in old.items()}
+    branch, debt = [], []
+    for op, lines in new.items():
+        before = old_notes.get(op.split(" ", 1)[0], set())
+        for n in lines:
+            (debt if unnumbered(n) in before else branch).append(f"{op}: {n}")
+    print(f"  {len(actions)} changed operation(s) checked; FORM, STYLE and CODES fail the gate")
+    for p in problems:
+        print(f"  !! {p}")
+    print("  new on the branch:")
+    print_capped([f"    !! {r}" for r in branch], STALE_ROWS_SHOWN, True, "    none")
+    print("  already so at the merge-base (base debt, SKILL.md §4; not in the gate):")
+    print_capped([f"    {r}" for r in debt], STALE_ROWS_SHOWN, True, "    none")
+    GATE.extend(f"[openapi-endpoint-docs.md] {r}" for r in branch)
+    print()
+
+
+# --- verification.md line citations ----------------------------------------------------------------
+# claims.md §4, fixing-findings.md §12: a row cites lines of a C# file, and a fix that moves those lines leaves the
+# row pointing at something else. Each citation of a changed .cs file is checked on the scanned tree: a range starts
+# on a member, an attribute, a comment or a statement, never on a blank line, a lone brace or inside a statement,
+# and ends on a closing brace or the end of a statement; a name given in backticks right after it is in the cited
+# lines. A row the branch left alone is also compared with the merge-base: its cited block found elsewhere in the
+# new file has moved. What fails the same way at the merge-base is the base's and is listed apart, outside the gate.
+
+CITED_FILE = re.compile(r"(?<![\w/.-])(?P<file>\.?\w[\w./-]*\.cs)\b")
+CITED_LINES = re.compile(r"(?<!\w)(?P<file>\.?\w[\w./-]*\.cs)?:(?P<nums>\d+(?:-\d+)?(?:,\s*\d+(?:-\d+)?)*)(?![\w.])")
+CITED_MEMBER = re.compile(r"(?P<file>\w[\w./-]*\.cs)`?\s+`(?P<member>\w+)`\s*\((?P<n>\d+)\b"
+                          r"|`(?P<cls>[A-Z]\w+)\.(?P<member2>[A-Z]\w+)`\s*\((?P<n2>\d+)\b")
+CODE_NAME = re.compile(r"`([^`\s]+)`")
+CONTINUES = re.compile(r"(?:,|\(|=|=>|\+|-|\*|&&|\|\||\?|\?\?|:)\s*$")
+CONTINUED = re.compile(r"^\s*(?:\.|\?\.|\?\?|\?|:|=>|&&|\|\||\+)(?!\s*//)")
+DECLARATION = re.compile(r"^\s*(?:\[|///|//|/\*|\*|#|(?:public|private|protected|internal|static|async|override|"
+                         r"virtual|abstract|sealed|readonly|partial|const|record|class|interface|enum|struct)\b)")
+
+
+def _code(line: str) -> str:
+    """The code of a line without a trailing `//` comment; nothing for a comment line."""
+    if line.lstrip().startswith(("//", "/*", "*")):
+        return ""
+    return line.split("//", 1)[0].rstrip()
+
+
+def _prev_code(lines: list[str], i: int) -> str | None:
+    """The last code line above line `i` (1-based), comments and blank lines skipped."""
+    for k in range(i - 2, -1, -1):
+        if _code(lines[k]).strip():
+            return _code(lines[k])
+    return None
+
+
+def _next_code(lines: list[str], i: int) -> str | None:
+    """The first code line below line `i` (1-based)."""
+    for k in range(i, len(lines)):
+        if _code(lines[k]).strip():
+            return _code(lines[k])
+    return None
+
+
+def citation_problems(lines: list[str], ranges: list[tuple[int, int]], names: list[str]) -> list[str]:
+    """What is wrong with ranges of a C# file cited together, and with the names given for them."""
+    out = []
+    for a, b in ranges:
+        if a < 1 or b > len(lines) or a > b:
+            out.append(f"{a}-{b} is outside the file ({len(lines)} lines)")
+            continue
+        first, last = lines[a - 1].strip(), lines[b - 1].strip()
+        span = f"{a}-{b}" if a != b else str(a)
+        if not first:
+            out.append(f"{span} starts on a blank line")
+        elif first in ("{", "}", "};", "});", ")"):
+            out.append(f"{span} starts on a lone `{first}`")
+        elif a != b and not DECLARATION.match(lines[a - 1]) \
+                and (CONTINUED.match(lines[a - 1]) or CONTINUES.search(_prev_code(lines, a) or ";")):
+            out.append(f"{span} starts inside a statement")
+        if a == b:
+            continue
+        if not last:
+            out.append(f"{span} ends on a blank line")
+        elif last == "{":
+            out.append(f"{span} ends on an opening brace")
+        elif last.startswith(("///", "[")) and not last.endswith(("]);", "];")):
+            out.append(f"{span} ends on a comment or attribute of the next member")
+        elif CONTINUES.search(_code(lines[b - 1])) or CONTINUED.match(_next_code(lines, b) or ""):
+            out.append(f"{span} ends inside a statement")
+    if names and all(1 <= a <= b <= len(lines) for a, b in ranges):
+        cited = []
+        for a, b in ranges:
+            cited.extend(lines[a - 1:b])
+            # a range that ends on attributes or comments cites the member declared right below them
+            k = b
+            while k < len(lines) and lines[k - 1].lstrip().startswith(("[", "/")):
+                cited.append(lines[k])
+                k += 1
+        text = "\n".join(cited)
+        missing = [n for n in names if n not in text]
+        if missing:
+            out.append(f"{', '.join('`' + n + '`' for n in missing)} not in the cited lines")
+    return out
+
+
+def _named(paren: str) -> list[str]:
+    """The names in backticks of a parenthetical that can be looked up in the cited code: identifiers of members or
+    types (a capital letter or a leading underscore), and attributes."""
+    names = []
+    for token in CODE_NAME.findall(paren):
+        token = token.rstrip("()")
+        if re.fullmatch(r"\[[A-Z][\w(),. \"=]*\]", token):
+            names.append(token)
+        elif re.fullmatch(r"[A-Za-z_]\w*(?:\.\w+)*", token) and (token[0] == "_" or any(c.isupper() for c in token)):
+            names.append(token.rsplit(".", 1)[-1])
+    return names
+
+
+def parse_citations(row: str) -> list[tuple[str, list[tuple[int, int]], list[str]]]:
+    """(cited file as written, ranges, names to find) for each group of citations in a row. A bare `:N` takes the
+    last file named before it; a parenthetical right after a citation names what the citations of that file since
+    the last parenthetical point at."""
+    events = []
+    for m in CITED_MEMBER.finditer(row):
+        f = m.group("file") or (m.group("cls") + ".cs")
+        n = int(m.group("n") or m.group("n2"))
+        events.append((m.start(), m.end(), "member", f, [(n, n)], [m.group("member") or m.group("member2")]))
+    for m in CITED_LINES.finditer(row):
+        if any(s <= m.start() < e for s, e, *_ in events):
+            continue
+        ranges = []
+        for part in re.split(r",\s*", m.group("nums")):
+            lo, _, hi = part.partition("-")
+            ranges.append((int(lo), int(hi or lo)))
+        events.append((m.start(), m.end(), "lines", m.group("file"), ranges, []))
+    for m in CITED_FILE.finditer(row):
+        if not any(s <= m.start() < e for s, e, *_ in events):
+            events.append((m.start(), m.end(), "file", m.group("file"), [], []))
+    events.sort()
+    groups, pending, last_file = [], [], None
+    for _, end, kind, f, ranges, names in events:
+        if f:
+            last_file = f
+        if kind == "file" or not last_file:
+            continue
+        if kind == "member":
+            groups.append((last_file, ranges, names))
+            continue
+        pending.append((last_file, ranges))
+        rest = row[end:].lstrip("` ")
+        if rest.startswith("("):
+            depth, k = 0, 0
+            for k, ch in enumerate(rest):
+                depth += ch == "("
+                depth -= ch == ")"
+                if depth == 0:
+                    break
+            # a parenthetical that cites further lines describes them, not this citation: its names before the
+            # first such citation are the ones of this one
+            paren = re.split(r"(?<!\w):\d|\w\.cs:\d", rest[:k + 1], maxsplit=1)[0]
+            same = [r for pf, rs in pending if pf == last_file for r in rs]
+            groups.extend((pf, rs, []) for pf, rs in pending if pf != last_file)
+            groups.append((last_file, same, _named(paren)))
+            pending = []
+        elif rest.startswith((";", "|")) or not rest:
+            groups.extend((pf, rs, []) for pf, rs in pending)
+            pending = []
+    groups.extend((pf, rs, []) for pf, rs in pending)
+    return groups
+
+
+def print_citation_section(files, added, view: str, merge_base: str, full: bool) -> None:
+    print("## verification.md line citations of changed C# files (claims.md §4, fixing-findings.md §12)")
+    changed_cs = [p for st, p in files if p.endswith(".cs") and not st.startswith("D")]
+    specs = [p for p in git("ls-tree", "-r", "--name-only", view, "openspec/specs", check=False).splitlines()
+             if p.endswith("/verification.md")]
+    if not changed_cs or not specs:
+        print("  none to check")
+        print()
+        return
+
+    def resolve(token: str) -> str | None:
+        token = token.lstrip("./")
+        if token in changed_cs:
+            return token
+        hits = [p for p in changed_cs if p.endswith("/" + token)]
+        return hits[0] if len(hits) == 1 else None
+
+    @functools.lru_cache(maxsize=None)
+    def lines_at(ref: str, path: str) -> tuple[str, ...] | None:
+        blob = git_bytes("show", f"{ref}:{path}")
+        return None if blob is None else tuple(blob.decode("utf-8", "replace").replace("\r\n", "\n").split("\n"))
+
+    branch_rows, moved, edited, base_debt = [], [], [], []
+    checked = 0
+    for spec in specs:
+        text = lines_at(view, spec)
+        if not text:
+            continue
+        written = {n for n, _ in added.get(spec, [])}
+        for n, row in enumerate(text, 1):
+            if ".cs" not in row:
+                continue
+            for token, ranges, names in parse_citations(row):
+                path = resolve(token)
+                new = lines_at(view, path) if path and ranges else None
+                if new is None:
+                    continue
+                checked += 1
+                problems = citation_problems(list(new), ranges, names)
+                where = f"{spec}:{n} cites {path}:" + ", ".join(f"{a}-{b}" if a != b else str(a) for a, b in ranges)
+                if n in written:
+                    branch_rows.extend(f"{where}: {p}" for p in problems)
+                    continue
+                old = lines_at(merge_base, path)
+                if old is None:
+                    branch_rows.extend(f"{where}: {p}" for p in problems)
+                    continue
+                old_problems = set(citation_problems(list(old), ranges, names))
+                for p in problems:
+                    (base_debt if p in old_problems else branch_rows).append(f"{where}: {p}")
+                stripped = [l.rstrip() for l in new]
+                for a, b in ranges:
+                    if a < 1 or a > b or b > len(old):
+                        continue
+                    block = [l.rstrip() for l in old[a - 1:b]]
+                    if stripped[a - 1:b] == block or not any(block):
+                        continue
+                    found = [k + 1 for k in range(len(stripped) - len(block) + 1) if stripped[k:k + len(block)] == block]
+                    span = f"{a}-{b}" if a != b else str(a)
+                    if len(found) == 1:
+                        c = found[0]
+                        moved.append(f"{spec}:{n} cites {path}:{span}: the cited lines are now at "
+                                     + (f"{c}-{c + b - a}" if a != b else str(c)))
+                    elif not found:
+                        edited.append(f"{spec}:{n} cites {path}:{span}: the branch changed the cited lines")
+    print(f"  {checked} citation group(s) of changed .cs files checked")
+    for title, rows, gate in (("rows the branch wrote, and rows whose cited lines it moved", branch_rows, True),
+                              ("cited blocks that moved under rows the branch left alone", moved, True),
+                              ("cited lines the branch edited under rows it left alone (a hint: does the row hold?)",
+                               edited, False),
+                              ("already so at the merge-base (base debt, SKILL.md §4; not in the gate)", base_debt, False)):
+        print(f"  {title}:")
+        print_capped([f"    {'!! ' if gate else ''}{r}" for r in rows], STALE_ROWS_SHOWN, full, "    none")
+        if gate:
+            GATE.extend(f"[claims.md §4] {r}" for r in rows)
+    print()
+
+
+
 STATEFUL = re.compile(
     r"\b(BackgroundService|IHostedService|PeriodicTimer|Channel<|SemaphoreSlim|IDistributedLockProvider|"
     r"DistributedLock|StopAsync|IIntegrationEventHandler|Interlocked)\b|(\w*(?:lease|nextattempt|retry)\w*)", re.I)
@@ -1064,12 +1415,21 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base")
     ap.add_argument("--head", default="HEAD")
+    ap.add_argument("--since-review", metavar="SHA", help="also show files changed since the previous review")
     ap.add_argument("--worktree", action="store_true")
     ap.add_argument("--full", action="store_true")
     ap.add_argument("--gate", action="store_true")
     a = ap.parse_args()
 
     head_sha = git("rev-parse", "--verify", f"{a.head}^{{commit}}").strip()
+    if a.since_review is not None:
+        reviewed = git("rev-parse", "--verify", "--end-of-options", f"{a.since_review}^{{commit}}",
+                       check=False).strip() if a.since_review else ""
+        if not reviewed:
+            fail(f"--since-review: unknown reviewed commit {a.since_review!r}")
+        if git("merge-base", reviewed, head_sha, check=False).strip() != reviewed:
+            fail(f"--since-review: {reviewed} is not an ancestor of {a.head}. "
+                 "Check the review boundary after a rebase or switch to a full review.")
     # "Checked out" is decided by the ref, not the commit: another branch at the same commit is not the branch the
     # working tree belongs to. A detached HEAD matches by commit (a sha, a tag).
     head_ref = git("symbolic-ref", "-q", "HEAD", check=False).strip()
@@ -1139,6 +1499,16 @@ def main() -> None:
     print()
 
     # --- files ---------------------------------------------------------------------------------
+    if a.since_review is not None:
+        print("## Changes since the previous review")
+        print(f"  reviewed commit: {reviewed}")
+        changes = git("diff", "--name-status", "-M", reviewed, view, "--").splitlines()
+        for change in changes:
+            print(f"  {change}")
+        if not changes:
+            print("  none")
+        print()
+
     name_status = [l.split("\t") for l in git("diff", "--name-status", "-M", *diff_args).splitlines() if l]
     numstat = {}
     for l in git("diff", "--numstat", "-M", *diff_args).splitlines():
@@ -1409,6 +1779,8 @@ def main() -> None:
     old_paths = [ns[1] for ns in name_status if ns[0].startswith(("R", "D")) and len(ns) > 1]
     renames = {ns[-1]: ns[1] for ns in name_status if ns[0].startswith("R") and len(ns) > 2}
     print_openspec_section(files, endpoint_names, view, merge_base, old_paths, untracked, a.full, renames)
+    print_citation_section(files, added, view, merge_base, a.full)
+    print_operation_texts_section(list(dict.fromkeys(CHANGED_ACTIONS)), view, merge_base, a.gate)
     print_claims_section(added, commit_bodies, a.full)
     # A commit no remote-tracking ref reaches is not pushed yet: its message can still be fixed (claims.md §4).
     unpushed = set(git("log", "--no-merges", "--format=%h", f"{merge_base}..{a.head}", "--not", "--remotes",

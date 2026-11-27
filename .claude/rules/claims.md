@@ -18,6 +18,7 @@ were written from the design, and later fix rounds changed the code under them. 
 - A task is ticked only when done; a blocked one stays unticked with its reason or moves to a follow-up (§4)
 - A commit message says "updated" only for what it updated, and is checked before it is pushed (§4)
 - A `verification.md` row cites by name, `File.cs::Method`; a row the branch touches is rewritten so (§4)
+- A number, absolute word or library behaviour a fix round writes names its test (one-step mutation) or CODE-ONLY (§6)
 
 ## 1. A claim points at the code or the test that makes it true
 
@@ -93,3 +94,23 @@ source, not a finding by itself, and a claim worded otherwise is still the write
   writes outside `sdk/` and `openspec/config.yaml`, with their added line counts, and which of the branch's commits are not pushed yet — the list §3 has the
   author re-read after a fix round (`fixing-findings.md` §6). Each list shows its first 60 entries,
   all with `--full`; a text whose behaviour changed outside the diff is still the writer's to find.
+- "verification.md line citations": each cited range of a changed C# file checked for where it starts
+  and ends and for the backticked names after it, and the cited blocks of untouched rows that moved;
+  its `!!` lines fail `--gate` (`fixing-findings.md` §12).
+
+## 6. A claim the fix writes is pinned in the same batch
+
+- A number, an absolute word or a statement about how a dependency behaves that a fix round adds to
+  a remark, a comment, a spec, a `verification.md` row or a commit message names, in the same batch,
+  the test that pins it, or is marked CODE-ONLY in `verification.md` (in the commit message when no
+  row covers it). Reasoning about the code is not a source: the claims below were all reasoned.
+- A test pins a value only if a mutation of that value by one step makes it red: a threshold of 5
+  changed to 4 and to 6, a duration a unit shorter and longer (`prove-red.sh --mutate`, `tests.md`
+  "A test has to be able to fail"). A test that stays green under a mutation pins a range; the text
+  then states the range, not the value.
+- Seen in bugfix/78009, each written by a fix round to answer a finding and corrected by the next:
+  "up to 4 requests" where a failed creation sent 6; "5 or more requests failed" written as a state,
+  although the breaker opens only on a failed request after them; "an error status is not counted",
+  although Polly records an outcome its predicate does not handle as a success.
+- Guard: the scan's "Claims with numbers" of the round's commits, each line with its test and
+  mutation or CODE-ONLY (`fixing-findings.md` §9); reviewers build matrix M12 (`review-branch` §3 M).

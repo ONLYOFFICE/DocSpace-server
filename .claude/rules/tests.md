@@ -16,6 +16,7 @@ after editing any `.cs` file.
 ## Checklist
 
 - Proven red with `prove-red.sh`, its last line in the commit; if impossible here, "not proven red" and why (Able to fail)
+- A test that pins a value is red under `--mutate` one step on each side, or the texts state a range (Able to fail)
 - It asserts the effect (letters, rows, stored state), not that nothing threw or an empty snapshot (Able to fail)
 - Only what lies outside the process is stubbed, at the HTTP boundary, as the real contract says (Able to fail)
 - A right is checked with the lowest role holding it; routes, counts and messages compared exactly (Able to fail)
@@ -151,6 +152,21 @@ of a commit. When the
 test calls what the change adds, the whole change cannot be taken away (exit 3): pass `--patch` with
 only the behavioural hunk. When the run is impossible here (environment, cost), the commit says "not
 proven red" and why.
+
+A test that pins a value — a threshold, a limit, a duration, a count — is proven red by a mutation of
+that value by one step on each side, not by taking the change away: two runs of `--mutate`, each
+expected red. A test that stays green under one of them pins a range, and the texts say the range
+(`claims.md` §6). The example mutates the circuit breaker threshold of bugfix/78009:
+
+```bash
+.claude/scripts/prove-red.sh --mutate 'products/ASC.Files/Core/Services/OFormService/OFormRequestManager.cs:MinimumThroughput = 5=>MinimumThroughput = 4' --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*OFormRequestManagerTests"
+.claude/scripts/prove-red.sh --mutate 'products/ASC.Files/Core/Services/OFormService/OFormRequestManager.cs:MinimumThroughput = 5=>MinimumThroughput = 6' --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*OFormRequestManagerTests"
+```
+
+A test that asserts that the code uses only one client, host or name ("the check asks with the
+client without cookies") makes every other name fail, a deny-all default, not only the default one.
+Seen in bugfix/78009: such a test made only the default client fail, so a switch to any other named
+client kept it green; the next round found the gallery's own client still passing.
 
 What leaves a test unable to fail:
 
