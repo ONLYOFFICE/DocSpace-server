@@ -51,6 +51,7 @@ import {
   setRoundAttachmentIds,
   setRoundProfileId,
   setRoundThreadId,
+  setRoundSignal,
 } from "../requestContext.js";
 import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
 import { applyAiProjectChatContext } from "../storage/aiProjectChatContext.js";
@@ -83,7 +84,16 @@ import { systemToolsSource } from "../tools/systemTools.js";
 import { toolErrorForLog } from "../tools/toolErrorLog.js";
 import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
 import { documentAgentTools } from "../tools/documentAgent.js";
-import { DOCUMENT_AGENT_TYPE, getCompaction, getPersistIntervalMs } from "../../config/index.js";
+import {
+  CHAT_SANDBOX_TYPE,
+  DOCUMENT_AGENT_TYPE,
+  getCompaction,
+  getPersistIntervalMs,
+  PLUGIN_AGENT_TYPE,
+  PLUGIN_INSTALL_TYPE,
+} from "../../config/index.js";
+import { pluginAgentTools } from "../pluginAgent/pluginAgentTools.js";
+import { sandboxTools } from "../sandbox/sandboxTools.js";
 import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
@@ -121,9 +131,12 @@ function withRequestSignal<T>(res: Response, body: T): T {
   // engine never reads them, the tool context does (every action handler
   // passes through here, so the ids are in place before `getTools`).
   setKnowledgeRoomIds(knowledgeRoomIdsOf(actionArgs));
+  const signal = responseAbortSignal(res);
+  // A tool that works for minutes (the plugin agent) stops with the reply through this.
+  setRoundSignal(signal);
   return {
     ...body,
-    actionArgs: { ...actionArgs, signal: responseAbortSignal(res) },
+    actionArgs: { ...actionArgs, signal },
   };
 }
 
@@ -559,6 +572,12 @@ const engine = new AIEngine({
     toolsAdapter,
     formAnalysisSubAgent,
     documentAgentTools,
+    // `plugin_agent` and `install_plugin`, for the owner and the DocSpace admins of a portal
+    // whose installation names a sandbox. Both groups are approval-required.
+    pluginAgentTools,
+    // The caller's sandbox as tools of the chat's own model, on an installation that names
+    // one (`ai.sandbox`).
+    sandboxTools,
   ),
   // Approval-required server types: the MCP servers (host-configured and
   // custom — the latter resolved per request, see primeCustomServers) plus
@@ -569,6 +588,9 @@ const engine = new AIEngine({
     ...getCustomServerNames(),
     DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
     DOCUMENT_AGENT_TYPE,
+    PLUGIN_AGENT_TYPE,
+    PLUGIN_INSTALL_TYPE,
+    CHAT_SANDBOX_TYPE,
   ],
   // Fold a thread that nears its model's context window into a summary
   // message before the round. The summary is stored through the ordinary

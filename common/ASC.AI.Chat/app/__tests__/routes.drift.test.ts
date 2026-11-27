@@ -113,7 +113,7 @@ describe("the API router and the OpenAPI document", () => {
       .flatMap((item) => Object.values(item))
       .map((op) => (op as { operationId?: unknown }).operationId);
 
-    expect(ids).toHaveLength(116);
+    expect(ids).toHaveLength(117);
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids.every((id) => typeof id === "string" && /^ai[A-Z]/.test(id))).toBe(true);
   });

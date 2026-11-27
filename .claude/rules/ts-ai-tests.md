@@ -48,6 +48,8 @@ none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it di
   | the chat context aggregate and a primed round | `fixtures/chatContext.ts` (`chatContextDto`, `inRound`) | |
   | the properties of a C# DTO class, the members of an enum, the fields a Node function reads | `readClass`, `readEnum`, `readsOf` in `helpers/csharp.ts` | |
   | `ProfileDto` and a stubbed model provider | `fixtures/providers.ts` (`profileDto`, `useProfile`, `useProvider`) | |
+  | `EmployeeFullDto` as `GET people/@self` answers it | `fixtures/peopleApi.ts` (`selfDto`) | |
+  | the sandbox gateway of the plugin agent and of the chat's sandbox tools: files in memory, commands answered by `run`, a method made to fail | `fakeGateway(upstream)`, `refusedWith`, `chunked`, `frame` in `sandboxGateway.ts` | msw |
   | the whole app: parsers, gate, routes, 404 | `request(createApp())` | supertest |
   | waits between polls and retries | `useFastTimers()` in `time.ts` | vitest fake timers |
   | an upstream that never answers, and what the call comes to at its timeout | `stalled` in `upstream.ts`, `afterUpstreamTimeout(run)` in `time.ts` | msw, vitest fake timers |

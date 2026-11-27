@@ -4,5 +4,6 @@ yarn.lock
 *.tgz
 app/generated
 templates
+skills
 eslint-suppressions.json
 coverage
