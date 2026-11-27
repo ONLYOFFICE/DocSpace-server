@@ -161,9 +161,9 @@ export interface PluginAgentSetting {
   maxConcurrentTasks?: number;
   /** The lifetime a sandbox is created and renewed with. */
   sandboxTtlSeconds?: number;
-  /** This service as a sandbox reaches it, for the package registry route; `http://localhost:<port>` by default. */
+  /** This service as a sandbox reaches it; naming it turns the package registry route on. */
   serviceUrl?: string;
-  /** The npm registry the route forwards to; the public one by default. */
+  /** The npm registry the route forwards to; the public one by default. Read only with `serviceUrl`. */
   registryUrl?: string;
   /** Where fetched package archives are kept, and the most they may take together, in MiB. */
   cacheDir?: string;

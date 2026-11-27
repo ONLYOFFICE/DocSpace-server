@@ -11,9 +11,12 @@ See proposal.md for the motivation. What shapes the approach:
 - **The sandbox is the gateway of the document agent's repository** (`gateway.v1.SandboxService`): `Create`
   (idempotent by a session UUID, with a `ttl`), `Get`, `Renew`, `Delete`, `Exec` (one shell string, streamed
   stdout/stderr and an exit event), `ListDir`, `Stat`, `MakeDir`, `Remove`, and file bytes over
-  `PUT`/`GET /sandboxes/{id}/files?path=`. Every route but `/healthz` wants a bearer token. The image and the
-  sandbox size come from the gateway's configuration, one image per gateway, and a sandbox has no egress
-  unless the gateway's policy file allows a target.
+  `PUT`/`GET /sandboxes/{id}/files?path=`. Every route but `/healthz` wants a bearer token. The image, the
+  sandbox size and the egress come from a profile of the gateway's profiles file; each profile has its own
+  token, and a caller sees only the sandboxes of its token's profile. A sandbox has no egress unless its
+  profile allows a target. The repository's `plugin` profile is an image with Node, npm, `git`, `jq` and
+  `unzip` (no `zip`), the dependencies of a generated plugin project in npm's cache, and egress to
+  `registry.npmjs.org` only.
 - **The skill is more than text.** `apps-plugin-sdk` holds `SKILL.md` and `references/` for the model, and
   `scripts/generate-plugin.mjs`, `scripts/validate-plugin.mjs` with `templates/` that have to run next to the
   project. A generated project builds with `npm install && npm run build && npm run typecheck` and leaves
@@ -161,6 +164,12 @@ plugin package", 5 MB), and the result names its size in bytes.
 `/plugin-agent/npm/*`, registered outside the API prefix like the document agent's file routes, so the
 portal's router does not forward to it and only the internal network sees it.
 
+- **Off by default:** the route serves only an installation that names the address a sandbox reaches this
+  service at. Without that address no registry is written into the sandbox's `.npmrc` and the route
+  answers 401 to everybody: npm then works as the sandbox's owner set it up, from the cache of the image
+  and through the egress of the profile. The route is for an installation whose sandboxes are given no way
+  to a registry; with it the image's cache is not used, since npm keeps its cache by registry address.
+
 - **Gate:** a random token per task, given to the sandbox in an `.npmrc` (`registry=` and the matching
   `_authToken`), compared in constant time against the tokens of the running tasks. The token dies with the
   task, and it is known to the instance that runs the task only.
@@ -226,8 +235,8 @@ are both present, as with `ai.documentAgent`.
 | tool-call budget | 150 | 1 – 10000 |
 | concurrent tasks | 2 | 1 – 16 |
 | sandbox `ttl`, seconds | 600 | 60 – 3600 |
-| address the sandbox reaches this service at | `http://localhost:<port>` | — |
-| upstream registry | `https://registry.npmjs.org` | — |
+| address the sandbox reaches this service at | none (registry route off) | — |
+| upstream registry of the route | `https://registry.npmjs.org` | — |
 | cache directory, cache size cap in MiB | `asc-ai-chat/npm-cache` under the system's temporary directory, 2048 | 64 – 65536 |
 
 Each has an environment override in the `AI__PLUGIN_AGENT__*` form. A value out of range falls back to the
@@ -241,13 +250,16 @@ list is the request to its owner, and the place to change first when the answer 
 - **API:** the gateway API as the document agent's repository documents it today — `Create`, `Renew`,
   `Delete`, `Exec`, `MakeDir`, and file bytes over `/sandboxes/{id}/files?path=`, with a bearer token.
   Nothing else of it is used: no MCP tunnel, no `ListDir`, no `Stat`, no `Remove`.
-- **Image:** `sh`, `node`, `npm`, `zip`, `unzip`, `mkdir`, `rm` and `test` on the path, and a writable
-  `/workspace`: the client works under that path and nowhere else. The skill's scripts are copied in by
-  ASC.AI.Chat, so the image does not have to carry them.
-- **Network:** a sandbox reaches ASC.AI.Chat at the configured address and nothing else is needed. That
-  address has to lead to the very instance that runs the task: the registry token is known to it alone.
-- **Selection:** a gateway serves one image, so the address in `ai.pluginAgent` is expected to be an
-  endpoint that gives Node sandboxes; how that endpoint is provided is the owner's choice.
+- **Image:** `sh`, `node`, `npm`, `git`, `unzip`, `mktemp`, `mkdir`, `rm` and `test` on the path, and a
+  writable `/workspace`: the client works under that path and nowhere else. The sources archive is written
+  by `git archive`, as the `plugin` image has no `zip`. The skill's scripts are copied in by ASC.AI.Chat,
+  so the image does not have to carry them.
+- **Network:** a way for npm in a sandbox to its packages. Either the profile's own (the image's cache and
+  egress to a registry, as the `plugin` profile has), or, with the registry route on, egress to
+  ASC.AI.Chat at the configured address. That address has to lead to the very instance that runs the task:
+  the registry token is known to it alone.
+- **Selection:** the token in `ai.pluginAgent` is expected to be the token of a profile that gives Node
+  sandboxes (`plugin` in the repository's examples).
 - **Lifetime:** a `ttl` of at least 60 seconds that `Renew` extends, and a refusal that can be told from
   "unreachable" when no sandbox is free (`RESOURCE_EXHAUSTED` today).
 
@@ -272,8 +284,9 @@ only ordinary workspace files and the files of the cache directory.
   DocSpace admins are offered the tools; the validator runs before delivery; an installation always asks,
   and the task's result names the direct dependencies the admin is about to trust. The portal's own archive
   checks and CSP handling apply on upload.
-- **Install scripts of arbitrary packages run in the sandbox** → the sandbox is a VM without egress except to
-  this service, holds no portal credential, and is removed when the task ends.
+- **Install scripts of arbitrary packages run in the sandbox** → the sandbox is a VM whose egress is what its
+  profile allows (a registry, or this service with the registry route on), holds no portal credential, and
+  is removed when the task ends.
 - **The registry route is an open proxy to the upstream for whoever holds a token** → tokens exist only while
   a task runs, are random and compared in constant time; only `GET`/`HEAD`; paths are mapped, not followed;
   the cache is capped.
@@ -296,9 +309,9 @@ only ordinary workspace files and the files of the cache directory.
 
 - **One quota for all portals.** The limit of concurrent tasks is per instance of the service, not per
   portal or user: two long tasks of one caller keep every other portal of that instance out until they end.
-- **One instance.** The registry token of a task is known to the instance that runs it, and the default
-  address a sandbox reaches the service at is `localhost`. With several instances behind one address, or a
-  sandbox on another host, the address has to be configured to lead to the instance itself.
+- **One instance, with the registry route on.** The registry token of a task is known to the instance that
+  runs it, so with several instances behind one address the configured address has to lead to the instance
+  itself.
 - **The registry holds bodies in memory.** Four requests at a time, each an archive of up to 128 MiB (and
   the chunks it arrived in while it is read) or a document of up to 64 MiB with its parsed form. Streaming
   to disk and to the client would remove that cost.
@@ -314,12 +327,14 @@ only ordinary workspace files and the files of the cache directory.
 ## Migration Plan
 
 1. Ship the service with the block absent: nothing changes.
-2. Per deployment, once the sandbox service is there: give ASC.AI.Chat outbound access to the registry and
-   add `ai.pluginAgent` with the sandbox's address and token.
+2. Per deployment, once the sandbox service is there: add `ai.pluginAgent` with the gateway's address and
+   the token of its plugin profile. Only where sandboxes get no way to a registry: also name the address
+   they reach ASC.AI.Chat at, open that address in the profile's egress and give ASC.AI.Chat outbound
+   access to the registry.
 3. Rollback: remove the block. Files that tasks saved and plugins that were installed stay, as ordinary
    files and plugins; the cache directory can be deleted.
 
 ## Open Questions
 
-- Whether the sandbox image warms an npm cache of its own is its owner's call; the registry route works
-  either way.
+- None. The sandbox image warms an npm cache of its own; whether an installation uses it or the registry
+  route is the configuration's choice (decision 6).

@@ -400,8 +400,12 @@ export interface PluginAgentConfig {
   maxConcurrentTasks: number;
   /** The lifetime a sandbox is created and renewed with: how long an orphan of a restart lives. */
   sandboxTtlSeconds: number;
-  /** Where a sandbox reaches this service, for the package registry route. */
-  serviceUrl: string;
+  /**
+   * Where a sandbox reaches this service, for the package registry route. Undefined when the
+   * installation names none: the route then answers nobody and npm in a sandbox is left to what
+   * the sandbox gives it (its image's cache, its own way to a registry).
+   */
+  serviceUrl: string | undefined;
   /** The npm registry the route forwards to. */
   registryUrl: string;
   cacheDir: string;
@@ -428,7 +432,8 @@ const MIB = 1024 * 1024;
 // from the environment as `AI__PLUGIN_AGENT__<FIELD>` (`SANDBOX_URL`, `SANDBOX_TOKEN`,
 // `TASK_TIMEOUT_SECONDS`, `MAX_TOOL_CALLS`, `MAX_CONCURRENT_TASKS`, `SANDBOX_TTL_SECONDS`,
 // `SERVICE_URL`, `REGISTRY_URL`, `CACHE_DIR`, `CACHE_MAX_MB`). Undefined without the sandbox's URL
-// and token: the tools are then not offered and the registry route answers nobody. As with the
+// and token: the tools are then not offered and the registry route answers nobody. Without
+// `serviceUrl` the agent works and only the registry route is off. As with the
 // document agent, an environment variable that is set wins even when empty, so an install can
 // switch the agent off whatever the appsettings name.
 export function getPluginAgent(): PluginAgentConfig | undefined {
@@ -487,10 +492,7 @@ export function getPluginAgent(): PluginAgentConfig | undefined {
       PLUGIN_AGENT_MAX_SANDBOX_TTL_SECONDS,
       PLUGIN_AGENT_DEFAULT_SANDBOX_TTL_SECONDS,
     ),
-    serviceUrl: (serviceUrl === ""
-      ? `http://localhost:${getAppConfig().port}`
-      : serviceUrl
-    ).replace(/\/+$/, ""),
+    serviceUrl: serviceUrl === "" ? undefined : serviceUrl.replace(/\/+$/, ""),
     registryUrl: (registryUrl === "" ? PLUGIN_AGENT_DEFAULT_REGISTRY_URL : registryUrl).replace(
       /\/+$/,
       "",

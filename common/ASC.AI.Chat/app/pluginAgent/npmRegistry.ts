@@ -30,9 +30,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// The npm registry a plugin task's sandbox installs from. A sandbox has no way out but this
-// service, so `npm install` in it is pointed here, and this route forwards to the registry the
-// installation names (the public one by default) and keeps the archives it fetched.
+// The npm registry a plugin task's sandbox installs from, for an installation whose sandboxes
+// have no way out but this service. It is on when the installation names this service's address
+// for sandboxes (`serviceUrl`): `npm install` in a sandbox is then pointed here, and this route
+// forwards to the registry the installation names (the public one by default) and keeps the
+// archives it fetched. Without that address the route answers 401 to everybody.
 //
 // A machine endpoint outside the API prefix, like the document agent's file routes: the portal's
 // router does not forward to it. The gate is the token of a running task; it dies with the task.
@@ -135,7 +137,14 @@ export function registerPluginAgentRegistry(app: Application): void {
     PLUGIN_AGENT_NPM_PATH,
     asyncHandler(async (req, res) => {
       const config = getPluginAgent();
-      if (!config || !isRunningTaskToken(presentedToken(req.headers.authorization))) {
+      // Off unless the installation names this service's address for sandboxes: no task is
+      // then told of the route, and its token opens nothing.
+      const serviceUrl = config?.serviceUrl;
+      if (
+        !config ||
+        serviceUrl === undefined ||
+        !isRunningTaskToken(presentedToken(req.headers.authorization))
+      ) {
         res.status(401).json({ error: "Unauthorized" });
         return;
       }
@@ -162,7 +171,7 @@ export function registerPluginAgentRegistry(app: Application): void {
           return;
         }
         if (target.kind === "document") {
-          await serveDocument(config, target.path, req.baseUrl, res, gone.signal);
+          await serveDocument(config, target.path, `${serviceUrl}${req.baseUrl}`, res, gone.signal);
         } else {
           await serveArchive(config, target.path, res, gone.signal);
         }
@@ -264,7 +273,7 @@ function refuse(res: Response, outcome: "absent" | "failed"): void {
 async function serveDocument(
   config: PluginAgentConfig,
   targetPath: string,
-  mountPath: string,
+  routeUrl: string,
   res: Response,
   client: AbortSignal,
 ): Promise<void> {
@@ -287,8 +296,8 @@ async function serveDocument(
     refuse(res, "failed");
     return;
   }
-  // Where the caller reached this route, so that an archive link leads back to it.
-  rewriteArchiveLinks(document, config.registryUrl, `${config.serviceUrl}${mountPath}`);
+  // The route as a sandbox reaches it, so that an archive link leads back to it.
+  rewriteArchiveLinks(document, config.registryUrl, routeUrl);
   res.status(200).type(answer.contentType).send(JSON.stringify(document));
 }
 

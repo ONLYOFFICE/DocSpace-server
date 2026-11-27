@@ -62,7 +62,18 @@ const CHECKS: [name: string, command: string][] = [
 ];
 
 // Without what `npm install` and the build put there: both are made again from the sources.
-const ARCHIVE_COMMAND = `rm -f ${SOURCES_ARCHIVE} && zip -qr ${SOURCES_ARCHIVE} . -x 'node_modules/*' -x 'dist/*' -x '.git/*'`;
+// Written by git, which the sandbox image has, where it has no `zip`: every file of the project
+// is added to an index of a repository made for this in a temporary directory, the project's own
+// `.gitignore` set aside, and the tree of that index is archived. A `.git` of the project is
+// never added by git, and no commit is made.
+const ARCHIVE_COMMAND = [
+  `rm -f ${SOURCES_ARCHIVE}`,
+  "export GIT_DIR=$(mktemp -d) GIT_WORK_TREE=.",
+  "git init -q",
+  "git add -A -f -- . ':(exclude,top)node_modules' ':(exclude,top)dist'",
+  `git archive --format=zip -o ${SOURCES_ARCHIVE} "$(git write-tree)"`,
+  'rm -rf "$GIT_DIR"',
+].join(" && ");
 
 export interface DeliveredPlugin {
   /** The package's name, as a file name takes it. */

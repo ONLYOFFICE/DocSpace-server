@@ -29,8 +29,10 @@ describe a plugin in the chat and get it built, checked and installed without le
   `addWebPluginFromFile` operation under the caller's session. It never installs on a standing permission:
   the call is approved by the user each time, and where the user's settings would let it run unasked it
   installs nothing; a pre-approval of the tool is withdrawn when it is met, so that the next call asks.
-- ASC.AI.Chat serves the sandbox a read-only npm registry that forwards to the public registry and caches
-  what it fetched, so a sandbox needs network access to this service only. Any package may be requested.
+- ASC.AI.Chat can serve the sandbox a read-only npm registry that forwards to the public registry and
+  caches what it fetched, so that a sandbox needs network access to this service only; any package may be
+  requested. The route is off unless the installation names the address a sandbox reaches the service at:
+  without it npm in a sandbox uses what the sandbox gives it (the cache of its image, its own egress).
 - A new read operation, `aiSettingsGetPluginAgent` (`GET api/2.0/ai/plugin-agent`), tells a client whether
   the caller is offered the plugin tools, so that it offers to build a plugin only where one can be built.
 - No preview run and no screenshot in this change: the checks are the build, the type check and the
@@ -108,9 +110,9 @@ No row of `openspec/deviations.md` is touched.
 - **Dependencies**: none added to `package.json` by design (see design.md); the skill repository
   `ONLYOFFICE/agent-skills` (Apache-2.0) becomes a submodule.
 - **External dependency, not built here**: a sandbox service for plugin work, provided by its owner. This
-  change writes the client side only and states what it needs from the sandbox (design.md). ASC.AI.Chat
-  itself needs outbound access to the npm registry. Without the configuration block the feature is off and
-  nothing else changes.
+  change writes the client side only and states what it needs from the sandbox (design.md). With the
+  registry route on, ASC.AI.Chat itself needs outbound access to the npm registry. Without the
+  configuration block the feature is off and nothing else changes.
 - **Security**: a built plugin runs in the browser of every user of the portal, and may bundle any npm
   package. The gates are the admin-only offer, the validator before delivery and the approval before an
   installation; see design.md, Risks.

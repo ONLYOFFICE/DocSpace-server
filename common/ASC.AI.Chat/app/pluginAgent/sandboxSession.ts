@@ -31,7 +31,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // The sandbox of one plugin task, from its creation to its removal: created for the task's id,
-// given the skill's scripts and an npm configuration that points at this service, kept alive by
+// given the skill's scripts and an npm configuration (one that points at this service when the
+// installation names its address for sandboxes), kept alive by
 // a timer while the task runs, and deleted when the task ends, however it ends (a deletion the
 // gateway does not take is logged and the sandbox left to its lifetime).
 //
@@ -76,17 +77,24 @@ export interface SandboxSession {
   dispose(): Promise<void>;
 }
 
-/** The npm configuration of a task: this service as the registry, the task's token as its credential. */
-export function npmConfiguration(serviceUrl: string, registryToken: string): string {
+/**
+ * The npm configuration of a task. With `serviceUrl`, this service is the registry and the
+ * task's token its credential. Without it no registry is named: npm keeps the one the sandbox
+ * gives it, so the packages its image holds in npm's cache are found there.
+ */
+export function npmConfiguration(serviceUrl: string | undefined, registryToken: string): string {
+  // Asked of a registry by every install and read by nobody: the route of this service serves
+  // none of them, and a sandbox's own way to a registry is spared them.
+  const quiet = ["audit=false", "fund=false", "update-notifier=false"];
+  if (serviceUrl === undefined) {
+    return [...quiet, ""].join("\n");
+  }
   const registry = `${serviceUrl}${PLUGIN_AGENT_NPM_PATH}/`;
   return [
     `registry=${registry}`,
     // npm sends a token to the addresses under the path it is configured for, the archives included.
     `${registry.replace(/^https?:/, "")}:_authToken=${registryToken}`,
-    // Both would call routes this service does not serve.
-    "audit=false",
-    "fund=false",
-    "update-notifier=false",
+    ...quiet,
     // A lock file then names no registry address: the one a sandbox installs from is this
     // service's internal address, and the lock file leaves with the sources.
     "omit-lockfile-registry-resolved=true",

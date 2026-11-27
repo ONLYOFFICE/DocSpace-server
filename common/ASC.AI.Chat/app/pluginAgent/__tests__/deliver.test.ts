@@ -46,8 +46,14 @@ const PROBE = "test -d /workspace/my-plugin";
 const BUILD = "npm run build";
 const TYPECHECK = "npm run typecheck";
 const VALIDATE = "node /workspace/.skill/scripts/validate-plugin.mjs . --invoke";
-const ARCHIVE =
-  "rm -f /workspace/.sources.zip && zip -qr /workspace/.sources.zip . -x 'node_modules/*' -x 'dist/*' -x '.git/*'";
+const ARCHIVE = [
+  "rm -f /workspace/.sources.zip",
+  "export GIT_DIR=$(mktemp -d) GIT_WORK_TREE=.",
+  "git init -q",
+  "git add -A -f -- . ':(exclude,top)node_modules' ':(exclude,top)dist'",
+  'git archive --format=zip -o /workspace/.sources.zip "$(git write-tree)"',
+  'rm -rf "$GIT_DIR"',
+].join(" && ");
 
 /** A gateway whose sandbox holds a project that passes every check. */
 const builtProject = (manifest: unknown = { name: "my-plugin", version: "1.2.0" }): FakeGateway => {

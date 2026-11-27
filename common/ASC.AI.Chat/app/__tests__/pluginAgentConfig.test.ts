@@ -114,7 +114,7 @@ describe("getPluginAgent", () => {
       maxToolCalls: 150,
       maxConcurrentTasks: 2,
       sandboxTtlSeconds: 600,
-      serviceUrl: "http://localhost:9837",
+      serviceUrl: undefined,
       registryUrl: "https://registry.npmjs.org",
       cacheDir: path.join(os.tmpdir(), "asc-ai-chat", "npm-cache"),
       cacheMaxBytes: 2048 * MIB,

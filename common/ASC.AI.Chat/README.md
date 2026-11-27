@@ -89,7 +89,7 @@ environment, which wins:
 | `ai.pluginAgent.maxToolCalls`       | `AI__PLUGIN_AGENT__MAX_TOOL_CALLS`       | `150`                                   | 1 – 10000  |
 | `ai.pluginAgent.maxConcurrentTasks` | `AI__PLUGIN_AGENT__MAX_CONCURRENT_TASKS` | `2`                                     | 1 – 16     |
 | `ai.pluginAgent.sandboxTtlSeconds`  | `AI__PLUGIN_AGENT__SANDBOX_TTL_SECONDS`  | `600`                                   | 60 – 3600  |
-| `ai.pluginAgent.serviceUrl`         | `AI__PLUGIN_AGENT__SERVICE_URL`          | `http://localhost:<port>`               |            |
+| `ai.pluginAgent.serviceUrl`         | `AI__PLUGIN_AGENT__SERVICE_URL`          | — (the package registry is off)         |            |
 | `ai.pluginAgent.registryUrl`        | `AI__PLUGIN_AGENT__REGISTRY_URL`         | `https://registry.npmjs.org`            |            |
 | `ai.pluginAgent.cacheDir`           | `AI__PLUGIN_AGENT__CACHE_DIR`            | `asc-ai-chat/npm-cache` in the temp dir |            |
 | `ai.pluginAgent.cacheMaxMb`         | `AI__PLUGIN_AGENT__CACHE_MAX_MB`         | `2048`                                  | 64 – 65536 |
@@ -104,20 +104,26 @@ calls it (`app/pluginAgent/sandboxClient.ts`). What it relies on:
 
 - the gateway's `Create`, `Renew`, `Delete`, `Exec` and `MakeDir` methods and the file routes
   `/sandboxes/{id}/files?path=`, with the bearer token above;
-- an image with `node`, `npm`, `zip` and `unzip` on the path and a writable `/workspace`;
-- network access from a sandbox to this service at `serviceUrl`, and to nothing else. `serviceUrl`
-  has to lead to the very instance that runs the task (the token a sandbox presents is known to it
-  alone), so the default `localhost` fits one instance on the sandbox's own host only.
+- `sandboxToken` being the token of a gateway profile that gives Node sandboxes (`plugin` in the
+  examples of that repository): the gateway picks the image, the size and the egress by the token;
+- an image with `node`, `npm`, `git` and `unzip` on the path and a writable `/workspace` (the
+  sources archive is written by `git archive`);
+- a way for npm in a sandbox to its packages: the cache of the image and the egress of the
+  profile, or the package registry below.
 
 A sandbox is created per task with the lifetime `sandboxTtlSeconds`, renewed three times within
 it while the task runs and deleted when the task ends. A task that dies with the process, or a
 deletion the gateway does not take, leaves the sandbox to expire within that lifetime.
 
-**The package registry.** A sandbox installs npm packages from this service:
+**The package registry.** Off unless `serviceUrl` is set, and meant for sandboxes that are given
+no way to a registry. With `serviceUrl`, the address a sandbox reaches this service at, a sandbox
+installs npm packages from this service:
 `GET /plugin-agent/npm/...`, outside the API prefix, forwards to `registryUrl` and keeps the
 archives it fetched in `cacheDir` (the one read longest ago is dropped past `cacheMaxMb`). The
-route answers only a request that carries the token of a running task. This service therefore
-needs outbound access to the registry; any package may be requested. A redirect of the registry is
+route answers only a request that carries the token of a running task. This service then needs
+outbound access to the registry, and the sandbox's profile egress to `serviceUrl`, which has to
+lead to the very instance that runs the task (the token is known to it alone); any package may be
+requested. The cache of the sandbox image is not used then: npm keeps it by registry address. A redirect of the registry is
 not followed (a mirror has to serve its archives itself), at most four requests are served at a time, and
 a document or an archive is held in memory while it is served (up to 64 and 128 MiB). The limit of
 concurrent tasks is per instance of the service, for all its portals together.

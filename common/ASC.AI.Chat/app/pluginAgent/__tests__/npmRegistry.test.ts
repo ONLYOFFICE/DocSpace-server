@@ -247,6 +247,12 @@ describe("the package registry route", () => {
     expect((await get("/react")).status).toBe(401);
   });
 
+  it("answers 401 for the token of a running task when the installation names no address of this service", async () => {
+    vi.stubEnv("AI__PLUGIN_AGENT__SERVICE_URL", "");
+    expect((await get("/react")).status).toBe(401);
+    expect(upstream.seen).toHaveLength(0);
+  });
+
   it.each(["put", "post", "delete", "patch"] as const)(
     "answers 405 for %s and sends nothing to the registry",
     async (method) => {

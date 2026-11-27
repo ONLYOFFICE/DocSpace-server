@@ -326,11 +326,11 @@ call SHALL say that the plugin may have been installed.
 
 ### Requirement: Package registry of a plugin task
 
-The service SHALL answer `GET` and `HEAD` under `/plugin-agent/npm/` with the package metadata and archives of
-the npm registry the installation names, for requests that carry the token of a running plugin task, and
-keep fetched archives. Archive links that lead to that registry SHALL point back at this route. The route
-SHALL answer 401 without such a token and, with one, 405 for another method, 404 for a path or package the
-registry does not have, and 502 otherwise.
+Where the installation names this service's address for sandboxes, the service SHALL answer `GET` and
+`HEAD` under `/plugin-agent/npm/` with metadata and archives of the configured npm registry, for
+requests that carry the token of a running plugin task, and keep fetched archives. Archive links to that
+registry SHALL point at this route. It SHALL answer 401 without such a token or address and, with both,
+405 for another method, 404 for a path or package the registry lacks, and 502 otherwise.
 
 #### Scenario: Install inside a task
 
@@ -346,6 +346,11 @@ registry does not have, and 502 otherwise.
 
 - **WHEN** a request carries the token of a task that has ended
 - **THEN** the route answers 401
+
+#### Scenario: Installation names no address of the service
+
+- **WHEN** a request carries the token of a running task and the installation names no address of this service for sandboxes
+- **THEN** the route answers 401 and nothing is sent to the registry
 
 #### Scenario: Publishing refused
 

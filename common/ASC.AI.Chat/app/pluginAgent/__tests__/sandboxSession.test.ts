@@ -107,6 +107,12 @@ describe("npmConfiguration", () => {
       "//chat.example/plugin-agent/npm/:_authToken=tok",
     );
   });
+
+  it("names no registry and no token when the installation names no address of this service", () => {
+    expect(npmConfiguration(undefined, "tok")).toBe(
+      ["audit=false", "fund=false", "update-notifier=false", ""].join("\n"),
+    );
+  });
 });
 
 describe("openSandboxSession", () => {
