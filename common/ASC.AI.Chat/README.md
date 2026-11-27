@@ -4,10 +4,46 @@ ASC New AI service — Express-based Node.js service for AI features integration
 
 ### Installation and usage
 
+Node.js 24.22.1 or newer and Yarn 4 (`engines` in `package.json`; the image is built from
+`node:24.22.1-alpine`).
+
 ```bash
 $ yarn install
 $ yarn start
 ```
+
+### Checks
+
+No CI job runs them: a change is handed over with the local run green and with what
+`yarn openapi` changes committed.
+
+```bash
+$ yarn check     # typecheck, lint, format:check and the tests with their coverage thresholds
+$ yarn test      # the tests alone; `yarn vitest run <file>` for one file
+$ yarn openapi   # rewrites app/generated and the API documentation's aichat_2.0.json
+```
+
+### Environment
+
+Read in `config/index.ts` only. A value that is given and is not taken is reported once with
+`console.warn` and the default is used; an optional value never stops the service.
+
+| Variable                      | Accepted                               | Default          |
+| ----------------------------- | -------------------------------------- | ---------------- |
+| `AI_CHAT_UPSTREAM_TIMEOUT_MS` | a whole number from 1000 to 3600000    | `300000`         |
+| `AI_CHAT_PERSIST_INTERVAL_MS` | a whole number from 1000 to 600000     | `10000`          |
+| `AI_CHAT_CONTEXT`             | `off` (exactly) switches the read off  | on               |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | an `http:` or `https:` address         | - (no telemetry) |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | `grpc`; anything else is http/protobuf | `http/protobuf`  |
+| `OTEL_SERVICE_NAME`           | a non-empty text                       | `ASC.AI.Chat`    |
+| `OTEL_METRIC_EXPORT_INTERVAL` | a whole number from 1000 to 3600000    | `15000`          |
+
+`AI_CHAT_UPSTREAM_TIMEOUT_MS` bounds one call to the AI service, the Files API or the People
+API; `AI_CHAT_PERSIST_INTERVAL_MS` is how often a streaming reply is saved while its round runs;
+`AI_CHAT_CONTEXT=off` switches the chat-context read of a round off for the whole process.
+Telemetry starts only when `openTelemetry:enable` of the shared `appsettings.json` is `true`
+and the endpoint is given; `openTelemetry:ServiceName` wins over `OTEL_SERVICE_NAME`. The
+`OTEL_*` values are read from the environment first and then from the settings files.
 
 ### Document agent
 
@@ -38,12 +74,12 @@ stored as an ordinary message of the thread (the marker lives in its `contents`)
 needs nothing new. On by default; switched off with `ai.compaction.enabled: false` in
 `appsettings.json` or `AI__COMPACTION__ENABLED=false` (or `0`). The environment wins over the file:
 
-| `appsettings.json`                   | Environment                             | Default   |
-| ------------------------------------ | --------------------------------------- | --------- |
-| `ai.compaction.enabled`              | `AI__COMPACTION__ENABLED`               | `true`    |
-| `ai.compaction.threshold`            | `AI__COMPACTION__THRESHOLD`             | `0.8`     |
-| `ai.compaction.keepRecent`           | `AI__COMPACTION__KEEP_RECENT`           | `4`       |
-| `ai.compaction.defaultContextWindow` | `AI__COMPACTION__DEFAULT_CONTEXT_WINDOW` | `128000`  |
+| `appsettings.json`                   | Environment                              | Default  |
+| ------------------------------------ | ---------------------------------------- | -------- |
+| `ai.compaction.enabled`              | `AI__COMPACTION__ENABLED`                | `true`   |
+| `ai.compaction.threshold`            | `AI__COMPACTION__THRESHOLD`              | `0.8`    |
+| `ai.compaction.keepRecent`           | `AI__COMPACTION__KEEP_RECENT`            | `4`      |
+| `ai.compaction.defaultContextWindow` | `AI__COMPACTION__DEFAULT_CONTEXT_WINDOW` | `128000` |
 
 The window of a model comes from the library's id-based table, else the default above. The gateway
 catalogue's `context_length` reaches the model list, but a saved profile does not keep it yet (the

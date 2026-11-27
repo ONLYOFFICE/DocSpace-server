@@ -99,7 +99,7 @@ and Google Workspace rows that need a valid archive of their format, the welcome
 | **Importing groups** | | |
 | `importGroups` sets every group; per-group `shouldImport` not read; name reuse; members from the import pool; manager set | `Info:109-112`; `Migrator:510-560`; `Workspace:630-683`; `Google:254-282`; `Nextcloud:270-294` | TEST-CONFIRMED [run: PASS] (group created, members only from the import pool: `Tests/MigrationImportTests.cs:88`) / CODE-ONLY (name reuse, manager) |
 | **Importing personal files and their shares** | | |
-| Folder "ASC migration files dd.MM.yyyy" in My documents as the user; tree by level; file versions/dates; shares re-applied with fallback to an allowed right; owner and unknown subjects skipped | `Migrator:562-791`; `Workspace:597-628` (1→Editing, 2→Read, 6→Comment), `Google:387-434`, `Nextcloud:530-566` | TEST-CONFIRMED [run: PASS] ("ASC migration files …" in My documents of the user, sub-folder tree and files: `Tests/MigrationImportTests.cs:106`) / CODE-ONLY (versions, dates, shares) |
+| Folder "ASC migration files dd.MM.yyyy" in My documents as the user; tree by level; file versions/dates; shares re-applied with fallback to an allowed right; owner and unknown subjects skipped | `Migrator:562-791`; `Workspace:597-628` (1→Editing, 2→Read, 6→Comment), `Google:387-434`, `Nextcloud:607-643` | TEST-CONFIRMED [run: PASS] ("ASC migration files …" in My documents of the user, sub-folder tree and files: `Tests/MigrationImportTests.cs:106`) / CODE-ONLY (versions, dates, shares) |
 | `importPersonalFiles` false → storage not imported; shares need the storage | `Info:95-97`; `Migrator:564-567, 668-671` | TEST-CONFIRMED [run: PASS] (`Tests/MigrationImportTests.cs:121`) |
 | **Importing common and project files of a Workspace portal** | | |
 | Common → Public room "ASC migration common files dd.MM.yyyy" as the caller; projects → Custom / Editing (private) room per project, owner changed, participants Content creator, Everyone Read for open projects | `Migrator:385-411, 580-613`; `Workspace:195-231, 400-434, 543-595`; `Info:100-107` | CODE-ONLY |
@@ -129,7 +129,7 @@ and Google Workspace rows that need a valid archive of their format, the welcome
 
 | Release note / document | Server |
 |---|---|
-| v2.5 notes: migration of "users with files, groups and shared files/folders" | Also Workspace Common documents and project files into rooms (`Migrator:385-411`), user photos and profile contacts (`Google:598-704`, `Nextcloud:333-393`). |
+| v2.5 notes: migration of "users with files, groups and shared files/folders" | Also Workspace Common documents and project files into rooms (`Migrator:385-411`), user photos and profile contacts (`Google:598-704`, `Nextcloud:418-476`). |
 | v3.6 notes: "no admin limit on the Select users step, everyone is a free User; the limit moved to Select user types" | Client logic. The server has no up-front limit at all: every user is proposed as `User` (`User:38`), and a RoomAdmin/DocSpaceAdmin that does not fit the paid-user quota fails individually at creation while the import continues (`Migrator:494-500`). |
 | v3.0 notes: "a warning dialog appears before data migration when the quota is on" | Client. The server rejects a backup bigger than the portal's total storage quota inside the job with "Backup is larger than the total size of the portal" (`Operation:123-141`), not at the API call. |
 | yaml `MigrationApiInfo.users` example `{"id": "...", "email": ..., "shouldImport": true}`, `groups` example `{"id": "1", "name": "Group1", ...}` | The wire fields are `key` (not `id`) for a user and `groupName` / `userUidList` (no `id`, no `name`) for a group (`ApiUser:47`, `common/ASC.Migration/ApiModels/MigratingApiGroup.cs:48-62`). A body built from the example would match no parsed user. |
@@ -154,11 +154,11 @@ and Google Workspace rows that need a valid archive of their format, the welcome
   `ASC.MigrationPersonalToDocspace`): schema and personal-portal migrations, unrelated to data import.
 - **The storage migration** (`common/ASC.Data.Storage/Migration`): moving files between storage providers.
 - **How each migrator reads its format** beyond what the caller sees (Workspace XML table dumps and
-  `files/folder_<n>/file_<id>/v<n>/content`, Nextcloud `INSERT INTO` regex parsing of `oc_accounts`,
+  `files/folder_<n>/file_<id>/v<n>/content`, Nextcloud `INSERT INTO` and `COPY` parsing of `oc_accounts`,
   `oc_accounts_data`, `oc_storages`, `oc_filecache`, `oc_share`, `oc_groups`, Google `*-info.json` share
   files, localized Takeout folder names, profile and account HTML): implementation; the spec names only the
   archive requirements and the resulting lists.
-- **Nextcloud permission bit mapping** (`Nextcloud:558-566`: bits 1/17/… → Read, else Editing) and the
+- **Nextcloud permission bit mapping** (`Nextcloud:635-643`: bits 1/17/… → Read, else Editing) and the
   Workspace project-folder discovery: implementation detail of "the right the source had".
 - **Rate-limit headers and 429/5xx rows** of the yaml: generic policy.
 - **The distributed task queue mechanics** (Redis-backed task list, 1-day TTL of the task and of the upload
@@ -206,3 +206,11 @@ tests.
 | Oversized profile photo skipped with a log line | `c4951746da`; resource `PhotoTooLarge` | TEST-CONFIRMED [run: PASS] (`web/ASC.Web.Api.Tests/Tests/07_Migration/WorkspaceParseTests.cs:111-127` `Migrate_UserPhoto_SkipsPhotoOverPixelLimit`) |
 | M3 | `c096f23fa9` removed the documented 500 of `finishMigration`, but `FinishMigration` (`MigrationController.cs:316-339`) still dereferences `ImportedUsers` unguarded, so the 500 remains, now undeclared | STILL OPEN |
 | M2–M14 (others) | the range changed the migrators and `MigrationOperation` (limits); the controller only in remarks; the upload handler, the queue reads, `Stop`/`Clear`, the user and group stages and the progress arithmetic are untouched | STILL OPEN |
+
+## Revision 2026-11-26 (bugs 85259, 85267, 85248)
+
+| Claim | Source | Status |
+|---|---|---|
+| A Nextcloud dump that writes an `INSERT` over several lines (a line break after `VALUES`, one row per line; `\n` or `\r\n`) is read like one with the rows on the line of the `INSERT`. Before the fix no table was found in such a dump and the parse ended without an error and without users. FIXED `97b4b72dbd` | `Nextcloud:306-322` (`GetInsertRows`: the statement is read up to the `;` that ends a line) | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/NextcloudParseTests.cs:344-366` `Parse_DumpWithRowPerLine_ReadsUsersAndFiles`, bug 85259) |
+| A Nextcloud dump written by pg_dump — no `INSERT`, the rows of a table after `COPY schema.table (columns) FROM stdin;`, one per line, values separated by tabs, NULL as `\N`, up to a line `\.` — is read like a MySQL one. Before the fix no table was found in such a dump and the parse ended without an error and without users. FIXED `4a3fd9d987` | `Nextcloud:301-304` (`GetDumpChunk`: the `INSERT` first, else the `COPY` block), `:324-393` (`GetCopyRows`, `UnescapeCopyValue`) | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/NextcloudParseTests.cs:377-412` `Parse_PostgreSqlDump_ReadsUsersAndFiles`, bug 85267) |
+| A Nextcloud backup packed without a folder around it (`config/`, `data/` and the dump as the top-level entries of a `.zip` or `.tar.gz`, entry names with or without a leading `./`) is read like one packed inside a folder. Before the fix the first folder of the unpacked archive was taken for the backup, every user failed with "Couldn't parse user" in the log and the parse ended without an error and without users. FIXED (uncommitted) | `Nextcloud:649-659` (`GetBackupRoot`: the folder that holds `data`), used at `:128`, `:155`, `:498` | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/NextcloudUnpackTests.cs:192-211` `Parse_ArchiveWithoutRootFolder_ReadsUsersAndFiles`, bug 85248) |

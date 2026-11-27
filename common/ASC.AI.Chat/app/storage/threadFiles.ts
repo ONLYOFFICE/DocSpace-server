@@ -39,10 +39,10 @@
 // service when they are bound to a message (see projectAttachments.ts) and
 // listed by `GET api/2.0/files/rooms/{id}/threads/{threadId}/attachments`.
 
-import { aiServiceBaseUrl, AiServiceHttpError, withTimeout } from "./httpClient.js";
-import { getForwardedHeaders } from "../requestContext.js";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { mapped, UpstreamShapeError } from "./upstreamShape.js";
 
 export interface ThreadArtifact {
   /** The ID of the new DocSpace file. */
@@ -67,35 +67,22 @@ export async function uploadThreadArtifact(
   form.append("title", title);
   form.append("file", new Blob([bytes], { type: mediaType }), title);
 
-  const url = `${aiServiceBaseUrl}/internal/ai/threads/${encodeURIComponent(threadId)}/artifacts`;
-  const { signal, cancel } = withTimeout(undefined);
+  let file: unknown;
   try {
-    // No Content-Type: `fetch` derives the multipart boundary from the body.
-    const res = await fetch(url, {
-      method: "POST",
-      headers: getForwardedHeaders(),
-      body: form,
-      signal,
-    });
-    if (res.status === 400 || res.status === 403 || res.status === 404) {
-      logger.info(`uploadThreadArtifact: thread ${threadId} takes no artifacts (${res.status})`);
+    file = await aiService.post(`/threads/${encodeURIComponent(threadId)}/artifacts`, form);
+  } catch (err) {
+    if (err instanceof AiServiceHttpError && [400, 403, 404].includes(err.status)) {
+      logger.info(`uploadThreadArtifact: thread ${threadId} takes no artifacts (${err.status})`);
       return undefined;
     }
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new AiServiceHttpError(res.status, res.statusText, text, url);
-    }
-    const json: unknown = await res.json();
-    const file = isObject(json) && isObject(json["response"]) ? json["response"] : json;
-    const id = isObject(file) ? getEntityId(file, "id") : undefined;
-    if (!isObject(file) || id === undefined) {
-      throw new Error("the AI service returned an artifact without an id");
-    }
-    logger.info(
-      `uploadThreadArtifact: ${title} -> thread ${threadId} as file ${id} (${bytes.length} bytes)`,
-    );
-    return { id, title: getString(file, "title") ?? title };
-  } finally {
-    cancel();
+    throw err;
   }
+  if (!isObject(file)) {
+    throw new UpstreamShapeError("POST threads/{id}/artifacts");
+  }
+  const id = mapped(getEntityId(file, "id"), "POST threads/{id}/artifacts");
+  logger.info(
+    `uploadThreadArtifact: ${title} -> thread ${threadId} as file ${id} (${bytes.length} bytes)`,
+  );
+  return { id, title: getString(file, "title") ?? title };
 }

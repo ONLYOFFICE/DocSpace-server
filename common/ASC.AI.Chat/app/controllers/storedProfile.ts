@@ -41,6 +41,7 @@ import type { Profile } from "@onlyoffice/ai-chat/core";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
 import { getString, isObject } from "../narrow.js";
+import { clientFault } from "../httpErrors.js";
 
 /**
  * The stored profile with this id, or `undefined` for an id the AI service
@@ -68,7 +69,7 @@ export async function resolveStoredProfile(sent: unknown): Promise<Profile> {
   const id = isObject(sent) ? getString(sent, "id") : undefined;
   const stored = id ? await readStoredProfile(id) : undefined;
   if (!stored) {
-    throw Object.assign(new Error("the AI profile does not exist"), { status: 404, expose: true });
+    throw clientFault(404, "the AI profile does not exist");
   }
   return stored;
 }

@@ -1,0 +1,12 @@
+{
+  "app/controllers/threadsController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 3
+    }
+  },
+  "app/controllers/toolsController.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  }
+}

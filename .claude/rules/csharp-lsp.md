@@ -149,3 +149,12 @@ Grep/Glob are allowed ONLY for non-symbol text: string literals,
 comments, config files (.json/.yml/.props), route templates, SQL.
 Calling Grep with a pattern that is a C# identifier (class, method,
 property name) is a violation of this rule.
+
+## TypeScript is outside this rule
+
+The rule is about C#. `common/ASC.AI.Chat` is a Node/TypeScript service
+under `common/`, and no TypeScript language server is enabled for this
+repository (`.claude/settings.json` enables `csharp-lsp` only), so a
+TypeScript identifier there is found with Grep. Narrow the search to
+`common/ASC.AI.Chat/app` (or `config`, `scripts`) and to `*.ts`, so that
+`node_modules` and the C# trees stay out of it.

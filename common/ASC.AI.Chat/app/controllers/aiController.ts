@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { Response } from "express";
@@ -65,13 +65,14 @@ import {
 } from "../storage/contextFolders.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
-import { aiService } from "../storage/httpClient.js";
+import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
 import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { readStoredProfile } from "./storedProfile.js";
-import { asActionType, getString, isObject, parseInt10 } from "../narrow.js";
+import { assertAiAccess } from "./aiAccess.js";
+import { asActionType, isObject, parseInteger } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
@@ -79,9 +80,10 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
+import { toolErrorForLog } from "../tools/toolErrorLog.js";
 import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
 import { documentAgentTools } from "../tools/documentAgent.js";
-import { DOCUMENT_AGENT_TYPE, getCompaction } from "../../config/index.js";
+import { DOCUMENT_AGENT_TYPE, getCompaction, getPersistIntervalMs } from "../../config/index.js";
 import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
@@ -125,25 +127,40 @@ function withRequestSignal<T>(res: Response, body: T): T {
   };
 }
 
+// The most knowledge bases one round takes, as many as it takes context folders
+// (`CONTEXT_FOLDERS_LIMIT`): every id goes to the AI service with each tool list of the round.
+export const KNOWLEDGE_ROOMS_LIMIT = 20;
+
 // `actionArgs.knowledgeRooms[].id` as the room ids the .NET side expects —
-// each a DocSpace room id, once, in the order sent. An older widget sends a
-// single `actionArgs.knowledgeRoom`; it is read the same way.
+// each a DocSpace room id, once, in the order sent, cut at
+// `KNOWLEDGE_ROOMS_LIMIT` like the context folders (`contextFolderIdsOf`). An
+// older widget sends a single `actionArgs.knowledgeRoom`; it is read the same way.
 function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
-  const list = Array.isArray(actionArgs["knowledgeRooms"])
-    ? (actionArgs["knowledgeRooms"] as unknown[])
-    : [actionArgs["knowledgeRoom"]];
-  const ids: number[] = [];
-  for (const room of list) {
+  const rooms = actionArgs["knowledgeRooms"];
+  const list: unknown[] = Array.isArray(rooms) ? rooms : [actionArgs["knowledgeRoom"]];
+  const ids = new Set<number>();
+  for (const [index, room] of list.entries()) {
     if (!isObject(room)) {
       continue;
     }
-    const id = room["id"];
-    const parsed = typeof id === "string" ? Number.parseInt(id, 10) : typeof id === "number" ? id : NaN;
-    if (Number.isInteger(parsed) && parsed > 0 && !ids.includes(parsed)) {
-      ids.push(parsed);
+    // The whole value has to be an integer: "9abc" names no room, it is not room 9.
+    const parsed = parseInteger(room["id"]);
+    if (parsed !== undefined && parsed > 0) {
+      ids.add(parsed);
+    }
+    if (ids.size === KNOWLEDGE_ROOMS_LIMIT) {
+      // The knowledge search of the round leaves the rest out; the log is the one place
+      // that says so (the limit is published on `actionArgs.knowledgeRooms`).
+      const unread = list.length - index - 1;
+      if (unread > 0) {
+        logger.warn(
+          `knowledgeRoomIdsOf: ${unread} entries of actionArgs.knowledgeRooms after the first ${KNOWLEDGE_ROOMS_LIMIT} room ids are ignored`,
+        );
+      }
+      break;
     }
   }
-  return ids;
+  return [...ids];
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt
@@ -163,12 +180,12 @@ function appendActionPrompt<T>(body: T, fragment: string): T {
   const existing = actionArgs["prompt"];
   const prompt =
     isObject(existing) && typeof existing["text"] === "string"
-      ? { ...existing, text: `${existing["text"] as string}\n\n${fragment}` }
+      ? { ...existing, text: `${existing["text"]}\n\n${fragment}` }
       : { mode: "append", text: fragment };
   return {
     ...body,
     actionArgs: { ...actionArgs, prompt },
-  } as T;
+  };
 }
 
 // The two ids a chat request may carry, as the client sends them:
@@ -194,6 +211,90 @@ function stringField(body: unknown, key: string): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
+// The ids a chat body carries (`threadId`, `entityId`, `contextEntityId`,
+// `profileId`) are strings on the wire: the engine's input types say so, and
+// the web client and the .NET suite send them as strings. `null` stays what it
+// was, an absent id. Any other type is the caller's mistake and answers 400
+// naming the field in every round (send, send-custom, the two stream routes,
+// regenerate, approve and deny), so that a number never reaches the aggregate
+// read, the thread read or the profile read (ts-ai-failure-paths.md §4).
+type ChatIdField = "threadId" | "entityId" | "contextEntityId" | "profileId";
+const STREAM_ID_FIELDS: readonly ChatIdField[] = [
+  "threadId",
+  "entityId",
+  "contextEntityId",
+  "profileId",
+];
+
+function idTypeError(body: unknown, fields: readonly ChatIdField[]): string | null {
+  if (!isObject(body)) {
+    return null;
+  }
+  for (const field of fields) {
+    const value = body[field];
+    if (value !== undefined && value !== null && typeof value !== "string") {
+      return `${field} must be a string`;
+    }
+  }
+  return null;
+}
+
+// An id of the body as the aggregate read takes it: a string as sent, else
+// absent. A round whose ids are of a wrong type is refused right after that
+// read (see idTypeError).
+function idOf(body: unknown, field: ChatIdField): string | undefined {
+  if (!isObject(body)) {
+    return undefined;
+  }
+  const value = body[field];
+  return typeof value === "string" ? value : undefined;
+}
+
+// The fields a resume of a round cannot do without (`RegenerateStreamInput` and `ToolCallData`
+// of the library), present and of their type. Left out, the engine went on with `undefined`:
+// `GET messages/undefined` to the AI service, then its status or a 409, where the document
+// promises a 400. Their values are the engine's to judge: an unknown thread is 404, an unknown
+// message or an index out of range 409 (openspec ai-agents "Decisions on a tool call").
+type ResumeField = "threadId" | "messageId" | "idx";
+
+function missingFieldError(body: unknown, fields: readonly ResumeField[]): string | null {
+  for (const field of fields) {
+    const value = isObject(body) ? body[field] : undefined;
+    if (field === "idx") {
+      if (typeof value !== "number" || !Number.isInteger(value)) {
+        return "idx is required and must be an integer";
+      }
+    } else if (typeof value !== "string") {
+      return `${field} is required and must be a string`;
+    }
+  }
+  return null;
+}
+
+// The aggregate read of a round that takes its ids from the body, then the
+// refusal of an id of a wrong type. Answers `false` when it has responded.
+// The aggregate read is the round's access gate when it installs a snapshot.
+// When it installs none (switched off by `AI_CHAT_CONTEXT` or the
+// `x-ai-chat-context: off` header, failed with anything but 401/403, or an
+// unusable answer) no gated call has been made, so the gate is asked here,
+// before any refusal of the body (ts-ai-failure-paths.md §3).
+async function primeRound(body: unknown, res: Response): Promise<boolean> {
+  const primed = await primeChatContext({
+    threadId: idOf(body, "threadId"),
+    entityId: idOf(body, "entityId"),
+    contextEntityId: idOf(body, "contextEntityId"),
+  });
+  if (!primed) {
+    await assertAiAccess();
+  }
+  const error = idTypeError(body, STREAM_ID_FIELDS);
+  if (error) {
+    res.status(400).json({ error });
+    return false;
+  }
+  return true;
+}
+
 // The folders and rooms the user selected as the chat's context in the
 // composer (`actionArgs.folderContexts`, up to `CONTEXT_FOLDERS_LIMIT`), by
 // id; empty when none is selected.
@@ -206,12 +307,6 @@ function contextFolderIdsOfBody(body: unknown): string[] {
 // prompt describes the tool set the engine actually wires up.
 function toolsScopeOf(body: unknown): string | undefined {
   return stringField(body, "contextEntityId") ?? stringField(body, "entityId");
-}
-
-// The folder the round is attributed to: the first of the context folders
-// the user selected, else the folder or room they are in.
-function locationOf(body: unknown): string | undefined {
-  return contextFolderIdsOfBody(body)[0] ?? stringField(body, "contextEntityId");
 }
 
 // The entry the round is attributed to for usage accounting: where the user
@@ -228,16 +323,22 @@ function sourceScopeOf(body: unknown): string | undefined {
   );
 }
 
+// A thread read that answers "this thread is not there": 404, or the 400 the
+// AI service gives a malformed id. Every other failure (a 5xx, a timeout, a
+// dropped connection) says nothing about the thread and is passed on, so the
+// caller gets a 5xx and can retry (ts-ai-failure-paths.md §1).
+function isThreadAbsent(err: unknown): err is AiServiceHttpError {
+  return err instanceof AiServiceHttpError && (err.status === 404 || err.status === 400);
+}
+
 // The round's profile and attachments for a request that resumes a round
 // (tool-call approval): the profile the round runs on, ranked as
 // sendWithStream ranks it (the caller's explicit choice, then the thread's
 // own), and the attachments of the thread's last user message, the one the
-// resumed round answers. Best-effort: a failed read leaves the document
-// agent tool to its own fallbacks.
-async function primeRoundFromThread(
-  threadId: unknown,
-  requestedProfileId: unknown,
-): Promise<void> {
+// resumed round answers. A thread that is not there leaves the document agent
+// tool to its own fallbacks; a read that failed otherwise fails the request
+// before the approved tool runs.
+async function primeRoundFromThread(threadId: unknown, requestedProfileId: unknown): Promise<void> {
   if (typeof threadId !== "string" || threadId.length === 0) {
     return;
   }
@@ -258,17 +359,17 @@ async function primeRoundFromThread(
     }
     setRoundAttachmentIds(lastUser ? extractAttachmentRefIds(lastUser) : []);
   } catch (err) {
-    logger.warn(
-      `primeRoundFromThread: thread ${threadId} not resolved: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
-    );
+    if (!isThreadAbsent(err)) {
+      throw err;
+    }
+    logger.warn(`primeRoundFromThread: thread ${threadId} not found: AI service ${err.status}`);
   }
 }
 
 // Attachment refs from the thread's persisted history, newest message first
-// so the most recently attached form wins. Best-effort — a failed read carries
-// no prior context rather than erroring the round.
+// so the most recently attached form wins. A thread that is not there carries
+// no prior context; a read that failed otherwise fails the round before its
+// stream opens.
 async function historyAttachmentRefIds(threadId: unknown): Promise<string[]> {
   if (typeof threadId !== "string" || threadId.length === 0) {
     return [];
@@ -277,10 +378,11 @@ async function historyAttachmentRefIds(threadId: unknown): Promise<string[]> {
   try {
     history = await storage.messages.readByThread(threadId);
   } catch (err) {
+    if (!isThreadAbsent(err)) {
+      throw err;
+    }
     logger.warn(
-      `withToolsPrompt: thread ${threadId} history read failed, form context not carried over: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
+      `withToolsPrompt: thread ${threadId} history not found, form context not carried over: AI service ${err.status}`,
     );
     return [];
   }
@@ -419,14 +521,11 @@ function customScopeOf(body: unknown): string | undefined {
 // is an HTTP hop, so pace them to a few seconds. The first create and the
 // terminal write are unconditional; this only paces the intermediate ones,
 // and the library salvages the staged text if the stream dies early.
-// Override with `AI_CHAT_PERSIST_INTERVAL_MS`; anything that is not a
-// positive integer keeps the default here rather than falling through to
-// the library's 150 ms fallback.
-const DEFAULT_PERSIST_INTERVAL_MS = 10_000;
-const PERSIST_INTERVAL_MS = ((): number => {
-  const configured = parseInt10(process.env["AI_CHAT_PERSIST_INTERVAL_MS"]);
-  return configured !== undefined && configured > 0 ? configured : DEFAULT_PERSIST_INTERVAL_MS;
-})();
+// Override with `AI_CHAT_PERSIST_INTERVAL_MS`, a whole number of
+// milliseconds from a second to ten minutes (`getPersistIntervalMs`); anything
+// else keeps the default here rather than falling through to the library's
+// 150 ms fallback.
+const PERSIST_INTERVAL_MS = getPersistIntervalMs();
 
 const toolsAdapter = new HttpToolsAdapter();
 const engine = new AIEngine({
@@ -514,33 +613,45 @@ function describeChatError(error: unknown): string {
 function describeToolCallPending(event: Record<string, unknown>): string {
   const idx = typeof event["idx"] === "number" ? event["idx"] : -1;
   const message = isObject(event["message"]) ? event["message"] : null;
-  const content =
-    message && Array.isArray(message["content"]) ? message["content"] : [];
+  const content = message && Array.isArray(message["content"]) ? message["content"] : [];
   const part = idx >= 0 && isObject(content[idx]) ? content[idx] : null;
-  const toolName =
-    part && typeof part["toolName"] === "string" ? part["toolName"] : "?";
-  const toolCallId =
-    part && typeof part["toolCallId"] === "string" ? part["toolCallId"] : "?";
+  const toolName = part && typeof part["toolName"] === "string" ? part["toolName"] : "?";
+  const toolCallId = part && typeof part["toolCallId"] === "string" ? part["toolCallId"] : "?";
   return `tool=${toolName} callId=${toolCallId} idx=${idx} serverExecuted=${
     event["serverExecuted"] === true
   } autoAllow=${event["autoAllow"] === true}`;
 }
 
 // Describe an in-engine tool result for the log without dumping it: an image
-// result carries megabytes of base64, and the interesting part is never the
-// payload — it is whether the tool answered with data, with a persisted ref,
-// or with an error (an unconfigured image profile, a provider/gateway refusal
-// such as a 402 from the paid route). Those errors are returned by the engine
-// as an ordinary tool result and are otherwise invisible server-side: the
-// library logs them only to its own console logger.
+// result carries megabytes of base64, any other one what the tool read (a
+// file's text, a search answer, another server's words), and the interesting
+// part is never the payload — it is whether the tool answered with data,
+// with a persisted ref, or with an error (an unconfigured image profile, a
+// provider/gateway refusal such as a 402 from the paid route). Those errors
+// are returned by the engine as an ordinary tool result and are otherwise
+// invisible server-side: the library logs them only to its own console
+// logger. An error is named by `toolErrorForLog`, anything else by its shape
+// and size. An object is named by its first keys; the ones left out are
+// counted (`+N more`), so a cut list does not read as the whole one.
+const TOOL_RESULT_KEYS_IN_LOG = 10;
+
 function describeToolResult(result: unknown): string {
   const text = typeof result === "string" ? result : JSON.stringify(result);
   if (text === undefined) {
-    return String(result);
+    return `a ${typeof result}`;
   }
+  let shape = "text";
   try {
     const parsed: unknown = JSON.parse(text);
-    if (isObject(parsed)) {
+    if (Array.isArray(parsed)) {
+      shape = `a list of ${parsed.length}`;
+    } else if (isObject(parsed)) {
+      const keys = Object.keys(parsed);
+      const shown = keys.slice(0, TOOL_RESULT_KEYS_IN_LOG);
+      if (keys.length > shown.length) {
+        shown.push(`+${keys.length - shown.length} more`);
+      }
+      shape = `{${shown.join(",")}}`;
       const data = isObject(parsed["data"]) ? parsed["data"] : null;
       if (data && typeof data["base64"] === "string") {
         return `{data.base64=${data["base64"].length}B} (not persisted — no ref)`;
@@ -549,13 +660,15 @@ function describeToolResult(result: unknown): string {
         return `{data.ref=${data["ref"]}}`;
       }
       if (parsed["error"] !== undefined) {
-        return `ERROR ${JSON.stringify(parsed["error"]).slice(0, 700)}`;
+        return `ERROR ${toolErrorForLog(parsed["error"])}`;
       }
+    } else {
+      shape = `a ${parsed === null ? "null" : typeof parsed}`;
     }
   } catch {
-    // Not JSON — fall through to the truncated raw form.
+    // Not JSON: a text.
   }
-  return `${text.slice(0, 500)}${text.length > 500 ? `… (${text.length}B)` : ""}`;
+  return `${shape} (${text.length}B)`;
 }
 
 // Scan an event's streamed message for tool-call content parts and record
@@ -610,10 +723,7 @@ function trackToolCalls(
 // a broken stream is invisible from the server side — it only shows up in
 // the browser DevTools network tab. Also traces tool-call lifecycle so a
 // tool that hangs (pending surfaced, stream never completes) is visible.
-async function* logStreamErrors<T>(
-  route: string,
-  iter: AsyncIterable<T>,
-): AsyncIterable<T> {
+async function* logStreamErrors<T>(route: string, iter: AsyncIterable<T>): AsyncIterable<T> {
   let eventCount = 0;
   const toolCalls = new Map<string, boolean>();
   const loggedResults = new Set<string>();
@@ -629,22 +739,16 @@ async function* logStreamErrors<T>(
             `${route}: provider returned message-incomplete — ${describeChatError(status["error"])}`,
           );
         } else if (status) {
-          logger.warn(
-            `${route}: message-incomplete reason=${String(status["reason"])}`,
-          );
+          logger.warn(`${route}: message-incomplete reason=${String(status["reason"])}`);
         }
       } else if (isObject(event) && event["type"] === "tool-call-pending") {
-        logger.info(
-          `${route}: tool-call-pending — ${describeToolCallPending(event)}`,
-        );
+        logger.info(`${route}: tool-call-pending — ${describeToolCallPending(event)}`);
       }
       yield event;
     }
     const toolSummary =
       toolCalls.size > 0
-        ? [...toolCalls]
-            .map(([name, executed]) => `${name}(executed=${executed})`)
-            .join(", ")
+        ? [...toolCalls].map(([name, executed]) => `${name}(executed=${executed})`).join(", ")
         : "<none>";
     logger.info(
       `${route}: stream completed after ${eventCount} event(s); toolCalls=${toolSummary}; ` +
@@ -703,9 +807,9 @@ function hasPromptContent(userMessage: unknown): boolean {
       return true;
     }
     if (
-      part["type"] === "text"
-      && typeof part["text"] === "string"
-      && part["text"].trim().length > 0
+      part["type"] === "text" &&
+      typeof part["text"] === "string" &&
+      part["text"].trim().length > 0
     ) {
       return true;
     }
@@ -719,9 +823,7 @@ function hasPromptContent(userMessage: unknown): boolean {
 // makes the C# lookup fail with 400; that is just as much "no such profile"
 // to the caller, so both collapse to the same message. A lookup that fails
 // any other way is the service failing, and is passed on with its status.
-async function unknownProfileIdError(
-  profileId: string | undefined,
-): Promise<string | null> {
+async function unknownProfileIdError(profileId: string | undefined): Promise<string | null> {
   if (!profileId) {
     return null;
   }
@@ -782,7 +884,7 @@ async function preflightStreamRound(body: SendStreamInput, res: Response): Promi
   // engine silently falls back to another model (Bug 83160).
   const profileError = await unknownProfileIdError(body.profileId);
   if (profileError === AI_TOOLS_UNPAID_ERROR) {
-    res.status(402).json({ error: await aiToolsUnpaidMessage() });
+    res.status(402).json({ error: AI_TOOLS_UNPAID_ERROR });
     return false;
   }
   if (profileError) {
@@ -792,30 +894,12 @@ async function preflightStreamRound(body: SendStreamInput, res: Response): Promi
   return true;
 }
 
-// Sentinel so the callers can tell the billing failure (402) apart from the
-// unknown-profile validation error (400) in unknownProfileIdError's single
-// string channel. Never sent as-is: the 402 body carries the portal's
-// localized wording, see aiToolsUnpaidMessage.
-const AI_TOOLS_UNPAID_ERROR =
-  "The AI Tools service is not paid for the current portal";
-
-// The 402 body for the unpaid gateway. The C# settings (`aiNotReadyMessage`)
-// carry the reason in the user's culture; this service has no resources of
-// its own, so answering with the English sentinel put a `ru` user back on an
-// untranslated refusal after the refusal moved out of the stream (Bug 84023,
-// same class as Bug 83048). Falls back to the sentinel when the portal
-// predates the field.
-async function aiToolsUnpaidMessage(): Promise<string> {
-  const primed = getChatContextSnapshot()?.aiNotReadyMessage;
-  if (primed) {
-    return primed;
-  }
-  const config = await aiService.get("/config").catch(() => undefined);
-  const message = isObject(config)
-    ? getString(config, "aiNotReadyMessage")
-    : undefined;
-  return message || AI_TOOLS_UNPAID_ERROR;
-}
+// The 402 body for the unpaid gateway, and the sentinel by which the callers
+// tell it apart from the unknown-profile validation error (400) in
+// unknownProfileIdError's single string channel. It is English: the AI
+// service serves no localized wording for this state (AiSettingsDto has no
+// such field), and this service has no resources of its own.
+const AI_TOOLS_UNPAID_ERROR = "The AI Tools service is not paid for the current portal";
 
 // 402 message when the effective profile rides the portal gateway while the
 // tenant's AI Tools wallet service is not paid, null otherwise. Without
@@ -824,9 +908,7 @@ async function aiToolsUnpaidMessage(): Promise<string> {
 // AiAccessibility status) is false here in exactly one reachable state —
 // the unpaid gateway wallet: the admin kill-switch already failed the
 // profile read above with 403, and non-gateway providers have no wallet.
-async function aiToolsUnpaidError(
-  providerType: string | undefined,
-): Promise<string | null> {
+async function aiToolsUnpaidError(providerType: string | undefined): Promise<string | null> {
   if (providerType !== "onlyoffice") {
     return null;
   }
@@ -835,7 +917,25 @@ async function aiToolsUnpaidError(
   if (primed !== undefined) {
     return primed ? null : AI_TOOLS_UNPAID_ERROR;
   }
-  const config = await aiService.get("/config").catch(() => undefined);
+  let config: unknown;
+  try {
+    config = await aiService.get("/config");
+  } catch (err) {
+    // A refusal of the caller's own (401, 403) is passed on. Any other failure
+    // leaves the wallet unknown, and unknown is safe to read as paid here: the
+    // check only moves the gateway's refusal out of the stream, and the
+    // gateway refuses an unpaid portal itself (AiGatewayProxyController.cs), so nothing is
+    // billed and the caller gets an error frame instead of the 402.
+    if (err instanceof AiServiceHttpError && (err.status === 401 || err.status === 403)) {
+      throw err;
+    }
+    logger.warn(
+      `ai-tools wallet check: /config not read, the gateway decides: ${
+        err instanceof AiServiceHttpError ? `AI service ${err.status}` : String(err)
+      }`,
+    );
+    return null;
+  }
   if (isObject(config) && config["aiReady"] === false) {
     return AI_TOOLS_UNPAID_ERROR;
   }
@@ -844,6 +944,9 @@ async function aiToolsUnpaidError(
 
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body the parser accepted.
+    await assertAiAccess();
     // The body used to reach the engine unchecked: an unknown or missing
     // actionType died in the assignment resolver and a missing userMessage
     // in the attachment resolver, both as 500 (Bug 84294). Checked before
@@ -876,9 +979,17 @@ export const aiController = {
     // profileId, so there is nothing for a caller to override.)
     markForwardHeadersToProvider();
     await primeChatContext({
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
+      entityId: idOf(req.body, "entityId"),
+      contextEntityId: idOf(req.body, "contextEntityId"),
     });
+    // The ids are checked after the access gate at the top of the handler.
+    {
+      const idError = idTypeError(req.body, ["entityId", "contextEntityId"]);
+      if (idError) {
+        res.status(400).json({ error: idError });
+        return;
+      }
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -901,7 +1012,8 @@ export const aiController = {
     // message and came back as a 500 (Bug 84299); a string `isStream` such
     // as "false" counted as true and switched the answer to a stream
     // (Bug 84300). Both are the caller's mistake, so 400, before anything
-    // is primed.
+    // is primed, and after the access gate (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     if (!isObject(req.body)) {
       res.status(400).json({ error: "the request body must be an object" });
       return;
@@ -932,6 +1044,14 @@ export const aiController = {
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
     await primeChatContext({ entityId: customScopeOf(req.body) });
+    // The ids are checked after the access gate at the top of the handler.
+    {
+      const idError = idTypeError(req.body, ["profileId"]);
+      if (idError) {
+        res.status(400).json({ error: idError });
+        return;
+      }
+    }
     // A profileId that names no profile would otherwise fall back to another
     // model without a word, and an unpaid AI Tools wallet would answer inside
     // the stream (Bugs 83160, 83344): refuse both up front, as the stored
@@ -939,7 +1059,7 @@ export const aiController = {
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
       if (profileError === AI_TOOLS_UNPAID_ERROR) {
-        res.status(402).json({ error: await aiToolsUnpaidMessage() });
+        res.status(402).json({ error: AI_TOOLS_UNPAID_ERROR });
         return;
       }
       if (profileError) {
@@ -977,14 +1097,21 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
+    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
+    // caller without AI access gets the 403 before a word about the body
+    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
+    if (req.body === null || req.body === undefined) {
+      await assertAiAccess();
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
     // One aggregate read for the whole round — every storage read below
     // (profiles, assignments, prefs, MCP servers, thread, history, folder
     // metadata) is served from it. See storage/chatContext.ts.
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -1012,10 +1139,7 @@ export const aiController = {
         `entityId=${req.body.entityId ?? "-"} contextEntityId=${req.body.contextEntityId ?? "-"} ` +
         `profileId=${req.body.profileId ?? "-"}`,
     );
-    await streamNdjson(
-      res,
-      tapStream("ai/send-with-stream", engine.sendWithStream(body)),
-    );
+    await streamNdjson(res, tapStream("ai/send-with-stream", engine.sendWithStream(body)));
   }),
 
   // OpenAI-compatible streaming chat: same input as sendWithStream, but the
@@ -1023,11 +1147,18 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    // A body of JSON `null` (the parser runs with `strict: false`; a request without a body
+    // arrives as `{}`): the reads below would throw on it. The gate is asked first, so that a
+    // caller without AI access gets the 403 before a word about the body
+    // (ts-ai-failure-paths.md §3); any other body reaches the gated read of the round itself.
+    if (req.body === null || req.body === undefined) {
+      await assertAiAccess();
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -1057,11 +1188,25 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    // A body that is no object (the parser runs with `strict: false`, so JSON `null`, a string
+    // or a number arrive as they are; a request without a body arrives as `{}`), or one without
+    // the ids of the round it resumes, is refused. The gate is asked first, so that a caller
+    // without AI access gets the 403 before a word about the body (ts-ai-failure-paths.md §3).
+    if (!isObject(req.body)) {
+      await assertAiAccess();
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
+    {
+      const missing = missingFieldError(req.body, ["threadId"]);
+      if (missing) {
+        res.status(400).json({ error: missing });
+        return;
+      }
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -1089,19 +1234,30 @@ export const aiController = {
     const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
-    await streamNdjson(
-      res,
-      tapStream("ai/regenerate-stream", engine.regenerateStream(body)),
-    );
+    await streamNdjson(res, tapStream("ai/regenerate-stream", engine.regenerateStream(body)));
   }),
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    // A body that is no object (the parser runs with `strict: false`, so JSON `null`, a string
+    // or a number arrive as they are; a request without a body arrives as `{}`), or one without
+    // the ids of the round it resumes, is refused. The gate is asked first, so that a caller
+    // without AI access gets the 403 before a word about the body (ts-ai-failure-paths.md §3).
+    if (!isObject(req.body)) {
+      await assertAiAccess();
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
+    {
+      const missing = missingFieldError(req.body, ["threadId", "messageId", "idx"]);
+      if (missing) {
+        res.status(400).json({ error: missing });
+        return;
+      }
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -1115,6 +1271,15 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
+    // `allowAlways` stores a standing permission for the tool, and the engine reads it by
+    // truthiness: the string "false" would grant it (ts-ai-failure-paths.md §4).
+    {
+      const allowAlways: unknown = isObject(req.body) ? req.body["allowAlways"] : undefined;
+      if (allowAlways !== undefined && allowAlways !== null && typeof allowAlways !== "boolean") {
+        res.status(400).json({ error: "allowAlways must be a boolean" });
+        return;
+      }
+    }
     // An approved tool runs in THIS request, not in the one that streamed the
     // round: the document agent tool needs the round's profile and the
     // attachments of the message it answers, resolved from the thread.
@@ -1125,11 +1290,25 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    await primeChatContext({
-      threadId: req.body.threadId,
-      entityId: req.body.entityId,
-      contextEntityId: req.body.contextEntityId,
-    });
+    // A body that is no object (the parser runs with `strict: false`, so JSON `null`, a string
+    // or a number arrive as they are; a request without a body arrives as `{}`), or one without
+    // the ids of the round it resumes, is refused. The gate is asked first, so that a caller
+    // without AI access gets the 403 before a word about the body (ts-ai-failure-paths.md §3).
+    if (!isObject(req.body)) {
+      await assertAiAccess();
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
+    if (!(await primeRound(req.body, res))) {
+      return;
+    }
+    {
+      const missing = missingFieldError(req.body, ["threadId", "messageId", "idx"]);
+      if (missing) {
+        res.status(400).json({ error: missing });
+        return;
+      }
+    }
     // A round inside an AI project runs on the project's model and linked
     // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
@@ -1144,9 +1323,6 @@ export const aiController = {
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
     const body = await withSourceMetadata(withRequestSignal(res, req.body));
-    await streamNdjson(
-      res,
-      tapStream("ai/deny-tool-call", engine.denyToolCall(body)),
-    );
+    await streamNdjson(res, tapStream("ai/deny-tool-call", engine.denyToolCall(body)));
   }),
 };

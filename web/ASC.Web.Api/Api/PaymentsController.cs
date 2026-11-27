@@ -1302,7 +1302,7 @@ public class PaymentController(
         {
             UtcStartDate = GetUtcStartDate(inDto.StartDate, tenant),
             UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow),
-            TimeZome = tenant.TimeZone ?? "UTC"
+            TimeZone = tenant.TimeZone ?? "UTC"
         };
 
         var usage = await tariffService.GetCustomerMonthlyUsageAsync(tenant.Id, filter);

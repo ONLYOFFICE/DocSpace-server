@@ -47,10 +47,17 @@
  */
 
 import { withTimeout, proxyBaseUrl } from "../storage/httpClient.js";
-import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
+import {
+  DocspaceApiHttpError,
+  filesApiDownloadText,
+  filesApiGet,
+  filesApiSend,
+} from "../storage/docspaceFilesApi.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { getObject, getObjectArray, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
+import { listAnswer, mapped, UpstreamShapeError } from "../storage/upstreamShape.js";
+import { pooled, UPSTREAM_CONCURRENCY } from "../storage/pooled.js";
 
 /** A file as the folder listing or the file-info endpoint describes it. */
 export interface PortalFile {
@@ -73,6 +80,13 @@ const MAX_POLL_MISSES = 3;
 const START_ATTEMPTS = 4;
 /** Pause between two such attempts. */
 const START_RETRY_MS = 1_500;
+/**
+ * Bytes of a converted text read at most. The generator keeps 40 000
+ * characters of a file (`MAX_CHARS_PER_FILE` in common.ts); a UTF-8 character
+ * takes at most 4 bytes, so a text cut here is still longer than what is kept
+ * and still reads as truncated there.
+ */
+const MAX_TEXT_BYTES = 256 * 1024;
 
 export class UnsupportedFileError extends Error {
   constructor(
@@ -83,14 +97,30 @@ export class UnsupportedFileError extends Error {
   }
 }
 
-function envelope(raw: unknown): Record<string, unknown> | undefined {
-  return isObject(raw) ? getObject(raw, "response") : undefined;
+/**
+ * The portal ran the conversion of this file and reported an error for it: the file's own
+ * refusal, like a 403 or a 404 of the file, not a failure of the request.
+ */
+export class ConversionFailedError extends Error {
+  constructor(detail: string) {
+    super(`conversion failed: ${detail}`);
+  }
 }
 
-// The list-shaped envelope: `{ response: [...] }`.
-function envelopeList(raw: unknown): unknown[] {
-  const list = isObject(raw) ? raw["response"] : undefined;
-  return Array.isArray(list) ? list : [];
+/**
+ * One file's conversion and the download of its text did not finish within
+ * `CONVERSION_BUDGET_MS`, while the request's own budget had not run out. What the portal did
+ * with the file is unknown (ts-ai-failure-paths.md §1).
+ */
+export class ConversionTimeoutError extends Error {
+  constructor(file: PortalFile, cause: unknown) {
+    super(`file ${file.id} was not read as text within ${CONVERSION_BUDGET_MS}ms`, { cause });
+  }
+}
+
+// The `response` of an answer, as the Files API clients unwrap it.
+function asRecord(response: unknown): Record<string, unknown> | undefined {
+  return isObject(response) ? response : undefined;
 }
 
 function toPortalFile(raw: Record<string, unknown>): PortalFile | undefined {
@@ -116,29 +146,24 @@ function idForBody(id: string): number | string {
   return /^\d+$/.test(id) ? Number(id) : id;
 }
 
-async function portalGet(url: string, signal?: AbortSignal): Promise<unknown> {
-  const { signal: timed, cancel } = withTimeout(signal);
-  try {
-    const res = await fetch(url, { headers: getForwardedHeaders(), signal: timed });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
-    }
-    return await res.json();
-  } finally {
-    cancel();
-  }
-}
-
 /**
  * The files of a folder, top level only, newest first, at most `count`.
  * A folder the caller cannot open propagates the portal's 403 / 404.
  */
 export async function listFolderFiles(folderId: string, count: number): Promise<PortalFile[]> {
-  const url =
-    `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(folderId)}` +
-    `?filterType=FilesOnly&count=${count}&sortBy=DateAndTime&sortOrder=descending`;
-  const body = envelope(await portalGet(url));
-  const files = body ? (getObjectArray(body, "files") ?? []) : [];
+  const body = asRecord(
+    await filesApiGet(encodeURIComponent(folderId), {
+      filterType: "FilesOnly",
+      count,
+      sortBy: "DateAndTime",
+      sortOrder: "descending",
+    }),
+  );
+  // A listing without its `files` is unknown, not an empty folder.
+  const files = body ? getObjectArray(body, "files") : undefined;
+  if (files === undefined) {
+    throw new UpstreamShapeError("GET files/{folderId}");
+  }
   const result: PortalFile[] = [];
   for (const raw of files) {
     const file = toPortalFile(raw);
@@ -150,12 +175,14 @@ export async function listFolderFiles(folderId: string, count: number): Promise<
   return result;
 }
 
-/** One file as the Files API describes it; `undefined` on 404. */
+/**
+ * One file as the Files API describes it; `undefined` on 404. An answer that
+ * names no file throws {@link UpstreamShapeError}: it is unknown, not absent.
+ */
 export async function getPortalFile(fileId: string): Promise<PortalFile | undefined> {
-  const url = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}`;
   try {
-    const body = envelope(await portalGet(url));
-    return body ? toPortalFile(body) : undefined;
+    const body = asRecord(await filesApiGet(`file/${encodeURIComponent(fileId)}`));
+    return mapped(body ? toPortalFile(body) : undefined, "GET files/file/{id}");
   } catch (err) {
     if (err instanceof DocspaceApiHttpError && err.status === 404) {
       return undefined;
@@ -172,19 +199,21 @@ let convertibleCache: Promise<Record<string, string[]>> | undefined;
 function getConvertible(): Promise<Record<string, string[]>> {
   if (!convertibleCache) {
     convertibleCache = (async () => {
-      const body = envelope(await portalGet(`${proxyBaseUrl}/api/2.0/files/settings`));
-      const table = body ? getObject(body, "extsConvertible") : undefined;
+      const body = asRecord(await filesApiGet("settings"));
+      // No table is an answer of an unknown shape, not "nothing converts";
+      // the rejection drops the cache below, so the next read asks again.
+      const table = mapped(
+        body ? getObject(body, "extsConvertible") : undefined,
+        "GET files/settings",
+      );
       const result: Record<string, string[]> = {};
-      if (table) {
-        for (const [ext, targets] of Object.entries(table)) {
-          if (Array.isArray(targets)) {
-            result[ext.toLowerCase()] = targets.filter((t): t is string => typeof t === "string");
-          }
+      for (const [ext, targets] of Object.entries(table)) {
+        if (Array.isArray(targets)) {
+          result[ext.toLowerCase()] = targets.filter((t): t is string => typeof t === "string");
         }
       }
       if (Object.keys(result).length === 0) {
-        // No table means the settings call answered something unexpected;
-        // keep asking rather than pinning "nothing converts" for the process.
+        // A table without a usable entry is not pinned for the process either.
         convertibleCache = undefined;
       }
       return result;
@@ -230,35 +259,26 @@ async function startConversion(
   target: string,
   signal: AbortSignal,
 ): Promise<FileOperation> {
-  const url = `${proxyBaseUrl}/api/2.0/files/fileops/bulkdownload`;
-  const { signal: timed, cancel } = withTimeout(signal);
-  try {
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: { ...getForwardedHeaders(), "content-type": "application/json" },
-      // `returnSingleOperation`: answer with this operation only. Without it
-      // the portal lists every operation of the user and drops the finished
-      // ones from its queue as it does so, which would hand another file's
-      // result (or an unrelated archive download) to this reader.
-      body: JSON.stringify({
-        fileConvertIds: [{ key: idForBody(file.id), value: target }],
-        returnSingleOperation: true,
-      }),
-      signal: timed,
-    });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+  // `returnSingleOperation`: answer with this operation only. Without it
+  // the portal lists every operation of the user and drops the finished
+  // ones from its queue as it does so, which would hand another file's
+  // result (or an unrelated archive download) to this reader.
+  const response = await filesApiSend(
+    "PUT",
+    "fileops/bulkdownload",
+    {
+      fileConvertIds: [{ key: idForBody(file.id), value: target }],
+      returnSingleOperation: true,
+    },
+    signal,
+  );
+  for (const raw of listAnswer(response, "PUT files/fileops/bulkdownload")) {
+    const op = isObject(raw) ? toOperation(raw) : undefined;
+    if (op) {
+      return op;
     }
-    for (const raw of envelopeList(await res.json())) {
-      const op = isObject(raw) ? toOperation(raw) : undefined;
-      if (op) {
-        return op;
-      }
-    }
-    throw new Error(`bulkdownload for file ${file.id} returned no operation`);
-  } finally {
-    cancel();
   }
+  throw new UpstreamShapeError("PUT files/fileops/bulkdownload");
 }
 
 /**
@@ -285,7 +305,7 @@ class OperationWatcher {
    */
   wait(op: FileOperation, signal: AbortSignal): Promise<FileOperation> {
     if (op.error) {
-      return Promise.reject(new Error(`conversion failed: ${op.error}`));
+      return Promise.reject(new ConversionFailedError(op.error));
     }
     if (op.finished) {
       return Promise.resolve(op);
@@ -325,14 +345,13 @@ class OperationWatcher {
     if (this.waiters.size === 0) {
       return;
     }
-    await Promise.all([...this.waiters.keys()].map((id) => this.pollOne(id)));
+    await pooled([...this.waiters.keys()], UPSTREAM_CONCURRENCY, (id) => this.pollOne(id));
     this.schedule();
   }
 
   /** Reads one operation by id; a finished one is dequeued by the read. */
   private async fetchOperation(id: string): Promise<FileOperation | undefined> {
-    const url = `${proxyBaseUrl}/api/2.0/files/fileops?id=${encodeURIComponent(id)}`;
-    return envelopeList(await portalGet(url, this.signal))
+    return listAnswer(await filesApiGet("fileops", { id }, this.signal), "GET files/fileops")
       .flatMap((raw) => {
         const op = isObject(raw) ? toOperation(raw) : undefined;
         return op ? [op] : [];
@@ -370,7 +389,7 @@ class OperationWatcher {
       return;
     }
     if (found.error) {
-      waiter.reject(new Error(`conversion failed: ${found.error}`));
+      waiter.reject(new ConversionFailedError(found.error));
     } else if (found.finished) {
       waiter.resolve(found);
     } else {
@@ -428,16 +447,22 @@ export class PortalTextReader {
         }
       }
     };
+    // `then(run, run)` starts the next conversion whether this one succeeded
+    // or failed, so a refused conversion does not block the files after it;
+    // its rejection is the caller's, who awaits `turn`.
     const turn = this.conversionQueue.then(run, run);
-    this.conversionQueue = turn.catch(() => undefined);
+    this.conversionQueue = turn;
     return turn;
   }
 
   /**
    * The file's content as plain text. Throws {@link UnsupportedFileError}
    * when the portal has no text conversion for the file's extension, a
-   * {@link DocspaceApiHttpError} when the portal refuses the file, and an
-   * `Error` when the conversion fails or exceeds its budget.
+   * {@link DocspaceApiHttpError} when the portal refuses the file,
+   * {@link ConversionFailedError} when the portal reports an error for its conversion and
+   * {@link ConversionTimeoutError} when the file's own budget runs out; any other failure (a
+   * dropped connection, an answer of an unknown shape, an operation that disappeared) is
+   * thrown as it came.
    */
   async readFileAsText(file: PortalFile): Promise<string> {
     const target = await textTargetFor(file);
@@ -452,21 +477,25 @@ export class PortalTextReader {
     try {
       const op = await this.convert(file, target, timed);
       if (!op.url) {
-        throw new Error(`conversion of file ${file.id} finished without a download URL`);
+        // A finished operation names its result; one without it is unknown.
+        throw new UpstreamShapeError("files/fileops");
       }
-      const url = throughProxy(op.url);
-      const res = await fetch(url, {
-        headers: { ...getForwardedHeaders(), accept: "text/plain" },
-        signal: timed,
-      });
-      if (!res.ok) {
-        throw new DocspaceApiHttpError(res.status, res.statusText, url);
-      }
-      const text = await res.text();
+      const text = await filesApiDownloadText(
+        throughProxy(op.url),
+        { ...getForwardedHeaders(), accept: "text/plain" },
+        MAX_TEXT_BYTES,
+        timed,
+      );
       logger.info(
         `meta.readFileAsText(${file.id} "${file.title}" -> ${target}) ${text.length} chars in ${Date.now() - started}ms`,
       );
       return text;
+    } catch (err) {
+      // The file's own budget, not the request's: the caller tells the two apart by the class.
+      if (timed.aborted && !this.signal.aborted) {
+        throw new ConversionTimeoutError(file, err);
+      }
+      throw err;
     } finally {
       cancel();
     }

@@ -66,7 +66,7 @@ public class MonthlyUsageReportBuilder(
                 {
                     UtcStartDate = context.UtcStartDate,
                     UtcEndDate = context.UtcEndDate,
-                    TimeZome = context.Tenant.TimeZone ?? "UTC"
+                    TimeZone = context.Tenant.TimeZone ?? "UTC"
                 };
 
                 var records = await tariffService.GetCustomerMonthlyUsageAsync(context.Tenant.Id, filter);

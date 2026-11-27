@@ -31,12 +31,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import logger from "../../log.js";
+import { DocspaceApiHttpError } from "../docspaceFilesApi.js";
 
 const { getFolderInfoCached } = vi.hoisted(() => ({ getFolderInfoCached: vi.fn() }));
 
-vi.mock("../../log.js", () => ({
-  default: { warn: vi.fn(), info: vi.fn(), debug: vi.fn(), error: vi.fn() },
-}));
 vi.mock("../docspaceFilesApi.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../docspaceFilesApi.js")>()),
   getFolderInfoCached,
@@ -109,7 +108,7 @@ describe("resolveContextFolders", () => {
   it("leaves out a folder that is gone or that the caller cannot read", async () => {
     getFolderInfoCached.mockImplementation(async (id: string) => {
       if (id === "1") return undefined;
-      if (id === "2") throw new Error("403 Forbidden");
+      if (id === "2") throw new DocspaceApiHttpError(403, "Forbidden", "files/folder/2");
       return { title: "Kept" };
     });
     expect(await resolveContextFolders(["1", "2", "3"])).toEqual([
@@ -185,6 +184,26 @@ describe("resolveLocation", () => {
     expect(await resolveLocation("4")).toEqual({ id: "4" });
     getFolderInfoCached.mockResolvedValueOnce(undefined);
     expect(await resolveLocation("4")).toEqual({ id: "4" });
+  });
+});
+
+describe("a read that rejects with something other than an Error", () => {
+  beforeEach(() => {
+    getFolderInfoCached.mockReset();
+  });
+
+  it("rejects with what was thrown for a context folder, without a warning", async () => {
+    getFolderInfoCached.mockRejectedValue("down");
+    await expect(resolveContextFolders(["1"])).rejects.toBe("down");
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it("keeps the location by its id and logs what was thrown", async () => {
+    getFolderInfoCached.mockRejectedValue("down");
+    expect(await resolveLocation("4")).toEqual({ id: "4" });
+    expect(vi.mocked(logger.warn).mock.calls).toEqual([
+      ["context: location 4 not readable by the caller, described by its id: down"],
+    ]);
   });
 });
 

@@ -132,7 +132,7 @@
           "items": {
             "$ref": "#/components/schemas/AiKnowledgeRoomRef"
           },
-          "description": "Knowledge rooms connected to the chat; the knowledge search tool of the round is limited to them. Each `id` has to be a DocSpace room id."
+          "description": "Knowledge rooms connected to the chat; the knowledge search tool of the round is limited to them. Each `id` has to be a DocSpace room id. The first 20 distinct ids are used and any further entry is ignored."
         },
         "knowledgeRoom": {
           "$ref": "#/components/schemas/AiKnowledgeRoomRef",
@@ -2611,50 +2611,6 @@
       ],
       "additionalProperties": false
     },
-    "AiProjectModel": {
-      "type": "object",
-      "properties": {
-        "profile": {
-          "type": [
-            "object",
-            "null"
-          ],
-          "properties": {
-            "id": {
-              "type": "string",
-              "description": "The profile id."
-            },
-            "name": {
-              "type": "string",
-              "description": "The profile name; empty when the profile is gone."
-            },
-            "provider": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "The provider type of the profile; `null` when the profile is gone."
-            },
-            "available": {
-              "type": "boolean",
-              "description": "`false` when the profile is gone or cannot chat: the project's rounds are refused."
-            }
-          },
-          "required": [
-            "id",
-            "name",
-            "provider",
-            "available"
-          ],
-          "additionalProperties": false
-        }
-      },
-      "required": [
-        "profile"
-      ],
-      "additionalProperties": false,
-      "description": "The project's own model; `null` when the project runs on the portal default."
-    },
     "AiToolPermissionModeWrapper": {
       "type": "object",
       "properties": {
@@ -3397,92 +3353,6 @@
         }
       }
     },
-    "aiAttachmentsSaveImage": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "input": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Image name."
-              },
-              "base64": {
-                "type": "string",
-                "description": "Full `data:image/...;base64,…` data URL."
-              },
-              "title": {
-                "type": "string",
-                "description": "Optional display title."
-              }
-            },
-            "required": [
-              "name",
-              "base64"
-            ],
-            "additionalProperties": false,
-            "description": "An image attachment draft to persist."
-          },
-          "entityId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "input"
-        ],
-        "additionalProperties": false
-      },
-      "response": {
-        "$ref": "#/components/schemas/AiAttachment"
-      }
-    },
-    "aiAttachmentsSaveImagesMany": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "inputs": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "Image name."
-                },
-                "base64": {
-                  "type": "string",
-                  "description": "Full `data:image/...;base64,…` data URL."
-                },
-                "title": {
-                  "type": "string",
-                  "description": "Optional display title."
-                }
-              },
-              "required": [
-                "name",
-                "base64"
-              ],
-              "additionalProperties": false,
-              "description": "An image attachment draft to persist."
-            }
-          },
-          "entityId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "inputs"
-        ],
-        "additionalProperties": false
-      },
-      "response": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/AiAttachment"
-        }
-      }
-    },
     "aiAttachmentsGet": {
       "request": {
         "type": "string"
@@ -3750,8 +3620,13 @@
           {
             "type": "object",
             "properties": {
+              "field": {
+                "type": "string",
+                "description": "The field of the profile the provider refused, when the engine can tell."
+              },
               "message": {
-                "type": "string"
+                "type": "string",
+                "description": "Why the test failed."
               }
             },
             "additionalProperties": false
@@ -4541,8 +4416,13 @@
           {
             "type": "object",
             "properties": {
+              "field": {
+                "type": "string",
+                "description": "The field of the configuration the provider refused, when the engine can tell."
+              },
               "message": {
-                "type": "string"
+                "type": "string",
+                "description": "Why the test failed."
               }
             },
             "additionalProperties": false
@@ -5125,7 +5005,7 @@
             "items": {
               "type": "string"
             },
-            "description": "What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` for every agent, as its instructions are not installed yet."
+            "description": "What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `modelUnconfirmed` when the write of that model got no usable answer (a timeout, a dropped connection, a 5xx) and the model may be stored, `instructionsNotSaved` for every agent, as its instructions are not installed yet."
           },
           "templateId": {
             "type": "string",
@@ -5321,55 +5201,6 @@
           "unresolved",
           "sources",
           "skipped"
-        ],
-        "additionalProperties": false
-      }
-    },
-    "aiProjectsSetModel": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "profileId": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "The UUID of a chat profile, or `null` for the portal default."
-          }
-        },
-        "required": [
-          "profileId"
-        ],
-        "additionalProperties": false
-      },
-      "response": {
-        "$ref": "#/components/schemas/Res_aiProjectsGetModel"
-      }
-    },
-    "aiProjectsGetModel": {
-      "response": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/AiProjectModel"
-          },
-          "count": {
-            "type": "number"
-          },
-          "status": {
-            "type": "number",
-            "description": "0 on success."
-          },
-          "statusCode": {
-            "type": "number",
-            "description": "The HTTP status, 200 on success."
-          }
-        },
-        "required": [
-          "response",
-          "count",
-          "status",
-          "statusCode"
         ],
         "additionalProperties": false
       }

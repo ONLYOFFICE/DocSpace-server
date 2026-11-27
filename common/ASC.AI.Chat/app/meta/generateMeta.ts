@@ -61,6 +61,7 @@ import {
 } from "./common.js";
 import type { Document, MetaSkipped, MetaSource } from "./common.js";
 import type { EntryKind } from "./portalMetadata.js";
+import { clientFault } from "../httpErrors.js";
 
 export { MAX_FILES, ModelCallError, NoContentError, NoProfileError } from "./common.js";
 /** Fields the answer carries at most — the portal holds 50 custom fields per entry. */
@@ -181,13 +182,10 @@ export async function generateMeta(input: GenerateMetaInput): Promise<GenerateMe
   if (input.kind === "file" && files.length === 0) {
     const reason = skipped[0]?.reason;
     if (reason === "not_found") {
-      throw Object.assign(new Error("The file does not exist"), { status: 404, expose: true });
+      throw clientFault(404, "The file does not exist");
     }
     if (reason === "forbidden") {
-      throw Object.assign(new Error("The caller cannot read the file"), {
-        status: 403,
-        expose: true,
-      });
+      throw clientFault(403, "The caller cannot read the file");
     }
   }
   const controller = new AbortController();

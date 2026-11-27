@@ -30,33 +30,20 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
-vi.mock("../../requestContext.js", () => ({
-  getForwardedHeaders: () => ({ cookie: "asc_auth_key=1" }),
-}));
-vi.mock("../httpClient.js", () => {
-  class AiServiceHttpError extends Error {
-    constructor(public readonly status: number) {
-      super(`HTTP ${status}`);
-    }
-  }
-  return {
-    AiServiceHttpError,
-    proxyBaseUrl: "http://portal",
-    withTimeout: () => ({ signal: undefined, cancel: () => {} }),
-  };
-});
 vi.mock("../docspaceFilesApi.js", () => {
   class DocspaceApiHttpError extends Error {
     constructor(public readonly status: number) {
       super(`DocSpace API ${status}`);
     }
   }
-  return { DocspaceApiHttpError, filesApiGet: vi.fn() };
+  return {
+    DocspaceApiHttpError,
+    filesApiGet: vi.fn(),
+    filesApiRequest: vi.fn(),
+    envelopeResponse: (raw: { response: unknown }) => raw.response,
+  };
 });
 vi.mock("../docspaceFileTransfer.js", () => ({ mediaTypeOf: () => "application/docx" }));
 vi.mock("../roomSkills.js", () => {
@@ -64,7 +51,8 @@ vi.mock("../roomSkills.js", () => {
   return { FileTooLargeError, readFileBytes: vi.fn() };
 });
 
-const { filesApiGet } = await import("../docspaceFilesApi.js");
+const { DocspaceApiHttpError, filesApiGet, filesApiRequest } =
+  await import("../docspaceFilesApi.js");
 const { FileTooLargeError, readFileBytes } = await import("../roomSkills.js");
 const {
   copyIntoProject,
@@ -74,25 +62,17 @@ const {
   uploadInChunks,
 } = await import("../projectAttachments.js");
 
-const fetchMock = vi.fn();
-
-const answer = (status: number, response: unknown = {}) => ({
-  ok: status >= 200 && status < 300,
-  status,
-  statusText: String(status),
-  json: async () => ({ response }),
-  text: async () => "",
-});
+const request = vi.mocked(filesApiRequest);
 
 /** The portal: its settings, the file's description, and the upload session. */
 function portal(file: Record<string, unknown>, chunkUploadSize = 4): void {
   vi.mocked(filesApiGet).mockImplementation(async (path) =>
     path === "settings" ? { chunkUploadSize } : file,
   );
-  fetchMock.mockImplementation(async (url: string) =>
-    url.endsWith("/session")
-      ? answer(200, { id: "s1" })
-      : answer(200, { file: { id: 77, title: "Report.docx" } }),
+  request.mockImplementation(async (_method, path) =>
+    path.endsWith("/session")
+      ? { response: { id: "s1" } }
+      : { response: { file: { id: 77, title: "Report.docx" } } },
   );
 }
 
@@ -101,11 +81,8 @@ beforeEach(() => {
   vi.mocked(readFileBytes)
     .mockReset()
     .mockResolvedValue(new Uint8Array([1, 2, 3, 4, 5, 6]));
-  fetchMock.mockReset();
-  vi.stubGlobal("fetch", fetchMock);
+  request.mockReset();
 });
-
-afterEach(() => vi.unstubAllGlobals());
 
 describe("uploadInChunks", () => {
   it("opens a session in the folder and sends the chunks in order", async () => {
@@ -117,18 +94,17 @@ describe("uploadInChunks", () => {
       "application/docx",
     );
     expect(id).toBe("77");
-    const [session, first, second] = fetchMock.mock.calls;
-    expect(session![0]).toBe("http://portal/api/2.0/files/12/session");
-    expect(JSON.parse(session![1].body)).toEqual({
-      fileName: "Report.docx",
-      fileSize: 6,
-      relativePath: "",
-      createNewIfExist: true,
+    const [session, first, second] = request.mock.calls;
+    expect(session?.slice(0, 2)).toEqual(["POST", "12/session"]);
+    expect(session?.[2]).toEqual({
+      json: { fileName: "Report.docx", fileSize: 6, relativePath: "", createNewIfExist: true },
     });
-    expect(first![0]).toBe("http://portal/api/2.0/files/12/session/s1");
-    expect(((first![1].body as FormData).get("file") as Blob).size).toBe(4);
-    expect(((second![1].body as FormData).get("file") as Blob).size).toBe(2);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(first?.slice(0, 2)).toEqual(["POST", "12/session/s1"]);
+    const chunkSizeOf = (body: unknown): number =>
+      ((body as { form: FormData }).form.get("file") as Blob).size;
+    expect(chunkSizeOf(first?.[2])).toBe(4);
+    expect(chunkSizeOf(second?.[2])).toBe(2);
+    expect(request).toHaveBeenCalledTimes(3);
   });
 });
 
@@ -142,7 +118,7 @@ describe("copyIntoProject", () => {
   it("leaves a file that already lies in the project room", async () => {
     portal({ title: "Report.docx", folderId: 12 });
     expect(await copyIntoProject("12", "40")).toBe("40");
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(request).not.toHaveBeenCalled();
   });
 
   it("leaves a third-party file and a file over the limit", async () => {
@@ -154,7 +130,7 @@ describe("copyIntoProject", () => {
 
   it("attaches the file where it is when the room refuses it or it grows over the limit", async () => {
     portal({ title: "Movie.mp4", folderId: 5 });
-    fetchMock.mockResolvedValue(answer(400));
+    request.mockRejectedValue(new DocspaceApiHttpError(400, "Bad Request", "u"));
     expect(await copyIntoProject("12", "40")).toBe("40");
 
     vi.mocked(readFileBytes).mockRejectedValue(new FileTooLargeError("40", MAX_COPY_BYTES));
@@ -167,7 +143,7 @@ describe("copyIntoProject", () => {
     expect(await copyIntoProject("12", "40")).toBe("40");
 
     vi.mocked(readFileBytes).mockResolvedValue(new Uint8Array([1]));
-    fetchMock.mockResolvedValue(answer(200, {}));
+    request.mockResolvedValue({ response: {} });
     expect(await copyIntoProject("12", "40")).toBe("40");
 
     vi.mocked(filesApiGet).mockRejectedValue(new TypeError("fetch failed"));

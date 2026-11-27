@@ -37,24 +37,45 @@
 // who may read (any member of the portal) and write (a portal
 // administrator). `raw: true` keeps the portal API's envelope
 // (`{ response }`), which the client unwraps as it does for every other
-// route. The one thing checked here is what the AI service does not know:
-// the agent's own ceilings on the limits.
+// route. Checked here: what the AI service does not know (the agent's own
+// ceilings on the limits) and that its answer is that envelope.
 
+import { assertAiAccess } from "./aiAccess.js";
 import { asyncHandler } from "./_helpers.js";
 import { aiService } from "../storage/httpClient.js";
 import {
   DOCUMENT_AGENT_SETTINGS_PATH,
   documentAgentSettingsSchema,
 } from "../storage/documentAgentSettingsStorage.js";
+import { getObject } from "../narrow.js";
+import { envelopeAnswer, UpstreamShapeError } from "../storage/upstreamShape.js";
+
+// Both actions of the AI service (DocumentAgentController.cs) answer a
+// `DocumentAgentSettingsDto` in the portal API's envelope. An answer that is
+// not that envelope (a 204, a text body, an object without `response`) is
+// unknown: answered 502 and never relayed as a 200 (ts-ai-failure-paths.md §1).
+function settingsEnvelope(value: unknown, call: string): Record<string, unknown> {
+  const envelope = envelopeAnswer(value, call);
+  if (getObject(envelope, "response") === undefined) {
+    throw new UpstreamShapeError(call);
+  }
+  return envelope;
+}
 
 export const documentAgentController = {
   // GET document-agent/settings → `GET internal/ai/document-agent/settings`.
   getSettings: asyncHandler(async (_req, res) => {
-    res.json(await aiService.get(DOCUMENT_AGENT_SETTINGS_PATH, { raw: true }));
+    res.json(
+      settingsEnvelope(
+        await aiService.get(DOCUMENT_AGENT_SETTINGS_PATH, { raw: true }),
+        "GET document-agent/settings",
+      ),
+    );
   }),
 
   // PUT document-agent/settings → `PUT internal/ai/document-agent/settings`.
   setSettings: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const parsed = documentAgentSettingsSchema.safeParse(req.body);
     if (!parsed.success) {
       const issues = parsed.error.issues
@@ -63,6 +84,11 @@ export const documentAgentController = {
       res.status(400).json({ error: `Invalid settings: ${issues}` });
       return;
     }
-    res.json(await aiService.put(DOCUMENT_AGENT_SETTINGS_PATH, parsed.data, { raw: true }));
+    res.json(
+      settingsEnvelope(
+        await aiService.put(DOCUMENT_AGENT_SETTINGS_PATH, parsed.data, { raw: true }),
+        "PUT document-agent/settings",
+      ),
+    );
   }),
 };

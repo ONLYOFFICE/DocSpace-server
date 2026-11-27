@@ -82,8 +82,8 @@ public class ThreadFilesDisclosureTests(AspireAppFixture fixture) : ThreadFilesA
     public async Task ListAiHubRoot_SortedByUsedSpace_OrdersProjectsByTitle()
     {
         await FilesHttpClient.Authenticate(Owner);
-        var empty = await AgentsTests.AiProjects.CreateAsync(RoomsApi, $"aaa-{Guid.NewGuid():N}");
-        var filled = await AgentsTests.AiProjects.CreateAsync(RoomsApi, $"zzz-{Guid.NewGuid():N}");
+        var empty = await CreateAiProjectAsync($"aaa-{Guid.NewGuid():N}");
+        var filled = await CreateAiProjectAsync($"zzz-{Guid.NewGuid():N}");
         var member = await InviteMemberAsync(filled);
         await RoomsApi.SetRoomSecurityAsync(
             empty,

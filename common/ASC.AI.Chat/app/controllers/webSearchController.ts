@@ -35,9 +35,10 @@ import { WebSearchEngine } from "@onlyoffice/ai-chat/core";
 import type { WebSearchConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { isObject } from "../narrow.js";
+import { isObject, readProp } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
+import { badRequest } from "../httpErrors.js";
 
 async function checkConfigUrl(config: WebSearchConfig): Promise<void> {
   await assertSafeBaseUrl(config.baseUrl);
@@ -56,10 +57,6 @@ async function assertWebSearchAccess(): Promise<void> {
   await storage.webSearch.read();
 }
 
-function badRequest(message: string): never {
-  throw Object.assign(new Error(message), { status: 400, expose: true });
-}
-
 /** A field a client actually sent a value for; `null` counts as "not set". */
 function isSet(value: unknown): boolean {
   return value !== undefined && value !== null;
@@ -75,7 +72,7 @@ function isSet(value: unknown): boolean {
 function unpackConfig(body: unknown): { body: unknown; entityId: unknown } {
   const args = unpackPositional(body, ["body", "entityId"] as const);
   return {
-    body: args.body ?? (args as { config?: unknown }).config,
+    body: args.body ?? readProp(args, "config"),
     entityId: args.entityId,
   };
 }
@@ -102,23 +99,45 @@ function asConfig(value: unknown): WebSearchConfig {
   if (!isObject(value)) {
     badRequest("config is required and must be an object");
   }
-  const { provider, key, baseUrl, isCloudProvider, headers } = value as Record<string, unknown>;
+  const { provider, key, baseUrl, isCloudProvider, headers } = value;
   if (typeof provider !== "string" || !provider.trim()) {
     badRequest("config.provider is required and must be a non-empty string");
   }
-  if (isSet(key) && typeof key !== "string") {
+  const config: WebSearchConfig = { provider };
+  if (typeof key === "string") {
+    config.key = key;
+  } else if (isSet(key)) {
     badRequest("config.key must be a string");
   }
-  if (isSet(baseUrl) && typeof baseUrl !== "string") {
+  if (typeof baseUrl === "string") {
+    config.baseUrl = baseUrl;
+  } else if (isSet(baseUrl)) {
     badRequest("config.baseUrl must be a string");
   }
-  if (isSet(isCloudProvider) && typeof isCloudProvider !== "boolean") {
+  if (typeof isCloudProvider === "boolean") {
+    config.isCloudProvider = isCloudProvider;
+  } else if (isSet(isCloudProvider)) {
     badRequest("config.isCloudProvider must be a boolean");
   }
-  if (isSet(headers) && !isObject(headers)) {
+  if (isObject(headers)) {
+    config.headers = asHeaders(headers);
+  } else if (isSet(headers)) {
     badRequest("config.headers must be an object");
   }
-  return value as unknown as WebSearchConfig;
+  return config;
+}
+
+// The headers are sent to the provider with every search, so each value has to be a header
+// value: a number or an object would reach the request as whatever its string form is.
+function asHeaders(headers: Record<string, unknown>): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [name, value] of Object.entries(headers)) {
+    if (typeof value !== "string") {
+      badRequest("config.headers values must be strings");
+    }
+    result[name] = value;
+  }
+  return result;
 }
 
 /**
@@ -142,6 +161,7 @@ function asEntityId(value: unknown): string | undefined {
 
 export const webSearchController = {
   getActiveConfig: asyncHandler(async (req, res) => {
+    await assertWebSearchAccess();
     const entityId = asEntityId(req.query["entityId"]);
     // A room config must not be readable by someone who cannot open the
     // room (Bug 82901). Inaccessible/unknown rooms surface as 404 — the
@@ -152,13 +172,14 @@ export const webSearchController = {
   }),
 
   isConfigured: asyncHandler(async (req, res) => {
+    await assertWebSearchAccess();
     const entityId = asEntityId(req.query["entityId"]);
     await assertEntityAccessible(entityId);
     const value = await engine.isConfigured(entityId);
     res.json(value);
   }),
 
-  testConnection: asyncHandler<WebSearchConfig>(async (req, res) => {
+  testConnection: asyncHandler(async (req, res) => {
     // The access gate runs first: a Guest or an AI-disabled portal must get
     // its 403 rather than a report on the shape of the body it sent.
     await assertWebSearchAccess();
