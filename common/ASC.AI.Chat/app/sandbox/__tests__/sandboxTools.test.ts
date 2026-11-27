@@ -50,7 +50,12 @@ import type { FakeGateway } from "../../__tests__/helpers/sandboxGateway.js";
 import { MAX_OUTPUT_CHARS, MAX_READ_BYTES, MAX_WRITE_CHARS } from "../../pluginAgent/agentTools.js";
 import { setChatContextSnapshot, setRoundSignal, setRoundThreadId } from "../../requestContext.js";
 import { MAX_FILE_BYTES } from "../../tools/documentAgentFiles.js";
-import { EXEC_MAX_TIMEOUT_SECONDS, MAX_TITLE_CHARS, sandboxTools } from "../sandboxTools.js";
+import {
+  EXEC_MAX_TIMEOUT_SECONDS,
+  MAX_TITLE_CHARS,
+  sandboxTools,
+  titleOf,
+} from "../sandboxTools.js";
 
 // Everything the tools talk to is stubbed at the network: the gateway, the People API, the Files
 // API and the AI service. Where a saved file goes is `sandboxTools.upstream.test.ts`.
@@ -180,15 +185,30 @@ describe("who is offered the sandbox", () => {
     ]);
     expect(tools.every((tool) => tool.requireApproval === false)).toBe(true);
     // The idle lifetime of the configuration, in the words the model reads.
-    expect(tools[0]?.description).toContain("for at least 15 minutes after the last one");
+    expect(tools[0]?.description).toContain("for about 15 minutes after the last one has ended");
     expect(upstream.seen).toEqual([]);
   });
 
+  it.each([
+    ["90", "for about a minute after"],
+    ["119", "for about a minute after"],
+    ["120", "for about 2 minutes after"],
+  ])(
+    "tells the model the idle lifetime of %s seconds in whole minutes, rounded down",
+    async (idle, words) => {
+      vi.stubEnv("AI__SANDBOX__IDLE_TTL_SECONDS", idle);
+
+      expect((await sandboxTools.getTools())["chat-sandbox"]?.[0]?.description).toContain(words);
+    },
+  );
+
   it("answers an unknown tool and a call outside a conversation without asking anybody", async () => {
     expect(await call("sandbox_other", {})).toBe('Unknown tool "sandbox_other"');
-    expect(await call("sandbox_exec", { command: "ls" }, { thread: null })).toBe(
-      "A sandbox belongs to a conversation, and this call is made outside one.",
-    );
+    for (const thread of [null, ""]) {
+      expect(await call("sandbox_exec", { command: "ls" }, { thread })).toBe(
+        "A sandbox belongs to a conversation, and this call is made outside one.",
+      );
+    }
     expect(upstream.seen).toEqual([]);
   });
 
@@ -198,13 +218,14 @@ describe("who is offered the sandbox", () => {
     expect(gateway.execs[0]?.cwd).toBe("/workspace/t-9");
   });
 
-  it("takes a thread id of 100 characters as a directory name", async () => {
-    const thread = "x".repeat(100);
+  it.each([["x"], ["x".repeat(100)]])(
+    "takes a thread id of the shortest and the longest length as a directory name: %j",
+    async (thread) => {
+      await call("sandbox_exec", { command: "ls" }, { thread });
 
-    await call("sandbox_exec", { command: "ls" }, { thread });
-
-    expect(gateway.execs[0]?.cwd).toBe(`/workspace/${thread}`);
-  });
+      expect(gateway.execs[0]?.cwd).toBe(`/workspace/${thread}`);
+    },
+  );
 
   it.each([["a/b"], [".."], ["a b"], ["x".repeat(101)]])(
     "asks nobody for a thread id that is not a directory name: %j",
@@ -238,6 +259,7 @@ describe("the sandbox of a caller", () => {
 
     expect(upstream.seen.filter((request) => request.path.endsWith("/Create"))).toHaveLength(2);
     expect(sentTo("Create")).toEqual({ sessionId: USER, ttl: "1500s" });
+    expect(sentTo("Renew")).toEqual({ id: "sb-1", ttl: "1500s" });
     expect(gateway.execs.map((made) => made.cwd)).toEqual([DIR, "/workspace/t-2"]);
     expect(gateway.execs[1]?.timeout).toBe("300s");
   });
@@ -578,7 +600,7 @@ describe("sandbox_save_file", () => {
   const save = (args: unknown, options: Parameters<typeof call>[2] = {}) =>
     call("sandbox_save_file", args, options);
   const TITLE_REFUSAL =
-    "'title' is a file name of 1 to 165 characters, without '/', '\\', line breaks, control, invisible and text-direction characters.";
+    "'title' is a file name of 1 to 165 characters, without '/', '\\', line breaks, control characters and characters that are not displayed (zero-width and text-direction marks and the like).";
   /** The requests of a save that store something. */
   const stores = (): string[] =>
     requests().filter((name) => name === "artifacts" || name === "insert");
@@ -607,7 +629,9 @@ describe("sandbox_save_file", () => {
   it.each([
     ["x"],
     ["x".repeat(MAX_TITLE_CHARS)],
+    // The two joiners: a Persian name with U+200C, a Malayalam one with U+200D.
     ["\u0646\u0645\u06cc\u200c\u062e\u0648\u0627\u0647\u0645.csv"],
+    ["\u0d28\u0d4d\u200d.csv"],
   ])(
     "saves it under a title of the shortest and the longest length taken, and one with a joiner: %j",
     async (title) => {
@@ -633,6 +657,16 @@ describe("sandbox_save_file", () => {
     [{ path: "/workspace/a.txt", title: "Pay\u00adroll.xlsx" }, undefined],
     [{ path: "/workspace/a.txt", title: "Pay\ufeffroll.xlsx" }, undefined],
     [{ path: "/workspace/a.txt", title: "Payroll\u{e0041}.xlsx" }, undefined],
+    // A word joiner, an invisible times, a variation selector, a filler, an annotation mark.
+    [{ path: "/workspace/a.txt", title: "Pay\u2060roll.xlsx" }, undefined],
+    [{ path: "/workspace/a.txt", title: "Pay\u2062roll.xlsx" }, undefined],
+    [{ path: "/workspace/a.txt", title: "Payroll\ufe0f.xlsx" }, undefined],
+    [{ path: "/workspace/a.txt", title: "Payroll\u3164.xlsx" }, undefined],
+    [{ path: "/workspace/a.txt", title: "Pay\ufff9roll.xlsx" }, undefined],
+    // The other marks of the direction of a text.
+    [{ path: "/workspace/a.txt", title: "a\u061cb.txt" }, undefined],
+    [{ path: "/workspace/a.txt", title: "a\u200eb.txt" }, undefined],
+    [{ path: "/workspace/a.txt", title: "a\u200fb.txt" }, undefined],
     [{ path: "/workspace/a.txt", title: "  " }, undefined],
     [{ path: "/workspace/a.txt", title: ".." }, undefined],
     [{ path: "/workspace/a.txt", title: "." }, undefined],
@@ -642,6 +676,25 @@ describe("sandbox_save_file", () => {
   ])("refuses %j before a folder or a sandbox is asked for", async (args, message) => {
     expect(await save(args)).toBe(message ?? TITLE_REFUSAL);
     expect(upstream.seen).toEqual([]);
+  });
+
+  it("refuses every character Unicode says is not displayed, but the two joiners", () => {
+    const hidden = /\p{Default_Ignorable_Code_Point}/u;
+    const taken: string[] = [];
+    for (let code = 0; code <= 0x10ffff; code++) {
+      const char = String.fromCodePoint(code);
+      if (hidden.test(char) && titleOf(`a${char}b`) !== undefined) {
+        taken.push(code.toString(16));
+      }
+    }
+
+    expect(taken).toEqual(["200c", "200d"]);
+  });
+
+  it("saves a file of one byte", async () => {
+    gateway.files.set("/workspace/one", Buffer.from("x"));
+
+    expect(await save({ path: "/workspace/one" })).toContain('"bytes":1,');
   });
 
   it("asks for no sandbox when there is no folder to save into", async () => {

@@ -525,12 +525,15 @@ export const CHAT_SANDBOX_DEFAULT_IDLE_TTL_SECONDS = 900;
 // The longest timeout a command of the chat's sandbox may ask for. Every call renews the sandbox
 // to the idle lifetime plus this, a file call too: a renewal that added only the timeout of its
 // own call would move the expiry back, under a command another conversation runs or into the
-// idle time a command was promised.
+// idle time that follows a command. That holds while the instances that serve a user read one
+// idle lifetime.
 export const CHAT_SANDBOX_MAX_COMMAND_SECONDS = 600;
-// The bounds of the idle lifetime are the gateway's, read from its source (`document-agent` at
-// commit f7f4509) and not yet run against a gateway: it refuses a lifetime under a minute and
-// over its maximum, an hour unless its owner sets another (GATEWAY_SANDBOX_MAX_TTL). The idle
-// lifetime and the 600 seconds added to it stay within that hour.
+// The upper bound of the idle lifetime is the gateway's, read from its source (`document-agent`
+// at commit f7f4509) and not yet run against a gateway: it refuses a lifetime over its maximum,
+// an hour unless its owner sets another (GATEWAY_SANDBOX_MAX_TTL), and the idle lifetime with
+// the 600 seconds added to it stays within that hour. The lower bound is this service's own
+// choice, a minute: the gateway's shortest lifetime, a minute too, is never reached by a
+// lifetime that has 600 seconds added.
 export const CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS = 60;
 export const CHAT_SANDBOX_MAX_IDLE_TTL_SECONDS = 3600 - CHAT_SANDBOX_MAX_COMMAND_SECONDS;
 
@@ -546,12 +549,12 @@ export function getChatSandbox(): ChatSandboxConfig | undefined {
   const block: unknown = ai?.sandbox;
   const isBlock = typeof block === "object" && block !== null && !Array.isArray(block);
   if (isGiven(block) && !isBlock) {
-    refuse("ai:sandbox", Array.isArray(block) ? "a list" : block, "an object", SANDBOX_NOT_NAMED);
+    refuse("ai:sandbox", shownOf(block), "an object", SANDBOX_NOT_NAMED);
   } else {
     refused.delete("ai:sandbox");
   }
   const setting: ChatSandboxSetting | undefined = isBlock ? block : undefined;
-  textOfFile("ai:sandbox:url", "AI__SANDBOX__URL", setting?.url, setting?.url);
+  textOfFile("ai:sandbox:url", "AI__SANDBOX__URL", setting?.url, shownOf(setting?.url));
   // A token is a secret: the line names its type, not the value.
   textOfFile("ai:sandbox:token", "AI__SANDBOX__TOKEN", setting?.token, kindOfValue(setting?.token));
   const sandboxUrl = envOrSetting("AI__SANDBOX__URL", setting?.url);
@@ -585,7 +588,15 @@ const SANDBOX_NOT_NAMED: Fallback = {
 
 /** What a value is, in the words of a line that may not show it. */
 function kindOfValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return "a list";
+  }
   return typeof value === "object" ? "an object" : `a ${typeof value}`;
+}
+
+/** A value as a line shows it: a list and an object by their kind, anything else as it is. */
+function shownOf(value: unknown): unknown {
+  return typeof value === "object" ? kindOfValue(value) : value;
 }
 
 /**

@@ -174,11 +174,16 @@ export interface PluginAgentSetting {
 // the gateway the plugin agent uses, one per user, that the chat's model runs commands
 // in. Absent or without the gateway's URL and token, its tools are not offered.
 export interface ChatSandboxSetting {
-  /** The sandbox gateway and the bearer token every route of it wants. */
-  url?: string;
-  token?: string;
-  /** How long a sandbox is kept after a tool call, before the longest command timeout is added. */
-  idleTtlSeconds?: number;
+  // `unknown`: the block is read as it stands in the file, and `getChatSandbox` reports a
+  // field of the wrong type instead of trusting it.
+  /** The sandbox gateway and the bearer token every route of it wants: two texts. */
+  url?: unknown;
+  token?: unknown;
+  /**
+   * How long a sandbox is kept after a tool call, before the longest command timeout is added:
+   * a whole number of seconds.
+   */
+  idleTtlSeconds?: unknown;
 }
 
 // Automatic history compaction (`ai.compaction` in the shared

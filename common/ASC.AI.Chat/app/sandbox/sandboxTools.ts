@@ -106,7 +106,9 @@ function tool(name: string, description: string, properties: object, required: s
 }
 
 function toolsOf(config: ChatSandboxConfig): TMCPItem[] {
-  const idleMinutes = Math.round(config.idleTtlSeconds / 60);
+  // Rounded down: after a command that ran to its timeout, the idle lifetime is what is left.
+  const idleMinutes = Math.floor(config.idleTtlSeconds / 60);
+  const idleTime = idleMinutes === 1 ? "a minute" : `${idleMinutes} minutes`;
   const file = {
     type: "string",
     description:
@@ -119,8 +121,8 @@ function toolsOf(config: ChatSandboxConfig): TMCPItem[] {
         "credential of the portal and no file but those these tools wrote into it. The command " +
         `runs in the directory of this conversation, ${CHAT_SANDBOX_ROOT}/<conversation id> ` +
         "(print it with pwd); the user's other conversations have theirs beside it. Returns the " +
-        "exit code, stdout and stderr. The sandbox and its files stay for the next calls for at " +
-        `least ${idleMinutes} minutes after the last one; some time after that a call starts an ` +
+        "exit code, stdout and stderr. The sandbox and its files stay for the next calls for " +
+        `about ${idleTime} after the last one has ended; some time after that a call starts an ` +
         "empty one without saying so, and files written earlier are gone. It is made for Python " +
         "scripts: expect python3 with numpy, pandas, scipy, matplotlib, openpyxl, python-docx, " +
         "python-pptx, pypdf, reportlab and Pillow, and no network, so nothing can be installed; " +
@@ -167,17 +169,19 @@ const forLog = (err: unknown): string =>
   err instanceof AiServiceHttpError ? `AI service ${err.status} ${err.statusText}` : String(err);
 
 // What a title may not hold. A path separator, since the title is a name. A control character or
-// a line separator, which the workspace would show as a break. A character that turns the
-// direction of the text (U+202E and its kin), with which `invoice<U+202E>fdp.html` is listed as
-// a PDF, and one that takes no room (a zero-width space, a soft hyphen, a tag), with which a
-// second `Payroll.xlsx` lies beside the first: the model picks the title, and a text it read
-// may have told it which. The joiners U+200C and U+200D stay: Persian and Indic names are
-// written with them. A look-alike letter of another script is not caught by any of this.
+// a line separator, which the workspace would show as a break. A character that is not
+// displayed: Unicode's Default_Ignorable_Code_Point (the marks that turn the direction of the
+// text, with which `invoice<U+202E>fdp.html` is listed as a PDF; the zero-width space, the soft
+// hyphen, the fillers, the variation selectors and the tags, with which a second `Payroll.xlsx`
+// lies beside the first) and the three interlinear annotation marks, which that property leaves
+// out. The model picks the title, and a text it read may have told it which. The joiners U+200C
+// and U+200D are the exception: Persian and Indic names are written with them. A look-alike
+// letter of another script is not caught by any of this.
 const NOT_OF_A_NAME =
-  /[/\\\p{Cc}\u00AD\u061C\u200B\u200E\u200F\u2028-\u202E\u2060\u2066-\u2069\uFEFF\u{E0000}-\u{E007F}]/u;
+  /[/\\\p{Cc}\p{Zl}\p{Zp}\uFFF9-\uFFFB]|(?![\u200C\u200D])\p{Default_Ignorable_Code_Point}/u;
 
 /** A file name this service saves under: none of the characters above, not over its length. */
-function titleOf(value: string): string | undefined {
+export function titleOf(value: string): string | undefined {
   const title = value.trim();
   return title !== "" &&
     title !== "." &&
@@ -286,7 +290,7 @@ async function saveFile(
     return "'title' is a file name: a string.";
   }
   if (!title) {
-    return `'title' is a file name of 1 to ${MAX_TITLE_CHARS} characters, without '/', '\\', line breaks, control, invisible and text-direction characters.`;
+    return `'title' is a file name of 1 to ${MAX_TITLE_CHARS} characters, without '/', '\\', line breaks, control characters and characters that are not displayed (zero-width and text-direction marks and the like).`;
   }
   // The checks of the arguments and of the folder come before the sandbox is asked
   // (ts-ai-failure-paths.md §6); what the file itself is refused for shows only once it is read.

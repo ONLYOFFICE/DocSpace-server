@@ -50,7 +50,9 @@ vi.mock("nconf", () => {
   return { default: nconf };
 });
 
-const { getChatSandbox } = await import("../../config/index.js");
+// The module keeps what it has already reported: each test reads a fresh one
+// (ts-ai-tests.md §5).
+let getChatSandbox: (typeof import("../../config/index.js"))["getChatSandbox"];
 
 const ENV = ["AI__SANDBOX__URL", "AI__SANDBOX__TOKEN", "AI__SANDBOX__IDLE_TTL_SECONDS"];
 const ON = { url: "http://gateway:9090/", token: "secret" };
@@ -63,11 +65,13 @@ const withSettings = (sandbox: unknown) => {
 };
 
 describe("getChatSandbox", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     for (const name of ENV) {
       delete process.env[name];
     }
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.resetModules();
+    ({ getChatSandbox } = await import("../../config/index.js"));
   });
 
   afterEach(() => {
@@ -146,6 +150,16 @@ describe("getChatSandbox", () => {
     ["a block", "yes", "config: ai:sandbox is yes, not an object"],
     ["a block that is a list", [ON], "config: ai:sandbox is a list, not an object"],
     ["an address", { ...ON, url: 9090 }, "config: ai:sandbox:url is 9090, not a text"],
+    [
+      "an address that is a list",
+      { ...ON, url: [ON.url] },
+      "config: ai:sandbox:url is a list, not a text",
+    ],
+    [
+      "a token that is a list",
+      { ...ON, token: [ON.token] },
+      "config: ai:sandbox:token is a list, not a text",
+    ],
     // The token is not shown: the line names its type.
     ["a token", { ...ON, token: 424242 }, "config: ai:sandbox:token is a number, not a text"],
     [
@@ -173,12 +187,16 @@ describe("getChatSandbox", () => {
     expect(warn).toHaveBeenCalledTimes(2);
   });
 
-  it("says nothing about a token of the file that the environment overrides", () => {
+  it("says nothing about an address and a token of the file that the environment overrides", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    withSettings({ ...ON, token: 31337 });
+    withSettings({ url: 9090, token: 31337 });
+    process.env["AI__SANDBOX__URL"] = "http://from.the.environment";
     process.env["AI__SANDBOX__TOKEN"] = "from the environment";
 
-    expect(getChatSandbox()?.sandboxToken).toBe("from the environment");
+    expect(getChatSandbox()).toMatchObject({
+      sandboxUrl: "http://from.the.environment",
+      sandboxToken: "from the environment",
+    });
     expect(warn).not.toHaveBeenCalled();
   });
 

@@ -171,22 +171,26 @@ check the profile.
 **One sandbox per user, one directory per conversation.** A tool call that is not refused before
 the gateway asks it for the sandbox of the session that is the caller's user id
 (`GET people/@self`): the gateway answers the one that runs, or starts one. A call is refused
-before the gateway outside a conversation, for its arguments, when the portal does not say who
-the caller is and, for a save, when there is no folder to save into or it cannot be read. All
-conversations of a user share the sandbox, and each works in `/workspace/{threadId}`: a command
-runs there, and a relative path of a file tool is read from there. Nothing about a sandbox is
-stored by this service or by the AI service, so any instance serves any call.
+before the gateway without the configuration, for a tool name the adapter does not know, outside
+a conversation or with a thread id that is no directory name, for its arguments, when the portal
+does not say who the caller is and, for a save, when there is no folder to save into or it
+cannot be read. All conversations of a user share the sandbox, and each works in
+`/workspace/{threadId}`: a command runs there, and a relative path of a file tool is read from
+there. Nothing about a sandbox is stored by this service or by the AI service, so any instance
+serves any call.
 
-**Lifetime.** Every call the gateway answers a sandbox for moves its expiry to the idle lifetime
-plus 600 seconds from now, 600 being the longest timeout a command may ask for. The lifetime is
-the same for every call, a file call too, so that no call moves the expiry back: not under a
-command another conversation runs, and not into the idle time that follows a command. Nothing
-renews the sandbox between calls. The gateway takes a lifetime of a minute to its maximum, an
-hour by default (`GATEWAY_SANDBOX_MAX_TTL`), which is why the idle lifetime is 60 to 3000
-seconds. This service never deletes a sandbox, not when a thread is deleted either: one nobody
-calls expires at the gateway, and the next call starts an empty one. A call cannot tell a
-sandbox it started from one that ran, so the model is not told; the description of
-`sandbox_exec` says how long files stay at least.
+**Lifetime.** A call whose renewal the gateway takes moves the sandbox's expiry to the idle
+lifetime plus 600 seconds from now, 600 being the longest timeout a command may ask for. The
+lifetime is the same for every call, a file call too, so that a call does not move the expiry
+back, under a command another conversation runs or into the idle time that follows a command;
+this holds while the instances that serve a user read one idle lifetime. Nothing renews the
+sandbox between calls. The idle lifetime is 60 to 3000 seconds: the upper bound keeps it and the
+600 within the gateway's longest lifetime, an hour by default (`GATEWAY_SANDBOX_MAX_TTL`), and
+the lower one is this service's choice. This service never deletes a sandbox, not when a thread
+is deleted either: one nobody calls expires at the gateway, and the next call starts an empty
+one. A call cannot tell a sandbox it started from one that ran, so the model is not told; the
+description of `sandbox_exec` says about how long files stay, in whole minutes of the idle
+lifetime rounded down.
 
 ### Automatic history compaction
 
