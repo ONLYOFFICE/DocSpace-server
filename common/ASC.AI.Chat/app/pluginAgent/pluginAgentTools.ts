@@ -99,6 +99,18 @@ const MAX_LAST_WORDS_CHARS = 500;
 /** A zip archive starts with the signature of its first entry, or of its end when it is empty. */
 const ZIP_SIGNATURES = ["PK\u0003\u0004", "PK\u0005\u0006"];
 
+// The agent that builds the plugin works alone and cannot ask anybody, and a task takes many
+// minutes: what the request leaves open is asked of the user by the chat's model, before the call.
+const CLARIFY_FIRST =
+  "Do not call this tool on a request that leaves the plugin unclear. First ask the user what is " +
+  "missing, with the ask_user_question tool when it is offered and in plain text otherwise: what " +
+  "the plugin does and for whom, where it appears in the interface (a context menu item, a main " +
+  "button item, a profile menu item, an info panel tab, a page of its own, a handler of a file " +
+  "type), which external services or data it uses, and which settings an admin fills in. Ask " +
+  "only what the user has not said, a few questions at a time, and call the tool once the " +
+  "answers are in, with everything the user said written into 'task'. A request that already " +
+  "says all of it, and a specific change to a plugin built earlier, need no questions.";
+
 const PLUGIN_AGENT_TOOL: TMCPItem = {
   name: PLUGIN_AGENT_TOOL_NAME,
   description:
@@ -107,7 +119,8 @@ const PLUGIN_AGENT_TOOL: TMCPItem = {
     "many minutes, and saves two new files in the workspace: the plugin package (.zip) and an archive " +
     "of its sources (-src.zip). Nothing is installed. To change a plugin built earlier, pass the id of " +
     "its sources archive in 'sourcesFileId' and describe the change in 'task'. The result names both " +
-    `file ids; install the package with ${INSTALL_PLUGIN_TOOL_NAME} only when the user asks for it.`,
+    `file ids; install the package with ${INSTALL_PLUGIN_TOOL_NAME} only when the user asks for it. ` +
+    CLARIFY_FIRST,
   inputSchema: {
     type: "object",
     properties: {

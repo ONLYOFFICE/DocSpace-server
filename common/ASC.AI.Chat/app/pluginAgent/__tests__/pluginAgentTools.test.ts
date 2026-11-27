@@ -192,6 +192,16 @@ describe("who is offered the plugin agent", () => {
   const offered = () =>
     inRequestContext({ authorization: "Bearer user" }, () => pluginAgentTools.getTools());
 
+  it("tells the model to ask the user what a request leaves open before it calls plugin_agent", async () => {
+    self = () => docspace({ isAdmin: true, isOwner: false, isRoomAdmin: false });
+    const description = (await offered())["plugin-agent"]?.[0]?.description ?? "";
+    expect(description).toContain(
+      "Do not call this tool on a request that leaves the plugin unclear",
+    );
+    expect(description).toContain("ask_user_question");
+    expect(description).toContain("need no questions");
+  });
+
   it.each([
     ["a DocSpace admin", { isAdmin: true, isOwner: false, isRoomAdmin: false }],
     ["the owner", { isAdmin: false, isOwner: true, isRoomAdmin: false }],

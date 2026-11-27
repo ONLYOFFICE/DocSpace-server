@@ -83,6 +83,12 @@ The model's tools:
 | `read_skill` | a file of the skill's `SKILL.md` and `references/`, read from the service's own disk |
 | `deliver_plugin` | runs the gate of decision 5 and ends the task when it passes |
 
+The sub-agent can ask nobody (the nudge above), so questions belong before the call: the description of
+`plugin_agent` tells the chat's model to ask the user what a request leaves open (what the plugin does and
+for whom, where it appears, which services and settings it needs), with the chat's own `ask_user_question`
+tool when the client offers it, and to call the tool once the answers are in. This is guidance to a model,
+not a check of the service: a call with a short `task` still starts a task.
+
 *Alternative:* copy the document agent's loop, client and tools. Rejected by the user in favour of code
 written for this task; the copy would also bring the generated protobuf client and its two dependencies.
 
