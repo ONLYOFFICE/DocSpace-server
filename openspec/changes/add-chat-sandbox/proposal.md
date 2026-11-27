@@ -14,15 +14,14 @@ result to the user, without a second model and without a task that takes minutes
   sandbox: `sandbox_exec` (one shell command), `sandbox_read_file`, `sandbox_write_file` (a text file of the
   sandbox) and `sandbox_save_file` (a file of the sandbox saved as a new file of the workspace). The chat's
   own model calls them; nothing is delegated to a sub-agent.
-- A caller has one sandbox, shared by all their conversations: every call that is not refused first
-  (for its arguments or, for a save, for want of a folder) asks the gateway for the sandbox
-  of the session that is the caller's user id, and the gateway answers the one that runs or starts one.
-  Each conversation works in a directory of its own, `/workspace/{threadId}`.
-- The sandbox is kept by use alone: every such call moves its expiry to the idle lifetime of the
-  installation's configuration from now (a command's own timeout is added), and nothing renews it between
-  calls. ASC.AI.Chat
-  never deletes it, not when a thread is deleted either: a sandbox nobody calls expires at the gateway, and
-  the next call starts an empty one. This differs from `plugin_agent`, whose sandbox lives for exactly one
+- A caller has one sandbox, shared by all their conversations: a call that is not refused before the
+  gateway asks it for the sandbox of the session that is the caller's user id, and the gateway answers the
+  one that runs or starts one. Each conversation works in a directory of its own, `/workspace/{threadId}`.
+- The sandbox is kept by use alone: every call the gateway answers a sandbox for moves its expiry to the
+  idle lifetime of the installation's configuration plus 600 seconds, the longest command timeout, from
+  now, and nothing renews it between calls. ASC.AI.Chat never deletes it, not when a thread is deleted
+  either: a sandbox nobody calls expires at the gateway, and the next call starts an empty one.
+  This differs from `plugin_agent`, whose sandbox lives for exactly one
   task, renewed by a timer and deleted when the task ends.
 - Nothing about a sandbox is stored, in ASC.AI.Chat or in the AI service, so any instance serves any call.
 - The sandbox never holds a credential of the portal: a file reaches the workspace only through

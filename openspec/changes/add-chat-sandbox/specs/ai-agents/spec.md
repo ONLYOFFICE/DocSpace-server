@@ -10,6 +10,11 @@ sandbox, and SHALL offer none of them otherwise. A call SHALL pause for approval
 permission mode that asks about every tool. A call made outside a thread SHALL answer the model an error and
 reach no sandbox.
 
+#### Scenario: Call outside a thread
+
+- **WHEN** the model calls a sandbox tool in a round that names no thread, or an empty thread id
+- **THEN** the model is told that a sandbox belongs to a conversation, and no request is made
+
 #### Scenario: Configured installation
 
 - **WHEN** a user sends a message on an installation that configures a chat sandbox
@@ -27,11 +32,11 @@ reach no sandbox.
 
 ### Requirement: One sandbox per user, one directory per thread
 
-Every sandbox tool call SHALL, unless it is refused first for its arguments or, for a save, for want of a
-folder, ask the gateway for the sandbox of the session that is the caller's user id, renew it, and make the
-directory `/workspace/{threadId}` in it. Calls of different threads of one user SHALL reach the same
-sandbox, each in its own directory. A thread id that is not a name
-of ASCII letters, digits, `-` and `_`, 100 characters at most, SHALL answer an error and reach nobody.
+A sandbox tool call that is not refused before the gateway SHALL ask it for the sandbox of the session that
+is the caller's user id, renew the sandbox it answers, and make the directory `/workspace/{threadId}` in
+it. Calls of different threads of one user SHALL reach the same sandbox, each in its own directory. A thread
+id that is not a name of ASCII letters, digits, `-` and `_`, 100 characters at most, SHALL answer an error
+and reach nobody.
 
 #### Scenario: Call in a thread
 
@@ -55,35 +60,35 @@ of ASCII letters, digits, `-` and `_`, 100 characters at most, SHALL answer an e
 
 ### Requirement: The sandbox is kept by use and never deleted by the chat
 
-Every sandbox tool call that reaches the gateway SHALL ask for and renew the sandbox with the
-installation's idle lifetime, a whole number of 660 to 3000 seconds and 900 by default, plus the command's
-timeout for `sandbox_exec`. Nothing else SHALL renew it, and the chat SHALL NOT ask the gateway to delete
-it, on a failed call and on thread deletion alike.
+A sandbox tool call SHALL ask for the sandbox, and renew the one it is answered, with one lifetime
+whatever the call: the installation's idle lifetime, a whole number of 60 to 3000 seconds and 900 by
+default, plus 600 seconds, the longest command timeout. Nothing else SHALL renew it, and the chat SHALL NOT
+ask the gateway to delete it, on a failed call and on thread deletion alike.
 
 #### Scenario: Idle lifetime at the bounds
 
-- **WHEN** the installation sets an idle lifetime of 660 or 3000 seconds
+- **WHEN** the installation sets an idle lifetime of 60 or 3000 seconds
 - **THEN** that lifetime is used
 
 #### Scenario: Idle lifetime out of bounds
 
-- **WHEN** the settings name an idle lifetime of 0, a negative number, 600, 659, 3001, a fraction or an empty value, and the environment names none
+- **WHEN** the settings name an idle lifetime of 0, a negative number, 59, 3001, a fraction or an empty value, and the environment names none
 - **THEN** 900 seconds are used
 
 #### Scenario: Idle lifetime of the environment out of bounds
 
-- **WHEN** the environment names an idle lifetime of 659 seconds or an empty one, and the settings name 1800
+- **WHEN** the environment names an idle lifetime of 59 seconds or an empty one, and the settings name 1800
 - **THEN** 1800 seconds are used
 
-#### Scenario: Default timeout
+#### Scenario: Lifetime of a command call
 
-- **WHEN** the model calls `sandbox_exec` with the default timeout on an installation whose idle lifetime is 900 seconds
-- **THEN** the sandbox is asked for and renewed with a lifetime of 960 seconds
+- **WHEN** the model calls `sandbox_exec` with the default timeout or with `timeout_seconds` 300, on an installation whose idle lifetime is 900 seconds
+- **THEN** the sandbox is asked for and renewed with a lifetime of 1500 seconds
 
-#### Scenario: Longer command
+#### Scenario: File call after a command
 
-- **WHEN** the model calls `sandbox_exec` with `timeout_seconds` 300 on an installation whose idle lifetime is 900 seconds
-- **THEN** the sandbox is asked for with a lifetime of 1200 seconds
+- **WHEN** the model calls `sandbox_exec` with `timeout_seconds` 600 and then `sandbox_read_file`, on an installation whose idle lifetime is 900 seconds
+- **THEN** both calls renew the sandbox with a lifetime of 1500 seconds
 
 #### Scenario: Failed command call
 
@@ -94,8 +99,8 @@ it, on a failed call and on thread deletion alike.
 
 A sandbox tool call SHALL answer the model a text and never fail the reply: that no sandbox is free, that
 the sandbox is gone and a new call starts another, or that it cannot be reached. When the portal answers
-who the caller is with an error status, the call SHALL answer that status; when its answer names no id, an
-internal error. Neither SHALL ask the gateway for anything.
+who the caller is with an error status, the call SHALL answer that status; when its answer names no id,
+cannot be read or does not come, an internal error. Neither SHALL ask the gateway for anything.
 
 #### Scenario: No sandbox free
 
@@ -125,6 +130,11 @@ internal error. Neither SHALL ask the gateway for anything.
 #### Scenario: Portal names no id
 
 - **WHEN** `GET people/@self` answers 200 without an `id`
+- **THEN** the model is told that the call could not be completed due to an internal error, and the gateway is not called
+
+#### Scenario: Portal does not answer
+
+- **WHEN** `GET people/@self` gives no answer within the upstream timeout, or one that is not JSON
 - **THEN** the model is told that the call could not be completed due to an internal error, and the gateway is not called
 
 #### Scenario: Reply stopped
@@ -177,6 +187,11 @@ replace the file. Other arguments SHALL answer an error before any sandbox is re
 - **WHEN** the model writes `/workspace/a/b.txt` and then reads it
 - **THEN** the write answers the number of bytes written and the read answers the same text
 
+#### Scenario: Empty file read
+
+- **WHEN** the model reads a file of 0 bytes
+- **THEN** the result says that the file is empty
+
 #### Scenario: Absent file
 
 - **WHEN** the model reads a path that does not exist
@@ -215,10 +230,10 @@ replace the file. Other arguments SHALL answer an error before any sandbox is re
 ### Requirement: Saving a file of the sandbox into the workspace
 
 `sandbox_save_file` SHALL take `path` and an optional `title` of 1 to 165 characters, not `.` or `..` and
-without `/`, `\`, control or text-direction characters, the last name of `path` by default. It SHALL save
-the file, of 1 to 33554432 bytes, as a new file under the caller's session where a result of
-`document_agent` goes, and answer its id, title, size and place. A refusal of the workspace SHALL be answered as "not saved"; any
-other failed save as "may have been saved".
+without `/`, `\`, line breaks, control, invisible or text-direction characters, the last name of `path` by
+default. It SHALL save the file, of 1 to 33554432 bytes, as a new file under the caller's session where a
+result of `document_agent` goes, and answer its id, title, size and place. A refused upload SHALL be
+answered as "not saved"; any other failed upload as "may have been saved".
 
 #### Scenario: Saved
 
@@ -245,9 +260,14 @@ other failed save as "may have been saved".
 - **WHEN** the file has 33554432 bytes
 - **THEN** it is saved and the result names 33554432 bytes
 
+#### Scenario: Title with a joiner
+
+- **WHEN** `title` contains U+200C, as a Persian name does
+- **THEN** the file is saved under that title
+
 #### Scenario: Bad title
 
-- **WHEN** `title` is blank, `.`, `..`, has 166 characters, or contains `/`, `\`, a line break, U+007F, U+0085, U+2028, U+202E or U+2066
+- **WHEN** `title` is blank, `.`, `..`, has 166 characters, or contains `/`, `\`, a line break, U+007F, U+0085, U+2028, U+202E, U+2066, U+200B, U+00AD, U+FEFF or U+E0041
 - **THEN** the model is told what a title is, and neither a folder nor a sandbox is asked for
 
 #### Scenario: No folder to save into
