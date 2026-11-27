@@ -56,6 +56,7 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
 });
 const setRoundProfileId = vi.fn();
 const setRoundThreadId = vi.fn();
+const setRoundSignal = vi.fn();
 vi.mock("../../requestContext.js", () => ({
   markForwardHeadersToProvider: vi.fn(),
   getCustomServerNames: vi.fn(() => []),
@@ -65,6 +66,7 @@ vi.mock("../../requestContext.js", () => ({
   setRoundAttachmentIds: vi.fn(),
   setRoundProfileId,
   setRoundThreadId,
+  setRoundSignal,
 }));
 vi.mock("../../storage/chatContext.js", () => ({
   primeChatContext: vi.fn(async () => {}),
@@ -157,6 +159,7 @@ beforeEach(() => {
   readHistory.mockReset().mockResolvedValue([]);
   setRoundProfileId.mockReset();
   setRoundThreadId.mockReset();
+  setRoundSignal.mockReset();
 });
 
 // Both stored rounds check the same things before the stream opens.
@@ -246,6 +249,8 @@ describe("send", () => {
     const { res } = await run("send", { actionType: "Chat", userMessage: text("hi") });
     const sent = engine.send.mock.calls[0]?.[0] as { actionArgs: { signal: AbortSignal } };
     expect(sent.actionArgs.signal.aborted).toBe(false);
+    // The same signal is what a long tool of the round reads to stop with the reply.
+    expect(setRoundSignal).toHaveBeenCalledWith(sent.actionArgs.signal);
     const onClose = res.on.mock.calls.find(([event]) => event === "close")?.[1] as () => void;
     onClose();
     expect(sent.actionArgs.signal.aborted).toBe(true);

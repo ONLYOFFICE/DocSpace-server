@@ -91,6 +91,7 @@ export default tseslint.config(
       ".yarn/**",
       "app/generated/**",
       "templates/**",
+      "skills/**",
       "coverage/**",
       "server.js",
     ],

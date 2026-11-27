@@ -14310,6 +14310,88 @@
         }
       }
     },
+    "/api/2.0/ai/plugin-agent": {
+      "get": {
+        "tags": [
+          "AI / Settings"
+        ],
+        "operationId": "aiSettingsGetPluginAgent",
+        "summary": "Get the availability of the plugin agent",
+        "description": "Reports whether the calling user can have a plugin of the portal built in the chat: `available` is true when the installation configures a plugin agent with its plugin skill and the caller is the portal owner or a DocSpace admin, the same condition under which the chat offers the model its `plugin_agent` and `install_plugin` tools. No reason is given for a false: an installation without a plugin agent and a caller who may not use one answer alike. A client reads it before it offers to build a plugin.",
+        "responses": {
+          "200": {
+            "description": "Whether the caller is offered the plugin agent, as `{ available }`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "available": {
+                      "type": "boolean",
+                      "description": "Whether the chat offers the caller its plugin tools."
+                    }
+                  },
+                  "required": [
+                    "available"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The AI provider could not be reached or answered with a failure of its own, or a DocSpace service answered with a body this service cannot read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/ai/vectorization/tasks": {
       "post": {
         "tags": [
