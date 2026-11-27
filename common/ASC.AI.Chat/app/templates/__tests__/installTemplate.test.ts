@@ -49,7 +49,10 @@ vi.mock("../../storage/docspaceFilesApi.js", async (importOriginal) => ({
   filesApiSend: vi.fn(),
 }));
 const aiConfig = vi.hoisted(() => vi.fn());
-vi.mock("../../storage/httpClient.js", () => ({ aiService: { get: aiConfig } }));
+vi.mock("../../storage/httpClient.js", () => ({
+  aiService: { get: aiConfig },
+  AiServiceHttpError: class AiServiceHttpError extends Error {},
+}));
 const portalChatProfileId = vi.hoisted(() => vi.fn());
 vi.mock("../../storage/aiProjectChatContext.js", () => ({ portalChatProfileId }));
 
@@ -220,9 +223,9 @@ describe("installTemplate", () => {
 
     const result = await installTemplate(catalogWith({}), "agents/test/agent");
 
-    expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
+    expect(result.warnings).toEqual(["modelUnconfirmed", "instructionsNotSaved"]);
     expect(vi.mocked(logger.warn).mock.calls.map(([line]) => line)).toEqual([
-      `installTemplate: agents/test/agent: model not saved (${text})`,
+      `installTemplate: agents/test/agent: model unconfirmed, its write got no usable answer (${text})`,
     ]);
   });
 

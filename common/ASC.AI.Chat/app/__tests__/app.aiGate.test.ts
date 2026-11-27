@@ -96,6 +96,28 @@ describe("the AI access gate", () => {
     },
   );
 
+  // The same with an input the route accepts: one numeric `entityId`, `threadId` and `id`, in the
+  // query and in the body. A route that reads the entity from the Files API ahead of the gate
+  // passes the row above, where the repeated parameter is read as absent, and fails this one.
+  it.each(gated.map((op) => [op.operationId, op.method, op.path] as const))(
+    "answers 403 to %s with a well-formed entityId, with no request but to the AI service",
+    async (operationId, method, path) => {
+      upstream.use(http.all("*/internal/ai/*", () => docspaceError(403)));
+      const url = `${path.replace(/\{[^}]+\}/g, "1")}?entityId=1&threadId=1&id=1`;
+      const call = request(app)
+        [method as "get" | "post" | "put" | "patch" | "delete"](url)
+        .set(AUTH);
+      const reply =
+        method === "get"
+          ? await call
+          : await call.set(JSON_TYPE).send({ entityId: "1", threadId: "1", id: "1" });
+
+      expect(reply.status).toBe(403);
+      expect(responseViolations(operationId, 403, reply.body)).toEqual([]);
+      expect(upstream.seen.filter((r) => !r.path.startsWith("/internal/ai/"))).toEqual([]);
+    },
+  );
+
   // The parsers of createApp run in front of the authentication gate and of the AI access gate
   // (ts-ai-express.md §2): what they refuse is answered for every caller, and no route is reached.
   describe("behind the body parser", () => {

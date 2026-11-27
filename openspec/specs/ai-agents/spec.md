@@ -1431,7 +1431,7 @@ without the provider's body or URL.
 
 `aiOpenaiChatCompletions` and `aiOpenaiImagesGenerations` SHALL relay the request for the profile named in
 the path to its provider and answer verbatim to DocSpace admins, Room admins and Users (Guest 403,
-anonymous 401, AI off 403). A malformed or unknown `profileId` SHALL answer 400; `stream` true streams
+anonymous 401, AI off 403). A malformed `profileId` SHALL answer 400 and an unknown one 404; `stream` true streams
 chunks; an image generation on a text-only model is refused (400). The gateway proxy exposes only models,
 chat completions, image generation, search and contents (others 404).
 
@@ -2499,66 +2499,75 @@ user gets no access to the project. Threads of other members of the project SHAL
 - **WHEN** the former owner also has a thread with an artifact in a project owned by someone else, where the former owner is a member, and is enabled again after the transfer
 - **THEN** the former owner still reads that thread and its artifact
 
-### Requirement: Pinned projects in the root folders
+### Requirement: Projects in the root folders
 
-`getRootFolders` SHALL return in `folders` of the AI rooms section only the AI projects the caller pinned and may
-see, sorted as the listing of the section sorts pinned rooms. `total` and `count` of that section SHALL equal their
-number and `startIndex` SHALL be 0, whatever paging and filters the request carries. The other sections SHALL keep
-their behaviour.
+`getRootFolders` SHALL return in `folders` of the AI rooms section at most five AI projects: first the ones the
+caller pinned, then the others, each group by `updated`, newest first. `total` and `count` of that section SHALL
+equal their number and `startIndex` SHALL be 0, whatever paging, filters and `sortBy` the request carries. Other
+room types of the section SHALL NOT be listed. The other sections SHALL keep their behaviour.
 
-#### Scenario: Only pinned projects are listed
+#### Scenario: Pinned projects come first
 
-- **WHEN** the owner creates three AI projects and an Instructions room, pins two of the projects and then the Instructions room, and calls `getRootFolders` with `filterType=2` and `count=1`
-- **THEN** `folders` of the AI rooms section holds the two pinned projects with `total` and `count` 2 and `startIndex` 0
-- **AND** neither the Instructions room nor the unpinned project is in it
+- **WHEN** the owner creates four AI projects and an Instructions room, pins the first two projects and the Instructions room, and calls `getRootFolders` with `filterType=2`, `count=1`, `startIndex=5`, `sortBy=AZ` and a `filterValue` no project title contains
+- **THEN** `folders` of the AI rooms section holds the second and the first project, pinned, then the fourth and the third, with `total` and `count` 4 and `startIndex` 0
+- **AND** the Instructions room is not in it
 
 #### Scenario: Nothing pinned
 
-- **WHEN** the caller has pinned no AI project, or only an Instructions room
+- **WHEN** the owner creates six AI projects and pins none
+- **THEN** `folders` of the AI rooms section holds the five newest, newest first, none of them pinned
+
+#### Scenario: More than five pinned
+
+- **WHEN** the owner creates six AI projects, pins them all and creates a seventh
+- **THEN** `folders` of the AI rooms section holds the five newest pinned projects, and not the seventh
+
+#### Scenario: A changed project moves up
+
+- **WHEN** the owner renames the oldest of three unpinned projects
+- **THEN** that project comes first in `folders` of the AI rooms section
+
+#### Scenario: No project in the section
+
+- **WHEN** the section holds only an Instructions room, pinned
 - **THEN** `folders` of the AI rooms section is empty and its `total` is 0, and the section itself is still listed
 
-#### Scenario: Paging and filters do not cut the list
+#### Scenario: Unpinned project moves behind the pinned ones
 
-- **WHEN** ten AI projects are pinned, the most the pin limit of the AI rooms section allows, and `getRootFolders` is called with `count=1`, `startIndex=5`, a `filterValue` no project title contains and `sortBy=AZ`
-- **THEN** `folders` of the AI rooms section holds all ten projects in the order of their titles, with `total` and `count` 10 and `startIndex` 0
-
-#### Scenario: Unpinned project leaves the list
-
-- **WHEN** a pinned project is unpinned with `unpinRoom` and `getRootFolders` is called again
-- **THEN** the project is no longer in `folders` of the AI rooms section and `getRoomsFolder` with `searchArea=AiHub` still lists it
+- **WHEN** the owner pins the older of two projects and then unpins it with `unpinRoom`
+- **THEN** the newer project comes first and neither is pinned
 
 #### Scenario: Other sections are not changed
 
-- **WHEN** the owner has two Custom rooms and a pinned AI project and calls `getRootFolders` with `count=1`
+- **WHEN** the owner has two Custom rooms and two AI projects and calls `getRootFolders` with `count=1`
 - **THEN** the Rooms section holds one room with `total` 2, as before the change
 
-### Requirement: Who finds a pinned project in the root folders
+### Requirement: Who finds a project in the root folders
 
-A pinned AI project SHALL be listed in the root folders when the caller is a DocSpace admin, created the project
-or holds a share of their own on it; a share held through a group SHALL NOT count. A pin SHALL be personal: the
-pins of other accounts SHALL NOT be listed. A pin on a project the caller may no longer see SHALL be skipped and
-kept, so the project is listed again once the caller regains access.
+An AI project SHALL be listed in the root folders only when the caller created it or holds a share of their own on
+it; a share held through a group SHALL NOT count, and a DocSpace admin gets no exception. A pin SHALL be personal.
+A pin on a project the caller may no longer see SHALL be skipped and kept, so the project comes back pinned once
+the caller regains access.
 
 #### Scenario: Member pins a project
 
 - **WHEN** the owner invites a User to a project as Content creator and the User pins it
-- **THEN** the project is in `folders` of the AI rooms section of the User's `getRootFolders`
-- **AND** it is not in the owner's list, since the owner did not pin it
+- **THEN** the project is listed pinned in the User's `getRootFolders` and unpinned in the owner's
 
 #### Scenario: Member loses access and regains it
 
-- **WHEN** a member who pinned a project is removed from it and calls `getRootFolders`, and is then invited again
-- **THEN** the project is not listed while the member is out of it, and is listed again after the new invitation without a new pin
+- **WHEN** a member of two projects who pinned one of them is removed from it, calls `getRootFolders`, and is then invited again
+- **THEN** only the other project is listed while the member is out, and after the new invitation the pinned project is listed first again without a new pin
 
 #### Scenario: DocSpace admin outside the project
 
-- **WHEN** a DocSpace admin who was never invited to a project pins it
-- **THEN** the project is in `folders` of the AI rooms section of the admin's `getRootFolders`, as it is in the admin's listing of the section
+- **WHEN** a DocSpace admin who was never invited to two projects pins one of them
+- **THEN** `folders` of the AI rooms section of the admin's `getRootFolders` is empty, although the admin's listing of the section shows both
 
 #### Scenario: Creator of the project
 
-- **WHEN** a Room admin creates a project, pins it and calls `getRootFolders`
-- **THEN** the project is listed, although the creator holds no share record on it
+- **WHEN** a Room admin creates two projects, pins the first and calls `getRootFolders`
+- **THEN** both are listed, the pinned one first, although the creator holds no share record on them
 
 ### Requirement: Drafts that are not sent are removed
 

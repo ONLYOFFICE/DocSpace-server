@@ -49,7 +49,10 @@ vi.mock("../../storage/docspaceFilesApi.js", () => {
 });
 
 const aiConfig = vi.fn();
-vi.mock("../../storage/httpClient.js", () => ({ aiService: { get: aiConfig } }));
+vi.mock("../../storage/httpClient.js", () => ({
+  aiService: { get: aiConfig },
+  AiServiceHttpError: class AiServiceHttpError extends Error {},
+}));
 
 const portalChatProfileId = vi.fn();
 vi.mock("../../storage/aiProjectChatContext.js", () => ({ portalChatProfileId }));
@@ -266,7 +269,8 @@ describe("installTemplate", () => {
       });
       const result = await installTemplate(catalog, catalog.agents[0]!.id);
       expect(result.id).toBe("7");
-      expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
+      // The write got no answer: the model may be stored.
+      expect(result.warnings).toEqual(["modelUnconfirmed", "instructionsNotSaved"]);
     }
   });
 

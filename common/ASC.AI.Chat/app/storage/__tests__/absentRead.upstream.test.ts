@@ -33,7 +33,7 @@
 
 import { describe, expect, it } from "vitest";
 import { afterUpstreamTimeout } from "../../__tests__/helpers/time.js";
-import { http, stalled, useUpstream } from "../../__tests__/helpers/upstream.js";
+import { http, HttpResponse, stalled, useUpstream } from "../../__tests__/helpers/upstream.js";
 import { HttpAssignmentsStorage } from "../assignmentsStorage.js";
 import { HttpAttachmentsStorage } from "../attachmentsStorage.js";
 import { HttpMcpServersStorage } from "../mcpServersStorage.js";
@@ -42,6 +42,8 @@ import { HttpPreferencesStorage } from "../preferencesStorage.js";
 import { HttpPromptFoldersStorage } from "../promptFoldersStorage.js";
 import { HttpPromptsStorage } from "../promptsStorage.js";
 import { HttpThreadsStorage } from "../threadsStorage.js";
+import { HttpToolPrefsStorage } from "../toolPrefsStorage.js";
+import { UpstreamShapeError } from "../upstreamShape.js";
 import { HttpWebSearchStorage } from "../webSearchStorage.js";
 
 // Every call of the AI service that reads a 404 as "not there": a read that answers `null` for
@@ -86,5 +88,24 @@ describe("a call that reads a 404 as absent, against an AI service that never an
     expect(outcome).toEqual({ error: expect.any(Error) });
     expect(String("error" in outcome && outcome.error)).toContain("upstream timeout after");
     expect(upstream.seen).toHaveLength(1);
+  });
+});
+
+// The envelope of a failure (`ErrorApiResponse`, common/ASC.Api.Core/Middleware/
+// CommonApiResponse.cs: `status: 1` and `error`, no `response`) sent with a 200 by a hop in
+// front of the AI service. It is not the empty envelope of an action that returned null: read
+// as "nothing stored", it switched every disabled tool back on.
+describe("the same calls, against the envelope of a failure sent with a 200", () => {
+  it.each([
+    ...calls,
+    ["toolPrefs.readDisabled", () => new HttpToolPrefsStorage().readDisabled()] as const,
+  ])("%s rejects with an answer of an unknown shape", async (_name, call) => {
+    upstream.use(
+      http.all("*/internal/ai/*", () =>
+        HttpResponse.json({ error: { message: "boom" }, status: 1, statusCode: 500 }),
+      ),
+    );
+
+    await expect(call()).rejects.toBeInstanceOf(UpstreamShapeError);
   });
 });

@@ -58,7 +58,11 @@ vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ...(await original<typeof import("@onlyoffice/ai-chat/core")>()),
   ToolsEngine: engineClass(() => engine),
 }));
-const mcpServers = vi.hoisted(() => ({ readByName: vi.fn(), readAll: vi.fn() }));
+// `readAllForWrite`, the complete read a replace-all builds on, is the same double as `readAll`.
+const mcpServers = vi.hoisted(() => {
+  const readAll = vi.fn();
+  return { readByName: vi.fn(), readAll, readAllForWrite: readAll };
+});
 // The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
 const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn() }));
 vi.mock("../../storage/index.js", () => ({ storage: { mcpServers, toolPrefs } }));
@@ -71,6 +75,7 @@ vi.mock("../../tools/systemTools.js", () => ({
 const { toolsController } = await import("../toolsController.js");
 const { customToolsSource } = await import("../../tools/customTools.js");
 const { AiServiceHttpError } = await import("../../storage/httpClient.js");
+const { UNREADABLE_MCP_SERVER_CONFIG } = await import("../../storage/mcpServersStorage.js");
 
 const upstream = useUpstream();
 
@@ -367,6 +372,35 @@ describe.each([
     expect(engineCall()).not.toHaveBeenCalled();
     expect(responseViolations(operationId, 500, reply.body)).toEqual([]);
   });
+
+  // A stored server whose config cannot be read: the storage reads it as the stand-in, and only
+  // a config that carries `headers` is written over it.
+  it("writes a config with headers over a stored entry whose config cannot be read", async () => {
+    mcpServers.readByName.mockResolvedValue(UNREADABLE_MCP_SERVER_CONFIG);
+    engineCall().mockResolvedValue({ success: true });
+
+    const reply = await send(handler, { name: "crm", config: { url: URL_A, headers: {} } });
+
+    expect(reply.status).toBe(200);
+    expect(engineCall()).toHaveBeenCalledWith("crm", { url: URL_A, headers: {} }, undefined);
+  });
+
+  it.each([
+    ["a config without headers", { url: URL_A }],
+    ["no config", undefined],
+  ])(
+    "answers 502 for %s over a stored entry whose config cannot be read",
+    async (_name, config) => {
+      mcpServers.readByName.mockResolvedValue(UNREADABLE_MCP_SERVER_CONFIG);
+
+      const reply = await send(handler, { name: "crm", config });
+
+      expect(reply.status).toBe(502);
+      expect(reply.body).toEqual({ error: "Bad Gateway" });
+      expect(engineCall()).not.toHaveBeenCalled();
+      expect(responseViolations(operationId, 502, reply.body)).toEqual([]);
+    },
+  );
 
   it("relays the status of the AI service when the engine's write fails", async () => {
     engineCall().mockRejectedValue(
@@ -777,7 +811,7 @@ describe("toolsController.replaceAllCustomServers", () => {
       undefined,
     );
     expect(mcpServers.readAll).toHaveBeenCalledTimes(1);
-    expect(mcpServers.readAll).toHaveBeenCalledWith(undefined);
+    expect(mcpServers.readAllForWrite).toHaveBeenCalledWith();
     expect(mcpServers.readByName).not.toHaveBeenCalled();
     expect(responseViolations(operationId, 200, reply.body)).toEqual([]);
   });
@@ -906,6 +940,49 @@ describe("toolsController.replaceAllCustomServers", () => {
     expect(reply.body).toEqual({ error: 'Entity "42" not found' });
     expect(mcpServers.readAll).not.toHaveBeenCalled();
     expect(responseViolations(operationId, 404, reply.body)).toEqual([]);
+  });
+
+  it("removes a stored entry whose config cannot be read when the map does not name it", async () => {
+    mcpServers.readAll.mockResolvedValue({
+      crm: { url: URL_A, headers: SECRET },
+      broken: UNREADABLE_MCP_SERVER_CONFIG,
+    });
+    engine.replaceAllCustomServers.mockResolvedValue({ success: true });
+
+    const reply = await send(handler, { map: { crm: { url: URL_A } } });
+
+    expect(reply.status).toBe(200);
+    expect(engine.replaceAllCustomServers).toHaveBeenCalledWith(
+      { crm: { url: URL_A, headers: SECRET } },
+      undefined,
+    );
+  });
+
+  it("writes such an entry when the map gives it a config with headers", async () => {
+    mcpServers.readAll.mockResolvedValue({ broken: UNREADABLE_MCP_SERVER_CONFIG });
+    engine.replaceAllCustomServers.mockResolvedValue({ success: true });
+
+    const reply = await send(handler, { map: { broken: { url: URL_A, headers: SECRET } } });
+
+    expect(reply.status).toBe(200);
+    expect(engine.replaceAllCustomServers).toHaveBeenCalledWith(
+      { broken: { url: URL_A, headers: SECRET } },
+      undefined,
+    );
+  });
+
+  it.each([
+    ["a config without headers", { url: URL_A }],
+    ["null", null],
+  ])("answers 502 and writes nothing when the map gives such an entry %s", async (_n, config) => {
+    mcpServers.readAll.mockResolvedValue({ broken: UNREADABLE_MCP_SERVER_CONFIG });
+
+    const reply = await send(handler, { map: { broken: config } });
+
+    expect(reply.status).toBe(502);
+    expect(reply.body).toEqual({ error: "Bad Gateway" });
+    expect(engine.replaceAllCustomServers).not.toHaveBeenCalled();
+    expect(responseViolations(operationId, 502, reply.body)).toEqual([]);
   });
 
   it("answers 500 and writes nothing when the registry cannot be read", async () => {

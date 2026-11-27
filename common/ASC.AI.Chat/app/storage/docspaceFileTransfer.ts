@@ -41,6 +41,7 @@ import { envelopeResponse, filesApiRequest } from "./docspaceFilesApi.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import { mapped, UpstreamShapeError } from "./upstreamShape.js";
+import { writeWasRefused } from "./writeOutcome.js";
 
 export interface UploadedFile {
   /** The new DocSpace entry id (internal int or thirdparty string, as a string). */
@@ -89,14 +90,27 @@ export async function uploadFile(
   form.append("file", new Blob([bytes], { type: mediaType }), title);
 
   // A refusal is a DocspaceApiHttpError with its status (its message carries no body).
-  const file = envelopeResponse(
-    await filesApiRequest("POST", `${encodeURIComponent(folderId)}/insert`, { form }),
-  );
-  if (!isObject(file)) {
-    throw new UpstreamShapeError("POST files/{folderId}/insert");
+  let id: string;
+  let saved: string;
+  try {
+    const file = envelopeResponse(
+      await filesApiRequest("POST", `${encodeURIComponent(folderId)}/insert`, { form }),
+    );
+    if (!isObject(file)) {
+      throw new UpstreamShapeError("POST files/{folderId}/insert");
+    }
+    id = mapped(getEntityId(file, "id"), "POST files/{folderId}/insert");
+    saved = getString(file, "title") ?? title;
+  } catch (err) {
+    // Only a refusal says that no file was made. The callers answer the failure; the line says
+    // where a file nobody can name may lie (ts-ai-failure-paths.md §6).
+    if (!writeWasRefused(err)) {
+      logger.warn(
+        `uploadFile: ${title} may exist in folder ${folderId}, the upload got no usable answer`,
+      );
+    }
+    throw err;
   }
-  const id = mapped(getEntityId(file, "id"), "POST files/{folderId}/insert");
-  const saved = getString(file, "title") ?? title;
   logger.info(`uploadFile: ${title} -> folder ${folderId} as entry ${id} (${bytes.length} bytes)`);
   return { id, title: saved };
 }

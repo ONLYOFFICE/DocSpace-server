@@ -853,6 +853,19 @@ describe("HttpToolsAdapter.callTool", () => {
     ]);
   });
 
+  it("keeps the last line of a tool's error in the log, cut, and hands the model the whole text", async () => {
+    const error = `the request was { "prompt": "the user's text" }\n${"e".repeat(400)}`;
+    answerCall([{ error }]);
+
+    await expect(new HttpToolsAdapter().callTool("t", {})).resolves.toBe(
+      `Tool "t" failed: ${error}`,
+    );
+
+    const line = String(vi.mocked(logger.warn).mock.calls[0]?.[0]);
+    expect(line).toMatch(/^docspaceTools\.callTool name=t failed after \d+ms: e{300}$/);
+    expect(line).not.toContain("the user's text");
+  });
+
   it("adds the editor link to the result of a generate tool", async () => {
     answerCall([
       { result: { data: { id: 9, title: "R.docx", parentId: 1, parentTitle: "My" } }, error: null },

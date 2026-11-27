@@ -599,10 +599,14 @@ dotnet format style <csproj> --include <changed .cs files> --verify-no-changes
 ```
 
 For a branch that changes `common/ASC.AI.Chat`, run the service's own gate as well; a failure of
-any of its four steps is a finding under `ts-ai-style.md` (Checks):
+any of its four steps is a finding under `ts-ai-style.md` (Checks). No CI job runs either
+command, so the second one is the only check that the committed generated files are the ones
+the sources produce; a difference it prints is a finding under the same section:
 
 ```bash
 cd common/ASC.AI.Chat && yarn check    # typecheck, lint, format:check, tests
+yarn openapi && git diff --exit-code -- app/generated \
+  ../Tools/ASC.Api.Documentation/ASC.Api.Documentation/json/aichat_2.0.json
 ```
 
 New warnings in the changed files are findings under `csharp-style.md`. `dotnet format` is the

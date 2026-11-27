@@ -44,7 +44,7 @@ const restricted = config.find(
 )?.rules?.["no-restricted-syntax"];
 
 const linter = new Linter({ configType: "flat" });
-const swallowed = (code: string): number =>
+const messages = (code: string): string[] =>
   linter
     .verify(
       code,
@@ -57,7 +57,11 @@ const swallowed = (code: string): number =>
       ],
       "app/x.ts",
     )
-    .filter((m) => m.message.startsWith("A .catch() that answers a constant")).length;
+    .map((m) => m.message);
+const swallowed = (code: string): number =>
+  messages(code).filter((m) => m.startsWith("A .catch() that answers a constant")).length;
+const fannedOut = (code: string): number =>
+  messages(code).filter((m) => m.startsWith("Promise.all over a mapped list")).length;
 
 describe("the rule against a .catch() that answers a constant", () => {
   it("is in the configuration of the service code", () => {
@@ -86,5 +90,24 @@ describe("the rule against a .catch() that answers a constant", () => {
     ["a handler that answers a value it read", "const v = p.catch((e) => fallback(e));"],
   ])("leaves %s alone", (_what, code) => {
     expect(swallowed(code)).toBe(0);
+  });
+});
+
+// Calls made in a loop for one request go through `pooled` (ts-ai-style.md, "Upstream calls").
+describe("the rule against Promise.all over a mapped list", () => {
+  it.each([
+    ["Promise.all over a map", "await Promise.all(ids.map((id) => read(id)));"],
+    ["Promise.allSettled over a map", "await Promise.allSettled(ids.map(read));"],
+    ["a map of a slice", "await Promise.all(ids.slice(0, 20).map((id) => read(id)));"],
+  ])("refuses %s", (_what, code) => {
+    expect(fannedOut(code)).toBe(1);
+  });
+
+  it.each([
+    ["a fixed list of calls", "const [a, b] = await Promise.all([readA(), readB()]);"],
+    ["pooled", "await pooled(ids, 4, (id) => read(id));"],
+    ["a list of workers", "await Promise.all(Array.from({ length: 4 }, worker));"],
+  ])("leaves %s alone", (_what, code) => {
+    expect(fannedOut(code)).toBe(0);
   });
 });

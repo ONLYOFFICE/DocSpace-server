@@ -35,6 +35,7 @@ import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { PromptsStorage, Prompt } from "@onlyoffice/ai-chat/core";
 import { listAnswer, mapped, namesNoEntity } from "./upstreamShape.js";
+import { pooled, UPSTREAM_CONCURRENCY } from "./pooled.js";
 
 const PATH = "/prompts";
 const FOLDERS_PATH = "/prompt-folders";
@@ -87,9 +88,10 @@ export class HttpPromptsStorage implements PromptsStorage {
     // The C# `POST /prompts/batch` endpoint currently
     // returns `NoContent` and so cannot deliver server-assigned ids
     // back to us. Until it returns the persisted list we fan out as
-    // N parallel single-creates — slower for large bundles, but
-    // preserves input order and is correct.
-    return Promise.all(prompts.map((p) => this.create(p)));
+    // single creates, a few at a time (`pooled`) - slower for large
+    // bundles, but it preserves input order and is correct. A create
+    // that fails starts no further one; the ones made before it stay.
+    return pooled(prompts, UPSTREAM_CONCURRENCY, (p) => this.create(p));
   }
 
   async readById(id: string): Promise<Prompt | null> {
@@ -156,6 +158,6 @@ export class HttpPromptsStorage implements PromptsStorage {
     // Server-side folder delete cascades; this is a fallback for callers
     // that intentionally want to clear a folder without removing it.
     const prompts = await this.readByFolderId(folderId);
-    await Promise.all(prompts.map((p) => this.delete(p.id)));
+    await pooled(prompts, UPSTREAM_CONCURRENCY, (p) => this.delete(p.id));
   }
 }

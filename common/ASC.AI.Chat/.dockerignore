@@ -3,7 +3,17 @@ node_modules
 .yarn/install-state.gz
 .yarn/cache
 
-# Not needed at runtime
+# Not needed at runtime: the tests, their reports and the tools of `yarn check` and
+# `yarn openapi`, whose packages the image does not install
+**/__tests__
+coverage
+scripts
+vitest.config.ts
+eslint.config.js
+eslint.config.d.ts
+eslint-suppressions.json
+.prettierrc.json
+.prettierignore
 Dockerfile
 .dockerignore
 .git

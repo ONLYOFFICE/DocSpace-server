@@ -32,6 +32,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
+ * How many calls one request keeps in flight to a service it loops over, where the caller has
+ * no number of its own. A download that holds its file in memory counts the same: the limit
+ * then bounds the memory of the request as well.
+ */
+export const UPSTREAM_CONCURRENCY = 4;
+
+/**
  * `run` of every item, at most `limit` at a time, answered in the order of `items`. The calls
  * of one request go to a service with the caller's own session: started all at once, a listing
  * of a thousand rooms was some sixty requests in flight for a single caller. When a call fails

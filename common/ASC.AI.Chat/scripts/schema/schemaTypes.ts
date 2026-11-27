@@ -163,6 +163,7 @@ export type AiActionArgs = {
   /**
    * Knowledge rooms connected to the chat; the knowledge search tool of
    * the round is limited to them. Each `id` has to be a DocSpace room id.
+   * The first 20 distinct ids are used and any further entry is ignored.
    */
   knowledgeRooms?: KnowledgeRoomRef[];
   /**
@@ -858,7 +859,7 @@ export type Res_aiTemplatesInstall = TemplateRoom & {
   skillSets: TemplateRoom[];
   /** The Knowledge rooms made for an agent's knowledge bases; empty for the other kinds. */
   knowledgeBases: TemplateRoom[];
-  /** What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` for every agent, as its instructions are not installed yet. */
+  /** What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `modelUnconfirmed` when the write of that model got no usable answer (a timeout, a dropped connection, a 5xx) and the model may be stored, `instructionsNotSaved` for every agent, as its instructions are not installed yet. */
   warnings: string[];
 };
 

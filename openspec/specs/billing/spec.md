@@ -933,7 +933,7 @@ A portal without a customer or a readable wallet gets an empty result.
 
 `getAccountingServicePrices` SHALL return to a DocSpace admin (403 otherwise and without the billing and
 accounting services; 401 anonymous) the price records of one wallet service as the accounting service
-keeps them — time unit, cost, resulting price, volume threshold, validity, status and discount category —
+keeps them — time unit, cost, resulting price, validity, status and discount category —
 all records by default and the ones in force with `active=true`. `serviceName` is limited to 255
 characters (400). The list is cached for all portals for up to an hour.
 

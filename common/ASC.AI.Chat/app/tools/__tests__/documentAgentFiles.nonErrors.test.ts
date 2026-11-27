@@ -130,9 +130,12 @@ describe("the document agent's routes when a storage rejects with a string", () 
       .send(Buffer.from("x"));
 
     expect(reply.status).toBe(502);
-    expect(reply.body).toEqual({ error: "the file could not be saved" });
+    expect(reply.body).toEqual({
+      error:
+        "the workspace gave no usable answer; the file may have been saved all the same, so do not save it again before checking the folder",
+    });
     expect(vi.mocked(logger.warn)).toHaveBeenCalledWith(
-      "documentAgentFiles: a.docx not saved into folder 5: socket closed",
+      "documentAgentFiles: a.docx may have been saved into folder 5: socket closed",
     );
   });
 });

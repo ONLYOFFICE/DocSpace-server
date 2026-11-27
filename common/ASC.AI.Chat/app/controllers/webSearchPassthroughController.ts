@@ -73,6 +73,10 @@ const EXA_BASE_URL = "https://api.exa.ai";
 // without a bound.
 const MAX_ANSWER_BYTES = 10 * 1024 * 1024;
 
+// The most pages one `contents` request names. Every address is fetched by the portal's search
+// provider on the portal's key, so the count is bounded here and not left to the provider.
+export const MAX_CONTENT_URLS = 20;
+
 function queryParam(originalUrl: string, name: string): string | undefined {
   const queryIndex = originalUrl.indexOf("?");
   if (queryIndex < 0) {
@@ -183,6 +187,10 @@ function bodyError(
   ) {
     return { error: "urls is required and must be a non-empty array of strings", field: "urls" };
   }
+  // Counted as they are sent on: a page named twice is one address.
+  if (new Set<unknown>(urls).size > MAX_CONTENT_URLS) {
+    return { error: `urls must name at most ${MAX_CONTENT_URLS} addresses`, field: "urls" };
+  }
   return undefined;
 }
 
@@ -213,7 +221,13 @@ function passthrough(subPath: "search" | "contents") {
       res.status(400).json(problem);
       return;
     }
-    const upstream = buildUpstream(config, subPath, incoming, source);
+    // A page named twice is fetched once (ts-ai-failure-paths.md §4).
+    const urls = incoming["urls"];
+    const request =
+      subPath === "contents" && Array.isArray(urls)
+        ? { ...incoming, urls: [...new Set<unknown>(urls)] }
+        : incoming;
+    const upstream = buildUpstream(config, subPath, request, source);
     if (!upstream) {
       res.status(404).json({ error: "Web search is not configured" });
       return;

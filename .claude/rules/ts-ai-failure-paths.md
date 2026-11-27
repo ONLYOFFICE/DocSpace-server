@@ -83,8 +83,11 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
   routes (`ProfileAccessGuestTests`: "id-format checks run before the role check") and the four
   `context` reads, which go to the Files API only.
 - Guard: `app/__tests__/app.aiGate.test.ts` sends every published operation outside that list a
-  path parameter, a repeated query parameter and a body of the wrong type, with the AI service
-  answering 403: the answer is 403 and nothing but the AI service was called. A new route is in it
+  path parameter, a repeated query parameter and a body of the wrong type, and then a
+  well-formed numeric `entityId`, `threadId` and `id` in the query and the body, with the AI
+  service answering 403: the answer is 403 and nothing but the AI service was called. The second
+  row is the one that sees a Files API read of the entity ahead of the gate (`threads/list`
+  made one until the gate was put first). A new route is in it
   without a line of its own; a new exception goes into the list with its source. The same file pins
   the parser's 400 and 413 in front of the gates.
 
@@ -129,9 +132,12 @@ only. Cite it as `[ts-ai-failure-paths.md §N]`.
 - A file that cannot be put in its new place stays attached where it is.
 - A step that creates something and gets an unknown answer (§1: a timeout, a dropped connection, a
   5xx, a 2xx that cannot be read) may have created it. Nothing is deleted on such an answer, and
-  the answer says that the object may exist: only a refusal (a 4xx) says it does not. A template
-  install names such a room as `unconfirmed`; a generated image whose attachment record got an
-  unknown answer is kept (`recordWasRefused` in `attachmentsStorage.ts`).
+  the answer says that the object may exist: only a refusal (a 4xx) says it does not
+  (`writeWasRefused` in `storage/writeOutcome.ts`). A template
+  install names such a room as `unconfirmed` and a model write as `modelUnconfirmed`; a generated
+  image whose attachment record got an unknown answer is kept (`recordWasRefused` in
+  `attachmentsStorage.ts`); an upload that got one logs where the file may lie (`uploadFile`,
+  `uploadInChunks`, `uploadToolImage`), and the document agent is told not to save again.
 - Seen in review: installing a template left an agent's Instructions rooms behind when the Files
   service refused the Knowledge room (c373d83b5e); a model write that timed out failed the whole
   installation instead of being one of its warnings (9a9cf905cc).

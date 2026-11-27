@@ -66,6 +66,8 @@ vi.mock("../portalFiles.js", () => ({
     readFileAsText = readFileAsText;
   },
   UnsupportedFileError: class UnsupportedFileError extends Error {},
+  ConversionFailedError: class ConversionFailedError extends Error {},
+  ConversionTimeoutError: class ConversionTimeoutError extends Error {},
 }));
 vi.mock("../portalMetadata.js", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),

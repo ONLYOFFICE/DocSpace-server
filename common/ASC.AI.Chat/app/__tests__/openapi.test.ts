@@ -484,7 +484,7 @@ describe("the served document", () => {
       "`actionType` or `profileId` is missing. A body that is not valid JSON is refused with 400 as well.",
     );
     expect(badRequestOf("aiOpenaiChatCompletions")["description"]).toBe(
-      "Relayed from the provider, which refused the request body.",
+      "Relayed from the provider, which refused the request body, or from the AI service, which refused a `profileId` that is not a UUID.",
     );
   });
 

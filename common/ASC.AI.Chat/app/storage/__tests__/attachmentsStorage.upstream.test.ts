@@ -1118,7 +1118,11 @@ describe("createMany of a generated image", () => {
     expect(inserts).toHaveLength(1);
     expect(logged("error")[0]).toBe(`insertGeneratedImage: POST ${FILES}/4/insert -> 500 Boom`);
     expect(result[0]?.source).toBe("tool");
-    expect(logged("error")[1]).toMatch(
+    // A 500 does not say that nothing was stored.
+    expect(logged("error")[1]).toBe(
+      "uploadToolImage: a file may exist in folder 4, its creation got no usable answer; nothing names it",
+    );
+    expect(logged("error")[2]).toMatch(
       /^uploadToolImage: entityId=- FAILED at stage=insert: DocSpace API 500 Boom for /,
     );
   });
@@ -1134,7 +1138,11 @@ describe("createMany of a generated image", () => {
 
     const result = await new HttpAttachmentsStorage().createMany([tool()]);
 
-    expect(logged("error")[1]).toContain(
+    // A 2xx that names no file: the file may be stored, and the log says where.
+    expect(logged("error")[1]).toBe(
+      "uploadToolImage: a file may exist in folder 4, its creation got no usable answer; nothing names it",
+    );
+    expect(logged("error")[2]).toContain(
       "uploadToolImage: entityId=- FAILED at stage=insert: POST files/{folderId}/insert: the answer has an unexpected shape",
     );
     expect(result[0]?.id).not.toBe("ref-90");

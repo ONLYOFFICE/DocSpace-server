@@ -65,6 +65,8 @@ vi.mock("../portalFiles.js", () => ({
     readFileAsText = readFileAsText;
   },
   UnsupportedFileError: class UnsupportedFileError extends Error {},
+  ConversionFailedError: class ConversionFailedError extends Error {},
+  ConversionTimeoutError: class ConversionTimeoutError extends Error {},
 }));
 vi.mock("../portalMetadata.js", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -496,7 +498,9 @@ describe("fillMeta", () => {
       status: 403,
     });
 
-    readFileAsText.mockRejectedValue(new Error("boom"));
+    readFileAsText.mockRejectedValue(
+      new (await import("../portalFiles.js")).ConversionFailedError("boom"),
+    );
     await expect(
       fillMeta({ kind: "file", id: "1", overwrite: false, dryRun: false }),
     ).rejects.toBeInstanceOf(NoContentError);

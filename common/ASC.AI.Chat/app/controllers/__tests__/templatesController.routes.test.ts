@@ -709,10 +709,11 @@ describe("templatesController.install", () => {
     expect(responseViolations("aiTemplatesInstall", status, reply.body)).toEqual([]);
   });
 
+  // Only a refusal says that the model is not stored; after a 5xx it may be.
   it.each([
-    [400, "Bad Request"],
-    [500, "Internal Server Error"],
-  ])("keeps the agent and warns when the model write fails with %i", async (status) => {
+    [400, "modelNotSaved"],
+    [500, "modelUnconfirmed"],
+  ])("keeps the agent and warns when the model write fails with %i", async (status, warning) => {
     failAt = 11;
     failure = () => docspaceError(status);
 
@@ -721,7 +722,7 @@ describe("templatesController.install", () => {
     expect(reply.status).toBe(200);
     expect(reply.body).toMatchObject({
       id: "103",
-      warnings: ["modelNotSaved", "instructionsNotSaved"],
+      warnings: [warning, "instructionsNotSaved"],
     });
     expect(calls.map((c) => c.step)).toEqual(STEPS);
   });

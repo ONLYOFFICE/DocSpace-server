@@ -138,25 +138,40 @@ function withRequestSignal<T>(res: Response, body: T): T {
   };
 }
 
+// The most knowledge bases one round takes, as many as it takes context folders
+// (`CONTEXT_FOLDERS_LIMIT`): every id goes to the AI service with each tool list of the round.
+export const KNOWLEDGE_ROOMS_LIMIT = 20;
+
 // `actionArgs.knowledgeRooms[].id` as the room ids the .NET side expects —
-// each a DocSpace room id, once, in the order sent. An older widget sends a
-// single `actionArgs.knowledgeRoom`; it is read the same way.
+// each a DocSpace room id, once, in the order sent, cut at
+// `KNOWLEDGE_ROOMS_LIMIT` like the context folders (`contextFolderIdsOf`). An
+// older widget sends a single `actionArgs.knowledgeRoom`; it is read the same way.
 function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
   const rooms = actionArgs["knowledgeRooms"];
   const list: unknown[] = Array.isArray(rooms) ? rooms : [actionArgs["knowledgeRoom"]];
-  const ids: number[] = [];
-  for (const room of list) {
+  const ids = new Set<number>();
+  for (const [index, room] of list.entries()) {
     if (!isObject(room)) {
       continue;
     }
-    const id = room["id"];
     // The whole value has to be an integer: "9abc" names no room, it is not room 9.
-    const parsed = parseInteger(id);
-    if (parsed !== undefined && parsed > 0 && !ids.includes(parsed)) {
-      ids.push(parsed);
+    const parsed = parseInteger(room["id"]);
+    if (parsed !== undefined && parsed > 0) {
+      ids.add(parsed);
+    }
+    if (ids.size === KNOWLEDGE_ROOMS_LIMIT) {
+      // The knowledge search of the round leaves the rest out; the log is the one place
+      // that says so (the limit is published on `actionArgs.knowledgeRooms`).
+      const unread = list.length - index - 1;
+      if (unread > 0) {
+        logger.warn(
+          `knowledgeRoomIdsOf: ${unread} entries of actionArgs.knowledgeRooms after the first ${KNOWLEDGE_ROOMS_LIMIT} room ids are ignored`,
+        );
+      }
+      break;
     }
   }
-  return ids;
+  return [...ids];
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt

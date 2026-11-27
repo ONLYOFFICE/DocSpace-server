@@ -58,6 +58,8 @@ vi.mock("../portalFiles.js", () => ({
     readFileAsText = readFileAsText;
   },
   UnsupportedFileError: class UnsupportedFileError extends Error {},
+  ConversionFailedError: class ConversionFailedError extends Error {},
+  ConversionTimeoutError: class ConversionTimeoutError extends Error {},
 }));
 
 const { storage } = await import("../../storage/index.js");
@@ -177,7 +179,9 @@ describe("generateMeta", () => {
     await expect(generateMeta({ kind: "file", id: "1" })).rejects.toBeInstanceOf(NoProfileError);
 
     vi.mocked(storage.assignments.readByType).mockResolvedValue("p1");
-    readFileAsText.mockRejectedValue(new Error("boom"));
+    readFileAsText.mockRejectedValue(
+      new (await import("../portalFiles.js")).ConversionFailedError("boom"),
+    );
     const failure = await generateMeta({ kind: "file", id: "1" }).catch((e: unknown) => e);
     expect(failure).toBeInstanceOf(NoContentError);
     expect((failure as InstanceType<typeof NoContentError>).skipped).toEqual([

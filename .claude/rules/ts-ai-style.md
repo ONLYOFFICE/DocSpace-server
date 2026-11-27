@@ -81,7 +81,10 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
   baseline (`eslint-suppressions.json`) holds no exception to it, and a new upstream call does not
   add one.
 - The body of a refused answer is read with `errorBodyText` (`storage/errorBody.ts`), not with
-  `res.text().catch(() => "")`. A field of a value of unknown type (the `status` of a caught
+  `res.text().catch(() => "")`. No refused answer is left with its body unread, whether the
+  call throws or reads it as "absent": the Files and People clients end it through
+  `refusedAnswer` / `releaseBody` (`storage/docspaceFilesApi.ts`), and
+  `storage/__tests__/refusedBody.test.ts` walks every exported call of the two. A field of a value of unknown type (the `status` of a caught
   error) is read with `readProp` (`app/narrow.ts`), not through a cast.
 - Every call is bounded: `withTimeout(signal)` with `cancel()` in a `finally`, and the result is
   awaited inside that `try` (`ts-ai-failure-paths.md` §7).
@@ -93,8 +96,10 @@ states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
   request (`namesNoEntity`), and the clients refuse any path with such a segment with 404
   (`assertEntityPath`, `storage/upstreamShape.ts`).
 - Calls made in a loop for one request go through `pooled(items, limit, run)`
-  (`storage/pooled.ts`), a few at a time, not through a bare `Promise.all` over the list (`meta/common.ts` keeps two
-  older worker pools of its own).
+  (`storage/pooled.ts`), a few at a time (`UPSTREAM_CONCURRENCY` where the caller has no number
+  of its own), not through a bare `Promise.all` over the list: ESLint refuses
+  `Promise.all(list.map(...))`, and `storage/__tests__/fanOut.upstream.test.ts` counts the calls
+  in flight (`meta/common.ts` keeps two older worker pools of its own).
 
 ## State and logging
 

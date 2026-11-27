@@ -43,6 +43,8 @@ import {
 } from "../../config/index.js";
 import { customToolsSource, resolveCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
+import { isUnreadableMcpServerConfig } from "../storage/mcpServersStorage.js";
+import { UpstreamShapeError } from "../storage/upstreamShape.js";
 import { systemToolsSource, getSystemServerConfig } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
@@ -83,7 +85,10 @@ function assertRoutableServerName(rawName: unknown): string {
 // shadows the system group with a broken connection. A write without a
 // config re-saves the entry already registered under that name; anything
 // else without a config is refused. `stored` is the registry read once by a
-// caller that resolves many entries (the whole-map save).
+// caller that resolves many entries (the whole-map save). A stored server whose
+// config cannot be read (UNREADABLE_MCP_SERVER_CONFIG) is written over only by a
+// config that carries `headers`: the stored ones cannot be read, so whether a
+// config without them should keep them is unknown, and that is a 502.
 async function resolveConfig(
   name: string,
   provided: unknown,
@@ -96,11 +101,18 @@ async function resolveConfig(
   const portal = stored
     ? (stored[name] ?? null)
     : await storage.mcpServers.readByName(name, undefined);
+  const unreadable = isUnreadableMcpServerConfig(portal);
   if (isObject(provided) && Object.keys(provided).length > 0) {
-    return keepStoredHeaders(provided, portal);
+    if (unreadable && !("headers" in provided)) {
+      throw new UpstreamShapeError(`GET mcp-servers (server ${name})`);
+    }
+    return unreadable ? provided : keepStoredHeaders(provided, portal);
   }
   if ((typeof provided === "string" || Array.isArray(provided)) && provided.length > 0) {
     return forTheEngineToRefuse(provided);
+  }
+  if (unreadable) {
+    throw new UpstreamShapeError(`GET mcp-servers (server ${name})`);
   }
   if (portal) {
     return portal;
@@ -351,7 +363,10 @@ export const toolsController = {
     const entityId = optionalString(args.entityId, "entityId");
     await assertEntityAccessible(entityId);
     const map = args.map;
-    const stored = await storage.mcpServers.readAll(undefined);
+    // The registry from the AI service. A stored server whose config cannot be read is in it
+    // as a stand-in, not left out: a map that names it without `headers` gets a 502 from
+    // resolveConfig, one that leaves it out removes it like any server it does not name.
+    const stored = await storage.mcpServers.readAllForWrite();
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
       assertRoutableServerName(name);

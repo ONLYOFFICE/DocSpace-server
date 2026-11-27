@@ -37,7 +37,7 @@ import { isObject } from "../narrow.js";
 import { cancelReader, errorBodyText, readTextCapped } from "./errorBody.js";
 
 export { readTextCapped };
-import { assertEntityPath, jsonAnswer } from "./upstreamShape.js";
+import { assertEntityPath, jsonAnswer, UpstreamShapeError } from "./upstreamShape.js";
 
 // Hard ceiling for a single upstream round-trip so a hung AI service / MCP
 // server can't pin a Node socket (and the caller's request) indefinitely.
@@ -111,20 +111,26 @@ export interface RequestOptions {
   raw?: boolean;
 }
 
-function unwrapDocSpaceEnvelope(json: unknown): unknown {
+function unwrapDocSpaceEnvelope(json: unknown, call: string): unknown {
   if (!isObject(json) || !("status" in json)) {
     return json;
   }
   if ("response" in json) {
     return json.response;
   }
-  // The portal API leaves null properties out of its JSON, so an action that returned null is
-  // wrapped without `response`: `{ count, status, statusCode }`. That is the same answer as
-  // `response: null`, not an object of an unknown shape.
-  if (typeof json["status"] === "number" && typeof json["statusCode"] === "number") {
+  if (typeof json["status"] !== "number" || typeof json["statusCode"] !== "number") {
+    return json;
+  }
+  // An envelope without `response`. The portal API leaves null properties out of its JSON, so
+  // an action that returned null is wrapped as `{ count, status, statusCode }` with `status: 0`
+  // (`SuccessApiResponse`): the same answer as `response: null`. The envelope of a failure
+  // (`ErrorApiResponse`: `status: 1` and `error`) has no `response` either; sent with a 200 by
+  // a hop in between, it is not "nothing stored" but an answer of an unknown shape
+  // (ts-ai-failure-paths.md §1).
+  if (json["status"] === 0 && !("error" in json)) {
     return null;
   }
-  return json;
+  throw new UpstreamShapeError(call);
 }
 
 async function jsonRequest(
@@ -177,7 +183,7 @@ async function jsonRequest(
     const contentType = res.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
       const json = await jsonAnswer(res, `${method} ${path}`);
-      return raw ? json : unwrapDocSpaceEnvelope(json);
+      return raw ? json : unwrapDocSpaceEnvelope(json, `${method} ${path}`);
     }
     // Awaited here, not returned as a promise: the finally below cancels the
     // timeout signal, and that must happen after the body has been read.
