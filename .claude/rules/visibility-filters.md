@@ -3,6 +3,7 @@ paths:
   - "products/ASC.Files/Core/Core/Dao/TeamlabDao/SecurityDao.cs"
   - "products/ASC.Files/Core/Core/Security/**"
   - "products/ASC.Files/Core/Utils/FileSharing.cs"
+  - "products/ASC.Files/Core/Utils/FileUploader.cs"
   - "products/ASC.People/Server/Api/**"
   - "common/ASC.Api.Core/Model/Employee*.cs"
   - "common/ASC.Api.Core/Webhook/Payloads/**"
@@ -20,6 +21,17 @@ checking that the caller may see them, a `shared` flag and an `includeShared` fi
 the access list hid from it. Every one was in a table nobody had filled in.
 
 Reviewers check the same points as matrix M8 of `review-branch` and cite them as `[visibility-filters.md §N]`.
+
+## Checklist
+
+- The PR or commit states in one or two sentences who may learn what; a covering spec is updated with it (§1)
+- Table 1 is filled: every source of the result (`Union` branch, passed list, fallback) x every invariant (§2)
+- A Restrict record counts as no membership and no access in every branch; only the `shared` flag differs (§2)
+- Table 2 is filled: each output (list, count, flags, filters, search, profile) x caller x entry kind (§3)
+- For an endpoint that needs only read access, the reader column of table 2 is filled (§3)
+- Each touched row of table 2 has a test with the weakest caller, asserting absence after a presence (§4)
+- Each such test is proven red with `prove-red.sh`; an untested cell is listed as "not verified" in the PR (§4)
+- A fix refills both tables for the whole method and endpoint; a rejection shows every named cell (§5)
 
 ## 1. State the rule before the code
 

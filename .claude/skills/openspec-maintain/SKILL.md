@@ -43,7 +43,7 @@ evidence, test code) and name the new ids to the user, so that the user files th
 
 | Status | Meaning |
 |---|---|
-| TEST-CONFIRMED | an integration test asserts the claim, cited as `file:line` |
+| TEST-CONFIRMED | an integration test asserts the claim, cited by name as `File.cs::Method` (several: `File.cs::A, B`). Older rows cite `File.cs:line`; a row you touch is rewritten to the name form, since a line citation moves with every edit above it (one review found 121 of 378 stale) |
 | CODE-ONLY | read from code, configuration or the OpenAPI document; no test. Say why when it is unreachable |
 | LIVE-CONFIRMED | checked by hand against a running stand |
 | MATRIX-ONLY / NOTES-ONLY / TS-ONLY | only the role matrix, the release notes or a TS test says it |

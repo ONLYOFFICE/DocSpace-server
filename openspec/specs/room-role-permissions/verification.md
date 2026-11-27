@@ -19,7 +19,7 @@ both are enforced in `products/ASC.Files/Core/Utils/FileSharing.cs:190-198` and 
 "The role is not available for this user type" (`products/ASC.Files/Core/Resources/FilesCommonResource.resx:331`),
 which no test asserts (only the 403). Shared theory data of the suite: `03_Rooms/RoomAccessData.cs:43-66`
 (all accesses; the User / Guest set without Room manager; update / link access expectations) and
-`.claude/rules/tests.md:170-187`. Unless a row says otherwise the test runs on a Custom room and the member
+`.claude/rules/tests.md` "Access-level matrices must match the product". Unless a row says otherwise the test runs on a Custom room and the member
 is a User-type account invited with the stated role.
 
 Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row. The `yaml` line numbers were moved to the submodule commit release/v4.1.0 pins (`ce37da4`); where the header names an older submodule commit, that stays the version the yaml texts were read from.

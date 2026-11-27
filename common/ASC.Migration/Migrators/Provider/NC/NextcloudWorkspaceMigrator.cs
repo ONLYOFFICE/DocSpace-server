@@ -125,7 +125,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 await ReportProgressAsync(50, MigrationResource.UnzippingFinished);
             }
 
-            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
+            var dbFile = Directory.GetFiles(GetBackupRoot()).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
             dbFile ??= Directory.GetFiles(TmpFolder).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
             if (dbFile == null)
             {
@@ -152,7 +152,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 {
                     try
                     {
-                        var rootFolder = Directory.GetDirectories(TmpFolder)[0];
+                        var rootFolder = GetBackupRoot();
                         // the user id comes from the dump, so the folder built from it must stay inside the backup
                         var cachePath = GetSafeExtractPath(Path.Combine(rootFolder, "data"), Path.Combine(user.Key, "cache"));
                         var drivePath = Directory.Exists(cachePath) ? cachePath : null;
@@ -280,22 +280,34 @@ public class NextcloudWorkspaceMigrator : Migrator
         foreach (var g in groupList)
         {
             var group = new MigrationGroup { Info = new GroupInfo(), UserKeys = [] };
-            group.Info.Name = g.Split(',').First().Trim('\'');
+            group.Info.Name = g[0];
             MigrationInfo.Groups.Add(group.Info.Name, group);
         }
 
         var usersInGroups = GetDumpChunk("oc_group_user", sqlFile);
         foreach (var user in usersInGroups)
         {
-            var userGroupGid = user.Split(',').First().Trim('\'');
-            var userUid = user.Split(',').Last().Trim('\'');
+            var userGroupGid = user[0];
+            var userUid = user[^1];
             MigrationInfo.Groups[userGroupGid].UserKeys.Add(userUid);
         }
     }
 
-    private IEnumerable<string> GetDumpChunk(string tableName, string dump)
+    /// <summary>
+    /// The rows of a table as the dump lists them, each row as its values in column order with NULL as the text
+    /// "NULL", or null when the dump has no data for the table. A MySQL or MariaDB dump holds them in an INSERT,
+    /// a PostgreSQL dump in a COPY block.
+    /// </summary>
+    private static IEnumerable<string[]> GetDumpChunk(string tableName, string dump)
     {
-        var regex = new Regex($"INSERT INTO `{tableName}` VALUES (.*);");
+        return GetInsertRows(tableName, dump) ?? GetCopyRows(tableName, dump);
+    }
+
+    private static List<string[]> GetInsertRows(string tableName, string dump)
+    {
+        // A dump writes the rows of an INSERT either on its line or one per line after VALUES. A line break inside
+        // a value is escaped in a dump, so the statement ends at the first ";" that ends a line.
+        var regex = new Regex($@"INSERT INTO `{tableName}` VALUES\s*(.*?);[ \t]*(\r?\n|\z)", RegexOptions.Singleline);
         var match = regex.Match(dump);
         if (!match.Success)
         {
@@ -304,7 +316,80 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         var entryRegex = new Regex(@"(\(.*?\))[,;]");
         var accountDataMatches = entryRegex.Matches(match.Groups[1].Value + ";");
-        return accountDataMatches.Select(m => m.Groups[1].Value.Trim('(', ')'));
+        return accountDataMatches
+            .Select(m => m.Groups[1].Value.Trim('(', ')').Split(',').Select(s => s.Trim('\'')).ToArray())
+            .ToList();
+    }
+
+    private static List<string[]> GetCopyRows(string tableName, string dump)
+    {
+        // pg_dump writes the rows after "COPY schema.table (columns) FROM stdin;", one per line with the values
+        // separated by tabs, and ends them with a line "\."
+        var regex = new Regex($@"^COPY (?:""?\w+""?\.)?""?{tableName}""? \([^)]*\) FROM stdin;[ \t]*\r?\n", RegexOptions.Multiline);
+        var match = regex.Match(dump);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        var rows = new List<string[]>();
+        var position = match.Index + match.Length;
+        while (position < dump.Length)
+        {
+            var end = dump.IndexOf('\n', position);
+            if (end < 0)
+            {
+                end = dump.Length;
+            }
+
+            var line = dump[position..end].TrimEnd('\r');
+            position = end + 1;
+            if (line == @"\.")
+            {
+                break;
+            }
+
+            rows.Add(line.Split('\t').Select(UnescapeCopyValue).ToArray());
+        }
+
+        return rows;
+    }
+
+    private static string UnescapeCopyValue(string value)
+    {
+        if (value == @"\N")
+        {
+            return "NULL";
+        }
+
+        if (!value.Contains('\\'))
+        {
+            return value;
+        }
+
+        var result = new StringBuilder(value.Length);
+        for (var i = 0; i < value.Length; i++)
+        {
+            if (value[i] != '\\' || i == value.Length - 1)
+            {
+                result.Append(value[i]);
+                continue;
+            }
+
+            i++;
+            result.Append(value[i] switch
+            {
+                'b' => '\b',
+                'f' => '\f',
+                'n' => '\n',
+                'r' => '\r',
+                't' => '\t',
+                'v' => '\v',
+                _ => value[i]
+            });
+        }
+
+        return result.ToString();
     }
 
     private Dictionary<string, MigrationUser> DbExtractUser(string dbFile)
@@ -321,7 +406,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         foreach (var account in accounts)
         {
-            var userId = account.Split(',').First().Trim('\'');
+            var userId = account[0];
 
             usersData.Add(userId, new MigrationUser(DisplayUserSettingsHelper)
             {
@@ -333,10 +418,8 @@ public class NextcloudWorkspaceMigrator : Migrator
         var accountsData = GetDumpChunk("oc_accounts_data", sqlFile);
         if (accountsData != null)
         {
-            foreach (var accountData in accountsData)
+            foreach (var values in accountsData)
             {
-                var values = accountData.Split(',')
-                    .Select(s => s.Trim('\'')).ToArray();
                 usersData.TryGetValue(values[1], out var user);
                 if (user == null)
                 {
@@ -399,10 +482,8 @@ public class NextcloudWorkspaceMigrator : Migrator
         var storages = GetDumpChunk("oc_storages", sqlFile);
         if (storages != null)
         {
-            foreach (var storage in storages)
+            foreach (var values in storages)
             {
-                var values = storage.Split(',')
-                           .Select(s => s.Trim('\'')).ToArray();
                 var uid = values[1].Split(':').Last();
                 usersData.TryGetValue(uid, out var user);
 
@@ -414,7 +495,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
     private void ParseStorage(string key, MigrationUser user, string dbFile)
     {
-        var rootFolder = Directory.GetDirectories(TmpFolder)[0];
+        var rootFolder = GetBackupRoot();
 
         var filesPath = GetSafeExtractPath(Path.Combine(rootFolder, "data"), Path.Combine(key, "files"));
         var drivePath = Directory.Exists(filesPath) ? filesPath : null;
@@ -429,10 +510,8 @@ public class NextcloudWorkspaceMigrator : Migrator
         var fileCaches = GetDumpChunk("oc_filecache", sqlFile);
         if (fileCaches != null)
         {
-            foreach (var cache in fileCaches)
+            foreach (var values in fileCaches)
             {
-                var values = cache.Split(',')
-                           .Select(s => s.Trim('\'')).ToArray();
                 if (user.Storage.RootKey != values[1])
                 {
                     continue;
@@ -450,10 +529,8 @@ public class NextcloudWorkspaceMigrator : Migrator
         var shares = GetDumpChunk("oc_share", sqlFile);
         if (shares != null)
         {
-            foreach (var share in shares)
+            foreach (var values in shares)
             {
-                var values = share.Split(',')
-                           .Select(s => s.Trim('\'')).ToArray();
                 var fileId = int.Parse(values[10]);
                 var file = filesAndFolders.FirstOrDefault(ff => ff.FileId == fileId);
 
@@ -563,5 +640,21 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
 
         return Array.Exists([1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27], el => el == role) ? ASCShare.Read : ASCShare.Editing; //permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
+    }
+
+    /// <summary>
+    /// The folder that holds the backup's <c>data</c> folder. An archive is packed either with one folder around
+    /// the backup or with the backup's own entries at its top level, and is unpacked into <see cref="Migrator.TmpFolder"/>.
+    /// </summary>
+    private string GetBackupRoot()
+    {
+        var folders = Directory.GetDirectories(TmpFolder);
+        var wrapper = folders.FirstOrDefault(folder => Directory.Exists(Path.Combine(folder, "data")));
+        if (wrapper != null)
+        {
+            return wrapper;
+        }
+
+        return Directory.Exists(Path.Combine(TmpFolder, "data")) ? TmpFolder : folders[0];
     }
 }

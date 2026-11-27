@@ -1,41 +1,45 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { AsyncLocalStorage } from "async_hooks";
 import type { IncomingHttpHeaders } from "http";
 import type { Request, Response, NextFunction } from "express";
 import type { ForwardedHeaders, RequestContext } from "./types.js";
-import type { DocspaceFolderInfo, DocspaceFileInfo, SourceMeta } from "./storage/docspaceFilesApi.js";
+import type {
+  DocspaceFolderInfo,
+  DocspaceFileInfo,
+  SourceMeta,
+} from "./storage/docspaceFilesApi.js";
 import type { ChatContextSnapshot } from "./storage/chatContextSnapshot.js";
 
 const HOP_BY_HOP = new Set<string>([
@@ -195,6 +199,20 @@ export function getRoundThreadId(): string | undefined {
   return als.getStore()?.roundThreadId;
 }
 
+// The signal of the current chat round: fired when the client goes away before the reply ended
+// (see `responseAbortSignal` of aiController.ts). A tool that works for minutes reads it to stop
+// with the reply; a tool call itself is handed none. The first value stays.
+export function setRoundSignal(signal: AbortSignal): void {
+  const store = als.getStore();
+  if (store && store.roundSignal === undefined) {
+    store.roundSignal = signal;
+  }
+}
+
+export function getRoundSignal(): AbortSignal | undefined {
+  return als.getStore()?.roundSignal;
+}
+
 // Attachment ref ids of the current user message (see RequestContext.roundAttachmentIds).
 export function setRoundAttachmentIds(ids: string[]): void {
   const store = als.getStore();
@@ -241,15 +259,23 @@ export function getKnowledgeRoomIds(): number[] {
 // Per-request folder-info memoization store (see RequestContext). Undefined
 // outside a request context, where callers fall back to a direct fetch.
 export function getFolderInfoCache():
-  | Map<string, Promise<DocspaceFolderInfo | undefined>>
-  | undefined {
+  Map<string, Promise<DocspaceFolderInfo | undefined>> | undefined {
   return als.getStore()?.folderInfoCache;
 }
 
-export function getFileInfoCache():
-  | Map<string, Promise<DocspaceFileInfo | undefined>>
-  | undefined {
+export function getFileInfoCache(): Map<string, Promise<DocspaceFileInfo | undefined>> | undefined {
   return als.getStore()?.fileInfoCache;
+}
+
+export function setPortalAdmin(isAdmin: boolean): void {
+  const store = als.getStore();
+  if (store) {
+    store.portalAdmin = isAdmin;
+  }
+}
+
+export function getPortalAdmin(): boolean | undefined {
+  return als.getStore()?.portalAdmin;
 }
 
 // The entry the current round is attributed to (see RequestContext.sourceMeta).

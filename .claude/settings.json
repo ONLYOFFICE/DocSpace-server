@@ -4,6 +4,12 @@
       "Bash(dotnet build *)",
       "Bash(dotnet test *)",
       "Bash(dotnet format *)",
+      "Bash(yarn typecheck*)",
+      "Bash(yarn lint*)",
+      "Bash(yarn test*)",
+      "Bash(yarn vitest *)",
+      "Bash(yarn format:check*)",
+      "Bash(yarn check*)",
       "Bash(openspec *)",
       "mcp__codegraph__*"
     ],
@@ -11,6 +17,20 @@
       "../buildtools/config",
       "../Logs",
       "../tests"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ai-chat-check.sh",
+            "timeout": 60
+          }
+        ]
+      }
     ]
   },
   "extraKnownMarketplaces": {

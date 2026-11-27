@@ -39,8 +39,13 @@
  * bases, which are installed with it, and given the portal's chat model.
  *
  * Every install makes new rooms: nothing is matched against what the portal
- * already holds. A step the Files service refuses fails the install with its
- * status, and the rooms made before it stay. The agent's model is the
+ * already holds. A step that fails before the first room fails the install
+ * as it is; one that fails after it throws `TemplateInstallIncompleteError`,
+ * which carries the step's error and the rooms already made, so that the
+ * answer can name them (they stay in the portal). The creation of a room that
+ * is not refused with a 4xx and still names no room - a timeout, a dropped
+ * connection, a 5xx, a 2xx without an id - throws it as well, for the first
+ * room too, with that room as `unconfirmed`: it may exist. The agent's model is the
  * exception: a portal that has no chat model, or does not store it, still
  * gets the agent, and the answer says so in `warnings`. A template that
  * holds a knowledge base is refused with 409 before the first room on a
@@ -63,6 +68,9 @@ import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import { findTemplate, readTemplateFile } from "./catalog.js";
 import type { AgentTemplate, SourceTemplate, Template, TemplateCatalog } from "./catalog.js";
+import { clientFault } from "../httpErrors.js";
+import { mapped, UpstreamShapeError } from "../storage/upstreamShape.js";
+import { writeWasRefused } from "../storage/writeOutcome.js";
 
 /** `RoomType` on the C# side. */
 const ROOM_TYPES = { skillSet: 10, knowledgeBase: 11, agent: 12 } as const;
@@ -81,37 +89,110 @@ export interface InstalledTemplate extends InstalledRoom {
   skillSets: InstalledRoom[];
   /** The Knowledge rooms made for an agent's knowledge bases; empty otherwise. */
   knowledgeBases: InstalledRoom[];
-  /** What was skipped: `modelNotSaved`; `instructionsNotSaved` for every agent. */
+  /**
+   * What was skipped: `modelNotSaved`, or `modelUnconfirmed` when the write of the model got
+   * no usable answer and the model may be stored; `instructionsNotSaved` for every agent.
+   */
   warnings: string[];
 }
 
-function httpError(status: number, message: string): Error {
-  return Object.assign(new Error(message), { status, expose: true });
+/** The rooms an installation has made so far. */
+export interface InstalledRooms {
+  skillSets: InstalledRoom[];
+  knowledgeBases: InstalledRoom[];
+  /** The agent's room, once it is made. */
+  agent?: InstalledRoom;
+  /**
+   * The room whose creation got an answer that does not say whether it was made
+   * ({@link roomWasRefused}): it may exist in the portal under this title, and its id is unknown.
+   */
+  unconfirmed?: UnconfirmedRoom;
 }
 
+export interface UnconfirmedRoom {
+  /** The template the room was asked for. */
+  templateId: string;
+  /** The title the room was asked with. */
+  title: string;
+}
+
+/**
+ * A step of an installation failed after its first room was made, or the creation of a room -
+ * the first one included - got an answer that leaves it unknown. `cause` is the step's own
+ * error, which decides the status of the answer; `made` lists the rooms that exist and the one
+ * that may.
+ */
+export class TemplateInstallIncompleteError extends Error {
+  constructor(
+    readonly made: InstalledRooms,
+    cause: unknown,
+  ) {
+    super("The template was installed in part", { cause });
+    this.name = "TemplateInstallIncompleteError";
+  }
+}
+
+/** Whether the installation has made any room yet, or may have. */
+function madeAny(made: InstalledRooms): boolean {
+  return (
+    made.skillSets.length + made.knowledgeBases.length > 0 ||
+    made.agent !== undefined ||
+    made.unconfirmed !== undefined
+  );
+}
+
+/**
+ * Whether a failed `POST files/rooms` says that no room was made: the Files service refused it
+ * with a 4xx. A timeout, a dropped connection, a 5xx and a 2xx that names no room are unknown:
+ * the room may exist (ts-ai-failure-paths.md §1, §6).
+ */
+function roomWasRefused(err: unknown): boolean {
+  return err instanceof DocspaceApiHttpError && err.status >= 400 && err.status < 500;
+}
+
+/**
+ * Makes the room of a template. A failure that leaves the room unknown is noted in `made`
+ * before it is thrown, so that the answer says a room may exist that it cannot name.
+ */
 async function createRoom(
   template: Template,
   roomType: number,
+  made: InstalledRooms,
   tags: string[] = [],
 ): Promise<InstalledRoom> {
   const { id: templateId, name: title, color, cover } = template;
-  const room = await filesApiSend("POST", "rooms", {
-    title,
-    roomType,
-    // The room is drawn as the catalog draws its template.
-    ...(color ? { color } : {}),
-    ...(cover ? { cover } : {}),
-    ...(tags.length > 0 ? { tags } : {}),
-  });
-  const id = isObject(room) ? getEntityId(room, "id") : undefined;
-  if (!isObject(room) || id === undefined) {
-    throw new Error("DocSpace returned a room without an id");
+  try {
+    const room = await filesApiSend("POST", "rooms", {
+      title,
+      roomType,
+      // The room is drawn as the catalog draws its template.
+      ...(color ? { color } : {}),
+      ...(cover ? { cover } : {}),
+      ...(tags.length > 0 ? { tags } : {}),
+    });
+    if (!isObject(room)) {
+      throw new UpstreamShapeError("POST files/rooms");
+    }
+    const id = mapped(getEntityId(room, "id"), "POST files/rooms");
+    return { templateId, id, title: getString(room, "title") ?? title };
+  } catch (err) {
+    if (!roomWasRefused(err)) {
+      logger.warn(
+        `installTemplate: ${templateId}: the room "${title}" may exist, its creation got no usable answer`,
+      );
+      made.unconfirmed = { templateId, title };
+    }
+    throw err;
   }
-  return { templateId, id, title: getString(room, "title") ?? title };
 }
 
-async function installSource(template: SourceTemplate): Promise<InstalledRoom> {
-  const room = await createRoom(template, ROOM_TYPES[template.kind]);
+/** Makes the room of a skill set or a knowledge base, adds it to `made` and fills it. */
+async function installSource(
+  template: SourceTemplate,
+  made: InstalledRooms,
+): Promise<InstalledRoom> {
+  const room = await createRoom(template, ROOM_TYPES[template.kind], made);
+  (template.kind === "skillSet" ? made.skillSets : made.knowledgeBases).push(room);
   for (const file of template.files) {
     await uploadFile(room.id, file, await readTemplateFile(template, file), mediaTypeOf(file));
   }
@@ -133,43 +214,57 @@ async function installAgent(
       }
       return source;
     });
-  const skillSets: InstalledRoom[] = [];
-  for (const source of sources(template.skills)) {
-    skillSets.push(await installSource(source));
+  // Both lists are checked before the first room is made.
+  const skillTemplates = sources(template.skills);
+  const knowledgeTemplates = sources(template.knowledges);
+  const made: InstalledRooms = { skillSets: [], knowledgeBases: [] };
+  let agent: InstalledRoom;
+  try {
+    for (const source of skillTemplates) {
+      await installSource(source, made);
+    }
+    for (const source of knowledgeTemplates) {
+      await installSource(source, made);
+    }
+    agent = await createRoom(template, ROOM_TYPES.agent, made, [template.category]);
+    made.agent = agent;
+    const roomIds = [...made.skillSets, ...made.knowledgeBases].map((room) => Number(room.id));
+    if (roomIds.length > 0) {
+      await filesApiSend("POST", `rooms/${encodeURIComponent(agent.id)}/sources`, { roomIds });
+    }
+  } catch (err) {
+    if (!madeAny(made)) {
+      throw err;
+    }
+    throw new TemplateInstallIncompleteError(made, err);
   }
-  const knowledgeBases: InstalledRoom[] = [];
-  for (const source of sources(template.knowledges)) {
-    knowledgeBases.push(await installSource(source));
-  }
-
-  const agent = await createRoom(template, ROOM_TYPES.agent, [template.category]);
-  const roomIds = [...skillSets, ...knowledgeBases].map((room) => Number(room.id));
-  if (roomIds.length > 0) {
-    await filesApiSend("POST", `rooms/${encodeURIComponent(agent.id)}/sources`, { roomIds });
-  }
+  const { skillSets, knowledgeBases } = made;
 
   const warnings: string[] = [];
   // A template names no model, so the agent is given the one the portal
   // chats on now and keeps it when the portal's choice changes later.
+  // Set once the write of the model has started: only then can a failure have stored it.
+  let writing = false;
   try {
-    const profileId = await portalChatProfileId().catch((err: unknown) => {
-      logger.warn(
-        `installTemplate: ${template.id}: the portal's chat model not read: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-      return null;
-    });
-    if (!profileId) {
-      throw new DocspaceApiHttpError(404, "Not Found", "the portal has no chat model");
+    const profileId = await portalChatProfileId();
+    if (profileId) {
+      writing = true;
+      await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/model`, { profileId });
+    } else {
+      logger.warn(`installTemplate: ${template.id}: model not saved (the portal has no chat model)`);
+      warnings.push("modelNotSaved");
     }
-    await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/model`, { profileId });
   } catch (err) {
-    // The rooms and the agent are made by now, so a write that fails in any
-    // way - a refusal, a timeout, a dropped connection - is told as a
-    // warning and never loses the caller the ids of what was made.
+    // The rooms and the agent are made by now, so a read of the portal's
+    // model or a write of it that fails in any way - a refusal, a timeout, a
+    // dropped connection - is told as a warning and never loses the caller
+    // the ids of what was made. Only a refusal of the write (a 4xx), or a
+    // failure before it, says that the model is not stored: after a timeout,
+    // a dropped connection or a 5xx of the write it may be
+    // (ts-ai-failure-paths.md §6).
+    const unconfirmed = writing && !writeWasRefused(err);
     logger.warn(
-      `installTemplate: ${template.id}: model not saved (${
+      `installTemplate: ${template.id}: model ${unconfirmed ? "unconfirmed, its write got no usable answer" : "not saved"} (${
         err instanceof DocspaceApiHttpError
           ? err.status
           : err instanceof Error
@@ -177,7 +272,7 @@ async function installAgent(
             : String(err)
       })`,
     );
-    warnings.push("modelNotSaved");
+    warnings.push(unconfirmed ? "modelUnconfirmed" : "modelNotSaved");
   }
   // Nothing stores an agent's instructions yet (the Files service has no
   // `rooms/{id}/instructions`), so they are skipped and the caller is told.
@@ -199,12 +294,15 @@ function makesKnowledgeRoom(template: Template): boolean {
 // failed read is not "off": it throws, and nothing is made either way.
 async function assertKnowledgeRoomsAllowed(template: Template): Promise<void> {
   const config = await aiService.get("/config");
+  // The settings are always an object: another shape is unknown, not "off".
+  if (!isObject(config)) {
+    throw new UpstreamShapeError("GET config");
+  }
   const enabled =
-    isObject(config) &&
-    (config["vectorizationEnabled"] === true || config["vectorizationNeedReset"] === true);
+    config["vectorizationEnabled"] === true || config["vectorizationNeedReset"] === true;
   if (!enabled) {
     logger.info(`installTemplate: ${template.id}: refused, vectorization is not set up`);
-    throw httpError(
+    throw clientFault(
       409,
       "This template holds a knowledge base, which needs vectorization to be set up on the portal",
     );
@@ -218,7 +316,7 @@ export async function installTemplate(
 ): Promise<InstalledTemplate> {
   const template = findTemplate(catalog, id);
   if (!template) {
-    throw httpError(404, "Template not found");
+    throw clientFault(404, "Template not found");
   }
   if (makesKnowledgeRoom(template)) {
     await assertKnowledgeRoomsAllowed(template);
@@ -226,6 +324,14 @@ export async function installTemplate(
   if (template.kind === "agent") {
     return installAgent(template, catalog);
   }
-  const room = await installSource(template);
-  return { ...room, kind: template.kind, skillSets: [], knowledgeBases: [], warnings: [] };
+  const made: InstalledRooms = { skillSets: [], knowledgeBases: [] };
+  try {
+    const room = await installSource(template, made);
+    return { ...room, kind: template.kind, skillSets: [], knowledgeBases: [], warnings: [] };
+  } catch (err) {
+    if (!madeAny(made)) {
+      throw err;
+    }
+    throw new TemplateInstallIncompleteError(made, err);
+  }
 }

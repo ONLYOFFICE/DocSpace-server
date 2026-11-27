@@ -33,9 +33,6 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 vi.mock("../httpClient.js", () => ({
   proxyBaseUrl: "http://portal",
   withTimeout: () => ({ signal: undefined, cancel: () => {} }),
@@ -47,7 +44,8 @@ vi.mock("../../requestContext.js", () => ({
 }));
 vi.mock("../chatContextSnapshot.js", () => ({ lookupChatContextFolder: () => ({ hit: false }) }));
 
-const { filesApiGet, DocspaceApiHttpError, folderSourceType } = await import("../docspaceFilesApi.js");
+const { filesApiGet, DocspaceApiHttpError, folderSourceType } =
+  await import("../docspaceFilesApi.js");
 
 const fetchMock = vi.fn();
 

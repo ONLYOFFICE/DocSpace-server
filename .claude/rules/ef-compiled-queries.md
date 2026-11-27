@@ -14,6 +14,17 @@ DAOs, `DbTenantService` and the AI integration do. A query written inline is tra
 on every call and fails to translate only when a request finally reaches it; a compiled one is
 translated once and is exercised at service start.
 
+## Checklist
+
+- No inline LINQ on a `DbSet` in a DAO: each read, count and `ExecuteDelete` is a compiled query (The shape)
+- Context method: public, instance, `[PreCompileQuery]`; its delegate in a `static file class` (The shape)
+- The tenant id is an explicit parameter of the compiled query (The shape)
+- Optional filters are nullable parameters; paging uses `OrderBy…ThenBy` on a unique column (One fixed shape)
+- An uncompiled query (`ExecuteUpdate`, dynamic predicate) is commented "Not precompiled on purpose:" (Exceptions)
+- No `[PreCompileQuery]` method has an effect outside the database, such as a cache or an event (The warmup)
+- The service log has no `WarmupBaseDbContextStartupTask` WARN line for the new methods (Verify)
+- Every new query method is exercised by a test of the rows it returns (Verify)
+
 ## The shape
 
 One file per area, next to the others (`products/ASC.Files/Core/Core/EF/Queries/`,

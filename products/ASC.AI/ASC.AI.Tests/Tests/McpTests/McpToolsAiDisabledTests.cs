@@ -34,8 +34,8 @@
 namespace ASC.AI.Tests.Tests.McpTests;
 
 /// <summary>
-/// The tools surface with the portal AI switch off: every route but the catalogue is 403, a refused write changes
-/// nothing, and the catalogue stays readable.
+/// The tools surface with the portal AI switch off: every route is 403, the catalogue included, and a refused write
+/// changes nothing.
 /// </summary>
 [Trait("Category", "Permissions")]
 [Trait("Feature", "AI/Mcp")]
@@ -77,18 +77,18 @@ public class McpToolsAiDisabledTests(AspireAppFixture fixture) : McpToolsPermiss
         (await SnapshotAsync()).Should().Be(before, "the refused call changed nothing");
     }
 
-    /// <summary>list-system-tools is the one route AI-off does not gate.</summary>
+    /// <summary>The catalogue is gated like every other AI route: readable with AI on, 403 with AI off.</summary>
     [Fact]
-    public async Task ListSystemTools_StaysReadableWithAiAccessDisabled()
+    public async Task ListSystemTools_WithAiAccessDisabled_Is403()
     {
+        // The same call with AI on is the control: the route is not refused for any other reason.
         (await GetToolsAsync("list-system-tools")).Code.Should().Be(200);
 
         await SetPortalAiAccessAsync(false);
         var reply = await GetToolsAsync("list-system-tools");
 
-        reply.Code.Should().Be(200, reply.ToString());
-        var system = reply.Json!.Value.GetProperty("system").EnumerateArray().Select(s => s.GetString()).ToList();
-        reply.Json!.Value.GetProperty("groups").EnumerateObject().Select(p => p.Name).Except(system).Should().BeEmpty("no registered server appears");
+        reply.Code.Should().Be(403, reply.ToString());
+        reply.Error.Should().Be("Forbidden");
     }
 
     /// <summary>Puts the state a control call changed back, so the refused call is measured against the same state.</summary>

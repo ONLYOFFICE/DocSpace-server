@@ -78,6 +78,9 @@ export const editorToolsController = {
   list: asyncHandler(async (req, res) => {
     markForwardHeadersToProvider();
     const entityId = asString(req.query["entityId"]);
+    // The listing asks the system MCP servers with the caller's credentials: the access gate
+    // comes first (ts-ai-failure-paths.md §3).
+    await assertAiAccess(entityId);
 
     const grouped = await adapter.getTools(entityId, { attachmentId: [] });
     const approval = approvalServerTypes();
@@ -94,15 +97,11 @@ export const editorToolsController = {
         tools.push({
           name: item.name,
           description: item.description ?? "",
-          inputSchema: (item.inputSchema ?? {
-            type: "object",
-            properties: {},
-          }) as Record<string, unknown>,
+          inputSchema: item.inputSchema ?? { type: "object", properties: {} },
           // Server-type policy, overridable per tool: read-only (GET) MCP
           // operations arrive with `requireApproval: false` from
           // systemToolsSource and run without a dialog.
-          requireApproval:
-            approval.has(serverType) && item.requireApproval !== false,
+          requireApproval: approval.has(serverType) && item.requireApproval !== false,
         });
       }
     }
@@ -114,11 +113,8 @@ export const editorToolsController = {
     markForwardHeadersToProvider();
     const body = isObject(req.body) ? req.body : {};
     const name = typeof body["name"] === "string" ? body["name"].trim() : "";
-    const args = isObject(body["arguments"])
-      ? (body["arguments"] as Record<string, unknown>)
-      : {};
-    const entityId =
-      typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+    const args = isObject(body["arguments"]) ? body["arguments"] : {};
+    const entityId = typeof body["entityId"] === "string" ? body["entityId"] : undefined;
 
     if (!name || EXCLUDED_TOOLS.has(name)) {
       res.status(400).json({ error: "Unknown tool name" });
@@ -127,6 +123,8 @@ export const editorToolsController = {
     // The system tools run against the MCP server with the caller's own
     // credentials and never pass through the AI service, so with AI switched
     // off a folder still got created and a file deleted (Bugs 84390, 84391).
+    // The name is judged before the gate: that order is contract, pinned by
+    // EditorToolAiDisabledTests (CONTRACT passthrough-13 in the route test).
     await assertAiAccess(entityId);
 
     // A name no adapter owns fell through to the last one, whose "tool not

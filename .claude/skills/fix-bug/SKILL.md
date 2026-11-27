@@ -91,8 +91,8 @@ here: these are Markdown files).
 - **A row of `deviations.md`**: move it to the "Closed" table with `FIXED <commit>`, or `FIXED (uncommitted)`
   when the user has not committed yet, and a one-line note of what the server does now.
 - **The spec's own `verification.md`**: set the same row of its "Suspected defects" section to FIXED, and turn
-  the claim rows the test cites into `TEST-CONFIRMED` with the test's `file:line` (no run mark: the next full
-  run writes it).
+  the claim rows the test cites into `TEST-CONFIRMED`, citing the test by name, `File.cs::Method` (no run
+  mark: the next full run writes it).
 - **The requirement**: the spec described the server without the defect, so add the behaviour that is now
   true to the governing requirement or scenario of `spec.md`, in the API terms that file uses. Run
   `openspec validate --specs --no-interactive`.
@@ -104,6 +104,21 @@ variable (ask the user when it is unset). Mark it fixed there and add nothing ab
 released version carries the fix; tell the user so. Its test follows the rule of the `openspec-maintain` skill:
 a test already in the repository stays and turns green with the fix; a test for a hole not yet published is
 committed with the release, not before.
+
+## A bug of the AI chat service
+
+When the defect is in `common/ASC.AI.Chat` (the Node service behind `/api/2.0/ai/*`), the steps are
+the same and the tools differ:
+
+- **Find the test** (step 1) in both suites: the .NET trait in `products/ASC.AI/ASC.AI.Tests`, and
+  the number in a vitest name, `grep -rn "Bug 12345" common/ASC.AI.Chat/app --include="*.test.ts"`.
+- **Which suite gets the new test**: `.claude/rules/ts-ai-tests.md` §1. A decision the service makes
+  by itself (a status mapping, a refused body, a field left out) is a vitest test named with
+  `(Bug 12345)`; a defect that shows only against the real services is a .NET test with the trait.
+- **Red and green** (steps 3 and 5): `cd common/ASC.AI.Chat && yarn vitest run <file> -t "Bug 12345"`,
+  then the file, then `yarn check`.
+- **Fix** (step 4) by `.claude/rules/ts-ai-style.md` and `ts-ai-failure-paths.md`; the section of
+  the latter that names the defect also names its sibling paths to check.
 
 ## Build notes
 

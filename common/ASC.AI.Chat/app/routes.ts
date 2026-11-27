@@ -68,6 +68,8 @@ import { vectorizationController } from "./controllers/vectorizationController.j
 import { webSearchController } from "./controllers/webSearchController.js";
 import { webSearchPassthroughController } from "./controllers/webSearchPassthroughController.js";
 import { registerDocumentAgentFiles } from "./tools/documentAgentFiles.js";
+import { registerPluginAgentRegistry } from "./pluginAgent/npmRegistry.js";
+import { pluginAgentController } from "./controllers/pluginAgentController.js";
 
 export { API_PREFIX };
 
@@ -224,6 +226,7 @@ export default function registerRoutes(app: Application): void {
   router.put("/config/tool-mode", settingsController.setToolMode);
   router.get("/document-agent/settings", documentAgentController.getSettings);
   router.put("/document-agent/settings", documentAgentController.setSettings);
+  router.get("/plugin-agent", pluginAgentController.get);
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
 
@@ -234,8 +237,8 @@ export default function registerRoutes(app: Application): void {
 
   // OpenAI-compatible passthrough for the document editor's AI plugin
   // (external-provider transport). Explicit sub-paths only — the allowlist
-  // is the registration itself. The request body is raw here: `app.ts`
-  // skips the JSON body parser for `/openai/*`.
+  // is the registration itself. The request body is raw here: `app/createApp.ts`
+  // runs no body parser for `/openai/*`.
   router.post(
     "/openai/:profileId/v1/chat/completions",
     openaiPassthroughController.chatCompletions,
@@ -269,11 +272,14 @@ export default function registerRoutes(app: Application): void {
   // The document agent's file-link server, outside the API prefix and its
   // catalog: a machine endpoint with its own token, not a route of the chat.
   registerDocumentAgentFiles(app);
+  // The package registry a plugin task's sandbox installs from: outside the API prefix for the
+  // same reason, with the token of a running task as its gate.
+  registerPluginAgentRegistry(app);
 
   app.use(API_PREFIX, router);
 
   app.use((req, res) => {
     logger.warn(`Route not found: ${req.method} ${req.originalUrl}`);
-    res.sendStatus(404);
+    res.status(404).json({ error: "Not Found" });
   });
 }

@@ -982,14 +982,15 @@ public class FoldersControllerCommon(
     /// Returns every top-level section that the caller can see, each with its first page of content. Sections come
     /// in this order: "Favorites", "Recent", "Shared with me", "My documents", "Trash", "Rooms", "Forms", and
     /// "Archive". While the private rooms app is on, "Private rooms" comes before "Archive". While AI access is on for
-    /// the portal, the AI agents and AI hub sections follow. AI hub lists only the AI projects the caller pinned and
-    /// can access. They are sorted like pinned rooms in the section listing. The list has
+    /// the portal, the AI agents and AI hub sections follow. AI hub lists at most five AI projects that the caller
+    /// created or was invited to. Pinned projects come first, then the others. Each group is sorted by `updated`,
+    /// newest first. The list has
     /// "Recent" only after `PUT api/2.0/files/displayrecent` turns it on. It skips "My documents" if the account has
     /// none, which is usual for a guest. To skip "Trash", set `withoutTrash` to `true`. Any signed-in user can call
     /// it. The call is read-only, but a valid `sortBy` becomes the account's default order. It does not clear
     /// new-item marks. The filters, `count`, and `startIndex` apply to each section except AI hub. So `count=1`
-    /// returns one entry per other section, each with its own `total`. AI hub always lists every pinned
-    /// project. This is the most expensive listing of the module. When you
+    /// returns one entry per other section, each with its own `total`. For AI hub, `total` is the number of listed
+    /// projects. This is the most expensive listing of the module. When you
     /// need one section, read it directly, for example with `GET api/2.0/files/@my`. The call returns 400 if `count`
     /// is outside its allowed range.
     /// </remarks>
@@ -1008,7 +1009,7 @@ public class FoldersControllerCommon(
         {
             if (isAiHub)
             {
-                yield return await folderContentDtoHelper.GetAsync(folder, null, null, null, 0, false, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, 0, -1, null, pinnedAiProjects: true);
+                yield return await folderContentDtoHelper.GetAsync(folder, null, null, null, 0, false, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, 0, -1, null, aiHubRootProjects: true);
                 continue;
             }
 

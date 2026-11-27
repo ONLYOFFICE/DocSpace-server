@@ -32,9 +32,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 vi.mock("../httpClient.js", () => ({
   proxyBaseUrl: "http://portal",
   withTimeout: () => ({ signal: undefined, cancel: () => {} }),

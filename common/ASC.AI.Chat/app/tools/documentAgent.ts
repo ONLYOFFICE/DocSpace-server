@@ -72,6 +72,7 @@ import {
   getFileInfo,
 } from "../storage/docspaceFilesApi.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
+import type { DocspaceFileInfo, DocspaceFolderInfo } from "../storage/docspaceFilesApi.js";
 import {
   getForwardedHeaders,
   getRoundAttachmentIds,
@@ -93,7 +94,7 @@ import {
   MAX_FILE_BYTES,
 } from "./documentAgentFiles.js";
 import { fileEditorUrl } from "./httpToolsAdapter.js";
-import { runDocumentTask, DocumentAgentError } from "./documentAgentClient.js";
+import { runDocumentTask, DocumentAgentError, failureText } from "./documentAgentClient.js";
 import type { DocumentAgentSettings, DocumentTaskOutput } from "./documentAgentClient.js";
 import { getArray, getString, isObject } from "../narrow.js";
 import { aiServiceBaseUrl } from "../storage/httpClient.js";
@@ -206,9 +207,16 @@ export const documentAgentTools: ToolsAdapter = {
     } catch (err) {
       // Contract: a failure is a result, never a throw — a throw aborts the chat stream.
       const message = err instanceof Error ? err.message : String(err);
-      logger.warn(`${DOCUMENT_AGENT_TOOL_NAME} failed: ${message}`);
+      // A DocumentAgentError was logged with its cause where it was made.
+      logger.warn(
+        `${DOCUMENT_AGENT_TOOL_NAME} failed: ${
+          err instanceof DocumentAgentError ? message : failureText(err)
+        }`,
+      );
+      // The message of a Files API error names the internal address it was read from: the
+      // model, its provider and the stored history get the status only.
       if (err instanceof DocspaceApiHttpError) {
-        return `The workspace could not be reached: ${message}.`;
+        return `The workspace could not be reached: it answered ${err.status}.`;
       }
       if (err instanceof DocumentAgentError) {
         return `The document agent is unavailable: ${message}.`;
@@ -372,7 +380,7 @@ export async function savedFilesOf(
       logger.warn(`${DOCUMENT_AGENT_TOOL_NAME}: artifact ${artifact.name} names no file of ours`);
       continue;
     }
-    const info = await getFileInfo(id).catch(() => undefined);
+    const info = await readBackSavedFile(id);
     const title = info?.title ?? artifact.name;
     const fileExst = info?.fileExst ?? extensionOf(title);
     saved.push({
@@ -385,6 +393,27 @@ export async function savedFilesOf(
     });
   }
   return saved;
+}
+
+/**
+ * The details of a file the outputs endpoint saved. A 404 answers undefined through
+ * `getFileInfo`; any other failure (a 5xx, a timeout, a body of the wrong shape) is unknown and
+ * is logged with its status, then read as "no details" too. That is safe here, unlike for a read
+ * that decides access: the file exists, as the endpoint took it, and failing or dropping it would
+ * hide a file the task made from the user (ts-ai-failure-paths.md §6). It is listed under the
+ * artifact's name, without its folder and link.
+ */
+async function readBackSavedFile(id: string): Promise<DocspaceFileInfo | undefined> {
+  try {
+    return await getFileInfo(id);
+  } catch (err) {
+    // The status only: the message of a failure names the internal address it was read from.
+    const status = err instanceof DocspaceApiHttpError ? String(err.status) : "no HTTP answer";
+    logger.warn(
+      `${DOCUMENT_AGENT_TOOL_NAME}: saved file ${id} could not be read back (${status}), listing it without its details`,
+    );
+    return undefined;
+  }
 }
 
 /** The extension of a file name, with its dot, as the Files API writes `fileExst`. */
@@ -404,7 +433,11 @@ function savedFileId(url: string): string | undefined {
 }
 
 /** The outputs endpoint of this service with the folder the files go into and, for results, their conversation. */
-function outputsUrl(config: DocumentAgentConfig, folderId: string, threadId?: string | null): string {
+function outputsUrl(
+  config: DocumentAgentConfig,
+  folderId: string,
+  threadId?: string | null,
+): string {
   const url = new URL(`${config.filesUrl}${DOCUMENT_AGENT_OUTPUTS_PATH}`);
   url.searchParams.set(DOCUMENT_AGENT_OUTPUTS_FOLDER_PARAM, folderId);
   if (threadId) {
@@ -427,8 +460,7 @@ async function resolveLogTarget(tenant: TenantSettings, resultsFolderId: string)
   if (chosen === null || chosen === resultsFolderId) {
     return resultsFolderId;
   }
-  const info = await getFolderInfo(chosen).catch(() => undefined);
-  if (canTakeUpload(info)) {
+  if (canTakeUpload(await readLogFolder(chosen))) {
     return chosen;
   }
   logger.warn(
@@ -437,13 +469,29 @@ async function resolveLogTarget(tenant: TenantSettings, resultsFolderId: string)
   return resultsFolderId;
 }
 
+// The chosen log folder's details. A 404 answers undefined through `getFolderInfo` and a 403 is
+// read as undefined here: both say the user cannot write there. Any other failure is unknown and
+// rethrown, so the task fails with the workspace's status instead of silently logging elsewhere.
+async function readLogFolder(folderId: string): Promise<DocspaceFolderInfo | undefined> {
+  try {
+    return await getFolderInfo(folderId);
+  } catch (err) {
+    if (err instanceof DocspaceApiHttpError && err.status === 403) {
+      return undefined;
+    }
+    throw err;
+  }
+}
+
 // The model the task runs on: the portal's pick for the agent when it has
 // one that still exists, else the chat's own (the round's profile when the
 // handler recorded one, else the portal's chat default). Read raw,
 // as the C# storage serves it: the in-process override would point an
 // `onlyoffice` profile at this service's own address, which the agent, on
 // another host, cannot reach (see modelSettings).
-async function resolveProfile(pickedProfileId: string | null): Promise<DocspaceProfile | undefined> {
+async function resolveProfile(
+  pickedProfileId: string | null,
+): Promise<DocspaceProfile | undefined> {
   if (pickedProfileId) {
     const picked = await storage.profiles.readByIdRaw(pickedProfileId);
     if (picked) {
@@ -681,7 +729,9 @@ function stringHeaders(headers: Record<string, unknown>): Record<string, string>
 
 // Where the files go: the current folder when the user may create there,
 // else My documents.
-async function resolveUploadTarget(entityId: string | undefined): Promise<string | undefined> {
+export async function resolveUploadTarget(
+  entityId: string | undefined,
+): Promise<string | undefined> {
   if (entityId && canTakeUpload(await getFolderInfo(entityId))) {
     return entityId;
   }

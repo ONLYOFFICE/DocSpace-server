@@ -31,17 +31,23 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService } from "../storage/httpClient.js";
+import { envelopeAnswer } from "../storage/upstreamShape.js";
 import { asyncHandler } from "./_helpers.js";
 
 // Thin proxy for the .NET AI vectorization endpoint (VectorizationController,
 // `internal/ai/vectorization/tasks`). The body (`{ files: [...] }`) is
 // forwarded as-is; `raw: true` keeps the DocSpace `{ response, status, ... }`
 // envelope so the client sees the same shape it did when this was served
-// directly from .NET.
+// directly from .NET. An answer that is not that envelope is answered 502.
 export const vectorizationController = {
   // POST vectorization/tasks → `POST internal/ai/vectorization/tasks`.
   startTask: asyncHandler(async (req, res) => {
-    const result = await aiService.post("/vectorization/tasks", req.body ?? {}, { raw: true });
+    const result = envelopeAnswer(
+      await aiService.post("/vectorization/tasks", req.body ?? {}, { raw: true }),
+      "POST vectorization/tasks",
+      // `StartTaskAsync` returns nothing: its envelope carries no `response`.
+      true,
+    );
     res.json(result);
   }),
 };

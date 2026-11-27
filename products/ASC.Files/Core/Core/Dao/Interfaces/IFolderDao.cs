@@ -71,7 +71,7 @@ public interface IFolderDao<T>
         bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false,
         MetadataFilter metadataFilter = null, bool excludeAiProjectContent = false);
 
-    IAsyncEnumerable<Folder<T>> GetAiProjectsVisibleToAsync(IEnumerable<T> projectsIds, int aiHubRootId, Guid userId, bool isAdmin);
+    IAsyncEnumerable<Folder<T>> GetAiHubRootProjectsAsync(IEnumerable<T> pinnedIds, int aiHubRootId, Guid userId, int count);
 
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags,
         bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null);
