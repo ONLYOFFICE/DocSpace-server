@@ -146,7 +146,9 @@ our own, two more dependencies and a generated file to keep in step with another
 3. On success: read `name`, `version` and the direct dependencies from the project's `package.json` (each
    bounded and checked for its shape, since they go into the result the chat model reads); read
    `dist/plugin.zip`; archive the project without `node_modules`, `dist` and `.git` inside the sandbox and
-   read that. Either file over 32 MiB fails the gate.
+   read that. A package over 5 MiB, what a portal accepts for a plugin unless its `plugins:maxSize` is
+   changed, or a sources archive over 32 MiB fails the gate; `install_plugin` reads a package up to the
+   same 5 MiB.
 4. Save both files under the caller's session where `document_agent` would (among the artifacts of a
    conversation of an AI project, else the current folder when the caller may create there, else My
    documents; the chat beside the plugins page of the settings sends no folder, so a plugin asked for
@@ -326,6 +328,9 @@ only ordinary workspace files and the files of the cache directory.
   approval shows that id, not the content: a file replaced by another room member between the build and the
   approval, or an archive the model was talked into naming, is installed if approved.
 - **The delivery gate does not hold against the model** (decision 5).
+- **The package limit is a constant.** The 5 MiB of the gate and of `install_plugin` is the portal's default,
+  not its setting: a portal whose `plugins:maxSize` is lower refuses the upload itself, and one whose limit
+  is higher gets no larger package from the agent.
 - **The upload and the registry are tested against stubs.** The request to `settings/webplugins` and what a
   real `npm install` asks of the route are first seen against the real services in task 7.1.
 

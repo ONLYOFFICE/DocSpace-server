@@ -91,7 +91,7 @@ denied call SHALL start no task.
 ### Requirement: Result of a plugin task
 
 A plugin task SHALL take the package only after the project built, passed its type check and passed the
-validator of the plugin skill, with a package and a sources archive of at most 32 MiB each. It SHALL then
+validator of the plugin skill, with a package of at most 5 MiB and a sources archive of at most 32 MiB. It SHALL then
 save two new files, the package `<name>.zip` and the sources `<name>-src.zip`, and return their ids with that
 name (the project's package name made fit for a file title), the version and the direct dependencies. It
 SHALL install nothing and change no existing file.
@@ -109,7 +109,7 @@ SHALL install nothing and change no existing file.
 
 #### Scenario: Package over the size limit
 
-- **WHEN** the build leaves a package larger than 32 MiB
+- **WHEN** the build leaves a package larger than 5 MiB
 - **THEN** the check of the package fails, the model is told so, and nothing is saved
 
 ### Requirement: Where the results of a plugin task are saved
@@ -308,7 +308,7 @@ the caller's session and returns the plugin's name, version and `enabled`.
 
 #### Scenario: File that is not a readable archive
 
-- **WHEN** `fileId` names a file that does not exist, that the caller may not read, that is larger than 32 MiB, whose name does not end in `.zip` or whose content is not a zip archive
+- **WHEN** `fileId` names a file that does not exist, that the caller may not read, that is larger than 5 MiB, whose name does not end in `.zip` or whose content is not a zip archive
 - **THEN** the call returns an error and nothing is installed
 
 ### Requirement: Refusals and unknown answers of an installation
