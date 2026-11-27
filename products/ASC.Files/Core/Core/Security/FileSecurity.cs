@@ -2244,15 +2244,16 @@ public class FileSecurity(
         if (ace == null)
         {
             var cachedRecords = GetCachedRecords<T>();
-            // one record per account and parent, the account's own record only (RecordHoldsForSiblings), so no account
-            // reads a record found for another account or through a link
+            // one record per account and parent, kept only when it holds for every entry of the parent
+            // (RecordHoldsForSiblings), so no account reads a record found for another account or through another link
             var cacheable = !isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive;
             var cacheKey = cacheable ? GetUserRecordCacheKey(e.ParentId, userId, requestLinkApplies) : null;
 
             if (cacheable && cachedRecords.TryGetValue(cacheKey, out var value) && value != null)
             {
+                // the copy keeps the entry it was inherited from, as the record computed for this entry would: the
+                // DTOs read a record of the entry's own id as the entry's own link (`external`) or share (`sharedBy`)
                 ace = value.Clone();
-                ace.EntryId = e.Id;
             }
             else
             {
@@ -2261,7 +2262,7 @@ public class FileSecurity(
                 {
                     ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, await shares.GetAsync());
 
-                    if (cacheable && RecordHoldsForSiblings(ace, e.Id, e.FileEntryType))
+                    if (cacheable && RecordHoldsForSiblings(ace, e.Id, e.FileEntryType, await RequestLinkIdAsync(ace, requestLinkApplies)))
                     {
                         cachedRecords.TryAdd(cacheKey, ace);
                     }
@@ -4216,14 +4217,33 @@ public class FileSecurity(
     }
 
     /// <summary>
-    /// Whether the record an account has to an entry is kept for the other entries of the same folder: a User or AiProject
-    /// record the entry inherits is, as on the base. A record of the entry itself is not, and neither is a link's record:
-    /// a sibling's own link, or another link the account remembers, can outrank it.
+    /// Whether the record an account has to an entry is kept for the other entries of the same folder. A record the entry
+    /// inherits is kept when it is a User or AiProject record, as on the base, or the record of the link the request was
+    /// opened with (<paramref name="requestLinkId"/>). A link is a record of one entry only, so no sibling has its own
+    /// record of that link. Only User and Group records rank above the request's link, and the cache covers the room
+    /// roots only, where an entry takes no User or Group share of its own: <c>FileSharing</c> accepts only the subject
+    /// types of <c>_availableRoomFileAccesses</c>, links, for a file or a folder inside a room. A record of the entry
+    /// itself is not kept, and neither is the record of a link the account remembers from an earlier visit: a sibling's
+    /// own link, or the request's link, can outrank it.
     /// </summary>
-    public static bool RecordHoldsForSiblings<T>(FileShareRecord<T> record, T entryId, FileEntryType entryType)
+    public static bool RecordHoldsForSiblings<T>(FileShareRecord<T> record, T entryId, FileEntryType entryType, Guid requestLinkId)
     {
-        return record is { SubjectType: SubjectType.User or SubjectType.AiProject } &&
-               !(Equals(record.EntryId, entryId) && record.EntryType == entryType);
+        if (record is null || (Equals(record.EntryId, entryId) && record.EntryType == entryType))
+        {
+            return false;
+        }
+
+        return record.SubjectType is SubjectType.User or SubjectType.AiProject ||
+               (requestLinkId != Guid.Empty && record.Subject == requestLinkId &&
+                record.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+    }
+
+    // the link the request was opened with, when it applies to this check; read only for a link's record
+    private async Task<Guid> RequestLinkIdAsync<T>(FileShareRecord<T> record, bool requestLinkApplies)
+    {
+        return requestLinkApplies && record is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink }
+            ? await externalShare.GetLinkIdAsync()
+            : Guid.Empty;
     }
 
     private string GetCacheKey<T>(T parentId)

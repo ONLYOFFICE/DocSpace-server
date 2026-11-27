@@ -2156,8 +2156,8 @@ public class UserController(
     /// status. With `isUser` set to true, the account becomes a guest, and false makes it a user again. If the tariff
     /// or quota has no free seat for this, the call returns 402. The call ignores a request to make the portal owner, a
     /// DocSpace admin, or a module admin a guest. If the portal refuses the `files` URL or its server returns an error,
-    /// the call returns 403. If no account has the ID, the call returns 404. The call changes data. You can repeat it
-    /// with the same body. It returns the profile after the update. To change the language, use
+    /// the call returns 403 and changes nothing. If no account has the ID, the call returns 404. The call changes data.
+    /// You can repeat it with the same body. It returns the profile after the update. To change the language, use
     /// `PUT api/2.0/people/{userId}/culture`. To change the type, use `PUT api/2.0/people/type/{type}`.
     /// </remarks>
     /// <summary>
@@ -2261,12 +2261,15 @@ public class UserController(
             }
 
             await UpdateContactsAsync(inDto.UpdateMember.Contacts, user);
-            await UpdateDepartmentsAsync(inDto.UpdateMember.Department, user);
 
+            // the photo comes before the groups: a download that fails then leaves the account as it was, instead of
+            // changed groups and a profile that is not saved; a failure after the photo keeps the new photo
             if (photoValidation != null)
             {
                 await DownloadAndSavePhotoAsync(photoValidation, user);
             }
+
+            await UpdateDepartmentsAsync(inDto.UpdateMember.Department, user);
 
             changed = true;
         }

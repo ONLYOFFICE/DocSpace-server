@@ -39,7 +39,8 @@ namespace ASC.Core.Common.Tests;
 /// names no account, and any account the request's link applied to read it before its own records; and the record of a
 /// room was computed from the shares of the entry checked and kept under the key of the folder records, so a link of
 /// one file could answer for its siblings. The keys now always name the account, a room's record has keys of its own,
-/// a room's record is kept only when it is the room's, and a folder's record only when it is the account's own.
+/// a room's record is kept only when it is the room's, and a folder's record only when it is the account's own or the
+/// record of the link the request was opened with.
 /// </summary>
 public class UserRecordCacheTests
 {
@@ -50,6 +51,7 @@ public class UserRecordCacheTests
 
     private static readonly Guid _member = Guid.NewGuid();
     private static readonly Guid _linkVisitor = Guid.NewGuid();
+    private static readonly Guid _requestLink = Guid.NewGuid();
 
     [Fact]
     public void GetUserRecordCacheKey_TwoAccountsTheRequestsLinkAppliesTo_GetDifferentKeys()
@@ -88,6 +90,16 @@ public class UserRecordCacheTests
         var folder = ASC.Files.Core.Security.FileSecurity.GetUserRecordCacheKey(TenantId, RoomId, _member, requestLinkApplies);
 
         room.Should().NotBe(folder);
+    }
+
+    [Fact]
+    public void GetRoomRecordCacheKey_AnotherTenantRoomOrLinkScope_GetsAnotherKey()
+    {
+        var key = ASC.Files.Core.Security.FileSecurity.GetRoomRecordCacheKey(TenantId, RoomId, _member, requestLinkApplies: false);
+
+        ASC.Files.Core.Security.FileSecurity.GetRoomRecordCacheKey(TenantId + 1, RoomId, _member, requestLinkApplies: false).Should().NotBe(key);
+        ASC.Files.Core.Security.FileSecurity.GetRoomRecordCacheKey(TenantId, RoomId + 1, _member, requestLinkApplies: false).Should().NotBe(key);
+        ASC.Files.Core.Security.FileSecurity.GetRoomRecordCacheKey(TenantId, RoomId, _member, requestLinkApplies: true).Should().NotBe(key);
     }
 
     [Fact]
@@ -130,7 +142,7 @@ public class UserRecordCacheTests
     {
         var record = Record(FolderId, FileEntryType.Folder, subjectType);
 
-        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(record, FileId, FileEntryType.File).Should().BeTrue();
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(record, FileId, FileEntryType.File, Guid.Empty).Should().BeTrue();
     }
 
     [Theory]
@@ -141,7 +153,7 @@ public class UserRecordCacheTests
     {
         var record = Record(FileId, FileEntryType.File, subjectType);
 
-        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(record, FileId, FileEntryType.File).Should().BeFalse();
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(record, FileId, FileEntryType.File, Guid.Empty).Should().BeFalse();
     }
 
     [Theory]
@@ -152,7 +164,30 @@ public class UserRecordCacheTests
         // a sibling's own link, or another link the account remembers, can outrank the folder's link
         var record = Record(FolderId, FileEntryType.Folder, subjectType);
 
-        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(record, FileId, FileEntryType.File).Should().BeFalse();
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(record, FileId, FileEntryType.File, Guid.Empty).Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(ASC.Files.Core.Security.SubjectType.ExternalLink)]
+    [InlineData(ASC.Files.Core.Security.SubjectType.PrimaryExternalLink)]
+    public void RecordHoldsForSiblings_TheInheritedRecordOfTheRequestsLink_Holds(ASC.Files.Core.Security.SubjectType subjectType)
+    {
+        // no sibling has a record of its own for that link, and no remembered link outranks it
+        var record = Record(FolderId, FileEntryType.Folder, subjectType, _requestLink);
+
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(record, FileId, FileEntryType.File, _requestLink).Should().BeTrue();
+    }
+
+    [Fact]
+    public void RecordHoldsForSiblings_TheRequestsLinkOnTheFileItselfOrAnotherLink_DoesNotHold()
+    {
+        var onTheFile = Record(FileId, FileEntryType.File, ASC.Files.Core.Security.SubjectType.ExternalLink, _requestLink);
+        var rememberedLink = Record(FolderId, FileEntryType.Folder, ASC.Files.Core.Security.SubjectType.ExternalLink);
+        var noRequestLink = Record(FolderId, FileEntryType.Folder, ASC.Files.Core.Security.SubjectType.ExternalLink, _requestLink);
+
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(onTheFile, FileId, FileEntryType.File, _requestLink).Should().BeFalse();
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(rememberedLink, FileId, FileEntryType.File, _requestLink).Should().BeFalse();
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(noRequestLink, FileId, FileEntryType.File, Guid.Empty).Should().BeFalse();
     }
 
     [Fact]
@@ -161,7 +196,7 @@ public class UserRecordCacheTests
         // a folder and a file may share an id; the kind of the entry tells them apart
         var record = Record(FileId, FileEntryType.Folder, ASC.Files.Core.Security.SubjectType.User);
 
-        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(record, FileId, FileEntryType.File).Should().BeTrue();
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(record, FileId, FileEntryType.File, Guid.Empty).Should().BeTrue();
     }
 
     [Fact]
@@ -169,18 +204,18 @@ public class UserRecordCacheTests
     {
         var group = Record(FolderId, FileEntryType.Folder, ASC.Files.Core.Security.SubjectType.Group);
 
-        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings<int>(null, FileId, FileEntryType.File).Should().BeFalse();
-        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(group, FileId, FileEntryType.File).Should().BeFalse();
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings<int>(null, FileId, FileEntryType.File, Guid.Empty).Should().BeFalse();
+        ASC.Files.Core.Security.FileSecurity.RecordHoldsForSiblings(group, FileId, FileEntryType.File, Guid.Empty).Should().BeFalse();
     }
 
-    private static ASC.Files.Core.Security.FileShareRecord<int> Record(int entryId, FileEntryType entryType, ASC.Files.Core.Security.SubjectType subjectType)
+    private static ASC.Files.Core.Security.FileShareRecord<int> Record(int entryId, FileEntryType entryType, ASC.Files.Core.Security.SubjectType subjectType, Guid? subject = null)
     {
         return new ASC.Files.Core.Security.FileShareRecord<int>
         {
             EntryId = entryId,
             EntryType = entryType,
             SubjectType = subjectType,
-            Subject = Guid.NewGuid(),
+            Subject = subject ?? Guid.NewGuid(),
             Share = ASC.Files.Core.Security.FileShare.Editing
         };
     }

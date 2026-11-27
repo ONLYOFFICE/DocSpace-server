@@ -90,7 +90,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `POST api/2.0/people` (Add a user), after the portal saves the avatar from `files`, if any, but not if the download fails
+        - `POST api/2.0/people` (Add a user)
         - `POST api/2.0/people/thirdparty/signup` (Sign up with a provider), only when the call creates a new account
       tags:
         - user

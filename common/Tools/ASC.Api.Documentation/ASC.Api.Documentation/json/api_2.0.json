@@ -11154,7 +11154,7 @@
           "Portal / Users"
         ],
         "summary": "Send congratulations",
-        "description": "Sends the welcome email of a newly registered portal to the account in `userid`. Anyone can call it without\r\nsigning in. Instead of a token, `key` must be the confirmation key of the sign-in link for that account. The\r\nkey works for one hour. The call returns 403 for a wrong, foreign, or expired key, and then sends nothing. The\r\ncall changes data. Call it once, right after registration. Each repeated call with a valid key sends the emails\r\nagain. On a hosted portal, the password link of the earlier email then stops working. If the installation\r\nrequires SMS or an authenticator app after registration, the call turns that method on for the portal. It skips\r\nthis step for an internal test address. On a hosted portal in custom mode, the call also sends the registration\r\ndata to the sales address. The call returns no data.",
+        "description": "Sends the welcome email of a newly registered portal to its owner, named in `userid`. Anyone can call it\r\nwithout signing in. Instead of a token, `key` must be the confirmation key of the sign-in link for that account.\r\nThe key works for one hour. The call returns 403 for another account, or a wrong, foreign, or expired key, and\r\nthen sends nothing. The call changes data. Call it once, right after registration. Each repeated call with a\r\nvalid key sends the emails again. On a hosted portal, the password link of the earlier email then stops\r\nworking. If the installation requires SMS or an authenticator app after registration, the call turns that\r\nmethod on for the portal. It skips this step for an internal test address. On a hosted portal in custom mode,\r\nthe call also sends the registration data to the sales address. The call returns no data.",
         "operationId": "sendCongratulations",
         "parameters": [
           {
@@ -11199,7 +11199,7 @@
             }
           },
           "403": {
-            "description": "The confirmation key does not match the user or is older than one hour"
+            "description": "`userid` is not the portal owner, or the confirmation key does not match the user or is older than one hour"
           },
           "429": {
             "description": "Too Many Requests.",
@@ -17906,7 +17906,7 @@
           "Settings / DocsCloud"
         ],
         "summary": "Start the Docs Connect trial",
-        "description": "Starts the free Docs Connect trial for the current portal. If the trial is granted, the call adds the assigned\r\nDocs Connect server to the Content Security Policy settings. To check the subscriptions and the tariff state\r\nfirst, use `GET api/2.0/portal/tariff`. Requires the EditPortalSettings permission, which the portal owner and\r\nDocSpace admins have. Other callers get 403. The call changes data, and a repeated call returns 400. It\r\nreturns `true` if the trial is granted. It returns `false` if the billing service declines it, for example\r\nafter an earlier trial. Then nothing changes. It also returns `false` if the billing service does not answer,\r\nor the portal cannot read its answer. Then the trial may be granted. So check `GET api/2.0/portal/tariff` with\r\n`refresh=true` before you call again. The call never buys a paid plan. To move a paid Docs Connect\r\nsubscription to Docs Connect Dev Pack, use `POST api/2.0/settings/docscloud/switchtodevpack`. The call returns\r\n400 if the portal already has a Docs Connect trial, Docs Connect, or Docs Connect Dev Pack. It returns 402 if\r\nthe tariff is delayed or not paid. It returns 403 if the billing service is not configured. If the\r\ninstallation has no Docs Connect trial quota, the call returns 404. After a granted trial, the call returns\r\n403 if the server address makes the Content Security Policy header too long. The trial then stays granted.",
+        "description": "Starts the free Docs Connect trial for the current portal. If the trial is granted, the call adds the assigned\r\nDocs Connect server to the Content Security Policy settings. To check the subscriptions and the tariff state\r\nfirst, use `GET api/2.0/portal/tariff`. Requires the EditPortalSettings permission, which the portal owner and\r\nDocSpace admins have. Other callers get 403. The call changes data, and a repeated call returns 400. It\r\nreturns `true` if the trial is granted. It also returns `true` if the portal cannot get the server from Docs\r\nConnect. Then the Content Security Policy stays unchanged. To check that Docs Connect is active, use\r\n`GET api/2.0/settings/docscloud/tenant`. The call returns `false` if the billing service declines the trial,\r\nfor example after an earlier trial. Then nothing changes. It also returns `false` if the billing service does\r\nnot answer, or the portal cannot read its answer. Then the trial may be granted. So check\r\n`GET api/2.0/portal/tariff` with `refresh=true` before you call again. The call never buys a paid plan. To move\r\na paid Docs Connect subscription to Docs Connect Dev Pack, use `POST api/2.0/settings/docscloud/switchtodevpack`.\r\nThe call returns 400 if the portal already has a Docs Connect trial, Docs Connect, or Docs Connect Dev Pack. It\r\nreturns 402 if the tariff is delayed or not paid. It returns 403 if the billing service is not configured. If\r\nthe installation has no Docs Connect trial quota, the call returns 404. After a granted trial, the call returns\r\n403 if the server address makes the Content Security Policy header too long. The trial then stays granted.",
         "operationId": "startDocsCloudTrial",
         "responses": {
           "200": {
@@ -20386,7 +20386,7 @@
           "Settings / License"
         ],
         "summary": "Refresh the license",
-        "description": "Re-reads the license file of this Enterprise installation and applies its quota and tariff to the portal. So a\r\nreplaced file or a renewed license takes effect without a restart. If a file was staged by\r\n`POST api/2.0/settings/license`, the call activates it. For the first activation, use\r\n`POST api/2.0/settings/license/accept` instead. Any signed-in user can call it. Despite the `GET`, the call\r\nchanges data. You can repeat it, and each call applies the same license again. The call returns `true` when\r\nit applied the license. It returns `false` and changes nothing on a SaaS or open-source installation, which\r\nhas no license path. The call returns 402 if the file is missing, cannot be read, or has no customer id or\r\nsignature. It also returns 402 if the editing service does not confirm the license or reports another one. If\r\nthe license starts later, the call returns 400. The call works while the portal is unpaid.",
+        "description": "Re-reads the license file of this Enterprise installation and applies its quota and tariff to the portal. So a\r\nreplaced file or a renewed license takes effect without a restart. If a file was staged by\r\n`POST api/2.0/settings/license`, the call activates it. For the first activation, use\r\n`POST api/2.0/settings/license/accept` instead. Requires a DocSpace admin. Other callers get 403. Despite the\r\n`GET`, the call changes data. You can repeat it, and each call applies the same license again. The call returns\r\n`true` when it applied the license. It returns `false` and changes nothing on a SaaS or open-source installation, which\r\nhas no license path. The call returns 402 if the file is missing, cannot be read, or has no customer id or\r\nsignature. It also returns 402 if the editing service does not confirm the license or reports another one. If\r\nthe license starts later, the call returns 400. The call works while the portal is unpaid.",
         "operationId": "refreshLicense",
         "responses": {
           "200": {
@@ -20415,6 +20415,9 @@
           },
           "402": {
             "description": "No license file is on disk, the file cannot be read as a license or carries no customer id or signature, or the editing service does not confirm it"
+          },
+          "403": {
+            "description": "The caller is not a DocSpace admin"
           },
           "401": {
             "description": "Unauthorized",
@@ -20489,7 +20492,7 @@
           "Settings / License"
         ],
         "summary": "Activate a license",
-        "description": "Activates the license file staged by `POST api/2.0/settings/license` on this Enterprise installation. The call\r\nmakes the staged file the active one and applies its quota and tariff to the portal. This replaces any trial in\r\nforce. Without a staged file, it applies the active license file again. Any signed-in user can call it. The call\r\nchanges data, and you can repeat it. Read the result from the body, not from the status code. An empty string\r\nmeans the license is now active. Any other string is a message that explains why the activation failed. The call\r\nreturns such a message for a missing or incorrect file, or a license the editing service rejects. It also\r\nreturns a message if the license starts later. The call records the acceptance of the license even if the\r\nactivation fails. On a SaaS or open-source installation, the call changes nothing. It returns a message that the\r\npricing plan does not support the option. The call works while the portal is unpaid.",
+        "description": "Activates the license file staged by `POST api/2.0/settings/license` on this Enterprise installation. The call\r\nmakes the staged file the active one and applies its quota and tariff to the portal. This replaces any trial in\r\nforce. Without a staged file, it applies the active license file again. Requires a DocSpace admin. Other\r\ncallers get 403. The call changes data, and you can repeat it. Read the result from the body, not from the status\r\ncode. An empty string means the license is now active. Any other string is a message that explains why the activation failed. The call\r\nreturns such a message for a missing or incorrect file, or a license the editing service rejects. It also\r\nreturns a message if the license starts later. The call records the acceptance of the license even if the\r\nactivation fails. On a SaaS or open-source installation, the call changes nothing. It returns a message that the\r\npricing plan does not support the option. The call works while the portal is unpaid.",
         "operationId": "acceptLicense",
         "responses": {
           "200": {
@@ -20512,6 +20515,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The caller is not a DocSpace admin"
           },
           "401": {
             "description": "Unauthorized",
@@ -27800,7 +27806,7 @@
           "Settings / TFA settings"
         ],
         "summary": "Update the TFA settings",
-        "description": "Sets the portal-wide two-factor authentication policy. With `type` `1`, it switches on the SMS method, and with\r\n`2`, the authenticator app. Any other `type`, including `0`, turns TFA off. Switching one method on switches the\r\nother off. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other\r\ncallers get 403. If `id` or `mandatoryUsers` names the portal owner while `id` is not the caller, the call\r\nreturns 403. The call changes data and replaces the trusted and mandatory lists. Switching a method on signs out\r\nevery session on the portal, including the caller's. With `type` `1` or `2`, a repeated call saves the same\r\npolicy and signs everyone out again. You can repeat a call that turns TFA off. It returns `true` if it switched\r\na method on. It returns `false` if it turned TFA off. To also get the caller's own confirmation link, use\r\n`PUT api/2.0/settings/tfaappwithlink`. If the method is unavailable on the portal or SMS has no provider, the\r\ncall returns 405. The call returns 400 for an unreadable `type` or a malformed ID. It also returns 400 if a\r\n`trustedIps` entry is not an address, range, or CIDR block. It works even when the portal payment is overdue.",
+        "description": "Sets the portal-wide two-factor authentication policy. With `type` `1`, it switches on the SMS method, and with\r\n`2`, the authenticator app. With `0`, it turns TFA off. Switching one method on switches the\r\nother off. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other\r\ncallers get 403. If `id` or `mandatoryUsers` names the portal owner while `id` is not the caller, the call\r\nreturns 403. The call changes data and replaces the trusted and mandatory lists. Switching a method on signs out\r\nevery session on the portal, including the caller's. With `type` `1` or `2`, a repeated call saves the same\r\npolicy and signs everyone out again. You can repeat a call that turns TFA off. It returns `true` if it switched\r\na method on. It returns `false` if it turned TFA off. To also get the caller's own confirmation link, use\r\n`PUT api/2.0/settings/tfaappwithlink`. If the method is unavailable on the portal or SMS has no provider, the\r\ncall returns 405. The call returns 400 for an unreadable or unknown `type`, or a malformed ID. It also returns\r\n400 if a `trustedIps` entry is not an address, range, or CIDR block. Then the policy stays as it was. It works\r\neven when the portal payment is overdue.",
         "operationId": "updateTfaSettings",
         "requestBody": {
           "content": {
@@ -27835,7 +27841,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block"
+            "description": "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, a number other than 0, 1 and 2, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block"
           },
           "403": {
             "description": "The caller has no portal-settings right, or names the owner's account in `id` or `mandatoryUsers` while `id` is not the caller's own"
@@ -28126,7 +28132,7 @@
           "Settings / TFA settings"
         ],
         "summary": "Update TFA settings with a link",
-        "description": "Sets the portal-wide two-factor policy as `PUT api/2.0/settings/tfaapp` does. It also returns the caller's own\r\nconfirmation link. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.\r\nOther callers get 403. If `id` or `mandatoryUsers` names the portal owner while `id` is not the caller, the call\r\nreturns 403. Any `type` other than `1` and `2` turns TFA off. The call changes data. Switching a method on signs\r\nout every session on the portal. With `type` `1` or `2`, a repeated call signs everyone out again and returns a\r\nnew link. You can repeat a call that turns TFA off. The call returns an empty string if it turned TFA off or the\r\ncaller is exempt. Usually, the caller is exempt through their own address in `trustedIps`. For the authenticator\r\nmethod, the call sets the link's cookie but does not return its value. To get the value, use\r\n`GET api/2.0/settings/tfaapp/confirm`, which issues a new link. If the method is unavailable on the portal or\r\nSMS has no provider, the call returns 405. The call returns 400 for an unreadable `type` or a malformed ID. It\r\nalso returns 400 if a `trustedIps` entry is not an address, range, or CIDR block.",
+        "description": "Sets the portal-wide two-factor policy as `PUT api/2.0/settings/tfaapp` does. It also returns the caller's own\r\nconfirmation link. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.\r\nOther callers get 403. If `id` or `mandatoryUsers` names the portal owner while `id` is not the caller, the call\r\nreturns 403. With `type` `0`, the call turns TFA off. The call changes data. Switching a method on signs\r\nout every session on the portal. With `type` `1` or `2`, a repeated call signs everyone out again and returns a\r\nnew link. You can repeat a call that turns TFA off. The call returns an empty string if it turned TFA off or the\r\ncaller is exempt. Usually, the caller is exempt through their own address in `trustedIps`. For the authenticator\r\nmethod, the call sets the link's cookie but does not return its value. To get the value, use\r\n`GET api/2.0/settings/tfaapp/confirm`, which issues a new link. If the method is unavailable on the portal or\r\nSMS has no provider, the call returns 405. The call returns 400 for an unreadable or unknown `type`, or a\r\nmalformed ID. It also returns 400 if a `trustedIps` entry is not an address, range, or CIDR block.",
         "operationId": "updateTfaSettingsLink",
         "requestBody": {
           "content": {
@@ -28161,7 +28167,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block"
+            "description": "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, a number other than 0, 1 and 2, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block"
           },
           "403": {
             "description": "The caller has no portal-settings right, or names the owner's account in `id` or `mandatoryUsers` while `id` is not the caller's own"
@@ -50252,7 +50258,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "The second factor the portal demands. The two methods are mutually exclusive, so switching one on switches\r\nthe other off, and any value outside the defined set is read as switching TFA off rather than refused.",
+            "description": "The second factor the portal demands. The two methods are mutually exclusive, so switching one on switches\r\nthe other off, and None switches the second factor off.",
             "$ref": "#/components/schemas/TfaType"
           },
           "id": {

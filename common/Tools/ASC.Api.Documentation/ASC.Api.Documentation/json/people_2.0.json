@@ -496,7 +496,7 @@
           "Api keys"
         ],
         "summary": "Update an API key",
-        "description": "Renames an API key, replaces its scopes, or turns it on or off. The secret stays the same.\r\nRequires the creator of the key or a DocSpace admin. Other callers get 403.\r\nThe call changes data. You can repeat it with the same body.\r\nIt changes only the fields in the body.\r\nPass only `*` in `permissions` to remove all scope restrictions.\r\nWith `isActive` set to false, the key stops authenticating requests but stays in the list.\r\nThe call returns `true` after a change.\r\nFor an expired key, it changes nothing and returns `false`.\r\nTo remove a key for good, use `DELETE api/2.0/keys/{keyId}`.\r\nIf no key has this ID, the call returns 404.\r\nThe call returns 400 if the name is empty, has only spaces, or is too long.\r\nIt also returns 400 if `permissions` is empty or has an unknown scope.",
+        "description": "Renames an API key, replaces its scopes, or turns it on or off. The secret stays the same.\r\nRequires the creator of the key or a DocSpace admin. Other callers get 403.\r\nThe call changes data. You can repeat it with the same body.\r\nIt changes only the fields in the body.\r\nA `permissions` list that contains `*` removes all scope restrictions.\r\nWith `isActive` set to false, the key stops authenticating requests but stays in the list.\r\nThe call returns `true` after a change.\r\nFor an expired key, it changes nothing and returns `false`.\r\nTo remove a key for good, use `DELETE api/2.0/keys/{keyId}`.\r\nIf no key has this ID, the call returns 404.\r\nThe call returns 400 if the name is empty, has only spaces, or is too long.\r\nIt also returns 400 if `permissions` is empty or has an unknown scope.",
         "operationId": "updateApiKey",
         "parameters": [
           {
@@ -4625,7 +4625,7 @@
           "People / Profiles"
         ],
         "summary": "Add a user",
-        "description": "Creates an account in the portal. An admin can add a person directly, or a person can accept an invitation link.\r\nTo accept a link, set `fromInviteLink` to true and pass the `key` of the link. The link then sets the account\r\ntype, and the call ignores `type`. If the link is invalid or expired, the call returns 403. Without a link, a\r\nroom admin can create a user, and a DocSpace admin can also create a room admin. Only the portal owner can\r\ncreate a DocSpace admin. Other callers get 403. Without a link, the `Guest` type also returns 403. The call also\r\nreturns 403 if the portal does not allow inviting members, or guests for a guest link. The call changes data. A\r\nrepeated call with the same email returns 400. With an invitation link that `POST api/2.0/people/invite`\r\nemailed, a repeat returns 403. If `password` breaks the portal password policy, the call returns 400. It also\r\nreturns 400 if the first and last names are not valid. Without `password` and `passwordHash`, the portal sets a\r\nrandom password that nobody knows. Without a free paid seat, the call creates a user instead. If the user limit\r\nis also reached, it returns 402. So check the type flags of the returned profile, such as `isRoomAdmin`. The\r\ncall also downloads the avatar from `files`. If the portal refuses that URL, the call returns 403 and creates no\r\naccount. If its server returns an error, the call also returns 403. Any failed download keeps the created\r\naccount. To invite several people by email, use `POST api/2.0/people/invite`.\n\nRaises the `user.created` webhook after the portal saves the avatar from `files`, if any, but not if the download fails.",
+        "description": "Creates an account in the portal. An admin can add a person directly, or a person can accept an invitation link.\r\nTo accept a link, set `fromInviteLink` to true and pass the `key` of the link. The link then sets the account\r\ntype, and the call ignores `type`. If the link is invalid or expired, the call returns 403. Without a link, a\r\nroom admin can create a user, and a DocSpace admin can also create a room admin. Only the portal owner can\r\ncreate a DocSpace admin. Other callers get 403. Without a link, the `Guest` type also returns 403. The call also\r\nreturns 403 if the portal does not allow inviting members, or guests for a guest link. The call changes data. A\r\nrepeated call with the same email returns 400. With an invitation link that `POST api/2.0/people/invite`\r\nemailed, a repeat returns 403. If `password` breaks the portal password policy, the call returns 400. It also\r\nreturns 400 if the first and last names are not valid. Without `password` and `passwordHash`, the portal sets a\r\nrandom password that nobody knows. Without a free paid seat, the call creates a user instead. If the user limit\r\nis also reached, it returns 402. So check the type flags of the returned profile, such as `isRoomAdmin`. The\r\ncall also downloads the avatar from `files`. If the portal refuses that URL, the call returns 403 and creates no\r\naccount. If the portal cannot save the photo, the account is created without it. That happens when the download\r\nfails, or when the caller may not change the photo of the new profile. To invite several people by email, use\r\n`POST api/2.0/people/invite`.\n\nRaises the `user.created` webhook.",
         "operationId": "addMember",
         "requestBody": {
           "content": {
@@ -4663,7 +4663,7 @@
             "description": "The password does not meet the portal password policy"
           },
           "403": {
-            "description": "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created"
+            "description": "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, or the `files` URL was refused"
           },
           "401": {
             "description": "Unauthorized",
@@ -4732,8 +4732,7 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "user.created",
-            "when": "after the portal saves the avatar from `files`, if any, but not if the download fails"
+            "trigger": "user.created"
           }
         ]
       },
@@ -5453,7 +5452,7 @@
           "People / Profiles"
         ],
         "summary": "Update a user",
-        "description": "Updates an account. The fields it applies depend on whose account it is. On their own account, a caller can\r\nchange the names, location, comment, `spam`, contacts, groups, and avatar. The call then ignores `disable` and\r\n`isUser`. On another account, the call applies only `disable` and `isUser` and ignores all other fields. Any\r\nsigned-in user can call it for their own account. For another account, it requires a DocSpace admin, and other\r\ncallers get 403. Only the portal owner can edit another DocSpace admin, and nobody else can edit the portal\r\nowner. The call changes groups only if the caller can edit groups. For an LDAP or SSO account, it keeps the\r\nnames and location. If the names are not valid, the call returns 400. With `disable` set to true, the account\r\ngets the `Terminated` status, and its sessions end. Deletion with `DELETE api/2.0/people/{userId}` requires this\r\nstatus. With `isUser` set to true, the account becomes a guest, and false makes it a user again. If the tariff\r\nor quota has no free seat for this, the call returns 402. The call ignores a request to make the portal owner, a\r\nDocSpace admin, or a module admin a guest. If the portal refuses the `files` URL or its server returns an error,\r\nthe call returns 403. If no account has the ID, the call returns 404. The call changes data. You can repeat it\r\nwith the same body. It returns the profile after the update. To change the language, use\r\n`PUT api/2.0/people/{userId}/culture`. To change the type, use `PUT api/2.0/people/type/{type}`.\n\nRaises the `user.updated` webhook on every call for the caller's own account, even one that changes nothing. Raises the `user.updated` webhook for another account when `disable` is sent or `isUser` changes the type.",
+        "description": "Updates an account. The fields it applies depend on whose account it is. On their own account, a caller can\r\nchange the names, location, comment, `spam`, contacts, groups, and avatar. The call then ignores `disable` and\r\n`isUser`. On another account, the call applies only `disable` and `isUser` and ignores all other fields. Any\r\nsigned-in user can call it for their own account. For another account, it requires a DocSpace admin, and other\r\ncallers get 403. Only the portal owner can edit another DocSpace admin, and nobody else can edit the portal\r\nowner. The call changes groups only if the caller can edit groups. For an LDAP or SSO account, it keeps the\r\nnames and location. If the names are not valid, the call returns 400. With `disable` set to true, the account\r\ngets the `Terminated` status, and its sessions end. Deletion with `DELETE api/2.0/people/{userId}` requires this\r\nstatus. With `isUser` set to true, the account becomes a guest, and false makes it a user again. If the tariff\r\nor quota has no free seat for this, the call returns 402. The call ignores a request to make the portal owner, a\r\nDocSpace admin, or a module admin a guest. If the portal refuses the `files` URL or its server returns an error,\r\nthe call returns 403 and changes nothing. If no account has the ID, the call returns 404. The call changes data.\r\nYou can repeat it with the same body. It returns the profile after the update. To change the language, use\r\n`PUT api/2.0/people/{userId}/culture`. To change the type, use `PUT api/2.0/people/type/{type}`.\n\nRaises the `user.updated` webhook on every call for the caller's own account, even one that changes nothing. Raises the `user.updated` webhook for another account when `disable` is sent or `isUser` changes the type.",
         "operationId": "updateMember",
         "parameters": [
           {
@@ -10379,7 +10378,7 @@
           "People / User data"
         ],
         "summary": "Get the deletion progress",
-        "description": "Returns the progress of the job that deletes the data of a user.\r\nTo start the job, use `POST api/2.0/people/remove/start`. Requires a DocSpace admin. Other callers get 403.\r\nThe call is read-only. This is the call to poll. Repeat it until `isCompleted` is true.\r\nIf no job exists for the user, the response has no progress object. If the job fails, `error` holds the reason.\r\nTo cancel a running job, use `PUT api/2.0/people/remove/terminate`.",
+        "description": "Returns the progress of the job that deletes the data of a user.\r\nTo start the job, use `POST api/2.0/people/remove/start`. Requires a DocSpace admin. Other callers get 403.\r\nOnly the portal owner can read the job of a DocSpace admin, until the job deletes the profile. Other DocSpace\r\nadmins get 403 for it.\r\nThe call is read-only. This is the call to poll. Repeat it until `isCompleted` is true.\r\nIf no job exists for the user, the response has no progress object. If the job fails, `error` holds the reason.\r\nTo cancel a running job, use `PUT api/2.0/people/remove/terminate`.",
         "operationId": "getRemoveProgress",
         "parameters": [
           {
@@ -10419,7 +10418,7 @@
             }
           },
           "403": {
-            "description": "No permissions to perform this action"
+            "description": "The caller is not a DocSpace admin, or the account is a DocSpace admin and the caller is not the portal owner"
           },
           "401": {
             "description": "Unauthorized",
@@ -10723,7 +10722,7 @@
           "People / User data"
         ],
         "summary": "Terminate the data deletion",
-        "description": "Cancels the job that deletes the data of a user.\r\nRequires a DocSpace admin. Other callers get 403.\r\nThe call changes data. It removes the job from the queue and returns no body.\r\nIt does not restore the data that the job already deleted. You cannot resume the job.\r\nTo start again, use `POST api/2.0/people/remove/start`.\r\nIf no job exists for the user, nothing changes. So you can repeat the call.\r\nTo check whether the job still runs, use `GET api/2.0/people/remove/progress/{userId}`.\r\nThe call returns 400 if the body has no `userId`.",
+        "description": "Cancels the job that deletes the data of a user.\r\nRequires a DocSpace admin. Other callers get 403.\r\nOnly the portal owner can cancel the job of a DocSpace admin, until the job deletes the profile. Other DocSpace\r\nadmins get 403 for it.\r\nThe call changes data. It removes the job from the queue and returns no body.\r\nIt does not restore the data that the job already deleted. You cannot resume the job.\r\nTo start again, use `POST api/2.0/people/remove/start`.\r\nIf no job exists for the user, nothing changes. So you can repeat the call.\r\nTo check whether the job still runs, use `GET api/2.0/people/remove/progress/{userId}`.\r\nThe call returns 400 if the body has no `userId`.",
         "operationId": "terminateRemove",
         "requestBody": {
           "content": {
@@ -10754,7 +10753,7 @@
             "description": "The request body cannot be read or has no `userId`"
           },
           "403": {
-            "description": "No permissions to perform this action"
+            "description": "The caller is not a DocSpace admin, or the account is a DocSpace admin and the caller is not the portal owner"
           },
           "401": {
             "description": "Unauthorized",
@@ -11622,7 +11621,7 @@
           "People / User type"
         ],
         "summary": "Start updating user type",
-        "description": "Starts a job that changes an account to `Guest` or `User`. The same job moves the rooms and shared files of the\r\naccount to another admin. Changing an account to `Guest` also removes it from every AI project. The job deletes\r\nits chat threads there, with their files. For other types, use `PUT api/2.0/people/type/{type}`. Any other type\r\nreturns 400.\r\nRequires a room admin or a DocSpace admin. Other callers get 403. The `Guest` type also returns 403 if the\r\nportal does not allow inviting guests. Only the portal owner can change a DocSpace admin. Otherwise the call\r\nreturns 400. The call also returns 400 for a system or disabled account, or for the account of the caller. The\r\nrecipient is `reassignUserId`, or the caller if it is empty. It must be an active room admin or DocSpace admin,\r\nother than the account. Otherwise the call returns 400. The call queues work. While the job runs, a repeated\r\ncall returns its state and starts nothing. After the job ends, a repeat starts a new job, which emails the\r\ncaller again. Poll `GET api/2.0/people/type/progress/{userId}` until `isCompleted` is true. To cancel the job,\r\nuse `PUT api/2.0/people/type/terminate`. A failure inside the job shows in `error` of the progress, not as a\r\nstatus code.\n\nRaises the `user.updated` webhook once the queued type change succeeds, not when it is cancelled or fails. Raises the `room.updated` webhook for every room of the account, once the job moves it to the recipient. Raises the `agent.updated` webhook instead for an AI agent the account owns.",
+        "description": "Starts a job that changes an account to `Guest` or `User`. The same job moves the rooms and shared files of the\r\naccount to another admin. Changing an account to `Guest` also removes it from every AI project. The job deletes\r\nits chat threads there, with their files. For other types, use `PUT api/2.0/people/type/{type}`. Any other type\r\nreturns 400.\r\nRequires a room admin or a DocSpace admin. Other callers get 403. A room admin also gets 403 for a guest they\r\nare not related to, such as one another member invited. The `Guest` type also returns 403 if the\r\nportal does not allow inviting guests. Only the portal owner can change a DocSpace admin. Otherwise the call\r\nreturns 400. The call also returns 400 for a system or disabled account, or for the account of the caller. The\r\nrecipient is `reassignUserId`, or the caller if it is empty. It must be an active room admin or DocSpace admin,\r\nother than the account. Otherwise the call returns 400. The call queues work. While the job runs, a repeated\r\ncall returns its state and starts nothing. After the job ends, a repeat starts a new job, which emails the\r\ncaller again. Poll `GET api/2.0/people/type/progress/{userId}` until `isCompleted` is true. To cancel the job,\r\nuse `PUT api/2.0/people/type/terminate`. A failure inside the job shows in `error` of the progress, not as a\r\nstatus code.\n\nRaises the `user.updated` webhook once the queued type change succeeds, not when it is cancelled or fails. Raises the `room.updated` webhook for every room of the account, once the job moves it to the recipient. Raises the `agent.updated` webhook instead for an AI agent the account owns.",
         "operationId": "startUserTypeUpdate",
         "requestBody": {
           "content": {
@@ -11660,7 +11659,7 @@
             "description": "The requested type is neither Guest nor User, the account is a system account, disabled or the caller, the recipient is the same account or is not an active admin, or a non-owner tried to convert a DocSpace admin"
           },
           "403": {
-            "description": "No permissions to perform this action"
+            "description": "The caller may not change account types or cannot see the account, or the type is Guest and the portal does not allow inviting guests"
           },
           "401": {
             "description": "Unauthorized",
