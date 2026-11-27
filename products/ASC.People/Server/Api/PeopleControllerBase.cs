@@ -158,23 +158,4 @@ public abstract class PeopleControllerBase(
 
         await _userPhotoManager.SaveOrUpdatePhoto(user.Id, imageByteArray);
     }
-
-    /// <summary>
-    /// Downloads and saves the photo of an account that was just created, and returns the failure instead of throwing
-    /// it: the caller records the creation (audit, webhook, room invitation) first and throws the failure afterwards,
-    /// so a photo that cannot be downloaded never leaves a created account without its records.
-    /// </summary>
-    protected async Task<ExceptionDispatchInfo> TryDownloadAndSavePhotoAsync(UrlValidationResult photoValidation, UserInfo user)
-    {
-        try
-        {
-            await DownloadAndSavePhotoAsync(photoValidation, user);
-
-            return null;
-        }
-        catch (Exception ex)
-        {
-            return ExceptionDispatchInfo.Capture(ex);
-        }
-    }
 }

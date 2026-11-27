@@ -2244,8 +2244,8 @@ public class FileSecurity(
         if (ace == null)
         {
             var cachedRecords = GetCachedRecords<T>();
-            // one record per account and parent: a record found through a link is the account's too, so an account with
-            // a record of its own never reads another account's link record (its own subjects come first)
+            // one record per account and parent, the account's own record only (RecordHoldsForSiblings), so no account
+            // reads a record found for another account or through a link
             var cacheable = !isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive;
             var cacheKey = cacheable ? GetUserRecordCacheKey(e.ParentId, userId, requestLinkApplies) : null;
 
@@ -4199,12 +4199,30 @@ public class FileSecurity(
     }
 
     /// <summary>
-    /// Whether the record an account has to an entry also holds for the other entries of the same folder: a record the
-    /// entry inherits from a folder or a room does, a record of the entry itself (a link of this file) does not.
+    /// The key of an account's record of a room, kept apart from the records of <see cref="GetUserRecordCacheKey{T}(int, T, Guid, bool)"/>,
+    /// which are keyed by the parent of an entry and may belong to a folder inside the room.
+    /// </summary>
+    public static string GetRoomRecordCacheKey<T>(int tenantId, T roomId, Guid userId, bool requestLinkApplies)
+    {
+        var key = $"{tenantId}-room-{userId}-{roomId}";
+
+        return requestLinkApplies ? key + "-request-link" : key;
+    }
+
+    /// <summary>Whether a record found for an entry of a room is the record of the room itself.</summary>
+    public static bool IsRecordOfTheRoom<T>(FileShareRecord<T> record, T roomId)
+    {
+        return record is { EntryType: FileEntryType.Folder } && Equals(record.EntryId, roomId);
+    }
+
+    /// <summary>
+    /// Whether the record an account has to an entry is kept for the other entries of the same folder: a User or AiProject
+    /// record the entry inherits is, as on the base. A record of the entry itself is not, and neither is a link's record:
+    /// a sibling's own link, or another link the account remembers, can outrank it.
     /// </summary>
     public static bool RecordHoldsForSiblings<T>(FileShareRecord<T> record, T entryId, FileEntryType entryType)
     {
-        return record is { SubjectType: SubjectType.User or SubjectType.AiProject or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } &&
+        return record is { SubjectType: SubjectType.User or SubjectType.AiProject } &&
                !(Equals(record.EntryId, entryId) && record.EntryType == entryType);
     }
 
@@ -4244,11 +4262,19 @@ public class FileSecurity(
         var cachedRecords = GetCachedRecords<T>();
         // the record depends on whether the request's link applies to this check, so the key does too: the same
         // account checked as another account in the same request reads its own key and never gets the link's record
-        var cacheKey = GetUserRecordCacheKey(room.Id, userId, RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes.Value > 0));
+        var cacheKey = GetRoomRecordCacheKey(tenantManager.GetCurrentTenantId(), room.Id, userId, RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes.Value > 0));
 
-        if (!cachedRecords.TryGetValue(cacheKey, out var record))
+        if (cachedRecords.TryGetValue(cacheKey, out var record))
         {
-            record = await GetCurrentShareAsync(room, userId, isDocSpaceAdmin, await shares.GetAsync());
+            return record;
+        }
+
+        // the shares are those of the entry checked, so the best record can be the entry's own (a link of this file or
+        // of its folder): only a record of the room itself holds for the other entries of the room
+        record = await GetCurrentShareAsync(room, userId, isDocSpaceAdmin, await shares.GetAsync());
+
+        if (IsRecordOfTheRoom(record, room.Id))
+        {
             cachedRecords.TryAdd(cacheKey, record);
         }
 

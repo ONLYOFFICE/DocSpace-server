@@ -69,8 +69,7 @@ public class FormFillingEditOutsideFillingRoomTests(
 
     /// <summary>
     /// The allowed cell of the same matrix: a member with editing access gets 200 where a reader gets 403, so the 403
-    /// above comes from the access check and not from a refusal of every caller. Outside a form-filling room the action
-    /// changes no filling state of the form.
+    /// above comes from the access check and not from a refusal of every caller.
     /// </summary>
     [Theory]
     [InlineData(RoomType.VirtualDataRoom)]
@@ -87,7 +86,6 @@ public class FormFillingEditOutsideFillingRoomTests(
         var editor = await InviteContact(EmployeeType.User);
         await InviteToRoom(room.Id, editor, FileShare.Editing);
         await _filesClient.Authenticate(editor);
-        var before = (await _filesApi.GetFileInfoAsync(form.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Act
         var status = (await _filesApi.ManageFormFillingWithHttpInfoAsync(
@@ -97,11 +95,43 @@ public class FormFillingEditOutsideFillingRoomTests(
 
         // Assert
         ((int)status).Should().Be(200);
+    }
 
+    /// <summary>
+    /// Outside a form-filling room the action changes no filling state: a form of a virtual data room whose filling
+    /// runs (a role is assigned) keeps it after an editor sends <c>Edit</c>.
+    /// </summary>
+    [Fact]
+    public async Task Edit_EditorOfARunningVdrForm_LeavesTheFillingAsItWas()
+    {
+        // Arrange: the owner assigns a role, which starts the filling of the form
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateVDRRoom("Autotest Edit Running Form " + Guid.NewGuid().ToString()[..8]);
+        var form = await CreateFormInRoom(room.Id);
+
+        var filler = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, filler, FileShare.FillForms);
+        var editor = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, editor, FileShare.Editing);
+
+        var roles = new List<FormRoleRequest>
+        {
+            new() { UserId = filler.Id, RoleName = "Anyone", RoomId = room.Id, RoleColor = "ffefbf", Sequence = 1 }
+        };
+        await _filesApi.SaveFormRoleMappingAsync(form.Id.ToString(), new SaveFormRoleMappingDto(form.Id, roles), TestContext.Current.CancellationToken);
+
+        var before = (await _filesApi.GetFileInfoAsync(form.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        before.StartFilling.Should().BeTrue("the assigned role starts the filling");
+
+        // Act
+        await _filesClient.Authenticate(editor);
+        await Manage(form.Id, FormFillingManageAction.Edit);
+
+        // Assert
+        await _filesClient.Authenticate(Owner);
         var after = (await _filesApi.GetFileInfoAsync(form.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        after.StartFilling.Should().Be(before.StartFilling);
+        after.StartFilling.Should().BeTrue();
         after.FormFillingStatus.Should().Be(before.FormFillingStatus);
-        after.IsFillingPreparing.Should().Be(before.IsFillingPreparing);
     }
 
     private async Task Manage(int formId, FormFillingManageAction action)

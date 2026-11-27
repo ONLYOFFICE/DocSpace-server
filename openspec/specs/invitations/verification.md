@@ -64,6 +64,7 @@ through its link" is removed.
 | Equal or higher type refused (403) | PT/01_Profiles/AddMemberTests.cs:153-216 | TEST-CONFIRMED [run: PASS] |
 | Field length validation 400 | PT/01_Profiles/AddMemberTests.cs:113-150 | TEST-CONFIRMED [run: PASS] |
 | Link-local avatar URL refused (403), bug 81491 | PT/01_Profiles/AddMemberTests.cs:246-263 | TEST-CONFIRMED [run: PASS] |
+| Avatar that cannot be downloaded: the account is created without a photo, 200 with the profile | `UserController.cs::SaveNewAccountPhotoAsync` (best effort, logged) | CODE-ONLY (unreachable: the stand has no host the photo URL check accepts that answers with an error) |
 | No free paid seat → created as User | UC:398-404; yaml `addMember` description | CODE-ONLY |
 | Guests are created through hidden `POST /people/active`, activated | UC:136-226 (`IgnoreApi`); `common/Tests/ASC.Tests.Common/Data/Invitations.cs:90-128`; PT/00_Regressions/GuestTest.cs:39-53 | TEST-CONFIRMED [run: PASS] |
 

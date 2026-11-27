@@ -120,6 +120,11 @@ NOT be created through this operation; the server creates them through the undoc
 - **WHEN** `files` names a URL in the link-local or metadata range
 - **THEN** the system denies the request (403, "Access denied")
 
+#### Scenario: Avatar that cannot be downloaded
+
+- **WHEN** `files` names a URL the portal accepts, but the photo cannot be saved: the download fails (an error status, a timeout, an image over the size limit), or the caller may not edit the new profile
+- **THEN** the account is created without a photo and the call answers 200 with the profile
+
 #### Scenario: No free paid seat
 
 - **WHEN** a Room admin or DocSpace admin is added while the portal has no free paid seat

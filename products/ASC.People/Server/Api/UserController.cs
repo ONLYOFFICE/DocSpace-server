@@ -132,7 +132,7 @@ public class UserController(
     /// Add an activated user
     /// </summary>
     /// <path>api/2.0/people/active</path>
-    [RaisesWebhook(WebhookTrigger.UserCreated, When = "once the avatar named in `files`, if any, is saved: when that download fails, the profile exists but the webhook is not sent")]
+    [RaisesWebhook(WebhookTrigger.UserCreated)]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
@@ -219,12 +219,12 @@ public class UserController(
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
-        // the account exists from here on: a photo that cannot be downloaded fails the call after the webhook
-        var photoFailure = photoValidation != null ? await TryDownloadAndSavePhotoAsync(photoValidation, user) : null;
+        if (photoValidation != null)
+        {
+            await SaveNewAccountPhotoAsync(photoValidation, user);
+        }
 
         await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
-
-        photoFailure?.Throw();
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -242,18 +242,19 @@ public class UserController(
     /// random password that nobody knows. Without a free paid seat, the call creates a user instead. If the user limit
     /// is also reached, it returns 402. So check the type flags of the returned profile, such as `isRoomAdmin`. The
     /// call also downloads the avatar from `files`. If the portal refuses that URL, the call returns 403 and creates no
-    /// account. If its server returns an error, the call also returns 403. Any failed download keeps the created
-    /// account. To invite several people by email, use `POST api/2.0/people/invite`.
+    /// account. If the portal cannot save the photo, the account is created without it. That happens when the download
+    /// fails, or when the caller may not change the photo of the new profile. To invite several people by email, use
+    /// `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Add a user
     /// </summary>
     /// <path>api/2.0/people</path>
-    [RaisesWebhook(WebhookTrigger.UserCreated, When = "after the portal saves the avatar from `files`, if any, but not if the download fails")]
+    [RaisesWebhook(WebhookTrigger.UserCreated)]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The new profile with its detailed information", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The password does not meet the portal password policy")]
-    [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created")]
+    [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, or the `files` URL was refused")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -406,9 +407,10 @@ public class UserController(
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
-        // the account exists from here on: a photo that cannot be downloaded fails the call after the audit record, the
-        // webhook and the room invitation
-        var photoFailure = photoValidation != null ? await TryDownloadAndSavePhotoAsync(photoValidation, user) : null;
+        if (photoValidation != null)
+        {
+            await SaveNewAccountPhotoAsync(photoValidation, user);
+        }
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
@@ -426,9 +428,24 @@ public class UserController(
             await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
         }
 
-        photoFailure?.Throw();
-
         return await employeeFullDtoHelper.GetFullAsync(user);
+    }
+
+    /// <summary>
+    /// Saves the photo of an account that was just created, best effort: the account exists already, so a photo that
+    /// cannot be saved (an error status, a timeout, an image over the size limit, or a caller without the right to edit
+    /// the new profile) is logged and the account stays without it, as the avatar of a sign-up through a provider does.
+    /// </summary>
+    private async Task SaveNewAccountPhotoAsync(UrlValidationResult photoValidation, UserInfo user)
+    {
+        try
+        {
+            await DownloadAndSavePhotoAsync(photoValidation, user);
+        }
+        catch (Exception ex)
+        {
+            logger.WarningNewAccountPhotoNotSaved(user.Id, ex);
+        }
     }
 
     /// <remarks>

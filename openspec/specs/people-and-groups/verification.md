@@ -37,7 +37,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Own address, every type, same as self profile | `P/GetProfileByEmailTests.cs:49` | TEST-CONFIRMED [run: PASS] |
 | Owner→admin, admin→Room admin, Room admin→User succeed | `P/GetProfileByEmailTests.cs:78` | TEST-CONFIRMED [run: PASS] |
 | User/Guest on another 403; unknown 404; anonymous 401 | `P/GetProfileByEmailTests.cs:116,130,102,91` | TEST-CONFIRMED [run: PASS] (by name) |
-| `encemail` decrypted; no address 400 | `P/ProfileLookupRulesTests.cs:44`; `User:1190-1220` | TEST-CONFIRMED [run: PASS] for the 400; `encemail` decryption stays CODE-ONLY (needs an address encrypted with the instance key) |
+| `encemail` decrypted; no address 400 | `P/ProfileLookupRulesTests.cs:44`; `UserController.cs::GetProfileByEmail` | TEST-CONFIRMED [run: PASS] for the 400; `encemail` decryption stays CODE-ONLY (needs an address encrypted with the instance key) |
 | **Own profile and profile list** | | |
 | Self profile; Guest has no personal folder | `P/GetSelfProfileTests.cs:45,62,87` | TEST-CONFIRMED [run: PASS] (by name) |
 | List with flags for Owner/admin; User, Guest 403; anonymous 401 | `P/GetAllProfilesTests.cs:46,78,91,104` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -70,10 +70,10 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | **Listing accounts by status** | | |
 | Owner, admin, Room admin lists; Room admin Terminated empty 200; User, Guest 403 | `S/UserStatusGetTests.cs:43,106,174,199`; `S/UserStatusGetPermissionsTests.cs:44,62,86` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Activation status through a confirmation link** | | |
-| Roles Activation, EmailActivation; list must be the caller alone, else 400; welcome letter once | `User:2117-2159` | CODE-ONLY (unreachable: the confirmation key arrives only in a letter) |
+| Roles Activation, EmailActivation; list must be the caller alone, else 400; welcome letter once | `UserController.cs::UpdateUserActivationStatus` | CODE-ONLY (unreachable: the confirmation key arrives only in a letter) |
 | **Who may start an email change** | | |
 | Allowed pairs | `E/EmailChangeInstructionsTests.cs:43-55,124-134` | TEST-CONFIRMED [run: PASS] |
-| DocSpace admin on a Guest: 200 (the web client offers "Change email" too) | live check 2026-11-14 on the `test` stand; `products/ASC.People/Server/Api/UserController.cs:1886-1900` (only an admin target needs the Owner) | LIVE-CONFIRMED |
+| DocSpace admin on a Guest: 200 (the web client offers "Change email" too) | live check 2026-11-14 on the `test` stand; `products/ASC.People/Server/Api/UserController.cs::SendEmailChangeInstructions` (only an admin target needs the Owner) | LIVE-CONFIRMED |
 | Denied pairs 403 "Access denied" | `E/EmailChangeInstructionsPermissionsTests.cs:42-73` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | `E/EmailChangeInstructionsPermissionsTests.cs:134` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Immediate change versus instructions** | | |
@@ -85,7 +85,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Longer than 255 → 400 | `E/EmailChangeInstructionsPermissionsTests.cs:117` | TEST-CONFIRMED [run: PASS] (by name) |
 | Disabled/pending 404, taken address 400, same address 400 | `E/EmailChangeInstructionsRulesTests.cs:75,90,106,124` | TEST-CONFIRMED [run: PASS]; the account's own address is caught by the "taken" lookup before the "same address" check, so that check is unreachable but the answer is the same 400 |
 | **Applying an email change from a link** | | |
-| Role EmailChange; 403 cases; lower-cased; Activated; empty 400 | `User:684-737` | CODE-ONLY (unreachable: the EmailChange key arrives only in a letter) |
+| Role EmailChange; 403 cases; lower-cased; Activated; empty 400 | `UserController.cs::ChangeUserEmail` | CODE-ONLY (unreachable: the EmailChange key arrives only in a letter) |
 | **Reading a user photo** | | |
 | Own; Owner/admin on anyone; Room admin except Guest | `F/PhotoGetTests.cs:49-85` | TEST-CONFIRMED [run: PASS] |
 | Room admin→Guest 403; User/Guest→others 403 | `F/PhotoGetPermissionsTests.cs:48-100` | TEST-CONFIRMED [run: PASS] |
@@ -178,6 +178,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Link removed, 200 | `X/ThirdPartyAccountLinkTests.cs:58` | TEST-CONFIRMED [run: PASS] for 200 on a provider that is not linked; removing a real link stays CODE-ONLY (no link can be made here) |
 | **Joining through a third-party account** | | |
 | Anonymous, invitation check, cancellation empty body | `Third:207-300`, yaml `signupThirdPartyAccount` | CODE-ONLY (unreachable: needs a provider-issued serialized profile) |
+| Avatar of the provider profile: a refused address, more than 3 redirects, an error or an image over the limit leave the account without a photo, the sign-up goes on | `ThirdpartyController.cs::SaveContactImage`, `::DownloadAvatarAsync` | CODE-ONLY (unreachable: needs a provider profile and a host the URL check accepts) |
 | **Who may manage groups** | | |
 | User manager forbidden: `removeMembersFrom`, `setMembersTo` | `G/GroupPermissionRemoveMembersTests.cs:227-235`; `G/GroupPermissionSetMembersTests.cs:165` | TEST-CONFIRMED [run: PASS] |
 | DocSpace admin allowed, non-admin 403, anonymous 401, each operation | `G/GroupPermission*Tests.cs` (`_DocSpaceAdmin_`, `_NonAdminRoles_Forbidden`, `_Anonymous_Unauthorized`); `G/GroupPermissionDeleteGroupTests.cs:72,86` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -276,12 +277,12 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Owner and DocSpace admin offered every member; Room admin every member with full profile | `Q/ShareCandidates/ShareCandidateCallersTests.cs:45,59`; `Q/ShareCandidates/ShareCandidateProfileTests.cs:103` | TEST-CONFIRMED [run: PASS] (by name) |
 | Accounts with a granting record on the entry or its parent folder are known | `Q/ShareCandidates/ShareCandidateAccessListTests.cs:46,70`; members of a group the file is shared with are not: `:97` | TEST-CONFIRMED [run: PASS] (by name) |
 | **What does not make an account known**: restricted from the room (self, own group), restricted member, restricted group, Restrict record on the room, group manager no member, template recipients; restricted in one room only still known | `Q/ShareCandidates/ShareCandidateUsersTests.cs:108,168,192,215,237,259,282,304`; `Q/ShareCandidates/ShareCandidateRoomUsersTests.cs:46` (`4cce45495e`, `1a215ae902`, `c48dbab686`, `328a620d4a`) | TEST-CONFIRMED [run: PASS] (by name) |
-| **Access state in the share search**: a reader learns no other recipient and no `shared`, in My documents, a room and a public room; `includeShared` empty | `Q/ShareCandidates/ShareCandidateAccessListTests.cs:125,154,185,207`; `User:3264-3274` (`CanSeeSharesAsync`: room → any reader, otherwise manager; an entry read without its parent room type counts as outside a public room, `products/ASC.Files/Core/Utils/FileSharing.cs:918-936`) | TEST-CONFIRMED [run: PASS] (by name); `excludeShared` removing nobody and `shared` true for a denying record CODE-ONLY (`597660e87b`, `328a620d4a`) |
+| **Access state in the share search**: a reader learns no other recipient and no `shared`, in My documents, a room and a public room; `includeShared` empty | `Q/ShareCandidates/ShareCandidateAccessListTests.cs:125,154,185,207`; `UserController.cs::GetUsers` (`CanSeeSharesAsync`: room → any reader, otherwise manager; an entry read without its parent room type counts as outside a public room, `products/ASC.Files/Core/Utils/FileSharing.cs:918-936`) | TEST-CONFIRMED [run: PASS] (by name); `excludeShared` removing nobody and `shared` true for a denying record CODE-ONLY (`597660e87b`, `328a620d4a`) |
 | **Guests and inviters**: guest met only in a room not offered, related guest offered; Room admin not related gets only the guest of the room with `area` All; `inviterId` of another ignored except for a DocSpace admin | `Q/ShareCandidates/ShareCandidateCallersTests.cs:92,116,153`; `Q/ShareCandidates/ShareCandidateFiltersTests.cs:79,100` (`575c1e1007`, `2410f9d7fb`) | TEST-CONFIRMED [run: PASS] (by name) |
 | **Profiles in the share search**: short profile for a User, people, folder and accounts searches | `Q/ShareCandidates/ShareCandidateProfileTests.cs:46,66,82` (`85fdddac88`) | TEST-CONFIRMED [run: PASS] (by name) |
 | **Groups offered to a User or a Guest**: only Everyone with total 1 although a group holds access, the group stays in `getFileSecurityInfo`; name search finds nothing (total 0); Room admin gets portal groups; folder variant | `R/GroupSearchPermissionsTests.cs:66-83,92-110,117-128,197`; `Q/ShareCandidates/ShareCandidateAccountsTests.cs:117`; `products/ASC.Files/Core/Utils/FileSharing.cs:791-801` (`f2cfa73361`, `c48dbab686`) | TEST-CONFIRMED [run: PASS] |
 | **Contact details of another account**: room access list and group members on an access list, User member gets no location, notes, contacts | `products/ASC.Files/Tests/Tests/04_Security/Sharing/AccessListMembersTests.cs:135-155,165-184` (`bf49b2b96a`); form roles and file or folder access lists by the same profile builder, `common/ASC.Api.Core/Model/EmployeeFullDto.cs` (`GetFullAsync`) | TEST-CONFIRMED [run: PASS] for the two cited lists; the others CODE-ONLY |
-| **Closing one's own profile through the confirmation link** | `User:812-850`; yaml `deleteProfile` (401 replaces the unreachable 404, `893c80e16c`) | CODE-ONLY (unreachable: the `ProfileRemove` key arrives only by letter) |
+| **Closing one's own profile through the confirmation link** | `UserController.cs::DeleteProfile`; yaml `deleteProfile` (401 replaces the unreachable 404, `893c80e16c`) | CODE-ONLY (unreachable: the `ProfileRemove` key arrives only by letter) |
 | **Real-time account and group events**: add-user and update-user carry `id` alone; update-group the group id alone; change-my-type reaches that user | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketPortalEventsTests.cs:97-99,135,147` (`10b9a0ad34`, `d4251f038b`) | TEST-CONFIRMED [run: PASS]; add-guest, update-guest and add-group CODE-ONLY (`common/ASC.Api.Core/Socket/UserSocketManager.cs`) |
 | Share search test classes moved from `16_ShareCandidates` to `08_Search/ShareCandidates` (`2cf612f989`) | git | READ |
 | Documented 500 removed from `addMember`, `deleteMember`, `removeUsers`, `updateMember`, the people searches with `filterBy` group, `linkThirdPartyAccount`, `signupThirdPartyAccount` (which also names a link with no uses left for its 403); `updateUserActivationStatus` now documents 401 and 403. No requirement cited a 500; the activation requirement states only the 400 | `9c6fcec6c5`, `893c80e16c` | READ |

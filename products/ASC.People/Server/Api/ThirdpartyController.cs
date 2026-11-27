@@ -455,8 +455,9 @@ public class ThirdpartyController(
     // a provider sends its avatar from a CDN behind one or two redirects (Facebook's picture address answers 302)
     private const int MaxAvatarRedirects = 3;
 
-    // the whole download of an avatar - every lookup, request and body, redirects included - ends within this time;
-    // each request also keeps the shorter deadline of LimitedImageReader
+    // the sign-up waits for the avatar - every lookup, request and body, redirects included - at most this long; each
+    // request also keeps the shorter deadline of LimitedImageReader. A lookup takes no token: past the deadline the
+    // sign-up stops waiting for it, and the lookup ends on the validator's own DNS timeout
     private static readonly TimeSpan _avatarDeadline = TimeSpan.FromSeconds(20);
 
     /// <summary>

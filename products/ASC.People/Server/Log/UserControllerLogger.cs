@@ -40,4 +40,7 @@ internal static partial class UserControllerLogger
 
     [LoggerMessage(LogLevel.Error, "Password recovery ({email}): {error}")]
     public static partial void ErrorPasswordRecovery(this ILogger<UserController> logger, string email, string error);
+
+    [LoggerMessage(LogLevel.Warning, "The photo of the new account {userId} was not saved; the account was created without it")]
+    public static partial void WarningNewAccountPhotoNotSaved(this ILogger<UserController> logger, Guid userId, Exception exception);
 }

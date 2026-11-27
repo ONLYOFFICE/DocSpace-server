@@ -14,7 +14,7 @@ Role → right mapping used by the tests and the code: the roles are the `FileSh
 (`RoomManager`), Content creator (`ContentCreator`), Editor (`Editing`), Form Filler (`FillForms`),
 Reviewer (`Review`), Commentator (`Comment`), Viewer (`Read`); the numeric values are not used anywhere in
 the spec. The per-room-type role table is `products/ASC.Files/Core/Core/Security/FileSecurity.cs:160-264`
-(`AvailableRoomAccesses`), the per-user-type table `FileSecurity.cs:265-291` (`AvailableUserAccesses`);
+(`AvailableRoomAccesses`), the per-user-type table `FileSecurity.cs::AvailableUserAccesses`;
 both are enforced in `products/ASC.Files/Core/Utils/FileSharing.cs:206-210` and `:303-309` with the message
 "The role is not available for this user type" (`products/ASC.Files/Core/Resources/FilesCommonResource.resx:340`),
 which no test asserts (only the 403). Shared theory data of the suite: `03_Rooms/RoomAccessData.cs:43-66`
@@ -69,7 +69,7 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the range rewrote the descriptions
 | Guest as Content creator (invitation accepted, used for copying) | `06_Operations/Copy/CopyPermissionsTests.cs:302-324`; `RoomReadPermissionsTests.cs:129-147` (Guest × Content creator) | TEST-CONFIRMED [run: PASS] |
 | User / Guest as Content creator, Editor, Reviewer, Commentator, Viewer; User as Form Filler | `RoomDeletePermissionsTests.cs:186-206` (Arrange); `RoomShareAccessLevelTests.cs:56, 79` | TEST-CONFIRMED [run: PASS] |
 | Owner, DocSpace admin, Room admin hold every role | `RoomReadPermissionsTests.cs:129-147`; `02_Folders/Upload/UploadPermissionsTests.cs:127-138`; `01_Files/EditSession/EditSessionPermissionsTests.cs:65`; `02_Folders/Crud/FolderRenamePermissionsTests.cs:51`; `CopyPermissionsTests.cs:382-420` | TEST-CONFIRMED [run: PASS] |
-| Full per-type table | `RoomShareUserTypeRolesTests.cs:54` (DocSpace admin, Room admin, User, Guest × Room manager, Content creator, Editor, Reviewer, Commentator, Viewer in a Custom room and Form Filler in a VDR: accepted exactly as the table, Room manager refused for User and Guest); `FileSecurity.cs:265-291` | TEST-CONFIRMED [run: PASS] |
+| Full per-type table | `RoomShareUserTypeRolesTests.cs:54` (DocSpace admin, Room admin, User, Guest × Room manager, Content creator, Editor, Reviewer, Commentator, Viewer in a Custom room and Form Filler in a VDR: accepted exactly as the table, Room manager refused for User and Guest); `FileSecurity.cs::AvailableUserAccesses` | TEST-CONFIRMED [run: PASS] |
 | User / Guest cannot own a room → 403 | `room-types` spec, scenario "User cannot become the owner" and its `verification.md` | CODE-ONLY (cross-reference) |
 | **Room management by role** | | |
 | Edit the room: Room manager 200, Content creator / Editor / Viewer 403; Owner 200 | `RoomUpdatePermissionsTests.cs:43-58, 166-199` | TEST-CONFIRMED [run: PASS] |
