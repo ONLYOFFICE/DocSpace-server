@@ -336,8 +336,8 @@ public abstract class FilesController<T>(
     /// download requests per gallery host over 30 seconds. A request fails if it cannot connect or times out. It also
     /// fails on a server error, Request Timeout, or Too Many Requests. A template file's error status is not a failure.
     /// The server stops asking that host for 30 seconds after a failed request. This happens when at least half of 5 or
-    /// more requests failed. Meanwhile, the call returns 502 immediately. This holds for all portals of the server
-    /// process. The gallery availability check can still return `true` then. If
+    /// more requests failed. Meanwhile, requests to that host fail immediately, and the call returns 502. This holds for
+    /// all portals of the server process. The gallery availability check can still return `true` then. If
     /// the new file exceeds the storage quota, the call returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own
     /// section, use `POST api/2.0/files/@my/file`.
     /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
@@ -1339,9 +1339,9 @@ public class FilesControllerCommon(
     /// can make up to 3 list requests and 3 file requests. The server counts download requests per gallery host over 30
     /// seconds. A request fails if it cannot connect or times out. It also fails on a server error, Request Timeout, or
     /// Too Many Requests. A template file's error status is not a failure. The server stops asking that host for 30
-    /// seconds after a failed request. This happens when at least half of 5 or more requests failed. Meanwhile, the
-    /// call returns 502 immediately. This holds for all portals of the server process. The gallery availability check
-    /// can still return `true` then.
+    /// seconds after a failed request. This happens when at least half of 5 or more requests failed. Meanwhile,
+    /// requests to that host fail immediately, and the call returns 502. This holds for all portals of the server
+    /// process. The gallery availability check can still return `true` then.
     /// </remarks>
     /// <summary>
     /// Create a file in My documents

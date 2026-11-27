@@ -361,7 +361,8 @@ public class OFormRequestManager(
     /// answered before: for a day after the gallery last answered, then a failed check means "unavailable". The time of
     /// that answer is kept in the cached value, since every failed check stores the entry again and would otherwise
     /// keep it for as long as the checks keep failing. The known "available" may be another process's, read from the
-    /// distributed cache, also when this process holds an expired "unavailable" of its own. Without a distributed cache
+    /// distributed cache, also when this process holds an expired "unavailable" of its own; the reader of a check
+    /// slower than the 200 ms wait still gets that "unavailable" until the check ends. Without a distributed cache
     /// (Redis off), a restart forgets it. With nothing known, a failed check means "unavailable" for up to 1 minute,
     /// kept by this process only, so one process that cannot reach the gallery never hides it from the others. A "true"
     /// another process writes ends it earlier, unless both checked at almost the same moment: the backplane drops a
@@ -525,7 +526,8 @@ public class OFormRequestManager(
             return domain;
         }
 
-        logger.WarningOFormGalleryAddress(value);
+        // Without its user info: a password written into the address must not stay in the log
+        logger.WarningOFormGalleryAddress(WithoutQuery(value));
 
         return null;
     }
@@ -540,8 +542,8 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// A gallery file address that is not an http or https address, for the log, without its query, fragment and user
-    /// info. It may not parse as a URI, so the parts are cut from the text.
+    /// A gallery file address, or the configured address of the gallery, that is not an http or https address, for the
+    /// log, without its query, fragment and user info. It may not parse as a URI, so the parts are cut from the text.
     /// </summary>
     private static string WithoutQuery(string url)
     {

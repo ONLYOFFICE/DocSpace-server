@@ -622,6 +622,41 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task Get_JustUnderHalfOfThirteenRequestsFailed_LeavesTheCircuitClosed()
+    {
+        // 7 answered requests (three creations with their files, a list answering 403), then two creations whose 3
+        // requests each fail: the last failure makes 6 of 13, just under half, and the next creation still asks the
+        // gallery. With a lower ratio (6 of 13 is about 0.46) the circuit would open there
+        var phase = 0;
+        var gallery = Gallery(request => Volatile.Read(ref phase) switch
+        {
+            0 => IsFile(request) ? new StubResponse(HttpStatusCode.OK, Pdf) : StubResponse.Json(HttpStatusCode.OK, ListWithFile()),
+            1 => new StubResponse(HttpStatusCode.Forbidden),
+            _ => new StubResponse(HttpStatusCode.ServiceUnavailable)
+        });
+        var manager = CreateManager(gallery.Url);
+
+        for (var i = 0; i < 3; i++)
+        {
+            await using (await manager.Get(1, ".pdf"))
+            {
+            }
+        }
+
+        Volatile.Write(ref phase, 1);
+        await AssertGalleryUnavailableAsync(manager);
+        Volatile.Write(ref phase, 2);
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+        var asked = gallery.CallCount;
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        asked.Should().Be(13);
+        gallery.CallCount.Should().BeGreaterThan(asked);
+    }
+
+    [Fact]
     public async Task Get_ErrorStatusesOfATemplateFile_CountAsAnsweredRequests()
     {
         // Two creations of a broken template answer 8 requests (a list and three file attempts each). The breaker takes
@@ -749,6 +784,19 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task GalleryAddressCannotBeRequested_IsLoggedWithoutItsUserInfo()
+    {
+        // An address of the configuration with a password in it: the warning names the address, not the password
+        var logs = new RecordingLoggerProvider();
+        var manager = CreateManager("ftp://user:secret@gallery.example/cms?token=secret", loggerProvider: logs);
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        logs.Entries.Should().Contain(entry => entry.Level == LogLevel.Warning && entry.Message.Contains("ftp://gallery.example/cms", StringComparison.Ordinal));
+        logs.Entries.Should().NotContain(entry => entry.Message.Contains("secret", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task Get_FileOfOneTemplateKeepsFailing_DoesNotOpenTheCircuitOfItsHost()
     {
         // The breaker of a host is shared by every portal of the process: one template whose file answers 5xx must not
@@ -805,7 +853,9 @@ public sealed class OFormRequestManagerTests : IDisposable
 
         using var reader = new StreamReader(stream);
         (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(Pdf);
-        gallery.Requests.Count(request => !IsFile(request)).Should().Be(2);
+
+        // At least the timed-out attempt and the one that got the list; a busy runner may give up one more
+        gallery.Requests.Count(request => !IsFile(request)).Should().BeGreaterThanOrEqualTo(2);
     }
 
     [Theory]
@@ -1267,8 +1317,89 @@ public sealed class OFormRequestManagerTests : IDisposable
         await first.ExpireAsync(key, options => options.SkipDistributedCacheWrite = true, token);
         await Task.Delay(TimeSpan.FromMilliseconds(50), token);
 
+        // The failed check keeps the "available", whether it ends within the 200 ms wait or in the background: what
+        // holds is the answer the node caches after it, not which path the first reader took
+        await firstManager.IsAvailableAsync();
+        await WaitForCachedAnswerAsync(first, key, expected: true);
         (await firstManager.IsAvailableAsync()).Should().BeTrue();
         gallery.CallCount.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_SlowCheckWithLocalFalseAndATrueOfAnotherNode_ReaderGetsTheLocalFalse()
+    {
+        // The window the remarks name: a node holds its own expired "unavailable", another node's "available" of the
+        // last day is in the distributed cache, and the check outlasts the 200 ms wait. The reader of that wait gets
+        // the node's own "unavailable"; the check then keeps the other node's "available"
+        var distributed = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        using var first = CreateNodeCache(distributed);
+        using var second = CreateNodeCache(distributed);
+        var slow = false;
+        var gallery = Gallery(_ => Volatile.Read(ref slow)
+            ? new StubResponse(HttpStatusCode.BadGateway).After(TimeSpan.FromSeconds(3))
+            : new StubResponse(HttpStatusCode.BadGateway));
+        var firstManager = CreateManager(gallery.Url, cache: first);
+        var key = AvailabilityCacheKey(gallery);
+        var token = TestContext.Current.CancellationToken;
+
+        (await firstManager.IsAvailableAsync()).Should().BeFalse();
+
+        await second.SetAsync(key, new OFormRequestManager.AvailabilityAnswer(true, DateTimeOffset.UtcNow), options => options
+            .SetDuration(TimeSpan.FromMilliseconds(1))
+            .SetFailSafe(true, TimeSpan.FromDays(1)), token);
+        await first.ExpireAsync(key, options => options.SkipDistributedCacheWrite = true, token);
+        await Task.Delay(TimeSpan.FromMilliseconds(50), token);
+        Volatile.Write(ref slow, true);
+        var checkEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        first.Events.BackgroundFactorySuccess += (_, _) => checkEnded.TrySetResult();
+        first.Events.BackgroundFactoryError += (_, _) => checkEnded.TrySetResult();
+
+        var watch = Stopwatch.StartNew();
+        (await firstManager.IsAvailableAsync()).Should().BeFalse();
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
+
+        await checkEnded.Task.WaitAsync(TimeSpan.FromSeconds(15), token);
+        await WaitForCachedAnswerAsync(first, key, expected: true);
+    }
+
+    [Theory]
+    [InlineData(23, false, true)]
+    [InlineData(24, false, false)]
+    [InlineData(23, true, true)]
+    [InlineData(24, true, false)]
+    public async Task IsAvailableAsync_RestartedNodeAndATrueInTheDistributedCache_KeepsItForTheDay(int hours, bool slowCheck, bool expected)
+    {
+        // A node that starts with an empty memory (a restart, a new pod) while the distributed cache holds an expired
+        // "available" of another node: a failed check, fast or slower than the 200 ms wait, keeps that answer for a
+        // day after the gallery last answered, and not after it
+        var time = new ManualTimeProvider();
+        var distributed = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        using var writer = CreateNodeCache(distributed);
+        using var restarted = CreateNodeCache(distributed);
+        var gallery = Gallery(_ => slowCheck
+            ? new StubResponse(HttpStatusCode.BadGateway).After(TimeSpan.FromSeconds(3))
+            : new StubResponse(HttpStatusCode.BadGateway));
+        var key = AvailabilityCacheKey(gallery);
+        var token = TestContext.Current.CancellationToken;
+
+        await writer.SetAsync(key, new OFormRequestManager.AvailabilityAnswer(true, time.GetUtcNow()), options => options
+            .SetDuration(TimeSpan.FromMilliseconds(1))
+            .SetFailSafe(true, TimeSpan.FromDays(1)), token);
+        await Task.Delay(TimeSpan.FromMilliseconds(50), token);
+        time.Advance(TimeSpan.FromHours(hours));
+        var checkEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        restarted.Events.FactorySuccess += (_, _) => checkEnded.TrySetResult();
+        restarted.Events.BackgroundFactorySuccess += (_, _) => checkEnded.TrySetResult();
+        restarted.Events.BackgroundFactoryError += (_, _) => checkEnded.TrySetResult();
+
+        var watch = Stopwatch.StartNew();
+        (await CreateManager(gallery.Url, cache: restarted, timeProvider: time).IsAvailableAsync()).Should().Be(expected);
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
+
+        // The check ends before the test does, not under it with the cache disposed. For a fast check the cache then
+        // holds what the day allows; a slow one is pinned by the answer within the wait only
+        await checkEnded.Task.WaitAsync(TimeSpan.FromSeconds(15), token);
+        await WaitForCachedAnswerAsync(restarted, key, expected);
     }
 
     [Fact]

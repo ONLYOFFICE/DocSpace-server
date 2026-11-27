@@ -100,13 +100,13 @@ after the last answer while the cache holds it (bug 78009).
 - **WHEN** the gallery answers with an error status, with a page that is not the list, not in time, drops the connection, cannot be reached, the check fails for a reason other than the gallery, or the check runs past the hard timeout of the cache
 - **THEN** the call returns `false`
 - **AND** that `false` stays with the process that checked, for up to a minute: another process of the installation asks the gallery itself
-- **AND** after that minute, while a new check takes longer than 200 ms, the call returns the expired `false`, for up to a day after it was stored
+- **AND** after that minute, while a new check takes longer than 200 ms, the call returns the expired `false`; it does so also when another process has since got `true`, until the check ends
 
 #### Scenario: Check fails with available known
 
 - **WHEN** the call returned `true` and a later check gets an error status or a page that is not the list
 - **THEN** the call still returns `true`
-- **AND** it keeps the `true` for a day after the last answer, however many checks fail meanwhile, and without a distributed cache a restart forgets it
+- **AND** it keeps the `true` for a day after the last answer, however many checks fail meanwhile; a process started anew keeps a `true` of the distributed cache the same way, and without a distributed cache a restart forgets it
 - **AND** a failed check a day or more after the last answer returns `false`
 
 #### Scenario: Caller

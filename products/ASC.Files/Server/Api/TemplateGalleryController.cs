@@ -50,20 +50,21 @@ public class TemplateGalleryController(OFormRequestManager oFormRequestManager) 
     /// keeps a known `true` for a day after the gallery last answered, however many checks fail. Without a shared
     /// cache, each server process keeps its own answers, and a restart forgets them. With nothing known, a failed check
     /// returns `false`. The server process that checked keeps that `false` for up to 1 minute. After 200 ms of waiting
-    /// for a refresh, the call can return an expired answer of the last day. The request to the gallery times out after
-    /// 4 seconds. Without a configured gallery, the call returns `false`. The answer is not a promise that a template
-    /// can be created. The server counts the requests of the downloads to each gallery host over 30 seconds. A request
-    /// fails if it cannot connect or times out. It also fails on a server error, Request Timeout, or Too Many Requests.
-    /// The server stops asking that host for 30 seconds after a failed request. This happens when at least half of 5 or
-    /// more requests failed. Meanwhile, the creation from a template returns 502, while this call can still return
-    /// `true`.
+    /// for a refresh, the call can return an expired answer of the last day. A process may then return its own
+    /// `false` while another got `true`. The request to the gallery times out after 4 seconds.
+    /// Without a configured gallery, the call returns `false`. The answer is not a promise that a template can be
+    /// created. The server counts the requests of the downloads to each gallery host over 30 seconds. A request fails
+    /// if it cannot connect or times out. It also fails on a server error, Request Timeout, or Too Many Requests. The
+    /// server stops asking that host for 30 seconds after a failed request. This happens when at least half of 5 or
+    /// more requests failed. Meanwhile, `POST api/2.0/files/{folderId}/file` with a `formId` fails, while this call
+    /// can still return `true`.
     /// </remarks>
     /// <summary>
     /// Check the template gallery
     /// </summary>
     /// <path>api/2.0/files/templateGallery/available</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "`true` when the gallery answered with its template list, `false` when no gallery is configured or the server has failed to get the list and knows no `true` from the last day", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the gallery answered with its template list, `false` when no gallery is configured or the server has failed to get the list and knows no `true` from the last day; while a slow check runs, also a process's own earlier `false`", typeof(bool))]
     [SwaggerResponse(401, "The caller is not signed in")]
     [HttpGet("templateGallery/available")]
     public async Task<bool> GetTemplateGalleryAvailable()
