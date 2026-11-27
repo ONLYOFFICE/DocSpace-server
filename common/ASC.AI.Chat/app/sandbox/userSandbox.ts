@@ -45,6 +45,7 @@
 
 import { CHAT_SANDBOX_MAX_COMMAND_SECONDS } from "../../config/index.js";
 import type { ChatSandboxConfig } from "../../config/index.js";
+import logger from "../log.js";
 import { createSandbox, makeDir, renewSandbox } from "../pluginAgent/sandboxClient.js";
 import { getSelfId } from "../storage/docspacePeopleApi.js";
 
@@ -74,11 +75,20 @@ export async function acquireUserSandbox(
   signal?: AbortSignal,
 ): Promise<string> {
   const ttlSeconds = lifetimeOf(config);
+  const started = Date.now();
   const userId = await getSelfId(signal);
+  const asked = Date.now();
   const id = await createSandbox(config, userId, ttlSeconds, signal);
+  const created = Date.now();
   // `Create` answers a sandbox that already runs as it is, with the expiry it had: the lifetime
   // it is sent applies to a new one only (the gateway's session service).
   await renewSandbox(config, id, ttlSeconds, signal);
   await makeDir(config, id, dir, signal);
+  // The one line a call that went well leaves: which sandbox served it and what the way to it
+  // cost. A `Create` of seconds is a sandbox that was started, one of milliseconds a running one.
+  logger.info(
+    `chat sandbox ${id} for ${dir}: ready in ${Date.now() - started}ms ` +
+      `(caller ${asked - started}ms, Create ${created - asked}ms), renewed to ${ttlSeconds}s`,
+  );
   return id;
 }
