@@ -132,7 +132,7 @@ export async function addWebPlugin(title: string, bytes: Uint8Array): Promise<We
       };
     }
     if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      throw await refusedAnswer(res, url);
     }
     const raw = await jsonAnswer(res, "POST settings/webplugins");
     const plugin = mapped(
