@@ -1319,7 +1319,7 @@ public class FileSecurity(
         // (CheckAsync adds the checked account's own flag, so a signed-in caller checks the guest account as authenticated),
         // and the current account's notification settings decide Mute of a room (IsAllGeneralNotificationSettingsOffAsync).
         var forCurrentAccount = userId == authContext.CurrentAccount.ID;
-        var requestLinkApplies = RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes > 0);
+        var requestLinkApplies = RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes.Value > 0);
 
         if ((e.RootFolderType == FolderType.AiHub || folder is { FolderType: FolderType.AiHub }) && !await aiAccessibility.IsAccessEnabledAsync())
         {
@@ -2244,10 +2244,12 @@ public class FileSecurity(
         if (ace == null)
         {
             var cachedRecords = GetCachedRecords<T>();
-            if (((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
-                 cachedRecords.TryGetValue(GetUserRecordCacheKey(e.ParentId, userId, requestLinkApplies), out var value)) ||
-                (requestLinkApplies && cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))) &&
-                value != null)
+            // one record per account and parent: a record found through a link is the account's too, so an account with
+            // a record of its own never reads another account's link record (its own subjects come first)
+            var cacheable = !isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive;
+            var cacheKey = cacheable ? GetUserRecordCacheKey(e.ParentId, userId, requestLinkApplies) : null;
+
+            if (cacheable && cachedRecords.TryGetValue(cacheKey, out var value) && value != null)
             {
                 ace = value.Clone();
                 ace.EntryId = e.Id;
@@ -2259,14 +2261,9 @@ public class FileSecurity(
                 {
                     ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, await shares.GetAsync());
 
-                    if (e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
-                        ace is { SubjectType: SubjectType.User or SubjectType.AiProject or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
+                    if (cacheable && RecordHoldsForSiblings(ace, e.Id, e.FileEntryType))
                     {
-                        var key = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink
-                            ? GetCacheKey(e.ParentId, ace.Subject)
-                            : GetUserRecordCacheKey(e.ParentId, userId, requestLinkApplies);
-
-                        cachedRecords.TryAdd(key, ace);
+                        cachedRecords.TryAdd(cacheKey, ace);
                     }
                 }
             }
@@ -3754,7 +3751,7 @@ public class FileSecurity(
         if (string.Equals(httpContextAccessor?.HttpContext?.Request.Method, nameof(HttpMethod.Get), StringComparison.OrdinalIgnoreCase))
         {
             // the request's link is part of the answer, so a check inside the scope is cached apart
-            return await _subjects.GetOrAdd(new SubjectRecord(userId, includeAvailableLinks, _requestLinkScopes > 0), s =>
+            return await _subjects.GetOrAdd(new SubjectRecord(userId, includeAvailableLinks, _requestLinkScopes.Value > 0), s =>
                 new Lazy<Task<List<OrderedSubject>>>(GetUserOrderedSubjectsAsync<int>(s.UserId, s.IncludeLinks))).Value;
         }
 
@@ -4035,17 +4032,19 @@ public class FileSecurity(
         return userId == currentAccountId || insideRequestLinkScope;
     }
 
-    private int _requestLinkScopes;
+    // flows with the caller's async context only: a check that runs in parallel on the same instance outside the
+    // scope, or was started before it, does not see the scope
+    private readonly AsyncLocal<int> _requestLinkScopes = new();
 
     /// <summary>
-    /// Makes the link of the request apply to every account checked until the returned scope is disposed. The document
-    /// server's edit callback uses it around the check of each editor: the callback carries the link the document was
-    /// opened with, it is not signed in, and an anonymous editor is checked as <see cref="Guid.Empty"/>. Nothing else
-    /// runs inside the scope, so no other account is checked with the link.
+    /// Makes the link of the request apply to every account checked in the caller's async flow until the returned
+    /// scope is disposed. The document server's edit callback uses it around the check of each editor: the callback is
+    /// not signed in, and an anonymous editor is checked as <see cref="Guid.Empty"/>. The link is the one in the
+    /// callback address, which is the link of one of the editors' sessions, not necessarily of the editor checked.
     /// </summary>
     public IDisposable ApplyRequestLinkToEveryAccount()
     {
-        _requestLinkScopes++;
+        _requestLinkScopes.Value++;
 
         return new RequestLinkScope(this);
     }
@@ -4062,7 +4061,7 @@ public class FileSecurity(
             }
 
             _disposed = true;
-            owner._requestLinkScopes--;
+            owner._requestLinkScopes.Value--;
         }
     }
 
@@ -4094,7 +4093,7 @@ public class FileSecurity(
             result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
         }
 
-        var linkId = RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes > 0)
+        var linkId = RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes.Value > 0)
             ? await externalShare.GetLinkIdAsync()
             : Guid.Empty;
         if (linkId != Guid.Empty)
@@ -4181,22 +4180,32 @@ public class FileSecurity(
         return false;
     }
 
-    private string GetCacheKey<T>(T parentId, Guid userId)
+    private string GetUserRecordCacheKey<T>(T parentId, Guid userId, bool requestLinkApplies)
     {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        return $"{tenantId}-{userId}-{parentId}";
+        return GetUserRecordCacheKey(tenantManager.GetCurrentTenantId(), parentId, userId, requestLinkApplies);
     }
 
     /// <summary>
-    /// The key of an account's record under a folder. A record found while the request's link applies to the check
-    /// (<see cref="RequestLinkApplies"/>) may come from that link, so it is kept apart from the record of the same
-    /// account checked without it.
+    /// The key of an account's record under a folder, for the records a request has already found. It always names the
+    /// account, whatever subject the record has: a record found through a link is that account's, and another account
+    /// with a record of its own must never read it. A record found while the request's link applies to the check
+    /// (<see cref="RequestLinkApplies"/>) is kept apart from the record of the same account checked without it.
     /// </summary>
-    private string GetUserRecordCacheKey<T>(T parentId, Guid userId, bool requestLinkApplies)
+    public static string GetUserRecordCacheKey<T>(int tenantId, T parentId, Guid userId, bool requestLinkApplies)
     {
-        var key = GetCacheKey(parentId, userId);
+        var key = $"{tenantId}-{userId}-{parentId}";
 
         return requestLinkApplies ? key + "-request-link" : key;
+    }
+
+    /// <summary>
+    /// Whether the record an account has to an entry also holds for the other entries of the same folder: a record the
+    /// entry inherits from a folder or a room does, a record of the entry itself (a link of this file) does not.
+    /// </summary>
+    public static bool RecordHoldsForSiblings<T>(FileShareRecord<T> record, T entryId, FileEntryType entryType)
+    {
+        return record is { SubjectType: SubjectType.User or SubjectType.AiProject or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } &&
+               !(Equals(record.EntryId, entryId) && record.EntryType == entryType);
     }
 
     private string GetCacheKey<T>(T parentId)
@@ -4235,7 +4244,7 @@ public class FileSecurity(
         var cachedRecords = GetCachedRecords<T>();
         // the record depends on whether the request's link applies to this check, so the key does too: the same
         // account checked as another account in the same request reads its own key and never gets the link's record
-        var cacheKey = GetUserRecordCacheKey(room.Id, userId, RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes > 0));
+        var cacheKey = GetUserRecordCacheKey(room.Id, userId, RequestLinkApplies(userId, authContext.CurrentAccount.ID, _requestLinkScopes.Value > 0));
 
         if (!cachedRecords.TryGetValue(cacheKey, out var record))
         {

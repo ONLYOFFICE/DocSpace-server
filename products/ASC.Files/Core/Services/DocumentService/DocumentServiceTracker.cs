@@ -315,8 +315,8 @@ public class DocumentServiceTrackerHelper(
 
                 try
                 {
-                    // the callback is not signed in and carries the link the document was opened with: each editor is
-                    // checked with it, an anonymous one as Guid.Empty
+                    // the callback is not signed in; its address carries the link of one of the editors' sessions, and
+                    // each editor is checked with that link, an anonymous one as Guid.Empty
                     using (fileSecurity.ApplyRequestLinkToEveryAccount())
                     {
                         file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant(), fillingSessionId: httpContextAccessor.HttpContext.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault());

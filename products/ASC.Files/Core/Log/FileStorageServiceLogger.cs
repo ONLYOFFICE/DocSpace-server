@@ -40,7 +40,7 @@ internal static partial class FileStorageServiceLogger
     [LoggerMessage(LogLevel.Error, "CreateThumbnails")]
     public static partial void ErrorCreateThumbnails(this ILogger logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Error, "The editing tab of file {fileId} added by a refused start was not removed")]
+    [LoggerMessage(LogLevel.Error, "The cleanup after a refused start of editing file {fileId} failed: a tab of the caller may be left in the tracker")]
     public static partial void ErrorStartEditCleanup(this ILogger logger, string fileId, Exception exception);
 
     [LoggerMessage(LogLevel.Error, "FileStorageService")]

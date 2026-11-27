@@ -219,12 +219,12 @@ public class UserController(
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
-        if (photoValidation != null)
-        {
-            await DownloadAndSavePhotoAsync(photoValidation, user);
-        }
+        // the account exists from here on: a photo that cannot be downloaded fails the call after the webhook
+        var photoFailure = photoValidation != null ? await TryDownloadAndSavePhotoAsync(photoValidation, user) : null;
 
         await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
+
+        photoFailure?.Throw();
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -406,10 +406,9 @@ public class UserController(
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
-        if (photoValidation != null)
-        {
-            await DownloadAndSavePhotoAsync(photoValidation, user);
-        }
+        // the account exists from here on: a photo that cannot be downloaded fails the call after the audit record, the
+        // webhook and the room invitation
+        var photoFailure = photoValidation != null ? await TryDownloadAndSavePhotoAsync(photoValidation, user) : null;
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
@@ -426,6 +425,8 @@ public class UserController(
         {
             await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
         }
+
+        photoFailure?.Throw();
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }

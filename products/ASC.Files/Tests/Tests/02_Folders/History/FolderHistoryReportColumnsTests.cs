@@ -46,7 +46,7 @@ public class FolderHistoryReportColumnsTests(
     private static readonly string[] _clientColumns = ["IP", "Browser", "Platform"];
 
     /// <summary>
-    /// H8: the CSV writer mapped every column of the event (<c>BaseEventMap</c>) and ignored the column set the task
+    /// The CSV writer mapped every column of the event (<c>BaseEventMap</c>) and ignored the column set the task
     /// resolved for a folder report, so the CSV file carried the columns the folder report drops. It now writes the
     /// resolved columns, as the XLSX writer does.
     /// </summary>
@@ -65,7 +65,7 @@ public class FolderHistoryReportColumnsTests(
     }
 
     /// <summary>
-    /// H8: the CSV file of a member who is not a DocSpace admin carried the IP, browser and platform of every
+    /// The CSV file of a member who is not a DocSpace admin carried the IP, browser and platform of every
     /// event, which the folder report keeps for DocSpace admins.
     /// </summary>
     [Fact]

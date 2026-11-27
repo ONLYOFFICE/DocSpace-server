@@ -143,8 +143,8 @@ and from the method body where a row needed the request; test line numbers point
 | **Password reminder from the sign-in page** | | |
 | Conditional message | `P/PasswordReminderTests.cs:76` | TEST-CONFIRMED [run: PASS] |
 | Same form whether or not the account exists | `P/PasswordReminderRulesTests.cs:61` | TEST-CONFIRMED [run: PASS] |
-| CAPTCHA 403 | `User:1995-2006`. Unreachable: the stand configures no CAPTCHA keys | CODE-ONLY |
-| **Changing a password through a confirmation link** | `User:585-653`; yaml `changeUserPassword`. Unreachable: the `PasswordChange` key exists only in the letter, which the suite cannot read | CODE-ONLY |
+| CAPTCHA 403 | `User:1996-2007`. Unreachable: the stand configures no CAPTCHA keys | CODE-ONLY |
+| **Changing a password through a confirmation link** | `User:586-654`; yaml `changeUserPassword`. Unreachable: the `PasswordChange` key exists only in the letter, which the suite cannot read | CODE-ONLY |
 
 ## Differences between the yaml and the server
 

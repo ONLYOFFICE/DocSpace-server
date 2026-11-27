@@ -455,6 +455,10 @@ public class ThirdpartyController(
     // a provider sends its avatar from a CDN behind one or two redirects (Facebook's picture address answers 302)
     private const int MaxAvatarRedirects = 3;
 
+    // the whole download of an avatar - every lookup, request and body, redirects included - ends within this time;
+    // each request also keeps the shorter deadline of LimitedImageReader
+    private static readonly TimeSpan _avatarDeadline = TimeSpan.FromSeconds(20);
+
     /// <summary>
     /// Saves the avatar of the provider profile as the photo of the new account. Each address, the first one and each
     /// redirect, is checked like an address a member sends to the photo endpoints (bug 81491) before it is requested,
@@ -481,11 +485,14 @@ public class ThirdpartyController(
 
     private async Task<byte[]> DownloadAvatarAsync(Guid userID, string url, CancellationToken cancellationToken)
     {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(_avatarDeadline);
+
         var address = url;
 
         for (var redirects = 0; redirects <= MaxAvatarRedirects; redirects++)
         {
-            var validation = await urlValidator.ValidateAsync(address, _avatarValidation);
+            var validation = await urlValidator.ValidateAsync(address, _avatarValidation).WaitAsync(deadline.Token);
             if (!validation.IsValid)
             {
                 logger.WarningAvatarNotSaved(userID, validation.ErrorMessage);
@@ -496,9 +503,8 @@ public class ThirdpartyController(
             using var request = new HttpRequestMessage(HttpMethod.Get, validation.ParsedUri);
             request.Options.Set(UrlValidator.PinnedIpKey, validation.ResolvedAddresses[0]);
 
-            // each request, with its body, has the deadline of LimitedImageReader; the lookup of the next address
-            // (ValidateAsync) is outside it
-            var download = await LimitedImageReader.DownloadAsync(httpClient, request, setupInfo.MaxImageUploadSize, cancellationToken);
+            // each request, with its body, has the deadline of LimitedImageReader, and all of them the avatar's deadline
+            var download = await LimitedImageReader.DownloadAsync(httpClient, request, setupInfo.MaxImageUploadSize, deadline.Token);
 
             if (IsRedirect(download.StatusCode) && download.Location != null)
             {

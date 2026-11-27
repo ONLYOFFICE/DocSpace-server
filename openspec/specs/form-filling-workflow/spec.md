@@ -312,7 +312,7 @@ replaces the file's content with the posted binary as a new version — a save, 
 #### Scenario: Save of a file open in an editor
 
 - **WHEN** `saveEditingFileFromForm` is sent without `forcesave`
-- **THEN** a session the caller has open alone is closed and the content is saved
+- **THEN** a session the caller has open alone is closed and the content is saved; the session is closed before the save's own checks (rights, lock, trash, encryption), so a save they refuse leaves it closed too
 - **AND** a file another account has open alone is refused (403), and that account's session stays; with `forcesave` the content is saved and no session is closed
 
 #### Scenario: What a submission records
