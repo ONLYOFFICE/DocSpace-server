@@ -29,6 +29,27 @@ be read.
 - **WHEN** a chat round cannot read the caller's role
 - **THEN** neither tool is offered for that round
 
+### Requirement: Reading whether the plugin agent is offered
+
+`aiSettingsGetPluginAgent` SHALL return `available`, true exactly when the chat offers the caller
+`plugin_agent` and `install_plugin`, and false otherwise without naming a reason. A caller who may not use
+AI SHALL get 403.
+
+#### Scenario: Offered
+
+- **WHEN** a DocSpace admin calls `aiSettingsGetPluginAgent` on an installation that configures a plugin agent
+- **THEN** the answer is 200 with `available` true
+
+#### Scenario: Not offered
+
+- **WHEN** a room admin calls it on the same installation, or the owner calls it on an installation without a plugin agent
+- **THEN** the answer is 200 with `available` false
+
+#### Scenario: AI switched off
+
+- **WHEN** a caller the AI service refuses (a guest, or a portal with AI switched off) calls it
+- **THEN** the answer is 403
+
 ### Requirement: Arguments of a plugin task
 
 `plugin_agent` SHALL take `task`, a string of 1 to 20000 characters counted without the white space around

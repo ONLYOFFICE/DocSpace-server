@@ -105,7 +105,9 @@ const ZIP_SIGNATURES = ["PK\u0003\u0004", "PK\u0005\u0006"];
 // `references/portal.md` "Limits", `references/items/event-listener-item.md`) in the words of the
 // product, not of the SDK: read them again when the skill's submodule is moved.
 const PLUGIN_CAN =
-  "A plugin runs in the user's browser inside the portal, with that user's rights. It can add: an " +
+  "A plugin here is a plugin of the portal itself - its files, rooms and the interface around " +
+  "them - never a plugin of the document, spreadsheet or presentation editors: do not ask which " +
+  "editor it is for. It runs in the user's browser inside the portal, with that user's rights. It can add: an " +
   "action on a selected file, folder or room (context menu, also for a multi-selection); a " +
   "'create new' entry in the main button; a profile menu entry; a tab in the info panel about the " +
   "selected file or room; a page of its own in the left sidebar (the place for a list, a table or " +
@@ -210,22 +212,32 @@ function refusedStatus(err: unknown): number | undefined {
   return status !== undefined && status >= 400 && status < 500 ? status : undefined;
 }
 
+/**
+ * Whether the caller is offered the plugin tools: the installation names a sandbox, the skill
+ * is there and the caller is the owner or a DocSpace admin. What is cheap comes first, and it
+ * never throws: asked on every chat round, and by the route a client reads before it offers to
+ * build a plugin.
+ */
+export async function pluginAgentAvailable(): Promise<boolean> {
+  if (!getPluginAgent()) {
+    return false;
+  }
+  try {
+    if (!(await pluginSkillPresent())) {
+      return false;
+    }
+  } catch (err) {
+    // A disk that cannot be read is a broken installation of an optional feature.
+    logger.warn(`pluginAgent: the plugin skill was not read, the tools are off: ${String(err)}`);
+    return false;
+  }
+  return (await callerRole()) === "admin";
+}
+
 export const pluginAgentTools: ToolsAdapter = {
-  // Asked on every chat round: what is cheap comes first, and nothing here fails the round.
+  // Asked on every chat round, and nothing here fails the round.
   async getTools(): Promise<Record<string, TMCPItem[]>> {
-    if (!getPluginAgent()) {
-      return {};
-    }
-    try {
-      if (!(await pluginSkillPresent())) {
-        return {};
-      }
-    } catch (err) {
-      // A disk that cannot be read is a broken installation of an optional feature.
-      logger.warn(`pluginAgent: the plugin skill was not read, the tools are off: ${String(err)}`);
-      return {};
-    }
-    if ((await callerRole()) !== "admin") {
+    if (!(await pluginAgentAvailable())) {
       return {};
     }
     return {

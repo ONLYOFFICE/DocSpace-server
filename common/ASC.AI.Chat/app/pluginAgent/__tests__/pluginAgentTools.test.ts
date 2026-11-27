@@ -200,6 +200,8 @@ describe("who is offered the plugin agent", () => {
     );
     expect(description).toContain("ask_user_question");
     expect(description).toContain("need no questions");
+    // The portal's plugins, never the editors': a model left alone asks which editor.
+    expect(description).toContain("do not ask which editor it is for");
     // What a plugin can be and cannot do, so that the questions come with options and a
     // request no plugin can serve is answered before a task is spent on it.
     expect(description).toContain("a page of its own in the left sidebar");

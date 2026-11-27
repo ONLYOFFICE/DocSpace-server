@@ -466,6 +466,8 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Returns the portal's document agent settings, as the Document Agent tab of the portal settings shows them: `enabled` (whether the `document_agent` tool is offered to the chat), `profileId` (the model profile its tasks run on, null for the chat's own model), `reasoning` (`default` for the model's own default, else `off`, `low`, `medium`, `high`, `max`), `maxToolCalls` and `maxFileBytes` (the limits of one task, at most the agent's own ceilings of 150 and 32 MiB), `taskLog` (whether every task leaves its full log as a file) and `taskLogFolderId` (where the logs go, null for next to the task's results). The settings are kept by the DocSpace AI service and proxied from it; a portal that never saved any gets the defaults, and a profile or a log folder that no longer exists comes back as null. Any member of the portal may read them, a guest may not.",
   aiSettingsSetDocumentAgent:
     "Replaces the portal's document agent settings and returns the stored result. The whole object is required, every field as `GET api/2.0/ai/document-agent/settings` returns it; a limit above the agent's ceiling, an unknown reasoning level or a missing field is rejected rather than coerced. The DocSpace AI service stores them and checks the rest: the profile has to exist, and the log folder has to be a portal folder (not a third-party one, not in the trash) the caller may create files in. Only a portal administrator may write.",
+  aiSettingsGetPluginAgent:
+    "Reports whether the calling user can have a plugin of the portal built in the chat: `available` is true when the installation configures a plugin agent with its plugin skill and the caller is the portal owner or a DocSpace admin, the same condition under which the chat offers the model its `plugin_agent` and `install_plugin` tools. No reason is given for a false: an installation without a plugin agent and a caller who may not use one answer alike. A client reads it before it offers to build a plugin.",
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
@@ -1604,6 +1606,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiSkillsGenerate:
     "The skill's title, its name and the whole Markdown file, frontmatter included; nothing is saved.",
   aiSkillsCreate: "The ID and the title of the new skill file.",
+  aiSettingsGetPluginAgent: "Whether the caller is offered the plugin agent, as `{ available }`.",
   aiTemplatesList: "The agents, skill sets and knowledge bases of the catalog.",
   aiTemplatesInstall:
     "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",

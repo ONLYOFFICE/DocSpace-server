@@ -844,6 +844,10 @@ type TemplateRoom = {
   /** The title the room was created with. */
   title: string;
 };
+export type Res_aiSettingsGetPluginAgent = {
+  /** Whether the chat offers the caller its plugin tools. */
+  available: boolean;
+};
 export type Res_aiTemplatesList = {
   agents: TemplateAgent[];
   skillSets: TemplateSource[];

@@ -446,7 +446,7 @@ describe("the served document", () => {
       Object.values(item),
     );
 
-    expect(operations).toHaveLength(116);
+    expect(operations).toHaveLength(117);
     for (const operation of operations) {
       expect((operation["responses"] as Json)["401"]).toEqual(UNAUTHORIZED);
     }

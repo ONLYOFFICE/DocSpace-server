@@ -103,7 +103,7 @@ describe("the open routes", () => {
 
     expect(reply.status).toBe(200);
     expect(reply.body.openapi).toBe("3.1.1");
-    expect(Object.keys(reply.body.paths)).toHaveLength(111);
+    expect(Object.keys(reply.body.paths)).toHaveLength(112);
     expect(reply.headers["cache-control"]).toBeUndefined();
   });
 
@@ -187,7 +187,7 @@ describe("the authentication gate", () => {
   );
 
   it("covers every published operation", () => {
-    expect(publishedOperations()).toHaveLength(116);
+    expect(publishedOperations()).toHaveLength(117);
   });
 
   it("logs the method and the full URL of a rejected request", async () => {

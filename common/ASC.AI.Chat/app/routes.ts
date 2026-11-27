@@ -69,6 +69,7 @@ import { webSearchController } from "./controllers/webSearchController.js";
 import { webSearchPassthroughController } from "./controllers/webSearchPassthroughController.js";
 import { registerDocumentAgentFiles } from "./tools/documentAgentFiles.js";
 import { registerPluginAgentRegistry } from "./pluginAgent/npmRegistry.js";
+import { pluginAgentController } from "./controllers/pluginAgentController.js";
 
 export { API_PREFIX };
 
@@ -225,6 +226,7 @@ export default function registerRoutes(app: Application): void {
   router.put("/config/tool-mode", settingsController.setToolMode);
   router.get("/document-agent/settings", documentAgentController.getSettings);
   router.put("/document-agent/settings", documentAgentController.setSettings);
+  router.get("/plugin-agent", pluginAgentController.get);
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
 

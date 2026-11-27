@@ -31,6 +31,8 @@ describe a plugin in the chat and get it built, checked and installed without le
   installs nothing; a pre-approval of the tool is withdrawn when it is met, so that the next call asks.
 - ASC.AI.Chat serves the sandbox a read-only npm registry that forwards to the public registry and caches
   what it fetched, so a sandbox needs network access to this service only. Any package may be requested.
+- A new read operation, `aiSettingsGetPluginAgent` (`GET api/2.0/ai/plugin-agent`), tells a client whether
+  the caller is offered the plugin tools, so that it offers to build a plugin only where one can be built.
 - No preview run and no screenshot in this change: the checks are the build, the type check and the
   validator.
 
@@ -70,7 +72,7 @@ One requirement is modified, `ai-agents` "Pre-approving tools", in its scenarios
 - **Who is affected**: only the owner and DocSpace admins of a portal with a plugin agent, since nobody else
   is offered the tool. In the web client the "always allow" choice on this tool's dialog has no lasting
   effect and that call installs nothing; the client shows the tool's answer, which says to ask again. The
-  published SDKs and the OpenAPI document are unchanged (no operation, field or status changes); webhooks,
+  operations the tool is reached through are unchanged (no field or status changes); webhooks,
   socket events, backup and restore, the portal migration and stored data are not affected, as the list is
   the user's existing tool preferences and is only made shorter.
 
@@ -85,8 +87,9 @@ Everything else is added behaviour:
 - **Web client (`../client`)**: the tools reach it through the existing tool-call and approval flow of the
   chat; a client that knows nothing of them shows them as any other tool call. A portal without a configured
   plugin agent, and every member who is not the owner or a DocSpace admin, sees the chat as before.
-- **Published SDKs and the OpenAPI document**: no operation is added, removed or changed in
-  `docspace-backend.yaml`. The registry route lives outside the API prefix the portal forwards to
+- **Published SDKs and the OpenAPI document**: one operation is added to the AI chat's document
+  (`aichat_2.0.json`), `aiSettingsGetPluginAgent`; no operation is removed or changed, and
+  `docspace-backend.yaml` is untouched. The registry route lives outside the API prefix the portal forwards to
   ASC.AI.Chat, like the document agent's file routes, and is not part of the published contract.
 - **Webhooks, socket events, audit**: an installation is an ordinary `addWebPluginFromFile` call, so it is
   audited and announced to clients as an upload from the settings page is ("Audit trail of plugin changes",

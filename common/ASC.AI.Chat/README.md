@@ -75,6 +75,9 @@ skill and saves two new files in the workspace, the package (`<name>.zip`) and i
 (`<name>-src.zip`); `install_plugin` installs a package into the portal. Without the
 configuration below, without the skill, or for any other member, neither tool is offered.
 
+A client asks `GET api/2.0/ai/plugin-agent` whether the caller is offered them (`{ available }`)
+before it offers to build a plugin.
+
 The agent is configured in the shared `appsettings.json` under `ai.pluginAgent`, or from the
 environment, which wins:
 
