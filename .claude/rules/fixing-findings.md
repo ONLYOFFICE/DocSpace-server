@@ -33,33 +33,30 @@ paths around it. Before a fix is handed back:
 5. **Fix a review in one batch.** Take all findings of one review (one sha) in one round and only
    then ask for the next review. Fixing between review runs moves the sha under the review, and
    each run then finds the bugs of the previous round's fixes mixed with what it missed before.
-6. **Offer to check your own work on what goes to review.** This item is the one schedule of
-   self-reviews, hand-over checks and re-checks; `CLAUDE.md` (Git Workflow) and `review-branch` (§0,
-   §8 "Self-review", "Hand-over block") point here. Each run costs passes of the skill with its
-   reviewer agents, so it is offered and the user decides; the reviewer uses the same skill, so what
-   the run finds would otherwise cost a review round. The reviewer checks the Hand-over block first:
-   a block whose checks fail sends the branch back unread, and a branch without a block, or with a
-   declined check, is reviewed with "no hand-over check" in the report header (`review-branch` §1
-   lists the checks).
-   "§7" below is `review-branch` §7, the re-check with its fresh reviewer (its point 3).
-   - **While working (on request):** a self-review (`review-branch` §0) is a one-pass check, cheaper
-     than the hand-over check, run when the user asks for it; it is not offered. Its fix batch gets §7
-     once, one more only when that found a blocker.
-   - **Before the first hand-over:** offer the hand-over check (`review-branch` §0 "Hand-over") on the
-     state that goes to review: the whole first review once and two independent passes of the deep
-     lenses with the estimate of what is still unfound, the fixes in one batch, §7 on that batch once
-     (one more only when it found a blocker; the fixes of the last one are part of the check),
-     `scan.py --gate` on the final tree, and the Hand-over block in the PR description.
-   - **After a review round:** offer the §7 re-check of your fixes however small the round is. On a
-     yes, fix what it finds in the same round; one more §7 only when it found a blocker. Then run
-     `scan.py --gate`, write the Hand-over block for the new tree, and the branch goes back to the
-     reviewer: the next check is theirs.
-   - **The hand-over check again, instead of §7:** when, since the last hand-over check, the branch
-     gained a new kind of state or a new artifact (a cache, a lock, a fallback, a new class, an
-     OpenSpec change, a refactoring that moves or rewrites code) in a round other than the own batch of a self-review or a hand-over check, whose
-     §7 reads the new artifact whole: §7 reads only the round's diff. Seen in review: one
-     self-review ran before four fix rounds and a spec change; about 14 of the 20 later findings sat in
-     that later code, and the fresh full pass at the end found 12 after a re-check that had found 1.
+6. **The author prepares the branch for the receiving reviewer.** Use this schedule for all file types.
+   - **While working:** a one-pass self-review runs on request (`review-branch` §0).
+   - **Before the first hand-over:** run the hand-over check (§0) on the finished branch. When it
+     finds issues, fix them together and run §7 on that batch. Record the final gate and checked
+     state in the Hand-over block (§8).
+   - **After receiving a review:** keep the reviewer's Markdown report and reviewed SHA. Handle all
+     items together. Under each ID record the change and evidence, or the reason for another
+     disposition (§7, §11 below). For a behaviour fix, exercise the reported case and the nearest
+     case that must keep working. Re-read affected claims (§9) and run the relevant tests.
+     The author runs `review-branch` §7, including its reviewer without memory (§0), before returning the
+     branch. Use the earlier SHA for `--since-review`; §7 covers worktree reviews and rebases.
+   - **When the internal re-check finds more:** fix the issues in one batch. Re-run the checks the
+     edits affect. A corrected citation needs a citation check and a read of its target. A blocker
+     or a follow-up edit that changes behaviour needs another independent pass over the affected
+     operation, including callers and failure paths. Read new or rewritten artifacts in full.
+     Return to a full hand-over check if the affected operations cannot be bounded, for example
+     after a cross-cutting refactor. Keep these iterations with the author.
+   - **Ready to return:** all IDs have answers, required checks passed, the required memory-free
+     passes and their scope are recorded in the Hand-over block,
+     blockers and rule violations are closed, and `scan.py --gate` passed on the final state (add
+     `--worktree` for local fixes). Put the returned commit or checked tree in the report and renew
+     the Hand-over block. The receiving reviewer verifies the answers and gives the final verdict.
+     A missing required check or unresolved product decision is an explicit open item for the
+     colleague who can resolve it; identify it when handing over a request for help.
    - **The base first:** when the scan reports that the base changed rules or review tooling that apply
      to the branch (`review-branch` §1), bring the base in before the check: the reviewer judges by
      those. With uncommitted work, commit or stash it first, or ask whoever commits the branch to
