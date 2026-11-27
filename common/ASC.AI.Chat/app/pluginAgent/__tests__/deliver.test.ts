@@ -34,7 +34,7 @@ import { describe, expect, it } from "vitest";
 
 import { HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
 import { MAX_FILE_BYTES } from "../../tools/documentAgentFiles.js";
-import { deliverPlugin, projectDirOf } from "../deliver.js";
+import { deliverPlugin, PLUGIN_PACKAGE_MAX_BYTES, projectDirOf } from "../deliver.js";
 import { SESSION_ENV, toolContext } from "./context.js";
 import { chunked, fakeGateway } from "../../__tests__/helpers/sandboxGateway.js";
 import type { FakeGateway } from "../../__tests__/helpers/sandboxGateway.js";
@@ -243,21 +243,23 @@ describe("deliverPlugin", () => {
   });
 
   /** A body one byte over the limit, sent as the same megabyte again and again. */
-  const overLimit = (): Response => {
+  const overLimit = (limit: number) => (): Response => {
     const piece = Buffer.alloc(1024 * 1024);
-    return chunked(
-      ...Array.from({ length: MAX_FILE_BYTES / piece.length }, () => piece),
-      Buffer.alloc(1),
-    );
+    return chunked(...Array.from({ length: limit / piece.length }, () => piece), Buffer.alloc(1));
   };
 
-  it("fails when the package is over the size a file may have", async () => {
+  it("fails when the package is a byte over the size a portal installs, and passes at that size", async () => {
+    expect(PLUGIN_PACKAGE_MAX_BYTES).toBe(5 * 1024 * 1024);
     const gateway = builtProject();
-    gateway.fail.set(`GET ${DIR}/dist/plugin.zip`, overLimit);
+    gateway.files.set(`${DIR}/dist/plugin.zip`, Buffer.alloc(PLUGIN_PACKAGE_MAX_BYTES));
+    expect(await deliverPlugin(toolContext(), DIR)).toMatchObject({ passed: true });
+
+    gateway.fail.set(`GET ${DIR}/dist/plugin.zip`, overLimit(PLUGIN_PACKAGE_MAX_BYTES));
     expect(await deliverPlugin(toolContext(), DIR)).toEqual({
       passed: false,
       check: "package",
-      report: `/workspace/my-plugin/dist/plugin.zip is over ${MAX_FILE_BYTES} bytes.`,
+      report:
+        "/workspace/my-plugin/dist/plugin.zip is over 5242880 bytes, the most a portal installs: make the package smaller.",
     });
   });
 
@@ -284,7 +286,7 @@ describe("deliverPlugin", () => {
 
   it("fails when the sources are over the size a file may have", async () => {
     const gateway = builtProject();
-    gateway.fail.set("GET /workspace/.sources.zip", overLimit);
+    gateway.fail.set("GET /workspace/.sources.zip", overLimit(MAX_FILE_BYTES));
     expect(await deliverPlugin(toolContext(), DIR)).toEqual({
       passed: false,
       check: "sources archive",

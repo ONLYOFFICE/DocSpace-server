@@ -68,6 +68,9 @@ export interface RequestContext {
   // DTO cannot change within one request, so the second reader joins the
   // first fetch (see `getFolderInfoOnce`).
   folderInfoCache?: Map<string, Promise<DocspaceFolderInfo | undefined>>;
+  // Whether the caller administers the portal, once a read of this request has said so (see
+  // `pluginAgentTools`). Unset until a read succeeds: a failed read is never remembered.
+  portalAdmin?: boolean;
   // In-flight `GET /files/file/{id}` reads, keyed by file id — the file-side
   // twin of `folderInfoCache` (see `getFileInfoOnce`). Kept apart because
   // files and folders have independent id spaces.

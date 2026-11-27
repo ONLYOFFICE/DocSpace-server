@@ -30,8 +30,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ActionType, custom } from "@onlyoffice/ai-chat/core";
-import type { Progress } from "@onlyoffice/ai-chat/core";
+import { ActionType, composeToolsAdapters, custom } from "@onlyoffice/ai-chat/core";
+import type { Progress, TMCPItem, ToolsAdapter } from "@onlyoffice/ai-chat/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { inRequestContext } from "../../__tests__/helpers/http.js";
@@ -212,6 +212,61 @@ describe("who is offered the plugin agent", () => {
     expect(description).toContain("a handler of a file extension");
     expect(description).toContain("It cannot: change anything inside an open document");
     expect(description).toContain("offer the closest thing above instead of calling this tool");
+  });
+
+  const selfReads = () => upstream.seen.filter((r) => r.path.includes("people/@self")).length;
+
+  it("reads the role once in a request for the offer and the calls of other adapters' tools, and anew for its own", async () => {
+    // POST settings/webplugins (WebPluginsController.AddWebPluginFromFile): a refusal will do.
+    upstream.use(http.post("*/api/2.0/settings/webplugins", () => docspaceError(400, "no")));
+    const tool: TMCPItem = {
+      name: "sandbox_exec",
+      description: "",
+      inputSchema: { type: "object", properties: {} },
+      serverType: "sandbox",
+      enabled: true,
+    };
+    const other: ToolsAdapter = {
+      getTools: () => Promise.resolve({ sandbox: [tool] }),
+      callTool: () => Promise.resolve("ran"),
+    };
+    // The order of the service: the plugin tools are asked before the sandbox's.
+    const composed = composeToolsAdapters(pluginAgentTools, other);
+    await inRequestContext({ authorization: "Bearer user" }, async () => {
+      // The round's offer.
+      expect(Object.keys(await composed.getTools())).toContain("plugin-install");
+      expect(selfReads()).toBe(1);
+      // A tool of another adapter: the composed adapter looks for its owner, no read is added.
+      expect(await composed.callTool("sandbox_exec", {}, "folder-7")).toBe("ran");
+      expect(await composed.callTool("sandbox_exec", {}, "folder-7")).toBe("ran");
+      expect(selfReads()).toBe(1);
+      // A tool of its own: one read, where the work starts.
+      await composed.callTool("install_plugin", { fileId: 101 }, "folder-7");
+      expect(selfReads()).toBe(2);
+    });
+  });
+
+  it("answers for install_plugin itself when the role cannot be read at the call", async () => {
+    const composed = composeToolsAdapters(pluginAgentTools, {
+      getTools: () => Promise.resolve({}),
+      callTool: (name) => Promise.resolve(`Unknown tool "${name}"`),
+    });
+    await inRequestContext({ authorization: "Bearer user" }, async () => {
+      await composed.getTools();
+      self = () => docspaceError(500, "down");
+      expect(await composed.callTool("install_plugin", { fileId: 101 }, "folder-7")).toBe(
+        "The caller's role could not be read just now, so nothing was started. Try again.",
+      );
+    });
+  });
+
+  it("does not remember a role that could not be read", async () => {
+    await inRequestContext({ authorization: "Bearer user" }, async () => {
+      self = () => docspaceError(500, "down");
+      expect(await pluginAgentTools.getTools()).toEqual({});
+      self = () => docspace({ isAdmin: true, isOwner: false, isRoomAdmin: false });
+      expect(Object.keys(await pluginAgentTools.getTools())).toContain("plugin-agent");
+    });
   });
 
   it.each([
@@ -1124,11 +1179,12 @@ describe("install_plugin", () => {
     );
   });
 
-  it("hands the reader the size a file may have and refuses a package over it", async () => {
-    vi.mocked(readFileBytes).mockRejectedValue(new FileTooLargeError("101", MAX_FILE_BYTES));
+  it("hands the reader the size a portal installs and refuses a package over it", async () => {
+    vi.mocked(readFileBytes).mockRejectedValue(new FileTooLargeError("101", 5 * 1024 * 1024));
     expect(await install({ fileId: 101 })).toBe(
-      `Nothing was installed. File 101 is over ${MAX_FILE_BYTES} bytes.`,
+      "Nothing was installed. File 101 is over 5242880 bytes.",
     );
-    expect(vi.mocked(readFileBytes)).toHaveBeenCalledWith("101", 32 * 1024 * 1024);
+    expect(vi.mocked(readFileBytes)).toHaveBeenCalledWith("101", 5 * 1024 * 1024);
+    expect(upstream.seen.some((r) => r.path.includes("webplugins"))).toBe(false);
   });
 });

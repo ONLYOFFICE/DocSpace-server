@@ -267,6 +267,17 @@ export function getFileInfoCache(): Map<string, Promise<DocspaceFileInfo | undef
   return als.getStore()?.fileInfoCache;
 }
 
+export function setPortalAdmin(isAdmin: boolean): void {
+  const store = als.getStore();
+  if (store) {
+    store.portalAdmin = isAdmin;
+  }
+}
+
+export function getPortalAdmin(): boolean | undefined {
+  return als.getStore()?.portalAdmin;
+}
+
 // The entry the current round is attributed to (see RequestContext.sourceMeta).
 // Set by `primeSourceMeta` before the engine runs; read back by the engines'
 // `resolveSource` dep, which the library carries into every request of the

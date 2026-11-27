@@ -56,10 +56,12 @@ import type { PluginAgentConfig } from "../../config/index.js";
 import logger from "../log.js";
 import { isObject } from "../narrow.js";
 import {
+  getPortalAdmin,
   getRoundProfileId,
   getRoundSignal,
   getRoundThreadId,
   markForwardHeadersToProvider,
+  setPortalAdmin,
 } from "../requestContext.js";
 import { invalidateChatContext, readChatContext } from "../storage/chatContextSnapshot.js";
 import { DocspaceApiHttpError, getFileInfo } from "../storage/docspaceFilesApi.js";
@@ -71,7 +73,7 @@ import { resolveUploadTarget } from "../tools/documentAgent.js";
 import { MAX_FILE_BYTES, saveResult } from "../tools/documentAgentFiles.js";
 import { AGENT_TOOLS, callAgentTool, DELIVER_TOOL, stepOf } from "./agentTools.js";
 import type { ToolContext } from "./agentTools.js";
-import { deliverPlugin, projectDirOf } from "./deliver.js";
+import { deliverPlugin, PLUGIN_PACKAGE_MAX_BYTES, projectDirOf } from "./deliver.js";
 import type { DeliveredPlugin } from "./deliver.js";
 import { ModelTurnError, runLoop } from "./loop.js";
 import type { ToolOutcome } from "./loop.js";
@@ -200,7 +202,9 @@ function positiveInteger(value: unknown): number | undefined {
  */
 async function callerRole(): Promise<"admin" | "other" | "unknown"> {
   try {
-    return (await isPortalAdmin()) ? "admin" : "other";
+    const isAdmin = await isPortalAdmin();
+    setPortalAdmin(isAdmin);
+    return isAdmin ? "admin" : "other";
   } catch (err) {
     logger.warn(`pluginAgent: the caller's role was not read, the tools are off: ${String(err)}`);
     return "unknown";
@@ -235,7 +239,10 @@ export async function pluginAgentAvailable(): Promise<boolean> {
     logger.warn(`pluginAgent: the plugin skill was not read, the tools are off: ${String(err)}`);
     return false;
   }
-  return (await callerRole()) === "admin";
+  // The composed adapter asks every adapter for its tools on each call of any tool, to find the
+  // one that owns the name: within a request the role is read once for that. `callTool` reads
+  // it anew.
+  return getPortalAdmin() ?? (await callerRole()) === "admin";
 }
 
 export const pluginAgentTools: ToolsAdapter = {
@@ -298,7 +305,11 @@ export const pluginAgentTools: ToolsAdapter = {
 };
 
 /** The bytes of a workspace zip archive under the caller's rights, or the reason it is not one, for the model. */
-async function readArchive(fileId: number, what: string): Promise<Uint8Array | string> {
+async function readArchive(
+  fileId: number,
+  what: string,
+  maxBytes: number,
+): Promise<Uint8Array | string> {
   const id = String(fileId);
   const notAnArchive = `File ${id} is not a zip archive: ${what}.`;
   try {
@@ -310,12 +321,12 @@ async function readArchive(fileId: number, what: string): Promise<Uint8Array | s
     if (info.fileExst?.toLowerCase() !== ".zip") {
       return notAnArchive;
     }
-    const bytes = await readFileBytes(id, MAX_FILE_BYTES);
+    const bytes = await readFileBytes(id, maxBytes);
     const signature = Buffer.from(bytes.subarray(0, 4)).toString("latin1");
     return ZIP_SIGNATURES.includes(signature) ? bytes : notAnArchive;
   } catch (err) {
     if (err instanceof FileTooLargeError) {
-      return `File ${id} is over ${MAX_FILE_BYTES} bytes.`;
+      return `File ${id} is over ${maxBytes} bytes.`;
     }
     if (err instanceof DocspaceApiHttpError && (err.status === 403 || err.status === 404)) {
       return `File ${id} does not exist or cannot be read by the current user.`;
@@ -383,7 +394,11 @@ async function buildPlugin(
     const sources =
       sourcesFileId === undefined
         ? undefined
-        : await readArchive(sourcesFileId, "pass the '-src.zip' file an earlier task saved");
+        : await readArchive(
+            sourcesFileId,
+            "pass the '-src.zip' file an earlier task saved",
+            MAX_FILE_BYTES,
+          );
     if (typeof sources === "string") {
       return sources;
     }
@@ -626,7 +641,12 @@ async function installPlugin(
     }
   }
 
-  const bytes = await readArchive(fileId, "pass the plugin package a plugin task saved");
+  // No more than a portal takes is read into memory for an upload it would refuse.
+  const bytes = await readArchive(
+    fileId,
+    "pass the plugin package a plugin task saved",
+    PLUGIN_PACKAGE_MAX_BYTES,
+  );
   if (typeof bytes === "string") {
     return `Nothing was installed. ${bytes}`;
   }

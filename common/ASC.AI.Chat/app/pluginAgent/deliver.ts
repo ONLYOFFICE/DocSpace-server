@@ -51,6 +51,12 @@ import { SANDBOX_SKILL_DIR, SANDBOX_WORKSPACE } from "./sandboxSession.js";
 const CHECK_TIMEOUT_SECONDS = 600;
 const MANIFEST_LIMIT_BYTES = 1024 * 1024;
 const PROBE_TIMEOUT_SECONDS = 30;
+/**
+ * The largest package the gate passes and `install_plugin` uploads: what a portal accepts for a
+ * plugin unless its `plugins:maxSize` says otherwise (`WebPluginConfigSettings.MaxSize`, 5 MiB).
+ * A portal set lower still refuses the upload with its own answer.
+ */
+export const PLUGIN_PACKAGE_MAX_BYTES = 5 * 1024 * 1024;
 /** Where the sources are archived before they are read: outside every project. */
 const SOURCES_ARCHIVE = `${SANDBOX_WORKSPACE}/.sources.zip`;
 
@@ -209,7 +215,11 @@ export async function deliverPlugin(
     };
   }
 
-  const packageBytes = await readOr(context, `${projectDir}/dist/plugin.zip`, MAX_FILE_BYTES);
+  const packageBytes = await readOr(
+    context,
+    `${projectDir}/dist/plugin.zip`,
+    PLUGIN_PACKAGE_MAX_BYTES,
+  );
   if (typeof packageBytes === "string") {
     return {
       passed: false,
@@ -217,7 +227,7 @@ export async function deliverPlugin(
       report:
         packageBytes === "absent"
           ? `The build left no ${projectDir}/dist/plugin.zip.`
-          : `${projectDir}/dist/plugin.zip is over ${MAX_FILE_BYTES} bytes.`,
+          : `${projectDir}/dist/plugin.zip is over ${PLUGIN_PACKAGE_MAX_BYTES} bytes, the most a portal installs: make the package smaller.`,
     };
   }
 
