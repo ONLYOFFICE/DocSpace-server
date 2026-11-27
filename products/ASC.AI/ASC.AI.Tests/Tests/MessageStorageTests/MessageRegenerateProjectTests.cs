@@ -54,7 +54,7 @@ public class MessageRegenerateProjectTests(AspireAppFixture fixture) : MessagePa
         await _aiAssignments.AiAssignmentsAssignAsync(new AiAssignmentsAssignRequest(AiActionType.Chat, other.Id), TestContext.Current.CancellationToken);
 
         await FilesHttpClient.Authenticate(Owner);
-        var projectId = await AgentsTests.AiProjects.CreateAsync(RoomsApi);
+        var projectId = await CreateAiProjectAsync();
         await AgentsTests.AiProjects.SetModelAsync(RoomsAiApi, projectId, projectModel.Id);
         var entityId = projectId.ToString();
 

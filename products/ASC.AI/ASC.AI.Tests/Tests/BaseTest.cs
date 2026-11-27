@@ -457,6 +457,31 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<ProfileDto>(response, TestContext.Current.CancellationToken);
     }
 
+    /// <summary>
+    /// Creates an AI project as whoever the Files client is signed in as; returns its room id. The Files API refuses
+    /// an AI project on a portal with neither the AI gateway nor a model profile, and the integration-test stack has
+    /// no gateway, so a portal without a profile gets one first. A profile the test made itself is left alone.
+    /// </summary>
+    protected async Task<int> CreateAiProjectAsync(string? title = null)
+    {
+        await EnsureAiProfileAsync();
+
+        return await AgentsTests.AiProjects.CreateAsync(RoomsApi, title);
+    }
+
+    // Creating a profile drops the cached "has a profile" answer of the portal on every node, so the project
+    // created right after sees it.
+    private async Task EnsureAiProfileAsync()
+    {
+        using var response = await _ai.GetAsync(ProfilesPath, TestContext.Current.CancellationToken);
+        var profiles = await _ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
+
+        if (profiles.Count == 0)
+        {
+            await CreateProfileInternalAsync();
+        }
+    }
+
     protected async Task CreateAssignmentInternalAsync(string actionType, Guid profileId, string? entityId = null)
     {
         using var response = await _ai.PostAsync(

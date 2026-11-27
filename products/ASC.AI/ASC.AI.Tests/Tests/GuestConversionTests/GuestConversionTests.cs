@@ -106,7 +106,7 @@ public class GuestConversionTests(AspireAppFixture fixture) : ThreadFilesTestBas
     {
         var projectOwner = await InviteContact(EmployeeType.RoomAdmin, TestContext.Current.CancellationToken);
         await FilesHttpClient.Authenticate(projectOwner);
-        var projectId = await AgentsTests.AiProjects.CreateAsync(RoomsApi);
+        var projectId = await CreateAiProjectAsync();
         var spaceBefore = await UsedSpaceAsync(projectId);
         var thread = await CreateMemberThreadAsync(projectId, projectOwner);
 
