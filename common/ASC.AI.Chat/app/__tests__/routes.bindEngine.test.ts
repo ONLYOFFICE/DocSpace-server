@@ -130,7 +130,7 @@ describe("bindEngine", () => {
 
     registerRoutes(app);
 
-    expect(boundRoutes(app)).toHaveLength(31);
+    expect(boundRoutes(app)).toHaveLength(32);
     expect(logger.info).toHaveBeenCalledWith(
       "Registered 0 engine routes across 0 engines under /api/2.0/ai",
     );

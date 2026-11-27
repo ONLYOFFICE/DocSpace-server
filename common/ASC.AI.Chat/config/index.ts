@@ -32,14 +32,17 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import nconf from "nconf";
+import os from "os";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import type {
   AppConfig,
+  ChatSandboxSetting,
   CompactionSetting,
   DocumentAgentSetting,
   McpServerSetting,
+  PluginAgentSetting,
   RootConfig,
 } from "../app/types.js";
 
@@ -378,6 +381,235 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
       "",
     ),
   };
+}
+
+// Group keys of the plugin agent's two tools. `plugin_agent` starts a task that may run for many
+// minutes; `install_plugin` puts code into every user's browser. Both are listed in
+// `systemServerTypes`, and the second has a key of its own so that nothing granted to the first
+// answers for it.
+export const PLUGIN_AGENT_TYPE = "plugin-agent";
+export const PLUGIN_INSTALL_TYPE = "plugin-install";
+
+export interface PluginAgentConfig {
+  sandboxUrl: string;
+  sandboxToken: string;
+  /** The whole task, sandbox start to the saved files. */
+  taskTimeoutSeconds: number;
+  /** Tool calls the model may make for one task. */
+  maxToolCalls: number;
+  /** Tasks this process runs at a time; one more is refused, not queued. */
+  maxConcurrentTasks: number;
+  /** The lifetime a sandbox is created and renewed with: how long an orphan of a restart lives. */
+  sandboxTtlSeconds: number;
+  /**
+   * Where a sandbox reaches this service, for the package registry route. Undefined when the
+   * installation names none: the route then answers nobody and npm in a sandbox is left to what
+   * the sandbox gives it (its image's cache, its own way to a registry).
+   */
+  serviceUrl: string | undefined;
+  /** The npm registry the route forwards to. */
+  registryUrl: string;
+  cacheDir: string;
+  cacheMaxBytes: number;
+}
+
+export const PLUGIN_AGENT_DEFAULT_TIMEOUT_SECONDS = 1800;
+export const PLUGIN_AGENT_MIN_TIMEOUT_SECONDS = 60;
+export const PLUGIN_AGENT_MAX_TIMEOUT_SECONDS = 7200;
+export const PLUGIN_AGENT_DEFAULT_TOOL_CALLS = 150;
+export const PLUGIN_AGENT_DEFAULT_CONCURRENT_TASKS = 2;
+export const PLUGIN_AGENT_MAX_CONCURRENT_TASKS = 16;
+export const PLUGIN_AGENT_DEFAULT_SANDBOX_TTL_SECONDS = 600;
+// The gateway refuses a lifetime under a minute; an hour is as long as an orphan should live.
+export const PLUGIN_AGENT_MIN_SANDBOX_TTL_SECONDS = 60;
+export const PLUGIN_AGENT_MAX_SANDBOX_TTL_SECONDS = 3600;
+export const PLUGIN_AGENT_DEFAULT_REGISTRY_URL = "https://registry.npmjs.org";
+export const PLUGIN_AGENT_DEFAULT_CACHE_MB = 2048;
+export const PLUGIN_AGENT_MIN_CACHE_MB = 64;
+export const PLUGIN_AGENT_MAX_CACHE_MB = 65536;
+const MIB = 1024 * 1024;
+
+// The plugin agent from the shared `appsettings.json` (`ai.pluginAgent`), each field overridable
+// from the environment as `AI__PLUGIN_AGENT__<FIELD>` (`SANDBOX_URL`, `SANDBOX_TOKEN`,
+// `TASK_TIMEOUT_SECONDS`, `MAX_TOOL_CALLS`, `MAX_CONCURRENT_TASKS`, `SANDBOX_TTL_SECONDS`,
+// `SERVICE_URL`, `REGISTRY_URL`, `CACHE_DIR`, `CACHE_MAX_MB`). Undefined without the sandbox's URL
+// and token: the tools are then not offered and the registry route answers nobody. Without
+// `serviceUrl` the agent works and only the registry route is off. As with the
+// document agent, an environment variable that is set wins even when empty, so an install can
+// switch the agent off whatever the appsettings name.
+export function getPluginAgent(): PluginAgentConfig | undefined {
+  const ai: RootConfig["ai"] = nconf.get("ai");
+  const setting: PluginAgentSetting | undefined =
+    ai?.pluginAgent && typeof ai.pluginAgent === "object" ? ai.pluginAgent : undefined;
+  const sandboxUrl = envOrSetting("AI__PLUGIN_AGENT__SANDBOX_URL", setting?.sandboxUrl);
+  const sandboxToken = envOrSetting("AI__PLUGIN_AGENT__SANDBOX_TOKEN", setting?.sandboxToken);
+  if (!sandboxUrl || !sandboxToken) {
+    return undefined;
+  }
+  const int = (
+    field: string,
+    key: keyof PluginAgentSetting,
+    min: number,
+    max: number,
+    used: number,
+  ): number =>
+    envInt(`AI__PLUGIN_AGENT__${field}`, min, max) ??
+    intWithin(`ai:pluginAgent:${key}`, setting?.[key], min, max, { used }) ??
+    used;
+  const serviceUrl = firstText(process.env["AI__PLUGIN_AGENT__SERVICE_URL"], setting?.serviceUrl);
+  const registryUrl = firstText(
+    process.env["AI__PLUGIN_AGENT__REGISTRY_URL"],
+    setting?.registryUrl,
+  );
+  const cacheDir = firstText(process.env["AI__PLUGIN_AGENT__CACHE_DIR"], setting?.cacheDir);
+  return {
+    sandboxUrl: sandboxUrl.replace(/\/+$/, ""),
+    sandboxToken,
+    taskTimeoutSeconds: int(
+      "TASK_TIMEOUT_SECONDS",
+      "taskTimeoutSeconds",
+      PLUGIN_AGENT_MIN_TIMEOUT_SECONDS,
+      PLUGIN_AGENT_MAX_TIMEOUT_SECONDS,
+      PLUGIN_AGENT_DEFAULT_TIMEOUT_SECONDS,
+    ),
+    maxToolCalls: int(
+      "MAX_TOOL_CALLS",
+      "maxToolCalls",
+      1,
+      MAX_TOOL_CALLS_LIMIT,
+      PLUGIN_AGENT_DEFAULT_TOOL_CALLS,
+    ),
+    maxConcurrentTasks: int(
+      "MAX_CONCURRENT_TASKS",
+      "maxConcurrentTasks",
+      1,
+      PLUGIN_AGENT_MAX_CONCURRENT_TASKS,
+      PLUGIN_AGENT_DEFAULT_CONCURRENT_TASKS,
+    ),
+    sandboxTtlSeconds: int(
+      "SANDBOX_TTL_SECONDS",
+      "sandboxTtlSeconds",
+      PLUGIN_AGENT_MIN_SANDBOX_TTL_SECONDS,
+      PLUGIN_AGENT_MAX_SANDBOX_TTL_SECONDS,
+      PLUGIN_AGENT_DEFAULT_SANDBOX_TTL_SECONDS,
+    ),
+    serviceUrl: serviceUrl === "" ? undefined : serviceUrl.replace(/\/+$/, ""),
+    registryUrl: (registryUrl === "" ? PLUGIN_AGENT_DEFAULT_REGISTRY_URL : registryUrl).replace(
+      /\/+$/,
+      "",
+    ),
+    cacheDir: cacheDir === "" ? path.join(os.tmpdir(), "asc-ai-chat", "npm-cache") : cacheDir,
+    cacheMaxBytes:
+      int(
+        "CACHE_MAX_MB",
+        "cacheMaxMb",
+        PLUGIN_AGENT_MIN_CACHE_MB,
+        PLUGIN_AGENT_MAX_CACHE_MB,
+        PLUGIN_AGENT_DEFAULT_CACHE_MB,
+      ) * MIB,
+  };
+}
+
+// Group key of the chat's own sandbox tools. Listed in `systemServerTypes`: the "ask" permission
+// mode pauses a call, the default mode does not (the tools ask for no approval of their own).
+export const CHAT_SANDBOX_TYPE = "chat-sandbox";
+
+export interface ChatSandboxConfig {
+  sandboxUrl: string;
+  sandboxToken: string;
+  /** How long a sandbox is kept after a tool call, before the longest command timeout is added. */
+  idleTtlSeconds: number;
+}
+
+export const CHAT_SANDBOX_DEFAULT_IDLE_TTL_SECONDS = 900;
+// The longest timeout a command of the chat's sandbox may ask for. Every call renews the sandbox
+// to the idle lifetime plus this, a file call too: a renewal that added only the timeout of its
+// own call would move the expiry back, under a command another conversation runs or into the
+// idle time that follows a command. That holds while the instances that serve a user read one
+// idle lifetime.
+export const CHAT_SANDBOX_MAX_COMMAND_SECONDS = 600;
+// The upper bound of the idle lifetime is the gateway's, read from its source (`document-agent`
+// at commit f7f4509) and not yet run against a gateway: it refuses a lifetime over its maximum,
+// an hour unless its owner sets another (GATEWAY_SANDBOX_MAX_TTL), and the idle lifetime with
+// the 600 seconds added to it stays within that hour. The lower bound is this service's own
+// choice, a minute: the gateway's shortest lifetime, a minute too, is never reached by a
+// lifetime that has 600 seconds added.
+export const CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS = 60;
+export const CHAT_SANDBOX_MAX_IDLE_TTL_SECONDS = 3600 - CHAT_SANDBOX_MAX_COMMAND_SECONDS;
+
+// The chat's sandbox from the shared `appsettings.json` (`ai.sandbox`), each field overridable
+// from the environment (`AI__SANDBOX__URL`, `AI__SANDBOX__TOKEN`, `AI__SANDBOX__IDLE_TTL_SECONDS`).
+// Undefined without the gateway's URL and token: the tools are then not offered. As with the two
+// agents, an environment variable that is set wins even when empty, so an install can switch the
+// sandbox off whatever the appsettings name. A block that is not an object, and an address or a
+// token of the file that is not a text and that the environment does not override, read as
+// absent and are reported: the tools vanish otherwise without a word.
+export function getChatSandbox(): ChatSandboxConfig | undefined {
+  const ai: RootConfig["ai"] = nconf.get("ai");
+  const block: unknown = ai?.sandbox;
+  const isBlock = typeof block === "object" && block !== null && !Array.isArray(block);
+  if (isGiven(block) && !isBlock) {
+    refuse("ai:sandbox", shownOf(block), "an object", SANDBOX_NOT_NAMED);
+  } else {
+    refused.delete("ai:sandbox");
+  }
+  const setting: ChatSandboxSetting | undefined = isBlock ? block : undefined;
+  textOfFile("ai:sandbox:url", "AI__SANDBOX__URL", setting?.url, shownOf(setting?.url));
+  // A token is a secret: the line names its type, not the value.
+  textOfFile("ai:sandbox:token", "AI__SANDBOX__TOKEN", setting?.token, kindOfValue(setting?.token));
+  const sandboxUrl = envOrSetting("AI__SANDBOX__URL", setting?.url);
+  const sandboxToken = envOrSetting("AI__SANDBOX__TOKEN", setting?.token);
+  if (!sandboxUrl || !sandboxToken) {
+    return undefined;
+  }
+  return {
+    sandboxUrl: sandboxUrl.replace(/\/+$/, ""),
+    sandboxToken,
+    idleTtlSeconds:
+      envInt(
+        "AI__SANDBOX__IDLE_TTL_SECONDS",
+        CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS,
+        CHAT_SANDBOX_MAX_IDLE_TTL_SECONDS,
+      ) ??
+      intWithin(
+        "ai:sandbox:idleTtlSeconds",
+        setting?.idleTtlSeconds,
+        CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS,
+        CHAT_SANDBOX_MAX_IDLE_TTL_SECONDS,
+        { used: CHAT_SANDBOX_DEFAULT_IDLE_TTL_SECONDS },
+      ) ??
+      CHAT_SANDBOX_DEFAULT_IDLE_TTL_SECONDS,
+  };
+}
+
+const SANDBOX_NOT_NAMED: Fallback = {
+  effect: "the chat's sandbox is not configured by it",
+};
+
+/** What a value is, in the words of a line that may not show it. */
+function kindOfValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return "a list";
+  }
+  return typeof value === "object" ? "an object" : `a ${typeof value}`;
+}
+
+/** A value as a line shows it: a list and an object by their kind, anything else as it is. */
+function shownOf(value: unknown): unknown {
+  return typeof value === "object" ? kindOfValue(value) : value;
+}
+
+/**
+ * Reports a setting of the file that has to be a text and is something else, as `shown`. Not
+ * when the environment variable `env` is set: {@link envOrSetting} then does not read the file's
+ * value, and the line would say that nothing is configured while the variable configures it.
+ */
+function textOfFile(name: string, env: string, value: unknown, shown: unknown): void {
+  if (process.env[env] === undefined && isGiven(value) && typeof value !== "string") {
+    refuse(name, shown, "a text", SANDBOX_NOT_NAMED);
+  } else {
+    refused.delete(name);
+  }
 }
 
 /** The first value that is a non-blank string, trimmed; "" when there is none. */

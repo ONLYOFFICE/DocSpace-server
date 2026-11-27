@@ -20,3 +20,17 @@ Dockerfile
 .gitignore
 *.log
 *.md
+
+# The plugin skill (git submodule) is content the plugin agent reads and copies into its sandbox:
+# its markdown is needed at runtime, the rest of the skills repository is not
+!skills/**/*.md
+skills/agent-skills/.git
+skills/agent-skills/.github
+skills/agent-skills/.claude
+skills/agent-skills/.claude-plugin
+skills/agent-skills/assets
+skills/agent-skills/evals
+skills/agent-skills/tools
+skills/agent-skills/skills/*/evals
+skills/agent-skills/skills/apps-embed-sdk
+skills/agent-skills/skills/apps-ui-kit

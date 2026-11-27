@@ -129,6 +129,28 @@ public class ThreadFilesAuthorAccessTests(AspireAppFixture fixture) : ThreadFile
     }
 
     [Fact]
+    public async Task VersionInfo_OwnArtifact_Succeeds()
+    {
+        var artifact = await CreateArtifactAsync();
+
+        await FilesHttpClient.Authenticate(artifact.Author);
+        var versions = (await FilesApi.GetFileVersionInfoAsync(artifact.File.Id, TestContext.Current.CancellationToken)).Response;
+
+        versions.Should().ContainSingle().Which.@Version.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task OpenEdit_OwnArtifactFirstVersion_OpensForViewingOnly()
+    {
+        var artifact = await CreateArtifactAsync();
+
+        await FilesHttpClient.Authenticate(artifact.Author);
+        var config = (await FilesApi.OpenEditFileAsync(artifact.File.Id, version: 1, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        config.Document.Permissions.Edit.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task Share_OwnArtifact_Returns403()
     {
         var artifact = await CreateArtifactAsync();

@@ -729,7 +729,9 @@ function stringHeaders(headers: Record<string, unknown>): Record<string, string>
 
 // Where the files go: the current folder when the user may create there,
 // else My documents.
-async function resolveUploadTarget(entityId: string | undefined): Promise<string | undefined> {
+export async function resolveUploadTarget(
+  entityId: string | undefined,
+): Promise<string | undefined> {
   if (entityId && canTakeUpload(await getFolderInfo(entityId))) {
     return entityId;
   }

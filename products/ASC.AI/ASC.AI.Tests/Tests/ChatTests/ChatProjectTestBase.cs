@@ -53,7 +53,7 @@ public abstract class ChatProjectTestBase(AspireAppFixture fixture) : ChatPart3T
     {
         await FilesHttpClient.Authenticate(Owner);
 
-        return await AgentsTests.AiProjects.CreateAsync(RoomsApi);
+        return await CreateAiProjectAsync();
     }
 
     /// <summary>Creates a project as the Owner and selects <paramref name="profile"/> as its model.</summary>

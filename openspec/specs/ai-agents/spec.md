@@ -2163,14 +2163,14 @@ that a message of another thread already holds.
 ### Requirement: Privacy of the contents of a project
 
 A file or folder inside an AI project (an artifact, an attachment, a file not sent yet) SHALL be readable by
-its creator only: `getFileInfo`, `getPresignedFileUri`, `copyBatchItems`, `bulkDownload` and `getFolderInfo`
-SHALL answer 403 to another member, to the project's owner and to a DocSpace admin. The creator SHALL read,
-download and copy it and nothing else: `updateFile`, `deleteFile`, `moveBatchItems`, an external link and
-`insertFile` SHALL answer 403.
+its creator only: `getFileInfo`, `getPresignedFileUri`, `getFileVersionInfo`, `copyBatchItems`, `bulkDownload`
+and `getFolderInfo` SHALL answer 403 to another member, to the project's owner and to a DocSpace admin. The
+creator SHALL read, download and copy it, and read the version list of a file, and nothing else: `updateFile`,
+`deleteFile`, `moveBatchItems`, an external link and `insertFile` SHALL answer 403.
 
 #### Scenario: Artifact of another member
 
-- **WHEN** another member of the project, the project's owner and a DocSpace admin each read a member's artifact, ask for its download link, copy it into their My documents and request it as an archive
+- **WHEN** another member of the project, the project's owner and a DocSpace admin each read a member's artifact, ask for its download link, read its version list, copy it into their My documents and request it as an archive
 - **THEN** every call answers 403
 
 #### Scenario: Folder of another member's thread
@@ -2195,8 +2195,13 @@ download and copy it and nothing else: `updateFile`, `deleteFile`, `moveBatchIte
 
 #### Scenario: Creator opens the editor
 
-- **WHEN** the creator calls `openEditFile` for an own artifact
-- **THEN** the document opens with the edit permission false
+- **WHEN** the creator calls `openEditFile` for an own artifact, without a version and with `version=1`
+- **THEN** the document opens with the edit permission false each time
+
+#### Scenario: Version list of an artifact
+
+- **WHEN** the creator, another member, the project's owner and a DocSpace admin each call `getFileVersionInfo` for the creator's artifact
+- **THEN** the creator gets its one version and every other call answers 403
 
 ### Requirement: Used space of a project
 
