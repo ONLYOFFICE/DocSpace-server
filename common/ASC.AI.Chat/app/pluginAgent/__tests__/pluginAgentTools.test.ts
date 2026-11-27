@@ -52,12 +52,16 @@ import {
   shouldForwardHeadersToProvider,
 } from "../../requestContext.js";
 import { invalidateChatContext } from "../../storage/chatContextSnapshot.js";
-import { DocspaceApiHttpError, getFileInfo } from "../../storage/docspaceFilesApi.js";
+import {
+  DocspaceApiHttpError,
+  getFileInfo,
+  getMyDocumentsFolderId,
+} from "../../storage/docspaceFilesApi.js";
 import { storage } from "../../storage/index.js";
 import { FileTooLargeError, readFileBytes } from "../../storage/roomSkills.js";
 import { UpstreamShapeError } from "../../storage/upstreamShape.js";
-import { resolveUploadTarget } from "../../tools/documentAgent.js";
-import { MAX_FILE_BYTES, saveResult } from "../../tools/documentAgentFiles.js";
+import { uploadFile } from "../../storage/docspaceFileTransfer.js";
+import { MAX_FILE_BYTES } from "../../tools/documentAgentFiles.js";
 import { MAX_TASK_CHARS, pluginAgentTools } from "../pluginAgentTools.js";
 import { loadPluginSkill, pluginSkillPresent } from "../skill.js";
 import { endTask, runningTaskCount, startTask } from "../tasks.js";
@@ -78,12 +82,9 @@ vi.mock("../skill.js", async (importOriginal) => ({
   loadPluginSkill: vi.fn(),
   pluginSkillPresent: vi.fn(),
 }));
-vi.mock("../../tools/documentAgent.js", () => ({
-  resolveUploadTarget: vi.fn(),
-}));
-vi.mock("../../tools/documentAgentFiles.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../tools/documentAgentFiles.js")>()),
-  saveResult: vi.fn(),
+vi.mock("../../storage/docspaceFileTransfer.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../storage/docspaceFileTransfer.js")>()),
+  uploadFile: vi.fn(),
 }));
 vi.mock("../../storage/chatContextSnapshot.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../storage/chatContextSnapshot.js")>()),
@@ -96,6 +97,7 @@ vi.mock("../../storage/roomSkills.js", async (importOriginal) => ({
 vi.mock("../../storage/docspaceFilesApi.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../storage/docspaceFilesApi.js")>()),
   getFileInfo: vi.fn(),
+  getMyDocumentsFolderId: vi.fn(),
 }));
 
 const upstream = useUpstream();
@@ -167,17 +169,15 @@ beforeEach(() => {
   vi.spyOn(storage.assignments, "readByType").mockResolvedValue("p-chat");
   vi.spyOn(storage.profiles, "readById").mockResolvedValue(PROFILE);
   vi.spyOn(storage.toolPrefs, "updateAllowAlways").mockResolvedValue(undefined);
-  vi.mocked(resolveUploadTarget).mockReset().mockResolvedValue("folder-7");
+  vi.mocked(getMyDocumentsFolderId).mockReset().mockResolvedValue("my-docs");
   vi.mocked(getFileInfo)
     .mockReset()
     .mockResolvedValue({ title: "my-plugin-src.zip", fileExst: ".zip" });
   vi.mocked(readFileBytes).mockReset().mockResolvedValue(ZIP);
   let saved = 100;
-  vi.mocked(saveResult)
+  vi.mocked(uploadFile)
     .mockReset()
-    .mockImplementation((_thread, folderId, name) =>
-      Promise.resolve({ id: String(++saved), title: name, where: `into folder ${folderId}` }),
-    );
+    .mockImplementation((_folderId, name) => Promise.resolve({ id: String(++saved), title: name }));
   vi.spyOn(storage.preferences, "readToolPermissionMode").mockResolvedValue("auto");
   vi.spyOn(storage.toolPrefs, "readAllowAlways").mockResolvedValue([]);
 });
@@ -400,18 +400,17 @@ describe("a call that starts nothing", () => {
     expect(answer).not.toContain("internal");
   });
 
-  it("refuses when no model is configured, or no folder can take the files", async () => {
+  it("refuses when no model is configured, or My documents cannot be opened", async () => {
     vi.spyOn(storage.assignments, "readByType").mockResolvedValue(null);
     expect(await build({ task: "x" })).toBe(
       "No model is configured for this chat, the plugin agent cannot run.",
     );
 
     vi.spyOn(storage.assignments, "readByType").mockResolvedValue("p-chat");
-    vi.mocked(resolveUploadTarget).mockResolvedValue(undefined);
+    vi.mocked(getMyDocumentsFolderId).mockResolvedValue(undefined);
     expect(await build({ task: "x" })).toBe(
-      "There is no folder the resulting files could be saved into.",
+      "Your My documents section could not be opened, so the resulting files have nowhere to be saved.",
     );
-    expect(vi.mocked(resolveUploadTarget)).toHaveBeenCalledWith("folder-7");
     // Refused before the sources were asked for.
     expect(getFileInfo).not.toHaveBeenCalled();
   });
@@ -490,17 +489,16 @@ describe("a plugin task", () => {
     });
     expect(
       vi
-        .mocked(saveResult)
-        .mock.calls.map(([thread, folder, name, bytes, type]) => [
-          thread,
+        .mocked(uploadFile)
+        .mock.calls.map(([folder, name, bytes, type]) => [
           folder,
           name,
           String(Buffer.from(bytes)),
           type,
         ]),
     ).toEqual([
-      [undefined, "folder-7", "my-plugin.zip", "PK package", "application/zip"],
-      [undefined, "folder-7", "my-plugin-src.zip", "PK sources", "application/zip"],
+      ["my-docs", "my-plugin.zip", "PK package", "application/zip"],
+      ["my-docs", "my-plugin-src.zip", "PK sources", "application/zip"],
     ]);
     expect(model.histories[0]).toEqual([{ role: "user", content: "A button that greets" }]);
     const asked = vi.mocked(custom).mock.calls[0]?.[0];
@@ -519,16 +517,16 @@ describe("a plugin task", () => {
     ).toBe(true);
   });
 
-  it("keeps the files among the artifacts of the round's conversation when it has one", async () => {
+  it("saves into My documents in a conversation of an AI project too, whatever folder the chat is open in", async () => {
     ready();
     scriptModel([DELIVER]);
     await inRequestContext({ authorization: "Bearer user" }, () => {
       setRoundThreadId("thread-9");
       return pluginAgentTools.callTool("plugin_agent", { task: "x" }, "folder-7");
     });
-    expect(vi.mocked(saveResult).mock.calls.map(([thread]) => thread)).toEqual([
-      "thread-9",
-      "thread-9",
+    expect(vi.mocked(uploadFile).mock.calls.map(([folder]) => folder)).toEqual([
+      "my-docs",
+      "my-docs",
     ]);
   });
 
@@ -625,7 +623,7 @@ describe("a plugin task", () => {
 
     expect(JSON.parse(answer as string)).toMatchObject({ name: "my-plugin" });
     expect(JSON.stringify(model.histories[1])).toContain("The build failed (npm run build).");
-    expect(saveResult).toHaveBeenCalledTimes(2);
+    expect(uploadFile).toHaveBeenCalledTimes(2);
   });
 
   it.each([[undefined], ["/tmp/x"], ["/workspace"], ["/workspace/my plugin"]])(
@@ -653,7 +651,7 @@ describe("a plugin task", () => {
     expect(await build({ task: "x" })).toBe(
       "The plugin was not finished: the budget of 2 tool calls was spent. The last failed check: type check. No file was saved.",
     );
-    expect(saveResult).not.toHaveBeenCalled();
+    expect(uploadFile).not.toHaveBeenCalled();
     expect(gateway.calls.at(-1)).toBe("Delete");
   });
 
@@ -682,7 +680,7 @@ describe("a plugin task", () => {
       "The plugin was not finished: the agent stopped without handing it over. No file was saved. Its last words: "
         .length + 500,
     );
-    expect(saveResult).not.toHaveBeenCalled();
+    expect(uploadFile).not.toHaveBeenCalled();
     expect(gateway.calls.at(-1)).toBe("Delete");
   });
 
@@ -702,7 +700,7 @@ describe("a plugin task", () => {
       "The plugin task was stopped at its time limit of 90 seconds. No file was saved.",
     );
     expect(vi.mocked(AbortSignal.timeout)).toHaveBeenCalledWith(90_000);
-    expect(saveResult).not.toHaveBeenCalled();
+    expect(uploadFile).not.toHaveBeenCalled();
     expect(gateway.calls.at(-1)).toBe("Delete");
   });
 
@@ -718,7 +716,7 @@ describe("a plugin task", () => {
     expect(await build({ task: "x" }, undefined, reply.signal)).toBe(
       "The plugin task was stopped with the reply. No file was saved.",
     );
-    expect(saveResult).not.toHaveBeenCalled();
+    expect(uploadFile).not.toHaveBeenCalled();
     expect(gateway.calls.at(-1)).toBe("Delete");
   });
 
@@ -770,7 +768,7 @@ describe("a plugin task", () => {
   it("says that no file was saved when the workspace refuses the package", async () => {
     ready();
     scriptModel([DELIVER]);
-    vi.mocked(saveResult).mockRejectedValue(
+    vi.mocked(uploadFile).mockRejectedValue(
       new DocspaceApiHttpError(403, "x", "http://internal/api"),
     );
 
@@ -780,7 +778,7 @@ describe("a plugin task", () => {
       "The plugin was built, but the workspace refused to save it: it answered 403. No file was saved.",
     );
     expect(answer).not.toContain("internal");
-    expect(saveResult).toHaveBeenCalledTimes(1);
+    expect(uploadFile).toHaveBeenCalledTimes(1);
     expect(gateway.calls.at(-1)).toBe("Delete");
   });
 
@@ -791,14 +789,14 @@ describe("a plugin task", () => {
   ])("says that the package may have been saved when the workspace %s", async (_name, failure) => {
     ready();
     scriptModel([DELIVER]);
-    vi.mocked(saveResult).mockRejectedValue(failure);
+    vi.mocked(uploadFile).mockRejectedValue(failure);
 
     const answer = await build({ task: "x" });
 
     expect(answer).toBe(
       "The plugin was built, but the workspace's answer to saving my-plugin.zip could not be read: the file may or may not have been saved. Look for it before building again.",
     );
-    expect(saveResult).toHaveBeenCalledTimes(1);
+    expect(uploadFile).toHaveBeenCalledTimes(1);
   });
 
   it.each([
@@ -817,8 +815,8 @@ describe("a plugin task", () => {
     async (_name, failure, warning) => {
       ready();
       scriptModel([DELIVER]);
-      vi.mocked(saveResult)
-        .mockResolvedValueOnce({ id: "201", title: "my-plugin.zip", where: "x" })
+      vi.mocked(uploadFile)
+        .mockResolvedValueOnce({ id: "201", title: "my-plugin.zip" })
         .mockRejectedValueOnce(failure);
 
       expect(JSON.parse((await build({ task: "x" })) as string)).toMatchObject({
@@ -837,7 +835,7 @@ describe("a plugin task", () => {
       "The plugin was not finished: the model's provider failed a request. No file was saved.",
     );
     expect(custom).toHaveBeenCalledTimes(2);
-    expect(saveResult).not.toHaveBeenCalled();
+    expect(uploadFile).not.toHaveBeenCalled();
     expect(gateway.calls.at(-1)).toBe("Delete");
   });
 });

@@ -114,21 +114,21 @@ SHALL install nothing and change no existing file.
 
 ### Requirement: Where the results of a plugin task are saved
 
-The two files SHALL go among the artifacts of the conversation when it belongs to an AI project, else into
-the folder the chat is opened in when the caller may create files there, else into My documents. A save the
+The two files SHALL go into the caller's My documents, wherever the chat is opened and whatever
+conversation the task runs in; when that section cannot be opened the call SHALL start no task. A save the
 workspace refuses SHALL be reported as not saved; a save whose answer cannot be read SHALL be reported as
 possibly saved. When only the sources are not saved, the call SHALL still return the package's id with a
 warning.
 
-#### Scenario: Conversation of an AI project
+#### Scenario: Chat opened in a room, or in a conversation of an AI project
 
-- **WHEN** the task runs in a conversation of an AI project
-- **THEN** both files are saved among that conversation's artifacts
+- **WHEN** the task runs in a chat opened in a room the caller may create files in, or in a conversation of an AI project
+- **THEN** both files are saved in the caller's My documents, not in that room and not among the conversation's artifacts
 
-#### Scenario: Folder the caller cannot write to
+#### Scenario: My documents cannot be opened
 
-- **WHEN** the chat is opened in a folder where the caller may not create files and the conversation belongs to no AI project
-- **THEN** the two files are saved in the caller's My documents
+- **WHEN** the workspace refuses the caller's My documents section when the tool is called
+- **THEN** the call returns an error and no task starts
 
 #### Scenario: Workspace refuses the package
 

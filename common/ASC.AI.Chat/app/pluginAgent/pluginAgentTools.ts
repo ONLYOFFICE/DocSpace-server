@@ -32,7 +32,7 @@
 
 // The plugin agent as two tools of the chat. `plugin_agent` hands a description of a DocSpace
 // plugin to a sub-agent that runs inside this process: it builds the plugin in a sandbox by the
-// plugin skill, and leaves the package and its sources as two new files of the workspace.
+// plugin skill, and leaves the package and its sources as two new files in the caller's My documents.
 // `install_plugin` installs such a package into the portal.
 //
 // Both are offered to the owner and the DocSpace admins of a portal only, on an installation
@@ -58,17 +58,20 @@ import { isObject } from "../narrow.js";
 import {
   getRoundProfileId,
   getRoundSignal,
-  getRoundThreadId,
   markForwardHeadersToProvider,
 } from "../requestContext.js";
-import { invalidateChatContext, readChatContext } from "../storage/chatContextSnapshot.js";
-import { DocspaceApiHttpError, getFileInfo } from "../storage/docspaceFilesApi.js";
+import { invalidateChatContext } from "../storage/chatContextSnapshot.js";
+import {
+  DocspaceApiHttpError,
+  getFileInfo,
+  getMyDocumentsFolderId,
+} from "../storage/docspaceFilesApi.js";
+import { uploadFile } from "../storage/docspaceFileTransfer.js";
 import { addWebPlugin, isPortalAdmin } from "../storage/docspacePeopleApi.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
 import { FileTooLargeError, readFileBytes } from "../storage/roomSkills.js";
-import { resolveUploadTarget } from "../tools/documentAgent.js";
-import { MAX_FILE_BYTES, saveResult } from "../tools/documentAgentFiles.js";
+import { MAX_FILE_BYTES } from "../tools/documentAgentFiles.js";
 import { AGENT_TOOLS, callAgentTool, DELIVER_TOOL, stepOf } from "./agentTools.js";
 import type { ToolContext } from "./agentTools.js";
 import { deliverPlugin, projectDirOf } from "./deliver.js";
@@ -138,7 +141,7 @@ const PLUGIN_AGENT_TOOL: TMCPItem = {
   description:
     "Build a plugin for this ONLYOFFICE DocSpace portal. Hand over a description of what the plugin " +
     "must do in 'task': an agent writes it in a sandbox, builds and validates it, which may take " +
-    "many minutes, and saves two new files in the workspace: the plugin package (.zip) and an archive " +
+    "many minutes, and saves two new files in the user's My documents: the plugin package (.zip) and an archive " +
     "of its sources (-src.zip). Nothing is installed. To change a plugin built earlier, pass the id of " +
     "its sources archive in 'sourcesFileId' and describe the change in 'task'. The result names both " +
     `file ids; install the package with ${INSTALL_PLUGIN_TOOL_NAME} only when the user asks for it. ` +
@@ -276,7 +279,7 @@ export const pluginAgentTools: ToolsAdapter = {
       if (!skill) {
         return "The plugin agent is not configured on this server.";
       }
-      return await buildPlugin(config, skill, input, entityId, options);
+      return await buildPlugin(config, skill, input, options);
     } catch (err) {
       // Contract: a failure is a result, never a throw — a throw aborts the chat stream. What
       // arrives here failed before anything was saved or sent to the portal: the steps that
@@ -343,7 +346,6 @@ async function buildPlugin(
   config: PluginAgentConfig,
   skill: PluginSkill,
   args: Record<string, unknown>,
-  entityId: string | undefined,
   options: ToolCallOptions | undefined,
 ): Promise<string> {
   // Measured as it is used: without the white space around it.
@@ -362,9 +364,12 @@ async function buildPlugin(
   if (!profile) {
     return "No model is configured for this chat, the plugin agent cannot run.";
   }
-  const folderId = await resolveUploadTarget(entityId);
+  // Always My documents, wherever the chat is open and whatever conversation it is: a plugin is
+  // asked for from the settings as well, where no folder is open, and its package is the
+  // admin's own file until it is installed.
+  const folderId = await getMyDocumentsFolderId();
   if (!folderId) {
-    return "There is no folder the resulting files could be saved into.";
+    return "Your My documents section could not be opened, so the resulting files have nowhere to be saved.";
   }
   const running = startTask(config.maxConcurrentTasks);
   if (!running) {
@@ -518,17 +523,10 @@ function systemPromptOf(skill: PluginSkill): string {
  * the id of the first.
  */
 async function saveResults(plugin: DeliveredPlugin, folderId: string): Promise<string> {
-  const threadId = getRoundThreadId() ?? readChatContext("thread")?.requested.threadId;
   const packageTitle = `${plugin.name}.zip`;
   let saved: { id: string; title: string };
   try {
-    saved = await saveResult(
-      threadId,
-      folderId,
-      packageTitle,
-      plugin.packageBytes,
-      "application/zip",
-    );
+    saved = await uploadFile(folderId, packageTitle, plugin.packageBytes, "application/zip");
   } catch (err) {
     logger.warn(`${PLUGIN_AGENT_TOOL_NAME}: ${packageTitle} was not saved: ${String(err)}`);
     const refused = refusedStatus(err);
@@ -539,8 +537,7 @@ async function saveResults(plugin: DeliveredPlugin, folderId: string): Promise<s
   let sources: { id: string; title: string } | undefined;
   let warning: string | undefined;
   try {
-    const file = await saveResult(
-      threadId,
+    const file = await uploadFile(
       folderId,
       `${plugin.name}-src.zip`,
       plugin.sourcesBytes,

@@ -71,7 +71,7 @@ environment, which wins:
 The chat can build a DocSpace plugin and install it (`app/pluginAgent/`). The model of the owner
 and of a DocSpace admin gets two more tools: `plugin_agent` hands a description of a plugin to a
 sub-agent that runs inside this service, builds the plugin in a sandbox by the `apps-plugin-sdk`
-skill and saves two new files in the workspace, the package (`<name>.zip`) and its sources
+skill and saves two new files in the caller's My documents, the package (`<name>.zip`) and its sources
 (`<name>-src.zip`); `install_plugin` installs a package into the portal. Without the
 configuration below, without the skill, or for any other member, neither tool is offered.
 
