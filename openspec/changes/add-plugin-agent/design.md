@@ -210,7 +210,11 @@ reads the file:
 
 - under "allow" it installs nothing and says that the mode has to change;
 - under "auto" with the tool on the list it installs nothing, removes the entry (from the list read anew,
-  not from the round's snapshot) and asks to be called again, so the next call pauses. The engine writes that entry before it runs the very call the user approved with
+  not from the round's snapshot) and asks to be called again, so the next call pauses. The list is looked
+  at twice: in the round's snapshot, on which the engine decided to run the call unasked, and in a read made
+  now. An entry only the snapshot holds (removed in the settings or by another round since) makes the call
+  install nothing as well; nothing is written then, and the snapshot is dropped so the next call is decided
+  on the stored list. The engine writes that entry before it runs the very call the user approved with
   "always allow", so that call lands here too: the user is asked once more instead of being sent to the
   settings, and the adapter never has to tell a fresh approval from an old one.
 

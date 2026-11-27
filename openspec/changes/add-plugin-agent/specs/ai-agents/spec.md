@@ -281,6 +281,11 @@ the caller's session and returns the plugin's name, version and `enabled`.
 - **WHEN** the caller's mode skips the dialog for pre-approved tools, the caller holds an `allowAlways` entry for `install_plugin`, and the model calls it
 - **THEN** nothing is installed, the entry is removed, and the call returns that the tool has to be called again
 
+#### Scenario: Pre-approval removed during the round
+
+- **WHEN** the round's copy of the caller's settings holds an `allowAlways` entry for `install_plugin`, the entry has been removed since, and the model calls the tool in that round
+- **THEN** nothing is installed, nothing is written to the list, and the call returns that the tool has to be called again
+
 #### Scenario: Approved with "always allow"
 
 - **WHEN** the caller approves the pending call with `allowAlways` under that mode
