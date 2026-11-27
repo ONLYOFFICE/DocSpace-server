@@ -652,13 +652,17 @@ changed is a question for the user (fix the expectation or the code), not a regr
 ## 7. Re-check mode
 
 Input: the previous findings (a `.md` path the user gave, or the last review in this
-conversation). Re-scan (§1) and then:
+conversation). For a review of a commit, take the reviewed SHA from the previous report's Coverage
+section and add `--since-review <sha>` to the §1 scan. Include `--worktree` when reviewing local
+fixes. The gate still compares the whole branch to its base. If the previous review covered
+uncommitted changes, use its recorded tree as the diff baseline. If the reviewed state cannot be
+identified or the commit is no longer an ancestor, establish the boundary or run a full review.
 
 1. For **each** previous item, read the current code at its place and classify: **Fixed**
    (how, with `path:line`), **Partially fixed**, **Not fixed**. Do not trust the commit message
-   ("review fixes") — check each item.
-2. Review only what changed since the previous review (`git log <prev-sha>..HEAD`, diff of those
-   commits) with §3–§4 for **New** — a fix commit is where new bugs come from: a
+   ("review fixes") - check each item, including findings outside the files listed for this round.
+2. Use "Changes since the previous review" (or the diff from the recorded tree) to locate the
+   batch. Review its diff with §3-§4 for **New** - a fix commit is where new bugs come from: a
    filter narrowed for one caller loses another caller's lookup, a default added on create changes
    every update, "this failure is not an attempt" makes a row retry for ever, a restore change fails
    on archives without the new column. For **each fix** ask, beyond §3 B:

@@ -5,11 +5,13 @@ Everything here is a cheap, deterministic signal read from `git diff` — a HINT
 reviewer, never a verdict. Each hit still has to be read in context before it becomes a finding.
 
 Usage (from the repo root, server/):
-    python .claude/skills/review-branch/scan.py [--base <ref>] [--head <ref>] [--worktree] [--full] [--gate]
+    python .claude/skills/review-branch/scan.py [--base <ref>] [--head <ref>] [--worktree] [--since-review <sha>] [--full] [--gate]
 
 --base      ref to compare against; default: the candidate with the fewest commits ahead of it
             (origin/release/* newest first, origin/develop, origin/master)
 --head      default HEAD
+--since-review  also list file changes from the previous reviewed commit to the scanned tree.
+            The commit must be an ancestor of the selected head (or the head itself).
 --worktree  compare the base against the working tree (uncommitted changes included); only for the
             checked-out branch, so with a --head that names another ref (another branch, even at the same
             commit) it exits 2; with a detached HEAD a --head at that commit is accepted
@@ -1239,12 +1241,21 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base")
     ap.add_argument("--head", default="HEAD")
+    ap.add_argument("--since-review", metavar="SHA", help="also show files changed since the previous review")
     ap.add_argument("--worktree", action="store_true")
     ap.add_argument("--full", action="store_true")
     ap.add_argument("--gate", action="store_true")
     a = ap.parse_args()
 
     head_sha = git("rev-parse", "--verify", f"{a.head}^{{commit}}").strip()
+    if a.since_review is not None:
+        reviewed = git("rev-parse", "--verify", "--end-of-options", f"{a.since_review}^{{commit}}",
+                       check=False).strip() if a.since_review else ""
+        if not reviewed:
+            fail(f"--since-review: unknown reviewed commit {a.since_review!r}")
+        if git("merge-base", reviewed, head_sha, check=False).strip() != reviewed:
+            fail(f"--since-review: {reviewed} is not an ancestor of {a.head}. "
+                 "Check the review boundary after a rebase or switch to a full review.")
     # "Checked out" is decided by the ref, not the commit: another branch at the same commit is not the branch the
     # working tree belongs to. A detached HEAD matches by commit (a sha, a tag).
     head_ref = git("symbolic-ref", "-q", "HEAD", check=False).strip()
@@ -1314,6 +1325,16 @@ def main() -> None:
     print()
 
     # --- files ---------------------------------------------------------------------------------
+    if a.since_review is not None:
+        print("## Changes since the previous review")
+        print(f"  reviewed commit: {reviewed}")
+        changes = git("diff", "--name-status", "-M", reviewed, view, "--").splitlines()
+        for change in changes:
+            print(f"  {change}")
+        if not changes:
+            print("  none")
+        print()
+
     name_status = [l.split("\t") for l in git("diff", "--name-status", "-M", *diff_args).splitlines() if l]
     numstat = {}
     for l in git("diff", "--numstat", "-M", *diff_args).splitlines():
