@@ -33,16 +33,17 @@ LEGEND_EN = (
     "> **Test run {commit}** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, {date}), written by script. "
     "After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; "
     "`[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; "
-    "`[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. "
+    "`[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve, or a cited test or test file the script did not find. "
     "PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately."
 )
 MARK = re.compile(r" \[run: [A-Z-]+\]")
 # A test is cited by name, `File.cs::Method` (several: `File.cs::A, B`), which survives every edit of the file, or,
 # in older rows, by lines, `File.cs:12-40`, which moves with every edit above it.
 # A further name after a comma starts with a capital or an underscore, as test methods do, is not the file of the
-# next citation (`B.cs::X`) and ends the item (a comma, a backtick, `;`, `)`, `|` or the end follows), so that the
-# prose after a citation is not read as a name - the same as NAME_CITATION in review-branch/scan.py.
-CITE = re.compile(r"([A-Za-z_0-9]+\.cs)(?:::([A-Za-z_]\w*(?:\s*,\s*[A-Z_]\w*(?![\w.]*::|\.\w)(?=\s*(?:[,`;)|]|$)))*)"
+# next citation (`B.cs::X`) and ends the list or the item: another name after a comma, a backtick, `;`, `)`, `(`,
+# `:`, `|`, a full stop, "and" or "or", or the end of the row follows. So the prose after a citation is not read as a
+# name ("::A, However, the" takes `A` only) - the same as NAME_CITATION in review-branch/scan.py.
+CITE = re.compile(r"([A-Za-z_0-9]+\.cs)(?:::([A-Za-z_]\w*(?:\s*,\s*[A-Z_]\w*(?![\w.]*::|\.\w)(?=\s*(?:,\s*[A-Z_]|[`;)|(:]|\.(?!\w)|$)|\s+(?:and|or)\b))*)"
                   r"|:([0-9][0-9,\s\-]*))?")
 METHOD = re.compile(r"^\s*(?:public|internal)\s+(?:async\s+)?(?:Task|ValueTask|void)\s+(\w+)\s*\(")
 
@@ -79,34 +80,46 @@ date = open(date_file).read().strip() if os.path.exists(date_file) else "date un
 
 # test methods per file: (line, method, bug-marked)
 sources = collections.defaultdict(list)
+test_files = set()
 for path in glob.glob("**/*Tests*/**/*.cs", recursive=True):
     p = path.replace("\\", "/")
     if "/bin/" in p or "/obj/" in p or "worktrees" in p:
         continue
-    lines = open(path, encoding="utf-8-sig", errors="replace").read().split("\n")
+    test_files.add(os.path.basename(path))
+    lines = open(path, encoding="utf-8-sig", errors="replace").read().replace("\r\n", "\n").split("\n")
     for i, line in enumerate(lines, 1):
         m = METHOD.match(line)
         if not m:
             continue
-        window = "\n".join(lines[max(0, i - 15) : i - 1]).split("}\n")[-1]
+        # the attributes of the method: everything since the end of the member above it, however many
+        # [InlineData] rows a [Theory] has
+        window = "\n".join(lines[max(0, i - 400) : i - 1]).split("}\n")[-1]
         if not re.search(r"\[(Fact|Theory|SkipFact|Retry)", window):
             continue
         bug = bool(re.search(r'Trait\("Bug",|Trait\("Category",\s*"Bug"\)', window))
         sources[os.path.basename(path)].append((i, m.group(1), bug))
 
 
-def classify(row):
-    found, linked = [], False
+def classify(row, unresolved):
+    found, linked, dangling = [], False, False
     for fn, names, rng in CITE.findall(row):
         tests = sources.get(fn)
         if not tests:
+            # a test file that is not there (renamed or deleted) is a dangling citation; another .cs file (product
+            # code, a test helper with no test method) is no test citation at all
+            if fn.endswith("Tests.cs") and fn not in test_files and (names.strip() or rng.strip()):
+                unresolved.append(f"{fn} (no such test file)")
+                dangling = True
             continue
         chosen = tests
         if names.strip():
             wanted_names = {n.strip() for n in names.split(",")}
             chosen = [t for t in tests if t[1] in wanted_names]
-            if not chosen:
-                # a name no test method of the file has: the citation does not resolve, the same as no citation
+            if missing := sorted(wanted_names - {t[1] for t in tests}):
+                # a name the script finds no test method for (a renamed or deleted test): the row cites a test that
+                # is not there, so the tests that are found do not stand for it
+                unresolved.append(f"{fn}::{', '.join(missing)}")
+                dangling = True
                 continue
         linked = True
         if not names.strip() and rng.strip():
@@ -129,7 +142,7 @@ def classify(row):
             r = first.get(fn[:-3], {}).get(t[1])
             if r:
                 found.append((fn[:-3], t[1], t[2], r))
-    if not linked:
+    if dangling or not linked:
         return "nolink"
     if not found:
         return "notrun"
@@ -188,11 +201,13 @@ if args.ru:
     prefix_ru = template_ru.split("{commit}")[0]
 
 total = collections.Counter()
+unresolved_all = []
 print(f"{'spec':<28}" + "".join(f"{v:>14}" for v in TAG.values()) + ("  copy" if args.ru else ""))
 for vf in sorted(glob.glob("openspec/specs/*/verification.md")):
     spec = os.path.basename(os.path.dirname(vf))
     rows = [MARK.sub("", l) for l in open(vf, encoding="utf-8").read().split("\n") if l.startswith("|") and "TEST-CONFIRMED" in l]
-    tags = [classify(r) for r in rows]
+    missing_names = []
+    tags = [classify(r, missing_names) for r in rows]
     rewrite(vf, tags, legend_en, prefix_en)
     c = collections.Counter(tags)
     total.update(c)
@@ -209,4 +224,10 @@ for vf in sorted(glob.glob("openspec/specs/*/verification.md")):
             else:
                 note = f"MISMATCH {n}/{len(tags)}"
     print(f"{spec:<28}" + "".join(f"{c[k]:>14}" for k in TAG) + (f"  {note}" if note else ""))
+    unresolved_all += [f"{spec}: {u}" for u in missing_names]
 print(f"{'TOTAL':<28}" + "".join(f"{total[k]:>14}" for k in TAG))
+if unresolved_all:
+    print("cited tests the script did not find - no test method of that name, or no such test file (those rows "
+          "are NO-LINK):")
+    for u in unresolved_all:
+        print(f"  {u}")

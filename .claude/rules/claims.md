@@ -18,7 +18,7 @@ were written from the design, and later fix rounds changed the code under them. 
 - A task is ticked only when done; a blocked one stays unticked with its reason or moves to a follow-up (§4)
 - A commit message says "updated" only for what it updated, and is checked before it is pushed (§4)
 - A `verification.md` row cites by name, `File.cs::Method`; a row the branch touches is rewritten so (§4)
-- A number, absolute word or library behaviour a fix round writes names its test (one-step mutation) or CODE-ONLY (§6)
+- A number or absolute word a fix round writes names its test (one-step mutation) or CODE-ONLY; a library's behaviour, its characterization test (§6)
 
 ## 1. A claim points at the code or the test that makes it true
 
@@ -67,6 +67,9 @@ were written from the design, and later fix rounds changed the code under them. 
   `File.cs:120-140`. Line citations moved with every edit above them: one review found 121 of a spec's
   378 stale, and stale citations were 8 findings of ten reviews. A row the branch touches is rewritten
   to the name form; one that still cites lines of a file the branch moves is updated in the same branch.
+  The scan and `apply_run_marks.py` read a further name after a comma only when another name, a
+  backtick, `;`, `)`, `(`, `:`, `|`, a full stop, "and", "or" or the end of the row follows it: write
+  `File.cs::A, B` in backticks when prose follows the list.
 - A commit message is checked before it is pushed: once pushed it cannot change, so a review that
   finds it wrong can only ask for the PR description to say it right. The scan lists the claims of the
   branch's commit messages ("Claims with numbers").
@@ -100,15 +103,17 @@ source, not a finding by itself, and a claim worded otherwise is still the write
 
 ## 6. A claim the fix writes is pinned in the same batch
 
-- A number, an absolute word or a statement about how a dependency behaves that a fix round adds to
-  a remark, a comment, a spec, a `verification.md` row or a commit message names, in the same batch,
-  the test that pins it, or is marked CODE-ONLY in `verification.md` (in the commit message when no
-  row covers it). Reasoning about the code is not a source: the claims below were all reasoned.
+- A number or an absolute word that a fix round adds to a remark, a comment, a spec, a
+  `verification.md` row or a commit message names, in the same batch, the test that pins it, or is
+  marked CODE-ONLY in `verification.md` (in the commit message when no row covers it). A statement
+  about how a dependency behaves names its characterization test (`dependency-behaviour.md` §1);
+  CODE-ONLY does not stand for it. Reasoning about the code is not a source: the claims below were all
+  reasoned.
 - A test pins a value only if a mutation of that value by one step makes it red: a threshold of 5
   changed to 4 and to 6, a duration a unit shorter and longer (`prove-red.sh --mutate`, `tests.md`
   "A test has to be able to fail"). A test that stays green under a mutation pins a range; the text
   then states the range, not the value.
-- Seen in bugfix/78009, each written by a fix round to answer a finding and corrected by the next:
+- Seen in review, in one branch, each written by a fix round to answer a finding and corrected by the next:
   "up to 4 requests" where a failed creation sent 6; "5 or more requests failed" written as a state,
   although the breaker opens only on a failed request after them; "an error status is not counted",
   although Polly records an outcome its predicate does not handle as a success.

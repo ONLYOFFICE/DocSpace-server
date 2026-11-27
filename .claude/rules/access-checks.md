@@ -50,8 +50,12 @@ points as lens E of `review-branch` and cite them as `[access-checks.md §N]`.
 
 ## 3. Ids from the request, work handed on
 
-- Every id of a request list is checked for the caller before it is used, counted or queued, in one
-  batch call (`FileSecurity.FilterReadAsync` over the entries), and the list has a named upper limit.
+- Every id of a request list is checked for the caller, for the right the action needs, before it is
+  used, counted or queued, and the list has a named upper limit. A read filter lets through ids the
+  caller may read but not change. `FileSecurity` has batch calls for reading (`FilterReadAsync`,
+  `CanReadAsync` over the entries), downloading (`FilterDownloadAsync`) and deleting (`CanDeleteAsync`
+  over the entries); a move or a share is checked entry by entry (`CanMoveAsync`, `CanShareAsync`),
+  with the entries loaded in one batch.
 - A background task acts under the account that asked for it. A wider account (the portal owner, a
   system account standing in for an anonymous caller) acts only on ids that passed the caller's check.
 

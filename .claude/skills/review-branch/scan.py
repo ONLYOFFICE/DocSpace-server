@@ -10,8 +10,10 @@ Usage (from the repo root, server/):
 --base      ref to compare against; default: the candidate with the fewest commits ahead of it
             (origin/release/* newest first, origin/develop, origin/master)
 --head      default HEAD
---since-review  also list file changes from the previous reviewed commit to the scanned tree.
-            The commit must be an ancestor of the selected head (or the head itself).
+--since-review  also list file changes from the previous reviewed commit to the scanned tree that are in
+            the branch's own diff against the merge-base, and the files the branch changed at the review and
+            has undone since; what a merge of the base brought after the review is counted, not listed. The
+            commit must be an ancestor of the selected head (or the head itself).
 --worktree  compare the base against the working tree (uncommitted changes included); only for the
             checked-out branch, so with a --head that names another ref (another branch, even at the same
             commit) it exits 2; with a detached HEAD a --head at that commit is accepted
@@ -26,8 +28,12 @@ Usage (from the repo root, server/):
             without a license header (generated files and thirdparty/ excepted); a verification.md line
             citation of a changed C# file that the branch wrote wrong or moved; a FORM, STYLE or CODES finding
             of openapi-desc-opt/check_texts.py on a changed operation that the merge-base does not have (also
-            for an operation not in the emitted document yet). Exit 0 otherwise; 2 when the scan itself
-            cannot run (git, the arguments, an error of the script)
+            for an operation not in the emitted document yet), and a run of that check that gave no answer
+            on the scanned tree (not next to the scan, an exit code other than 0 and 1, a crash, a report
+            that stops before its end or has no answer for an operation; an action it answers it cannot
+            check - its project emits no document, or no published action of that name is in the file - is
+            listed, not gated). Exit 0 otherwise; 2 when the scan itself cannot run (git, the arguments, an
+            error of the script)
 
 With --worktree the scan reads a commit of what `git commit -a` would record (clean filters applied,
 intent-to-add files and moved submodule pointers included), built in a temporary copy of the index; the
@@ -43,8 +49,9 @@ import os
 import re
 import subprocess
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
+from typing import NamedTuple
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 # The scan reads the repository; `git status` would otherwise refresh and rewrite the real index under its lock,
@@ -56,10 +63,14 @@ RULES_DIR = Path(".claude/rules")
 GATE: list[str] = []
 # What a review runs: a base change to one of these that applies to the branch makes a check on the branch's older
 # copy see less. CLAUDE.md is left out: its frequent edits are lists, and the rules it points to are covered here.
-REVIEW_TOOLING = (".claude/rules", ".claude/skills/review-branch", ".claude/scripts/prove-red.sh", "openspec/config.yaml",
-                  ".claude/skills/openapi-desc-opt/check_texts.py")
+# The text check of --gate is check_texts.py with what it reads: its index (scan.py), the limits (tools.py and the
+# readability/ settings, which it checks against each other) and the plain-word table of description-rules.md §5.3.
+CHECK_TEXTS_INPUTS = tuple(f".claude/skills/openapi-desc-opt/{p}" for p in (
+    "check_texts.py", "scan.py", "tools.py", "readability/", "references/description-rules.md"))
+REVIEW_TOOLING = (".claude/rules", ".claude/skills/review-branch", ".claude/scripts/prove-red.sh",
+                  "openspec/config.yaml", *CHECK_TEXTS_INPUTS)
 # Rules whose `paths:` say less than where they apply: CLAUDE.md (Git Workflow) has every branch follow
-# fixing-findings.md §6 and §9-§11, whatever files the branch changes.
+# fixing-findings.md §6 and §9-§12, whatever files the branch changes.
 ALWAYS_APPLIES = {".claude/rules/fixing-findings.md"}
 # Rules with no `paths:` that govern how the agent works, not what a branch must hold (SKILL.md §3 A): a base change
 # to them leaves nothing for a branch to bring in.
@@ -71,7 +82,8 @@ LICENSE_MARKS = ("Copyright (C) Ascensio System SIA", "(c) Copyright Ascensio Sy
 def tooling_applies(path: str, ref: str, branch_paths: list[str]) -> bool:
     """Whether a rule or review-tooling file, as `ref` holds it, applies to a branch that changes `branch_paths`:
     a rule whose `paths:` match a file of the branch or that has none, fixing-findings.md always, this skill and its
-    scan, prove-red.sh, and the spec rules when the branch touches openspec/."""
+    scan, prove-red.sh, the spec rules when the branch touches openspec/, and the text check of --gate with its
+    inputs (CHECK_TEXTS_INPUTS) when the branch changes a controller."""
     if path in NOT_A_REVIEW_CRITERION:
         return False
     if path in ALWAYS_APPLIES:
@@ -83,7 +95,7 @@ def tooling_applies(path: str, ref: str, branch_paths: list[str]) -> bool:
         return not text or not globs or any(g.match(p) for g in globs for p in branch_paths)
     if path == "openspec/config.yaml":
         return any(p.startswith("openspec/") for p in branch_paths)
-    if path.endswith("/check_texts.py"):
+    if path.startswith(CHECK_TEXTS_INPUTS):
         # --gate runs it on the changed actions, which live in controllers
         return any(p.endswith("Controller.cs") for p in branch_paths)
     return path.startswith(REVIEW_TOOLING)
@@ -208,7 +220,7 @@ def added_lines(diff_args: list[str]) -> dict[str, list[tuple[int, str]]]:
 
 
 # --- checks on added lines -----------------------------------------------------------------------
-# (rule file, label, regex, path filter)
+# (rule file, label, regex, path filter); the filter "paths:" is the rule's own `paths:` (C# outside the tests)
 
 def is_cs(p: str) -> bool:
     return p.endswith(".cs") and not p.startswith(("migrations/", "sdk/"))
@@ -250,7 +262,8 @@ LINE_CHECKS = [
      re.compile(r'"(?:2[4-9]|[3-9]\d|\d{3,}):[0-5]\d(?::[0-5]\d)?"'),
      lambda p: p.endswith((".cs", ".json")) and not p.startswith(("sdk/", "migrations/")) and not p.endswith("_2.0.json")),
     ("dto-mapping.md", "* DTO built inline in a controller - a Mapperly mapper, or only server-owned fields set here?",
-     re.compile(r"\bnew\s+\w+Dto\s*[({]"), lambda p: p.endswith("Controller.cs") and is_cs(p) and not is_test(p)),
+     re.compile(r"\bnew\s+\w+Dto\s*(?:<[^>]*>)?\s*[({]"),
+     lambda p: p.endswith("Controller.cs") and is_cs(p) and not is_test(p)),
     ("configuration.md", "* configuration value read - through ConfigurationValueExtensions (a list or a bound section: configuration.md §1), both bounds, 0 / negative / huge?",
      re.compile(r"\.GetValue<\s*(int|long|double|bool|TimeSpan|int\[\])|configuration\[\s*\"|\.GetSection\(\s*\"[^\"]*\"\s*\)\s*\.Get<"),
      lambda p: is_cs(p) and not is_test(p)),
@@ -269,7 +282,7 @@ LINE_CHECKS = [
      re.compile(r"\.Decrypt(?:Async)?\s*\("), lambda p: is_cs(p) and not is_test(p)),
     ("row-states.md", "* sentinel date - a state in a column of its own? (§1)",
      re.compile(r"DateTime\.(?:MinValue|UnixEpoch)|new\s+DateTime\(\s*19\d\d\b"),
-     lambda p: is_cs(p) and not is_test(p) and re.search(r"/(?:EF|Dao|Database)/", p) is not None),
+     "paths:"),
     ("caching.md", "hand-rolled cache / IMemoryCache / IDistributedCache",
      re.compile(r"\bIMemoryCache\b|\bIDistributedCache\b|static\s+(readonly\s+)?ConcurrentDictionary<|\bLazy<"), is_cs),
     ("caching.md", "bare RemoveAsync/RemoveByTagAsync - on the memory cache it clears the local node only",
@@ -833,7 +846,7 @@ CITATION = re.compile(r"(?<![\w/.-])(\.?\w[\w./-]*):\d")
 # capital or an underscore, as C# members do, is not the file of the next citation (`B.cs::X`), and ends the item
 # (a comma, a backtick, `;`, `)`, `|` or the end follows), so that the prose after a citation is not read as a name.
 NAME_CITATION = re.compile(r"(?<![\w/.-])(\.?\w[\w./-]*)::([A-Za-z_]\w*"
-                           r"(?:\s*,\s*[A-Z_]\w*(?![\w.]*::|\.\w)(?=\s*(?:[,`;)|]|$)))*)")
+                           r"(?:\s*,\s*[A-Z_]\w*(?![\w.]*::|\.\w)(?=\s*(?:,\s*[A-Z_]|[`;)|(:]|\.(?!\w)|$)|\s+(?:and|or)\b))*)")
 
 
 def renamed_requirements(lines: list[str]) -> dict[str, str]:
@@ -896,27 +909,105 @@ NUMBER_CLAIM = re.compile(
 PROVE_RED_LINE = re.compile(r"^\s*(?:prove-red\b|RED as expected|STILL GREEN)")
 
 
-def comment_part(text: str) -> str | None:
-    """The comment of a C# line: a whole-line `//`, `///`, `/*` or `*` line, or the first `//` or `/*` outside a
-    string or char literal. The inner lines of a block comment that do not start with `*` are not recognized."""
+def comment_spans(s: str, backtick: bool = False) -> list[tuple[int, int]]:
+    """(start, end) of each comment of one line outside string and char literals: a `//` runs to the end of the line,
+    a `/*` to its `*/` or the end. A backslash escapes the next character in a string or char literal, except in a C#
+    verbatim string (`@"..."`, `$@"..."`, `@$"..."`), where `""` is the quote. A backtick opens a literal only with
+    `backtick` (TypeScript's template literal; in C# it is a character of a string). Interpolation holes and raw
+    string literals are not parsed."""
+    spans, quote, verbatim, i = [], None, False, 0
+    quotes = "\"'`" if backtick else "\"'"
+    while i < len(s):
+        c = s[i]
+        if quote:
+            if verbatim:
+                if c == '"':
+                    if s.startswith('""', i):
+                        i += 2
+                        continue
+                    quote = None
+            elif c == "\\":
+                i += 2
+                continue
+            elif c == quote:
+                quote = None
+        elif c in quotes:
+            quote = c
+            verbatim = c == '"' and not backtick and (s[i - 1:i] == "@" or s[max(0, i - 2):i] == "@$")
+        elif s.startswith("//", i):
+            spans.append((i, len(s)))
+            break
+        elif s.startswith("/*", i):
+            end = s.find("*/", i + 2)
+            end = len(s) if end < 0 else end + 2
+            spans.append((i, end))
+            i = end
+            continue
+        i += 1
+    return spans
+
+
+def comment_part(text: str, backtick: bool = False) -> str | None:
+    """The comment of a C# or TypeScript line, from its first `//` or `/*` outside a literal (`comment_spans`) to the
+    end of the line; a whole-line `//`, `///`, `/*` or `*` line is all comment. The inner lines of a block comment
+    that do not start with `*` are not recognized."""
     s = text.strip()
     if s.startswith(("//", "/*", "*")):
         return s
+    spans = comment_spans(s, backtick)
+    return s[spans[0][0]:] if spans else None
+
+
+def shell_comment(line: str) -> str | None:
+    """The `#` comment of a shell line, outside quotes; `$#` and `${#x}` are no comment."""
     quote, i = None, 0
-    while i < len(s) - 1:
-        c = s[i]
+    while i < len(line):
+        c = line[i]
         if quote:
-            if c == "\\" and quote in '"`':
+            if c == "\\" and quote == '"':
                 i += 2
                 continue
             if c == quote:
                 quote = None
-        elif c in "\"'`":
+        elif c == "\\":
+            i += 2
+            continue
+        elif c in "\"'":
             quote = c
-        elif s.startswith(("//", "/*"), i):
-            return s[i:]
+        elif c == "#" and (i == 0 or line[i - 1] in " \t;|&(") :
+            return line[i:]
         i += 1
     return None
+
+
+def script_text_lines(path: str, source: str) -> tuple[set[int], set[int]]:
+    """(comment lines, docstring lines) of a .py or .sh file; the shebang is neither."""
+    comments, docs = set(), set()
+    if path.endswith(".py"):
+        import ast
+        import io
+        import tokenize
+        try:
+            for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+                if tok.type == tokenize.COMMENT:
+                    comments.add(tok.start[0])
+        except (tokenize.TokenError, SyntaxError):
+            pass
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            tree = None
+        for node in ast.walk(tree) if tree else ():
+            body = getattr(node, "body", None)
+            if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and body \
+                    and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) \
+                    and isinstance(body[0].value.value, str):
+                docs.update(range(body[0].lineno, body[0].end_lineno + 1))
+    else:
+        comments = {n for n, line in enumerate(source.splitlines(), 1) if shell_comment(line) is not None}
+    if source.startswith("#!"):
+        comments.discard(1)
+    return comments, docs
 
 
 def print_claims_section(added, commit_bodies: list[tuple[str, str]], full: bool) -> None:
@@ -966,7 +1057,8 @@ def openapi_responses(ref: str, path: str) -> dict[str, set[str]] | None:
 TEXTS_SHOWN = 60
 
 
-def print_texts_section(added, endpoints, files, untracked, commit_bodies, unpushed: set[str], full: bool) -> None:
+def print_texts_section(added, endpoints, files, untracked, commit_bodies, unpushed: set[str], full: bool,
+                        view: str) -> None:
     """claims.md §3: the texts a fix batch wrote or reached, for the author to re-read against the code after it
     (fixing-findings.md §6, the batch check). A text the diff does not touch and whose behaviour changed - the remarks
     of an action in an unchanged controller that calls a changed service - is still the author's to find."""
@@ -976,18 +1068,24 @@ def print_texts_section(added, endpoints, files, untracked, commit_bodies, unpus
         if not path.endswith((".cs", ".ts", ".py", ".sh")) or path.startswith(("sdk/", "migrations/")) \
                 or path.endswith((".Designer.cs", "ModelSnapshot.cs")):
             continue
-        script = path.endswith((".py", ".sh"))
-        comment_of = (lambda t: t.strip() if t.strip().startswith("#") and not t.strip().startswith("#!") else None) \
-            if script else comment_part
+        if path.endswith((".py", ".sh")):
+            # a comment at the end of a line and a docstring are texts too: the whole file tells them apart
+            comments, docs = script_text_lines(path, (git_bytes("show", f"{view}:{path}") or b"").decode("utf-8", "replace"))
+            is_text = lambda n, t: n in comments or n in docs
+            is_doc = lambda n, t: n in docs
+        else:
+            ts = path.endswith(".ts")
+            is_text = lambda n, t: comment_part(t, backtick=ts) is not None
+            is_doc = lambda n, t: t.strip().startswith("///")
         # the license header of a new file is no claim about the code
         header, k = set(), 0
-        while k < len(lines) and lines[k][0] == k + 1 and lines[k][1].strip() and comment_of(lines[k][1]):
+        while k < len(lines) and lines[k][0] == k + 1 and lines[k][1].strip() and is_text(*lines[k]):
             k += 1
         if any(mark in t for _, t in lines[:k] for mark in LICENSE_MARKS):
             header = {n for n, _ in lines[:k]}
-        nums = [n for n, t in lines if comment_of(t) and n not in header]
+        nums = [n for n, t in lines if is_text(n, t) and n not in header]
         if nums:
-            doc = sum(1 for n, t in lines if t.strip().startswith("///") and n not in header)
+            doc = sum(1 for n, t in lines if is_doc(n, t) and n not in header)
             listed = nums if full else nums[:8]
             shown = ", ".join(map(str, listed)) + (f" (+{len(nums) - len(listed)})" if len(nums) > len(listed) else "")
             rows.append(f"    {path}: {len(nums)} comment line(s), {doc} of them doc comments - lines {shown}")
@@ -1045,30 +1143,49 @@ def print_checklists_section(view: str, names: list[str]) -> None:
 # openapi-endpoint-docs.md: the `<remarks>` and the declared codes of a changed action are checked by the
 # openapi-desc-opt check, from the source, so an action not in the emitted document yet is checked too. It runs on a
 # copy of the scanned tree (and of the merge-base): what fails the same way at the merge-base is base debt, outside
-# the gate. Only FORM, STYLE and CODES fail the gate; the other kinds and the readability tools are hints.
+# the gate. Only FORM, STYLE and CODES fail the gate; the other kinds and the readability tools are hints. A check
+# that gave no answer for an operation on the scanned tree fails the gate too: a gate that passes what it did not
+# check is open. An action the check answers it cannot check (its project emits no document, or it is not published)
+# is listed for a reading by hand, outside the gate.
 
 TEXT_GATE_KINDS = ("FORM", "STYLE", "CODES")
 DOC_TOOL_DIR = "common/Tools/ASC.Api.Documentation/ASC.Api.Documentation"
 
 
+class TextRun(NamedTuple):
+    notes: dict[str, list[str]]  # "operationId (NAME)" -> ["KIND note", ...], the gate kinds only
+    checked: int                 # operations check_texts.py checked
+    unchecked: list[str]         # "FILE:METHOD — reason" of an action it reports it cannot check: its project emits
+                                 # no document, or no published action of that name is in the file (IgnoreApi)
+    failures: list[str]          # why the run gave no answer for some of the actions, or none at all
+
+
+# Windows limits a command line to 32 767 characters; the actions of one run of check_texts.py stay well under it.
+ACTION_ARGS_PER_RUN = 24_000
+
+
+def one_line(text: str, limit: int = 300) -> str:
+    """The last `limit` characters of a tool's output on one line, for a gate line that stays one line."""
+    return " ".join(text.split())[-limit:]
+
+
 def check_texts_script() -> Path | None:
-    """The openapi-desc-opt check next to this scan, else the one of the checked-out tree (a scan saved elsewhere)."""
-    for candidate in (Path(__file__).resolve().parent.parent / "openapi-desc-opt" / "check_texts.py",
-                      Path(".claude/skills/openapi-desc-opt/check_texts.py").resolve()):
-        if candidate.is_file():
-            return candidate
-    return None
+    """The openapi-desc-opt check of the same copy as this scan. A copy of the scan saved without it gets none: the
+    checked-out tree's check_texts.py can be older or newer than the scan and gate differently (SKILL.md §1 "The
+    rules are the base's" saves both folders)."""
+    candidate = Path(__file__).resolve().parent.parent / "openapi-desc-opt" / "check_texts.py"
+    return candidate if candidate.is_file() else None
 
 
-def text_notes(script: Path, ref: str, actions: list[tuple[str, str]]) -> tuple[dict[str, list[str]], list[str]]:
-    """({operation: ["KIND note", ...]}, [problems]) of check_texts.py run on `ref`'s copy of the files it reads."""
+def text_notes(script: Path, ref: str, actions: list[tuple[str, str]]) -> TextRun:
+    """check_texts.py run on `ref`'s copy of the files it reads, for the actions whose file `ref` has."""
     import tarfile
     import tempfile
 
     present = set(git("ls-tree", "-r", "--name-only", ref, check=False).splitlines())
     wanted = [(f, m) for f, m in actions if f in present]
     if not wanted:
-        return {}, []
+        return TextRun({}, 0, [], [])
     with tempfile.TemporaryDirectory() as tmp:
         project_dirs = {p.rsplit("/", 1)[0] for p in present if p.endswith(".csproj") and "/" in p}
         projects = set()
@@ -1085,34 +1202,124 @@ def text_notes(script: Path, ref: str, actions: list[tuple[str, str]]) -> tuple[
         with open(tar_path, "wb") as out:
             res = subprocess.run(["git", "archive", "--format=tar", ref, "--", *paths], stdout=out, stderr=subprocess.PIPE)
         if res.returncode != 0:
-            return {}, [f"git archive {ref} failed: {res.stderr.decode('utf-8', 'replace').strip()[:200]}"]
+            return TextRun({}, 0, [], [f"git archive {ref} failed: {res.stderr.decode('utf-8', 'replace').strip()[:200]}"])
         root = os.path.join(tmp, "tree")
         with tarfile.open(tar_path) as tar:
             tar.extractall(root, filter="data") if hasattr(tarfile, "data_filter") else tar.extractall(root)
-        args = [sys.executable, str(script), "--root", root, "--work", os.path.join(tmp, "work"), "--no-tools"]
+        chunks, size = [[]], 0
         for f, m in wanted:
-            args += ["--action", f"{f}:{m}"]
-        res = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                             env=dict(os.environ, PYTHONUTF8="1"))
-    notes: dict[str, list[str]] = defaultdict(list)
-    problems, current = [], None
-    for line in res.stdout.splitlines():
-        if line.startswith(("CHECK:", "TOOLS:", "MISSING TOOLS:", "tool inputs:")) or not line.strip():
+            if chunks[-1] and size + len(f) + len(m) + 12 > ACTION_ARGS_PER_RUN:
+                chunks.append([])
+                size = 0
+            chunks[-1].append((f, m))
+            size += len(f) + len(m) + 12
+        notes: dict[str, list[str]] = defaultdict(list)
+        checked, unchecked, failures = 0, [], []
+        for chunk in chunks:
+            args = [sys.executable, str(script), "--root", root, "--work", os.path.join(tmp, "work"), "--no-tools"]
+            for f, m in chunk:
+                args += ["--action", f"{f}:{m}"]
+            res = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                 env=dict(os.environ, PYTHONUTF8="1"))
+            # An operation is answered by its own head, matched by file and method: "NAME  (operationId) — FILE:LINE
+            # Class.Method" heads its notes, "FILE:METHOD — error" says why it was not checked. Any other line (a
+            # warning) answers nothing.
+            answered, current = set(), None
+            for line in res.stdout.splitlines():
+                if not line.strip() or line.startswith(" "):
+                    if current and (m := re.match(r"\s+([A-Z]+)\s+(.*)", line)) and m.group(1) in TEXT_GATE_KINDS:
+                        notes[current].append(f"{m.group(1)} {m.group(2)}")
+                    continue
+                current = None
+                if m := re.match(r"(.*?)  \((\w+)\) — (.+):\d+ \S*?(\w+)$", line):
+                    if (m.group(3), m.group(4)) in chunk:
+                        current = f"{m.group(2)} ({m.group(1)})"
+                        answered.add((m.group(3), m.group(4)))
+                        checked += 1
+                elif (m := re.match(r"(.+):(\w+) — (.+)$", line)) and (m.group(1), m.group(2)) in chunk:
+                    answered.add((m.group(1), m.group(2)))
+                    unchecked.append(line)
+            # check_texts.py exits with 1 when it could not check an item, which is its normal answer for an action
+            # it cannot check; a crash exits with 1 too, so a run counts only when it reached its last lines
+            if res.returncode not in (0, 1):
+                why = f"exited with {res.returncode}"
+            elif "Traceback (most recent call last)" in (res.stderr or ""):
+                why = f"crashed (exit {res.returncode}, a traceback on stderr)"
+            elif "CHECK:" not in res.stdout:
+                why = "printed no report"
+            elif not re.search(r"^TOOLS: ", res.stdout, re.M):
+                why = "stopped before the end of its report"
+            else:
+                why = None
+            if why:
+                failures.append(f"check_texts.py on {ref} {why}: {one_line(res.stderr or res.stdout)}")
+            elif missing := [f"{f}:{m}" for f, m in chunk if (f, m) not in answered]:
+                failures.append(f"check_texts.py on {ref} gave no answer for {len(missing)} of {len(chunk)} "
+                                f"operation(s): {', '.join(missing[:5])}" + (" ..." if len(missing) > 5 else ""))
+    return TextRun(notes, checked, unchecked, failures)
+
+
+# What a note of check_texts.py is about, to match it with the merge-base's notes of the same operation (base debt):
+# the codes of a CODES note and the words of a §5.3 note one by one, the average and the sentence count by value.
+CODES_NOTE = re.compile(r"CODES (in the old text|declared|named in the text)[^:]*: (.*?)\.(?:\s|$)")
+WORDS_NOTE = re.compile(r"STYLE sentence \d+: (.+) \(§5\.3\)$")
+AVERAGE_NOTE = re.compile(r"FORM average ([\d.]+) words per sentence")
+FEW_NOTE = re.compile(r"FORM (\d+) sentences, fewer than")
+STATUS_CODE = re.compile(r"\b[1-5]\d\d\b")
+
+
+def note_units(note: str) -> list[tuple[str, ...]]:
+    if (m := CODES_NOTE.match(note)) and (found := STATUS_CODE.findall(m.group(2))):
+        return [("CODES", m.group(1), c) for c in found]
+    if m := WORDS_NOTE.match(note):
+        return [("WORD", w.strip().lower()) for w in m.group(1).split(",")]
+    # a sentence added above a long one renumbers it: the note is compared without its sentence number
+    return [(re.sub(r"\bsentence \d+", "sentence", note),)]
+
+
+def split_base_debt(old: list[str], new: list[str]) -> tuple[list[str], list[str]]:
+    """(the branch's notes, base debt) of one operation. A note is base debt when the merge-base had what it is about:
+    the same sentence, each of its codes or replaced words, an average or a sentence count no worse than the
+    merge-base's (a sentence the branch adds may lower the average or name a code the merge-base left out, which
+    changes the text of the note, not what it is about). Each unit the merge-base had - a sentence, a code, a word -
+    covers one unit of the branch: a second sentence that starts with code is the branch's. The notes with the most
+    units take theirs first, and only a note that is covered whole takes any, so a new note cannot use up the units of
+    an old one; which of two notes with the same units is the old one is not known, and either is reported."""
+    def value(pattern: re.Pattern, notes: list[str]) -> float | None:
+        return next((float(m.group(1)) for n in notes if (m := pattern.match(n))), None)
+
+    base_average, base_count = value(AVERAGE_NOTE, old), value(FEW_NOTE, old)
+    pool = Counter(u for n in old if not AVERAGE_NOTE.match(n) and not FEW_NOTE.match(n) for u in note_units(n))
+    verdict: dict[int, str] = {}
+    rest = []
+    for i, n in enumerate(new):
+        if m := AVERAGE_NOTE.match(n):
+            verdict[i] = "debt" if base_average is not None and float(m.group(1)) <= base_average else "branch"
+        elif m := FEW_NOTE.match(n):
+            verdict[i] = "debt" if base_count is not None and float(m.group(1)) >= base_count else "branch"
+        else:
+            rest.append(i)
+    needs = {i: Counter(note_units(new[i])) for i in rest}
+    for i in sorted(rest, key=lambda k: -sum(needs[k].values())):
+        if all(pool[u] >= k for u, k in needs[i].items()):
+            pool.subtract(needs[i])
+            verdict[i] = "debt"
+    branch, debt = [], []
+    for i, n in enumerate(new):
+        if verdict.get(i) == "debt":
+            debt.append(n)
             continue
-        if not line.startswith(" "):
-            # "NAME  (operationId) — where" heads an operation; "NAME — error" is one that could not be checked
-            m = re.match(r"(.*?)  \((\w+)\) — ", line)
-            current = f"{m.group(2)} ({m.group(1)})" if m else None
-            if not m:
-                problems.append(line)
-        elif current and (m := re.match(r"\s+([A-Z]+)\s+(.*)", line)) and m.group(1) in TEXT_GATE_KINDS:
-            notes[current].append(f"{m.group(1)} {m.group(2)}")
-    if res.returncode not in (0, 1) or ("CHECK:" not in res.stdout):
-        problems.append(f"check_texts.py on {ref} ended with {res.returncode}: {(res.stderr or res.stdout).strip()[-300:]}")
-    return notes, problems
+        need = needs.get(i)
+        added = [u for u in need if pool[u] < need[u]] if need else []
+        if need and len(need) > 1 and len(added) < len(need):
+            branch.append(f"{n} [not at the merge-base: {', '.join(u[-1] for u in added)}]")
+        else:
+            branch.append(n)
+    return branch, debt
 
 
-def print_operation_texts_section(actions: list[tuple[str, str]], view: str, merge_base: str, gate: bool) -> None:
+def print_operation_texts_section(actions: list[tuple[str, str]], view: str, merge_base: str, gate: bool,
+                                  renames: dict[str, str]) -> None:
     print("## Texts of the changed operations (openapi-endpoint-docs.md, check_texts.py --from source)")
     if not actions:
         print("  no changed operation")
@@ -1124,22 +1331,32 @@ def print_operation_texts_section(actions: list[tuple[str, str]], view: str, mer
         return
     script = check_texts_script()
     if not script:
-        print("  !! not run: .claude/skills/openapi-desc-opt/check_texts.py not found - check the texts by hand (§3 A2)")
+        reason = (f"the texts of {len(actions)} changed operation(s) were not checked: openapi-desc-opt/check_texts.py "
+                  "is not next to this scan (a copy saved without it, SKILL.md §1)")
+        print(f"  !! {reason}")
+        GATE.append(f"[openapi-endpoint-docs.md] {reason}")
         print()
         return
-    new, problems = text_notes(script, view, actions)
-    old, _ = text_notes(script, merge_base, actions)
-    # a sentence added above a long one renumbers it: the note is compared without its sentence number
-    unnumbered = lambda n: re.sub(r"\bsentence \d+", "sentence", n)
-    old_notes = {k.split(" ", 1)[0]: {unnumbered(n) for n in v} for k, v in old.items()}
+    new = text_notes(script, view, actions)
+    # a file the branch moved is read at the merge-base under its old path
+    old = text_notes(script, merge_base, [(renames.get(f, f), m) for f, m in actions])
+    # a merge-base run that gave no answer leaves nothing to compare with: every note is the branch's
+    old_notes = {} if old.failures else {k.split(" ", 1)[0]: v for k, v in old.notes.items()}
     branch, debt = [], []
-    for op, lines in new.items():
-        before = old_notes.get(op.split(" ", 1)[0], set())
-        for n in lines:
-            (debt if unnumbered(n) in before else branch).append(f"{op}: {n}")
-    print(f"  {len(actions)} changed operation(s) checked; FORM, STYLE and CODES fail the gate")
-    for p in problems:
-        print(f"  !! {p}")
+    for op, lines in new.notes.items():
+        mine, theirs = split_base_debt(old_notes.get(op.split(" ", 1)[0], []), lines)
+        branch += [f"{op}: {n}" for n in mine]
+        debt += [f"{op}: {n}" for n in theirs]
+    print(f"  {len(actions)} changed operation(s): {new.checked} checked, {len(new.unchecked)} not checkable here; "
+          "FORM, STYLE and CODES fail the gate")
+    for f in new.failures:
+        print(f"  !! not run on the scanned tree: {f}")
+        GATE.append(f"[openapi-endpoint-docs.md] the texts of the changed operations were not checked: {f}")
+    for u in new.unchecked:
+        print(f"  !! not checked: {u} - read its texts by hand (§3 A2)")
+    for f in old.failures:
+        print(f"  !! not run on the merge-base, so base debt cannot be told apart and every note counts as the "
+              f"branch's: {f}")
     print("  new on the branch:")
     print_capped([f"    !! {r}" for r in branch], STALE_ROWS_SHOWN, True, "    none")
     print("  already so at the merge-base (base debt, SKILL.md §4; not in the gate):")
@@ -1152,9 +1369,12 @@ def print_operation_texts_section(actions: list[tuple[str, str]], view: str, mer
 # claims.md §4, fixing-findings.md §12: a row cites lines of a C# file, and a fix that moves those lines leaves the
 # row pointing at something else. Each citation of a changed .cs file is checked on the scanned tree: a range starts
 # on a member, an attribute, a comment or a statement, never on a blank line, a lone brace or inside a statement,
-# and ends on a closing brace or the end of a statement; a name given in backticks right after it is in the cited
-# lines. A row the branch left alone is also compared with the merge-base: its cited block found elsewhere in the
-# new file has moved. What fails the same way at the merge-base is the base's and is listed apart, outside the gate.
+# and ends on a closing brace or the end of a statement, or on the comments and attributes of the member below when
+# it holds nothing else; a name given in backticks right after it is in the cited lines. A citation the branch did
+# not write - a row it left alone, or one it touched that had the citation at the merge-base - is also compared with
+# the merge-base: its cited block found elsewhere in the new file has moved, and what fails the same way at the
+# merge-base is the base's, listed apart, outside the gate. A row citing the old path of a file the branch moved is
+# the branch's.
 
 CITED_FILE = re.compile(r"(?<![\w/.-])(?P<file>\.?\w[\w./-]*\.cs)\b")
 CITED_LINES = re.compile(r"(?<!\w)(?P<file>\.?\w[\w./-]*\.cs)?:(?P<nums>\d+(?:-\d+)?(?:,\s*\d+(?:-\d+)?)*)(?![\w.])")
@@ -1167,11 +1387,32 @@ DECLARATION = re.compile(r"^\s*(?:\[|///|//|/\*|\*|#|(?:public|private|protected
                          r"virtual|abstract|sealed|readonly|partial|const|record|class|interface|enum|struct)\b)")
 
 
+# the declaration of a member: a modifier first (a method, a property, a delegate field, a local function)
+MEMBER_DECLARATION = re.compile(r"^\s*(?:public|private|protected|internal|static|async|override|virtual|sealed|"
+                                r"readonly|partial|unsafe|extern)\b")
+# `case X:` and `default:` end with a colon and still end their statement
+CASE_LABEL = re.compile(r"^\s*(?:case\b.*|default\s*):\s*$")
+
+
 def _code(line: str) -> str:
-    """The code of a line without a trailing `//` comment; nothing for a comment line."""
-    if line.lstrip().startswith(("//", "/*", "*")):
-        return ""
-    return line.split("//", 1)[0].rstrip()
+    """The code of a C# line with its comments taken out: a trailing `//`, and each `/* ... */` wherever it stands
+    (one in a string literal is code); nothing for a comment line or the inner line of a block comment."""
+    s = line.rstrip()
+    if s.lstrip().startswith("*"):
+        if "*/" not in s:
+            return ""
+        s = s[s.index("*/") + 2:]
+    parts, last = [], 0
+    for a, b in comment_spans(s):
+        parts.append(s[last:a])
+        last = b
+    parts.append(s[last:])
+    return "".join(parts).rstrip()
+
+
+def _continues(code: str) -> bool:
+    """The code line goes on into the next one (a trailing operator, comma or open parenthesis)."""
+    return bool(CONTINUES.search(code)) and not CASE_LABEL.match(code)
 
 
 def _prev_code(lines: list[str], i: int) -> str | None:
@@ -1204,7 +1445,7 @@ def citation_problems(lines: list[str], ranges: list[tuple[int, int]], names: li
         elif first in ("{", "}", "};", "});", ")"):
             out.append(f"{span} starts on a lone `{first}`")
         elif a != b and not DECLARATION.match(lines[a - 1]) \
-                and (CONTINUED.match(lines[a - 1]) or CONTINUES.search(_prev_code(lines, a) or ";")):
+                and (CONTINUED.match(lines[a - 1]) or _continues(_prev_code(lines, a) or ";")):
             out.append(f"{span} starts inside a statement")
         if a == b:
             continue
@@ -1213,8 +1454,13 @@ def citation_problems(lines: list[str], ranges: list[tuple[int, int]], names: li
         elif last == "{":
             out.append(f"{span} ends on an opening brace")
         elif last.startswith(("///", "[")) and not last.endswith(("]);", "];")):
-            out.append(f"{span} ends on a comment or attribute of the next member")
-        elif CONTINUES.search(_code(lines[b - 1])) or CONTINUED.match(_next_code(lines, b) or ""):
+            # only comments and attributes cite the member below them; code followed by them runs into the next one
+            k = b
+            while k > a and lines[k - 2].lstrip().startswith(("///", "//", "[")):
+                k -= 1
+            if any(_code(l).strip() and not l.lstrip().startswith("[") for l in lines[a - 1:k - 1]):
+                out.append(f"{span} ends on a comment or attribute of the next member")
+        elif _continues(_code(lines[b - 1])) or CONTINUED.match(_next_code(lines, b) or ""):
             out.append(f"{span} ends inside a statement")
     if names and all(1 <= a <= b <= len(lines) for a, b in ranges):
         cited = []
@@ -1226,7 +1472,8 @@ def citation_problems(lines: list[str], ranges: list[tuple[int, int]], names: li
                 cited.append(lines[k])
                 k += 1
         text = "\n".join(cited)
-        missing = [n for n in names if n not in text]
+        # a name in prose keeps the case of the sentence (`taskId` for `TaskId`)
+        missing = [n for n in names if n.lower() not in text.lower()]
         if missing:
             out.append(f"{', '.join('`' + n + '`' for n in missing)} not in the cited lines")
     return out
@@ -1245,10 +1492,10 @@ def _named(paren: str) -> list[str]:
     return names
 
 
-def parse_citations(row: str) -> list[tuple[str, list[tuple[int, int]], list[str]]]:
-    """(cited file as written, ranges, names to find) for each group of citations in a row. A bare `:N` takes the
-    last file named before it; a parenthetical right after a citation names what the citations of that file since
-    the last parenthetical point at."""
+def parse_citations(row: str) -> list[tuple[str, list[tuple[int, int]], list[str], bool]]:
+    """(cited file as written, ranges, names to find, exact) for each group of citations in a row. A bare `:N` takes
+    the last file named before it; a parenthetical right after a citation names what the citations of that file since
+    the last parenthetical point at. `exact` is False for "`Name` (N)", whose number may be a bug number."""
     events = []
     for m in CITED_MEMBER.finditer(row):
         f = m.group("file") or (m.group("cls") + ".cs")
@@ -1273,7 +1520,7 @@ def parse_citations(row: str) -> list[tuple[str, list[tuple[int, int]], list[str
         if kind == "file" or not last_file:
             continue
         if kind == "member":
-            groups.append((last_file, ranges, names))
+            groups.append((last_file, ranges, names, False))
             continue
         pending.append((last_file, ranges))
         rest = row[end:].lstrip("` ")
@@ -1288,17 +1535,17 @@ def parse_citations(row: str) -> list[tuple[str, list[tuple[int, int]], list[str
             # first such citation are the ones of this one
             paren = re.split(r"(?<!\w):\d|\w\.cs:\d", rest[:k + 1], maxsplit=1)[0]
             same = [r for pf, rs in pending if pf == last_file for r in rs]
-            groups.extend((pf, rs, []) for pf, rs in pending if pf != last_file)
-            groups.append((last_file, same, _named(paren)))
+            groups.extend((pf, rs, [], True) for pf, rs in pending if pf != last_file)
+            groups.append((last_file, same, _named(paren), True))
             pending = []
         elif rest.startswith((";", "|")) or not rest:
-            groups.extend((pf, rs, []) for pf, rs in pending)
+            groups.extend((pf, rs, [], True) for pf, rs in pending)
             pending = []
-    groups.extend((pf, rs, []) for pf, rs in pending)
+    groups.extend((pf, rs, [], True) for pf, rs in pending)
     return groups
 
 
-def print_citation_section(files, added, view: str, merge_base: str, full: bool) -> None:
+def print_citation_section(files, added, view: str, merge_base: str, full: bool, renames: dict[str, str]) -> None:
     print("## verification.md line citations of changed C# files (claims.md §4, fixing-findings.md §12)")
     changed_cs = [p for st, p in files if p.endswith(".cs") and not st.startswith("D")]
     specs = [p for p in git("ls-tree", "-r", "--name-only", view, "openspec/specs", check=False).splitlines()
@@ -1315,10 +1562,44 @@ def print_citation_section(files, added, view: str, merge_base: str, full: bool)
         hits = [p for p in changed_cs if p.endswith("/" + token)]
         return hits[0] if len(hits) == 1 else None
 
+    moved_from = {old: new for new, old in renames.items() if new.endswith(".cs")}
+
+    def moved_away(token: str) -> str | None:
+        """The new path of a file the branch moved, for a token that names its old path (a file name the move kept
+        resolves to the new path)."""
+        token = token.lstrip("./")
+        hits = [o for o in moved_from if o == token or o.endswith("/" + token)]
+        return moved_from[hits[0]] if len(hits) == 1 else None
+
     @functools.lru_cache(maxsize=None)
     def lines_at(ref: str, path: str) -> tuple[str, ...] | None:
         blob = git_bytes("show", f"{ref}:{path}")
-        return None if blob is None else tuple(blob.decode("utf-8", "replace").replace("\r\n", "\n").split("\n"))
+        if blob is None:
+            return None
+        text = blob.decode("utf-8", "replace").replace("\r\n", "\n")
+        # the newline that ends the last line starts no line of its own
+        return tuple((text[:-1] if text.endswith("\n") else text).split("\n"))
+
+    @functools.lru_cache(maxsize=None)
+    def hunks(spec: str) -> tuple[tuple[int, int, int, int], ...]:
+        """(new start, new count, old start, old count) of each hunk of the spec's diff from the merge-base."""
+        out = []
+        for line in git("diff", "-U0", "--no-color", "--no-ext-diff", f"{merge_base}..{view}", "--", spec,
+                        check=False).splitlines():
+            if m := re.match(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line):
+                out.append((int(m.group(3)), int(m.group(4) or 1), int(m.group(1)), int(m.group(2) or 1)))
+        return tuple(out)
+
+    def replaced_citations(spec: str, n: int) -> frozenset:
+        """(token, ranges) of the citations of the merge-base rows that the hunk holding row `n` replaced: a row the
+        branch only touched (a run mark, a word) keeps those, a row it inserted has none."""
+        rows = lines_at(merge_base, spec) or ()
+        for new_start, new_count, old_start, old_count in hunks(spec):
+            if new_start <= n < new_start + new_count:
+                old_rows = rows[old_start - 1:old_start - 1 + old_count] if old_count else ()
+                return frozenset((t, tuple(r)) for row in old_rows if ".cs" in row
+                                 for t, r, _, _ in parse_citations(row))
+        return frozenset()
 
     branch_rows, moved, edited, base_debt = [], [], [], []
     checked = 0
@@ -1330,24 +1611,32 @@ def print_citation_section(files, added, view: str, merge_base: str, full: bool)
         for n, row in enumerate(text, 1):
             if ".cs" not in row:
                 continue
-            for token, ranges, names in parse_citations(row):
+            for token, ranges, names, exact in parse_citations(row):
                 path = resolve(token)
+                if path is None and ranges and (moved_to := moved_away(token)):
+                    branch_rows.append(f"{spec}:{n} cites {token}, which the branch moved to {moved_to}")
+                    continue
                 new = lines_at(view, path) if path and ranges else None
                 if new is None:
+                    continue
+                old = lines_at(merge_base, renames.get(path, path))
+                # "`Name` (81615)" after a test name is a bug number when it is past the end of the file on both sides
+                if not exact and all(a > len(new) and (old is None or a > len(old)) for a, _ in ranges):
                     continue
                 checked += 1
                 problems = citation_problems(list(new), ranges, names)
                 where = f"{spec}:{n} cites {path}:" + ", ".join(f"{a}-{b}" if a != b else str(a) for a, b in ranges)
-                if n in written:
+                # a row the branch touched (a run mark, a word) keeps the citations the rows it replaced had: those
+                # are compared with the merge-base like the rows it left alone; a citation the branch wrote is its own
+                if old is None or (n in written and (token, tuple(ranges)) not in replaced_citations(spec, n)):
                     branch_rows.extend(f"{where}: {p}" for p in problems)
                     continue
-                old = lines_at(merge_base, path)
-                if old is None:
-                    branch_rows.extend(f"{where}: {p}" for p in problems)
-                    continue
-                old_problems = set(citation_problems(list(old), ranges, names))
+                # matched by what is wrong, not by the file's length: a range already past the end at the merge-base
+                # stays base debt when the branch changes the length of the file
+                same = lambda p: re.sub(r" \(\d+ lines\)$", "", p)
+                old_problems = {same(p) for p in citation_problems(list(old), ranges, names)}
                 for p in problems:
-                    (base_debt if p in old_problems else branch_rows).append(f"{where}: {p}")
+                    (base_debt if same(p) in old_problems else branch_rows).append(f"{where}: {p}")
                 stripped = [l.rstrip() for l in new]
                 for a, b in ranges:
                     if a < 1 or a > b or b > len(old):
@@ -1364,9 +1653,10 @@ def print_citation_section(files, added, view: str, merge_base: str, full: bool)
                     elif not found:
                         edited.append(f"{spec}:{n} cites {path}:{span}: the branch changed the cited lines")
     print(f"  {checked} citation group(s) of changed .cs files checked")
-    for title, rows, gate in (("rows the branch wrote, and rows whose cited lines it moved", branch_rows, True),
-                              ("cited blocks that moved under rows the branch left alone", moved, True),
-                              ("cited lines the branch edited under rows it left alone (a hint: does the row hold?)",
+    for title, rows, gate in (("citations the branch wrote or left pointing at a moved file, and new problems of the "
+                               "others", branch_rows, True),
+                              ("cited blocks that moved under citations the branch did not write", moved, True),
+                              ("cited lines the branch edited under citations it did not write (a hint: does the row hold?)",
                                edited, False),
                               ("already so at the merge-base (base debt, SKILL.md §4; not in the gate)", base_debt, False)):
         print(f"  {title}:")
@@ -1423,8 +1713,9 @@ def main() -> None:
 
     head_sha = git("rev-parse", "--verify", f"{a.head}^{{commit}}").strip()
     if a.since_review is not None:
-        reviewed = git("rev-parse", "--verify", "--end-of-options", f"{a.since_review}^{{commit}}",
-                       check=False).strip() if a.since_review else ""
+        # a value that starts with "-" would be read as an option (older git has no --end-of-options for rev-parse)
+        reviewed = git("rev-parse", "--verify", "--quiet", f"{a.since_review}^{{commit}}", check=False).strip() \
+            if a.since_review and not a.since_review.startswith("-") else ""
         if not reviewed:
             fail(f"--since-review: unknown reviewed commit {a.since_review!r}")
         if git("merge-base", reviewed, head_sha, check=False).strip() != reviewed:
@@ -1503,10 +1794,23 @@ def main() -> None:
         print("## Changes since the previous review")
         print(f"  reviewed commit: {reviewed}")
         changes = git("diff", "--name-status", "-M", reviewed, view, "--").splitlines()
-        for change in changes:
+        # a merge of the base after the review changes files the branch never touched: the batch is what is also in
+        # the branch's own diff against the merge-base
+        own = set(git("diff", "--name-only", "-M", *diff_args).splitlines())
+        # a file in the branch's own diff at the review and gone from it now was undone by the branch: part of the
+        # batch, named; the rest came with a merge of the base
+        reviewed_base = git("merge-base", base, reviewed, check=False).strip() or merge_base
+        own_then = set(git("diff", "--name-only", "-M", reviewed_base, reviewed, "--", check=False).splitlines())
+        batch = [c for c in changes if c.split("\t")[-1] in own]
+        undone = [c for c in changes if c.split("\t")[-1] not in own and c.split("\t")[-1] in own_then]
+        for change in batch:
             print(f"  {change}")
-        if not changes:
+        for change in undone:
+            print(f"  {change}  (back as at the merge-base: the branch undid its change)")
+        if not batch and not undone:
             print("  none")
+        if rest := len(changes) - len(batch) - len(undone):
+            print(f"  {rest} more file(s) changed since the review came with a merge of the base, not listed")
         print()
 
     name_status = [l.split("\t") for l in git("diff", "--name-status", "-M", *diff_args).splitlines() if l]
@@ -1598,7 +1902,9 @@ def main() -> None:
     hits: dict[tuple[str, str], list[str]] = defaultdict(list)
     for path, lines in added.items():
         for rule, label, rx, flt in LINE_CHECKS:
-            if not flt(path):
+            # "paths:" takes the rule's own `paths:`, so the hint and the rule cannot drift apart
+            if not (any(pt.match(path) for pt in rules.get(rule, [])) and is_cs(path) and not is_test(path)
+                    if flt == "paths:" else flt(path)):
                 continue
             for n, text in lines:
                 s = text.strip()
@@ -1647,7 +1953,9 @@ def main() -> None:
                 hits[("correctness", "* empty catch / swallowed failure - logged, and is the primary action still right?")].append(f"{path}:{line}")
 
     # ef-compiled-queries.md "Exceptions": an ExecuteUpdate cannot be precompiled, and its method says so in a comment
-    # that starts "Not precompiled on purpose:"; the comment sits above the method, so the lines above the call count.
+    # that starts "Not precompiled on purpose:". The comment belongs to the member that holds the call: the comments
+    # and attributes right above its declaration, or the lines of the member above the call; a comment of the member
+    # above it does not count. With no declaration found, the 30 lines above the call stand in.
     for path, lines in added.items():
         if not is_cs(path) or is_test(path):
             continue
@@ -1657,9 +1965,19 @@ def main() -> None:
             continue
         source = (git_bytes("show", f"{view}:{path}") or b"").decode("utf-8", "replace").splitlines()
         for n, t in calls:
-            if "Not precompiled on purpose:" not in "\n".join(source[max(0, n - 31):n]):
-                hits[("ef-compiled-queries.md", "ExecuteUpdate with no \"Not precompiled on purpose:\" comment in the "
-                      "30 lines above")].append(f"{path}:{n}  {t.strip()[:140]}")
+            indent = len(t) - len(t.lstrip())
+            decl = next((k for k in range(n, 0, -1) if MEMBER_DECLARATION.match(source[k - 1])
+                         and len(source[k - 1]) - len(source[k - 1].lstrip()) <= indent), None)
+            if decl is None:
+                own = source[max(0, n - 31):n]
+            else:
+                top = decl
+                while top > 1 and source[top - 2].lstrip().startswith(("//", "/*", "*", "[")):
+                    top -= 1
+                own = source[top - 1:n]
+            if "Not precompiled on purpose:" not in "\n".join(own):
+                hits[("ef-compiled-queries.md", "ExecuteUpdate with no \"Not precompiled on purpose:\" comment on the "
+                      "member that holds it")].append(f"{path}:{n}  {t.strip()[:140]}")
 
     # license header on new source files - not on generated files (a `*.Designer.cs`, an `<auto-generated>` header)
     # and not on vendored code under thirdparty/, which carry no header of ours by design
@@ -1779,13 +2097,13 @@ def main() -> None:
     old_paths = [ns[1] for ns in name_status if ns[0].startswith(("R", "D")) and len(ns) > 1]
     renames = {ns[-1]: ns[1] for ns in name_status if ns[0].startswith("R") and len(ns) > 2}
     print_openspec_section(files, endpoint_names, view, merge_base, old_paths, untracked, a.full, renames)
-    print_citation_section(files, added, view, merge_base, a.full)
-    print_operation_texts_section(list(dict.fromkeys(CHANGED_ACTIONS)), view, merge_base, a.gate)
+    print_citation_section(files, added, view, merge_base, a.full, renames)
+    print_operation_texts_section(list(dict.fromkeys(CHANGED_ACTIONS)), view, merge_base, a.gate, renames)
     print_claims_section(added, commit_bodies, a.full)
     # A commit no remote-tracking ref reaches is not pushed yet: its message can still be fixed (claims.md §4).
     unpushed = set(git("log", "--no-merges", "--format=%h", f"{merge_base}..{a.head}", "--not", "--remotes",
                        check=False).split())
-    print_texts_section(added, endpoints, files, untracked, commit_bodies, unpushed, a.full)
+    print_texts_section(added, endpoints, files, untracked, commit_bodies, unpushed, a.full, view)
     print_stateful_section(added)
     print_size_section(added)
 
@@ -1860,7 +2178,7 @@ def main() -> None:
 
     # --- gate ----------------------------------------------------------------------------------
     # Only what stops a hand-over whatever the branch is, so a script stops it, not a reader (SKILL.md §8 "Hand-over
-    # block"). The heuristic sections above stay hints and never fail the gate.
+    # block"). The lines are the ones --gate's help lists; every other section above stays a hint.
     print("## Gate (hard failures - `--gate` exits with 1 when there is any)")
     print("\n".join(f"  !! {g}" for g in GATE) if GATE else "  none")
     if a.gate and GATE:

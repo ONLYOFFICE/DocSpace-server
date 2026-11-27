@@ -24,7 +24,7 @@ and cite them as `[failure-paths.md §N]`.
 - No `catch {}` or catch inside a transaction the callee joins; retries and skipped entries end; a lease lasts (§7, §8)
 - Every decision on a state that ends (trial, lease, token) compares the end with now, on every path that answers (§9)
 - A multi-step operation has a table of step x interruption, re-checked against each fix (§10)
-- A decision the stand cannot reach is a pure function with a unit test at its boundaries (§11)
+- A decision the stand cannot reach is a pure function with a unit test at its boundaries; one of the AppHost configuration, which no unit-test project reaches, stays a function of its inputs and its commit says "not proven" (§11)
 
 ## 1. Order: check → action → record → best-effort
 
@@ -137,7 +137,7 @@ and cite them as `[failure-paths.md §N]`.
 - The end is enforced by the code on every path that answers: the factory, the stale answer of a
   soft timeout, a fail-safe copy, an entry another process wrote. A text that discloses "may keep it
   longer" does not replace the bound, and a review does not drop such a question as disclosed
-  (`review-branch` §4 "Disclosed is not decided"). Seen in bugfix/78009: a known "available" was to
+  (`review-branch` §4 "Disclosed is not decided"). Seen in review: a known "available" was to
   end a day after the last answer; rounds disclosed the paths that kept it longer (the fail-safe
   re-armed, the stale answer of a slow check) until the code bounded each.
 - Guard: a unit test of the decision with the end yesterday (§11), one per path that answers;

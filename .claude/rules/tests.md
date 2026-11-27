@@ -20,10 +20,20 @@ after editing any `.cs` file.
 - It asserts the effect (letters, rows, stored state), not that nothing threw or an empty snapshot (Able to fail)
 - Only what lies outside the process is stubbed, at the HTTP boundary, as the real contract says (Able to fail)
 - A right is checked with the lowest role holding it; routes, counts and messages compared exactly (Able to fail)
-- A decision the stand cannot reach has a unit test of its own (`failure-paths.md` §11)
+- A decision the stand cannot reach has a unit test of its own; one of the AppHost configuration, which no unit-test project reaches, is kept a function of its inputs and named "not proven" in the commit (`failure-paths.md` §11)
+- A test that the code uses only one client, host or name makes every other name fail, not only the default one (Able to fail)
 - Async writes are polled on a deadline, returning the last state, no timeout token on the call (Has to be polled)
 - A failure is asserted on the `ApiException`'s `ErrorCode` and `ErrorContent!`, never `?.` (Asserting failures)
 - Calls go through the SDK; raw HTTP only for the listed carve-outs (Endpoints the SDK does not expose)
+- SDK signatures are read from `sdk/docspace-api-sdk-csharp`, never guessed or taken from the NuGet cache (The SDK is the source of truth)
+- What is not specific to one product stays in `ASC.Tests.Common`: a suite extends the base instead of copying it; an AI-suite class cleans up in a `DisposeAsync` override that calls base in a `finally` (The shared harness)
+- Each test works on the portal of its own `BaseTest.InitializeAsync` and shares no state with other tests (One portal per test)
+- A role is switched by authenticating the shared client as an invited user (`InviteContact`, `Authenticate`); a guest comes from `BaseTest.InviteGuest`, never `InviteContact` (Roles)
+- An invitation's access is one `FileSecurity.AvailableRoomAccesses` allows for that room and subject type, and `RoomManager` goes to a `RoomAdmin` only (Access-level matrices)
+- All suites of one feature are in its own folder (One feature, one folder)
+- An integration class covers one endpoint and stays under ~24 cases, `InlineData` rows and `MemberData` sizes counted (Class size)
+- A test of an open bug carries `[Trait("Bug", "N")]`, asserts the intended behaviour and is red, never skipped (Known bugs)
+- A payment test past the tariff check is in `ASC.Web.Api.Billing.Tests`, scripts only its own portal and asserts what the stack did (Payment services)
 
 ## The shared harness lives in `common/Tests/ASC.Tests.Common`
 
@@ -156,16 +166,21 @@ proven red" and why.
 A test that pins a value — a threshold, a limit, a duration, a count — is proven red by a mutation of
 that value by one step on each side, not by taking the change away: two runs of `--mutate`, each
 expected red. A test that stays green under one of them pins a range, and the texts say the range
-(`claims.md` §6). The example mutates the circuit breaker threshold of bugfix/78009:
+(`claims.md` §6). The example mutates a threshold of 5 in a service one step down and one step up
+(`Foo.cs` and `FooTests` stand for the real names):
 
 ```bash
-.claude/scripts/prove-red.sh --mutate 'products/ASC.Files/Core/Services/OFormService/OFormRequestManager.cs:MinimumThroughput = 5=>MinimumThroughput = 4' --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*OFormRequestManagerTests"
-.claude/scripts/prove-red.sh --mutate 'products/ASC.Files/Core/Services/OFormService/OFormRequestManager.cs:MinimumThroughput = 5=>MinimumThroughput = 6' --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*OFormRequestManagerTests"
+.claude/scripts/prove-red.sh --mutate 'products/ASC.Files/Core/Services/Foo.cs:MinimumThroughput = 5=>MinimumThroughput = 4' --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*FooTests"
+.claude/scripts/prove-red.sh --mutate 'products/ASC.Files/Core/Services/Foo.cs:MinimumThroughput = 5=>MinimumThroughput = 6' --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*FooTests"
 ```
+
+A text that holds `=>` itself (a lambda, an expression body) takes the form that reads OLD and NEW
+whole: `--mutate products/ASC.Files/Core/Services/Foo.cs --old 'Threshold => 5' --new 'Threshold => 4'`,
+then `--new 'Threshold => 6'`.
 
 A test that asserts that the code uses only one client, host or name ("the check asks with the
 client without cookies") makes every other name fail, a deny-all default, not only the default one.
-Seen in bugfix/78009: such a test made only the default client fail, so a switch to any other named
+Seen in review: such a test made only the default client fail, so a switch to any other named
 client kept it green; the next round found the gallery's own client still passing.
 
 What leaves a test unable to fail:

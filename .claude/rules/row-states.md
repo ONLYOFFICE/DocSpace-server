@@ -4,6 +4,12 @@ paths:
   - "**/Dao/**/*.cs"
   - "**/Database/**/*.cs"
   - "common/ASC.Core.Common/Data/**/*.cs"
+  - "**/Data/**/*.cs"
+  - "**/Repositories/**/*.cs"
+  - "**/*Repository.cs"
+  - "**/*Dao.cs"
+  - "**/*DbContext.cs"
+  - "**/DbWorker.cs"
   - "migrations/**/*.cs"
 ---
 

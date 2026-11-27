@@ -29,7 +29,7 @@ can rest on such behaviour as well as code. Reviewers cite it as `[dependency-be
   comes out. Not by reasoning, not by reading the library's source alone, and not by a sentence that
   discloses the doubt in a remark or the PR description. A review does not close such a question
   without the test (`review-branch` §4 "Disclosed is not decided").
-- Seen in bugfix/78009, each assumed for several rounds and settled only by a test: `context.Fail`
+- Seen in review, in one branch, each assumed for several rounds and settled only by a test: `context.Fail`
   re-armed the fail-safe, so a known "available" never ended; on the 200 ms soft timeout the cache
   answered the stale value past the factory's own check of its age; with an expired local entry and a
   stale distributed one, the factory saw the distributed `true` but `context.Fail` returned the local
