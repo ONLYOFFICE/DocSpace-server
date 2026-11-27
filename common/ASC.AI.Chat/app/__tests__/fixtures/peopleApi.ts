@@ -34,7 +34,7 @@
 /**
  * `EmployeeFullDto` of a User as `GET api/2.0/people/@self` answers it
  * (common/ASC.Api.Core/Model/EmployeeFullDto.cs with its base EmployeeDto.cs,
- * PeopleController.SelfAsync), in the envelope: every property the two classes declare.
+ * UserController.GetSelfProfile), in the envelope: the properties the two classes declare.
  */
 export function selfDto(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
@@ -44,13 +44,10 @@ export function selfDto(overrides: Record<string, unknown> = {}): Record<string,
       userName: "jane",
       email: "jane@portal.example",
       contacts: [],
-      birthday: null,
-      sex: null,
       status: 1,
       activationStatus: 1,
       terminated: null,
       department: "",
-      workFrom: null,
       groups: [],
       location: null,
       notes: null,
@@ -65,7 +62,7 @@ export function selfDto(overrides: Record<string, unknown> = {}): Record<string,
       mobilePhone: null,
       mobilePhoneActivationStatus: 0,
       isSSO: false,
-      theme: null,
+      theme: "Base",
       quotaLimit: -1,
       usedSpace: 0,
       shared: null,
@@ -79,7 +76,6 @@ export function selfDto(overrides: Record<string, unknown> = {}): Record<string,
       tfaAppEnabled: false,
       id: "a0d6bc40-2b3c-4c1a-9a7d-1f1b2c3d4e5f",
       displayName: "Jane Doe",
-      title: null,
       avatar: "/static/images/default_user_photo_size_82-82.png",
       avatarOriginal: "/static/images/default_user_photo_size_200-200.png",
       avatarMax: "/static/images/default_user_photo_size_200-200.png",

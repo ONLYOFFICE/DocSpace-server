@@ -42,7 +42,11 @@
 import path from "path";
 import type { TMCPItem, ToolCallOptions, ToolsAdapter } from "@onlyoffice/ai-chat/core";
 
-import { CHAT_SANDBOX_TYPE, getChatSandbox } from "../../config/index.js";
+import {
+  CHAT_SANDBOX_MAX_COMMAND_SECONDS,
+  CHAT_SANDBOX_TYPE,
+  getChatSandbox,
+} from "../../config/index.js";
 import type { ChatSandboxConfig } from "../../config/index.js";
 import logger from "../log.js";
 import { getString, isObject } from "../narrow.js";
@@ -76,7 +80,9 @@ export const SANDBOX_WRITE_TOOL = "sandbox_write_file";
 export const SANDBOX_SAVE_TOOL = "sandbox_save_file";
 
 export const EXEC_DEFAULT_TIMEOUT_SECONDS = 60;
-export const EXEC_MAX_TIMEOUT_SECONDS = 600;
+export const EXEC_MAX_TIMEOUT_SECONDS = CHAT_SANDBOX_MAX_COMMAND_SECONDS;
+// The length `skills/createSkill.ts` takes for a name. The Files service cuts a longer title at
+// 170 characters instead of refusing it, and the model would then name a file that is not there.
 export const MAX_TITLE_CHARS = 165;
 
 const TOOL_NAMES = new Set([
@@ -93,7 +99,7 @@ function tool(name: string, description: string, properties: object, required: s
     inputSchema: { type: "object", properties, required },
     serverType: CHAT_SANDBOX_TYPE,
     // The group is listed in `systemServerTypes`, so the "ask" mode pauses a call. No approval
-    // of its own: a command runs in a machine that holds nothing of the portal.
+    // of its own: a command runs in a machine that holds no credential of the portal.
     requireApproval: false,
     enabled: true,
   };
@@ -113,9 +119,9 @@ function toolsOf(config: ChatSandboxConfig): TMCPItem[] {
         "credential of the portal and no file but those these tools wrote into it. The command " +
         `runs in the directory of this conversation, ${CHAT_SANDBOX_ROOT}/<conversation id> ` +
         "(print it with pwd); the user's other conversations have theirs beside it. Returns the " +
-        "exit code, stdout and stderr. The sandbox and its files stay for the next calls until " +
-        `it has been unused for about ${idleMinutes} minutes; after that a call starts an empty ` +
-        "one without saying so, and files written earlier are gone. It is made for Python " +
+        "exit code, stdout and stderr. The sandbox and its files stay for the next calls for at " +
+        `least ${idleMinutes} minutes after the last one; some time after that a call starts an ` +
+        "empty one without saying so, and files written earlier are gone. It is made for Python " +
         "scripts: expect python3 with numpy, pandas, scipy, matplotlib, openpyxl, python-docx, " +
         "python-pptx, pypdf, reportlab and Pillow, and no network, so nothing can be installed; " +
         "an installation may differ, so check before relying on a tool or on the network. Save " +
@@ -163,10 +169,14 @@ const forLog = (err: unknown): string =>
 // What a title may not hold. A path separator, since the title is a name. A control character or
 // a line separator, which the workspace would show as a break. A character that turns the
 // direction of the text (U+202E and its kin), with which `invoice<U+202E>fdp.html` is listed as
-// a PDF: the model picks the title, and a text it read may have told it which.
-const NOT_OF_A_NAME = /[/\\\p{Cc}\u2028\u2029\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/u;
+// a PDF, and one that takes no room (a zero-width space, a soft hyphen, a tag), with which a
+// second `Payroll.xlsx` lies beside the first: the model picks the title, and a text it read
+// may have told it which. The joiners U+200C and U+200D stay: Persian and Indic names are
+// written with them. A look-alike letter of another script is not caught by any of this.
+const NOT_OF_A_NAME =
+  /[/\\\p{Cc}\u00AD\u061C\u200B\u200E\u200F\u2028-\u202E\u2060\u2066-\u2069\uFEFF\u{E0000}-\u{E007F}]/u;
 
-/** A file name the workspace takes: no path, none of the characters above, not over its length. */
+/** A file name this service saves under: none of the characters above, not over its length. */
 function titleOf(value: string): string | undefined {
   const title = value.trim();
   return title !== "" &&
@@ -211,13 +221,7 @@ async function exec(call: Call, args: Record<string, unknown>): Promise<string> 
     return `'timeout_seconds' is a whole number from 1 to ${EXEC_MAX_TIMEOUT_SECONDS}.`;
   }
   const timeoutSeconds = asked ?? EXEC_DEFAULT_TIMEOUT_SECONDS;
-  // The command's own time is added: the idle lifetime counts from where the command may end.
-  const id = await acquireUserSandbox(
-    call.config,
-    call.dir,
-    call.config.idleTtlSeconds + timeoutSeconds,
-    call.signal,
-  );
+  const id = await acquireUserSandbox(call.config, call.dir, call.signal);
   const result = await execInSandbox(call.config, id, command, {
     cwd: call.dir,
     timeoutSeconds,
@@ -232,12 +236,7 @@ async function readFile(call: Call, args: Record<string, unknown>): Promise<stri
   if (!target) {
     return `${SANDBOX_READ_TOOL} requires 'path', a path without '..'.`;
   }
-  const id = await acquireUserSandbox(
-    call.config,
-    call.dir,
-    call.config.idleTtlSeconds,
-    call.signal,
-  );
+  const id = await acquireUserSandbox(call.config, call.dir, call.signal);
   try {
     const bytes = await readSandboxFile(call.config, id, target, MAX_READ_BYTES, call.signal);
     return bytes.length === 0 ? `(${target} is empty)` : Buffer.from(bytes).toString("utf8");
@@ -261,14 +260,13 @@ async function writeFile(call: Call, args: Record<string, unknown>): Promise<str
   if (content.length > MAX_WRITE_CHARS) {
     return `'content' is over ${MAX_WRITE_CHARS} characters: write the file in parts with ${SANDBOX_EXEC_TOOL}.`;
   }
-  const id = await acquireUserSandbox(
-    call.config,
-    call.dir,
-    call.config.idleTtlSeconds,
-    call.signal,
-  );
+  const id = await acquireUserSandbox(call.config, call.dir, call.signal);
   const bytes = Buffer.from(content, "utf8");
-  await makeDir(call.config, id, path.posix.dirname(target), call.signal);
+  const parent = path.posix.dirname(target);
+  // The conversation's directory is made with the sandbox.
+  if (parent !== call.dir) {
+    await makeDir(call.config, id, parent, call.signal);
+  }
   await writeSandboxFile(call.config, id, target, bytes, call.signal);
   return `Wrote ${bytes.length} bytes to ${target}.`;
 }
@@ -288,19 +286,15 @@ async function saveFile(
     return "'title' is a file name: a string.";
   }
   if (!title) {
-    return `'title' is a file name of 1 to ${MAX_TITLE_CHARS} characters, without '/', '\\', control and text-direction characters.`;
+    return `'title' is a file name of 1 to ${MAX_TITLE_CHARS} characters, without '/', '\\', line breaks, control, invisible and text-direction characters.`;
   }
-  // Every check that can refuse comes before the sandbox is asked (ts-ai-failure-paths.md §6).
+  // The checks of the arguments and of the folder come before the sandbox is asked
+  // (ts-ai-failure-paths.md §6); what the file itself is refused for shows only once it is read.
   const folderId = await resolveUploadTarget(entityId);
   if (!folderId) {
     return "There is no folder the file could be saved into.";
   }
-  const id = await acquireUserSandbox(
-    call.config,
-    call.dir,
-    call.config.idleTtlSeconds,
-    call.signal,
-  );
+  const id = await acquireUserSandbox(call.config, call.dir, call.signal);
   let bytes: Uint8Array;
   try {
     bytes = await readSandboxFile(call.config, id, target, MAX_FILE_BYTES, call.signal);

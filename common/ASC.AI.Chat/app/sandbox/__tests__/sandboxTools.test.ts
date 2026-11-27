@@ -32,14 +32,11 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  CHAT_SANDBOX_COMMAND_START_MARGIN_SECONDS,
-  CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS,
-} from "../../../config/index.js";
 import { snapshotOf } from "../../__tests__/fixtures/chatContext.js";
 import { fileDto, folderDto } from "../../__tests__/fixtures/filesApi.js";
 import { selfDto } from "../../__tests__/fixtures/peopleApi.js";
 import { inRequestContext } from "../../__tests__/helpers/http.js";
+import { afterUpstreamTimeout } from "../../__tests__/helpers/time.js";
 import {
   docspaceError,
   http,
@@ -63,7 +60,7 @@ const upstream = useUpstream();
 const THREAD = "0b9f2c66-6a0e-4a7e-9f0e-1c2d3e4f5a6b";
 const DIR = `/workspace/${THREAD}`;
 const USER = "a0d6bc40-2b3c-4c1a-9a7d-1f1b2c3d4e5f";
-// GET api/2.0/people/@self (PeopleController.SelfAsync).
+// GET api/2.0/people/@self (UserController.GetSelfProfile).
 const SELF = "*/api/2.0/people/@self";
 // GET api/2.0/files/folder/{folderId} (FoldersController.GetFolderInfo): the round's folder.
 const FOLDER = "*/api/2.0/files/folder/30";
@@ -183,7 +180,7 @@ describe("who is offered the sandbox", () => {
     ]);
     expect(tools.every((tool) => tool.requireApproval === false)).toBe(true);
     // The idle lifetime of the configuration, in the words the model reads.
-    expect(tools[0]?.description).toContain("unused for about 15 minutes");
+    expect(tools[0]?.description).toContain("for at least 15 minutes after the last one");
     expect(upstream.seen).toEqual([]);
   });
 
@@ -227,9 +224,9 @@ describe("the sandbox of a caller", () => {
     const result = await exec();
 
     expect(requests()).toEqual(["self", "Create", "Renew", "MakeDir", "Exec"]);
-    // The command's own time on top of the idle lifetime: 900 + 60.
-    expect(sentTo("Create")).toEqual({ sessionId: USER, ttl: "960s" });
-    expect(sentTo("Renew")).toEqual({ id: "sb-1", ttl: "960s" });
+    // The longest command timeout on top of the idle lifetime, whatever the call: 900 + 600.
+    expect(sentTo("Create")).toEqual({ sessionId: USER, ttl: "1500s" });
+    expect(sentTo("Renew")).toEqual({ id: "sb-1", ttl: "1500s" });
     expect(sentTo("MakeDir")).toEqual({ id: "sb-1", path: DIR });
     expect(gateway.execs).toEqual([{ id: "sb-1", command: "ls", cwd: DIR, timeout: "60s" }]);
     expect(result).toBe("exit code: 0\n[stdout]\na.txt\n");
@@ -240,7 +237,7 @@ describe("the sandbox of a caller", () => {
     await call("sandbox_exec", { command: "ls", timeout_seconds: 300 }, { thread: "t-2" });
 
     expect(upstream.seen.filter((request) => request.path.endsWith("/Create"))).toHaveLength(2);
-    expect(sentTo("Create")).toEqual({ sessionId: USER, ttl: "1200s" });
+    expect(sentTo("Create")).toEqual({ sessionId: USER, ttl: "1500s" });
     expect(gateway.execs.map((made) => made.cwd)).toEqual([DIR, "/workspace/t-2"]);
     expect(gateway.execs[1]?.timeout).toBe("300s");
   });
@@ -336,24 +333,46 @@ describe("the sandbox of a caller", () => {
       }),
     );
 
-    // A call that went on asking would end at the upstream timeout only.
+    // A call that went on asking would end at the upstream timeout only: it is given turns of
+    // the event loop, not time.
+    const turns = async (count: number): Promise<string> => {
+      for (let turn = 0; turn < count; turn++) {
+        await new Promise((resolve) => setImmediate(resolve));
+      }
+      return "still asking the portal";
+    };
     const answer = await Promise.race([
       call("sandbox_exec", { command: "ls" }, { signal: round.signal }),
-      new Promise((resolve) => setTimeout(() => resolve("still asking the portal"), 200)),
+      turns(200),
     ]);
 
     expect(answer).toBe("The call was stopped with the reply.");
     expect(requests()).toEqual(["self"]);
   });
 
-  it("takes no idle lifetime under the longest command timeout and the margin for its start", () => {
-    // A file call renews to the idle lifetime from now, a command to the idle lifetime plus its
-    // timeout, counted from before its directory is made.
-    expect(CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS).toBe(
-      EXEC_MAX_TIMEOUT_SECONDS + CHAT_SANDBOX_COMMAND_START_MARGIN_SECONDS,
-    );
-    // The directory is made by a call of 30 seconds at most (sandboxClient.ts).
-    expect(CHAT_SANDBOX_COMMAND_START_MARGIN_SECONDS).toBeGreaterThanOrEqual(30);
+  it.each([
+    ["a portal that does not answer", () => stalled()],
+    ["an answer of the portal that is not JSON", () => new HttpResponse("who?", { status: 200 })],
+  ])(
+    "answers an internal error for %s, and asks the gateway for nothing",
+    async (_name, answer) => {
+      vi.spyOn(logger, "warn").mockImplementation(() => logger);
+      upstream.use(http.get(SELF, answer));
+
+      expect(await afterUpstreamTimeout(() => exec())).toEqual({
+        value: "The call could not be completed due to an internal error.",
+      });
+      expect(requests()).toEqual(["self"]);
+    },
+  );
+
+  it("is renewed to the same lifetime by every call, so that no call moves its expiry back", async () => {
+    await exec({ command: "sleep 590", timeout_seconds: EXEC_MAX_TIMEOUT_SECONDS });
+    const afterCommand = sentTo("Renew");
+    await call("sandbox_read_file", { path: "/workspace/a.txt" });
+
+    expect(afterCommand).toEqual({ id: "sb-1", ttl: "1500s" });
+    expect(sentTo("Renew")).toEqual(afterCommand);
   });
 });
 
@@ -410,7 +429,7 @@ describe("sandbox_exec", () => {
 });
 
 describe("sandbox_read_file and sandbox_write_file", () => {
-  it("writes a file with its directories and reads it back, each call renewing for the idle lifetime", async () => {
+  it("writes a file with its directories and reads it back, each call renewing the sandbox", async () => {
     expect(await call("sandbox_write_file", { path: "/workspace/a/b.txt", content: "héllo" })).toBe(
       "Wrote 6 bytes to /workspace/a/b.txt.",
     );
@@ -421,7 +440,7 @@ describe("sandbox_read_file and sandbox_write_file", () => {
       "MakeDir /workspace/a",
       "PUT /workspace/a/b.txt",
     ]);
-    expect(sentTo("Renew")).toEqual({ id: "sb-1", ttl: "900s" });
+    expect(sentTo("Renew")).toEqual({ id: "sb-1", ttl: "1500s" });
 
     expect(await call("sandbox_read_file", { path: "/workspace/a/b.txt" })).toBe("héllo");
   });
@@ -449,6 +468,12 @@ describe("sandbox_read_file and sandbox_write_file", () => {
         content: "x".repeat(MAX_WRITE_CHARS),
       }),
     ).toBe(`Wrote ${MAX_WRITE_CHARS} bytes to /workspace/long.txt.`);
+  });
+
+  it("makes the conversation's directory once for a file written into it", async () => {
+    await call("sandbox_write_file", { path: "a.txt", content: "x" });
+
+    expect(gateway.calls).toEqual(["Create", "Renew", `MakeDir ${DIR}`, `PUT ${DIR}/a.txt`]);
   });
 
   it("writes an empty content as an empty file", async () => {
@@ -553,7 +578,7 @@ describe("sandbox_save_file", () => {
   const save = (args: unknown, options: Parameters<typeof call>[2] = {}) =>
     call("sandbox_save_file", args, options);
   const TITLE_REFUSAL =
-    "'title' is a file name of 1 to 165 characters, without '/', '\\', control and text-direction characters.";
+    "'title' is a file name of 1 to 165 characters, without '/', '\\', line breaks, control, invisible and text-direction characters.";
   /** The requests of a save that store something. */
   const stores = (): string[] =>
     requests().filter((name) => name === "artifacts" || name === "insert");
@@ -603,6 +628,11 @@ describe("sandbox_save_file", () => {
     [{ path: "/workspace/a.txt", title: "a\u2028b.txt" }, undefined],
     [{ path: "/workspace/a.txt", title: "invoice\u202efdp.html" }, undefined],
     [{ path: "/workspace/a.txt", title: "a\u2066b.txt" }, undefined],
+    // Characters that take no room: a zero-width space, a soft hyphen, a byte order mark, a tag.
+    [{ path: "/workspace/a.txt", title: "Payroll\u200b.xlsx" }, undefined],
+    [{ path: "/workspace/a.txt", title: "Pay\u00adroll.xlsx" }, undefined],
+    [{ path: "/workspace/a.txt", title: "Pay\ufeffroll.xlsx" }, undefined],
+    [{ path: "/workspace/a.txt", title: "Payroll\u{e0041}.xlsx" }, undefined],
     [{ path: "/workspace/a.txt", title: "  " }, undefined],
     [{ path: "/workspace/a.txt", title: ".." }, undefined],
     [{ path: "/workspace/a.txt", title: "." }, undefined],

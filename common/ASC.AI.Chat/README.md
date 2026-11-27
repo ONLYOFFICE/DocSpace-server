@@ -145,14 +145,15 @@ The chat's own model can run commands in a sandbox (`app/sandbox/`): `sandbox_ex
 `sandbox_read_file`, `sandbox_write_file`, and `sandbox_save_file`, which saves a file of the
 sandbox as a new file of the workspace under the user's session: among the artifacts of a
 conversation of an AI project, else into the current folder when the user may create there, else
-into My documents; an empty file is not saved. Nothing is delegated to a sub-agent. The tools are offered to every caller of the chat when the sandbox is configured, in
-the shared `appsettings.json` under `ai.sandbox` or from the environment:
+into My documents; an empty file is not saved. Nothing is delegated to a sub-agent. The tools
+are offered to every caller of the chat when the sandbox is configured, in the shared
+`appsettings.json` under `ai.sandbox` or from the environment:
 
-| Setting                     | Environment                     | Default | Bounds     |
-| --------------------------- | ------------------------------- | ------- | ---------- |
-| `ai.sandbox.url`            | `AI__SANDBOX__URL`              | —       |            |
-| `ai.sandbox.token`          | `AI__SANDBOX__TOKEN`            | —       |            |
-| `ai.sandbox.idleTtlSeconds` | `AI__SANDBOX__IDLE_TTL_SECONDS` | `900`   | 660 – 3000 |
+| Setting                     | Environment                     | Default | Bounds    |
+| --------------------------- | ------------------------------- | ------- | --------- |
+| `ai.sandbox.url`            | `AI__SANDBOX__URL`              | —       |           |
+| `ai.sandbox.token`          | `AI__SANDBOX__TOKEN`            | —       |           |
+| `ai.sandbox.idleTtlSeconds` | `AI__SANDBOX__IDLE_TTL_SECONDS` | `900`   | 60 – 3000 |
 
 It is the same gateway the plugin agent calls (`app/pluginAgent/sandboxClient.ts`), with the
 token of the profile a chat sandbox is made from. What is said here of the gateway is read from
@@ -167,26 +168,25 @@ credential of the portal, but the model can write into it what it read of the wo
 network access that content would have a way out nobody is asked about. This service does not
 check the profile.
 
-**One sandbox per user, one directory per conversation.** Every tool call that is not refused
-first (for its arguments or, for a save, for want of a folder to save into) asks the gateway for
-the sandbox of the session that is the caller's user id (`GET people/@self`): the gateway answers
-the one that runs, or starts one. All conversations of a user share it, and each works in
-`/workspace/{threadId}`: a command runs there, and a relative path of a file tool is read from
-there. Nothing about a sandbox is stored by this service or by the AI service, so any instance
-serves any call.
+**One sandbox per user, one directory per conversation.** A tool call that is not refused before
+the gateway asks it for the sandbox of the session that is the caller's user id
+(`GET people/@self`): the gateway answers the one that runs, or starts one. A call is refused
+before the gateway outside a conversation, for its arguments, when the portal does not say who
+the caller is and, for a save, when there is no folder to save into or it cannot be read. All
+conversations of a user share the sandbox, and each works in `/workspace/{threadId}`: a command
+runs there, and a relative path of a file tool is read from there. Nothing about a sandbox is
+stored by this service or by the AI service, so any instance serves any call.
 
-**Lifetime.** The gateway takes a lifetime of a minute to its maximum, an hour by default
-(`GATEWAY_SANDBOX_MAX_TTL`), which is why the idle lifetime ends at 3000 seconds: a command's
-timeout, 600 at most, is added to it. It starts at 660, that longest timeout and a minute: a
-file call renews to the idle lifetime alone, which must not end before a command another
-conversation of the user started. The minute is for the directory made between a command's
-renewal and its start, a call of 30 seconds at most; a command the gateway starts later than
-that is not covered.
-Every call that reaches the gateway moves the sandbox's expiry to the idle lifetime from now (a
-command's own timeout is added), and nothing renews it between calls. This service never deletes it, not
-when a thread is deleted either: a sandbox nobody calls expires at the gateway, and the next call
-starts an empty one. A call cannot tell a sandbox it started from one that ran, so the model is
-not told; the description of `sandbox_exec` says that files are gone after the idle time.
+**Lifetime.** Every call the gateway answers a sandbox for moves its expiry to the idle lifetime
+plus 600 seconds from now, 600 being the longest timeout a command may ask for. The lifetime is
+the same for every call, a file call too, so that no call moves the expiry back: not under a
+command another conversation runs, and not into the idle time that follows a command. Nothing
+renews the sandbox between calls. The gateway takes a lifetime of a minute to its maximum, an
+hour by default (`GATEWAY_SANDBOX_MAX_TTL`), which is why the idle lifetime is 60 to 3000
+seconds. This service never deletes a sandbox, not when a thread is deleted either: one nobody
+calls expires at the gateway, and the next call starts an empty one. A call cannot tell a
+sandbox it started from one that ran, so the model is not told; the description of
+`sandbox_exec` says how long files stay at least.
 
 ### Automatic history compaction
 

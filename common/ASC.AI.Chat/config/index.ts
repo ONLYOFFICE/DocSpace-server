@@ -517,45 +517,43 @@ export const CHAT_SANDBOX_TYPE = "chat-sandbox";
 export interface ChatSandboxConfig {
   sandboxUrl: string;
   sandboxToken: string;
-  /** How long a sandbox outlives the last tool call made in it; a command's timeout is added. */
+  /** How long a sandbox is kept after a tool call, before the longest command timeout is added. */
   idleTtlSeconds: number;
 }
 
 export const CHAT_SANDBOX_DEFAULT_IDLE_TTL_SECONDS = 900;
-// The upper bound: the gateway refuses a lifetime over its maximum, an hour unless its owner sets
-// another (GATEWAY_SANDBOX_MAX_TTL; read from the gateway's source, `document-agent` at commit
-// f7f4509, not yet run against a gateway). A command's timeout, 600 seconds at most, is added to
-// the idle lifetime, so the two together stay within that hour.
-// The lower bound is that longest timeout (EXEC_MAX_TIMEOUT_SECONDS of `app/sandbox/`) and a
-// margin: a file call renews the user's sandbox to the idle lifetime from now, which must not end
-// before a command another conversation of the user has started. That command starts after its
-// own renewal and the making of its directory, a call of 30 seconds at most; the margin is twice
-// that. A command the gateway starts later than the margin is not covered.
-export const CHAT_SANDBOX_COMMAND_START_MARGIN_SECONDS = 60;
-export const CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS = 600 + CHAT_SANDBOX_COMMAND_START_MARGIN_SECONDS;
-export const CHAT_SANDBOX_MAX_IDLE_TTL_SECONDS = 3000;
+// The longest timeout a command of the chat's sandbox may ask for. Every call renews the sandbox
+// to the idle lifetime plus this, a file call too: a renewal that added only the timeout of its
+// own call would move the expiry back, under a command another conversation runs or into the
+// idle time a command was promised.
+export const CHAT_SANDBOX_MAX_COMMAND_SECONDS = 600;
+// The bounds of the idle lifetime are the gateway's, read from its source (`document-agent` at
+// commit f7f4509) and not yet run against a gateway: it refuses a lifetime under a minute and
+// over its maximum, an hour unless its owner sets another (GATEWAY_SANDBOX_MAX_TTL). The idle
+// lifetime and the 600 seconds added to it stay within that hour.
+export const CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS = 60;
+export const CHAT_SANDBOX_MAX_IDLE_TTL_SECONDS = 3600 - CHAT_SANDBOX_MAX_COMMAND_SECONDS;
 
 // The chat's sandbox from the shared `appsettings.json` (`ai.sandbox`), each field overridable
 // from the environment (`AI__SANDBOX__URL`, `AI__SANDBOX__TOKEN`, `AI__SANDBOX__IDLE_TTL_SECONDS`).
 // Undefined without the gateway's URL and token: the tools are then not offered. As with the two
 // agents, an environment variable that is set wins even when empty, so an install can switch the
-// sandbox off whatever the appsettings name. A block, an address or a token of the wrong type
-// reads as absent and is reported: the tools vanish otherwise without a word.
+// sandbox off whatever the appsettings name. A block that is not an object, and an address or a
+// token of the file that is not a text and that the environment does not override, read as
+// absent and are reported: the tools vanish otherwise without a word.
 export function getChatSandbox(): ChatSandboxConfig | undefined {
   const ai: RootConfig["ai"] = nconf.get("ai");
   const block: unknown = ai?.sandbox;
-  if (isGiven(block) && typeof block !== "object") {
-    refuse("ai:sandbox", block, "an object", SANDBOX_NOT_NAMED);
+  const isBlock = typeof block === "object" && block !== null && !Array.isArray(block);
+  if (isGiven(block) && !isBlock) {
+    refuse("ai:sandbox", Array.isArray(block) ? "a list" : block, "an object", SANDBOX_NOT_NAMED);
+  } else {
+    refused.delete("ai:sandbox");
   }
-  const setting: ChatSandboxSetting | undefined =
-    block && typeof block === "object" ? block : undefined;
-  if (isGiven(setting?.url) && typeof setting?.url !== "string") {
-    refuse("ai:sandbox:url", setting?.url, "a text", SANDBOX_NOT_NAMED);
-  }
-  if (isGiven(setting?.token) && typeof setting?.token !== "string") {
-    // A token is a secret: the line names its type, not the value.
-    refuse("ai:sandbox:token", `a ${typeof setting?.token}`, "a text", SANDBOX_NOT_NAMED);
-  }
+  const setting: ChatSandboxSetting | undefined = isBlock ? block : undefined;
+  textOfFile("ai:sandbox:url", "AI__SANDBOX__URL", setting?.url, setting?.url);
+  // A token is a secret: the line names its type, not the value.
+  textOfFile("ai:sandbox:token", "AI__SANDBOX__TOKEN", setting?.token, kindOfValue(setting?.token));
   const sandboxUrl = envOrSetting("AI__SANDBOX__URL", setting?.url);
   const sandboxToken = envOrSetting("AI__SANDBOX__TOKEN", setting?.token);
   if (!sandboxUrl || !sandboxToken) {
@@ -584,6 +582,24 @@ export function getChatSandbox(): ChatSandboxConfig | undefined {
 const SANDBOX_NOT_NAMED: Fallback = {
   effect: "the chat's sandbox is not configured by it",
 };
+
+/** What a value is, in the words of a line that may not show it. */
+function kindOfValue(value: unknown): string {
+  return typeof value === "object" ? "an object" : `a ${typeof value}`;
+}
+
+/**
+ * Reports a setting of the file that has to be a text and is something else, as `shown`. Not
+ * when the environment variable `env` is set: {@link envOrSetting} then does not read the file's
+ * value, and the line would say that nothing is configured while the variable configures it.
+ */
+function textOfFile(name: string, env: string, value: unknown, shown: unknown): void {
+  if (process.env[env] === undefined && isGiven(value) && typeof value !== "string") {
+    refuse(name, shown, "a text", SANDBOX_NOT_NAMED);
+  } else {
+    refused.delete(name);
+  }
+}
 
 /** The first value that is a non-blank string, trimmed; "" when there is none. */
 function firstText(...values: unknown[]): string {

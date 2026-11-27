@@ -79,7 +79,7 @@ beforeEach(() => {
   vi.stubEnv("AI__SANDBOX__TOKEN", "gw-secret");
   fakeGateway(upstream).files.set("/workspace/out/report.csv", Buffer.from("a,b\n"));
   upstream.use(
-    // GET api/2.0/people/@self (PeopleController.SelfAsync).
+    // GET api/2.0/people/@self (UserController.GetSelfProfile).
     http.get("*/api/2.0/people/@self", () => HttpResponse.json(selfDto())),
     // GET api/2.0/files/folder/{folderId} (FoldersController.GetFolderInfo): a room the caller
     // may create in.

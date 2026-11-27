@@ -177,7 +177,7 @@ export interface ChatSandboxSetting {
   /** The sandbox gateway and the bearer token every route of it wants. */
   url?: string;
   token?: string;
-  /** How long a sandbox outlives the last tool call made in it; a command's timeout is added. */
+  /** How long a sandbox is kept after a tool call, before the longest command timeout is added. */
   idleTtlSeconds?: number;
 }
 

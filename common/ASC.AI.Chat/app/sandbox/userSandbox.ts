@@ -36,12 +36,14 @@
 // service serves any call. Each conversation works in a directory of its own in it.
 //
 // A plugin task owns its sandbox for as long as it runs: a timer renews it and the task's
-// `finally` deletes it. This one is kept alive by use alone: every tool call that reaches the
-// gateway moves the expiry to its own length plus the idle lifetime (a call refused for its
-// arguments reaches nobody), nothing renews it in between, and nothing here deletes
+// `finally` deletes it. This one is kept alive by use alone: every tool call that gets as far as
+// the gateway moves the expiry to the idle lifetime plus the longest command timeout, the same
+// for every call so that no call moves it back; nothing renews it in between, and nothing here
+// deletes
 // it: a sandbox nobody calls is removed by the gateway when it expires, a deleted conversation
 // leaves its directory to go with it.
 
+import { CHAT_SANDBOX_MAX_COMMAND_SECONDS } from "../../config/index.js";
 import type { ChatSandboxConfig } from "../../config/index.js";
 import { createSandbox, makeDir, renewSandbox } from "../pluginAgent/sandboxClient.js";
 import { getSelfId } from "../storage/docspacePeopleApi.js";
@@ -57,17 +59,21 @@ export function threadDirOf(threadId: string): string | undefined {
   return THREAD_DIR_NAME.test(threadId) ? `${CHAT_SANDBOX_ROOT}/${threadId}` : undefined;
 }
 
+/** The lifetime every call asks for and renews to. */
+export const lifetimeOf = (config: ChatSandboxConfig): number =>
+  config.idleTtlSeconds + CHAT_SANDBOX_MAX_COMMAND_SECONDS;
+
 /**
- * The caller's running sandbox with `dir` in it, its expiry moved to `ttlSeconds` from now;
+ * The caller's running sandbox with `dir` in it, its expiry moved to {@link lifetimeOf} from now;
  * started when the caller has none. A sandbox started by this call is empty: `dir` is made
  * either way, so a call cannot tell, and neither can its result.
  */
 export async function acquireUserSandbox(
   config: ChatSandboxConfig,
   dir: string,
-  ttlSeconds: number,
   signal?: AbortSignal,
 ): Promise<string> {
+  const ttlSeconds = lifetimeOf(config);
   const userId = await getSelfId(signal);
   const id = await createSandbox(config, userId, ttlSeconds, signal);
   // `Create` answers a sandbox that already runs as it is, with the expiry it had: the lifetime
