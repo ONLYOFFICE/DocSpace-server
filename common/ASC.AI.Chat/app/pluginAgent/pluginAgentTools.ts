@@ -582,7 +582,8 @@ const MAY_BE_INSTALLED =
  * standing permission, so in the two cases the engine did not ask about this call it installs
  * nothing. A standing permission is taken back at once, so that the next call asks: the engine
  * writes it before it runs the very call it was given with, and the user who ticked "always"
- * on the dialog is asked once more instead of being sent to the settings.
+ * on the dialog is asked once more instead of being sent to the settings. One that the round's
+ * copy of the list still holds after it was removed counts as standing as well.
  */
 async function installPlugin(
   args: Record<string, unknown>,
@@ -600,16 +601,28 @@ async function installPlugin(
   if (mode === "auto") {
     // The list holds `<group>_<tool>` tokens (the library's `allowAlwaysToken`).
     const token = `${PLUGIN_INSTALL_TYPE}_${INSTALL_PLUGIN_TOOL_NAME}`;
-    // Read anew, not from what the round was started with: the write below puts the whole
-    // list back, and a task may have run for many minutes since, in which the user changed it.
+    // The engine decided to run this call unasked on the copy of the list the round holds, when
+    // it holds one. That copy may be many minutes old, so the entry is looked for in it and in
+    // a read made now: an entry in either means nobody was asked about this call. One taken
+    // away since the round began (in the settings, or by this code in another round) is in the
+    // first copy only.
+    const inRound = readChatContext("toolPrefs")
+      ? await storage.toolPrefs.readAllowAlways(entityId)
+      : [];
     invalidateChatContext("toolPrefs");
     const list = await storage.toolPrefs.readAllowAlways(entityId);
     if (list.includes(token)) {
+      // The write puts the whole list back, so it is built on the read made now.
       await storage.toolPrefs.updateAllowAlways(
         list.filter((entry) => entry !== token),
         entityId,
       );
       return `Nothing was installed: an installation is approved one call at a time, so the standing approval of ${INSTALL_PLUGIN_TOOL_NAME} was removed. Call ${INSTALL_PLUGIN_TOOL_NAME} again: the user will be asked.`;
+    }
+    if (inRound.includes(token)) {
+      // Nothing to write: the entry is gone already, and the round's copy was dropped above,
+      // so the engine reads the list anew for the next call.
+      return `Nothing was installed: the call was started on a standing approval of ${INSTALL_PLUGIN_TOOL_NAME} that has been removed since, and an installation is approved one call at a time. Call ${INSTALL_PLUGIN_TOOL_NAME} again: the user will be asked.`;
     }
   }
 

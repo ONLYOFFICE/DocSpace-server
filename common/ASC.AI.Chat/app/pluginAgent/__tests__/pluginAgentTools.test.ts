@@ -51,7 +51,8 @@ import {
   setRoundThreadId,
   shouldForwardHeadersToProvider,
 } from "../../requestContext.js";
-import { invalidateChatContext } from "../../storage/chatContextSnapshot.js";
+import { invalidateChatContext, readChatContext } from "../../storage/chatContextSnapshot.js";
+import type { ChatContextSnapshot } from "../../storage/chatContextSnapshot.js";
 import { DocspaceApiHttpError, getFileInfo } from "../../storage/docspaceFilesApi.js";
 import { storage } from "../../storage/index.js";
 import { FileTooLargeError, readFileBytes } from "../../storage/roomSkills.js";
@@ -88,6 +89,8 @@ vi.mock("../../tools/documentAgentFiles.js", async (importOriginal) => ({
 vi.mock("../../storage/chatContextSnapshot.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../storage/chatContextSnapshot.js")>()),
   invalidateChatContext: vi.fn(),
+  // No copy of the round by default, as outside a primed round.
+  readChatContext: vi.fn(),
 }));
 vi.mock("../../storage/roomSkills.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../storage/roomSkills.js")>()),
@@ -163,6 +166,7 @@ beforeEach(() => {
   vi.mocked(loadPluginSkill).mockReset().mockResolvedValue(SKILL);
   vi.mocked(pluginSkillPresent).mockReset().mockResolvedValue(true);
   vi.mocked(invalidateChatContext).mockClear();
+  vi.mocked(readChatContext).mockReset();
   // The portal's chat model, read the way an in-process call needs it.
   vi.spyOn(storage.assignments, "readByType").mockResolvedValue("p-chat");
   vi.spyOn(storage.profiles, "readById").mockResolvedValue(PROFILE);
@@ -1016,6 +1020,40 @@ describe("install_plugin", () => {
     expect(JSON.parse((await install({ fileId: 101 })) as string)).toMatchObject({
       installed: true,
     });
+  });
+
+  it("installs nothing on a standing approval only the round's copy of the list still holds", async () => {
+    upstream.use(http.post(WEBPLUGINS, installed));
+    // The round holds a copy of the list: the engine ran the call unasked on it.
+    vi.mocked(readChatContext).mockReturnValue({} as ChatContextSnapshot);
+    const list = vi
+      .spyOn(storage.toolPrefs, "readAllowAlways")
+      .mockResolvedValueOnce(["docspace_x", "plugin-install_install_plugin"])
+      // The read made now: the entry was removed after the round began.
+      .mockResolvedValueOnce(["docspace_x"]);
+
+    expect(await install({ fileId: 101 })).toBe(
+      "Nothing was installed: the call was started on a standing approval of install_plugin that has been removed since, and an installation is approved one call at a time. Call install_plugin again: the user will be asked.",
+    );
+    expect(list).toHaveBeenCalledTimes(2);
+    // The round's copy is read before it is dropped, the list of now after.
+    const dropped = vi.mocked(invalidateChatContext).mock.invocationCallOrder[0]!;
+    expect(list.mock.invocationCallOrder[0]).toBeLessThan(dropped);
+    expect(dropped).toBeLessThan(list.mock.invocationCallOrder[1]!);
+    expect(storage.toolPrefs.updateAllowAlways).not.toHaveBeenCalled();
+    expect(getFileInfo).not.toHaveBeenCalled();
+    expect(upstream.seen.some((r) => r.path.includes("webplugins"))).toBe(false);
+  });
+
+  it("writes back the list of now, not the round's copy, when both hold the standing approval", async () => {
+    vi.mocked(readChatContext).mockReturnValue({} as ChatContextSnapshot);
+    vi.spyOn(storage.toolPrefs, "readAllowAlways")
+      .mockResolvedValueOnce(["old_entry", "plugin-install_install_plugin"])
+      .mockResolvedValueOnce(["plugin-install_install_plugin", "new_entry"]);
+
+    expect(await install({ fileId: 101 })).toMatch(/^Nothing was installed: /);
+    expect(storage.toolPrefs.updateAllowAlways).toHaveBeenCalledWith(["new_entry"], "folder-7");
+    expect(upstream.seen.some((r) => r.path.includes("webplugins"))).toBe(false);
   });
 
   it("installs nothing when the standing approval cannot be taken back", async () => {
