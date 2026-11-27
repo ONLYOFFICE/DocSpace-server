@@ -237,7 +237,10 @@ const CONTRACTS: Contract[] = [
   {
     cs: [["common/ASC.Api.Core/Model/EmployeeFullDto.cs", "EmployeeFullDto"]],
     node: ["app/storage/docspacePeopleApi.ts", "getSelf"],
-    notSent: { response: "the DocSpace envelope `{ response }` around the DTO" },
+  },
+  {
+    cs: [["common/ASC.Api.Core/Model/EmployeeFullDto.cs", "EmployeeFullDto"]],
+    node: ["app/storage/docspacePeopleApi.ts", "getSelfId"],
   },
   {
     cs: [["web/ASC.Web.Api/ApiModels/ResponseDto/WebPluginDto.cs", "WebPluginDto"]],

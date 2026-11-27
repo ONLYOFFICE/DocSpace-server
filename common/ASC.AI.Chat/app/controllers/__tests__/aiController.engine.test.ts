@@ -45,6 +45,8 @@ import type { FakeAIEngine } from "./aiController.harness.js";
 vi.mock("@onlyoffice/ai-chat/core", async (original) => ({
   ...(await original<typeof import("@onlyoffice/ai-chat/core")>()),
   AIEngine: (await import("./aiController.harness.js")).FakeAIEngine,
+  // The adapters as the controller lists them: several of them are stand-ins here.
+  composeToolsAdapters: (...adapters: unknown[]) => ({ adapters }),
 }));
 vi.mock("../../storage/index.js", async () => ({
   storage: (await import("./aiController.harness.js")).storage,
@@ -185,6 +187,16 @@ describe("the engine the controller builds", () => {
     ]);
   });
 
+  it("composes the chat's sandbox tools into the adapter, after the plugin agent's", async () => {
+    const { deps } = await load();
+    const { pluginAgentTools } = await import("../../pluginAgent/pluginAgentTools.js");
+    const { sandboxTools } = await import("../../sandbox/sandboxTools.js");
+
+    const { adapters } = deps.toolsAdapter as { adapters: unknown[] };
+    expect(adapters.at(-2)).toBe(pluginAgentTools);
+    expect(adapters.at(-1)).toBe(sandboxTools);
+  });
+
   it("reads the round's source back from the request context", async () => {
     const { deps, context, inRequestContext } = await load();
     const source = { id: "8", type: "Room", title: "Reports" };
@@ -198,7 +210,7 @@ describe("the engine the controller builds", () => {
     expect(deps.resolveSource()).toBeUndefined();
   });
 
-  it("asks for approval for system, custom, integration, document agent and plugin agent tools", async () => {
+  it("lists the system, custom, integration, document agent, plugin agent and sandbox groups as the ones the asking mode pauses", async () => {
     const { deps, getServerTypes, context, inRequestContext } = await load();
     getServerTypes.mockReturnValue(["portal-mcp"]);
 
@@ -214,6 +226,7 @@ describe("the engine the controller builds", () => {
       "document-agent",
       "plugin-agent",
       "plugin-install",
+      "chat-sandbox",
     ]);
   });
 

@@ -30,8 +30,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { http, HttpResponse } from "../../__tests__/helpers/upstream.js";
-import type { useUpstream } from "../../__tests__/helpers/upstream.js";
+import { http, HttpResponse } from "./upstream.js";
+import type { useUpstream } from "./upstream.js";
 
 export const GATEWAY_URL = "http://gateway:9090";
 const RPC = `${GATEWAY_URL}/gateway.v1.SandboxService`;
@@ -74,7 +74,8 @@ export interface ExecOutcome {
 
 /**
  * A sandbox gateway that keeps files in memory and answers commands through `run`: enough of
- * the gateway of the document agent's repository for the code that drives a plugin task.
+ * the gateway of the document agent's repository for the code that drives a plugin task and the
+ * chat's own sandbox tools.
  */
 export interface FakeGateway {
   /** Every call in the order it was made: `Create`, `Renew`, `Delete`, `MakeDir /path`, `PUT /path`, `GET /path`, `Exec command`. */

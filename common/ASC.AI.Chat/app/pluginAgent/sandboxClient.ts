@@ -30,9 +30,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// The sandbox a plugin task works in, as this service uses it. The sandbox is somebody else's
-// service (the gateway of the document agent's repository, `gateway.v1.SandboxService`); this is
-// the only module that calls it, so a different API changes this file and its tests.
+// The sandbox a plugin task and a conversation of the chat work in, as this service uses it. The
+// sandbox is somebody else's service (the gateway of the document agent's repository,
+// `gateway.v1.SandboxService`); this is the only module that calls it, so a different API changes
+// this file and its tests.
 //
 // Three kinds of call. The unary methods are plain JSON `POST`s, as the gateway documents them.
 // `Exec` is a Connect server stream (`application/connect+json`): the request and every message

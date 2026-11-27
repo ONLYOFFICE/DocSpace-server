@@ -33,7 +33,7 @@
 import type { PluginAgentConfig } from "../../../config/index.js";
 import type { ToolContext } from "../agentTools.js";
 import type { PluginSkill } from "../skill.js";
-import { GATEWAY_URL } from "./gateway.js";
+import { GATEWAY_URL } from "../../__tests__/helpers/sandboxGateway.js";
 
 export const CONFIG: PluginAgentConfig = {
   sandboxUrl: GATEWAY_URL,

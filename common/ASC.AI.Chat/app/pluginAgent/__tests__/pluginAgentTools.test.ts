@@ -62,8 +62,8 @@ import { MAX_TASK_CHARS, pluginAgentTools } from "../pluginAgentTools.js";
 import { loadPluginSkill, pluginSkillPresent } from "../skill.js";
 import { endTask, runningTaskCount, startTask } from "../tasks.js";
 import type { RunningTask } from "../tasks.js";
-import { fakeGateway, refusedWith } from "./gateway.js";
-import type { FakeGateway } from "./gateway.js";
+import { fakeGateway, refusedWith } from "../../__tests__/helpers/sandboxGateway.js";
+import type { FakeGateway } from "../../__tests__/helpers/sandboxGateway.js";
 import { PROFILE, PROVIDER_ERROR, scriptModel } from "./model.js";
 import type { ScriptedTurn } from "./model.js";
 

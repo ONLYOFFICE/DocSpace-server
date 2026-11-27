@@ -38,6 +38,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import type {
   AppConfig,
+  ChatSandboxSetting,
   CompactionSetting,
   DocumentAgentSetting,
   McpServerSetting,
@@ -508,6 +509,81 @@ export function getPluginAgent(): PluginAgentConfig | undefined {
       ) * MIB,
   };
 }
+
+// Group key of the chat's own sandbox tools. Listed in `systemServerTypes`: the "ask" permission
+// mode pauses a call, the default mode does not (the tools ask for no approval of their own).
+export const CHAT_SANDBOX_TYPE = "chat-sandbox";
+
+export interface ChatSandboxConfig {
+  sandboxUrl: string;
+  sandboxToken: string;
+  /** How long a sandbox outlives the last tool call made in it; a command's timeout is added. */
+  idleTtlSeconds: number;
+}
+
+export const CHAT_SANDBOX_DEFAULT_IDLE_TTL_SECONDS = 900;
+// The upper bound: the gateway refuses a lifetime over its maximum, an hour unless its owner sets
+// another (GATEWAY_SANDBOX_MAX_TTL; read from the gateway's source, `document-agent` at commit
+// f7f4509, not yet run against a gateway). A command's timeout, 600 seconds at most, is added to
+// the idle lifetime, so the two together stay within that hour.
+// The lower bound is that longest timeout (EXEC_MAX_TIMEOUT_SECONDS of `app/sandbox/`) and a
+// margin: a file call renews the user's sandbox to the idle lifetime from now, which must not end
+// before a command another conversation of the user has started. That command starts after its
+// own renewal and the making of its directory, a call of 30 seconds at most; the margin is twice
+// that. A command the gateway starts later than the margin is not covered.
+export const CHAT_SANDBOX_COMMAND_START_MARGIN_SECONDS = 60;
+export const CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS = 600 + CHAT_SANDBOX_COMMAND_START_MARGIN_SECONDS;
+export const CHAT_SANDBOX_MAX_IDLE_TTL_SECONDS = 3000;
+
+// The chat's sandbox from the shared `appsettings.json` (`ai.sandbox`), each field overridable
+// from the environment (`AI__SANDBOX__URL`, `AI__SANDBOX__TOKEN`, `AI__SANDBOX__IDLE_TTL_SECONDS`).
+// Undefined without the gateway's URL and token: the tools are then not offered. As with the two
+// agents, an environment variable that is set wins even when empty, so an install can switch the
+// sandbox off whatever the appsettings name. A block, an address or a token of the wrong type
+// reads as absent and is reported: the tools vanish otherwise without a word.
+export function getChatSandbox(): ChatSandboxConfig | undefined {
+  const ai: RootConfig["ai"] = nconf.get("ai");
+  const block: unknown = ai?.sandbox;
+  if (isGiven(block) && typeof block !== "object") {
+    refuse("ai:sandbox", block, "an object", SANDBOX_NOT_NAMED);
+  }
+  const setting: ChatSandboxSetting | undefined =
+    block && typeof block === "object" ? block : undefined;
+  if (isGiven(setting?.url) && typeof setting?.url !== "string") {
+    refuse("ai:sandbox:url", setting?.url, "a text", SANDBOX_NOT_NAMED);
+  }
+  if (isGiven(setting?.token) && typeof setting?.token !== "string") {
+    // A token is a secret: the line names its type, not the value.
+    refuse("ai:sandbox:token", `a ${typeof setting?.token}`, "a text", SANDBOX_NOT_NAMED);
+  }
+  const sandboxUrl = envOrSetting("AI__SANDBOX__URL", setting?.url);
+  const sandboxToken = envOrSetting("AI__SANDBOX__TOKEN", setting?.token);
+  if (!sandboxUrl || !sandboxToken) {
+    return undefined;
+  }
+  return {
+    sandboxUrl: sandboxUrl.replace(/\/+$/, ""),
+    sandboxToken,
+    idleTtlSeconds:
+      envInt(
+        "AI__SANDBOX__IDLE_TTL_SECONDS",
+        CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS,
+        CHAT_SANDBOX_MAX_IDLE_TTL_SECONDS,
+      ) ??
+      intWithin(
+        "ai:sandbox:idleTtlSeconds",
+        setting?.idleTtlSeconds,
+        CHAT_SANDBOX_MIN_IDLE_TTL_SECONDS,
+        CHAT_SANDBOX_MAX_IDLE_TTL_SECONDS,
+        { used: CHAT_SANDBOX_DEFAULT_IDLE_TTL_SECONDS },
+      ) ??
+      CHAT_SANDBOX_DEFAULT_IDLE_TTL_SECONDS,
+  };
+}
+
+const SANDBOX_NOT_NAMED: Fallback = {
+  effect: "the chat's sandbox is not configured by it",
+};
 
 /** The first value that is a non-blank string, trimmed; "" when there is none. */
 function firstText(...values: unknown[]): string {

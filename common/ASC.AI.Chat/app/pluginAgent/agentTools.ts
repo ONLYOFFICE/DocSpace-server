@@ -176,7 +176,7 @@ export function execReport(result: ExecResult): string {
 }
 
 /** An absolute path of the sandbox without a `..` part, or undefined. */
-function sandboxPath(value: unknown): string | undefined {
+export function sandboxPath(value: unknown): string | undefined {
   return typeof value === "string" && value.startsWith("/") && !value.split("/").includes("..")
     ? value
     : undefined;

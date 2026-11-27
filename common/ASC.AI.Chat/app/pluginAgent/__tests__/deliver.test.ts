@@ -36,8 +36,8 @@ import { HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
 import { MAX_FILE_BYTES } from "../../tools/documentAgentFiles.js";
 import { deliverPlugin, projectDirOf } from "../deliver.js";
 import { SESSION_ENV, toolContext } from "./context.js";
-import { chunked, fakeGateway } from "./gateway.js";
-import type { FakeGateway } from "./gateway.js";
+import { chunked, fakeGateway } from "../../__tests__/helpers/sandboxGateway.js";
+import type { FakeGateway } from "../../__tests__/helpers/sandboxGateway.js";
 
 const upstream = useUpstream();
 

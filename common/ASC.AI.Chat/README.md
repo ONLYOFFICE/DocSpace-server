@@ -139,6 +139,55 @@ each time: under the "Allow" permission mode it installs nothing and says what t
 with the tool on the always-allowed list it installs nothing and takes the tool off the list, so
 that the next call asks. `plugin_agent` asks for approval too, but may be pre-approved.
 
+### Sandbox of the chat
+
+The chat's own model can run commands in a sandbox (`app/sandbox/`): `sandbox_exec`,
+`sandbox_read_file`, `sandbox_write_file`, and `sandbox_save_file`, which saves a file of the
+sandbox as a new file of the workspace under the user's session: among the artifacts of a
+conversation of an AI project, else into the current folder when the user may create there, else
+into My documents; an empty file is not saved. Nothing is delegated to a sub-agent. The tools are offered to every caller of the chat when the sandbox is configured, in
+the shared `appsettings.json` under `ai.sandbox` or from the environment:
+
+| Setting                     | Environment                     | Default | Bounds     |
+| --------------------------- | ------------------------------- | ------- | ---------- |
+| `ai.sandbox.url`            | `AI__SANDBOX__URL`              | —       |            |
+| `ai.sandbox.token`          | `AI__SANDBOX__TOKEN`            | —       |            |
+| `ai.sandbox.idleTtlSeconds` | `AI__SANDBOX__IDLE_TTL_SECONDS` | `900`   | 660 – 3000 |
+
+It is the same gateway the plugin agent calls (`app/pluginAgent/sandboxClient.ts`), with the
+token of the profile a chat sandbox is made from. What is said here of the gateway is read from
+its source (the `document-agent` repository at commit f7f4509) and has not been run against a
+gateway yet: its example profile `chat` (`GATEWAY_TOKEN_CHAT`, image `sandbox-chat`: Python 3.12
+with libraries for data, charts and office files, no egress) is what the description of
+`sandbox_exec` tells the model to expect.
+
+**The profile has to be one without egress.** The tools ask for no approval of their own, so a
+call pauses only under the permission mode that asks about every tool. The sandbox never holds a
+credential of the portal, but the model can write into it what it read of the workspace: with
+network access that content would have a way out nobody is asked about. This service does not
+check the profile.
+
+**One sandbox per user, one directory per conversation.** Every tool call that is not refused
+first (for its arguments or, for a save, for want of a folder to save into) asks the gateway for
+the sandbox of the session that is the caller's user id (`GET people/@self`): the gateway answers
+the one that runs, or starts one. All conversations of a user share it, and each works in
+`/workspace/{threadId}`: a command runs there, and a relative path of a file tool is read from
+there. Nothing about a sandbox is stored by this service or by the AI service, so any instance
+serves any call.
+
+**Lifetime.** The gateway takes a lifetime of a minute to its maximum, an hour by default
+(`GATEWAY_SANDBOX_MAX_TTL`), which is why the idle lifetime ends at 3000 seconds: a command's
+timeout, 600 at most, is added to it. It starts at 660, that longest timeout and a minute: a
+file call renews to the idle lifetime alone, which must not end before a command another
+conversation of the user started. The minute is for the directory made between a command's
+renewal and its start, a call of 30 seconds at most; a command the gateway starts later than
+that is not covered.
+Every call that reaches the gateway moves the sandbox's expiry to the idle lifetime from now (a
+command's own timeout is added), and nothing renews it between calls. This service never deletes it, not
+when a thread is deleted either: a sandbox nobody calls expires at the gateway, and the next call
+starts an empty one. A call cannot tell a sandbox it started from one that ran, so the model is
+not told; the description of `sandbox_exec` says that files are gone after the idle time.
+
 ### Automatic history compaction
 
 The chat engine can fold a thread that nears its model's context window into a summary message

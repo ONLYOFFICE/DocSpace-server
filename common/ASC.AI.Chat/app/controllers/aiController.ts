@@ -85,6 +85,7 @@ import { toolErrorForLog } from "../tools/toolErrorLog.js";
 import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
 import { documentAgentTools } from "../tools/documentAgent.js";
 import {
+  CHAT_SANDBOX_TYPE,
   DOCUMENT_AGENT_TYPE,
   getCompaction,
   getPersistIntervalMs,
@@ -92,6 +93,7 @@ import {
   PLUGIN_INSTALL_TYPE,
 } from "../../config/index.js";
 import { pluginAgentTools } from "../pluginAgent/pluginAgentTools.js";
+import { sandboxTools } from "../sandbox/sandboxTools.js";
 import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
@@ -573,6 +575,9 @@ const engine = new AIEngine({
     // `plugin_agent` and `install_plugin`, for the owner and the DocSpace admins of a portal
     // whose installation names a sandbox. Both groups are approval-required.
     pluginAgentTools,
+    // The caller's sandbox as tools of the chat's own model, on an installation that names
+    // one (`ai.sandbox`).
+    sandboxTools,
   ),
   // Approval-required server types: the MCP servers (host-configured and
   // custom — the latter resolved per request, see primeCustomServers) plus
@@ -585,6 +590,7 @@ const engine = new AIEngine({
     DOCUMENT_AGENT_TYPE,
     PLUGIN_AGENT_TYPE,
     PLUGIN_INSTALL_TYPE,
+    CHAT_SANDBOX_TYPE,
   ],
   // Fold a thread that nears its model's context window into a summary
   // message before the round. The summary is stored through the ordinary

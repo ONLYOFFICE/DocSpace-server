@@ -45,7 +45,7 @@ import {
   openSandboxSession,
 } from "../sandboxSession.js";
 import type { PluginSkill } from "../skill.js";
-import { fakeGateway, GATEWAY_URL, refusedWith } from "./gateway.js";
+import { fakeGateway, GATEWAY_URL, refusedWith } from "../../__tests__/helpers/sandboxGateway.js";
 
 const upstream = useUpstream();
 

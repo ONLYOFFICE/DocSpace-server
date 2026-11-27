@@ -45,7 +45,7 @@ import {
   stepOf,
 } from "../agentTools.js";
 import { SESSION_ENV, toolContext } from "./context.js";
-import { fakeGateway, refusedWith } from "./gateway.js";
+import { fakeGateway, refusedWith } from "../../__tests__/helpers/sandboxGateway.js";
 
 const upstream = useUpstream();
 

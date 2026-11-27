@@ -50,25 +50,36 @@ export interface DocspaceSelf {
   isRoomAdmin: boolean;
 }
 
-/** `GET people/@self`, the role flags the service's checks need. */
-export async function getSelf(): Promise<DocspaceSelf> {
+/** `GET people/@self`: the DTO of the caller, out of its envelope. */
+async function selfAnswer(callerSignal?: AbortSignal): Promise<JsonObject> {
   const url = `${proxyBaseUrl}/api/2.0/people/@self`;
-  const { signal, cancel } = withTimeout(undefined);
+  const { signal, cancel } = withTimeout(callerSignal);
   try {
     const res = await fetch(url, { headers: getForwardedHeaders(), signal });
     if (!res.ok) {
       throw await refusedAnswer(res, url);
     }
     const raw = await jsonAnswer(res, "GET people/@self");
-    const self = mapped(isObject(raw) ? getObject(raw, "response") : undefined, "GET people/@self");
-    return {
-      isAdmin: getBoolean(self, "isAdmin") === true,
-      isOwner: getBoolean(self, "isOwner") === true,
-      isRoomAdmin: getBoolean(self, "isRoomAdmin") === true,
-    };
+    return mapped(isObject(raw) ? getObject(raw, "response") : undefined, "GET people/@self");
   } finally {
     cancel();
   }
+}
+
+/** `GET people/@self`, the role flags the service's checks need. */
+export async function getSelf(): Promise<DocspaceSelf> {
+  const self = await selfAnswer();
+  return {
+    isAdmin: getBoolean(self, "isAdmin") === true,
+    isOwner: getBoolean(self, "isOwner") === true,
+    isRoomAdmin: getBoolean(self, "isRoomAdmin") === true,
+  };
+}
+
+/** `GET people/@self`, the caller's id (a GUID); `signal` ends the read with its caller. */
+export async function getSelfId(signal?: AbortSignal): Promise<string> {
+  const self = await selfAnswer(signal);
+  return mapped(getString(self, "id") || undefined, "GET people/@self");
 }
 
 /** Whether the caller may change the portal's settings. */

@@ -170,6 +170,17 @@ export interface PluginAgentSetting {
   cacheMaxMb?: number;
 }
 
+// The sandbox of the chat itself (`ai.sandbox` in the shared `appsettings.json`): a sandbox of
+// the gateway the plugin agent uses, one per user, that the chat's model runs commands
+// in. Absent or without the gateway's URL and token, its tools are not offered.
+export interface ChatSandboxSetting {
+  /** The sandbox gateway and the bearer token every route of it wants. */
+  url?: string;
+  token?: string;
+  /** How long a sandbox outlives the last tool call made in it; a command's timeout is added. */
+  idleTtlSeconds?: number;
+}
+
 // Automatic history compaction (`ai.compaction` in the shared
 // `appsettings.json`): the library folds a thread that nears its model's
 // context window into a summary message before the round. On by default.
@@ -194,6 +205,7 @@ export interface RootConfig {
     mcp?: McpServerSetting[];
     documentAgent?: DocumentAgentSetting;
     pluginAgent?: PluginAgentSetting;
+    sandbox?: ChatSandboxSetting;
     compaction?: CompactionSetting;
   };
 }
