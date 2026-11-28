@@ -150,7 +150,7 @@
     <PackageVersion Include="Moq" Version="4.21.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.6.3" />
     <PackageVersion Include="MySql.Data" Version="9.2.0" />
-    <!-- Transitive pin: AspNetCore.HealthChecks.MySql 9.0.0 (used by Aspire.Hosting.MySql in the AppHost) pulls MySqlConnector 2.3.1, which has a known moderate-severity vulnerability (GHSA-473q-m89c-ghf8, fixed in 2.6.1). Keep it at the version Microting.EntityFrameworkCore.MySql brings to the services (3.0.0 for Microting 11.0.0): a lower pin fails the restore with NU1109. AspNetCore.HealthChecks.MySql 9.0.0 is built against MySqlConnector 2.x; that its MySQL health check works on 3.x in the AppHost was not checked at run time. -->
+    <!-- Transitive pin: AspNetCore.HealthChecks.MySql 9.0.0 (used by Aspire.Hosting.MySql in the AppHost) pulls MySqlConnector 2.3.1, which has a known moderate-severity vulnerability (GHSA-473q-m89c-ghf8, fixed in 2.6.1). Keep it at the version Microting.EntityFrameworkCore.MySql brings to the services (3.0.0 for Microting 11.0.0): a lower pin fails the restore with NU1109. AspNetCore.HealthChecks.MySql 9.0.0 is built against MySqlConnector 2.x; the AppHost resolves 3.0.0 (its project.assets.json), and the MySQL stack of the integration suites starts and passes with it; the health check was not tested on its own. -->
     <PackageVersion Include="MySqlConnector" Version="3.0.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="NLog" Version="5.5.0" />

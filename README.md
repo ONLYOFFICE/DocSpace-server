@@ -31,7 +31,7 @@ This repository contains the **backend** for [ONLYOFFICE DocSpace](https://githu
 ## Technology Stack
 
 ### Core
-- **Language:** C# 15.0, the net11.0 default (the services set no LangVersion; ASC.Analyzers uses latest, ASC.Migration.Creator and the PostgreSQL Standalone migrations pin 12)
+- **Language:** C# 15.0, the net11.0 default (the services set no LangVersion; ASC.Analyzers uses latest; only the legacy net8.0 test projects outside ASC.Tests.slnx, ASC.Common.Tests and ASC.Notify.Textile.Tests, pin 12)
 - **Runtime:** .NET 11.0 with ASP.NET Core
 - **Orchestration:** .NET Aspire 13.1
 - **DI Container:** Autofac 10.0

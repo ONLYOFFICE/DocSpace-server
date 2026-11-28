@@ -58,7 +58,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
                     if (response.Key.StartsWith('2') && response.Value.Content != null)
                     {
                         // Microsoft.OpenApi 3 exposes the content as IOpenApiMediaType, whose Schema is read-only;
-                        // the generator writes concrete media types, a media type reference would be a component.
+                        // the generator writes concrete media types (SwaggerSuccessApiResponseFilterTests), a media type reference would be a component.
                         foreach (var mediaType in response.Value.Content.Values.OfType<OpenApiMediaType>())
                         {
                             mediaType.Schema = WrapSchemaInSuccessApiResponse(mediaType.Schema, schemas, generated);
@@ -81,7 +81,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             // A type with no schema of its own - `JsonElement?`, `object?` - is any JSON value, null included.
             // Swashbuckle up to 10.2 emitted it as `type: null` alone, which claims the payload is always null;
             // from 10.3 (and in 11) it is an empty schema, which the object branch below would document as
-            // `type: object` (GET apps/{id}/settings). Both land here, and so does any other empty schema.
+            // `type: object` (GET apps/{id}/settings; SwaggerSuccessApiResponseFilterTests). Both land here, and so does any other empty schema.
             responseSchemaKey = "JsonValueWrapper";
             responseSchema = CreateSuccessApiResponseSchema(new OpenApiSchema(),
                 ("The successful API response containing an arbitrary JSON value.",
