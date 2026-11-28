@@ -46,6 +46,7 @@ global using System.Security.Cryptography.X509Certificates;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Nodes;
+global using System.Text.RegularExpressions;
 global using System.Xml.Linq;
 
 global using ASC.AI.Worker.Extensions;
@@ -71,6 +72,7 @@ global using ASC.Files.Core.ApiModels.WebhookDto;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Core.Thirdparty;
 global using ASC.Files.Core.Services.OFormService;
+global using ASC.Files.Extensions;
 global using ASC.Notify;
 global using ASC.Notify.Channels;
 global using ASC.Notify.Cron;
@@ -81,7 +83,6 @@ global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
 global using ASC.Notify.Sinks;
 global using ASC.Notify.Textile;
-global using ASC.Files.Extensions;
 global using ASC.People.Extensions;
 global using ASC.Webhooks.Contract;
 global using ASC.Webhooks.Core;
@@ -114,6 +115,7 @@ global using WireMock.Types;
 global using WireMock.Util;
 
 global using ZiggyCreatures.Caching.Fusion;
+global using ZiggyCreatures.Caching.Fusion.Backplane;
 global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 
 global using static ASC.Core.Common.Tests.PaymentStubs;

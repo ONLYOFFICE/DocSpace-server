@@ -125,6 +125,11 @@ public class OFormRequestManager(
     // Marks the request for a template file: the breaker takes its error status as an answered request, not a failure
     private static readonly HttpRequestOptionsKey<bool> _fileRequestKey = new("ASC.Files.TemplateGallery.FileRequest");
 
+    /// <summary>
+    /// How often a failure of the gallery of one kind is logged while it lasts.
+    /// </summary>
+    public static readonly TimeSpan FailureLogInterval = TimeSpan.FromMinutes(5);
+
     private static readonly TimeSpan _availableDuration = TimeSpan.FromMinutes(10);
 
     /// <summary>
@@ -190,7 +195,10 @@ public class OFormRequestManager(
         }
         catch (Exception e) when (IsGalleryFailure(e))
         {
-            logger.WarningOFormGalleryUnreachable(e);
+            if (await IsFirstFailureOfIntervalAsync("unreachable"))
+            {
+                logger.WarningOFormGalleryUnreachable(e);
+            }
 
             throw GalleryUnavailable();
         }
@@ -208,7 +216,10 @@ public class OFormRequestManager(
         using var response = await httpClient.GetAsync($"{GetListUrl()}?filters[id][$eq]={id}&locale=*&populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={Uri.EscapeDataString(ext)}", HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            logger.WarningOFormGalleryStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
+            if (await IsFirstFailureOfIntervalAsync("status"))
+            {
+                logger.WarningOFormGalleryStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
+            }
 
             throw GalleryUnavailable();
         }
@@ -227,7 +238,10 @@ public class OFormRequestManager(
         // download answers 502
         if (!Uri.TryCreate(domain, file.Url, out var fileUri) || !IsHttp(fileUri))
         {
-            logger.WarningOFormGalleryFileAddress(WithoutQuery(file.Url));
+            if (await IsFirstFailureOfIntervalAsync("file-address"))
+            {
+                logger.WarningOFormGalleryFileAddress(WithoutQuery(file.Url));
+            }
 
             throw GalleryUnavailable();
         }
@@ -238,7 +252,10 @@ public class OFormRequestManager(
         using var streamResponse = await httpClient.SendAsync(fileRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!streamResponse.IsSuccessStatusCode)
         {
-            logger.WarningOFormGalleryFileStatus(WithoutQuery(streamResponse.RequestMessage?.RequestUri), (int)streamResponse.StatusCode);
+            if (await IsFirstFailureOfIntervalAsync("file-status"))
+            {
+                logger.WarningOFormGalleryFileStatus(WithoutQuery(streamResponse.RequestMessage?.RequestUri), (int)streamResponse.StatusCode);
+            }
 
             throw GalleryUnavailable();
         }
@@ -246,7 +263,10 @@ public class OFormRequestManager(
         var length = streamResponse.Content.Headers.ContentLength;
         if (length > MaxTemplateSize)
         {
-            logger.WarningOFormGalleryFileTooLarge(WithoutQuery(fileUri), MaxTemplateSize);
+            if (await IsFirstFailureOfIntervalAsync("file-too-large"))
+            {
+                logger.WarningOFormGalleryFileTooLarge(WithoutQuery(fileUri), MaxTemplateSize);
+            }
 
             throw GalleryUnavailable();
         }
@@ -259,7 +279,10 @@ public class OFormRequestManager(
         // a blank editor. The rest of the file is not read when its start is not the format's
         if (!HasFormatSignature(head.AsSpan(0, read), ext))
         {
-            logger.WarningOFormGalleryNotForm(WithoutQuery(fileUri));
+            if (await IsFirstFailureOfIntervalAsync("not-form"))
+            {
+                logger.WarningOFormGalleryNotForm(WithoutQuery(fileUri));
+            }
 
             throw GalleryUnavailable();
         }
@@ -274,7 +297,10 @@ public class OFormRequestManager(
 
             if (!await CopyAtMostAsync(body, stream, MaxTemplateSize - read, cancellationToken))
             {
-                logger.WarningOFormGalleryFileTooLarge(WithoutQuery(fileUri), MaxTemplateSize);
+                if (await IsFirstFailureOfIntervalAsync("file-too-large"))
+                {
+                    logger.WarningOFormGalleryFileTooLarge(WithoutQuery(fileUri), MaxTemplateSize);
+                }
 
                 throw GalleryUnavailable();
             }
@@ -327,7 +353,10 @@ public class OFormRequestManager(
 
         if (response.Content.Headers.ContentLength > MaxListSize)
         {
-            logger.WarningOFormGalleryAnswerTooLarge(uri, MaxListSize);
+            if (await IsFirstFailureOfIntervalAsync("answer-too-large"))
+            {
+                logger.WarningOFormGalleryAnswerTooLarge(uri, MaxListSize);
+            }
 
             return null;
         }
@@ -337,7 +366,10 @@ public class OFormRequestManager(
 
         if (!await CopyAtMostAsync(body, buffer, MaxListSize, cancellationToken))
         {
-            logger.WarningOFormGalleryAnswerTooLarge(uri, MaxListSize);
+            if (await IsFirstFailureOfIntervalAsync("answer-too-large"))
+            {
+                logger.WarningOFormGalleryAnswerTooLarge(uri, MaxListSize);
+            }
 
             return null;
         }
@@ -348,7 +380,10 @@ public class OFormRequestManager(
         var data = await JsonSerializer.DeserializeAsync<OFromRequestData>(buffer, _options, cancellationToken);
         if (data?.Data == null)
         {
-            logger.WarningOFormGalleryNoList(uri);
+            if (await IsFirstFailureOfIntervalAsync("no-list"))
+            {
+                logger.WarningOFormGalleryNoList(uri);
+            }
         }
 
         return data;
@@ -365,8 +400,8 @@ public class OFormRequestManager(
     /// slower than the 200 ms wait still gets that "unavailable" until the check ends. Without a distributed cache
     /// (Redis off), a restart forgets it. With nothing known, a failed check means "unavailable" for up to 1 minute,
     /// kept by this process only, so one process that cannot reach the gallery never hides it from the others. A "true"
-    /// another process writes ends it earlier, unless both checked at almost the same moment: the backplane drops a
-    /// notification older than the local entry, and the "unavailable" stays for its minute. When the next check takes
+    /// another process writes ends it earlier, when its notification arrives through the backplane, also one that
+    /// arrives after this process stored its "unavailable". When the next check takes
     /// longer than 200 ms, a reader with an expired answer of the last day gets that answer while the check continues
     /// in the background, except an "available" a day after the gallery last answered, which that reader gets as
     /// "unavailable"; the check then caches what it gets, or, when it fails with "available" known for less than a day,
@@ -437,10 +472,42 @@ public class OFormRequestManager(
     /// </summary>
     public static string GetAvailabilityCacheKey(string listUrl)
     {
-        var normalizedUrl = Uri.TryCreate(listUrl, UriKind.Absolute, out var uri) ? uri.AbsoluteUri : listUrl;
-        var urlHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(normalizedUrl)));
+        return Tenant.DefaultTenant + "oformgalleryanswer" + HashOf(listUrl);
+    }
 
-        return Tenant.DefaultTenant + "oformgalleryanswer" + urlHash;
+    /// <summary>
+    /// The key of the mark that a failure of the gallery of one <paramref name="kind"/> was logged, for the list URL,
+    /// scoped to the installation.
+    /// </summary>
+    public static string GetFailureLogCacheKey(string listUrl, string kind)
+    {
+        return Tenant.DefaultTenant + "oformgallerylogged" + kind + HashOf(listUrl);
+    }
+
+    private static string HashOf(string listUrl)
+    {
+        var normalizedUrl = Uri.TryCreate(listUrl, UriKind.Absolute, out var uri) ? uri.AbsoluteUri : listUrl;
+
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(normalizedUrl)));
+    }
+
+    /// <summary>
+    /// Whether a failure of the gallery of this <paramref name="kind"/> is to be logged now: the first one, and then at
+    /// most once per <see cref="FailureLogInterval"/> for the installation, so a gallery that stays down does not log on
+    /// every creation from a template. Another kind of failure is logged at once. The mark lives in the cache shared by
+    /// the processes; two that fail at the same moment may both log, which costs one more warning.
+    /// </summary>
+    private async ValueTask<bool> IsFirstFailureOfIntervalAsync(string kind)
+    {
+        var key = GetFailureLogCacheKey(GetListUrl(), kind);
+        if ((await cache.TryGetAsync<bool>(key)).HasValue)
+        {
+            return false;
+        }
+
+        await cache.SetAsync(key, true, options => options.SetDuration(FailureLogInterval));
+
+        return true;
     }
 
     /// <summary>

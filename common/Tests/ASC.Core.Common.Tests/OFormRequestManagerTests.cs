@@ -797,6 +797,32 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task Get_GalleryKeepsFailing_LogsTheFailureOncePerKind()
+    {
+        // A gallery that keeps refusing is logged on the first creation from a template, not on every one; when it
+        // starts failing another way, that is logged at once. A 403 is not retried and does not open the circuit, so
+        // each creation reaches the gallery and meets the same failure again
+        var logs = new RecordingLoggerProvider();
+        var noList = false;
+        var gallery = Gallery(_ => Volatile.Read(ref noList)
+            ? StubResponse.Json(HttpStatusCode.OK, """{"error":"not the list"}""")
+            : new StubResponse(HttpStatusCode.Forbidden));
+        var manager = CreateManager(gallery.Url, loggerProvider: logs);
+
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+
+        Volatile.Write(ref noList, true);
+        await AssertGalleryUnavailableAsync(manager);
+        await AssertGalleryUnavailableAsync(manager);
+
+        gallery.CallCount.Should().Be(5);
+        logs.Entries.Count(entry => entry.Level == LogLevel.Warning && Regex.IsMatch(entry.Message, @"^The template gallery answered 403 to http\S+$")).Should().Be(1);
+        logs.Entries.Count(entry => entry.Level == LogLevel.Warning && Regex.IsMatch(entry.Message, @"^The template gallery answered http\S+ without its template list$")).Should().Be(1);
+    }
+
+    [Fact]
     public async Task Get_FileOfOneTemplateKeepsFailing_DoesNotOpenTheCircuitOfItsHost()
     {
         // The breaker of a host is shared by every portal of the process: one template whose file answers 5xx must not
@@ -1403,6 +1429,68 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task IsAvailableAsync_TrueOfAnotherNode_EndsTheLocalFalseBeforeItsMinute()
+    {
+        // A process that failed its check keeps "unavailable" to itself for a minute. When another process gets the
+        // list, its "available" goes into the distributed cache and its notification through the backplane ends that
+        // minute: the first process answers "available" at once, without asking the gallery again
+        var hub = new HeldBackplaneHub();
+        var distributed = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        using var first = CreateNodeCache(distributed, hub);
+        using var second = CreateNodeCache(distributed, hub);
+        var answering = false;
+        var gallery = Gallery(_ => Volatile.Read(ref answering)
+            ? StubResponse.Json(HttpStatusCode.OK, List)
+            : new StubResponse(HttpStatusCode.BadGateway));
+        var firstManager = CreateManager(gallery.Url, cache: first);
+
+        (await firstManager.IsAvailableAsync()).Should().BeFalse();
+
+        Volatile.Write(ref answering, true);
+        (await CreateManager(gallery.Url, cache: second).IsAvailableAsync()).Should().BeTrue();
+
+        (await firstManager.IsAvailableAsync()).Should().BeTrue();
+        gallery.CallCount.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_TrueOfAnotherNodeDuringTheLocalCheck_EndsItsFalseWhenItArrives()
+    {
+        // Two processes check at almost the same moment: the second gets the list and writes "available" while the
+        // first is still waiting for the gallery, which then fails it. Until the notification of the "available"
+        // arrives, the first process answers its own "unavailable"; when it arrives, after that "unavailable" was
+        // stored, it still ends it, and the first process answers "available" without asking the gallery again
+        var hub = new HeldBackplaneHub();
+        var distributed = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        using var first = CreateNodeCache(distributed, hub);
+        using var second = CreateNodeCache(distributed, hub);
+        var requests = 0;
+        var gallery = Gallery(_ => Interlocked.Increment(ref requests) == 1
+            ? new StubResponse(HttpStatusCode.BadGateway).After(TimeSpan.FromSeconds(2))
+            : StubResponse.Json(HttpStatusCode.OK, List));
+        var firstManager = CreateManager(gallery.Url, cache: first);
+        var token = TestContext.Current.CancellationToken;
+
+        hub.Hold = true;
+        var firstCheck = firstManager.IsAvailableAsync();
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+        while (Volatile.Read(ref requests) == 0 && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(20, token);
+        }
+
+        (await CreateManager(gallery.Url, cache: second).IsAvailableAsync()).Should().BeTrue();
+        (await firstCheck.WaitAsync(TimeSpan.FromSeconds(10), token)).Should().BeFalse();
+        (await firstManager.IsAvailableAsync()).Should().BeFalse();
+
+        hub.Hold = false;
+        await hub.DeliverHeldAsync();
+
+        (await firstManager.IsAvailableAsync()).Should().BeTrue();
+        gallery.CallCount.Should().Be(2);
+    }
+
+    [Fact]
     public async Task IsAvailableAsync_SlowFailedCheckWithUnavailableKnown_StaysOnTheNodeThatChecked()
     {
         // The same as above when the failed check outlasts the 200 ms the reader waits for and ends in the background:
@@ -1465,7 +1553,7 @@ public sealed class OFormRequestManagerTests : IDisposable
         throw new TimeoutException($"The gallery availability cache did not store {expected}; the last read gave {seen}.");
     }
 
-    private static FusionCache CreateNodeCache(IDistributedCache distributed)
+    private static FusionCache CreateNodeCache(IDistributedCache distributed, HeldBackplaneHub? backplane = null)
     {
         var cache = new FusionCache(new FusionCacheOptions
         {
@@ -1478,6 +1566,10 @@ public sealed class OFormRequestManagerTests : IDisposable
             }
         });
         cache.SetupDistributedCache(distributed, new FusionCacheSystemTextJsonSerializer());
+        if (backplane is not null)
+        {
+            cache.SetupBackplane(backplane.CreateBackplane());
+        }
 
         return cache;
     }
@@ -1630,6 +1722,107 @@ public sealed class OFormRequestManagerTests : IDisposable
         var exception = await Assert.ThrowsAsync<CustomHttpException>(() => manager.Get(1, ext));
 
         exception.StatusCode.Should().Be((int)HttpStatusCode.BadGateway);
+    }
+
+    /// <summary>
+    /// A backplane in memory shared by the node caches of a test. While <see cref="Hold"/> is set it keeps the
+    /// messages until <see cref="DeliverHeldAsync"/>, so a test can let a notification arrive after a later write.
+    /// </summary>
+    private sealed class HeldBackplaneHub
+    {
+        private readonly List<BackplaneSubscriptionOptions> _subscribers = [];
+        private readonly ConcurrentQueue<BackplaneMessage> _held = new();
+
+        public bool Hold { get; set; }
+
+        public IFusionCacheBackplane CreateBackplane()
+        {
+            return new Backplane(this);
+        }
+
+        public async Task DeliverHeldAsync()
+        {
+            while (_held.TryDequeue(out var message))
+            {
+                await SendAsync(message);
+            }
+        }
+
+        private async ValueTask SendAsync(BackplaneMessage message)
+        {
+            BackplaneSubscriptionOptions[] subscribers;
+            lock (_subscribers)
+            {
+                subscribers = [.. _subscribers];
+            }
+
+            foreach (var subscriber in subscribers.Where(subscriber => subscriber.CacheInstanceId != message.SourceId))
+            {
+                if (subscriber.IncomingMessageHandlerAsync is { } handleAsync)
+                {
+                    await handleAsync(message);
+                }
+                else
+                {
+                    subscriber.IncomingMessageHandler?.Invoke(message);
+                }
+            }
+        }
+
+        private sealed class Backplane(HeldBackplaneHub hub) : IFusionCacheBackplane
+        {
+            private BackplaneSubscriptionOptions? _options;
+
+            public void Subscribe(BackplaneSubscriptionOptions options)
+            {
+                _options = options;
+                lock (hub._subscribers)
+                {
+                    hub._subscribers.Add(options);
+                }
+
+                options.ConnectHandler?.Invoke(new BackplaneConnectionInfo(false));
+            }
+
+            public ValueTask SubscribeAsync(BackplaneSubscriptionOptions options)
+            {
+                Subscribe(options);
+
+                return ValueTask.CompletedTask;
+            }
+
+            public void Unsubscribe()
+            {
+                lock (hub._subscribers)
+                {
+                    hub._subscribers.Remove(_options!);
+                }
+            }
+
+            public ValueTask UnsubscribeAsync()
+            {
+                Unsubscribe();
+
+                return ValueTask.CompletedTask;
+            }
+
+            public void Publish(BackplaneMessage message, FusionCacheEntryOptions options, CancellationToken token = default)
+            {
+                PublishAsync(message, options, token).AsTask().GetAwaiter().GetResult();
+            }
+
+            public ValueTask PublishAsync(BackplaneMessage message, FusionCacheEntryOptions options, CancellationToken token = default)
+            {
+                if (hub.Hold)
+                {
+                    hub._held.Enqueue(message);
+
+                    return ValueTask.CompletedTask;
+                }
+
+                return hub.SendAsync(message);
+            }
+        }
     }
 
     /// <summary>
