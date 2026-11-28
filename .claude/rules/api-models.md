@@ -18,6 +18,17 @@ can read or set.
 This file covers which types an endpoint may take and return. How their texts read is
 `.claude/rules/openapi-dto-docs.md` (properties) and `.claude/rules/openapi-endpoint-docs.md` (operations).
 
+## Checklist
+
+- No type in the request or response graph, at any depth, is a setting, entity, core/foreign class or service (§1)
+- The request DTO carries only caller-chosen fields; the controller sets the server-owned values itself (§2)
+- A server-owned field kept for compatibility is documented as ignored, and nothing reads it (§2)
+- A class only the response reads is renamed `<Entity>Dto` and moved into `ApiModels`, not copied (§3)
+- A copy is Mapperly (`Target` to a DTO, `Source` from a request); lookups and checks go in a `*DtoHelper` (§3)
+- A person in a new endpoint is an `EmployeeDto`/`EmployeeFullDto`, never `UserInfo` or `PortalUserDto` (§3)
+- Bound model `<Action><Entity>RequestDto`, nested body `<Action><Entity>Request`, result `<Entity>Dto` (§4)
+- A moved endpoint keeps its JSON field for field, and the OpenAPI diff shows only the intended changes (§5)
+
 ## 1. The boundary
 
 Everything a controller action sends or receives is an **API model**: a class in the `ApiModels`

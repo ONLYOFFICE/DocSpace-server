@@ -4733,6 +4733,21 @@
         "additionalProperties": false
       }
     },
+    "aiSettingsGetPluginAgent": {
+      "response": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "description": "Whether the chat offers the caller its plugin tools."
+          }
+        },
+        "required": [
+          "available"
+        ],
+        "additionalProperties": false
+      }
+    },
     "aiTemplatesList": {
       "response": {
         "type": "object",

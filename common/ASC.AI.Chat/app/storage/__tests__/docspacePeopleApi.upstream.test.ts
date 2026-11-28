@@ -36,52 +36,14 @@ import type { JsonBodyType } from "msw";
 import { describe, expect, it } from "vitest";
 import { http, HttpResponse, useUpstream } from "../../__tests__/helpers/upstream.js";
 import { DocspaceApiHttpError } from "../docspaceFilesApi.js";
-import { getSelf, isPortalAdmin, mayCreateAiRooms } from "../docspacePeopleApi.js";
+import { getSelf, getSelfId, isPortalAdmin, mayCreateAiRooms } from "../docspacePeopleApi.js";
 import { proxyBaseUrl } from "../httpClient.js";
 import { inRequest } from "../../__tests__/fixtures/filesApi.js";
+import { selfDto } from "../../__tests__/fixtures/peopleApi.js";
 
 // The People API client over a stubbed network, with the real httpClient.js and requestContext.js.
 const upstream = useUpstream();
 const SELF = `${proxyBaseUrl}/api/2.0/people/@self`;
-
-/**
- * `EmployeeFullDto` of a User as `GET api/2.0/people/@self` answers it
- * (common/ASC.Api.Core/Model/EmployeeFullDto.cs, PeopleController.SelfAsync), in the envelope.
- */
-function selfDto(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  return {
-    response: {
-      firstName: "Jane",
-      lastName: "Doe",
-      userName: "jane",
-      email: "jane@portal.example",
-      status: 1,
-      activationStatus: 1,
-      department: "",
-      groups: [],
-      isAdmin: false,
-      isRoomAdmin: false,
-      isLDAP: false,
-      listAdminModules: [],
-      isOwner: false,
-      isVisitor: false,
-      isCollaborator: true,
-      cultureName: "en-US",
-      isSSO: false,
-      quotaLimit: -1,
-      usedSpace: 0,
-      hasPersonalFolder: true,
-      id: "a0d6bc40-2b3c-4c1a-9a7d-1f1b2c3d4e5f",
-      displayName: "Jane Doe",
-      hasAvatar: false,
-      isAnonim: false,
-      ...overrides,
-    },
-    count: 1,
-    status: 0,
-    statusCode: 200,
-  };
-}
 
 const answer = (body: JsonBodyType) => upstream.use(http.get(SELF, () => HttpResponse.json(body)));
 
@@ -92,6 +54,26 @@ const failure = (p: Promise<unknown>): Promise<unknown> =>
     },
     (e: unknown) => e,
   );
+
+describe("getSelfId", () => {
+  it("reads the caller's id", async () => {
+    answer(selfDto());
+
+    await expect(getSelfId()).resolves.toBe("a0d6bc40-2b3c-4c1a-9a7d-1f1b2c3d4e5f");
+  });
+
+  it.each([undefined, null, "", 5])("refuses an answer whose id is %j", async (id) => {
+    answer(selfDto({ id }));
+
+    expect(await failure(getSelfId())).toBeInstanceOf(UpstreamShapeError);
+  });
+
+  it("passes on a refusal of the portal", async () => {
+    upstream.use(http.get(SELF, () => HttpResponse.json({}, { status: 500 })));
+
+    expect(await failure(getSelfId())).toMatchObject({ status: 500 });
+  });
+});
 
 describe("getSelf", () => {
   it("reads the role flags of the caller with the caller's credentials", async () => {

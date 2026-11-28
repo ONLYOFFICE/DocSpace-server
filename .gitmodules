@@ -46,3 +46,6 @@
 	path = sdk/docspace-api-sdk-ruby
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-ruby.git
 	branch = release/v4.1.0
+[submodule "common/ASC.AI.Chat/skills/agent-skills"]
+	path = common/ASC.AI.Chat/skills/agent-skills
+	url = https://github.com/ONLYOFFICE/agent-skills.git

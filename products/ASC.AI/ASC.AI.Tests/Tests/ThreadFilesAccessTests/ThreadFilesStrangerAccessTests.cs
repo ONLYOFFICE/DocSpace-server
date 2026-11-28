@@ -80,6 +80,22 @@ public class ThreadFilesStrangerAccessTests(AspireAppFixture fixture) : ThreadFi
     [InlineData(Stranger.ProjectMember)]
     [InlineData(Stranger.ProjectOwner)]
     [InlineData(Stranger.PortalAdmin)]
+    public async Task VersionInfo_SomeoneElsesArtifact_Returns403(Stranger stranger)
+    {
+        var artifact = await CreateArtifactAsync();
+
+        await AuthenticateAsync(stranger, artifact.ProjectId);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await FilesApi.GetFileVersionInfoAsync(
+            artifact.File.Id,
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Theory]
+    [InlineData(Stranger.ProjectMember)]
+    [InlineData(Stranger.ProjectOwner)]
+    [InlineData(Stranger.PortalAdmin)]
     public async Task Copy_SomeoneElsesArtifact_Returns403(Stranger stranger)
     {
         var artifact = await CreateArtifactAsync();

@@ -91,8 +91,8 @@ here: these are Markdown files).
 - **A row of `deviations.md`**: move it to the "Closed" table with `FIXED <commit>`, or `FIXED (uncommitted)`
   when the user has not committed yet, and a one-line note of what the server does now.
 - **The spec's own `verification.md`**: set the same row of its "Suspected defects" section to FIXED, and turn
-  the claim rows the test cites into `TEST-CONFIRMED` with the test's `file:line` (no run mark: the next full
-  run writes it).
+  the claim rows the test cites into `TEST-CONFIRMED`, citing the test by name, `File.cs::Method` (no run
+  mark: the next full run writes it).
 - **The requirement**: the spec described the server without the defect, so add the behaviour that is now
   true to the governing requirement or scenario of `spec.md`, in the API terms that file uses. Run
   `openspec validate --specs --no-interactive`.

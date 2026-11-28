@@ -166,6 +166,7 @@ describe("outside a request", () => {
     expect(ctx.getAnalyzeEntryIds()).toEqual([]);
     expect(ctx.getRoundProfileId()).toBeUndefined();
     expect(ctx.getRoundThreadId()).toBeUndefined();
+    expect(ctx.getRoundSignal()).toBeUndefined();
     expect(ctx.getRoundAttachmentIds()).toEqual([]);
     expect(ctx.getCustomServerNames()).toEqual([]);
     expect(ctx.getKnowledgeRoomIds()).toEqual([]);
@@ -186,6 +187,7 @@ describe("outside a request", () => {
     ctx.setAnalyzeEntryIds(["1"]);
     ctx.setRoundProfileId("p");
     ctx.setRoundThreadId("t");
+    ctx.setRoundSignal(new AbortController().signal);
     ctx.setRoundAttachmentIds(["r"]);
     ctx.setCustomServerNames(["s"]);
     ctx.setKnowledgeRoomIds([1]);
@@ -202,6 +204,7 @@ describe("outside a request", () => {
     expect(ctx.getAnalyzeEntryIds()).toEqual([]);
     expect(ctx.getRoundProfileId()).toBeUndefined();
     expect(ctx.getRoundThreadId()).toBeUndefined();
+    expect(ctx.getRoundSignal()).toBeUndefined();
     expect(ctx.getRoundAttachmentIds()).toEqual([]);
     expect(ctx.getCustomServerNames()).toEqual([]);
     expect(ctx.getKnowledgeRoomIds()).toEqual([]);
@@ -306,6 +309,15 @@ describe("within a request", () => {
       ctx.setRoundThreadId("t1");
       ctx.setRoundThreadId("t2");
       expect(ctx.getRoundThreadId()).toBe("t1");
+    });
+  });
+
+  it("keeps the first signal of the round", () => {
+    within({}, () => {
+      const first = new AbortController().signal;
+      ctx.setRoundSignal(first);
+      ctx.setRoundSignal(new AbortController().signal);
+      expect(ctx.getRoundSignal()).toBe(first);
     });
   });
 

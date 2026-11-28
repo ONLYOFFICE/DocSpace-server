@@ -43,7 +43,7 @@ import {
   getFolderInfo,
   getMyDocumentsFolderId,
 } from "../docspaceFilesApi.js";
-import { getSelf } from "../docspacePeopleApi.js";
+import { addWebPlugin, getSelf, getSelfId } from "../docspacePeopleApi.js";
 
 // A refused answer of the Files or People API is left with no unread body: a body nobody reads
 // keeps its connection out of the pool until the response is collected (ts-ai-style.md,
@@ -62,6 +62,8 @@ const CALLS: Readonly<Record<string, () => Promise<unknown>>> = {
   getFileInfo: () => getFileInfo("7"),
   getMyDocumentsFolderId: () => getMyDocumentsFolderId(),
   getSelf: () => getSelf(),
+  getSelfId: () => getSelfId(),
+  addWebPlugin: () => addWebPlugin("plugin.zip", new Uint8Array([1])),
 };
 
 const rows = Object.keys(CALLS).flatMap((name) =>

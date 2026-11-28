@@ -98,6 +98,17 @@ The component name is the SDK model name. It comes from `OpenApiSchemaId.Of`
 for a body — the envelope filter would invent `…ResponseWrapper`/`…WrapperWrapper`. The attribute changes
 the schema name only, never the JSON, and renames the model in every SDK.
 
+## Checklist
+
+- Every property and enum member `<summary>` gives the meaning, the source of a valid value or its format (§3.1)
+- A switch says what both values do, a bound what it means; a date carries the portal's offset, never UTC (§3.1)
+- Every scalar property has a realistic `<example>`, and the class-level JSON block agrees (§3.2)
+- No text restates type, nullability, enum members the schema shows, range numbers, default or nested fields (§3.3)
+- What the handler does with the value is in the operation's description, not on the property (§3.3)
+- A response property says what `null` and an empty collection mean and when it is filled (§3.4)
+- Before a shared type's property changed, every operation that references it was checked (§3.5)
+- XML tags are well-formed and spelled right; a `<ssummary>` is silent (Definition of done)
+
 ## Definition of done
 
 - [ ] Every property and enum member answers §3.1 and repeats nothing the schema prints (§3.3).

@@ -14,6 +14,17 @@ none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it di
 (`ts-ai-style.md`) apply to tests too; ESLint leaves them `any`, `!`, `fetch`, `process.env` and a
 `.catch()` that answers a constant (`no-restricted-syntax` is off there). Cite this file as `[ts-ai-tests.md §N]`.
 
+## Checklist
+
+- A decision the service makes is in vitest; a change of a route's contract is also in `ASC.AI.Tests` (§1)
+- Only the boundary is mocked, through the helpers table; a stubbed .NET route names its C# action (§2)
+- The fix's test was seen red with the fix taken out; a tracked defect's number is in its name (§3, §4)
+- Assertions cover status, body, upstream calls made or not, and what the answer must not contain (§3)
+- No network or DNS; every wait runs on fake timers; module state is re-imported between tests (§5)
+- Each new route, absent-read, secret-carrying answer, multi-step write and config value has its §6 rows (§6)
+- A new upstream mapper has a `CONTRACTS` row; a constant standing for a C# enum member has an enum row (§8)
+- A behaviour change updates its test in the same commit; coverage thresholds stay, no `v8 ignore` added (§9)
+
 ## 1. Which suite proves what
 
 - **vitest**: a decision the service makes by itself: what a body is refused for, how an upstream
@@ -48,6 +59,8 @@ none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it di
   | the chat context aggregate and a primed round | `fixtures/chatContext.ts` (`chatContextDto`, `inRound`) | |
   | the properties of a C# DTO class, the members of an enum, the fields a Node function reads | `readClass`, `readEnum`, `readsOf` in `helpers/csharp.ts` | |
   | `ProfileDto` and a stubbed model provider | `fixtures/providers.ts` (`profileDto`, `useProfile`, `useProvider`) | |
+  | `EmployeeFullDto` as `GET people/@self` answers it | `fixtures/peopleApi.ts` (`selfDto`) | |
+  | the sandbox gateway of the plugin agent and of the chat's sandbox tools: files in memory, commands answered by `run`, a method made to fail | `fakeGateway(upstream)`, `refusedWith`, `chunked`, `frame` in `sandboxGateway.ts` | msw |
   | the whole app: parsers, gate, routes, 404 | `request(createApp())` | supertest |
   | waits between polls and retries | `useFastTimers()` in `time.ts` | vitest fake timers |
   | an upstream that never answers, and what the call comes to at its timeout | `stalled` in `upstream.ts`, `afterUpstreamTimeout(run)` in `time.ts` | msw, vitest fake timers |
@@ -135,10 +148,10 @@ none of the 35 fixes before vitest arrived brought one, 30 of the 39 after it di
 
 ## 7. Tests cited by the specs
 
-- A `verification.md` row may cite a vitest test as `file.test.ts:line`. It then says "at unit
-  level": the status TEST-CONFIRMED is defined there as a .NET test, and the run marks are written
+- A `verification.md` row may cite a vitest test by its file and title, `file.test.ts` "<test title>",
+  not by line (`claims.md` §4). It then says "at unit level": the status TEST-CONFIRMED is defined there as a .NET test, and the run marks are written
   from the .NET run only, so a vitest citation reads `[run: NO-LINK]`.
-- A commit that moves the cited lines updates the rows (`claims.md` §4).
+- A row that still cites lines of a file the branch moves is updated in the same branch (`claims.md` §4).
 
 ## 8. The contract with the .NET services
 

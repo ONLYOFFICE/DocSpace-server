@@ -13,6 +13,28 @@ Applies to `products/*/Tests/`, `products/ASC.AI/ASC.AI.Tests/`, `web/ASC.Web.Ap
 (`csharp-style.md`) apply here too — including the mandatory `dotnet format style` check
 after editing any `.cs` file.
 
+## Checklist
+
+- Proven red with `prove-red.sh`, its last line in the commit; if impossible here, "not proven red" and why (Able to fail)
+- A test that pins a value is red under `--mutate` one step on each side, or the texts state a range (Able to fail)
+- It asserts the effect (letters, rows, stored state), not that nothing threw or an empty snapshot (Able to fail)
+- Only what lies outside the process is stubbed, at the HTTP boundary, as the real contract says (Able to fail)
+- A right is checked with the lowest role holding it; routes, counts and messages compared exactly (Able to fail)
+- A decision the stand cannot reach has a unit test of its own; one of the AppHost configuration, which no unit-test project reaches, is kept a function of its inputs and named "not proven" in the commit (`failure-paths.md` §11)
+- A test that the code uses only one client, host or name makes every other name fail, not only the default one (Able to fail)
+- Async writes are polled on a deadline, returning the last state, no timeout token on the call (Has to be polled)
+- A failure is asserted on the `ApiException`'s `ErrorCode` and `ErrorContent!`, never `?.` (Asserting failures)
+- Calls go through the SDK; raw HTTP only for the listed carve-outs (Endpoints the SDK does not expose)
+- SDK signatures are read from `sdk/docspace-api-sdk-csharp`, never guessed or taken from the NuGet cache (The SDK is the source of truth)
+- What is not specific to one product stays in `ASC.Tests.Common`: a suite extends the base instead of copying it; an AI-suite class cleans up in a `DisposeAsync` override that calls base in a `finally` (The shared harness)
+- Each test works on the portal of its own `BaseTest.InitializeAsync` and shares no state with other tests (One portal per test)
+- A role is switched by authenticating the shared client as an invited user (`InviteContact`, `Authenticate`); a guest comes from `BaseTest.InviteGuest`, never `InviteContact` (Roles)
+- An invitation's access is one `FileSecurity.AvailableRoomAccesses` allows for that room and subject type, and `RoomManager` goes to a `RoomAdmin` only (Access-level matrices)
+- All suites of one feature are in its own folder (One feature, one folder)
+- An integration class covers one endpoint and stays under ~24 cases, `InlineData` rows and `MemberData` sizes counted (Class size)
+- A test of an open bug carries `[Trait("Bug", "N")]`, asserts the intended behaviour and is red, never skipped (Known bugs)
+- A payment test past the tariff check is in `ASC.Web.Api.Billing.Tests`, scripts only its own portal and asserts what the stack did (Payment services)
+
 ## The shared harness lives in `common/Tests/ASC.Tests.Common`
 
 Everything that is not specific to one product is there, and every suite references it:
@@ -141,6 +163,26 @@ test calls what the change adds, the whole change cannot be taken away (exit 3):
 only the behavioural hunk. When the run is impossible here (environment, cost), the commit says "not
 proven red" and why.
 
+A test that pins a value — a threshold, a limit, a duration, a count — is proven red by a mutation of
+that value by one step on each side, not by taking the change away: two runs of `--mutate`, each
+expected red. A test that stays green under one of them pins a range, and the texts say the range
+(`claims.md` §6). The example mutates a threshold of 5 in a service one step down and one step up
+(`Foo.cs` and `FooTests` stand for the real names):
+
+```bash
+.claude/scripts/prove-red.sh --mutate 'products/ASC.Files/Core/Services/Foo.cs:MinimumThroughput = 5=>MinimumThroughput = 4' --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*FooTests"
+.claude/scripts/prove-red.sh --mutate 'products/ASC.Files/Core/Services/Foo.cs:MinimumThroughput = 5=>MinimumThroughput = 6' --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*FooTests"
+```
+
+A text that holds `=>` itself (a lambda, an expression body) takes the form that reads OLD and NEW
+whole: `--mutate products/ASC.Files/Core/Services/Foo.cs --old 'Threshold => 5' --new 'Threshold => 4'`,
+then `--new 'Threshold => 6'`.
+
+A test that asserts that the code uses only one client, host or name ("the check asks with the
+client without cookies") makes every other name fail, a deny-all default, not only the default one.
+Seen in review: such a test made only the default client fail, so a switch to any other named
+client kept it green; the next round found the gallery's own client still passing.
+
 What leaves a test unable to fail:
 
 - **Asserting that nothing threw.** Assert the effect instead: letters (Mailpit, `RecordingEventBus`),
@@ -183,23 +225,8 @@ The test also has to fail only for a reason:
 
 ### A decision the stand cannot reach
 
-"Not proven red: needs an Enterprise stack" is where later reviews kept finding the bugs: in one
-branch three fix commits wrote it, and the next reviews found the decisions behind it wrong (a
-wizard's fallback, an expired-trial check). A stand that cannot reach the path does not excuse the
-decision from a test:
-
-- Move the decision into a function of its inputs — the quota, the tariff end, the last answer
-  known, now — with no I/O, and call it where the decision was. The unit-test projects are
-  `common/Tests/ASC.Core.Common.Tests`, `common/Tests/ASC.Data.Backup.Core.Tests` and
-  `common/Tests/ASC.Site.Core.Tests` (the Site.Core host only, which no AppHost profile starts); the
-  product and Web suites are Aspire integration suites. So the function goes into a library a unit-test
-  project references (`ASC.Core.Common`, `ASC.Files.Core` or `ASC.Api.Core` for `ASC.Core.Common.Tests`),
-  also when the decision is made in Web.Api or Web.Studio, which no unit-test project reaches.
-  The integration test stays for the wiring; the unit test covers the decision with its boundaries:
-  the end yesterday, today and later (`failure-paths.md` §9), an unknown answer next to a refusal
-  (§4), each cell of a multi-step table the stand cannot reach (§10).
-- Prove that unit test red with `prove-red.sh` like any other.
-- "Not proven" is left for what remains after that — the wiring itself — and the commit names it.
+It gets a unit test of its own: `failure-paths.md` §11, which loads with the product code where the
+decision is written.
 
 ## Endpoints the SDK does not expose
 

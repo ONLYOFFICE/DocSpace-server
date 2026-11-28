@@ -1,6 +1,6 @@
 ---
 name: review-branch
-description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) and its OpenSpec specs for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation/OpenSpec reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new; the author's self-review while working; and the hand-over check of a finished branch (two independent passes, scan.py --gate, the Hand-over block the reviewer checks first). USE FOR: review the branch, check my branch before review, self-review, check it before I hand it over, hand-over check, look at the changes in a branch, does the branch follow the rules, does the branch break the specs, the fixes were merged - check them, re-check once more, check the fixes against the review file, find all the findings, why does every run find something new - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request, except after a self-review or a hand-over check), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
+description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) and its OpenSpec specs for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation/OpenSpec reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new; the author's self-review while working; and the hand-over check of a finished branch (one pass by default, two independent passes for a large branch, the author's batch check, scan.py --gate, the Hand-over block the reviewer checks first). USE FOR: review the branch, check my branch before review, self-review, check it before I hand it over, hand-over check, look at the changes in a branch, does the branch follow the rules, does the branch break the specs, the fixes were merged - check them, re-check once more, check the fixes against the review file, find all the findings, why does every run find something new - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request, except after a self-review or a hand-over check), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
 ---
 
 # Review a branch against the repo rules
@@ -29,17 +29,22 @@ with the rest of the report.
   "self-review", "check my branch". It runs when the user asks for it: a run of this skill with its
   reviewer agents is the user's call. Run it as a first review, against the base the reviewer will
   use, with `--worktree` while the work is uncommitted. Only the end differs: §8 "Self-review". A
-  finished branch gets the hand-over check below instead; when each of the two, and a §7 re-check,
-  runs or is offered is `.claude/rules/fixing-findings.md` §6, the one schedule of all three.
+  finished branch gets the hand-over check below instead; when each of the two, the author's batch
+  check and a §7 re-check run or are offered is `.claude/rules/fixing-findings.md` §6, the one
+  schedule of all of them.
 - **Hand-over** — the author's check of a finished branch before it goes to the reviewer: "check it
   before I hand it over", or a yes to the hand-over check `fixing-findings.md` §6 has the author
-  offer. It runs the whole first review once (§1–§6: the rules A, the matrices A0 and M, C, F, S, the
-  build) and the lenses B, D, E and G as §9's two independent passes on one frozen state, with the
-  estimate of what is still unfound. Then the self-review's end (§8 "Self-review": the union fixed
-  in one batch, §7 on it), `scan.py --gate`, and the Hand-over block (§8) for the PR description.
-  One pass finds a sample, so the reviewer's own pass keeps finding what a single pass of the author
-  skipped; two passes and the estimate are what make a clean hand-over likely. Its cost is §9's
-  (two to three times a review) plus the §7 re-check: say so when offering it. Uncommitted work is
+  offer. Two depths, both ending with the self-review's end (§8 "Self-review": all findings fixed in
+  one batch, the batch check on it), `scan.py --gate`, and the Hand-over block (§8):
+  - **light**, the default: the whole first review once (§1–§6: every lens, the matrices A0 and M,
+    the build). It costs about one review.
+  - **full**, for a branch of more than ~1 500 added product lines or one with a multi-step operation
+    (`failure-paths.md` §10), or when the user asks: A, A0, the matrices M, C, F, S and the build once,
+    and the lenses B, D, E and G as §9's two independent passes on one frozen state, with the estimate
+    of what is still unfound. It costs §9's two to three times a review: say so when offering it.
+  One pass finds about 55–60% of what is there (`fixing-findings.md` §6), so the reviewer's own pass
+  keeps finding what the author's skipped; on a large branch two passes and the estimate are what
+  make a clean hand-over likely. Uncommitted work is
   frozen as the tree the scan prints (`tree:`, the tree `git commit -a` would record, built in a
   temporary copy of the index); the block records that tree, and a commit of exactly that tree is the
   checked state. Until it is committed, the tree object exists only in the clone that ran the check.
@@ -48,12 +53,39 @@ One review covers **one sha**. While fix rounds keep landing, a fresh first revi
 branch finds new things every time for two reasons that look the same in the report: bugs in the
 code the fix commits just added, and old code the earlier runs did not reach. §4 tells them apart
 (origin); the fix is the process, not more reviewers: a full pass on a frozen sha, all its findings
-fixed in one batch, then §7 on the diff of that batch only.
+fixed in one batch, the author's batch check on it (`fixing-findings.md` §6), then §7 on the diff of
+that batch only. A review or re-check with no blocker and no rule violation ends the review (§8; a
+re-check once its fresh reviewer has run, §7 point 3).
 
 Arguments the user may pass in words: a branch other than the checked-out one, a base, "including
 uncommitted changes" (→ `--worktree`), "run the tests" (→ §6 runs, not just proposes).
 
-## Dependencies — none of them is allowed to stop the review
+### Review without memory
+
+On the receiving developer's first review, run the §3 correctness pass in an isolated session.
+For the author's light hand-over, isolate its one pass; for the full one, both §9 deep passes, each
+from the other too. For a §7 re-check on either side, isolate the fresh reviewer of §7 point 3. These
+are the passes the schedule already has (`fixing-findings.md` §6); isolation adds none.
+
+- The coordinator checks the Hand-over block when there is one, fixes the base and SHA/tree, and gives the reviewer
+  the scope, applicable rules, requirements, code, diff and access to tests. For a re-check, give
+  the batch boundary and let the reviewer follow callers and failure paths beyond the changed files.
+- Start a fresh worker with no inherited conversation or summaries: a subagent of the Agent tool,
+  given only its brief. Keep prior review files, PR discussion, author responses, Hand-over block,
+  previous coverage and other reviewers' output out of its inputs and searches, and tell it not to
+  read memory files. A subagent still receives the user's memory index and `CLAUDE.md`. `claude -p
+  --bare` would leave the memory out, but it also drops LSP and `CLAUDE.md` and needs an API key, so
+  this skill does not use it: the pass counts as isolated, and Coverage says "subagent, memory index
+  injected".
+  Repository rules and product specs remain sources for the review.
+- Have the reviewer return findings, evidence and coverage for that state before reconciliation.
+  The coordinator then checks earlier IDs, base debt and accepted limitations, merges duplicates
+  and follows up on uncovered paths. A familiar symptom with a new failing scenario still gets verified.
+- Record the SHA/tree, scope, isolation method and uncovered paths in Coverage. When no fresh worker
+  can be started (no Agent tool), the pass is pending under "Not verified", and the Hand-over block
+  names it; the review and the hand-over go on with that line (`fixing-findings.md` §6).
+
+## Dependencies - none of them is allowed to stop the review
 
 Some tools this skill uses are optional on a given machine. A missing one degrades one step; it
 never aborts the review. Every degradation is named in the report header ("performance: manual
@@ -89,8 +121,9 @@ merges of the base into the branch do not show up as branch changes. Read its he
 
 - **The Hand-over block, first.** Reviewing someone else's branch (a first review or a re-check),
   read the Hand-over block (§8) of the PR description, or of the message that handed the branch
-  over, before anything else. When the description cannot be reached (no CLI for the git host at
-  hand), ask the user for the block.
+  over, before anything else. The author writes it into the body of the branch's last commit too:
+  when the description cannot be reached (no CLI for the git host at hand), read it there
+  (`git log -1 --format=%B <branch>`), and ask the user only when neither has it.
   - **No block** (none given, or its check declined): review the branch as usual. The report header
     says "no hand-over check", and the report has no "Missed by the hand-over check" section. A
     colleague who does not run this skill hands branches over this way.
@@ -106,13 +139,16 @@ merges of the base into the branch do not show up as branch changes. Read its he
       code;
     - the block reports no open blocker or rule violation.
 
+    Check the isolation record too. If an author's pass is pending or a legacy block omits
+    the method, record the author-side gap. The receiving developer runs their own isolated pass.
+
     When one of these fails, the block promises a state the branch is not in: say so in one line and
     stop; the branch goes back to the author without a review, unless the user asks to review it
     anyway, and then the report header names the gap. This is stricter than for a branch with no
     block on purpose: a block that fails these checks claims a state the branch is not in, while a
     missing one claims nothing. What the author does depends on which check failed: for another tree,
-    renew the block (§8 "Hand-over block": the re-check of the change since the final tree, then the
-    gate); for a failing gate or an open blocker or rule violation, fix it (`fixing-findings.md` §11)
+    renew the block (§8 "Hand-over block": the batch check of the change since the final tree); for a
+    failing gate or an open blocker or rule violation, fix it (`fixing-findings.md` §11)
     and write a new block. Removing the block instead is open only when nothing in it was open.
 
   The block holds counts and coverage, and no finding except the accepted ones under Known
@@ -144,9 +180,12 @@ merges of the base into the branch do not show up as branch changes. Read its he
   commits the branch; afterwards the branch is checked against what changed (`fixing-findings.md`
   §6), not again in full. Reviewing someone else's branch from its own checkout, the skill and the
   scan that load are the branch's copies: read the base's rules and this file as
-  `git show "<base>:./<path>"`, and run the base's scan saved to the scratchpad
-  (`git show "<base>:./.claude/skills/review-branch/scan.py" > <scratchpad>/scan.py`, then
-  `python <scratchpad>/scan.py` from the repo root). Write the `:./` form: in Git Bash a
+  `git show "<base>:./<path>"`, and run the base's scan saved to the scratchpad with the text check
+  its `--gate` runs (`git archive "<base>" .claude/skills/review-branch .claude/skills/openapi-desc-opt |
+  tar -x -C <scratchpad>` - through a pipe, since Git Bash's tar reads a `C:` archive name as a remote host - then
+  `python <scratchpad>/.claude/skills/review-branch/scan.py` from the repo root). A scan saved without
+  `openapi-desc-opt` next to it does not borrow the branch's copy: its gate fails on the texts of the
+  changed operations. Write the `:./` form for `git show`: in Git Bash a
   `<base>:<path>` argument with a `/` on both sides of the colon is rewritten into a Windows path list,
   `git show` fails and the redirect leaves an empty file. Name the gap in the report header — for
   someone else's branch it is a note, not a finding.
@@ -177,22 +216,27 @@ is read in context. What each section is for:
 
 | Section | Turns into a finding when |
 |---|---|
+| Changes since the previous review | `--since-review` only, not a finding by itself: the files of the branch's own diff against the merge-base that changed since the reviewed commit, the batch §7 point 2 reviews, and a file the branch changed at the review and has undone since, marked so. Files a merge of the base brought in are counted, not listed; a file both the base and the branch changed is listed |
 | Rule signals | the hit really breaks the cited rule in that place (a `RemoveByTagAsync` on the *default* FusionCache is fine; on the `"memory"` one it is a bug). `[security]` and `[performance]` hits feed reviewers E and D |
 | Line-ending flips | always report: a whole-file LF↔CRLF flip turns 30 real lines into a 8 000-line diff, kills blame and conflicts every parallel branch. Fix = separate normalization commit or revert in this branch. Check first that the base itself did not normalize the file |
 | `git diff --check` | trailing whitespace / conflict markers in hand-written code (generated `*.Designer.cs` — ignore) |
 | Migrations | §3 C |
-| API contract and SDK | §3 C |
+| API contract and SDK | §3 C. A response code or an operation removed from a `json/*_2.0.json` is a contract change: a finding unless the endpoint really cannot return that code any more. A document the scan could not compare is named "not compared": read its diff by hand |
 | Localized resources (.resx) | §3 F. `!! placeholder mismatch` is a finding once you have looked at the value (a tag lost or renamed in a translation renders as literal `$Tag` or as nothing); "neutral changed, translation untouched" is one only if the commits do not declare it ("English only for now") |
-| Tests | §3 A3 and §6 |
+| Tests | §3 A3 and §6. A fix commit (its subject starts with "fix") that changes product `.cs` with neither a "RED as expected" line nor a "not proven" line is a remark when the fix changes behaviour (a typo fix is not one): the batch check proves a behavioural fix red or says why not (`fixing-findings.md` §6) |
 | Changed endpoints | not a finding by itself: the rows of the cross-cutting matrix (§3 A0) |
-| OpenSpec | the requirements reviewer S reads (§3 S). `!! ... openspec/ untouched` is not a finding by itself: it becomes one when a listed requirement no longer holds on the branch. The `!!` format lines are findings once read: a requirement the branch adds at 500 characters or more, one it brings to 500 or more, or one it makes longer while it is already over (`openspec/config.yaml` asks for under 500), and a ticked task that says it is blocked or not done (`claims.md` §4); with `--worktree` they cover untracked spec files too. A requirement is compared with every body it had at the merge-base under its name or the name a RENAMED pair gives — in the same file, its old path and, for a delta (active or archived), its capability's spec; REMOVED sections are not measured. A requirement with no such old body whose body equals that of a requirement gone from the same file is a rename without a pair, so unchanged; a requirement moved to another spec file is measured as new. An edit of a requirement that was already that long and did not grow is a reminder line without `!!`: not a finding, a note the author may act on. `verification.md rows citing changed files` is a list to check: each row whose lines moved or whose behaviour changed is stale. It finds citations by path (a `.claude/` one and a spec file included), alias, file name (marked when several files share it, so the row may cite another one) and folder alias; a row citing a changed file in another form is the reviewer's to find. The first 100 entries (a changed file in one `verification.md`) and 8 line numbers each are printed, all with `--full` |
+| OpenSpec | the requirements reviewer S reads (§3 S). `!! ... openspec/ untouched` is not a finding by itself: it becomes one when a listed requirement no longer holds on the branch. The `!!` format lines are findings once read: a requirement the branch adds at 500 characters or more, one it brings to 500 or more, or one it makes longer while it is already over (`openspec/config.yaml` asks for under 500), and a ticked task that says it is blocked or not done (`claims.md` §4); with `--worktree` they cover untracked spec files too. A requirement is compared with every body it had at the merge-base under its name or the name a RENAMED pair gives — in the same file, its old path and, for a delta (active or archived), its capability's spec; REMOVED sections are not measured. A requirement with no such old body whose body equals that of a requirement gone from the same file is a rename without a pair, so unchanged; a requirement moved to another spec file is measured as new. An edit of a requirement that was already that long and did not grow is a reminder line without `!!`: not a finding, a note the author may act on. `verification.md rows citing changed files` is a list to check: each row whose lines moved or whose behaviour changed is stale; a row that cites by name (`File.cs::Method`, `claims.md` §4) is listed as stale when the file's code no longer has that name (comments do not count; a renamed file is read at its new path), and otherwise as a row to re-read when the member's behaviour changed. It finds citations by path (a `.claude/` one and a spec file included), alias, file name (marked when several files share it, so the row may cite another one) and folder alias; a row citing a changed file in another form is the reviewer's to find. The first 100 entries (a changed file in one `verification.md`) and 8 line numbers each are printed, all with `--full` |
+| verification.md line citations | each citation of a changed C# file (a path, a file name, `:N` after it, `` `File.cs` `Member` (N) ``): a range that starts on a blank line, a lone brace or inside a statement, or ends on a blank line, an opening brace, the next member's comment or attribute, or inside a statement; a backticked name in the parenthetical right after it that is not in the cited lines; and, for a row the branch left alone, a cited block that moved (with the new lines) or that the branch edited (a hint). What fails the same way at the merge-base is listed as base debt (§4). The `!!` lines are findings once read (`claims.md` §4, `fixing-findings.md` §12) and fail the gate |
+| Texts of the changed operations | with `--gate` only: `openapi-desc-opt/check_texts.py --from source --no-tools` on each changed action, run on a copy of the scanned tree and of the merge-base, so an action not yet in the emitted document is checked from its `<remarks>` and `[SwaggerResponse]`. FORM, STYLE and CODES notes the merge-base does not have fail the gate; the merge-base's own are base debt (§4), matched by what a note is about, not by its text: the same sentence, each code and each replaced word, an average or a sentence count no worse than the merge-base's. A run that gave no answer for an operation on the scanned tree (the check not next to the scan, an exit code other than 0 and 1, a crash, a report that stops before its end or lacks the operation) fails the gate too, and so does every note when the merge-base run gave no answer, since base debt cannot be told apart then; an action the check answers it cannot check (its project emits no document, or it is not published: `IgnoreApi`) is listed as not checkable, outside the gate, and its texts are read by hand (§3 A2). A file the branch moved is checked at the merge-base under its old path. Read each like an A2 hint: a code of another operation named in prose reads as this one's code until the text names that operation (`openapi-endpoint-docs.md` §2.2 Notation) |
 | Review tooling brought in by the branch | not a finding: each merge of the base that brought a rule or review-tooling change applying to the branch, with the branch's own commits before and after it, and the date the scanned tree's tooling last changed. A check of the branch older than the newest such merge ran on the older copy (§1 "Earlier checks of the branch"); the author runs what the merge changed over the whole branch (`fixing-findings.md` §6 "The base first"). The tooling line goes into the report header (§8) |
 | Claims with numbers | §3 B "claims the branch writes": each number with a unit, worded duration, limit and date word the scan finds in the branch's commit messages, C# comments and spec texts is checked against the constant, the timeout or the test that makes it true (`claims.md` §1). A hit whose source says otherwise is a finding; a claim worded in a form the scan does not list is still read. The first 200 lines are printed, all with `--full` |
+| Texts the diff writes or reaches | not a finding: the texts the author re-reads after each fix batch (`claims.md` §3) — comments and doc comments the diff writes in `.cs`, `.ts`, `.py` and `.sh` (generated files and a new file's license header left out), the doc comments of the actions whose lines it changes, the Markdown files outside `sdk/` and `openspec/config.yaml` it writes, and which commit messages are not pushed yet (`claims.md` §4). Reviewer B reads it for §3 B "claims the branch writes"; a text whose behaviour changed outside the diff is still the reviewer's to find |
 | Stateful / background processing | the files reviewer G walks (§3 G) |
 | Size | how many chunks reviewers B, D, E and G are split into (§3 Coverage) |
 | New projects | an `!!` line: a project in neither `ASC.Web.slnx` nor `ASC.Tests.slnx` (a tool with a solution of its own is the exception), or a test project outside `products/` that `CLAUDE.md` does not name |
 | Possibly committed by accident | a review `.md`, a `.binlog`, `.env` committed by accident |
-| Gate | what stops a hand-over whatever the branch is: AI attribution in a commit; a base change, since the merge-base, to rules or review tooling that apply to the branch; an untracked file (`--worktree`; the branch's own saved review at the root excepted, §1); a requirement the branch adds at 500 characters or more, brings to 500 or more, or makes longer while over; a whole-file line-ending flip of what git would commit; a conflict marker; a new source file without a license header (generated files and `thirdparty/` excepted). `--gate` exits with 1 on any, 2 when the scan cannot run. In a review of someone else's branch, a gate line is reported as a finding only when it is a defect of the branch: newer base rules are a header note (§1) |
+| Checklists of the applicable rules | not a finding: the `## Checklist` of each applicable rule, which the author walks over each fix batch (`fixing-findings.md` §6). For reviewer A it is a start, never the whole rule: a checklist item points at the section that decides |
+| Gate | what stops a hand-over whatever the branch is: AI attribution in a commit; a base change, since the merge-base, to rules or review tooling that apply to the branch; an untracked file (`--worktree`; the branch's own saved review at the root excepted, §1); a requirement the branch adds at 500 characters or more, brings to 500 or more, or makes longer while over; a whole-file line-ending flip of what git would commit; a conflict marker; a new source file without a license header (generated files and `thirdparty/` excepted); a `verification.md` citation the branch wrote wrong or moved; a FORM, STYLE or CODES note of a changed operation's text that the merge-base does not have. `--gate` exits with 1 on any, 2 when the scan cannot run. In a review of someone else's branch, a gate line is reported as a finding only when it is a defect of the branch: newer base rules are a header note (§1) |
 
 Things `scan.py` cannot see and you must look for yourself: broken indentation left by a merge,
 `<summary>`/`<remarks>` swapped, a list in `CLAUDE.md` the branch leaves incomplete (services, launch
@@ -231,9 +275,9 @@ previous one counted as covered. So:
   place with the pattern, each marked as affected or fine. The fixer then fixes the class at once;
   a fix of the one cited line leaves the same finding to come back from its siblings.
 - **Start where the last run did not look.** If a previous review file of this branch has a
-  `Coverage` section (§8 Saving), give its "skimmed or not opened" files to the chunk reviewers as
-  read-first. Hand over the coverage only, never the previous findings — a reviewer given the list
-  checks the list.
+  `Coverage` section (§8 Saving), or its Hand-over block a `coverage:` line, give the files it names as
+  skimmed or not opened to the chunk reviewers as read-first for follow-up once the isolated pass has
+  returned its own coverage (§0).
 
 **A0. Cross-cutting matrix** — always, when the scan lists changed endpoints or the branch adds a
 write path (a service method, a background job, an event handler that changes data). One row per
@@ -268,10 +312,15 @@ count with the search it used, so a short matrix is visible as short.
 | M9 states that end | each place that decides on a state with an end date (a trial, a lease, a grace period, a tariff or quota in force), found by `findReferences` on the end property, and each writer that can move the end into the past | does the decision compare the end with now; what it answers when the end is later, today, yesterday; cite `[failure-paths.md §9]` |
 | M10 interrupted steps | for each multi-step operation with an effect a retry cannot undo (money, an external call, a claim held across steps): every step x (the step throws, the answer is unknown, the process stops after it, another instance takes the item over) | what is on record at that moment and what the next run does; a cell that ends in a repeated payment, a lost record or a wrong letter is a finding; cite `[failure-paths.md §10]`. Built again over the whole operation after each fix of one cell |
 | M11 cache instance | each value put into a FusionCache by the diff | which process obtains it and which reads it; whether a decision falls back on it; whether it must survive a restart. Obtained in one process and read in another, or a fallback for a decision, in the `"memory"` instance is a finding; an unknown answer that removes a known entry is one too; cite `[caching.md]` "Which instance" |
+| M12 claims | each number, absolute word and statement of a dependency's behaviour the branch writes: the scan's "Claims with numbers", the `<remarks>` and `[SwaggerResponse]` texts of the changed actions, the spec scenarios and `verification.md` rows the branch writes, its commit messages | the constant or the test that pins it, and the one-step mutation that turns that test red (`prove-red.sh --mutate`); a library's behaviour, its characterization test. A value with neither and not marked CODE-ONLY, or a test that stays green under the mutation while the text states the exact value, is a finding; cite `[claims.md §6]` |
+| M13 cache answer paths | each `GetOrSet` decision of the diff x the paths that answer it: factory success; factory failure with a stale value, and without; soft timeout with a stale value; hard timeout; an entry written by another process (L2, backplane); a restart with Redis and without | what the caller gets for each state with an end, at three points (the end later, now, past), and the characterization test the cell rests on. An answer past the end, or a cell resting on library behaviour no test shows, is a finding; cite `[failure-paths.md §9]`, `[dependency-behaviour.md §1]` |
 
 M2, M4, M5, M9 and M10 are the reviewer side of `.claude/rules/failure-paths.md` (§3, §8, §7, §9,
 §10); a finding in them, or one of B or G that matches a section of that rule, cites it as
-`[failure-paths.md §N]`, so the author finds the rule behind it. A matrix replaces neither B nor E — it closes the classes it names. When a reviewer's finding turns
+`[failure-paths.md §N]`, so the author finds the rule behind it. M12 is the reviewer side of
+`claims.md` §1 and §6, M13 of `failure-paths.md` §9 and `dependency-behaviour.md`; M12 is built in every
+review that writes texts, also in a re-check over the round's own texts, since fix rounds write most of
+them. A matrix replaces neither B nor E — it closes the classes it names. When a reviewer's finding turns
 out to be a class that has no matrix yet and can be enumerated, say so in the report as a candidate
 row for this table (the review itself edits nothing).
 
@@ -288,7 +337,10 @@ edit here. Distribute every applicable rule to a reviewer:
   `fixing-findings.md` constrains how findings are fixed — it is checked only in re-check mode (§7);
   `claims.md` is checked by lens B ("claims the branch writes") over code texts and by S over spec
   texts (S runs whenever the branch changes a file under `openspec/`), so it needs no reviewer of its
-  own;
+  own; `dependency-behaviour.md` is checked by lens B (each decision of the diff that rests on how a
+  library behaves - a retry predicate, a breaker's counting, the order of handler registration - has
+  its characterization test), with matrix M12 for the texts and M13 for cache answers, so it needs
+  none either;
 - the bullet lists are reminders of common misses, not the rule. The reviewer reads the
   rule file in full and checks against it — including its Definition of done, if it has one.
 
@@ -326,7 +378,7 @@ edit here. Distribute every applicable rule to a reviewer:
   - the `<remarks>` and the DTO `<summary>` of every action that reaches a member whose behaviour
     changed (LSP `incomingCalls` up to the controllers), even when the controller is not in the diff.
     A sentence that was true on the base and is false on the branch is an `openapi-endpoint-docs.md`
-    §5 "Untrue" finding of this branch ("each converted user gets a notification email" after the
+    §4 "Consistency" finding ("not untrue") of this branch ("each converted user gets a notification email" after the
     branch began to suppress repeats);
   - comments elsewhere that state the old invariant. Search the table name, the setting key or the
     entity in comments (`audit_events` led to a comment in `PortalRetentionJob` saying only login
@@ -372,7 +424,8 @@ edit here. Distribute every applicable rule to a reviewer:
 - packages and TFM only in `Directory.Packages.props`; no `EnforceCodeStyleInBuild` committed; new
   projects in `ASC.Web.slnx` / `ASC.Tests.slnx`.
 
-**D. Performance** — always, over the changed product `.cs` files (not tests, not migrations):
+**D. Performance** — always, over the changed product `.cs` files (not tests, not migrations). Its
+author-side part is `csharp-style.md` "Work per listed entry"; cite a per-entry lookup there:
 
 1. Sort the files into **hot path** (runs per request or per listed item: security filters, DAO
    list/search queries, DTO mapping of lists, serialization, per-row loops of reports, exports,
@@ -394,7 +447,9 @@ edit here. Distribute every applicable rule to a reviewer:
    performance finding states the scale it matters at ("5 000 queries per page of 100") and that
    it is static analysis, not a measurement.
 
-**E. Security** — always, over the changed product files (`.cs`, `.ts`, configs, nginx):
+**E. Security** — always, over the changed product files (`.cs`, `.ts`, configs, nginx). Its
+author-side rule is `access-checks.md` (what a caller may do) next to `visibility-filters.md` (what
+it may learn); cite a finding of authorization as `[access-checks.md §N]`:
 
 - **authorization**: every new or changed endpoint and service method checks access on the entry
   it actually acts on (`FileSecurity.Can*Async` / the role check) **before** acting, not on its
@@ -543,8 +598,9 @@ Reviewers over-report. For every finding, open the code at `where` yourself and 
   blocker that has not been traced from its input is a remark;
 - `introduced_by_branch: no` → check it with git before acting on it (`git log -S'<line>' <merge-base>..HEAD`,
   or the method in `git show <merge-base>:<path>`): "similar code existed" is not "this code existed",
-  and a wrong `no` silently hides a real finding. Confirmed → drop it, or keep it in one line under
-  "not from this branch" only when the branch makes it worse (moved it onto a hot path, widened its reach);
+  and a wrong `no` silently hides a real finding. Confirmed → it is no finding: in the first review it
+  goes to the "Base debt" list when it is in a file the branch touches ("Base debt, once" below), and
+  it stays a finding only when the branch makes it worse (moved it onto a hot path, widened its reach);
 - `siblings` checked: open the places listed as `fine` too, and look for the pattern in the chunks
   of other reviewers. All affected places go into **one** finding, so the fix covers the class;
 - a rule finding cites a rule that really says that (open the rule, check the section); a spec finding
@@ -560,6 +616,21 @@ Reviewers over-report. For every finding, open the code at `where` yourself and 
   answer — a scenario it did not consider, a rule it breaks, a statement in the entry that is false
   (`claims.md`) — and the finding quotes the entry. A blocker or a rule violation is never accepted as
   a limitation: an entry that holds one is reported as that finding;
+- **Disclosed is not decided**: a finding or a question is not dropped because a text of the branch
+  discloses it ("may keep it longer", "not verified from source", a Known limitations entry) when the
+  disclosed behaviour defeats the purpose of the fix — the bug's own scenario, a bound the branch
+  states. Report it with the bound the code has to enforce (`failure-paths.md` §9). A question about a
+  library's behaviour is closed by a characterization test, red or green, not by an answer
+  (`dependency-behaviour.md` §2). Seen in review: in one branch, three such questions about the cache were
+  answered by reasoning or a disclosing sentence for several rounds; each was a real defect;
+- **Base debt, once.** In the first review, and in the first pass of a hand-over check, list the
+  confirmed defects of the base (`introduced_by_branch: no`) in the files the branch touches: untrue
+  DTO or remarks texts, wrong numbers in a spec, stale `verification.md` rows the branch did not
+  write. The author decides each once: fixed in the branch, or noted in one line under "Base debt"
+  of the saved review (§8 Saving) and of the PR description. The coordinator applies that list
+  after the independent passes return. An item comes back only when the branch makes it worse.
+  Seen in review: in one branch, about five defects of the base came back from fresh passes in later rounds,
+  each costing a round's decision again;
 - **origin**: `git blame` the line (`git log -S` when blame lands on a normalization commit) and
   record the commit that introduced it. When an earlier review of this branch exists, each finding
   is either **new code** (the commit is later than that review) or **missed earlier** (the code was
@@ -570,11 +641,12 @@ Reviewers over-report. For every finding, open the code at `where` yourself and 
   not see it, reading the block's lines on matrices, lenses, rules and coverage — no rule says so; a
   rule says so but no matrix or scan check enumerates it; the matrix exists but the block shows it not
   built or short; every pass only skimmed the file (the block's coverage); the path cannot run here and
-  no decision was extracted for a unit test (`tests.md`); the check ran without a lens or on an older
+  no decision was extracted for a unit test (`failure-paths.md` §11); the check ran without a lens or on an older
   copy of the rules; the code was outside the check's scope (a re-check reads only its round's diff);
   the check found it and the author filed it under Known limitations although it is a blocker or a rule
   violation — and the change to the tooling that would have caught the class: a rule section, a matrix
-  row, a scan check, or "none: within the estimate the block gave". This is how the next hand-over
+  row, a scan check, or "none: within the estimate the block gave" (a full check) or "none: one pass"
+  (a light check, whose pass read the code and missed it). This is how the next hand-over
   check sees what this one missed.
 - **missed by earlier checks**: with no Hand-over block, but with earlier reviews of this branch (§1
   "Earlier checks of the branch"), name per "missed earlier" finding why those checks could not see
@@ -628,13 +700,18 @@ changed is a question for the user (fix the expectation or the code), not a regr
 ## 7. Re-check mode
 
 Input: the previous findings (a `.md` path the user gave, or the last review in this
-conversation). Re-scan (§1) and then:
+conversation). For a review of a commit, take the reviewed SHA from the previous report's Coverage
+section and add `--since-review <sha>` to the §1 scan. Include `--worktree` when reviewing local
+fixes. The gate still compares the whole branch to its base. If the previous review covered
+uncommitted changes, use its recorded tree as the diff baseline. If the reviewed state cannot be
+identified or the commit is no longer an ancestor, establish the boundary or run a full review.
 
 1. For **each** previous item, read the current code at its place and classify: **Fixed**
-   (how, with `path:line`), **Partially fixed**, **Not fixed**. Do not trust the commit message
-   ("review fixes") — check each item.
-2. Review only what changed since the previous review (`git log <prev-sha>..HEAD`, diff of those
-   commits) with §3–§4 for **New** — a fix commit is where new bugs come from: a
+   (how, with `path:line`), **Partially fixed**, **Not fixed**, or **Withdrawn** with the evidence of
+   point 5. Do not trust the commit message
+   ("review fixes") - check each item, including findings outside the files listed for this round.
+2. Use "Changes since the previous review" (or the diff from the recorded tree) to locate the
+   batch. Review its diff with §3-§4 for **New** - a fix commit is where new bugs come from: a
    filter narrowed for one caller loses another caller's lookup, a default added on create changes
    every update, "this failure is not an attempt" makes a row retry for ever, a restore change fails
    on archives without the new column. For **each fix** ask, beyond §3 B:
@@ -645,24 +722,32 @@ conversation). Re-scan (§1) and then:
    - did it fix the **class** or only the cited line — run the finding's `siblings` again;
    - does it come with a test that fails without it; a behavioural fix without one is a remark. Do
      not judge that by reading the test: run `.claude/scripts/prove-red.sh --commit <fix sha>` with
-     the test's filter (`--patch` with the behavioural hunk when the test calls what the fix adds).
+     the test's filter (`--patch` with the behavioural hunk when the test calls what the fix adds;
+     `--mutate` one step on each side when the fix pins a value, `tests.md`).
      STILL GREEN is a finding. A run the stand does not allow goes under "Not verified";
    - run the class matrices (§3 M) over the fix diff: a fix commit adds rows like any other code.
+
+   **New** is what the fix diff brought. Code that was there at the previous review and that it
+   missed is reported only as a blocker or a rule violation (origin "missed earlier", §4); a remark or
+   a question there is one unnumbered line ("missed earlier: n remarks, in <files>") or nothing, so
+   the round does not reopen the whole branch for remarks.
 
    A commit that moves or rewrites code (a refactoring, a split into new files or classes) is not read
    as a diff: the moved code is reviewed whole, as in a first review, with the matrices over it. Its
    diff shows the move, not what the code does, and blame lands on it, so a defect that moved with the
    code reads as new and one that the move introduced reads as old.
-3. Give the fix commits to one more reviewer **without** the previous findings — the code only,
-   with §3 B and G, and §3 S over the spec texts they change. A reviewer handed the earlier list
+3. Give the fix batch to an isolated reviewer (§0 "Review without memory"),
+   with §3 B and G, §3 S over the spec texts they change, matrix M12 over the texts the round wrote,
+   then reconcile its output against Base debt (§4). A reviewer handed the earlier list
    checks that list; the fresh one finds what the list did not name. This step is not skipped for a
    small round: seen in review, a re-check without it found 1 new item, and the fresh full pass that
-   followed on the same sha found 12. The Coverage line says it ran; when it could not,
-   the report names the gap and the closing line offers that pass first. When the round adds a new
+   followed on the same sha found 12. The Coverage line says it ran; when it could not, the report
+   names the gap, and the round has no verdict yet: the closing line offers that pass, and point 10
+   applies once it has run. Where no fresh worker can be started at all (§0, no Agent tool), the pass
+   is pending under "Not verified" and point 10 applies without it. When the round adds a new
    artifact (a new class, an OpenSpec change), the fresh reviewer reads that artifact whole, as a
-   first review, not as a diff — in a reviewer's re-check, and in the §7 a self-review or a hand-over
-   check runs on its own batch; any other such round of the author gets the hand-over check instead
-   (`fixing-findings.md` §6).
+   first review, not as a diff; in such a round of the author, the batch check reads it whole, and
+   after a review round the light hand-over check is offered again (`fixing-findings.md` §6).
 4. Re-evaluate findings that were dropped or accepted earlier ("acceptable", "not from this
    branch") when a fix changed the code around them.
 5. If an earlier finding turns out to be wrong, say so plainly and withdraw it. Withdrawing needs the
@@ -680,9 +765,14 @@ conversation). Re-scan (§1) and then:
    a wallet renewal opened a path to a second payment).
 9. When the previous review ran on an older copy of the rules or this skill (its header's tooling line
    against the scan's "Review tooling brought in by the branch"), the re-check is not limited to the
-   diff: each lens, matrix, rule or scan check the newer copy added runs over the whole branch, as
+   diff: each lens, matrix, rule or scan check the newer copy added or changed runs over the whole branch, as
    `fixing-findings.md` §6 "The base first" has the author do. A re-check of the diff alone on the newer
    copy sees the new classes only in the newest code.
+10. **The round's verdict.** Once the fresh reviewer of point 3 has run, with no blocker and no rule
+    violation left open or new, the review ends:
+    say so in the report. The remaining remarks and questions are the author's to fix with the batch
+    check or to write under Known limitations; no further re-check runs for them
+    (`fixing-findings.md` §6).
 
 ## 8. Report
 
@@ -707,40 +797,68 @@ Then, omitting empty sections:
 ## ❓ Questions        — behaviour changes and debatable semantics that need the author's decision
 ## Missed by the hand-over check — only with a Hand-over block (§4): per finding, why, and the tooling change
 ## Missed by earlier checks — no block, but earlier reviews of the branch (§4): counts per cause, the tooling change
+## Base debt          — first review only: defects of the base in the branch's files, to be fixed or noted once (§4)
 ## Not verified       — what stays unverified and what would verify it (a suite, a profile)
 ```
 
-Per finding: a `[security]` / `[performance]` / `[translation]` / `[spec]` tag when that is its category, the `[path:line](path:line)` link, what is wrong, the concrete scenario, the fix — a direction for the class, not a patch; a fix that adds or keeps state (a claim, a cache entry, a fallback) names the matrix row it has to be walked against (M9, M10, M11). Code
+Per finding: a `[security]` / `[performance]` / `[translation]` / `[spec]` tag when that is its category, the `[path:line](path:line)` link, what is wrong, the concrete scenario, the fix — a direction for the class, not a patch; a fix that adds or keeps state (a claim, a cache entry, a fallback) is written as what must hold ("the mark is released on every failure path"), not as a code change to copy, and names the matrix row it has to be walked against (M9, M10, M11): three next-round findings came from following a suggested fix (`fixing-findings.md` §8). Code
 snippets only when the line itself is the point (broken indentation, a wrong condition). No scan
 tables, no "what was done well" section — at most one line if something deserves it.
 
-Re-check report: **Fixed / Not fixed / New**, same per-item format.
+For a shared review, assign each finding a stable ID (R1, R2, ...). Keep existing IDs across rounds
+and give new findings the next unused number. With an older report, preserve its numbering or
+assign IDs once. For a behavioural finding, state the observable result that would close it.
+Record each new finding's origin (§4): introduced by the fixes or missed on the earlier state.
 
-Do not report:
+Re-check report: **Fixed / Partially fixed / Not fixed / Withdrawn / New**, same per-item format, and
+the round's verdict (§7 point 10). The author records a response and evidence under each original
+item (`fixing-findings.md` §6); the receiving reviewer verifies them and records the verdict per item.
+Reopen a closed item when a changed path or new evidence invalidates it.
+
+Do not report (ten reviews of November 2026 held 9 items outside the branch, 5 duplicates and 5
+wording-only items):
 - a renamed or re-numbered migration as a risk "for local DBs where the old one was applied" — the
   user drops that every time;
 - formatting the generated files (`*.Designer.cs`, `json/*_2.0.json`, SDK sources);
-- anything already present in the merge-base, unless the branch makes it worse (§4);
-- an entry of the PR's "Known limitations", unless with an argument it does not answer (§4).
+- anything already present in the merge-base as a numbered finding, unless the branch makes it worse
+  (§4); the first review lists it under "Base debt" when it is in a file the branch touches ("Base
+  debt, once"), and the other runs leave it out;
+- an entry of the PR's "Known limitations", unless with an argument it does not answer (§4);
+- a previous item that is not fixed as New: it is Not fixed, under its old number;
+- the same defect twice: one item per class, its other places listed in it;
+- wording: a text is a finding when it states what the code does not do (`claims.md`), not when it
+  could read better;
+- each claim of a commit message already pushed: one remark asks for the PR description to state it
+  right (`claims.md` §4), and the pushed message stays as it is.
 
-End with one line offering the next step: fix the blockers, run the named suites, or save the
-findings to a file. When "Missed by the hand-over check" names tooling changes, offer them to the user
+End with the verdict and one line offering the next step. A review or re-check with no blocker and
+no rule violation ends the review (a re-check once its fresh reviewer has run, §7 point 3): say so; its remarks and questions are the author's to fix with the
+batch check or to put under Known limitations, and no further round is offered for them
+(`fixing-findings.md` §6). Otherwise name each fix, check or decision that prevents closure, by its
+ID, and offer to fix the blockers, run the named suites, or save the findings to a file (a shared
+review: give the link to the saved report). When "Missed by the hand-over check" names tooling changes, offer them to the user
 too, as a change of their own to the rules, this skill or the scan: they are what keeps the next
 hand-over from missing the same class. The saved review keeps that section, and so it keeps "Missed by
 earlier checks".
 
 ### Saving to a file
 
-On request ("save to md"), write the findings — no header statistics, no "Fixed"
-unless asked — to `<branch-name-with-dashes>-review.md` at the repo root (or the folder the user
-named). Make each item readable without this conversation: place, scenario, fix, guard. The file
-stays untracked; never `git add` it.
+Save each external review to `<branch-name-with-dashes>-review.md` at the repo root
+(or the requested path). Use the supplied report for later rounds. Preserve the original findings,
+IDs, reviewed SHA and prior decisions when appending responses and verdicts. For example:
+
+    R1. A reader with access to A sees both A and B. Expected list: [A].
+    Author: changed the list filter. ReaderSeesOnlyAllowedFiles failed before and passed after.
+    Reviewer: Fixed on <returned sha>.
+
+Record the returned SHA (or checked tree for local fixes) once per batch. Keep the report untracked.
 
 End the file with a `Coverage` section the next run reads (§3 Coverage): the reviewed sha and date,
 the tooling line of the header (§8), the matrices built with their row counts, and the files no
-reviewer read in full. Every run of a
-branch saves one, also when the user did not ask for the findings: offer it in the closing line,
-since without it the next run cannot tell what is new from what was missed.
+reviewer read in full; and with the `Base debt` list as decided (§4), which the next runs take as
+exclusions. Update coverage for each checked state. A run whose report is not saved (a self-review,
+the passes of a hand-over check) keeps its coverage in the Hand-over block's `coverage:` line, which §3
+"Start where the last run did not look" reads the same way.
 
 ### Self-review
 
@@ -749,23 +867,26 @@ and the hand-over check (§0), which ends the same way, are the ones followed by
 separate request: the author asked for the check in order to fix what it finds. Reviewing someone
 else's branch stays read-only.
 
-1. Fix every finding in one batch (`fixing-findings.md`), then re-check that batch with §7, its fresh
-   reviewer (point 3) included; how often, and when the sequence ends, is `fixing-findings.md` §6.
-   The texts the batch reaches are re-read in the same batch (`claims.md` §3).
-   Uncommitted work has no fix commits for §7 to take: before fixing, save `git diff HEAD` to the
+1. Fix every finding in one batch (`fixing-findings.md`), then run the batch check on it
+   (`fixing-findings.md` §6), which pins each claim the batch wrote (`claims.md` §6), re-reads the texts
+   the batch reaches (`claims.md` §3) and reads code of a new kind the batch adds (a new class, a cache,
+   a fallback) whole. When the batch fixed a
+   blocker, offer the §7 re-check with its fresh reviewer (point 3).
+   Uncommitted work has no fix commits: before fixing, save `git diff HEAD` to the
    scratchpad (it holds the new files only once they are added, §1 "No new file is left out"; a
-   new file the fixes create is offered for `git add` the same way). The re-check then reads the
-   files the batch touched against that copy, gives the
-   fresh reviewer of §7 point 3 the difference, and proves a behavioural fix with `prove-red.sh
-   --patch` holding the fix's own hunk instead of `--commit`.
+   new file the fixes create is offered for `git add` the same way). The batch check, and a §7
+   re-check when one runs, then read the files the batch touched against that copy (its fresh
+   reviewer gets the difference), and a behavioural fix is proven with `prove-red.sh --patch`
+   holding the fix's own hunk instead of `--commit`.
 2. A finding whose fix would change behaviour or scope the user did not ask for goes to the user as
    a question, not into a silent fix.
 3. Write what the self-review could not verify (a suite it could not run, a platform, a profile)
    under "Not verified" in the commit message or the PR description, or, when the author does not
    commit, in the commit message proposed to the one who does: the reviewer starts there.
-4. Do not hand the findings list to the reviewer. A reviewer given a list checks that list (§7,
-   point 3); the reviewer runs a first review of their own. Save the file, when asked, as
-   `<branch-name-with-dashes>-self-review.md`, so that no later run takes it for a review round.
+4. Keep the author's internal findings separate from the colleague's shared review report. A
+   fresh reviewer sees the code first (§7 point 3). Save private self-review notes, when requested,
+   as `<branch-name-with-dashes>-self-review.md`. Return the colleague's report with the responses
+   and evidence for its IDs.
 5. A remark or a question the author decides not to fix goes into the PR description's "Known
    limitations", with the decision, the reason and who decided; the entry is a claim (`claims.md`) and
    states the effect as it is. A blocker or a rule violation is fixed, never listed there.
@@ -773,18 +894,26 @@ else's branch stays read-only.
 ### Hand-over block
 
 The hand-over check (§0 "Hand-over") and every later hand-over after a review round end with this
-block, written into the PR description (or the message that hands the branch over), so the reviewer
-can check it before reading anything (§1). It holds counts and coverage. The only findings in it are
+block, written into the PR description (or the message that hands the branch over) and into the body
+of the branch's last commit, the one whose tree is the final tree, so the reviewer can check it before
+reading anything, also without the PR (§1). When the author does not commit, the block goes into the
+commit message proposed to the one who does. It holds counts and coverage. The only findings in it are
 the accepted ones under Known limitations: decisions the author asks the reviewer not to raise again,
 open to a new argument (§4); the findings the check fixed stay out (§8 "Self-review" point 4).
 
 ```
 Hand-over check
 - checked tree: <tree id the scan printed for the passes>; final tree: <tree id after the fixes>
-  (commit <sha> when committed); date; base <base> at merge-base <sha>, rules of the base: yes
-- passes: <two independent passes n1 = .., n2 = .., in common m = .., estimated unfound .. |
-  re-check of the round with its fresh reviewer: .. new>; all fixed in one batch, re-checked: .. new
-- lenses run once: A (rules: ..), A0, C, F, S; matrices with rows: M2 = .., M4 = .., ...
+  (in the PR description: commit <sha> once committed; the copy in the commit body gives the tree); date; base <base> at merge-base <sha>, rules of the base: yes
+- passes: <light: one pass, n = .. | full: two independent passes n1 = .., n2 = .., in common m = ..,
+  estimated unfound .. | review round <date>: n = ..>; all fixed in one batch
+- batch check: scan hints answered; texts re-read; claims written: <n pinned by a test | n CODE-ONLY>;
+  prove-red: <n proven | not proven: why>;
+  §7 re-check with its fresh reviewer: <.. new | not run: no blocker fixed>
+- review without memory: <scope, tree and isolation method of each pass | pending: reason |
+  n/a: a review round, no pass of the author's own>
+- lenses run once: <light: all, A (rules: ..), A0, B, C, D, E, F, G, S | full: A (rules: ..), A0, C, F, S,
+  and B, D, E, G in both passes>; matrices with rows: M2 = .., M4 = .., ...
 - open: 0 blockers, 0 rule violations; remarks and questions not fixed: under Known limitations
 - gate: scan.py --gate exit 0 on the final tree; built without new warnings: <projects | no .cs changed>;
   yarn check: <green | not run: no ASC.AI.Chat change>
@@ -793,20 +922,28 @@ Hand-over check
 
 Known limitations
 - <what>: <decision, reason, decided by>
+
+Base debt
+- <defect of the base in a file of the branch>: <fixed in <sha> | noted, decided by>
 ```
+
+After a review round or a later batch the block is renewed, not shortened: the whole template again,
+with `passes:` naming the round and the earlier block's final tree kept as `previous final tree: <id>`.
+The reviewer's checks of §1 read the final tree, `open:` and `gate:` in every block, and §3 "Start where
+the last run did not look" reads `coverage:`.
 
 When the user declines the check, the block says so in one line ("Hand-over check: declined by
 <who>"); the reviewer then treats the branch as having no block (§1).
 
-The final tree is what was checked. The fixes of the check's own §7 re-check are part of the check,
-so the final tree is the one after them. A commit whose tree equals the final tree (the author's
+The final tree is what was checked. The fixes of the check's own batch are part of the check, so the
+final tree is the one after them. A commit whose tree equals the final tree (the author's
 uncommitted work, committed by the user) is the checked state. Any other change after the block is
-written needs the block again: the §7 re-check of the change since the final tree (`git diff <final
-tree> HEAD` in the clone that ran the check, its fresh reviewer included) and the gate; after a merge of
-the base, the gate, the §7 re-check of the merge's own resolutions (`git show --remerge-diff <merge>`)
-and a check of the branch against what the base changed in the rules and this skill
-(`fixing-findings.md` §6). After a review round, the block's passes line is the §7 re-check of the
-fixes.
+written needs the block again: the batch check of the change since the final tree, with `--base` the
+commit whose tree is the final tree (while that tree is not committed, `--base HEAD`, and `git diff
+<final tree>` in the clone that ran the check names what changed since), the gate included; after a merge of the base, the batch
+check of the merge's own resolutions (`git show --remerge-diff <merge>`) and a check of the branch
+against what the base changed in the rules and this skill (`fixing-findings.md` §6). After a review
+round, the block's passes line names the round and its count.
 
 ## 9. Saturation mode
 
@@ -818,19 +955,23 @@ completeness inside the enumerated classes (§3 M) and a measured estimate of th
 2. **Build every class matrix (§3 M) once.** Their rows are exhaustive, so they are not repeated
    per pass.
 3. **Two independent full passes** of §3 B, D, E, G: two sets of chunk agents with different chunk
-   cuts (by subsystem in one, by call path in the other), neither seeing the other's findings or any
-   earlier review's findings. Verify both through §4 separately.
+   cuts (by subsystem in one, by call path in the other), each isolated under §0 "Review without
+   memory". Collect both results before verifying each through §4.
 4. **Match** the verified findings of the two passes by class and place. With `n1` and `n2` findings
    and `m` in common, the estimated total is `n1 × n2 / m` (capture–recapture); the estimate minus
-   the union is roughly what is still unfound. `m = 0`, or a tiny `m`, means the passes sample
-   different code — the estimate is meaningless; run a third pass with the files both left skimmed.
-5. **Stop** when the estimate is within one or two of the union, or the user stops. Report the
+   the union is roughly what is still unfound. With zero or very small overlap report the estimate
+   as unavailable. Use both coverage reports to target any unexamined paths; two empty findings
+   lists alone give no estimate of missed defects.
+5. **Stop** once required paths and matrices have been checked and material disagreements resolved.
+   Record any remaining coverage gaps. Use the estimate as supporting information. Report the
    union once (§8), with the two counts, `m` and the estimate in the header.
 
 Saturation costs two to three times a normal review; say so before starting. As the first pass of a
 hand-over check (§0 "Hand-over") it also runs, once, what step 3 leaves out: the rules (A), the
-cross-cutting matrix (A0), C, F and S, besides the class matrices of step 2. The author does not stop
-at the report: the union is fixed in one batch, §7 runs on it, and the Hand-over block records the two
-counts, `m`, the estimate, the lenses and the matrices with their row counts. "Freeze the sha" for
+cross-cutting matrix (A0), C, F and S, besides the class matrices of step 2; that is the full
+hand-over check, and the light one runs one pass and no estimate. The author does not stop at the
+report: the union is fixed in one batch, the batch check runs on it (`fixing-findings.md` §6), and the
+Hand-over block records the two counts, `m`, the estimate, the lenses and the matrices with their row
+counts. "Freeze the sha" for
 uncommitted work means the tree the scan prints (`--worktree`): keep the work unchanged while the
 passes run.

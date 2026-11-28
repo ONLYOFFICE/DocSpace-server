@@ -14,6 +14,17 @@ Files, folders, metadata values and form data are indexed in OpenSearch (`ASC.El
 the index only narrows the candidates. Any change to what is searchable, or to a write path of an
 indexed entity, has an index side — and every read has to survive the index being absent.
 
+## Checklist
+
+- Every caller of `TrySelectIdsAsync`/`TrySelectAsync` handles `false` with an equivalent SQL path (Reads)
+- A select sets `.Limit(0, BaseIndexer<T>.QueryLimit)` and treats `ids.Count >= QueryLimit` as an overflow to SQL (Reads)
+- Index ids are intersected with the SQL query, never returned as the answer (Reads)
+- A change of an indexed value publishes its event after the commit; no indexer call in a DAO or a transaction (Writes)
+- An unreachable index never fails the operation; the entity's `ModifiedOn` moves with the change (Writes)
+- A new searchable field is on the entity, in `GetSearchContentFields`, with `ReIndexAsync` planned (Writes)
+- Index work runs in a tenant set by `TenantManager`; a new indexer has the parts listed there (Tenants)
+- Search tests poll on a deadline (30 s or more in a full run) and assert absence only after a presence (Tests)
+
 ## Reads: a SQL fallback is mandatory
 
 - `TrySelectIdsAsync` / `TrySelectAsync` return `(false, [])` when the index is disabled,

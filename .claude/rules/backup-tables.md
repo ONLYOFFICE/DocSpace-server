@@ -15,6 +15,19 @@ the archive — the backup succeeds, the restored portal has lost that feature's
 migration with `CreateTable`, `AddColumn`, `RenameTable`, `RenameColumn` or `DropTable` needs a
 look at the backup declarations, in the same branch.
 
+## Checklist
+
+- Every new tenant table is declared in its module's `Tables` with the right `IdType` (A new table 1)
+- Every user-id column is in `UserIDColumns` and every date column in `DateColumns` (A new table 2)
+- Every column holding another table's id has a `RelationInfo`, with a resolver if polymorphic (A new table 3)
+- A table without a tenant column overrides `GetSelectCommandConditionText` with a join (A new table 4)
+- Ids in strings, JSON or encrypted values: `TryPrepareRow`/`TryPrepareValue`/`PrepareData`, or classify it (A new table 5)
+- A table left out is in `_intentionallySkipped` with a reason or in `_knownGaps` with a ticket (A new table 6)
+- A rename or drop updates the declaration and both test registries (A changed table)
+- A new column holding an id or a user id has a relation or a `UserIDColumns` entry, and restore copes with an older archive that lacks it (A changed table)
+- Files of a new storage module or domain are allowed in `PortalTaskBase.IsStorageModuleAllowed`; a stored path that embeds DB ids is remapped (`GetByStorageModule`, `TryAdjustFilePath`) (Files in storage)
+- Entity in `MigrationContext`; `BackupCoverageTests` and a remap case per new table pass (A new table 7; Verify)
+
 ## A new table
 
 1. **Declare it** in the module that owns the feature (`Tables` of `FilesModuleSpecifics`,

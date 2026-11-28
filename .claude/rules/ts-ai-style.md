@@ -13,6 +13,17 @@ the error handler, shutdown, the proxy in front) in `ts-ai-express.md`, tests in
 the texts in `app/openapi.ts`, `app/apiCatalog.ts` and `scripts/schema/` like any other text that
 states behaviour. Cite this file as `[ts-ai-style.md, <section>]`.
 
+## Checklist
+
+- `yarn check` is green, `yarn openapi` output is committed, and each new file has the AGPL header (Checks; Misc)
+- No new `eslint-disable`, `@ts-ignore`, `@ts-expect-error` or suppression; prune after a fix (Checks)
+- No `any`, no `!`, no cast on body fields; external input stays `unknown` until `app/narrow.ts` checks it (Types)
+- Refusals use `clientFault`/`badRequest`; an upstream error's message never reaches a response (Errors)
+- Calls go through the three clients, `withTimeout` + `cancel()` in `finally`, `pooled` in loops (Upstream calls)
+- Config is read only in `config/index.ts`, through a reader with both bounds and a code default (Config)
+- Supplied URLs pass `assertSafeBaseUrl`; untrusted prompt text goes through `sanitizeInstruction` (Security)
+- A custom route is added to `routes.ts` and `CUSTOM_ROUTE_DOCS` together; literal paths come first (Routing)
+
 ## Checks
 
 - `yarn check` in `common/ASC.AI.Chat` runs `typecheck`, `lint`, `format:check` and the tests with

@@ -14,7 +14,7 @@ Every tool call re-sends your whole context, so keep it small and the steps few.
 ## What to change
 
 - Behaviour that changed in the range: fix the requirement and scenario, add a verification row (claim | source | status). No test was run in this revision: cite a test as TEST-CONFIRMED only when its assertion says it, and put no `[run: …]` mark on rows you add or change.
-- New tests in the range that cover an existing CODE-ONLY row: upgrade the row to TEST-CONFIRMED with file:line (no run mark).
+- New tests in the range that cover an existing CODE-ONLY row: upgrade the row to TEST-CONFIRMED, citing the test by name, `File.cs::Method` (no run mark).
 - Defects your specs list: set FIXED (commit) / STILL OPEN / REFUTED where the range touches them, with a one-line reason. New defects get the spec's prefix and the next free number. Exception: a security defect (a caller reads, changes or deletes what their rights do not allow, a secret, key, token or personal data leaks, a check runs for the wrong account or portal, a request reaches an internal address, a payment, licence or second-factor gate is bypassed, an audit event names the wrong actor) is never written into spec.md or verification.md; describe it only in your final message, marked SECURITY.
 - Add one revision line under the header of each verification.md you change: "Revision <date> (<A>..<B>)".
 

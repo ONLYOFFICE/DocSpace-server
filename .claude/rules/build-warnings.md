@@ -11,6 +11,16 @@ paths:
 A warning in a file you touched is unfinished work. The API projects build with **zero** warnings
 today, so "no new warnings" is a realistic bar, not an aspiration.
 
+## Checklist
+
+- Every touched project was built with `--no-dependencies --no-incremental` and shows no new warning (See them)
+- A build that could not run (`MSB3027`, locked DLLs) is reported as "not built", never as clean (See them)
+- A changed `*.Core` DTO is followed by a build of the controller project that uses it (Documentation warnings)
+- API002-API006 are answered with real texts per the openapi rules, not placeholders (Documentation warnings)
+- An action hidden by its own `IgnoreApi` in a published controller still has its docs (Documentation warnings)
+- No warning silenced; the one exception is a commented `.editorconfig` entry for a codebase-wide analyzer (Never silence)
+- `IDE*` warnings in the code you changed are fixed; the pre-existing baseline is left alone (Style warnings)
+
 ## See them
 
 After editing `.cs` files, build every project you touched:

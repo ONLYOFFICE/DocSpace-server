@@ -78,7 +78,7 @@ const ANALYZE_FORM_TOOL: TMCPItem = {
 // Flagged so C# emits ONLY the form-data tools (and their prompt) for this sub-agent, never for main.
 const formDataTools = new HttpToolsAdapter(true);
 
-type ToolCall = { id: string; name: string; args: Record<string, unknown> };
+export type ToolCall = { id: string; name: string; args: Record<string, unknown> };
 
 export const formAnalysisSubAgent: ToolsAdapter = {
   async getTools(): Promise<Record<string, TMCPItem[]>> {
@@ -169,7 +169,7 @@ async function runTurn(
 }
 
 // The model's requested tool calls, carried as `tool-call` content parts.
-function extractToolCalls(message: ThreadMessageLike): ToolCall[] {
+export function extractToolCalls(message: ThreadMessageLike): ToolCall[] {
   const content = message["content"];
   if (!Array.isArray(content)) {
     return [];
@@ -209,7 +209,7 @@ function readArgs(part: Record<string, unknown>): Record<string, unknown> {
 }
 
 // Re-attach each result to its `tool-call` part, so the next `custom` turn feeds it back to the model.
-function attachResults(
+export function attachResults(
   message: ThreadMessageLike,
   results: Map<string, unknown>,
 ): ThreadMessageLike {
