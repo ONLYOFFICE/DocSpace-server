@@ -1656,6 +1656,37 @@ public sealed class OFormRequestManagerTests : IDisposable
         gallery.CallCount.Should().Be(1);
     }
 
+    [Fact]
+    public async Task FailureLogMark_CacheThatThrows_LeavesTheGalleryFailureAndLogsIt()
+    {
+        // A distributed cache that throws, with a cache set to rethrow its exceptions: the mark that throttles the log
+        // cannot be read or written, and the gallery failure is still answered with 502 and false, and logged
+        var logs = new RecordingLoggerProvider();
+        using var cache = CreateNodeCache(new ThrowingDistributedCache());
+        cache.DefaultEntryOptions.ReThrowDistributedCacheExceptions = true;
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.Forbidden));
+        var manager = CreateManager(gallery.Url, cache: cache, loggerProvider: logs);
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        var managerWarnings = logs.Entries.Where(entry => entry.Category == typeof(OFormRequestManager).FullName && entry.Level == LogLevel.Warning).ToList();
+        managerWarnings.Should().ContainSingle(entry => Regex.IsMatch(entry.Message, @"^The template gallery answered 403 to http\S+$"));
+    }
+
+    [Fact]
+    public async Task FusionCache_DistributedCacheThatThrows_IsNotRethrownWithTheOptionsOfTheServices()
+    {
+        // The options AddHybridCache registers leave ReThrowDistributedCacheExceptions at its default: a Redis that is
+        // down does not reach the caller of TryGetAsync and SetAsync, and the value stays in the memory level
+        using var cache = CreateNodeCache(new ThrowingDistributedCache());
+        var token = TestContext.Current.CancellationToken;
+
+        await cache.SetAsync("mark", true, options => options.SetDuration(TimeSpan.FromMinutes(5)), token);
+        var mark = await cache.TryGetAsync<bool>("mark", token: token);
+
+        mark.HasValue.Should().BeTrue();
+    }
+
     private static string AvailabilityCacheKey(HttpStub gallery)
     {
         return OFormRequestManager.GetAvailabilityCacheKey(gallery.Url + GalleryPath);
@@ -1858,6 +1889,27 @@ public sealed class OFormRequestManagerTests : IDisposable
     /// A backplane in memory shared by the node caches of a test. While <see cref="Hold"/> is set it keeps the
     /// messages until <see cref="DeliverHeldAsync"/>, so a test can let a notification arrive after a later write.
     /// </summary>
+    private sealed class ThrowingDistributedCache : IDistributedCache
+    {
+        public byte[]? Get(string key) => throw Down();
+
+        public Task<byte[]?> GetAsync(string key, CancellationToken token = default) => throw Down();
+
+        public void Set(string key, byte[] value, DistributedCacheEntryOptions options) => throw Down();
+
+        public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default) => throw Down();
+
+        public void Refresh(string key) => throw Down();
+
+        public Task RefreshAsync(string key, CancellationToken token = default) => throw Down();
+
+        public void Remove(string key) => throw Down();
+
+        public Task RemoveAsync(string key, CancellationToken token = default) => throw Down();
+
+        private static InvalidOperationException Down() => new("The distributed cache is down");
+    }
+
     private sealed class HeldBackplaneHub
     {
         private readonly List<BackplaneSubscriptionOptions> _subscribers = [];

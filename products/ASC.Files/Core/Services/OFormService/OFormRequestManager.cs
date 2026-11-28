@@ -264,12 +264,7 @@ public class OFormRequestManager(
         var length = streamResponse.Content.Headers.ContentLength;
         if (length > MaxTemplateSize)
         {
-            if (await IsFirstFailureOfIntervalAsync("file-too-large"))
-            {
-                logger.WarningOFormGalleryFileTooLarge(WithoutQuery(fileUri), MaxTemplateSize);
-            }
-
-            throw GalleryUnavailable();
+            throw await FileTooLargeAsync(fileUri);
         }
 
         await using var body = await streamResponse.Content.ReadAsStreamAsync(cancellationToken);
@@ -298,12 +293,7 @@ public class OFormRequestManager(
 
             if (!await CopyAtMostAsync(body, stream, MaxTemplateSize - read, cancellationToken))
             {
-                if (await IsFirstFailureOfIntervalAsync("file-too-large"))
-                {
-                    logger.WarningOFormGalleryFileTooLarge(WithoutQuery(fileUri), MaxTemplateSize);
-                }
-
-                throw GalleryUnavailable();
+                throw await FileTooLargeAsync(fileUri);
             }
 
             stream.Position = 0;
@@ -498,19 +488,39 @@ public class OFormRequestManager(
     /// Whether a failure of the gallery of this <paramref name="kind"/> is to be logged now: the first one, and then at
     /// most once per <see cref="FailureLogInterval"/> for the installation, so a gallery that stays down does not log on
     /// every creation from a template. Another kind of failure is logged at once. The mark lives in the cache shared by
-    /// the processes; two that fail at the same moment may both log, which costs one more warning.
+    /// the processes; two that fail at the same moment may both log, which costs one more warning. A cache that throws
+    /// does not replace the failure of the gallery: the failure is then logged.
     /// </summary>
     private async ValueTask<bool> IsFirstFailureOfIntervalAsync(string kind)
     {
         var key = GetFailureLogCacheKey(GetListUrl(), kind);
-        if ((await cache.TryGetAsync<bool>(key)).HasValue)
+
+        try
         {
-            return false;
+            if ((await cache.TryGetAsync<bool>(key)).HasValue)
+            {
+                return false;
+            }
+
+            await cache.SetAsync(key, true, options => options.SetDuration(FailureLogInterval));
+        }
+        catch (Exception)
+        {
+            // The mark only throttles the log: without it the failure is logged, and the caller still answers with
+            // the failure of the gallery, not with the exception of the cache
         }
 
-        await cache.SetAsync(key, true, options => options.SetDuration(FailureLogInterval));
-
         return true;
+    }
+
+    private async Task<CustomHttpException> FileTooLargeAsync(Uri fileUri)
+    {
+        if (await IsFirstFailureOfIntervalAsync("file-too-large"))
+        {
+            logger.WarningOFormGalleryFileTooLarge(WithoutQuery(fileUri), MaxTemplateSize);
+        }
+
+        return GalleryUnavailable();
     }
 
     /// <summary>
@@ -543,10 +553,9 @@ public class OFormRequestManager(
         {
             // Not a failure of the gallery, yet the check has to answer: with nothing known, a 500 of the endpoint would
             // replace "unavailable", and a known "available" is kept by the check either way
-            if (await IsFirstFailureOfIntervalAsync("probe-error"))
-            {
-                logger.ErrorOFormGalleryProbeError(e);
-            }
+            // A failure of this code, not of the gallery: logged each time, like a failure of a download. The check runs
+            // at most once a minute per process, while its answer is cached
+            logger.ErrorOFormGalleryProbeError(e);
 
             return false;
         }
