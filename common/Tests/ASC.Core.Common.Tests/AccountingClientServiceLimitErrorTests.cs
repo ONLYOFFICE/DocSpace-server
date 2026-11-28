@@ -166,6 +166,44 @@ public class AccountingClientServiceLimitErrorTests
     }
 
     [Fact]
+    public async Task GetTotalServiceLimit_UnknownCustomerAs404_ThrowsCustomerNotFoundWithoutRetry()
+    {
+        // The current accounting paths answer a customer they do not know with 404.
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.NotFound,
+            """{"title":"Resource not found","status":404,"detail":"Customer 'portal-1' not found","code":"not_found"}"""));
+
+        var act = async () => await client.GetTotalServiceLimitAsync("portal-1", "ai-services", includeUsage: true);
+
+        await act.Should().ThrowExactlyAsync<AccountingCustomerNotFoundException>();
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetParticipantServiceLimits_UnknownServiceGroupAs404_ThrowsBadRequestWithoutRetry()
+    {
+        // A service group the accounting service does not have is a gap in its setup, not a missing limit.
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.NotFound,
+            """{"title":"Resource not found","status":404,"detail":"Service group 'ai-services' not found","code":"not_found"}"""));
+
+        var act = async () => await client.GetParticipantServiceLimitsAsync("portal-1", "ai-services", new ServiceLimitFilter());
+
+        (await act.Should().ThrowExactlyAsync<AccountingBadRequestException>())
+            .Which.Message.Should().Be("Service group 'ai-services' not found");
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task DisableParticipantServiceLimits_UnknownCustomerAs404_ThrowsCustomerNotFound()
+    {
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.NotFound,
+            """{"title":"Resource not found","status":404,"detail":"Customer 'portal-1' not found","code":"not_found"}"""));
+
+        var act = async () => await client.DisableParticipantServiceLimitsAsync("portal-1", "ai-services");
+
+        await act.Should().ThrowExactlyAsync<AccountingCustomerNotFoundException>();
+    }
+
+    [Fact]
     public async Task GetTotalServiceLimit_NoLimitSet_ThrowsNotFoundWithoutRetry()
     {
         // A missing limit is a definitive result, so the GET must not be retried.

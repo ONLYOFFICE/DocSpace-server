@@ -60,7 +60,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
         second.Keys.Should().BeEquivalentTo(first.Keys);
         handler.CallCount.Should().Be(2);
 
-        requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants"));
+        requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer-name/{PaymentRegion}{TenantId}/by-group-name/ai-services/participants"));
         requests.Select(uri => ParseQuery(uri)["offset"]).Should().Equal("0", "2");
         requests.Should().AllSatisfy(uri => ParseQuery(uri)["limit"].Should().Be("100"));
         requests.Should().AllSatisfy(uri => ParseQuery(uri)["includeUsage"].Should().Be("true"));
@@ -76,7 +76,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
 
         serviceLimits.Should().BeEmpty();
         // The empty list comes from the answer, not from a failure before the request: TariffService turns either into it.
-        handler.Requests.Should().ContainSingle().Which.Path.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants");
+        handler.Requests.Should().ContainSingle().Which.Path.Should().Be($"/api/serviceLimit/by-customer-name/{PaymentRegion}{TenantId}/by-group-name/ai-services/participants");
     }
 
     [Theory]
@@ -93,7 +93,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
 
         serviceLimits.Should().BeNull();
         // The null comes from the failed answer, not from a failure before the request; a 500 may be asked again.
-        handler.Requests.Should().NotBeEmpty().And.OnlyContain(request => request.Path == $"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants");
+        handler.Requests.Should().NotBeEmpty().And.OnlyContain(request => request.Path == $"/api/serviceLimit/by-customer-name/{PaymentRegion}{TenantId}/by-group-name/ai-services/participants");
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
 
         serviceLimit.Should().BeNull();
         // The list of the users was asked for and failed; the null is not a failure before the request.
-        handler.Requests.Should().Contain(request => request.Path == $"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants");
+        handler.Requests.Should().Contain(request => request.Path == $"/api/serviceLimit/by-customer-name/{PaymentRegion}{TenantId}/by-group-name/ai-services/participants");
     }
 
     [Fact]

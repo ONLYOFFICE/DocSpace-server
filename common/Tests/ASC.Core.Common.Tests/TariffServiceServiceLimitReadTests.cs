@@ -50,7 +50,7 @@ public class TariffServiceServiceLimitReadTests : TariffServiceServiceLimitTestB
 
         serviceLimit.Scope.Should().Be(ServiceLimitScope.Total);
         serviceLimit.Usage.AmountAvailable.Should().Be(187.6m);
-        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/total");
+        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer-name/{PaymentRegion}{TenantId}/by-group-name/ai-services/total");
         ParseQuery(handler.LastUri)["includeUsage"].Should().Be("true");
     }
 
@@ -74,7 +74,7 @@ public class TariffServiceServiceLimitReadTests : TariffServiceServiceLimitTestB
         var serviceLimit = await tariffService.GetGlobalServiceLimitAsync(TenantId, "ai-services");
 
         serviceLimit.Should().BeNull();
-        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/global");
+        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer-name/{PaymentRegion}{TenantId}/by-group-name/ai-services/global");
     }
 
     [Fact]

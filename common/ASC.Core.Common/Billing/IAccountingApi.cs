@@ -116,13 +116,13 @@ public interface IAccountingApi
     [Get("/serviceLimit/{id}")]
     Task<ServiceLimit> GetServiceLimitAsync(int id);
 
-    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/total")]
+    [Get("/serviceLimit/by-customer-name/{portalId}/by-group-name/{groupName}/total")]
     Task<ServiceLimit> GetTotalServiceLimitAsync(string portalId, string groupName, [Query] bool includeUsage);
 
-    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/global")]
+    [Get("/serviceLimit/by-customer-name/{portalId}/by-group-name/{groupName}/global")]
     Task<ServiceLimit> GetGlobalServiceLimitAsync(string portalId, string groupName);
 
-    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants")]
+    [Get("/serviceLimit/by-customer-name/{portalId}/by-group-name/{groupName}/participants")]
     Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(string portalId, string groupName, [Query] ServiceLimitFilter filter);
 
     /// <summary>
@@ -130,7 +130,7 @@ public interface IAccountingApi
     /// <see cref="GetCustomerOperationPages"/>. Leave <see cref="ServiceLimitFilter.Offset"/> unset - the offset
     /// travels in its own query parameter.
     /// </summary>
-    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants")]
+    [Get("/serviceLimit/by-customer-name/{portalId}/by-group-name/{groupName}/participants")]
     [Paged(Items = nameof(ServiceLimitReport.Collection), Total = nameof(ServiceLimitReport.TotalQuantity))]
     PagedEnumerable<ServiceLimitReport, ServiceLimit> GetParticipantServiceLimitPages(string portalId, string groupName, [Query] ServiceLimitFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
 
@@ -143,7 +143,7 @@ public interface IAccountingApi
     [Put("/serviceLimit/participants")]
     Task<int> SetParticipantServiceLimitsAsync([Body] ServiceLimitParticipantSetOperation data);
 
-    [Post("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants/disable")]
+    [Post("/serviceLimit/by-customer-name/{portalId}/by-group-name/{groupName}/participants/disable")]
     Task<int> DisableParticipantServiceLimitsAsync(string portalId, string groupName);
 
     [Delete("/serviceLimit/{id}")]

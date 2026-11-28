@@ -2000,9 +2000,9 @@ public static class AccountingHttpClientExtension
                         }
 
                         // "Customer not found" is a definitive result, not a transient error - retrying won't change it.
-                        // The customer reads answer it with 404, which counts only when it names the customer, and the
-                        // service limit paths with 400, which counts whenever it says "not found". Other 404s and 400s
-                        // are retried.
+                        // The paths with the customer in them answer it with 404, which counts only when it names the
+                        // customer; a 400 counts whenever it says "not found" (accounting versions before November 2026
+                        // answered so on the service limit paths). Other 404s and 400s are retried.
                         if (response.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.NotFound)
                         {
                             var content = await response.Content.ReadAsStringAsync();
@@ -2065,13 +2065,21 @@ public static class AccountingHttpClientExtension
         var detail = GetProblemDetail(content);
         var serviceLimitRequest = IsServiceLimitRequest(response.RequestMessage);
 
-        // A missing customer is a 404 on the customer reads and a 400 on the service limit paths. There a 400 "not found"
-        // may name something other than the customer - a service group the accounting service does not have - and
+        // A missing customer is a 404 on the paths with the customer in them and a 400 when a body names it (and on the
+        // service limit paths of accounting versions before November 2026). On the service limit operations a "not
+        // found" may name something other than the customer - a service group the accounting service does not have - and
         // reporting that as a missing customer would hide the real reason.
         if (IsCustomerNotFound(response.StatusCode, content) &&
             (!serviceLimitRequest || detail.StartsWith("Customer", StringComparison.OrdinalIgnoreCase)))
         {
             return new AccountingCustomerNotFoundException();
+        }
+
+        // A service group named in the path that the accounting service does not have is a gap in its setup, as the 400
+        // it used to answer, not a missing limit.
+        if (response.StatusCode == HttpStatusCode.NotFound && serviceLimitRequest && IsServiceGroupNotFound(detail))
+        {
+            return new AccountingBadRequestException(detail);
         }
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -2156,6 +2164,12 @@ public static class AccountingHttpClientExtension
     private static bool IsServiceLimitNotFound(string detail)
     {
         return detail.StartsWith("Service limit", StringComparison.OrdinalIgnoreCase) &&
+               detail.Contains("not found", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsServiceGroupNotFound(string detail)
+    {
+        return detail.StartsWith("Service group", StringComparison.OrdinalIgnoreCase) &&
                detail.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 

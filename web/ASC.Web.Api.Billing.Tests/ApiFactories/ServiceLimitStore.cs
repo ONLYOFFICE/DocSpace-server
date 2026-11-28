@@ -55,7 +55,7 @@ internal sealed class ServiceLimitStore
     private const int DefaultPageSize = 25;
 
     private static readonly Regex _byCustomer = new(
-        @"^/serviceLimit/by-customer/\{portalId\}/by-group/(?<group>[^/]+)/(?<kind>total|global|participants|participants/disable)$",
+        @"^/serviceLimit/by-customer-name/\{portalId\}/by-group-name/(?<group>[^/]+)/(?<kind>total|global|participants|participants/disable)$",
         RegexOptions.Compiled);
 
     private readonly ConcurrentDictionary<int, JsonObject> _limits = new();
@@ -94,7 +94,7 @@ internal sealed class ServiceLimitStore
         {
             if (accountNumber is not { } account)
             {
-                return CustomerNotFound(call.PortalId);
+                return CustomerNotFound(call.PortalId, HttpStatusCode.NotFound);
             }
 
             var group = byCustomer.Groups["group"].Value;
@@ -435,9 +435,11 @@ internal sealed class ServiceLimitStore
             $$"""{"title":"Bad request","status":400,"detail":"Service limit '{{id}}' not found"}""");
     }
 
-    private static PaymentServiceAnswer CustomerNotFound(string? portalId)
+    // The paths with the customer in them answer a missing customer with 404, the bodies that name it with 400.
+    private static PaymentServiceAnswer CustomerNotFound(string? portalId, HttpStatusCode status = HttpStatusCode.BadRequest)
     {
-        return PaymentServiceAnswer.Json(HttpStatusCode.BadRequest,
-            $$"""{"title":"Bad request","status":400,"detail":"Customer '{{portalId}}' not found"}""");
+        return status == HttpStatusCode.NotFound
+            ? PaymentServiceAnswer.Json(status, $$"""{"title":"Resource not found","status":404,"detail":"Customer '{{portalId}}' not found"}""")
+            : PaymentServiceAnswer.Json(status, $$"""{"title":"Bad request","status":400,"detail":"Customer '{{portalId}}' not found"}""");
     }
 }
