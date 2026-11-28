@@ -63,7 +63,7 @@ public class FormFillingReportCreator(
     private static readonly Regex _builtinTableNameRegex = new(@"^form_(\d+)_v(\d+)$", RegexOptions.Compiled);
 
     private static readonly HashSet<string> _checkboxOffStates =
-        new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
+        [with(StringComparer.OrdinalIgnoreCase), "off", "false", "0", "no", "n", "unchecked"];
 
     /// <summary>
     /// Indexes the submitted form, the half of a submission that has to happen under the form's submission lock: the

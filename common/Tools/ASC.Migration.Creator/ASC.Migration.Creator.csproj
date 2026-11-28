@@ -3,7 +3,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>

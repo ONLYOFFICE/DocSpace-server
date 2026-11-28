@@ -6,7 +6,6 @@
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <DefineConstants>$(DefineConstants)</DefineConstants>
-    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

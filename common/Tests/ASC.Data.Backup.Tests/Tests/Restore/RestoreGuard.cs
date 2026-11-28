@@ -68,10 +68,11 @@ public static class RestoreGuard
     private static readonly Regex _mentionsPath = new("path", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     // The only fields startrestore reads.
-    private static readonly HashSet<string> _bodyFields = new(StringComparer.Ordinal)
-    {
+    private static readonly HashSet<string> _bodyFields =
+    [
+        with(StringComparer.Ordinal),
         "backupId", "storageType", "storageParams", "notify", "dump"
-    };
+    ];
 
     // The only storageParams key a safe request may carry.
     private const string AllowedParamKey = "folderId";

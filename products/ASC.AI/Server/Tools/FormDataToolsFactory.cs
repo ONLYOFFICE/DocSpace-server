@@ -42,12 +42,13 @@ public class FormDataToolsFactory(
     private const string AggregateName = "aggregated_form_data";
     private const string SelfJoinName = "self_join_form_data";
 
-    private static readonly HashSet<string> _toolNames = new(StringComparer.Ordinal)
-    {
+    private static readonly HashSet<string> _toolNames =
+    [
+        with(StringComparer.Ordinal),
         QueryName,
         AggregateName,
         SelfJoinName
-    };
+    ];
 
     private const string FormDataRules =
         $"""

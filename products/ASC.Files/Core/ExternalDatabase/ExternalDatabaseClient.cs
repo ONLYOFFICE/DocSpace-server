@@ -202,7 +202,7 @@ public record DateDiffAggregate(string StartColumn, string EndColumn, string Uni
 
 file static class DateDiffUnits
 {
-    private static readonly HashSet<string> _allowed = new(StringComparer.OrdinalIgnoreCase) { "DAYS", "HOURS", "MINUTES" };
+    private static readonly HashSet<string> _allowed = [with(StringComparer.OrdinalIgnoreCase), "DAYS", "HOURS", "MINUTES"];
 
     public static void Validate(string unit)
     {
@@ -940,35 +940,41 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return Convert.ToInt64(result);
     }
 
-    private static readonly HashSet<string> _allowedOperators = new(StringComparer.OrdinalIgnoreCase)
-    {
+    private static readonly HashSet<string> _allowedOperators =
+    [
+        with(StringComparer.OrdinalIgnoreCase),
         "=", "!=", "<>", "<", ">", "<=", ">=", "LIKE", "NOT LIKE", "IS NULL", "IS NOT NULL", "IN", "NOT IN"
-    };
+    ];
 
-    private static readonly HashSet<string> _nullaryOperators = new(StringComparer.OrdinalIgnoreCase)
-    {
+    private static readonly HashSet<string> _nullaryOperators =
+    [
+        with(StringComparer.OrdinalIgnoreCase),
         "IS NULL", "IS NOT NULL"
-    };
+    ];
 
-    private static readonly HashSet<string> _allowedAggregateFunctions = new(StringComparer.OrdinalIgnoreCase)
-    {
+    private static readonly HashSet<string> _allowedAggregateFunctions =
+    [
+        with(StringComparer.OrdinalIgnoreCase),
         "COUNT", "COUNT_DISTINCT", "SUM", "AVG", "MIN", "MAX"
-    };
+    ];
 
-    private static readonly HashSet<string> _allowedDateParts = new(StringComparer.OrdinalIgnoreCase)
-    {
+    private static readonly HashSet<string> _allowedDateParts =
+    [
+        with(StringComparer.OrdinalIgnoreCase),
         "YEAR", "MONTH", "WEEK", "DAYOFYEAR", "QUARTER", "DAYOFWEEK"
-    };
+    ];
 
-    private static readonly HashSet<string> _datePartFilterOperators = new(StringComparer.OrdinalIgnoreCase)
-    {
+    private static readonly HashSet<string> _datePartFilterOperators =
+    [
+        with(StringComparer.OrdinalIgnoreCase),
         "=", "!=", "<", ">", "<=", ">=", "IN"
-    };
+    ];
 
-    private static readonly HashSet<string> _allowedJoinOperators = new(StringComparer.OrdinalIgnoreCase)
-    {
+    private static readonly HashSet<string> _allowedJoinOperators =
+    [
+        with(StringComparer.OrdinalIgnoreCase),
         "=", "!=", "<>", "<", ">", "<=", ">="
-    };
+    ];
 
     public const int MaxRowsPerRequest = 500;
 

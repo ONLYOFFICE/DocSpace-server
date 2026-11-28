@@ -50,12 +50,13 @@ public class EditorToolsFactory(
     private const string GeneratePresentationDescription = "Generates a complete presentation with custom theme, fonts, and streaming content.";
     private const string GenerateFormDescription = "Use this function if you are asked to generate a form or document template (contract, any document for filling) based on a description. Input: a detailed description of the desired form or template.";
 
-    private static readonly HashSet<string> _toolNames = new(StringComparer.Ordinal)
-    {
+    private static readonly HashSet<string> _toolNames =
+    [
+        with(StringComparer.Ordinal),
         GenerateDocxName,
         GeneratePresentationName,
         GenerateFormName
-    };
+    ];
 
     public bool Owns(string toolName)
     {

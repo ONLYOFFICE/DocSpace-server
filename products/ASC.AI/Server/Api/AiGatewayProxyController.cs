@@ -45,14 +45,15 @@ public class AiGatewayProxyController(
     UserManager userManager,
     AuthContext authContext) : ControllerBase
 {
-    private static readonly HashSet<string> _allowedPaths = new(StringComparer.OrdinalIgnoreCase)
-    {
+    private static readonly HashSet<string> _allowedPaths =
+    [
+        with(StringComparer.OrdinalIgnoreCase),
         "models",
         "chat/completions",
         "images/generations",
         "search",
         "contents"
-    };
+    ];
 
     private static readonly string[] _forwardedHeaders = ["x-session-id"];
 
