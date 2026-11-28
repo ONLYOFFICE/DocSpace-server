@@ -8,6 +8,17 @@ paths:
 The mapping library is **Riok.Mapperly** (referenced from `ASC.Common`, so every project has it).
 Mapster and AutoMapper were removed — never bring them, or any second mapping library, back.
 
+## Checklist
+
+- Every new conversion is a Mapperly mapper: no new `*Helper` method, inline initializer or other library (Rule)
+- Server-owned target fields (`LastModified`, `IsLicensor`) are set explicitly in the controller (Rule)
+- A source class that exists only for the response is moved into `ApiModels` instead of mapped (Rule)
+- The mapper follows its target type in the same file, named `<Type>Mapper`/`<Type>DtoMapper` (How to declare)
+- Strategy `Target` to an API DTO, `Source` from a request; `None` only where already used (How to declare)
+- Renames use `[MapProperty(nameof(...), nameof(...))]`; DI instances only via `[ObjectFactory]` (How to declare)
+- No I/O or `.Result` in a generated mapping; enriched fields come from a `*DtoHelper` (When a helper is still right)
+- A touched helper method that is only a flat copy is replaced by a mapper in the same change (Existing helpers)
+
 ## Rule
 
 Any **new** conversion — entity → DTO, request DTO → settings/domain, EF row ↔ domain — is a

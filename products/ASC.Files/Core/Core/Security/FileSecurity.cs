@@ -257,8 +257,7 @@ public class FileSecurity(
                 FolderType.AiProjectRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomManager, FileShare.None] }
+                        { SubjectType.User, [FileShare.ContentCreator, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -1256,7 +1255,8 @@ public class FileSecurity(
         if (e.RootFolderType == FolderType.AiHub &&
             parentFolders.Exists(f => f.FolderType == FolderType.AiProjectRoom) &&
             (e.CreateBy != userId ||
-             action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy)))
+             (action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy) &&
+              (file == null || action != FilesSecurityActions.ReadHistory))))
         {
             return false;
         }
@@ -3072,59 +3072,32 @@ public class FileSecurity(
         return rooms;
     }
 
-    public async Task<List<FileEntry>> GetPinnedAiProjectsAsync()
+    public async Task<List<FileEntry>> GetAiHubRootProjectsAsync()
     {
+        const int projectsCount = 5;
+
         var userId = authContext.CurrentAccount.ID;
 
         var pinnedIds = await daoFactory.GetTagDao<int>().GetTagsAsync(userId, 0, TagType.Pin)
             .Where(t => t.EntryType == FileEntryType.Folder && t.EntryId is int)
             .Select(t => (int)t.EntryId)
-            .Distinct()
-            .ToListAsync();
+            .ToHashSetAsync();
 
-        if (pinnedIds.Count == 0)
-        {
-            return [];
-        }
-
-        var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId);
         var aiHubId = await globalFolder.GetFolderAiHubAsync(daoFactory);
 
         var projects = await daoFactory.GetFolderDao<int>()
-            .GetAiProjectsVisibleToAsync(pinnedIds, aiHubId, userId, isAdmin)
-            .ToDictionaryAsync(p => p.Id);
+            .GetAiHubRootProjectsAsync(pinnedIds, aiHubId, userId, projectsCount)
+            .ToListAsync();
 
-        var ordered = pinnedIds.Where(projects.ContainsKey).Select(id => projects[id]).ToList();
-
-        foreach (var project in ordered)
+        foreach (var project in projects)
         {
-            if (project.ShareRecord != null)
-            {
-                project.Access = project.ShareRecord.Share;
-            }
-            else
-            {
-                project.Access = FileShare.None;
-
-                if (isAdmin)
-                {
-                    project.ShareRecord = new FileShareRecord<int>
-                    {
-                        EntryId = project.Id,
-                        EntryType = FileEntryType.Folder,
-                        Share = FileShare.None,
-                        SubjectType = SubjectType.User,
-                        Subject = userId
-                    };
-                }
-            }
-
-            project.Pinned = true;
+            project.Access = project.ShareRecord?.Share ?? FileShare.None;
+            project.Pinned = pinnedIds.Contains(project.Id);
             project.IsFavorite = false;
             project.Tags = [];
         }
 
-        return [.. ordered];
+        return [.. projects];
     }
 
     // FillingFormsRoom rooms physically live under VirtualRooms but are surfaced in the separate Forms

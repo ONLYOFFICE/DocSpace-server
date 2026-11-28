@@ -47,6 +47,7 @@ import {
   cleanDescription,
   toSkillName,
 } from "./generateSkill.js";
+import { clientFault } from "../httpErrors.js";
 
 /** Length of the file title a request may carry, extension excluded. */
 export const MAX_TITLE_LENGTH = 165;
@@ -54,10 +55,6 @@ export const MAX_TITLE_LENGTH = 165;
 export interface CreateSkillInput {
   destId: string;
   title: string;
-}
-
-function httpError(status: number, message: string): Error {
-  return Object.assign(new Error(message), { status, expose: true });
 }
 
 /** The title as the dialog sends it, without a `.md` the user typed themselves. */
@@ -104,13 +101,13 @@ export function buildSkillTemplate(title: string): string {
 export async function createSkill(input: CreateSkillInput): Promise<UploadedFile> {
   const title = toSkillTitle(input.title);
   if (!title || title.length > MAX_TITLE_LENGTH) {
-    throw httpError(
+    throw clientFault(
       400,
       `title must be a non-empty string of at most ${MAX_TITLE_LENGTH} characters`,
     );
   }
   if (!toSkillName(title)) {
-    throw httpError(400, "title must contain a letter or a digit");
+    throw clientFault(400, "title must contain a letter or a digit");
   }
   await assertInstructionsRoom(input.destId);
 

@@ -1,19 +1,48 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  FakeDocspaceApiHttpError,
-  fakeFetch,
-  headers,
-  logger,
-  portalJson,
-  PROXY,
-  withTimeout,
-} from "./mocks.js";
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
-vi.mock("../../log.js", () => ({ default: logger }));
-vi.mock("../../storage/httpClient.js", () => ({ withTimeout, proxyBaseUrl: PROXY }));
-vi.mock("../../requestContext.js", () => ({ getForwardedHeaders: () => headers }));
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { FakeDocspaceApiHttpError, logger } from "./mocks.js";
+
+const { filesApiGet, filesApiSend } = vi.hoisted(() => ({
+  filesApiGet: vi.fn(),
+  filesApiSend: vi.fn(),
+}));
+
 vi.mock("../../storage/docspaceFilesApi.js", () => ({
   DocspaceApiHttpError: FakeDocspaceApiHttpError,
+  filesApiGet,
+  filesApiSend,
 }));
 
 const { FieldType, getEntryMetadata, hasValue, parseEntryMetadata, setCustomFields, setValues } =
@@ -120,68 +149,39 @@ describe("hasValue", () => {
 
 describe("the Files metadata calls", () => {
   beforeEach(() => {
-    vi.unstubAllGlobals();
+    filesApiGet.mockReset();
+    filesApiSend.mockReset();
   });
 
-  it("reads an entry's metadata under the caller's headers", async () => {
-    const { fetchMock, calls } = fakeFetch([
-      {
-        match: (url) => url.endsWith("/api/2.0/files/metadata/file/42"),
-        answer: () => portalJson({ templates: [], customFields: [{ name: "A", value: "1" }] }),
-      },
-    ]);
-    vi.stubGlobal("fetch", fetchMock);
+  it("reads an entry's metadata through the Files API client", async () => {
+    filesApiGet.mockResolvedValue({ templates: [], customFields: [{ name: "A", value: "1" }] });
     const metadata = await getEntryMetadata("file", "42");
     expect(metadata.customFields).toEqual([{ name: "A", value: "1" }]);
-    expect(calls[0]?.url).toBe(`${PROXY}/api/2.0/files/metadata/file/42`);
-    expect((calls[0]?.init?.headers as Record<string, string>)["cookie"]).toBe(headers.cookie);
+    expect(filesApiGet.mock.calls).toEqual([["metadata/file/42"]]);
   });
 
-  it("writes values with PUT and a JSON body, and parses the metadata that comes back", async () => {
-    const { fetchMock, calls } = fakeFetch([
-      {
-        match: (url, init) => url.endsWith("/metadata/folder/5/values") && init?.method === "PUT",
-        answer: () =>
-          portalJson({
-            templates: [
-              { id: 1, fields: [{ id: 9, name: "N", type: 2, value: { numberValue: 3 } }] },
-            ],
-            customFields: [],
-          }),
-      },
-    ]);
-    vi.stubGlobal("fetch", fetchMock);
+  it("writes values with PUT and parses the metadata that comes back", async () => {
+    filesApiSend.mockResolvedValue({
+      templates: [{ id: 1, fields: [{ id: 9, name: "N", type: 2, value: { numberValue: 3 } }] }],
+      customFields: [],
+    });
     const after = await setValues("folder", "5", [{ fieldId: 9, numberValue: 3 }]);
     expect(after.templates[0]?.fields[0]?.value).toEqual({ numberValue: 3 });
-    const init = calls[0]?.init;
-    expect(init?.method).toBe("PUT");
-    expect((init?.headers as Record<string, string>)["content-type"]).toBe("application/json");
-    expect(JSON.parse(String(init?.body))).toEqual({ values: [{ fieldId: 9, numberValue: 3 }] });
+    expect(filesApiSend.mock.calls).toEqual([
+      ["PUT", "metadata/folder/5/values", { values: [{ fieldId: 9, numberValue: 3 }] }],
+    ]);
   });
 
   it("writes custom fields with PUT", async () => {
-    const { fetchMock, calls } = fakeFetch([
-      {
-        match: (url, init) =>
-          url.endsWith("/metadata/file/1/customFields") && init?.method === "PUT",
-        answer: () => portalJson([{ name: "A", value: "x" }]),
-      },
-    ]);
-    vi.stubGlobal("fetch", fetchMock);
+    filesApiSend.mockResolvedValue([{ name: "A", value: "x" }]);
     await setCustomFields("file", "1", [{ name: "A", value: "x" }]);
-    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
-      fields: [{ name: "A", value: "x" }],
-    });
+    expect(filesApiSend.mock.calls).toEqual([
+      ["PUT", "metadata/file/1/customFields", { fields: [{ name: "A", value: "x" }] }],
+    ]);
   });
 
   it("relays a portal refusal as DocspaceApiHttpError with its status", async () => {
-    const { fetchMock } = fakeFetch([
-      {
-        match: (url) => url.includes("/metadata/file/3"),
-        answer: () => new Response("", { status: 403, statusText: "Forbidden" }),
-      },
-    ]);
-    vi.stubGlobal("fetch", fetchMock);
+    filesApiGet.mockRejectedValue(new FakeDocspaceApiHttpError(403, "Forbidden", "u"));
     await expect(getEntryMetadata("file", "3")).rejects.toMatchObject({ status: 403 });
   });
 });

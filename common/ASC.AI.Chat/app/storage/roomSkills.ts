@@ -45,7 +45,7 @@
 // so the body read is a plain file read with the caller's own credentials.
 
 import type { ContextFolder, RoomSkill } from "@onlyoffice/ai-chat/core";
-import { proxyBaseUrl, withTimeout } from "./httpClient.js";
+import { proxyBaseUrl } from "./httpClient.js";
 import { countFilesApiRead, getForwardedHeaders } from "../requestContext.js";
 import {
   asString,
@@ -57,8 +57,18 @@ import {
   getString,
   isObject,
 } from "../narrow.js";
-import { DocspaceApiHttpError, filesApiGet } from "./docspaceFilesApi.js";
-import logger from "../log.js";
+import {
+  DocspaceApiHttpError,
+  filesApiDownloadBytes,
+  filesApiDownloadText,
+  filesApiGet,
+} from "./docspaceFilesApi.js";
+import { clientFault } from "../httpErrors.js";
+import { UpstreamShapeError } from "./upstreamShape.js";
+import { pooled } from "./pooled.js";
+
+// The body readers moved to the clients' module; kept importable from here for their readers.
+export { readBodyCapped } from "./httpClient.js";
 
 /** `RoomType.InstructionsRoom` on the C# side — the rooms whose Markdown files are skills. */
 const INSTRUCTIONS_ROOM_TYPE = 10;
@@ -74,6 +84,13 @@ const MAX_PAGES = 10;
 
 /** Rooms per catalog read: `roomIds` takes 1 to 20 ids (`AiHubService.MaxRoomsPerType`). */
 const SKILLS_BATCH_SIZE = 20;
+
+/**
+ * Requests to the Files API in flight for one listing: the pages of the rooms, then the catalog
+ * reads. A portal with a thousand Instructions rooms takes 9 more pages and 50 catalog reads,
+ * which went out all at once with the caller's session.
+ */
+const FILES_API_CONCURRENCY = 4;
 
 /**
  * Bytes of a skill file read at most. The widget cuts a body at 64 K
@@ -121,10 +138,17 @@ function parseSkill(raw: unknown): RoomSkill | undefined {
   return { id, name, description: getString(raw, "description") ?? "" };
 }
 
-/** The rooms of a catalog answer (`{ rooms: [{ id, title, logo, skills }] }`). */
+/**
+ * The rooms of a catalog answer (`{ rooms: [{ id, title, logo, skills }] }`). An answer without
+ * the list is unknown, not a catalog without rooms: it throws {@link UpstreamShapeError}.
+ */
 export function parseSkillsCatalog(raw: unknown): CatalogRoom[] {
+  const entries = isObject(raw) ? getObjectArray(raw, "rooms") : undefined;
+  if (entries === undefined) {
+    throw new UpstreamShapeError("GET files/rooms/skills");
+  }
   const rooms: CatalogRoom[] = [];
-  for (const entry of (isObject(raw) ? getObjectArray(raw, "rooms") : undefined) ?? []) {
+  for (const entry of entries) {
     const id = getEntityId(entry, "id");
     if (id === undefined) {
       continue;
@@ -159,8 +183,8 @@ export async function getRoomsSkills(roomIds: string[]): Promise<Map<string, Roo
   for (let i = 0; i < ids.length; i += SKILLS_BATCH_SIZE) {
     batches.push(ids.slice(i, i + SKILLS_BATCH_SIZE));
   }
-  const answers = await Promise.all(
-    batches.map((batch) => filesApiGet("rooms/skills", { roomIds: batch })),
+  const answers = await pooled(batches, FILES_API_CONCURRENCY, (batch) =>
+    filesApiGet("rooms/skills", { roomIds: batch }),
   );
   const result = new Map<string, RoomSkill[]>();
   for (const answer of answers) {
@@ -171,31 +195,24 @@ export async function getRoomsSkills(roomIds: string[]): Promise<Map<string, Roo
   return result;
 }
 
-function parseRoomsPage(
-  raw: unknown,
-): { rooms: ContextFolder["rooms"]; total: number } | undefined {
-  const envelope = isObject(raw) ? getObject(raw, "response") : undefined;
-  if (!envelope) {
-    return undefined;
+// The `response` of a rooms listing page: `{ folders: FolderDto[], total }`. A page without the
+// list is unknown, not a page without rooms.
+function parseRoomsPage(response: unknown): { rooms: ContextFolder["rooms"]; total: number } {
+  const folders = isObject(response) ? getObjectArray(response, "folders") : undefined;
+  if (!isObject(response) || folders === undefined) {
+    throw new UpstreamShapeError("GET files/rooms");
   }
   const rooms: ContextFolder["rooms"] = [];
-  for (const entry of getObjectArray(envelope, "folders") ?? []) {
+  for (const entry of folders) {
     const id = getEntityId(entry, "id");
     const name = getString(entry, "title");
     if (id !== undefined && name) {
       rooms.push({ id, name });
     }
   }
-  return { rooms, total: getNumber(envelope, "total") ?? rooms.length };
+  return { rooms, total: getNumber(response, "total") ?? rooms.length };
 }
 
-/**
- * The Instructions rooms the caller can read that hold at least one skill
- * file, as one cloud entry — `GET api/2.0/files/rooms?type=10`, paged, then
- * one look into each room. The server already leaves out rooms the caller
- * may not see. Empty when there is none, so the widget shows no picker at
- * all.
- */
 /** The search area of the root that keeps the Instructions and Knowledge rooms. */
 const AI_HUB_SEARCH_AREA = "AiHub";
 
@@ -206,38 +223,34 @@ const AI_HUB_SEARCH_AREA = "AiHub";
  * asks for that search area.
  */
 async function listRoomsOfType(roomType: number): Promise<ContextFolder["rooms"]> {
-  const rooms: ContextFolder["rooms"] = [];
-  for (let page = 0; page < MAX_PAGES; page += 1) {
-    const params = new URLSearchParams({
-      type: String(roomType),
+  const readPage = (page: number): Promise<unknown> =>
+    filesApiGet("rooms", {
+      type: roomType,
       searchArea: AI_HUB_SEARCH_AREA,
-      count: String(PAGE_SIZE),
-      startIndex: String(page * PAGE_SIZE),
+      count: PAGE_SIZE,
+      startIndex: page * PAGE_SIZE,
     });
-    const url = `${proxyBaseUrl}/api/2.0/files/rooms?${params}`;
-    const { signal, cancel } = withTimeout(undefined);
-    countFilesApiRead();
-    try {
-      const res = await fetch(url, { headers: getForwardedHeaders(), signal });
-      if (!res.ok) {
-        throw new DocspaceApiHttpError(res.status, res.statusText, url);
-      }
-      const parsed = parseRoomsPage(await res.json());
-      if (!parsed) {
-        logger.warn(`listRoomsOfType(${roomType}) -> unparseable response from ${url}`);
-        break;
-      }
-      rooms.push(...parsed.rooms);
-      if ((page + 1) * PAGE_SIZE >= parsed.total) {
-        break;
-      }
-    } finally {
-      cancel();
-    }
-  }
-  return rooms;
+  // The first page tells the total, so the other pages (at most
+  // MAX_PAGES - 1 of them) are read FILES_API_CONCURRENCY at a time; they
+  // are joined in page order.
+  const first = parseRoomsPage(await readPage(0));
+  const pageCount = Math.min(Math.ceil(first.total / PAGE_SIZE), MAX_PAGES);
+  const rest = Array.from({ length: Math.max(pageCount - 1, 0) }, (_, i) => i + 1);
+  // A page that cannot be read fails the listing: the rooms of the pages
+  // before it are not the caller's rooms.
+  const others = await pooled(rest, FILES_API_CONCURRENCY, async (page) =>
+    parseRoomsPage(await readPage(page)),
+  );
+  return [first, ...others].flatMap((page) => page.rooms);
 }
 
+/**
+ * The Instructions rooms the caller can read that hold at least one skill
+ * file, as one cloud entry — `GET api/2.0/files/rooms?type=10`, paged, then
+ * the skills of those rooms, 20 rooms a call (`getRoomsSkills`). The server
+ * already leaves out rooms the caller may not see. Empty when there is none,
+ * so the widget shows no picker at all.
+ */
 export async function getContextFolders(): Promise<ContextFolder[]> {
   const rooms = await listRoomsOfType(INSTRUCTIONS_ROOM_TYPE);
   if (rooms.length === 0) {
@@ -286,23 +299,13 @@ export function throughProxy(url: string, base: string = proxyBaseUrl): string {
  * host-relative); see {@link throughProxy} for where to fetch it from.
  */
 export async function presignedDownloadUrl(fileId: string): Promise<string> {
-  const uriUrl = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}/presigneduri`;
-  const { signal, cancel } = withTimeout(undefined);
-  countFilesApiRead();
-  try {
-    const res = await fetch(uriUrl, { headers: getForwardedHeaders(), signal });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, uriUrl);
-    }
-    const raw: unknown = await res.json();
-    const downloadUrl = isObject(raw) ? asString(raw["response"]) : undefined;
-    if (!downloadUrl) {
-      throw new Error(`No download address for file ${fileId}`);
-    }
-    return downloadUrl;
-  } finally {
-    cancel();
+  const downloadUrl = asString(
+    await filesApiGet(`file/${encodeURIComponent(fileId)}/presigneduri`),
+  );
+  if (!downloadUrl) {
+    throw new UpstreamShapeError("GET files/file/{id}/presigneduri");
   }
+  return downloadUrl;
 }
 
 /**
@@ -313,53 +316,7 @@ export async function presignedDownloadUrl(fileId: string): Promise<string> {
  */
 export async function readFileText(fileId: string): Promise<string> {
   const url = throughProxy(await presignedDownloadUrl(fileId));
-  const { signal, cancel } = withTimeout(undefined);
-  try {
-    const res = await fetch(url, { headers: downloadHeaders(), signal });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
-    }
-    // Awaited here, not returned as a promise: the finally below cancels the
-    // timeout signal, and that must happen after the body has been read.
-    return await readTextCapped(res, MAX_SKILL_BYTES);
-  } finally {
-    cancel();
-  }
-}
-
-/**
- * The body of a response, or `null` once it proves larger than `limit`
- * bytes: by its declared length, or by what has arrived when it declares
- * none. The rest of an oversized body is not read.
- */
-export async function readBodyCapped(res: Response, limit: number): Promise<Uint8Array | null> {
-  const declared = Number(res.headers.get("content-length"));
-  if (Number.isFinite(declared) && declared > limit) {
-    await res.body?.cancel();
-    return null;
-  }
-  if (!res.body) {
-    return new Uint8Array(0);
-  }
-  const reader = res.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let received = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      received += value.byteLength;
-      if (received > limit) {
-        return null;
-      }
-      chunks.push(value);
-    }
-  } finally {
-    await reader.cancel().catch(() => undefined);
-  }
-  return Buffer.concat(chunks, received);
+  return filesApiDownloadText(url, downloadHeaders(), MAX_SKILL_BYTES);
 }
 
 /** A file the caller may read is larger than the limit its reader set. */
@@ -379,20 +336,11 @@ export class FileTooLargeError extends Error {
  */
 export async function readFileBytes(fileId: string, limit: number): Promise<Uint8Array> {
   const url = throughProxy(await presignedDownloadUrl(fileId));
-  const { signal, cancel } = withTimeout(undefined);
-  try {
-    const res = await fetch(url, { headers: downloadHeaders(), signal });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
-    }
-    const bytes = await readBodyCapped(res, limit);
-    if (bytes === null) {
-      throw new FileTooLargeError(fileId, limit);
-    }
-    return bytes;
-  } finally {
-    cancel();
+  const bytes = await filesApiDownloadBytes(url, downloadHeaders(), limit);
+  if (bytes === null) {
+    throw new FileTooLargeError(fileId, limit);
   }
+  return bytes;
 }
 
 // The caller's conditional headers describe the widget's request, not the
@@ -403,37 +351,6 @@ export function downloadHeaders(): Record<string, string> {
       ([name]) => !CONDITIONAL_HEADERS.has(name.toLowerCase()),
     ),
   );
-}
-
-/**
- * The body decoded as UTF-8, at most `limit` bytes of it. The stream is
- * cancelled once the limit is reached, so a file far larger than a skill
- * costs neither the download nor the memory beyond that point.
- */
-async function readTextCapped(res: Response, limit: number): Promise<string> {
-  if (!res.body) {
-    return "";
-  }
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-  let text = "";
-  let received = 0;
-  try {
-    while (received < limit) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      const room = limit - received;
-      const chunk = value.length > room ? value.subarray(0, room) : value;
-      received += chunk.length;
-      text += decoder.decode(chunk, { stream: true });
-    }
-  } finally {
-    // Past the limit, or on an error: drop the rest of the download.
-    await reader.cancel().catch(() => undefined);
-  }
-  return text + decoder.decode();
 }
 
 /**
@@ -461,10 +378,7 @@ export async function getRoomSkills(roomId: string): Promise<RoomSkill[]> {
 export async function getRoomSkill(roomId: string, skillId: string): Promise<string> {
   const skills = await getRoomSkills(roomId);
   if (!skills.some((skill) => skill.id === skillId)) {
-    throw Object.assign(new Error(`Skill ${skillId} is not a skill of room ${roomId}`), {
-      status: 404,
-      expose: true,
-    });
+    throw clientFault(404, `Skill ${skillId} is not a skill of room ${roomId}`);
   }
   return readFileText(skillId);
 }

@@ -31,7 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ThreadsEngine, AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
+import { ThreadsEngine, ActionType } from "@onlyoffice/ai-chat/core";
+import { resolveOrNull } from "./assignmentsController.js";
 import type {
   Profile,
   OpenOrCreateInput,
@@ -47,11 +48,18 @@ import {
   attachmentLimitError,
   invalidMessageError,
 } from "./_helpers.js";
-import { asString, parseInt10, isObject, getString } from "../narrow.js";
+import { asString, parseInteger, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { getSourceMeta } from "../requestContext.js";
 import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 import { readStoredProfile, resolveStoredProfile } from "./storedProfile.js";
+import { clientFault } from "../httpErrors.js";
+import { assertAiAccess } from "./aiAccess.js";
+
+// A profile id as the AI service binds it: `TouchThreadRequestDto.ProfileId` is a `Guid?` read by
+// System.Text.Json, which takes the hyphenated 36-character form alone. Braces, parentheses and
+// the form without hyphens are a 400 there.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -61,15 +69,36 @@ function parseMessagesCursor(raw: unknown): MessagesCursor | undefined {
   if (typeof raw !== "string" || raw.length === 0) {
     return undefined;
   }
+  let parsed: unknown;
   try {
-    const parsed: unknown = JSON.parse(raw);
-    if (isObject(parsed) && getString(parsed, "id") !== undefined) {
-      return parsed as unknown as MessagesCursor;
-    }
+    parsed = JSON.parse(raw);
   } catch {
-    // fall through — not JSON
+    // not JSON
+    return undefined;
   }
-  return undefined;
+  if (!isObject(parsed)) {
+    return undefined;
+  }
+  const id = getString(parsed, "id");
+  if (id === undefined) {
+    return undefined;
+  }
+  return { id, createdAt: cursorCreatedAt(parsed["createdAt"]) };
+}
+
+// The storage sends `createdAt` as an ISO string, and also takes the epoch
+// milliseconds a message stored before this service sent ISO strings still
+// carries (`toWireCursor` in messagesStorage.ts). Anything else is no
+// position, which the storage reads as an unpaginated read.
+function cursorCreatedAt(value: unknown): string | null {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value !== "number") {
+    return null;
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 // Only an explicit `desc` turns the read around; anything else — absent,
@@ -110,8 +139,6 @@ interface CreateBody {
   entityId?: string;
 }
 
-const assignmentsEngine = new AssignmentsEngine({ storage });
-
 // Gate for creating a thread (review #6, Bug 82719). Two requirements:
 //  1. If an `entityId` is supplied it must reference a folder the caller can
 //     access — a missing folder surfaces as 404, a no-access response as 403
@@ -134,18 +161,12 @@ export async function assertThreadCreatable(
   const project = await readAiProjectChatContext(entityId);
   if (project) {
     if (!project.canChat) {
-      throw Object.assign(new Error("You cannot chat in this AI project"), {
-        status: 403,
-        expose: true,
-      });
+      throw clientFault(403, "You cannot chat in this AI project");
     }
     if (project.profileAvailable && project.effectiveProfileId) {
       return;
     }
-    throw Object.assign(new Error("The model of this AI project is not available"), {
-      status: 409,
-      expose: true,
-    });
+    throw clientFault(409, "The model of this AI project is not available");
   }
   // A malformed profileId makes the C# lookup fail with 400; treat that the
   // same as "no such profile" and fall through to the scope-assignment
@@ -154,17 +175,22 @@ export async function assertThreadCreatable(
   if (profileId && (await readStoredProfile(profileId))) {
     return;
   }
-  const resolved = await assignmentsEngine.tryResolveForAction(ActionType.Chat, entityId);
+  // A chat slot whose profile is gone is no profile, not a server failure.
+  const resolved = await resolveOrNull(ActionType.Chat, entityId);
   if (resolved?.profile) {
     return;
   }
-  throw Object.assign(new Error("no AI profile is available for this thread"), {
-    status: 404,
-    expose: true,
-  });
+  throw clientFault(404, "no AI profile is available for this thread");
 }
 
 type ThreadMessageInput = Omit<ThreadMessageLike, "id" | "createdAt">;
+
+// A message the storage keeps verbatim: an object with a known role and
+// something to store (`invalidMessageError`). Its parts are the widget's
+// and are stored as they came.
+function isMessageInput(message: unknown): message is ThreadMessageInput {
+  return invalidMessageError(message) === null;
+}
 
 interface AppendUserMessageBody {
   threadId: string;
@@ -194,12 +220,14 @@ interface UpdateMessageBody {
 
 export const threadsController = {
   create: asyncHandler<CreateBody>(async (req, res) => {
+    await assertAiAccess();
     await assertThreadCreatable(req.body?.entityId, req.body?.profileId);
     const thread = await engine.create(req.body);
     res.json(thread);
   }),
 
   openOrCreate: asyncHandler<OpenOrCreateInput>(async (req, res) => {
+    await assertAiAccess();
     // Thread creation requires a profile and, when scoped, an accessible entity
     // (review #6, Bug 82826). openOrCreate carries the resolved `profile`
     // object directly, so a missing/non-object profile means there is no model
@@ -238,6 +266,9 @@ export const threadsController = {
   }),
 
   appendUserMessage: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): a guest or a portal with AI
+    // off gets 403 for any body.
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["threadId", "message", "profileId"] as const);
     if (typeof args.threadId !== "string" || args.threadId.length === 0) {
       res.status(400).json({ error: "threadId required" });
@@ -247,12 +278,11 @@ export const threadsController = {
     // role used to be stored and served back as a user message (Bugs 84409,
     // 84410). The route stores user messages only: the engine appends the
     // other roles in-process, nothing sends them here.
-    const shapeError = invalidMessageError(args.message);
-    if (shapeError) {
-      res.status(400).json({ error: shapeError });
+    const message = args.message;
+    if (!isMessageInput(message)) {
+      res.status(400).json({ error: invalidMessageError(message) });
       return;
     }
-    const message = args.message as ThreadMessageInput;
     if (message.role !== "user") {
       res.status(400).json({ error: "append-user-message stores user messages only" });
       return;
@@ -264,6 +294,22 @@ export const threadsController = {
       res.status(400).json({ error: limitError });
       return;
     }
+    // The engine stores the message and binds the profile to the thread side by side, and the
+    // AI service refuses the binding for a profile id that is no UUID (400) and for one no
+    // profile carries (404, ThreadStorageService.TouchAsync reads the profile): both are checked
+    // here, or the message is stored while the caller is told 4xx. A profile deleted between this
+    // read and the binding still ends that way. `null` and "" stay what they were: no profile sent.
+    const sentProfileId: unknown = args.profileId;
+    if (sentProfileId !== undefined && sentProfileId !== null && sentProfileId !== "") {
+      if (typeof sentProfileId !== "string" || !UUID.test(sentProfileId)) {
+        res.status(400).json({ error: "profileId must be the id of a profile (a UUID)" });
+        return;
+      }
+      if (!(await readStoredProfile(sentProfileId))) {
+        res.status(404).json({ error: "the AI profile does not exist" });
+        return;
+      }
+    }
     const messageId = await engine.appendUserMessage(
       args.threadId,
       message,
@@ -273,6 +319,8 @@ export const threadsController = {
   }),
 
   touch: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["threadId", "profileId"] as const);
     // Without a thread id the storage would touch `/threads/undefined`.
     if (typeof args.threadId !== "string" || args.threadId.length === 0) {
@@ -284,6 +332,8 @@ export const threadsController = {
   }),
 
   rename: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["threadId", "title"] as const);
     // Same title rules as threads/create: a missing/null/empty/whitespace
     // title is a 400, never a silent success — rename used to accept all of
@@ -304,6 +354,8 @@ export const threadsController = {
   }),
 
   delete: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const { threadId } = unpackPositional(req.body, ["threadId"] as const);
     const idStr = typeof threadId === "string" ? threadId : asString(req.query["threadId"]);
     if (!idStr) {
@@ -323,6 +375,8 @@ export const threadsController = {
   }),
 
   clearMessages: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const { threadId } = unpackPositional(req.body, ["threadId"] as const);
     const idStr = typeof threadId === "string" ? threadId : asString(req.query["threadId"]);
     if (!idStr) {
@@ -334,14 +388,17 @@ export const threadsController = {
   }),
 
   regenerateTitle: asyncHandler(async (req, res) => {
-    const args = unpackPositional(
-      req.body,
-      ["threadId", "profile", "entityMeta"] as const,
-    );
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
+    const args = unpackPositional(req.body, ["threadId", "profile", "entityMeta"] as const);
     // The engine dereferences `profile` (and needs a real threadId); a missing
     // profile makes it throw a TypeError → 500 (Bug 82828). Validate both up
     // front and return a clean 400.
-    if (typeof args.threadId !== "string" || !isObject(args.profile)) {
+    if (
+      typeof args.threadId !== "string" ||
+      args.threadId.length === 0 ||
+      !isObject(args.profile)
+    ) {
       res.status(400).json({
         error: "threadId (string) and profile (object) are required",
       });
@@ -363,8 +420,14 @@ export const threadsController = {
   }),
 
   list: asyncHandler(async (req, res) => {
+    // The access gate before the query: the storage reads the folder named by `entityId` from
+    // the Files API ahead of its first call to the AI service (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const entityId = asString(req.query["entityId"]);
-    const count = parseInt10(req.query["count"]);
+    // A `count` that is not a whole integer ("20abc", "1.5") is left out like an
+    // absent one, so the service applies its own page size; its bounds are the
+    // AI service's (Range(1, 1000), 400 outside them).
+    const count = parseInteger(req.query["count"]);
     const cursor = parseThreadsCursor(req.query["cursor"]);
     const query = asString(req.query["query"]);
     const threads = await engine.list(entityId, count, cursor, query);
@@ -372,6 +435,8 @@ export const threadsController = {
   }),
 
   readMessages: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const threadId = asString(req.query["threadId"]);
     // Used to answer 200 with an empty list, which hid a forgotten ID
     // behind "no messages yet" (Bug 84408).
@@ -379,7 +444,8 @@ export const threadsController = {
       res.status(400).json({ error: "threadId required" });
       return;
     }
-    const count = parseInt10(req.query["count"]);
+    // Read as in `list`.
+    const count = parseInteger(req.query["count"]);
     const cursor = parseMessagesCursor(req.query["cursor"]);
     const direction = parseDirection(req.query["direction"]);
     const messages = await engine.readMessages(threadId, count, cursor, direction);
@@ -387,6 +453,8 @@ export const threadsController = {
   }),
 
   getById: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const threadId = asString(req.query["threadId"]);
     if (!threadId) {
       res.status(400).json({ error: "threadId required" });
@@ -403,6 +471,8 @@ export const threadsController = {
   }),
 
   getMessageById: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const messageId = asString(req.query["messageId"]);
     if (!messageId) {
       res.status(400).json({ error: "messageId required" });
@@ -419,6 +489,8 @@ export const threadsController = {
   }),
 
   updateMessage: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const args = unpackPositional(req.body, ["messageId", "message"] as const);
     if (typeof args.messageId !== "string" || args.messageId.length === 0) {
       res.status(400).json({ error: "messageId required" });
@@ -428,12 +500,11 @@ export const threadsController = {
     // message (Bug 84412). The role is pinned to the stored one rather than
     // to `user`: the widget rewrites assistant messages through this route
     // when it cancels a client-side tool call (Bug 84413).
-    const shapeError = invalidMessageError(args.message);
-    if (shapeError) {
-      res.status(400).json({ error: shapeError });
+    const message = args.message;
+    if (!isMessageInput(message)) {
+      res.status(400).json({ error: invalidMessageError(message) });
       return;
     }
-    const message = args.message as ThreadMessageInput;
     const stored = await storage.messages.readById(args.messageId);
     if (stored === null) {
       res.status(404).json({ error: "message not found" });
@@ -448,6 +519,8 @@ export const threadsController = {
   }),
 
   deleteMessage: asyncHandler(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3).
+    await assertAiAccess();
     const { messageId } = unpackPositional(req.body, ["messageId"] as const);
     const idStr = typeof messageId === "string" ? messageId : asString(req.query["messageId"]);
     if (!idStr) {

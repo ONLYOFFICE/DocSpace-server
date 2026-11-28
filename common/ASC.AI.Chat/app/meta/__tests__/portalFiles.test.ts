@@ -1,6 +1,39 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useFastTimers } from "../../__tests__/helpers/time.js";
 import {
-  FakeDocspaceApiHttpError,
   fakeFetch,
   headers,
   logger,
@@ -10,11 +43,16 @@ import {
   withTimeout,
 } from "./mocks.js";
 
-vi.mock("../../log.js", () => ({ default: logger }));
-vi.mock("../../storage/httpClient.js", () => ({ withTimeout, proxyBaseUrl: PROXY }));
-vi.mock("../../requestContext.js", () => ({ getForwardedHeaders: () => headers }));
-vi.mock("../../storage/docspaceFilesApi.js", () => ({
-  DocspaceApiHttpError: FakeDocspaceApiHttpError,
+// The Files API clients are the real ones, over the `fetch` each test stubs: only the proxy
+// address, the timeout and the caller's headers are the test's.
+vi.mock("../../storage/httpClient.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../storage/httpClient.js")>()),
+  withTimeout,
+  proxyBaseUrl: PROXY,
+}));
+vi.mock("../../requestContext.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../requestContext.js")>()),
+  getForwardedHeaders: () => headers,
 }));
 
 const { getPortalFile, listFolderFiles, PortalTextReader, textTargetFor, UnsupportedFileError } =
@@ -33,8 +71,6 @@ const settingsRoute = {
   match: (url: string) => url.endsWith("/api/2.0/files/settings"),
   answer: () => portalJson(SETTINGS),
 };
-
-type Route = { match: (url: string, init?: RequestInit) => boolean; answer: () => Response };
 
 function operation(id: string, extra: Record<string, unknown> = {}) {
   return { id, operation: 3, progress: 0, error: "", processed: "0", finished: false, ...extra };
@@ -112,6 +148,8 @@ describe("textTargetFor", () => {
 });
 
 describe("PortalTextReader", () => {
+  // The reader waits 500 ms between polls and 1.5 s between retries of a start.
+  useFastTimers();
   beforeEach(() => vi.unstubAllGlobals());
 
   it("converts through bulkdownload, polls the operation and downloads the text through the proxy", async () => {
@@ -407,7 +445,8 @@ describe("PortalTextReader budget", () => {
   beforeEach(() => vi.unstubAllGlobals());
 
   it("gives up waiting for an operation when the read's own signal aborts", async () => {
-    const { fetchMock } = fakeFetch([
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const { fetchMock, calls } = fakeFetch([
       settingsRoute,
       {
         match: (url) => url.endsWith("/fileops/bulkdownload"),
@@ -421,8 +460,22 @@ describe("PortalTextReader budget", () => {
     vi.stubGlobal("fetch", fetchMock);
     const controller = new AbortController();
     const reader = new PortalTextReader(controller.signal);
-    const read = reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" });
-    setTimeout(() => controller.abort(new Error("budget")), 50);
-    await expect(read).rejects.toThrow(/budget/);
+    const polls = () => calls.filter((c) => c.url.includes("/api/2.0/files/fileops?id=")).length;
+    try {
+      const read = reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" });
+      const outcome = expect(read).rejects.toThrow(/budget/);
+      // Two polls of 500 ms each find the operation still running.
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(polls()).toBe(2);
+
+      controller.abort(new Error("budget"));
+
+      await outcome;
+      // The poller has no waiter left, so it stops.
+      await vi.advanceTimersByTimeAsync(2_000);
+      expect(polls()).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

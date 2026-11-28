@@ -1,47 +1,54 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ProfilesEngine } from "@onlyoffice/ai-chat/core";
-import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-chat/core";
+import { loadProvider, ProfilesEngine } from "@onlyoffice/ai-chat/core";
+import type {
+  Profile,
+  CreateProfileInput,
+  ProfileMutationResult,
+  ProviderType,
+} from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { listOnlyofficeGatewayModels } from "../storage/profilesStorage.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
+import { mapped } from "../storage/upstreamShape.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { assertAiAccess } from "./aiAccess.js";
-import { asString, isObject } from "../narrow.js";
+import { asString, isObject, readProp } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import logger from "../log.js";
 import type { Response } from "express";
+import { clientFault } from "../httpErrors.js";
 
 const engine = new ProfilesEngine({ storage });
 
@@ -52,14 +59,14 @@ const engine = new ProfilesEngine({ storage });
 // made for an operation that cannot succeed anyway (Bug 83112).
 // `systemAiEnabled` mirrors `AiStatus.GatewayEnabled`
 // (AiSettingsService.GetAiSettingsAsync), the same state
-// AssertGatewayNotConfigured trips on.
+// AssertGatewayNotConfigured trips on. An answer that is not the settings
+// object leaves the flag unknown, and unknown is not "writable": the write
+// fails with 502 before anything is dialed (ts-ai-failure-paths.md §1).
 async function assertProfilesWritable(): Promise<void> {
-  const config = await aiService.get("/config");
-  if (isObject(config) && config["systemAiEnabled"] === true) {
-    throw Object.assign(
-      new Error("AI profiles are read-only on this portal (managed by the AI gateway)"),
-      { status: 403, expose: true },
-    );
+  const raw = await aiService.get("/config");
+  const config = mapped(isObject(raw) ? raw : undefined, "GET config");
+  if (config["systemAiEnabled"] === true) {
+    throw clientFault(403, "AI profiles are read-only on this portal (managed by the AI gateway)");
   }
 }
 
@@ -87,38 +94,27 @@ function rejectExternalProviderType(
 // letting `asyncHandler` collapse everything to a generic 500. The base URL
 // and key come from the user's profile form, so most failures are config
 // errors that should read as such in the UI.
+//
+// The library throws a plain Error for an unknown provider type and an
+// unknown profile id, and fetch a bare TypeError for a key no HTTP header
+// can carry: none of them has a class or a status to test, and their text
+// is not a contract (ts-ai-failure-paths.md §1). The routes decide those
+// before the call instead: the provider type through the library's own
+// registry (`unknownProviderType`, Bug 83117), the profile by reading it
+// (Bug 84426), a key the request carries by `headerSafeKeyError` (Bug 84428).
+// A key that is already stored is checked the same way after `listModels`
+// failed without a status.
 function describeProviderError(err: unknown): { status: number; message: string } {
-  // An unknown providerType never reaches the network — the provider
-  // registry lookup throws before any request is made. Surface it as the
-  // input error it is instead of collapsing into a 502 "Failed to list
-  // provider models" (Bug 83117).
-  if (err instanceof Error && err.message.startsWith("Unknown provider type")) {
-    return { status: 400, message: err.message };
-  }
-  // The library's profile lookup throws a plain Error for an unknown id;
-  // the routes check existence up front, this is the belt (Bug 84426).
-  if (err instanceof Error && err.message.startsWith("Profile not found")) {
-    return { status: 404, message: "Profile not found" };
-  }
-  // A key the SDK cannot put into an HTTP header (non-ASCII, a BOM) fails
-  // inside fetch with a bare TypeError before any request leaves; the
-  // routes reject such a key up front, this is the belt (Bug 84428).
-  if (err instanceof TypeError && /ByteString|invalid header|ERR_INVALID_CHAR/i.test(err.message)) {
-    return { status: 400, message: HEADER_UNSAFE_KEY_MESSAGE };
-  }
   // OpenAI-SDK HTTP errors expose a numeric `status`.
-  const httpStatus =
-    typeof (err as { status?: unknown })?.status === "number"
-      ? (err as { status: number }).status
-      : undefined;
+  const rawStatus = readProp(err, "status");
+  const httpStatus = typeof rawStatus === "number" ? rawStatus : undefined;
   if (httpStatus === 401 || httpStatus === 403) {
     return { status: 400, message: "Invalid API key for the AI provider" };
   }
   if (httpStatus === 404) {
     return {
       status: 400,
-      message:
-        "Invalid base URL — expected an OpenAI-compatible endpoint (e.g. ending in /v1)",
+      message: "Invalid base URL — expected an OpenAI-compatible endpoint (e.g. ending in /v1)",
     };
   }
   if (typeof httpStatus === "number" && httpStatus >= 500) {
@@ -140,7 +136,7 @@ function describeProviderError(err: unknown): { status: number; message: string 
   ]);
   let cur: unknown = err;
   for (let i = 0; i < 5 && cur; i++) {
-    const code = (cur as { code?: unknown }).code;
+    const code = readProp(cur, "code");
     if (typeof code === "string" && codes.has(code)) {
       return {
         status: 502,
@@ -148,16 +144,7 @@ function describeProviderError(err: unknown): { status: number; message: string 
           "The AI provider is unreachable — check the base URL and that the service is running",
       };
     }
-    cur = (cur as { cause?: unknown }).cause;
-  }
-
-  const msg = err instanceof Error ? err.message : String(err);
-  if (/connection error|fetch failed|timeout/i.test(msg)) {
-    return {
-      status: 502,
-      message:
-        "The AI provider is unreachable — check the base URL and that the service is running",
-    };
+    cur = readProp(cur, "cause");
   }
   return { status: 502, message: "Failed to list provider models" };
 }
@@ -194,6 +181,67 @@ function sendKeyRefusal(res: Response, message: string): void {
   res.status(400).json({ success: false, error: { field: "key", message, code: "invalid" } });
 }
 
+// A refusal of the engine (a taken name, an unknown provider type, a key the
+// provider refuses, an unknown id on update) is a 400 in the same
+// `{ success: false, error }` shape: the widget's ApiProvider hands a non-2xx
+// body of that shape back as a value, so its profile form reads it as before
+// (ts-ai-failure-paths.md §2). The profiles engine sets no `error.code`, and
+// the published document lists 400 alone for these writes, so every refusal
+// is one status.
+function sendProfileMutation(res: Response, result: ProfileMutationResult): void {
+  if (!result.success) {
+    res.status(400).json({ success: false, error: result.error });
+    return;
+  }
+  // The engine answers `create` with the stored profile and `update` with the body it was sent,
+  // spread: whatever else either carries stays here.
+  res.json({ success: true, profile: profileForSettings(result.profile) });
+}
+
+// The profile as an answer carries it: the fields of `AiProfile` in the
+// published document, by name. Spread from the storage, it carried whatever
+// the AI service adds to its ProfileDto (the BYOK provider of a profile that
+// runs on the portal's own key is one), and `key` and `headers` never leave
+// through these answers (ts-ai-failure-paths.md §5). An absent field is left
+// undefined, which the JSON answer omits.
+export type ProfileAnswer = Omit<Profile, "key" | "headers"> & { useResponsesApi?: boolean };
+
+export function profileForResponse(profile: Profile): ProfileAnswer {
+  // Not a field of the library's `Profile`: the AI service's ProfileDto
+  // carries it and `dtoToProfile` reads it.
+  const useResponsesApi = readProp(profile, "useResponsesApi");
+  return {
+    id: profile.id,
+    name: profile.name,
+    providerType: profile.providerType,
+    basedOn: profile.basedOn,
+    baseUrl: profile.baseUrl,
+    modelId: profile.modelId,
+    reasoning: profile.reasoning,
+    reasoningSupport: profile.reasoningSupport,
+    contextWindow: profile.contextWindow,
+    capabilities: profile.capabilities,
+    canUseTool: profile.canUseTool,
+    useResponsesApi: typeof useResponsesApi === "boolean" ? useResponsesApi : undefined,
+    isCloudProvider: profile.isCloudProvider,
+    useProxy: profile.useProxy,
+    createdAt: profile.createdAt,
+  };
+}
+
+// The profile as the settings cards read it: the listed fields and the provider key. The answer
+// of a write goes to the DocSpace admin who sent the key, and the widget puts it into its list as
+// it came; the list carries the key for an administrator alone, since the AI service reads it
+// `forClient` and drops the key for everyone else (spec ai-agents, "Key in the list for an
+// administrator"). `headers` and whatever else the object carries do not leave.
+export function profileForSettings(profile: Profile): ProfileAnswer & { key?: string } {
+  const answer: ProfileAnswer & { key?: string } = profileForResponse(profile);
+  if (typeof profile.key === "string") {
+    answer.key = profile.key;
+  }
+  return answer;
+}
+
 // 404 for a profile the caller cannot see, before the engine is involved:
 // the library's lookup throws a plain Error for a missing profile, which
 // collapsed into 502 "Failed to list provider models" on list-models and
@@ -203,9 +251,28 @@ async function profileExists(id: string): Promise<boolean> {
   return (await storage.profiles.readByIdRaw(id)) !== undefined;
 }
 
+// The refusal for a provider type the library's registry does not know, the same lookup the
+// engine makes before it calls out: it never reaches the network (Bug 83117).
+async function unknownProviderType(type: unknown): Promise<string | null> {
+  if (typeof type === "string" && (await loadProvider(type)) !== undefined) {
+    return null;
+  }
+  return `Unknown provider type: ${String(type)}`;
+}
+
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): with AI off, or for a caller
+    // without AI access, 403 for any body the parser accepted, and no outbound request to the sent baseUrl.
+    await assertAiAccess();
     await assertProfilesWritable();
+    // The engine compares the name with the stored ones before anything else: a body without a
+    // string name made it throw, which answered 500.
+    const sent: unknown = req.body;
+    if (!isObject(sent) || typeof sent["name"] !== "string") {
+      res.status(400).json({ error: "name is required and must be a string" });
+      return;
+    }
     if (rejectExternalProviderType(req.body?.providerType, res)) {
       return;
     }
@@ -215,12 +282,21 @@ export const profilesController = {
       sendKeyRefusal(res, keyError);
       return;
     }
-    const result = await engine.create(req.body);
-    res.json(result);
+    sendProfileMutation(res, await engine.create(req.body));
   }),
 
   update: asyncHandler<Profile>(async (req, res) => {
+    // The access gate before the body (ts-ai-failure-paths.md §3): with AI off, or for a caller
+    // without AI access, 403 for any body the parser accepted, and no outbound request to the sent baseUrl.
+    await assertAiAccess();
     await assertProfilesWritable();
+    // The engine compares the name with the stored ones before anything else: a body without a
+    // string name made it throw, which answered 500.
+    const sent: unknown = req.body;
+    if (!isObject(sent) || typeof sent["name"] !== "string") {
+      res.status(400).json({ error: "name is required and must be a string" });
+      return;
+    }
     if (rejectExternalProviderType(req.body?.providerType, res)) {
       return;
     }
@@ -230,11 +306,11 @@ export const profilesController = {
       sendKeyRefusal(res, keyError);
       return;
     }
-    const result = await engine.update(req.body);
-    res.json(result);
+    sendProfileMutation(res, await engine.update(req.body));
   }),
 
   delete: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const { id } = unpackPositional(req.body, ["id"] as const);
     const idStr = typeof id === "string" ? id : asString(req.query["id"]);
     if (!idStr) {
@@ -255,9 +331,7 @@ export const profilesController = {
     // One error per actually-missing field, so the client knows which
     // input to highlight (Bug 83116).
     if (!providerType) {
-      res
-        .status(400)
-        .json({ error: "providerType required", field: "providerType" });
+      res.status(400).json({ error: "providerType required", field: "providerType" });
       return;
     }
     if (!baseUrl) {
@@ -267,6 +341,11 @@ export const profilesController = {
     const keyError = headerSafeKeyError(apiKey);
     if (keyError) {
       res.status(400).json({ error: keyError, field: "apiKey" });
+      return;
+    }
+    const unknownType = await unknownProviderType(providerType);
+    if (unknownType) {
+      res.status(400).json({ error: unknownType });
       return;
     }
     await assertSafeBaseUrl(baseUrl);
@@ -315,8 +394,14 @@ export const profilesController = {
       res.status(400).json({ error: "profileId required" });
       return;
     }
-    if (!(await profileExists(profileId))) {
+    const profile = await storage.profiles.readByIdRaw(profileId);
+    if (profile === undefined) {
       res.status(404).json({ error: "Profile not found" });
+      return;
+    }
+    const unknownType = await unknownProviderType(profile.providerType);
+    if (unknownType) {
+      res.status(400).json({ error: unknownType });
       return;
     }
     try {
@@ -331,6 +416,19 @@ export const profilesController = {
       // forwards the upstream status instead.
       if (err instanceof AiServiceHttpError) {
         throw err;
+      }
+      // A key stored before the routes refused one no header can carry (Bug 84428) makes fetch
+      // throw a bare TypeError, with no status and no class of its own. The failure is not
+      // read from its text: when the provider gave no status, the stored key itself is checked,
+      // so the caller hears which input is wrong instead of a 502 of the provider.
+      if (typeof readProp(err, "status") !== "number") {
+        const keyed = await storage.profiles.readById(profileId);
+        const keyError = headerSafeKeyError(keyed?.key);
+        if (keyError) {
+          logger.warn(`listModels failed (profileId=${profileId}) -> 400: ${keyError}`);
+          res.status(400).json({ error: keyError });
+          return;
+        }
       }
       const { status, message } = describeProviderError(err);
       logger.warn(
@@ -369,7 +467,7 @@ export const profilesController = {
     // for an HTTP response (Bug 82821). The former justification for the
     // full profile — the doceditor Next passthrough — was removed; the
     // editor now goes through /openai/{profileId}/v1, which resolves the
-    // profile server-side. `key` and `headers` are dropped on top: no
+    // profile server-side. `key` and `headers` are left out on top: no
     // consumer reads them (on SaaS `key` is the "onlyoffice" placeholder;
     // on self-hosted it is the tenant's real provider secret).
     const profile = await storage.profiles.readByIdRaw(id);
@@ -377,17 +475,17 @@ export const profilesController = {
       res.status(404).json({ error: "Profile not found" });
       return;
     }
-    const { key: _key, headers: _headers, ...publicProfile } = profile;
-    res.json(publicProfile);
+    res.json(profileForResponse(profile));
   }),
 
   // `readAllForClient`, not `engine.list()`: the engine reads the full
   // profiles its provider calls need, while this answer reaches the browser
   // - the chat model picker and the editor read it as any user - so the AI
   // service drops `key` and `headers` for everyone but an administrator,
-  // whose settings cards edit them.
+  // whose settings cards edit the key. Each entry leaves by its listed fields
+  // (see profileForSettings).
   list: asyncHandler(async (_req, res) => {
     const profiles = await storage.profiles.readAllForClient();
-    res.json(profiles);
+    res.json(profiles.map(profileForSettings));
   }),
 };

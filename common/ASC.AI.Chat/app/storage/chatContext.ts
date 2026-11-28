@@ -52,23 +52,14 @@ import {
   getUpstreamReadCount,
   setChatContextSnapshot,
 } from "../requestContext.js";
-import nconf from "../../config/index.js";
+import nconf, { chatContextDisabled } from "../../config/index.js";
 import type { AppConfig } from "../types.js";
-import {
-  isObject,
-  getArray,
-  getBoolean,
-  getEntityId,
-  getNumber,
-  getObject,
-  getString,
-  type JsonObject,
-} from "../narrow.js";
+import { isObject, getBoolean, getEntityId, getNumber, getObject, getString } from "../narrow.js";
 import logger from "../log.js";
 
 const PATH = "/chat-context";
 
-const CHAT_CONTEXT_DISABLED = process.env["AI_CHAT_CONTEXT"] === "off";
+const CHAT_CONTEXT_DISABLED = chatContextDisabled();
 const OPT_OUT_HEADER = "x-ai-chat-context";
 const app: AppConfig | undefined = nconf.get("app");
 const IS_PRODUCTION = (app?.environment ?? "").toLowerCase() === "production";
@@ -107,11 +98,23 @@ function parseFolder(raw: unknown): DocspaceFolderInfo | undefined {
   return info;
 }
 
-function parseAssignments(raw: unknown): Record<string, string> {
-  const result: Record<string, string> = {};
+// The aggregate's required fields (ChatContextDto.cs) and its non-null
+// optional ones are read whole or not at all: a field of the wrong shape
+// makes the whole aggregate unreadable, and `primeChatContext` then installs
+// no snapshot, so the round reads each entity on its own. A snapshot of
+// empties would answer "no profiles", "no assignment" or "no thread" for what
+// is only unknown (`ts-ai-failure-paths.md` §1). One malformed element of a
+// list or a map is dropped, the rest kept. Two fields are read where they
+// are used instead: a missing or unreadable `config` leaves `aiReady` unset
+// (the round then reads `/config` itself) and the tool permission mode
+// `null`, which the preferences storage answers as "nothing stored"; a
+// missing `documentAgentEnabled` makes the document agent read its settings.
+
+function parseAssignments(raw: unknown): Record<string, string> | undefined {
   if (!isObject(raw)) {
-    return result;
+    return undefined;
   }
+  const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(raw)) {
     if (typeof value === "string") {
       result[key] = value;
@@ -122,11 +125,11 @@ function parseAssignments(raw: unknown): Record<string, string> {
 
 // `List<McpServerDto>` (`{ name, config }`, config as a JSON string) -> the
 // name -> config map `HttpMcpServersStorage.readAll` returns.
-function parseMcpServers(raw: unknown): Record<string, McpServerConfig> {
-  const result: Record<string, McpServerConfig> = {};
+function parseMcpServers(raw: unknown): Record<string, McpServerConfig> | undefined {
   if (!Array.isArray(raw)) {
-    return result;
+    return undefined;
   }
+  const result: Record<string, McpServerConfig> = {};
   for (const item of raw) {
     if (!isObject(item)) {
       continue;
@@ -143,27 +146,41 @@ function parseMcpServers(raw: unknown): Record<string, McpServerConfig> {
   return result;
 }
 
-function parseScope(raw: unknown, entityId: string | undefined): ChatContextScope | null {
+/** A scope of the aggregate; `undefined` when it cannot be read as `ChatContextScopeDto`. */
+function parseScope(raw: unknown, entityId: string | undefined): ChatContextScope | undefined {
   if (!isObject(raw)) {
-    return null;
+    return undefined;
+  }
+  const assignments = parseAssignments(raw["assignments"]);
+  const toolPrefs = getObject(raw, "toolPrefs");
+  const mcpServers = parseMcpServers(raw["mcpServers"]);
+  if (assignments === undefined || toolPrefs === undefined || mcpServers === undefined) {
+    return undefined;
   }
   const preferences = getObject(raw, "preferences");
-  const toolPrefs = getObject(raw, "toolPrefs");
   return {
     entityId,
     folder: parseFolder(raw["folder"]),
-    assignments: parseAssignments(raw["assignments"]),
+    assignments,
     reasoningLevel: preferences ? depthToLevel(preferences["depth"]) : null,
-    toolPrefs: toolPrefs ?? ({} as JsonObject),
-    mcpServers: parseMcpServers(raw["mcpServers"]),
+    toolPrefs,
+    mcpServers,
   };
 }
 
-function parseProfiles(raw: unknown): DocspaceProfile[] {
-  const result: DocspaceProfile[] = [];
+/** An optional scope: `null` when the aggregate carries none, `undefined` when it is unreadable. */
+function parseOptionalScope(
+  raw: unknown,
+  entityId: string | undefined,
+): ChatContextScope | null | undefined {
+  return raw === null || raw === undefined ? null : parseScope(raw, entityId);
+}
+
+function parseProfiles(raw: unknown): DocspaceProfile[] | undefined {
   if (!Array.isArray(raw)) {
-    return result;
+    return undefined;
   }
+  const result: DocspaceProfile[] = [];
   for (const item of raw) {
     const profile = dtoToProfile(item);
     if (profile) {
@@ -173,6 +190,8 @@ function parseProfiles(raw: unknown): DocspaceProfile[] {
   return result;
 }
 
+// Messages that cannot be read leave the slice `null`, which the messages
+// storage reads as "not in the aggregate" and asks for on its own.
 function parseMessages(raw: unknown): ThreadMessageLike[] | null {
   if (!Array.isArray(raw)) {
     return null;
@@ -187,8 +206,12 @@ function parseMessages(raw: unknown): ThreadMessageLike[] | null {
   return result;
 }
 
-function parseThread(raw: unknown): Thread | null {
-  return raw === null || raw === undefined ? null : dtoToThread(raw);
+/** A nullable field read by `parse`: `null` when absent, `undefined` when present and unreadable. */
+function parseNullable<T>(raw: unknown, parse: (value: unknown) => T | null): T | null | undefined {
+  if (raw === null || raw === undefined) {
+    return null;
+  }
+  return parse(raw) ?? undefined;
 }
 
 export function parseChatContext(
@@ -199,17 +222,27 @@ export function parseChatContext(
     return undefined;
   }
   const global = parseScope(raw["global"], undefined);
-  if (!global) {
-    return undefined;
-  }
-  const config = getObject(raw, "config");
-  const entity = parseScope(raw["entity"], request.entityId);
+  const profiles = parseProfiles(raw["profiles"]);
+  const entity = parseOptionalScope(raw["entity"], request.entityId);
   // The C# side skips the second scope when both ids match; a read for
   // `contextEntityId` must then land on the same scope as `entityId`.
   const contextEntity =
     request.contextEntityId !== undefined && request.contextEntityId === request.entityId
       ? entity
-      : parseScope(raw["contextEntity"], request.contextEntityId);
+      : parseOptionalScope(raw["contextEntity"], request.contextEntityId);
+  const thread = parseNullable(raw["thread"], dtoToThread);
+  const webSearch = parseNullable(raw["webSearch"], parseWebSearchConfig);
+  if (
+    global === undefined ||
+    profiles === undefined ||
+    entity === undefined ||
+    contextEntity === undefined ||
+    thread === undefined ||
+    webSearch === undefined
+  ) {
+    return undefined;
+  }
+  const config = getObject(raw, "config");
   return {
     requested: {
       threadId: request.threadId,
@@ -217,15 +250,14 @@ export function parseChatContext(
       contextEntityId: request.contextEntityId,
     },
     aiReady: config ? getBoolean(config, "aiReady") : undefined,
-    aiNotReadyMessage: config ? getString(config, "aiNotReadyMessage") : undefined,
     toolPermissionMode: config ? csharpToToolPermissionMode(config["toolPermissionMode"]) : null,
-    profiles: parseProfiles(getArray(raw, "profiles")),
+    profiles,
     global,
     entity,
     contextEntity,
-    thread: parseThread(raw["thread"]),
+    thread,
     messages: parseMessages(raw["messages"]),
-    webSearch: parseWebSearchConfig(raw["webSearch"]),
+    webSearch,
     documentAgentEnabled: getBoolean(raw, "documentAgentEnabled"),
     stale: new Set(),
   };
@@ -241,12 +273,16 @@ export function parseChatContext(
  * have. Anything else (network, 5xx, an unparseable payload) leaves the
  * request without a snapshot and the round degrades to the per-entity
  * reads, with a warning.
+ *
+ * Answers whether a snapshot was installed: only then did the read pass the
+ * AI service's access gate. Without one (switched off, failed, unusable) no
+ * gated call has been made yet.
  */
-export async function primeChatContext(request: ChatContextRequest): Promise<void> {
+export async function primeChatContext(request: ChatContextRequest): Promise<boolean> {
   // Kill switch for A/B measurement and rollback: every round then runs
   // on the per-entity reads exactly as before the aggregate existed.
   if (CHAT_CONTEXT_DISABLED || requestOptsOut()) {
-    return;
+    return false;
   }
   const query: Record<string, QueryValue> = {
     threadId: request.threadId,
@@ -261,21 +297,27 @@ export async function primeChatContext(request: ChatContextRequest): Promise<voi
     if (err instanceof AiServiceHttpError && (err.status === 401 || err.status === 403)) {
       throw err;
     }
+    // The message of an upstream error holds the internal address and the upstream body.
     logger.warn(
       `chat-context: aggregate read failed, falling back to per-entity reads: ${
-        err instanceof Error ? err.message : String(err)
+        err instanceof AiServiceHttpError
+          ? `AI service ${err.status}`
+          : err instanceof Error
+            ? err.message
+            : String(err)
       }`,
     );
-    return;
+    return false;
   }
   const snapshot = parseChatContext(raw, request);
   if (!snapshot) {
+    // The aggregate carries the thread's messages: the log gets its shape, not its content.
     logger.warn(
-      `chat-context: unusable payload, falling back to per-entity reads: ${JSON.stringify(
-        raw,
-      ).slice(0, 500)}`,
+      `chat-context: unusable payload, falling back to per-entity reads: ${
+        isObject(raw) ? `an object with ${Object.keys(raw).sort().join(",")}` : typeof raw
+      }`,
     );
-    return;
+    return false;
   }
   setChatContextSnapshot(snapshot);
   logger.info(
@@ -285,6 +327,7 @@ export async function primeChatContext(request: ChatContextRequest): Promise<voi
       `thread=${snapshot.thread ? "yes" : "no"} messages=${snapshot.messages?.length ?? "-"} ` +
       `webSearch=${snapshot.webSearch ? "yes" : "no"}`,
   );
+  return true;
 }
 
 /**

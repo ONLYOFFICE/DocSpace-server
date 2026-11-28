@@ -50,7 +50,7 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
     {
         await FilesHttpClient.Authenticate(Owner);
 
-        return await AgentsTests.AiProjects.CreateAsync(RoomsApi);
+        return await CreateAiProjectAsync();
     }
 
     protected async Task<User> InviteMemberAsync(int projectId)

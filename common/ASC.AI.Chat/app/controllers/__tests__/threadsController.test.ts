@@ -33,9 +33,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
 const engine = { touch: vi.fn(), openOrCreate: vi.fn() };
 vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@onlyoffice/ai-chat/core")>();
@@ -51,7 +48,14 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => {
   };
 });
 const readById = vi.fn();
-vi.mock("../../storage/index.js", () => ({ storage: { profiles: { readById } } }));
+// HttpStorageAdapter: the base of the resolve engine's storage in assignmentsController, which
+// the thread gate calls; the engine class itself is the mock above.
+// The access gate (aiAccess.ts) reads the tool prefs; a stand-in that answers lets the route go on.
+const toolPrefs = vi.hoisted(() => ({ readDisabled: vi.fn(async () => ({})) }));
+vi.mock("../../storage/index.js", () => ({
+  storage: { profiles: { readById }, toolPrefs },
+  HttpStorageAdapter: class {},
+}));
 const assertEntityAccessible = vi.fn(async () => {});
 vi.mock("../../storage/docspaceFilesApi.js", () => ({
   DocspaceApiHttpError: class extends Error {},
@@ -63,6 +67,7 @@ const readAiProjectChatContext = vi.fn();
 vi.mock("../../storage/aiProjectChatContext.js", () => ({ readAiProjectChatContext }));
 
 const { threadsController } = await import("../threadsController.js");
+const { handlerSettled } = await import("../_helpers.js");
 
 type Handler = (req: unknown, res: unknown, next: (e?: unknown) => void) => unknown;
 
@@ -70,7 +75,8 @@ const run = async (name: keyof typeof threadsController, body: unknown) => {
   const res = { status: vi.fn(), json: vi.fn() };
   res.status.mockReturnValue(res);
   const next = vi.fn();
-  await (threadsController[name] as unknown as Handler)({ body, query: {} }, res, next);
+  (threadsController[name] as unknown as Handler)({ body, query: {} }, res, next);
+  await handlerSettled(res);
   return {
     status: res.status.mock.calls[0]?.[0] as number | undefined,
     body: res.json.mock.calls[0]?.[0],

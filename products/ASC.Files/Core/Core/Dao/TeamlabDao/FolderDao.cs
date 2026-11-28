@@ -281,19 +281,13 @@ internal class FolderDao(
         }
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetAiProjectsVisibleToAsync(IEnumerable<int> projectsIds, int aiHubRootId, Guid userId, bool isAdmin)
+    public async IAsyncEnumerable<Folder<int>> GetAiHubRootProjectsAsync(IEnumerable<int> pinnedIds, int aiHubRootId, Guid userId, int count)
     {
-        var ids = projectsIds.ToList();
-        if (ids.Count == 0)
-        {
-            yield break;
-        }
-
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await foreach (var e in filesDbContext.AiProjectsWithOwnRecordAsync(tenantId, ids, aiHubRootId, userId, isAdmin))
+        await foreach (var e in filesDbContext.AiHubRootProjectsAsync(tenantId, pinnedIds.ToList(), aiHubRootId, userId, count))
         {
             var folder = mapper.MapDbFolderQueryToDbFolderInternal(e);
             folder.ShareRecord = e.SharedRecord != null ? securityRecordMapper.MapToInternal(e.SharedRecord) : null;

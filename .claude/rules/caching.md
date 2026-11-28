@@ -5,6 +5,17 @@ paths:
 
 # Caching
 
+## Checklist
+
+- Caches are FusionCache: no `ConcurrentDictionary`, `Lazy<T>`, raw `IMemoryCache`/`IDistributedCache` (Rule #1)
+- A value one process gets and another reads, or that outlives a restart, uses the default cache (Which instance)
+- The `"memory"` cache is cleared only through `RemoveAndNotifyAsync`/`RemoveByTagAndNotifyAsync` (Two FusionCache instances)
+- An unknown refresh answer keeps the entry; a known one is written by `SetAsync`, not a remove (Which instance)
+- Every `GetOrSet`/`Set` passes an explicit duration (Rules)
+- Every key and tag embeds `tenantId`; tags come from `CacheExtention`, keys from a `Get*CacheKey` method (Rules)
+- `ICacheNotify<T>` contracts keep their `[ProtoMember(n)]` numbers; `Subscribe` only from singletons (Cross-node)
+- Code does not assume cross-node consistency or a non-null `IConnectionMultiplexer` (No-Redis mode)
+
 ## Rule #1: Always use FusionCache — never hand-roll caches
 Do NOT suggest or implement caching via `Interlocked`, static `ConcurrentDictionary`, `Lazy<T>` singletons, or raw `IMemoryCache`/`IDistributedCache`. This project standardizes on FusionCache; hand-rolled caches have no cross-node invalidation, no telemetry, and no expiration discipline.
 

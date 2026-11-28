@@ -5,6 +5,19 @@ paths:
 
 # C# Conventions
 
+## Checklist
+
+- `dotnet format style <csproj> --include <edited files> --verify-no-changes` passes (Style Verification 1)
+- A `-p:EnforceCodeStyleInBuild=true` build adds no warning; the flag is never committed (Style Verification 2-3)
+- Parameters of `[LoggerMessage]` methods in touched `*Logger.cs` files are camelCase (Style Verification 5)
+- Every `using` directive is in the project's `GlobalUsings.cs`, none in the edited file (Style)
+- A new file has the AGPL 3.0 header, a file-scoped namespace and explicit access modifiers (Style)
+- Route segments are camelCase, never snake_case or kebab-case (Naming)
+- Known JSON shapes use `Deserialize<T>`; `JsonSerializerOptions` is a `private static readonly` field (JSON)
+- No DAO, cache or security lookup is awaited per entry of a list; a request list has a limit (Work per listed entry)
+- Numbers and dates in stored or machine-read text use the invariant culture and a format (Text for programs)
+- Hot-path performance work ran `dotnet-diag`, or says it was unavailable and walked by hand (Performance work)
+
 ## Naming
 - **Namespaces**: `ASC.<Module>[.<Feature>][.<Layer>]` (e.g., `ASC.Files.Core.ApiModels.RequestDto`)
 - **Controllers**: `*Controller`
@@ -54,6 +67,27 @@ After creating or editing any `.cs` file, verify style BEFORE finishing the task
 ## JSON
 - **Prefer typed deserialization**: `JsonSerializer.Deserialize<T>` into records/DTOs when the payload shape is known. Manual `JsonDocument`/`JsonElement` traversal only for truly dynamic shapes.
 - **Cache `JsonSerializerOptions`** in a `private static readonly` field (e.g. with `PropertyNameCaseInsensitive = true`) — never allocate options per call.
+
+## Work per listed entry
+This applies to every edit, not only to the performance work below: the cost grows with the list,
+and a test stand lists a few entries.
+- Code that runs once per entry of a list (a DTO helper of a listing, a security filter, a loop over
+  request ids) awaits no DAO, cache, security or user lookup inside the loop. Load what it needs in
+  one call for the whole list before the loop (`FileSecurity.FilterReadAsync` over the entries, one
+  query for the counts of all ids) and pass the result in.
+- A field a `*DtoHelper` fills per entry gets its batch on every path that maps a list (folder
+  content, Recent, Favorites, search, a section root), or the helper batches it itself. A per-entry
+  query kept as the fallback is an N+1 on every path that does not prefetch.
+- A list that comes from the request has a named upper limit, checked before the first lookup.
+- Seen in review: a count per room was prefetched for one section root and read with one query per
+  room in every other listing.
+
+## Text for programs
+- A number or a date written into text that is stored or read by a program (an audit description, a
+  cache key, a file name, a header, a URL) is formatted with `CultureInfo.InvariantCulture` and an
+  explicit format (`amount.ToString("0.##", CultureInfo.InvariantCulture)`, ISO 8601 for a date). An
+  interpolated `$"{amount}"` takes the culture of the host and the scale the value arrived with:
+  `10.0000`, or `10,5` on a host with another culture.
 
 ## Performance work
 Only when the task is explicitly about the performance of a **hot path** (code that runs per request

@@ -330,4 +330,84 @@ public class NextcloudParseTests(
         status.IsCompleted.Should().BeTrue();
         status.Error.Should().Contain(".zip, .tar.gz or .tgz");
     }
+
+    /// <summary>
+    /// A dump may write an INSERT over several lines - a line break after <c>VALUES</c> and one row
+    /// per line, as mariadb-dump of MariaDB 10.11 does. The parse used to expect the rows on the line
+    /// of the INSERT: it found no table in such a dump and ended without an error and without users.
+    /// It now reads the statement up to the ";" that ends a line.
+    /// </summary>
+    [Theory]
+    [Trait("Bug", "85259")]
+    [InlineData("\n")]
+    [InlineData("\r\n")]
+    public async Task Parse_DumpWithRowPerLine_ReadsUsersAndFiles(string lineBreak)
+    {
+        // Arrange
+        var dump = Dump
+            .Replace(" VALUES ", " VALUES\n", StringComparison.Ordinal)
+            .Replace("),(", "),\n(", StringComparison.Ordinal)
+            .Replace("\n", lineBreak, StringComparison.Ordinal);
+        await UploadBackupAsync("backup.zip", BuildZip(dump));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        var user = status.ParseResult.Users.Should().ContainSingle().Which;
+        user.Email.Should().Be(Email);
+        user.FirstName.Should().Be("Alice");
+        user.LastName.Should().Be("Smith");
+        user.MigratingFiles.FilesCount.Should().Be(1);
+        user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
+    }
+
+    /// <summary>
+    /// A Nextcloud on PostgreSQL is dumped by pg_dump, which writes no INSERT: the rows of a table
+    /// follow <c>COPY public.table (columns) FROM stdin;</c> one per line, the values separated by
+    /// tabs, NULL written as <c>\N</c>, up to a line <c>\.</c>. The parse used to read only INSERT
+    /// statements: it found no table in such a dump and ended without an error and without users.
+    /// It now reads the COPY block of a table when the dump has no INSERT for it.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "85267")]
+    public async Task Parse_PostgreSqlDump_ReadsUsersAndFiles()
+    {
+        // Arrange
+        const string dump =
+            "COPY public.oc_accounts (uid, data) FROM stdin;\n" +
+            $"{Uid}\t{{}}\n" +
+            "\\.\n\n" +
+            "COPY public.oc_accounts_data (id, uid, name, value) FROM stdin;\n" +
+            $"1\t{Uid}\tdisplayname\tAlice Smith\n" +
+            $"2\t{Uid}\taddress\t\n" +
+            $"3\t{Uid}\temail\t{Email}\n" +
+            "\\.\n\n" +
+            "COPY public.oc_storages (numeric_id, id, available, last_checked) FROM stdin;\n" +
+            $"7\thome::{Uid}\t1\t\\N\n" +
+            "\\.\n\n" +
+            "COPY public.oc_filecache (fileid, storage, path) FROM stdin;\n" +
+            "10\t7\tfiles\n" +
+            "11\t7\tfiles/hello.txt\n" +
+            "12\t7\tfiles/link.txt\n" +
+            "\\.\n";
+        await UploadBackupAsync("backup.zip", BuildZip(dump));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        var user = status.ParseResult.Users.Should().ContainSingle().Which;
+        user.Email.Should().Be(Email);
+        user.FirstName.Should().Be("Alice");
+        user.LastName.Should().Be("Smith");
+        user.MigratingFiles.FilesCount.Should().Be(1);
+        user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
+    }
 }

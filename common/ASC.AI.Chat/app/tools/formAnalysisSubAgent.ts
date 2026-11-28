@@ -51,8 +51,8 @@ import logger from "../log.js";
 const TOOL_NAME = "analyze_form";
 // Own serverType so composeToolsAdapters keeps this apart from the DocSpace tool groups.
 const SERVER_TYPE = FORM_ANALYSIS_TYPE;
-// Runaway-loop guard, not the normal stop (the model ends by answering without a tool call);
-// 10 matches common agent defaults (LangChain 15, OpenAI Agents 10).
+// Runaway-loop guard, not the normal stop (the model ends by answering without a tool call).
+// Twice the default of OpenAI Agents (10), above LangChain's 15: a form is read field by field.
 const MAX_ROUNDS = 20;
 
 const ANALYZE_FORM_TOOL: TMCPItem = {
@@ -78,7 +78,7 @@ const ANALYZE_FORM_TOOL: TMCPItem = {
 // Flagged so C# emits ONLY the form-data tools (and their prompt) for this sub-agent, never for main.
 const formDataTools = new HttpToolsAdapter(true);
 
-type ToolCall = { id: string; name: string; args: Record<string, unknown> };
+export type ToolCall = { id: string; name: string; args: Record<string, unknown> };
 
 export const formAnalysisSubAgent: ToolsAdapter = {
   async getTools(): Promise<Record<string, TMCPItem[]>> {
@@ -169,7 +169,7 @@ async function runTurn(
 }
 
 // The model's requested tool calls, carried as `tool-call` content parts.
-function extractToolCalls(message: ThreadMessageLike): ToolCall[] {
+export function extractToolCalls(message: ThreadMessageLike): ToolCall[] {
   const content = message["content"];
   if (!Array.isArray(content)) {
     return [];
@@ -209,7 +209,7 @@ function readArgs(part: Record<string, unknown>): Record<string, unknown> {
 }
 
 // Re-attach each result to its `tool-call` part, so the next `custom` turn feeds it back to the model.
-function attachResults(
+export function attachResults(
   message: ThreadMessageLike,
   results: Map<string, unknown>,
 ): ThreadMessageLike {

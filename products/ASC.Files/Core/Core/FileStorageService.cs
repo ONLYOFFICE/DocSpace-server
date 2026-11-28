@@ -298,7 +298,7 @@ public class FileStorageService //: IFileStorageService
         List<FolderType> folderType = null,
         bool withAiFolder = false,
         MetadataFilter metadataFilter = null,
-        bool pinnedAiProjects = false)
+        bool aiHubRootProjects = false)
     {
         var subjectId = subject ?? Guid.Empty;
         var subjectOwnerIdGuid = subjectOwnerId ?? Guid.Empty;
@@ -472,7 +472,7 @@ public class FileStorageService //: IFileStorageService
                 groupId,
                 privacyFilter,
                 folderType,
-                withAiFolder, metadataFilter, pinnedAiProjects);
+                withAiFolder, metadataFilter, aiHubRootProjects);
         }
         catch (Exception e)
         {
@@ -687,6 +687,7 @@ public class FileStorageService //: IFileStorageService
         await CheckQuotaFeatureAsync<TenantRoomQuotaSettings>(quota);
         await CheckPublicRoomCreationAsync(folderType);
         await CheckKnowledgeRoomCreationAsync(folderType);
+        await CheckAiProjectRoomCreationAsync(folderType);
 
         if (folderType.IsAiHubRoom())
         {
@@ -7044,6 +7045,20 @@ public class FileStorageService //: IFileStorageService
         }
 
         if (!await aiAccessibility.IsVectorizationEnabledAsync())
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
+    private async Task CheckAiProjectRoomCreationAsync(FolderType folderType)
+    {
+        if (folderType != FolderType.AiProjectRoom)
+        {
+            return;
+        }
+
+        var aiStatus = await aiAccessibility.GetStatusAsync();
+        if (!aiStatus.Enabled)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }

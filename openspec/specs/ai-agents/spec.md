@@ -423,7 +423,8 @@ every binding of one profile.
 
 Instructions rooms, Knowledge rooms and AI projects SHALL be rooms created through `createRoom` with their
 `roomType`, by the owner, a DocSpace admin or a Room admin (User, Guest 403), landing in the AI rooms section
-and never in Rooms; a Knowledge room needs vectorization enabled (403). Settings that do not apply to the
+and never in Rooms; a Knowledge room needs vectorization enabled (403), an AI project needs the AI gateway or an
+AI model profile of the portal (403). Settings that do not apply to the
 type SHALL be refused on create and update (400). They are never archived (403), make no template (403),
 take no folder in the section root (403) and are deleted outright.
 
@@ -445,11 +446,11 @@ take no folder in the section root (403) and are deleted outright.
 ### Requirement: Members of the AI rooms
 
 An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
-the same without Editor, an AI project only Room manager and Content creator. Every member reads the project;
-only a Room manager edits it; a non-member other than a DocSpace admin SHALL NOT read its model, sources or
-skills (403).
+the same without Editor, an AI project only Content creator. Every member reads the project; a member SHALL NOT
+edit it, its owner does; a non-member other than a DocSpace admin SHALL NOT read its model, sources or skills
+(403).
 
-#### Scenario: Content creator reads, Room manager writes
+#### Scenario: Content creator reads, does not write
 
 - **WHEN** a Content creator of the project reads the project model and then sets it
 - **THEN** the read answers 200 and the write 403
@@ -463,11 +464,12 @@ skills (403).
 
 The members of an AI project SHALL be users only: a group SHALL NOT be invited to a project with any role
 (403, "The role is not available for this user type"). A Guest SHALL NOT hold any role in a project (403,
-nobody added), while a User joins through an invitation link as Content creator.
+nobody added), while a User is invited by id or by email as Content creator. A project SHALL have no invitation
+link: `setRoomLink` with the invitation type answers 403 and creates no link.
 
 #### Scenario: Guest invited to a project
 
-- **WHEN** the owner invites a Guest to a project as Content creator by id, by email or through an invitation link
+- **WHEN** the owner invites a Guest to a project as Content creator by id or by email
 - **THEN** the system answers 403 and the Guest is not a member
 
 #### Scenario: Group invited to a project
@@ -478,14 +480,14 @@ nobody added), while a User joins through an invitation link as Content creator.
 ### Requirement: The model of an AI project
 
 `getProjectModel` SHALL answer the project's own chat model as a profile id, null while none is selected or
-the profile is gone (the portal's Chat binding then answers); `setProjectModel` SHALL need a project
-manager (403) and a `profileId` naming a catalogue profile that can chat (missing, unknown or image-only
+the profile is gone (the portal's Chat binding then answers); `setProjectModel` SHALL refuse a member of the
+project (403) and a `profileId` naming a catalogue profile that can chat (missing, unknown or image-only
 400, the project keeping its model), replace the previous choice, be audited and pushed to clients. An
 Instructions room or an unknown id answers 404 on either route.
 
 #### Scenario: Image profile refused
 
-- **WHEN** a Room manager of the project sets an image-only profile on a project that runs on a chat profile
+- **WHEN** the owner of the project sets an image-only profile on a project that runs on a chat profile
 - **THEN** the system answers 400 and the project keeps its model
 
 #### Scenario: Content creator reads the fixed model
@@ -495,12 +497,12 @@ Instructions room or an unknown id answers 404 on either route.
 
 #### Scenario: Model moved
 
-- **WHEN** a Room manager of the project sets another chat profile on a project with an open thread
+- **WHEN** the owner of the project sets another chat profile on a project with an open thread
 - **THEN** new rounds run on the new profile and the existing thread keeps its model
 
 #### Scenario: Selection cannot be cleared
 
-- **WHEN** a manager sends `setProjectModel` without a `profileId`
+- **WHEN** the owner sends `setProjectModel` without a `profileId`
 - **THEN** the system answers 400 and the selection stays: a selected model is replaced, never cleared
 
 ### Requirement: Sources of an AI project
@@ -509,16 +511,16 @@ Instructions room or an unknown id answers 404 on either route.
 `linkProjectSources` SHALL link active rooms of those two types that the caller manages and refuse the whole
 call (400, linking nothing) for any other room id, an empty list, over 40 ids or more than 20 rooms of one
 kind; `unlinkProjectSources` SHALL remove the listed links without checking rights on the rooms. Both writes
-need a Room manager of the project (403) and are audited.
+refuse a member of the project (403) and are audited.
 
 #### Scenario: Over the limit
 
-- **WHEN** a manager links a 21st Knowledge room
+- **WHEN** the owner of the project links a 21st Knowledge room
 - **THEN** the system answers 400 and the existing links stay
 
 #### Scenario: Room not linkable
 
-- **WHEN** a manager links an unknown room, a deleted one, a Custom room, another project or an Instructions room where they are only a Viewer
+- **WHEN** the owner of the project links an unknown room, a deleted one, a Custom room, another project or an Instructions room where they are only a Viewer
 - **THEN** the system answers 400 and nothing is linked
 
 #### Scenario: Deleted room
@@ -528,7 +530,7 @@ need a Room manager of the project (403) and are audited.
 
 #### Scenario: Duplicates and pushed changes
 
-- **WHEN** a manager links a room twice, or one already linked
+- **WHEN** the owner of the project links a room twice, or one already linked
 - **THEN** the room is linked once, and clients are told of the change
 
 ### Requirement: Access through a project
@@ -541,7 +543,7 @@ the skills of its linked Instructions rooms to any member.
 
 #### Scenario: Access ends with the link
 
-- **WHEN** a Content creator of the project reads a file of a linked Knowledge room and a Room manager of the project then unlinks the room
+- **WHEN** a Content creator of the project reads a file of a linked Knowledge room and the owner of the project then unlinks the room
 - **THEN** the read answers 200 before and 403 after
 
 ### Requirement: Skills of an Instructions room
@@ -939,12 +941,12 @@ neither the question nor an answer.
 
 #### Scenario: Project without a usable model
 
-- **WHEN** the owner or a manager sends into an AI project whose model is gone or cannot chat
+- **WHEN** the owner sends into an AI project whose model is gone or cannot chat
 - **THEN** the system answers 409 with `code` `projectModelUnavailable` before any stream
 
 ### Requirement: The model of a chat
 
-A round that the owner or a manager of an AI project sends with the project as `entityId` SHALL run on the
+A round that the owner or a member of an AI project sends with the project as `entityId` SHALL run on the
 project's model — its own, else the portal's Chat binding — whatever `profileId` it carries (blank or unknown
 included), never moving the thread. Outside a project a send with no `profileId` runs on the thread's own
 model, else on Chat, else on Default; a `profileId` sent becomes the thread's model; rebinding Chat moves no
@@ -952,7 +954,7 @@ thread.
 
 #### Scenario: Project answers on its model
 
-- **WHEN** a Room manager of the project sends into a project thread naming another profile
+- **WHEN** the owner of the project sends into a project thread naming another profile
 - **THEN** the reply runs on the project's model and the thread still reports that model
 - **AND** when a read member sends the same, the request does not reach the project's model (bug 82914)
 
@@ -1021,10 +1023,11 @@ SHALL cancel the generation and leave the thread usable.
 
 ### Requirement: Regenerating a reply
 
-`aiRegenerateStream` SHALL delete the last assistant reply, keep the question and every earlier turn, and
-stream a new reply on the thread's own model (the project's inside a project); a tool chain of the old reply
-SHALL be replaced whole. A thread with nothing to regenerate SHALL answer 200 generating nothing, an unknown
-thread 404 before any stream, another user's thread 403 keeping the reply, AI off 403.
+`aiRegenerateStream` SHALL replace the last assistant reply, keep the question and every earlier turn, and
+stream a new reply on the thread's own model (the project's inside a project). The old tool chain SHALL leave
+the reply's content and the model's history; a finished old reply SHALL stay in `metadata.custom.replyVersions`.
+Nothing to regenerate SHALL answer 200 generating nothing, an unknown thread 404 before any stream, another
+user's thread 403 keeping the reply, AI off 403.
 
 #### Scenario: Multi-turn thread
 
@@ -1035,6 +1038,11 @@ thread 404 before any stream, another user's thread 403 keeping the reply, AI of
 
 - **WHEN** the client hangs up mid-reply and the owner then regenerates
 - **THEN** the abandoned reply is replaced by a whole one
+
+#### Scenario: Earlier version kept
+
+- **WHEN** the owner regenerates a reply whose approved tool call finished it
+- **THEN** the new reply and every streamed model request of the regenerate carry neither the old call nor its result, and the new reply's `replyVersions.others` holds the old reply with both
 
 ### Requirement: Tool calls and the approval pause
 
@@ -1164,7 +1172,7 @@ is replaced whole on update; each change is audited.
 #### Scenario: AI off
 
 - **WHEN** AI is off and a member calls any of these routes
-- **THEN** the system answers 403 while the tools catalogue still answers
+- **THEN** the system answers 403, and so does the tools catalogue
 
 ### Requirement: One registry per portal
 
@@ -1304,9 +1312,14 @@ list under the server-prefixed key, where the read finds it.
 
 `aiToolsListSystemTools` SHALL answer the portal's tools grouped by server type — a registered server's tools
 under its name — the system group keys in `system` and in `errors` the reason a registered server delivered
-none (its credentials never echoed), to every signed-in member, Guests included, with AI on or off, whatever
-`entityId` it carries. The catalogue lists no tool twice, lists a registered server as no system group, and
+none (its credentials never echoed), to every non-guest member, whatever `entityId` it carries; a Guest and
+an AI-off portal get 403. The catalogue lists no tool twice, lists a registered server as no system group, and
 a registered server's tools reach the model in every chat.
+
+#### Scenario: Guest or AI off
+
+- **WHEN** a Guest reads the catalogue, or a member reads it while AI is off
+- **THEN** the system answers 403
 
 #### Scenario: Unreachable registered server
 
@@ -1418,7 +1431,7 @@ without the provider's body or URL.
 
 `aiOpenaiChatCompletions` and `aiOpenaiImagesGenerations` SHALL relay the request for the profile named in
 the path to its provider and answer verbatim to DocSpace admins, Room admins and Users (Guest 403,
-anonymous 401, AI off 403). A malformed or unknown `profileId` SHALL answer 400; `stream` true streams
+anonymous 401, AI off 403). A malformed `profileId` SHALL answer 400 and an unknown one 404; `stream` true streams
 chunks; an image generation on a text-only model is refused (400). The gateway proxy exposes only models,
 chat completions, image generation, search and contents (others 404).
 
@@ -1436,13 +1449,13 @@ chat completions, image generation, search and contents (others 404).
 
 `aiEditorToolsList` SHALL publish the tool catalogue — unique names, a description, an object input schema
 whose required arguments are declared and never also defaulted, `requireApproval` off for read tools and on
-for the ones that change something — identically to every non-guest member and on repeated reads, a Guest
-getting it without the document generators. Anonymous 401; AI off 403.
+for the ones that change something — identically to every non-guest member and on repeated reads.
+Anonymous 401; a Guest 403; AI off 403.
 
-#### Scenario: Guest catalogue
+#### Scenario: Guest refused
 
-- **WHEN** a Guest and a User read the catalogue
-- **THEN** the User's list holds the document generators and the Guest's does not
+- **WHEN** a Guest reads the catalogue
+- **THEN** the system answers 403
 
 ### Requirement: Calling an editor tool
 
@@ -2150,14 +2163,14 @@ that a message of another thread already holds.
 ### Requirement: Privacy of the contents of a project
 
 A file or folder inside an AI project (an artifact, an attachment, a file not sent yet) SHALL be readable by
-its creator only: `getFileInfo`, `getPresignedFileUri`, `copyBatchItems`, `bulkDownload` and `getFolderInfo`
-SHALL answer 403 to another member, to the project's owner and to a DocSpace admin. The creator SHALL read,
-download and copy it and nothing else: `updateFile`, `deleteFile`, `moveBatchItems`, an external link and
-`insertFile` SHALL answer 403.
+its creator only: `getFileInfo`, `getPresignedFileUri`, `getFileVersionInfo`, `copyBatchItems`, `bulkDownload`
+and `getFolderInfo` SHALL answer 403 to another member, to the project's owner and to a DocSpace admin. The
+creator SHALL read, download and copy it, and read the version list of a file, and nothing else: `updateFile`,
+`deleteFile`, `moveBatchItems`, an external link and `insertFile` SHALL answer 403.
 
 #### Scenario: Artifact of another member
 
-- **WHEN** another member of the project, the project's owner and a DocSpace admin each read a member's artifact, ask for its download link, copy it into their My documents and request it as an archive
+- **WHEN** another member of the project, the project's owner and a DocSpace admin each read a member's artifact, ask for its download link, read its version list, copy it into their My documents and request it as an archive
 - **THEN** every call answers 403
 
 #### Scenario: Folder of another member's thread
@@ -2182,8 +2195,13 @@ download and copy it and nothing else: `updateFile`, `deleteFile`, `moveBatchIte
 
 #### Scenario: Creator opens the editor
 
-- **WHEN** the creator calls `openEditFile` for an own artifact
-- **THEN** the document opens with the edit permission false
+- **WHEN** the creator calls `openEditFile` for an own artifact, without a version and with `version=1`
+- **THEN** the document opens with the edit permission false each time
+
+#### Scenario: Version list of an artifact
+
+- **WHEN** the creator, another member, the project's owner and a DocSpace admin each call `getFileVersionInfo` for the creator's artifact
+- **THEN** the creator gets its one version and every other call answers 403
 
 ### Requirement: Used space of a project
 
@@ -2327,8 +2345,8 @@ threads of the project SHALL keep their files.
 
 ### Requirement: Losing access to a project deletes the member's threads
 
-When a member's own access to an AI project is removed (by `setRoomSecurity` with no access, sent by a manager
-or by the member, or by `removeSecurityInfo` sent by the project's owner), the threads that member created in
+When a member's own access to an AI project is removed (by `setRoomSecurity` with no access, sent by the
+project's owner or by the member, or by `removeSecurityInfo` sent by the project's owner), the threads that member created in
 the project SHALL be deleted as by `aiThreadsDelete`, with their files. Threads of other members SHALL stay, a
 later invitation SHALL NOT bring the threads back, and a change of the project's owner SHALL delete nothing.
 
@@ -2486,66 +2504,75 @@ user gets no access to the project. Threads of other members of the project SHAL
 - **WHEN** the former owner also has a thread with an artifact in a project owned by someone else, where the former owner is a member, and is enabled again after the transfer
 - **THEN** the former owner still reads that thread and its artifact
 
-### Requirement: Pinned projects in the root folders
+### Requirement: Projects in the root folders
 
-`getRootFolders` SHALL return in `folders` of the AI rooms section only the AI projects the caller pinned and may
-see, sorted as the listing of the section sorts pinned rooms. `total` and `count` of that section SHALL equal their
-number and `startIndex` SHALL be 0, whatever paging and filters the request carries. The other sections SHALL keep
-their behaviour.
+`getRootFolders` SHALL return in `folders` of the AI rooms section at most five AI projects: first the ones the
+caller pinned, then the others, each group by `updated`, newest first. `total` and `count` of that section SHALL
+equal their number and `startIndex` SHALL be 0, whatever paging, filters and `sortBy` the request carries. Other
+room types of the section SHALL NOT be listed. The other sections SHALL keep their behaviour.
 
-#### Scenario: Only pinned projects are listed
+#### Scenario: Pinned projects come first
 
-- **WHEN** the owner creates three AI projects and an Instructions room, pins two of the projects and then the Instructions room, and calls `getRootFolders` with `filterType=2` and `count=1`
-- **THEN** `folders` of the AI rooms section holds the two pinned projects with `total` and `count` 2 and `startIndex` 0
-- **AND** neither the Instructions room nor the unpinned project is in it
+- **WHEN** the owner creates four AI projects and an Instructions room, pins the first two projects and the Instructions room, and calls `getRootFolders` with `filterType=2`, `count=1`, `startIndex=5`, `sortBy=AZ` and a `filterValue` no project title contains
+- **THEN** `folders` of the AI rooms section holds the second and the first project, pinned, then the fourth and the third, with `total` and `count` 4 and `startIndex` 0
+- **AND** the Instructions room is not in it
 
 #### Scenario: Nothing pinned
 
-- **WHEN** the caller has pinned no AI project, or only an Instructions room
+- **WHEN** the owner creates six AI projects and pins none
+- **THEN** `folders` of the AI rooms section holds the five newest, newest first, none of them pinned
+
+#### Scenario: More than five pinned
+
+- **WHEN** the owner creates six AI projects, pins them all and creates a seventh
+- **THEN** `folders` of the AI rooms section holds the five newest pinned projects, and not the seventh
+
+#### Scenario: A changed project moves up
+
+- **WHEN** the owner renames the oldest of three unpinned projects
+- **THEN** that project comes first in `folders` of the AI rooms section
+
+#### Scenario: No project in the section
+
+- **WHEN** the section holds only an Instructions room, pinned
 - **THEN** `folders` of the AI rooms section is empty and its `total` is 0, and the section itself is still listed
 
-#### Scenario: Paging and filters do not cut the list
+#### Scenario: Unpinned project moves behind the pinned ones
 
-- **WHEN** ten AI projects are pinned, the most the pin limit of the AI rooms section allows, and `getRootFolders` is called with `count=1`, `startIndex=5`, a `filterValue` no project title contains and `sortBy=AZ`
-- **THEN** `folders` of the AI rooms section holds all ten projects in the order of their titles, with `total` and `count` 10 and `startIndex` 0
-
-#### Scenario: Unpinned project leaves the list
-
-- **WHEN** a pinned project is unpinned with `unpinRoom` and `getRootFolders` is called again
-- **THEN** the project is no longer in `folders` of the AI rooms section and `getRoomsFolder` with `searchArea=AiHub` still lists it
+- **WHEN** the owner pins the older of two projects and then unpins it with `unpinRoom`
+- **THEN** the newer project comes first and neither is pinned
 
 #### Scenario: Other sections are not changed
 
-- **WHEN** the owner has two Custom rooms and a pinned AI project and calls `getRootFolders` with `count=1`
+- **WHEN** the owner has two Custom rooms and two AI projects and calls `getRootFolders` with `count=1`
 - **THEN** the Rooms section holds one room with `total` 2, as before the change
 
-### Requirement: Who finds a pinned project in the root folders
+### Requirement: Who finds a project in the root folders
 
-A pinned AI project SHALL be listed in the root folders when the caller is a DocSpace admin, created the project
-or holds a share of their own on it; a share held through a group SHALL NOT count. A pin SHALL be personal: the
-pins of other accounts SHALL NOT be listed. A pin on a project the caller may no longer see SHALL be skipped and
-kept, so the project is listed again once the caller regains access.
+An AI project SHALL be listed in the root folders only when the caller created it or holds a share of their own on
+it; a share held through a group SHALL NOT count, and a DocSpace admin gets no exception. A pin SHALL be personal.
+A pin on a project the caller may no longer see SHALL be skipped and kept, so the project comes back pinned once
+the caller regains access.
 
 #### Scenario: Member pins a project
 
 - **WHEN** the owner invites a User to a project as Content creator and the User pins it
-- **THEN** the project is in `folders` of the AI rooms section of the User's `getRootFolders`
-- **AND** it is not in the owner's list, since the owner did not pin it
+- **THEN** the project is listed pinned in the User's `getRootFolders` and unpinned in the owner's
 
 #### Scenario: Member loses access and regains it
 
-- **WHEN** a member who pinned a project is removed from it and calls `getRootFolders`, and is then invited again
-- **THEN** the project is not listed while the member is out of it, and is listed again after the new invitation without a new pin
+- **WHEN** a member of two projects who pinned one of them is removed from it, calls `getRootFolders`, and is then invited again
+- **THEN** only the other project is listed while the member is out, and after the new invitation the pinned project is listed first again without a new pin
 
 #### Scenario: DocSpace admin outside the project
 
-- **WHEN** a DocSpace admin who was never invited to a project pins it
-- **THEN** the project is in `folders` of the AI rooms section of the admin's `getRootFolders`, as it is in the admin's listing of the section
+- **WHEN** a DocSpace admin who was never invited to two projects pins one of them
+- **THEN** `folders` of the AI rooms section of the admin's `getRootFolders` is empty, although the admin's listing of the section shows both
 
 #### Scenario: Creator of the project
 
-- **WHEN** a Room admin creates a project, pins it and calls `getRootFolders`
-- **THEN** the project is listed, although the creator holds no share record on it
+- **WHEN** a Room admin creates two projects, pins the first and calls `getRootFolders`
+- **THEN** both are listed, the pinned one first, although the creator holds no share record on them
 
 ### Requirement: Drafts that are not sent are removed
 
@@ -2613,7 +2640,7 @@ an AI project included, SHALL NOT carry the field.
 
 #### Scenario: Number follows the links
 
-- **WHEN** a room is linked to two projects, a Room manager of the first unlinks it with `unlinkProjectSources`, and the second project is then deleted with `deleteRoom`
+- **WHEN** a room is linked to two projects, the owner of the first unlinks it with `unlinkProjectSources`, and the second project is then deleted with `deleteRoom`
 - **THEN** `getRoomInfo` of the room carries `linkedProjectsCount` 1 after the unlink and 0 after the deletion has completed
 
 ### Requirement: Listing the projects that use a room
@@ -2729,12 +2756,12 @@ SHALL send no such event for a room.
 
 #### Scenario: Room linked
 
-- **WHEN** a Room manager of a project links a Knowledge room while the owner of the portal listens to the AI rooms section
+- **WHEN** a Room admin who owns a project links a Knowledge room while the owner of the portal listens to the AI rooms section
 - **THEN** the owner's client receives the updated-folder event for the room
 
 #### Scenario: Room unlinked
 
-- **WHEN** a Room manager of a project unlinks a linked Instructions room while the owner of the portal listens to the AI rooms section
+- **WHEN** a Room admin who owns a project unlinks a linked Instructions room while the owner of the portal listens to the AI rooms section
 - **THEN** the owner's client receives the updated-folder event for the room
 
 #### Scenario: Project deleted
@@ -2744,7 +2771,7 @@ SHALL send no such event for a room.
 
 #### Scenario: Nothing linked anew
 
-- **WHEN** a Room manager links a room the project already links, after a first link whose event the owner's client received
+- **WHEN** a Room admin who owns a project links a room the project already links, after a first link whose event the owner's client received
 - **THEN** the owner's client receives no second updated-folder event for the room
 
 ### Requirement: Conversion of an AI agent into an AI project
@@ -2851,20 +2878,19 @@ profile the agent was bound to, and null when the agent had no assignment of its
 
 ### Requirement: Members of a converted agent
 
-The project SHALL take the agent's members as users only: a Room manager stays Room manager, a Content creator
-stays Content creator, a Viewer becomes Content creator. Each member of a group invited to the agent, as the
-group is at the conversion, SHALL become a Content creator unless the user holds a role of their own in the
-agent. A Guest and an invitation link SHALL NOT be carried over.
+The project SHALL take the agent's members as users only, each as Content creator, the only role of a project:
+a Room manager, a Content creator and a Viewer of the agent, and each member of a group invited to the agent as
+the group is at the conversion. A Guest and an invitation link SHALL NOT be carried over.
 
 #### Scenario: Roles carried over
 
 - **WHEN** an agent with a Room manager, a Content creator and a Viewer is converted
-- **THEN** `getRoomSecurityInfo` of the project lists the first as Room manager and the other two as Content creator
+- **THEN** `getRoomSecurityInfo` of the project lists all three as Content creator
 
 #### Scenario: Group invited to the agent
 
 - **WHEN** a group of two Users was invited to the agent as Viewer, one of the two being also a Room manager of the agent by their own role
-- **THEN** `getRoomSecurityInfo` of the project lists no group, the first User as Content creator and the second as Room manager
+- **THEN** `getRoomSecurityInfo` of the project lists no group and both Users as Content creator
 
 #### Scenario: Joining the group later
 

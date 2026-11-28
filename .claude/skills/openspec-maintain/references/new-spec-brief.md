@@ -12,7 +12,7 @@ The output of `.claude/skills/openspec-maintain/scripts/op_coverage.py` lists, p
 
 Every tool call re-sends your whole context, so keep the context small and the steps few.
 - Format: read only the first 60 lines of openspec/specs/billing/spec.md and of openspec/specs/billing/verification.md. Do not read other specs whole; Grep them for a term when you need to avoid overlap.
-- Tests first. Build yourself a one-file index with a small script (name, file:line, SDK call, expected status, Bug trait) over the test folders in your prompt, read that, then Read with offset/limit only around the assertions you cite. A test's name can contradict its assertion, so read the assertion before marking a row TEST-CONFIRMED. If you cite by index only, mark the row "by name" and say so in the header. Test conventions: .claude/rules/tests.md.
+- Tests first. Build yourself a one-file index with a small script (name, file:line, SDK call, expected status, Bug trait) over the test folders in your prompt, read that, then Read with offset/limit only around the assertions you cite. A test's name can contradict its assertion, so read the assertion before marking a row TEST-CONFIRMED. If you cite by index only, without reading the assertion, mark the row "from the index" and say so in the header. Test conventions: .claude/rules/tests.md.
 - Contract: Grep sdk/docspace-api-spec/docspace-backend.yaml for the operationId and read only that slice.
 - Code last, only for open points: codegraph_explore first, or LSP (ToolSearch "select:LSP"); Read a C# file only for what they did not return. Never Grep for a C# identifier under products/, common/, web/.
 - Write each file with one Write, or one script. No long series of Edit calls. Keep command output short. Do not re-read what you already have.
@@ -21,7 +21,7 @@ Every tool call re-sends your whole context, so keep the context small and the s
 
 spec.md: `# <NAME> Specification`, `## Purpose`, `## Requirements`, `### Requirement: <name>` with SHALL/MUST text under 500 characters, each with `#### Scenario: <name>` of `- **WHEN** …` / `- **THEN** …` (optional `- **AND** …`). English only. One behaviour per requirement. HTTP statuses where tests assert them. Nothing "planned". Names API operations (operationId), routes, request fields and status codes; NO class names, file names, resource keys, enum numbers or configuration keys (those go to verification.md). Clear defects are not requirements.
 
-verification.md: rows claim | source (test file:line / yaml operation / code file:line) | status (TEST-CONFIRMED, CODE-ONLY); then a table of differences between the yaml and the server, "Left out" with reasons, and "Suspected defects" with the prefix in your prompt: # | where | what the server does | evidence | evidence kind (red test by reading, red by code reading, per test comment). You run no tests, so never claim one passed or failed.
+verification.md: rows claim | source (test `File.cs::Method` / yaml operation / code `File.cs::Member`; a line citation moves with every edit above it) | status (TEST-CONFIRMED, CODE-ONLY); then a table of differences between the yaml and the server, "Left out" with reasons, and "Suspected defects" with the prefix in your prompt: # | where | what the server does | evidence | evidence kind (red test by reading, red by code reading, per test comment). You run no tests, so never claim one passed or failed.
 
 ## Finish
 

@@ -271,6 +271,13 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     hasBody: true,
   },
   {
+    method: "GET",
+    path: "/plugin-agent",
+    tag: "Settings",
+    operationId: "aiSettingsGetPluginAgent",
+    summary: "Get the availability of the plugin agent",
+  },
+  {
     method: "POST",
     path: "/vectorization/tasks",
     tag: "Vectorization",

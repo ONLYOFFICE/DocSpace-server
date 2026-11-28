@@ -313,7 +313,7 @@ entries of the named subjects.
 #### Scenario: Guest invited to an AI project
 
 - **WHEN** a Guest is invited to an AI project (v4.1) by account id with any access, or an email entry names an address that belongs to a Guest
-- **THEN** the system rejects the whole request (403, "The role is not available for this user type") and the guest is not a member; an AI project accepts Room manager and Content creator only
+- **THEN** the system rejects the whole request (403, "The role is not available for this user type") and the guest is not a member; an AI project accepts Content creator only
 
 #### Scenario: Group as subject
 
@@ -467,7 +467,7 @@ SHALL carry the access level that a person joining through it receives.
 
 - **WHEN** an invitation link is created, updated and deleted in a Custom, Public, Collaboration or Virtual data room
 - **THEN** every step succeeds
-- **AND** the invitation link of an AI project is created with the Room manager access, the only access its link offers
+- **AND** an AI project has no invitation link: creating one with any access answers 403 and no link is created
 
 #### Scenario: Form filling room accepts only its own roles
 
@@ -533,12 +533,6 @@ the registration is completed, which SHALL set the type the link grants, ignorin
 
 - **WHEN** a Guest follows a link into an AI agent room that grants Room manager or Content creator
 - **THEN** the guest is added with Viewer access
-
-#### Scenario: Joining an AI project through its link
-
-- **WHEN** a signed-in User who is not a member follows the invitation link of an AI project, which grants Room manager
-- **THEN** `result` is `UserExisted` and the User is a member with the Content creator access, the highest free role of a project
-- **AND** a signed-in Guest following the same link gets `QuotaFailed` and is not added
 
 #### Scenario: Individual email link already accepted
 

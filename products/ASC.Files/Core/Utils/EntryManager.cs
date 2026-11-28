@@ -364,7 +364,7 @@ public class EntryManager(IDaoFactory daoFactory,
         List<FolderType> folderType = null,
         bool withAiFolder = false,
         MetadataFilter metadataFilter = null,
-        bool pinnedAiProjects = false)
+        bool aiHubRootProjects = false)
     {
         int total;
         var withShared = true;
@@ -571,11 +571,11 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
-        else if (pinnedAiProjects && parent.FolderType == FolderType.AiHub && !parent.ProviderEntry)
+        else if (aiHubRootProjects && parent.FolderType == FolderType.AiHub && !parent.ProviderEntry)
         {
-            entries = await fileSecurity.GetPinnedAiProjectsAsync();
+            entries = await fileSecurity.GetAiHubRootProjectsAsync();
 
-            return ((await SortEntries<T>(entries, orderBy)).ToList(), entries.Count);
+            return (entries, entries.Count);
         }
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms && !parent.ProviderEntry)
         {

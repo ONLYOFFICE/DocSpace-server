@@ -61,7 +61,8 @@ rules:
       list: the archive step warns only about unticked tasks.
     - >-
       For every requirement the change modifies, add a task to update the integration tests that cite it in
-      the verification.md of its capability (the `File.cs:line` citations of its TEST-CONFIRMED rows).
+      the verification.md of its capability (the test citations of its TEST-CONFIRMED rows), and cite each test
+      by name, `File.cs::Method`, not by line.
     - >-
       For every new or modified requirement, add a task for an integration test, including the boundary
       scenarios, following .claude/rules/tests.md.

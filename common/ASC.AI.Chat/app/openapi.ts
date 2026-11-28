@@ -33,7 +33,7 @@
 
 import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import { EXAMPLE_AT_MS, EXAMPLE_IDS } from "./exampleIds.js";
-import { isObject } from "./narrow.js";
+import { isObject, readProp } from "./narrow.js";
 
 // OpenAPI document generation for the AI service.
 //
@@ -152,7 +152,7 @@ function tag(name: string): string {
 // is rejected with an explicit 400 (`actionType`, `id`, `name`, `profileId`,
 // `providerType`, `baseUrl`, `threadId`, `messageId`, and the
 // `serverType`/`toolName` pair), while these six are read through
-// `asString`/`parseInt10`/`parseThreadsCursor`/`parseMessagesCursor`/
+// `asString`/`parseInteger`/`parseThreadsCursor`/`parseMessagesCursor`/
 // `parseDirection`, which all yield `undefined` on an absent value and let the
 // service apply its own default. A name means the same thing wherever it
 // appears, as with `PARAM_DOCS` - none of these is guarded in any operation.
@@ -215,8 +215,6 @@ const PARAM_DOCS: Readonly<Record<string, string>> = {
 // Per-operation overrides, keyed by `operationId` then parameter name. Needed
 // for `id`, which the engines reuse for four different entities.
 const OPERATION_PARAM_DOCS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
-  aiProjectsGetModel: { id: "The AI project (room) identifier." },
-  aiProjectsSetModel: { id: "The AI project (room) identifier." },
   aiProfilesGetById: { id: "The AI provider profile identifier." },
   aiPromptsGetById: { id: "The saved prompt identifier." },
   aiPromptsGetFolderById: { id: "The prompt folder identifier." },
@@ -249,8 +247,6 @@ const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
 // Per-operation examples for `id`, which the engines reuse for four entities,
 // and for the project routes, whose `id` is an integer room ID rather than a UUID.
 const OPERATION_PARAM_EXAMPLES: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
-  aiProjectsGetModel: { id: EXAMPLE_IDS.project },
-  aiProjectsSetModel: { id: EXAMPLE_IDS.project },
   aiProfilesGetById: { id: EXAMPLE_IDS.profile },
   aiPromptsGetById: { id: EXAMPLE_IDS.prompt },
   aiPromptsGetFolderById: { id: EXAMPLE_IDS.promptFolder },
@@ -296,7 +292,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiSendWithStreamOpenAI:
     'The same chat round as `send-with-stream`, re-encoded as a server-sent-events stream of OpenAI `chat.completion.chunk` objects terminated by a `[DONE]` sentinel. Thread handling, persistence, title generation and the checks made before the stream opens are identical - an empty user message, more attachments than the per-kind cap and a new thread that cannot be created are refused the same way - and a tool call ends the stream with `finish_reason: "tool_calls"` instead of a pause event - resume it through the same approve and deny operations. Choose this route only for a client that already speaks the OpenAI wire format; `POST api/2.0/ai/ai/send-with-stream` is the native one. The skills of the Instructions rooms in `actionArgs.contextRooms` are read again for the round, so the list only has to name the rooms; when `entityId` names an AI project, the project\'s own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.',
   aiRegenerateStream:
-    "Re-rolls the last assistant reply of an existing thread: every message after the last user message - the previous reply and any tool-call hops - is dropped, and a fresh reply is streamed as newline-delimited `ChatEvent` objects against the unchanged prompt. The thread has to exist already, `threadId` is required, and no title is generated. The dropped messages are gone for good, so this is a destructive operation on the thread's tail rather than a retry that keeps both answers. Unlike `send-with-stream` the profile is not verified before the stream opens, so an unusable model surfaces as an error frame inside the 200 rather than as a 4xx. The skills of the Instructions rooms in `actionArgs.contextRooms` are read again for the round, so the list only has to name the rooms; when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
+    "Re-rolls the last assistant reply of an existing thread: the previous reply and any tool-call hops after the last user message are replaced, and a fresh reply is streamed as newline-delimited `ChatEvent` objects against the unchanged prompt. The thread has to exist already, `threadId` is required, and no title is generated. A finished previous reply is kept as an earlier version in the new reply's `metadata.custom.replyVersions`, so the user can switch back to it; only the active version is the message's content and the history the model gets next. Unlike `send-with-stream` the profile is not verified before the stream opens, so an unusable model surfaces as an error frame inside the 200 rather than as a 4xx. The skills of the Instructions rooms in `actionArgs.contextRooms` are read again for the round, so the list only has to name the rooms; when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
   aiApproveToolCall:
     "Resumes a chat round that a tool call has paused, and streams the continuation as newline-delimited `ChatEvent` objects. The result supplied in the request is persisted onto the assistant message that issued the call, so the tool is not executed here - the caller runs it and reports the outcome. The round continues against the augmented history and may pause again on a further tool call. Call `POST api/2.0/ai/ai/deny-tool-call` instead to refuse the call and let the model answer without it. The project context is applied again on resume: when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
   aiDenyToolCall:
@@ -314,10 +310,6 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Projects - the model of an AI project, a room of type 12 managed through
   // the Files API; stored as the project-scoped Chat assignment.
-  aiProjectsGetModel:
-    "Returns the model of an AI project: `profile` is the chat profile stored for the project (`id`, `name`, `provider`, and `available`, false when the profile is gone or cannot chat), or `null` when the project runs on the portal's `Chat` assignment. The project is read with the caller's credentials first, so a room the caller cannot read answers 403 and a room that is not an AI project 404. A member who is not the owner, a project manager or a content creator cannot read the stored model yet and gets `null`.",
-  aiProjectsSetModel:
-    "Sets the model of an AI project. `profileId` is the UUID of an existing profile that can chat, or `null` for the portal default. Owner and project managers only (the room's `security.EditRoom`). There is no scoped delete on the server, so `null` on a project that has a model of its own pins the portal's current `Chat` profile to it; a later change of the portal default does not reach the project until its model is set again. Answers the model as `GET` does.",
 
   // Assignments - which profile serves which AI action.
   aiAssignmentsResolveForAction:
@@ -382,13 +374,13 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiTemplatesList:
     "Returns the templates shipped with the service, in three lists: `agents`, `skillSets` and `knowledgeBases`. Every template has an `id` (its path in the catalog), a `name`, a `description` and a `category`, and may have the look of the room it becomes: a `color` (six hexadecimal digits) and a `cover` (the id of a built-in room cover from `GET api/2.0/files/rooms/covers`). A skill set and a knowledge base list the names of their `files`; an agent carries its `instructions` and, in `skills` and `knowledges`, the ids of the skill set and knowledge base templates it is linked to, each of which is a template of its own in the other two lists. The catalog is the same for every portal and every caller. This is a read-only operation.",
   aiTemplatesInstall:
-    "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
+    "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step that fails before the first room is made answers its status with the plain `{ error }`. A step that fails after it - a room, a file upload or the link to the sources refused by the Files service, a timeout or a dropped connection - answers the same status (500 when the step got no answer) with a body that names what exists: `skillSets` and `knowledgeBases` list the rooms already made, in the shape the success answer uses, `agent` is the agent's room when it was made, and `warning` is `installIncomplete`. Those rooms stay in the portal; nothing is undone. The creation of a room that the Files service does not refuse with a 4xx and that still names no room - a timeout, a dropped connection, a 5xx, a 2xx without the room's id - answers that body as well, for the first room too: `unconfirmed` carries the template and the title of the room, which may exist in the portal. The model is the exception: when the portal has no chat model, its model cannot be read, or the Files service refuses to store it, the agent is still returned, with `modelNotSaved` in `warnings`; when the write of the model got no usable answer - a timeout, a dropped connection, a 5xx - the agent is returned with `modelUnconfirmed`, as the model may be stored. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
 
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
-    "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
+    "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - with two exceptions: a JSON body which names no `model` gets the profile's model filled in (a `model` the body carries wins), and for a profile of the ONLYOFFICE provider a `metadata` object naming the entry the round is billed to is added, and a streaming body of up to 2 MB that carries no prompt-cache breakpoints gets them placed in its `messages`. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - the server log names its status, not its body, and the call answers a fixed 502 envelope. That holds while the status line is still to be sent. A request with `stream: true` whose provider has sent no headers 10 seconds after the request arrived is answered 200 as an event stream kept alive with comment lines; whatever the provider answers after that other than a stream - a 4xx, a 5xx, no answer at all - arrives as one error event of that stream, a 4xx with the provider's own envelope and anything else with a generic one. A client disconnect cancels the provider call.",
   aiOpenaiImagesGenerations:
-    "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - `prompt` has to be a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with the detail kept in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
+    "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent, except that a profile of the ONLYOFFICE provider gets a `metadata` object naming the entry the request is billed to added to a JSON body. The documented OpenAI fields are checked first - a body sent as JSON has to be a JSON object, `prompt` a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with only its status named in the server log. That holds while the status line is still to be sent: when the provider has sent no headers 20 seconds after the request arrived, the call answers 200 with a JSON content type and whitespace that keeps the connection alive, and the outcome follows in the body - the provider's own body for a 2xx or a 4xx, the fixed error envelope for a 5xx or a provider that could not be reached - so a client has to read `error` from a 200 as well. A body larger than this route accepts is refused before it is forwarded, and so is a body sent as JSON that is larger than 2 MB: the documented fields of such a body are not checked, so it is not relayed either. A client disconnect aborts the provider call.",
 
   // Preferences - per-scope extended-thinking settings. One value is stored
   // per scope (the depth); deep mode is its on/off view.
@@ -419,11 +411,11 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiProfilesGetById:
     "Returns one AI provider profile by its ID, with its secrets stripped: neither the API key nor the custom headers are ever sent back, on any portal. The ID is required and is read from the query, and an unknown one answers 404. The `baseUrl` in the answer is the one that was stored, not the internal gateway address a round actually dials, so it cannot be used to reach the provider directly. Use `GET api/2.0/ai/profiles/list` to enumerate profiles instead of reading them one by one.",
   aiProfilesList:
-    "Lists the portal's AI provider profiles. A portal administrator receives each profile in full, `key` and `headers` included, because the settings page edits them; every other caller gets them with those secrets stripped, as the single-profile read always does. It takes no parameters and is not paginated, because a portal holds few profiles. On a portal running the AI gateway the answer is synthesised from the gateway's own catalogue rather than from stored records. The IDs in the answer are what the assignment operations and every round's `profileId` accept.",
+    "Lists the portal's AI provider profiles. A portal administrator receives each profile with its `key`, because the settings page edits it; every other caller gets the profiles without it, as the single-profile read always does. `headers` are never part of the answer. It takes no parameters and is not paginated, because a portal holds few profiles. On a portal running the AI gateway the answer is synthesised from the gateway's own catalogue rather than from stored records. The IDs in the answer are what the assignment operations and every round's `profileId` accept.",
   aiProfilesListModels:
-    "Lists the models a stored profile's provider currently offers, asking the provider itself rather than reading a cached list. `profileId` is required and is read from the query. A failure is reported with the provider's own verdict: an unusable key comes back as 400 and a provider that is unreachable or broken as 502, while a profile the caller cannot see answers 404 before the provider is asked and a caller without access keeps the 403 the portal gave it. Use `POST api/2.0/ai/profiles/list-provider-models` to probe an endpoint that has no profile yet.",
+    "Lists the models a stored profile's provider currently offers, asking the provider itself rather than reading a cached list. `profileId` is required and is read from the query. A profile whose stored provider type names no provider the service has answers 400 before the provider is asked. A failure is reported with the provider's own verdict: an unusable key comes back as 400 and a provider that is unreachable or broken as 502, while a profile the caller cannot see answers 404 before the provider is asked and a caller without access keeps the 403 the portal gave it. Use `POST api/2.0/ai/profiles/list-provider-models` to probe an endpoint that has no profile yet.",
   aiProfilesListProviderModels:
-    "Lists the models an endpoint offers for credentials supplied in the request, before any profile exists - this is what a provider-setup form calls to fill its model picker. `providerType` and `baseUrl` are both required, and a 400 for either names the offending input in a `field` member so the form can highlight it; a `baseUrl` pointing at a private network address is refused as well, and so is an `apiKey` with characters that cannot travel in an HTTP header (anything outside printable ASCII), since no provider could ever accept it. For `providerType: \"onlyoffice\"` the answer comes from the portal gateway's catalogue, which carries richer capability data than the provider's own listing and matches what `GET api/2.0/ai/profiles/list` reports; a portal without that gateway falls back to asking the provider. A provider that is unreachable or broken is reported as 502, and one that rejects the key as 400.",
+    "Lists the models an endpoint offers for credentials supplied in the request, before any profile exists - this is what a provider-setup form calls to fill its model picker. `providerType` and `baseUrl` are both required, and a 400 for either names the offending input in a `field` member so the form can highlight it; a `providerType` the service has no provider for is refused with 400 as well, and so are a `baseUrl` pointing at a private network address and an `apiKey` with characters that cannot travel in an HTTP header (anything outside printable ASCII), since no provider could ever accept it. For `providerType: \"onlyoffice\"` the answer comes from the portal gateway's catalogue, which carries richer capability data than the provider's own listing and matches what `GET api/2.0/ai/profiles/list` reports; a portal without that gateway falls back to asking the provider. A provider that is unreachable or broken is reported as 502, and one that rejects the key as 400.",
   aiProfilesTestConnection:
     "Probes a stored profile's credentials against its provider and reports the outcome in the answer, writing nothing - this is what a Test button calls so that a failure does not commit anything. `profileId` is required and may be sent in the body or as a query parameter, and a profile the caller cannot see answers 404 before anything is probed. The result of the probe itself is carried in the body rather than in the status, so a failed probe still answers 200 and the caller has to read the payload. To validate credentials that are not stored yet, use `POST api/2.0/ai/profiles/list-provider-models`.",
 
@@ -474,6 +466,8 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Returns the portal's document agent settings, as the Document Agent tab of the portal settings shows them: `enabled` (whether the `document_agent` tool is offered to the chat), `profileId` (the model profile its tasks run on, null for the chat's own model), `reasoning` (`default` for the model's own default, else `off`, `low`, `medium`, `high`, `max`), `maxToolCalls` and `maxFileBytes` (the limits of one task, at most the agent's own ceilings of 150 and 32 MiB), `taskLog` (whether every task leaves its full log as a file) and `taskLogFolderId` (where the logs go, null for next to the task's results). The settings are kept by the DocSpace AI service and proxied from it; a portal that never saved any gets the defaults, and a profile or a log folder that no longer exists comes back as null. Any member of the portal may read them, a guest may not.",
   aiSettingsSetDocumentAgent:
     "Replaces the portal's document agent settings and returns the stored result. The whole object is required, every field as `GET api/2.0/ai/document-agent/settings` returns it; a limit above the agent's ceiling, an unknown reasoning level or a missing field is rejected rather than coerced. The DocSpace AI service stores them and checks the rest: the profile has to exist, and the log folder has to be a portal folder (not a third-party one, not in the trash) the caller may create files in. Only a portal administrator may write.",
+  aiSettingsGetPluginAgent:
+    "Reports whether the calling user can have a plugin of the portal built in the chat: `available` is true when the installation configures a plugin agent with its plugin skill and the caller is the portal owner or a DocSpace admin, the same condition under which the chat offers the model its `plugin_agent` and `install_plugin` tools. No reason is given for a false: an installation without a plugin agent and a caller who may not use one answer alike. A client reads it before it offers to build a plugin.",
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
@@ -507,17 +501,17 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Tools - custom MCP servers and per-tool preferences.
   aiToolsAddCustomServer:
-    "Registers a custom MCP server under the given name so the model may call its tools. The name becomes a URL path segment, so it may not be `.`, `..`, or contain a path separator or a control character. `config` may be omitted in two cases: a name matching a host-configured system server pins the entry to that server's canonical settings, and a name already registered keeps its stored configuration; anything else without a config is rejected. The registry is one map per portal: `entityId`, when sent, has to name a room the caller can open, and an unreachable one is refused so it cannot silently rewrite the registry.",
+    "Registers a custom MCP server under the given name so the model may call its tools. The name becomes a URL path segment, so it may not be `.`, `..`, or contain a path separator or a control character. `config` may be omitted in two cases: a name matching a host-configured system server pins the entry to that server's canonical settings, and a name already registered keeps its stored configuration; anything else without a config is rejected. The registry is one map per portal: `entityId`, when sent, has to name a room the caller can open, and an unreachable one is refused so it cannot silently rewrite the registry. A stored server whose configuration cannot be read counts as registered: the add answers that the name is taken, and `POST api/2.0/ai/tools/update-custom-server` with a `config` that carries `headers` replaces it.",
   aiToolsUpdateCustomServer:
-    "Replaces the stored configuration of a registered custom MCP server, under the same name and scope rules as the add operation. The name is re-validated as a routable path segment, and an omitted `config` resolves the same way - to a system server's canonical settings, or to the portal-level entry of that name. `entityId` has to name a room the caller can open. The answer carries the stored registry entry.",
+    "Replaces the stored configuration of a registered custom MCP server, under the same name and scope rules as the add operation. The name is re-validated as a routable path segment, and an omitted `config` resolves the same way - to a system server's canonical settings, or to the portal-level entry of that name. `entityId` has to name a room the caller can open. When the stored configuration cannot be read, its headers cannot be kept, so only a `config` that carries `headers` replaces it; any other answers 502. The answer carries the stored registry entry.",
   aiToolsRemoveCustomServer:
-    "Unregisters a custom MCP server from the scope, so the model is no longer offered its tools. The name is required and may be sent in the body or as a query parameter, and `entityId` has to name a room the caller can open. A name that is not registered is not reported: the call answers success without removing anything. The server itself is untouched - only this portal's registration is dropped.",
+    "Unregisters a custom MCP server from the portal's registry, so the model is no longer offered its tools. The name is required and may be sent in the body or as a query parameter. `entityId` has to name a room the caller can open, but the registry is one per portal: the server of that name is removed for the whole portal whatever `entityId` names. A name that is not registered is not reported: the call answers success without removing anything. The server itself is untouched - only this portal's registration is dropped.",
   aiToolsGetCustomServer:
-    "Returns the stored configuration of one registered custom MCP server. The name is required and is read from the query; `entityId` picks the scope, and omitting it reads the portal-wide registry. A name that is not registered answers a null body with status 200 rather than 404. The headers the server is called with are left out, as they carry its credentials. The configuration of a system server is returned empty on purpose: those run server-side only, so neither their endpoint nor their credentials are handed to a browser.",
+    "Returns the stored configuration of one registered custom MCP server. The name is required and is read from the query; `entityId` picks the scope, and omitting it reads the portal-wide registry. A name that is not registered answers a null body with status 200 rather than 404. The headers the server is called with are left out, as they carry its credentials. The configuration of a system server is returned empty on purpose: those run server-side only, so neither their endpoint nor their credentials are handed to a browser. A server whose stored configuration cannot be read is returned as an empty object as well.",
   aiToolsListCustomServers:
-    "Lists the custom MCP servers registered in the scope as a map of name to configuration. `entityId` picks the scope and omitting it lists the portal-wide registry. The configuration of any entry that names a host-configured system server comes back empty, for the same reason as in the single-server read, and the portal's own built-in MCP server is left out of the list entirely because it is always enabled and cannot be configured. The names in the answer are what the disable and always-allow operations accept as `serverType`.",
+    "Lists the custom MCP servers registered in the scope as a map of name to configuration. `entityId` picks the scope and omitting it lists the portal-wide registry. The configuration of any entry that names a host-configured system server comes back empty, for the same reason as in the single-server read, and the portal's own built-in MCP server is left out of the list entirely because it is always enabled and cannot be configured. A server whose stored configuration cannot be read is left out too. The names in the answer are what the disable and always-allow operations accept as `serverType`.",
   aiToolsReplaceAllCustomServers:
-    'Replaces the whole custom MCP server registry of the scope with the supplied map in one write, which makes it the operation a settings screen saves with. `map` is required: without it the registry would be emptied, so a missing or non-object value is rejected rather than treated as "none". Every name in the map is validated as a routable path segment and every configuration is resolved before anything is written, so a map with one bad entry changes nothing. `entityId` has to name a room the caller can open - this is the operation where an unreachable one would otherwise have wiped the portal-wide registry.',
+    'Replaces the whole custom MCP server registry of the scope with the supplied map in one write, which makes it the operation a settings screen saves with. `map` is required: without it the registry would be emptied, so a missing or non-object value is rejected rather than treated as "none". Every name in the map is validated as a routable path segment and every configuration is resolved before anything is written, so a map with one bad entry changes nothing. A stored server whose configuration cannot be read is removed when the map leaves it out; a map that names it with a configuration without `headers`, or with none, answers 502. `entityId` has to name a room the caller can open - this is the operation where an unreachable one would otherwise have wiped the portal-wide registry.',
   aiToolsListSystemTools:
     "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the portal's registered custom MCP servers - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
   aiToolsSetDisabled:
@@ -551,9 +545,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiWebSearchClear:
     "Removes the portal's web-search configuration, after which web search is unavailable everywhere it was not configured separately. This is not scoped: it takes no `entityId` and any body sent with it is ignored, so it cannot be used to clear one room's configuration. Clearing an already-unconfigured portal is not an error and the call answers success either way. The stored provider key is destroyed with the configuration and has to be entered again.",
   aiWebSearchPassthroughSearch:
-    "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. `query` has to be a non-empty string and `numResults`, when sent, a positive integer; a body failing that answers 400 naming the field, before anything is sent on. The provider's own 4xx status, body and content type are relayed as they stand, so a provider that rate-limits answers 429; a 5xx from the provider or from the hop in front of it is not relayed, its detail stays in the server log and the call answers a fixed 502, which is also what an unreachable provider answers. Closing the connection aborts the upstream request.",
+    "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. `query` has to be a non-empty string and `numResults`, when sent, a positive integer; a body failing that answers 400 naming the field, before anything is sent on. The provider's own 4xx status, body and content type are relayed as they stand, so a provider that rate-limits answers 429; a 5xx from the provider or from the hop in front of it is not relayed, the server log names its status, not its body, and the call answers a fixed 502, which is also what an unreachable provider answers. Closing the connection aborts the upstream request.",
   aiWebSearchPassthroughContents:
-    "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. `urls` has to be a non-empty array of strings, or the call answers 400 naming the field. The provider's 4xx status, body and content type are relayed, so its 429 surfaces unchanged, while a 5xx is replaced by a fixed 502 with the detail kept in the server log. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
+    "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. `urls` has to be a non-empty array of strings, or the call answers 400 naming the field. The provider's 4xx status, body and content type are relayed, so its 429 surfaces unchanged, while a 5xx is replaced by a fixed 502 with only its status named in the server log. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
 };
 
 // Resolve the prose for one operation, or `undefined` when the table does not
@@ -579,6 +573,25 @@ function jsonResponse(description: string, schema: Json = JSON_OBJECT_SCHEMA): J
   return {
     description,
     content: { "application/json": { schema } },
+  };
+}
+
+// The body parser's refusal of a body over its limit: `errorHandler` sends it as plain text.
+function tooLargeResponse(description: string): Json {
+  return {
+    description,
+    content: { "text/plain": { schema: { type: "string", example: "Payload Too Large" } } },
+  };
+}
+
+// A 413 the parser answers in plain text and the route itself in JSON.
+function tooLargeOrJsonResponse(description: string, schema: Json): Json {
+  return {
+    description,
+    content: {
+      "text/plain": { schema: { type: "string", example: "Payload Too Large" } },
+      "application/json": { schema },
+    },
   };
 }
 
@@ -609,7 +622,7 @@ const ERROR_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "400": "The request body or query is malformed, or a required value is missing.",
   "402":
     "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. " +
-    "`error` carries the portal's explanation in the caller's language.",
+    "`error` is a fixed English sentence: `The AI Tools service is not paid for the current portal`.",
   "403":
     "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one " +
     "the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
@@ -619,7 +632,11 @@ const ERROR_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "413": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
   "429": "Relayed verbatim from the AI provider, which is rate-limiting this portal's key.",
   "500": "Unhandled failure. The reason is logged server-side and never echoed back.",
-  "502": "The AI provider could not be reached, or answered with a failure of its own.",
+  "502":
+    "The AI provider could not be reached or answered with a failure of its own, or a DocSpace " +
+    "service answered with a body this service cannot read.",
+  "503":
+    "The DocSpace AI service or the Files API is unavailable; its status is relayed as it came.",
 };
 
 // `true` uses the shared text above; a string replaces it for this operation.
@@ -631,7 +648,9 @@ type ErrorSpec = Readonly<Record<string, string | true>>;
 //   403 - the AI-feature and guest gates of the .NET service, relayed by any
 //         handler that touches its storage;
 //   413 - the body parser, on every operation that carries a request body.
-const ALWAYS_ERRORS: readonly string[] = ["403", "500"];
+//   502, 503 - a DocSpace service that failed: every handler relays the status of a failed
+//         call to the AI service or the Files API, and answers 502 for a body it cannot read.
+const ALWAYS_ERRORS: readonly string[] = ["403", "500", "502", "503"];
 
 // Per-operation codes beyond the four above, keyed by `operationId`. There is
 // deliberately no fallback: an operation missing from this table declares only
@@ -642,58 +661,67 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // before the stream opens; `send`/`sendCustom` dispatch straight away.
   aiSendWithStream: {
     "400":
-      "The prompt is empty, more attachments were sent than the limit allows, or no AI " +
-      "profile could be resolved for the requested action.",
+      "The prompt is empty, more attachments were sent than the limit allows, no AI " +
+      "profile could be resolved for the requested action, or `threadId`, `entityId`, " +
+      "`contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
     "402": true,
-    "404": "The `entityId` names a room the caller cannot open, or no live profile is bound to it.",
+    "404":
+      "The `entityId` names a room the caller cannot open, no live profile is bound to it, or `threadId` names no thread of the caller.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiSendWithStreamOpenAI: {
     "400":
-      "The prompt is empty, more attachments were sent than the limit allows, or `profileId` names no AI profile.",
+      "The prompt is empty, more attachments were sent than the limit allows, `profileId` names no AI profile, " +
+      "or `threadId`, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
     "402": true,
+    "404":
+      "The `entityId` names a room the caller cannot open, no live profile is bound to it, or `threadId` names no thread of the caller.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiRegenerateStream: {
+    "400":
+      "The body is not an object, `threadId` is missing or not a string (`threadId is required and must be a string`), or `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
+    "403":
+      "AI is disabled for this portal, the caller is a guest, the thread belongs to another member, or the room named by `entityId` is one the caller cannot open.",
+    "404": "The thread does not exist.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiApproveToolCall: {
+    "400":
+      "The body is not an object, `threadId` or `messageId` is missing or not a string, `idx` is missing or not an integer, `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`), or `allowAlways` is not a boolean.",
+    "403":
+      "AI is disabled for this portal, the caller is a guest, the thread belongs to another member, or the room named by `entityId` is one the caller cannot open.",
+    "404": "The thread does not exist.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiDenyToolCall: {
+    "400":
+      "The body is not an object, `threadId` or `messageId` is missing or not a string, `idx` is missing or not an integer, or `entityId`, `contextEntityId` or `profileId` is neither a string nor null (`<field> must be a string`).",
+    "403":
+      "AI is disabled for this portal, the caller is a guest, the thread belongs to another member, or the room named by `entityId` is one the caller cannot open.",
+    "404": "The thread does not exist.",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
-  },
-
-  aiProjectsGetModel: {
-    "400": "The project id is not a positive integer.",
-    "403": "The caller cannot read the project.",
-    "404": "The project does not exist or is not an AI project.",
-  },
-  aiProjectsSetModel: {
-    "400":
-      "The project id is not a positive integer, or `profileId` is missing, not a UUID, names no " +
-      "profile, or names a profile that cannot chat.",
-    "403": "The caller cannot read the project, or is neither its owner nor a project manager.",
-    "404": "The project does not exist or is not an AI project.",
   },
 
   // Assignments - every write validates its action type first; reading all
   // assignments of a room resolves the room.
   aiSend: {
     "400":
-      "`actionType` is missing or unknown, or `userMessage` carries neither text nor an attachment.",
+      "`actionType` is missing or unknown, `userMessage` carries neither text nor an attachment, or " +
+      "`entityId` or `contextEntityId` is neither a string nor null (`<field> must be a string`).",
     "409":
       "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiSendCustom: {
     "400":
       "`systemPrompt` is missing or empty, `userMessage` carries neither text nor an attachment, " +
-      "`isStream` is not a boolean, or `profileId` names no AI profile.",
+      "`isStream` is not a boolean, `profileId` is neither a string nor null " +
+      "(`profileId must be a string`), or `profileId` names no AI profile.",
     "402": true,
   },
   aiAssignmentsResolveForAction: {
@@ -718,9 +746,12 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // Attachments - `linkToMessage` is the only one that resolves a message.
   aiAttachmentsSaveFile: {
     "400": "The attachment payload is malformed, or `input.path` is missing or empty.",
+    "404": "`input.path` names an entry that does not exist or that the caller cannot read.",
   },
   aiAttachmentsSaveFilesMany: {
-    "400": "`inputs` is not an array, names more than 100 files, or one of its entries is malformed.",
+    "400":
+      "`inputs` is not an array, names more than 100 files, or one of its entries is malformed.",
+    "404": "One of the entries does not exist or the caller cannot read it.",
   },
   aiAttachmentsGet: { "400": "The attachment ID is missing." },
   aiAttachmentsGetSuggestedQuestions: { "400": "The attachment ID is missing." },
@@ -728,6 +759,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "The list of attachment IDs is malformed or names more than 100 attachments.",
   },
   aiAttachmentsDelete: { "400": "The attachment ID is missing." },
+  aiAttachmentsDeleteMany: {
+    "400": "The body is not a list of attachment IDs, or names more than 100 attachments.",
+  },
   aiAttachmentsLinkToMessage: {
     "400":
       "The attachment or message reference is malformed, or `ids` names more than 100 attachments.",
@@ -760,7 +794,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // Metadata.
   aiMetaGenerate: {
     "400":
-      "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, or `prompt` is not a string.",
+      "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not a positive integer id of at most 2147483647 (a number or a string of digits), or `prompt` is not a string.",
     "403": "The caller cannot open the entry.",
     "404": "The entry does not exist.",
     "422": "The content could not be read as text; `skipped` says why.",
@@ -776,15 +810,28 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiSkillsCreate: {
     "400":
       "`destId` is not an integer id, `title` is missing, too long or has no letter or digit, or the folder is not an Instructions room.",
+    "402":
+      "The Files service refused the file because the portal is over its storage quota; its answer is relayed.",
     "403": "The caller cannot create files in the room.",
     "404": "The room does not exist.",
   },
   aiTemplatesInstall: {
-    "400": "`id` is missing or is not a string.",
-    "403": "The caller may not create a room of the kind the template needs.",
-    "404": "The catalog has no template with this `id`.",
+    "400":
+      "`id` is missing or is not a string, or the Files service refused a step after the first room; then `warning` is `installIncomplete` and the body names the rooms made.",
+    "402":
+      "The Files service refused a room or a file because the portal is over its quota; its answer is relayed. After the first room, `warning` is `installIncomplete` and the body names the rooms made.",
+    "403":
+      "The caller may not create a room of the kind the template needs. When the Files service refuses a step after the first room, `warning` is `installIncomplete` and the body names the rooms made.",
+    "404":
+      "The catalog has no template with this `id`, or the Files service answered 404 to a step after the first room; then `warning` is `installIncomplete` and the body names the rooms made.",
     "409":
       "The template holds a knowledge base and vectorization is not set up on the portal; no room was made.",
+    "413":
+      "The request body is larger than 100 KB, the JSON parser's limit (plain text), or the Files service refused a template file as too large; then `warning` is `installIncomplete` and the body names the rooms made.",
+    "500":
+      "Unhandled failure, logged server-side and never echoed back. A step after the first room that got no answer (a timeout, a dropped connection) or failed with 500 answers it too, with `warning: installIncomplete` and the rooms made; so does the creation of a room, the first included, that got no answer or a 500, with that room as `unconfirmed`.",
+    "502":
+      "A DocSpace service answered with a body this service cannot read. When it was the answer to the creation of a room, `warning` is `installIncomplete` and `unconfirmed` names the room, which may exist in the portal. When it was the answer to a later step - the upload of a template file into a room already made - `warning` is `installIncomplete` and the body names the rooms made; the file may exist in its room.",
   },
   aiSkillsGenerate: {
     "400":
@@ -802,7 +849,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
   aiMetaFill: {
     "400":
-      "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, `prompt` is not a string, or `overwrite` / `dryRun` is not a boolean.",
+      "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not a positive integer id of at most 2147483647 (a number or a string of digits), `prompt` is not a string, or `overwrite` / `dryRun` is not a boolean.",
     "403": "The caller cannot read the entry, or cannot edit it when the values are written.",
     "404": "The entry does not exist.",
     "422":
@@ -820,20 +867,31 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // OpenAI passthrough - the provider's answer is relayed as it stands, so any
   // status it returns can reach the caller, 429 included.
   aiOpenaiChatCompletions: {
+    "400":
+      "Relayed from the provider, which refused the request body, or from the AI service, which refused a `profileId` that is not a UUID.",
+    "403":
+      "Relayed from the AI service, which refused to read the profile: AI is disabled for this portal or the caller is a guest.",
+    "500":
+      "The profile could not be read (a timeout, a dropped connection) or another failure occurred; the detail is in the server log.",
     "404": "No profile with this identifier exists for the caller.",
     "413": "The request body is larger than this route accepts.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx; the failure, or the status of that answer without its body, is in the server log.",
   },
   aiOpenaiImagesGenerations: {
     "400":
-      "`prompt` is missing or empty, `n` is not a positive integer, or a documented string field has another type.",
+      "A body sent as JSON is not a JSON object (it does not parse, or is an array or a scalar), `prompt` is missing or empty, `n` is not a positive integer, or a documented string field has another type. Relayed from the AI service as well, when `profileId` is not a UUID.",
+    "403":
+      "Relayed from the AI service, which refused to read the profile: AI is disabled for this portal or the caller is a guest.",
+    "500":
+      "The profile could not be read (a timeout, a dropped connection) or another failure occurred; the detail is in the server log.",
     "404": "No profile with this identifier exists for the caller.",
-    "413": "The request body is larger than this route accepts.",
+    "413":
+      "The request body is larger than this route accepts: 100 MB, 28 MB for the ONLYOFFICE provider, and 2 MB for a body sent as JSON, which carries a prompt and its options only.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx; the failure, or the status of that answer without its body, is in the server log.",
   },
 
   // Preferences.
@@ -863,27 +921,35 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // runs on the AI gateway, and both validate the provider URL.
   aiProfilesCreate: {
     "400":
-      "The provider URL is missing, malformed, or points at a private network address, or the key " +
-      "holds characters that cannot travel in an HTTP header - that one answers with the profile " +
-      "result shape, `success: false` and an `error` naming the `key` field.",
+      "`name` is missing or not a string, the provider URL is not a string, is malformed or " +
+      'points at a private network address, or `providerType` is `"external"` - these answer ' +
+      "the plain `{ error }`. A key that holds " +
+      "characters that cannot travel in an HTTP header, and a profile the engine refuses (a name " +
+      "already taken, an unknown provider type, a key the provider refuses), answer with the " +
+      "profile result shape: `success: false` and an `error` naming the field.",
     "403": "AI profiles are read-only on this portal because they are managed by the AI gateway.",
   },
   aiProfilesUpdate: {
     "400":
-      "The provider URL is missing, malformed, or points at a private network address, or the key " +
-      "holds characters that cannot travel in an HTTP header - that one answers with the profile " +
-      "result shape, `success: false` and an `error` naming the `key` field.",
+      "`name` is missing or not a string, the provider URL is not a string, is malformed or " +
+      'points at a private network address, or `providerType` is `"external"` - these answer the plain ' +
+      "`{ error }`. A key that holds characters that cannot travel in an HTTP header, and a " +
+      "profile the engine refuses (a name already taken, an unknown provider type, a key the " +
+      "provider refuses, an id that names no stored profile), answer with the profile result " +
+      "shape: `success: false` and an `error` naming the field.",
     "403": "AI profiles are read-only on this portal because they are managed by the AI gateway.",
   },
   aiProfilesDelete: { "400": "The profile ID is missing." },
   aiProfilesListProviderModels: {
     "400":
-      "`baseUrl` is missing, points at a private network address, `apiKey` holds characters that " +
+      "`providerType` or `baseUrl` is missing, `providerType` names no provider the service " +
+      "has, `baseUrl` points at a private network address, `apiKey` holds characters that " +
       "cannot travel in an HTTP header, or the provider rejected the supplied API key.",
     "502": true,
   },
   aiProfilesListModels: {
-    "400": "`profileId` is missing, or the provider rejected the profile's API key.",
+    "400":
+      "`profileId` is missing, the stored profile's provider type names no provider the service has, the provider rejected the profile's API key, or the stored key holds characters that cannot be sent in an HTTP header.",
     "404": "No profile with this identifier exists for the caller.",
     "502": true,
   },
@@ -916,6 +982,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
   aiPromptsCreateFolder: {
     "400": "`name` is missing, empty or not a string.",
+    "404": "The engine refused the folder with the code `not_found`.",
     "409": "A folder of that name already exists.",
   },
   aiPromptsRenameFolder: {
@@ -933,11 +1000,13 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "The folder ID is missing.",
     "404": "No prompt folder has this ID.",
   },
+  aiPromptsList: { "400": "`folderId` is given more than once." },
   aiPromptsGetById: { "400": "The prompt ID is missing." },
   aiPromptsGetFolderById: { "400": "The folder ID is missing." },
 
   // Threads - the create pair resolves both the room and a live profile.
   aiThreadsCreate: {
+    "409": "`entityId` names an AI project whose model is gone or cannot chat.",
     "404":
       "The `entityId` names a room the caller cannot open, or no live AI profile is bound " +
       "to it, so there is no model to run the thread against.",
@@ -948,18 +1017,41 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "409":
       "No `threadId` was sent and `entityId` names an AI project whose model is gone or cannot chat.",
   },
-  aiThreadsTouch: { "400": "`threadId` is missing." },
+  aiThreadsTouch: {
+    "400": "`threadId` is missing.",
+    "403":
+      "AI is disabled for this portal, the caller is a guest, or the thread belongs to another member.",
+    "404": "The thread does not exist.",
+  },
   aiThreadsAppendUserMessage: {
     "400":
-      "`threadId` is missing, the message is empty or does not carry `role: user`, or it carries more attachments than the limit allows.",
+      "`threadId` is missing, the message is empty or does not carry `role: user`, it carries more attachments than the limit allows, or `profileId` is not a hyphenated UUID.",
+    "404": "`profileId` names no profile; the message is not stored.",
   },
-  aiThreadsReadMessages: { "400": "`threadId` is missing." },
-  aiThreadsRename: { "400": "`threadId` or the new title is missing." },
+  aiThreadsReadMessages: {
+    "400": "`threadId` is missing.",
+    "403":
+      "AI is disabled for this portal, the caller is a guest, or the thread belongs to another member.",
+    "404": "The thread does not exist.",
+  },
+  aiThreadsRename: {
+    "400": "`threadId` or the new title is missing.",
+    "403":
+      "AI is disabled for this portal, the caller is a guest, or the thread belongs to another member.",
+    "404": "The thread does not exist.",
+  },
+  // `count` is bounded by the AI service alone (ReadAllThreadsRequestDto: Range(1, 1000)).
+  aiThreadsList: { "400": "`count` is outside 1 to 1000; relayed from the DocSpace AI service." },
   aiThreadsDelete: {
     "400": "`threadId` is missing.",
     "404": "No thread has this ID.",
   },
-  aiThreadsClearMessages: { "400": "`threadId` is missing." },
+  aiThreadsClearMessages: {
+    "400": "`threadId` is missing.",
+    "403":
+      "AI is disabled for this portal, the caller is a guest, or the thread belongs to another member.",
+    "404": "The thread does not exist.",
+  },
   aiThreadsRegenerateTitle: {
     "400": "`threadId` is missing.",
     "404": "The `profile` carries no `id`, or no stored profile has it.",
@@ -989,7 +1081,10 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "The server name is missing or is not routable.",
     "404": true,
   },
-  aiToolsRemoveCustomServer: { "400": "The server name is missing.", "404": true },
+  aiToolsRemoveCustomServer: {
+    "400": "The server name is missing, or `entityId` is neither a string nor null.",
+    "404": true,
+  },
   aiToolsGetCustomServer: { "400": "The server name is missing." },
   aiToolsReplaceAllCustomServers: {
     "400": "The body is not a map of server name to configuration, or a name is not routable.",
@@ -1015,20 +1110,21 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiWebSearchIsConfigured: { "400": "`entityId` is not a string.", "404": true },
   aiWebSearchTestConnection: {
     "400":
-      "The configuration is missing or malformed, or the provider URL points at a private " +
-      "network address.",
+      "The configuration is missing or malformed (a field of the wrong type, or a value of " +
+      "`headers` that is not a string), or the provider URL points at a private network address.",
   },
   aiWebSearchConfigure: {
     "400":
-      "The configuration is missing or malformed, the provider URL points at a private " +
+      "The configuration is missing or malformed (a field of the wrong type, or a value of " +
+      "`headers` that is not a string), the provider URL points at a private " +
       "network address, or the provider refused the configuration - the body then carries " +
       "`success: false` and an `error` naming the field. Nothing is stored in any of these cases.",
     "404": true,
   },
   aiWebSearchSetActiveConfig: {
     "400":
-      "The configuration is missing or malformed, or the provider URL points at a private " +
-      "network address.",
+      "The configuration is missing or malformed (a field of the wrong type, or a value of " +
+      "`headers` that is not a string), or the provider URL points at a private network address.",
     "404": true,
   },
   aiWebSearchPassthroughSearch: {
@@ -1037,14 +1133,26 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404": "Web search is not configured for this portal.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx, or the AI service answered a web-search configuration that cannot be read; the failure, or the status of the provider's answer without its body, is in the server log.",
   },
   aiWebSearchPassthroughContents: {
     "400": "`urls` is missing or not a non-empty array of strings; `field` names the input.",
     "404": "Web search is not configured for this portal.",
     "429": true,
     "502":
-      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+      "The provider, or the hop in front of it, failed or answered a 5xx, or the AI service answered a web-search configuration that cannot be read; the failure, or the status of the provider's answer without its body, is in the server log.",
+  },
+
+  // Relays of the DocSpace AI service: its refusals keep their status.
+  aiByokKeysSet: {
+    "400": "The AI service refused the key; `error` carries its message.",
+    "404": "Relayed from the AI service, which answered 404 for this model id.",
+  },
+  aiByokKeysDelete: { "404": "Relayed from the AI service, which answered 404 for this id." },
+  aiSettingsSetVectorization: { "400": "The AI service refused the settings." },
+  aiVectorizationStartTask: {
+    "400": "The AI service refused the request, for instance one that names no file.",
+    "404": "A file named in the request does not exist.",
   },
 };
 
@@ -1054,23 +1162,59 @@ const OPERATION_SUCCESS_CODES: Readonly<Record<string, string>> = {
   aiExportTextToDocx: "202",
 };
 
+// The operations whose body `createApp` leaves unparsed (the OpenAI passthrough relays the raw
+// bytes), so the JSON parser's 400 cannot occur on them.
+const UNPARSED_BODY_OPERATIONS: ReadonlySet<string> = new Set([
+  "aiOpenaiChatCompletions",
+  "aiOpenaiImagesGenerations",
+]);
+
+// The JSON parser's refusal of a body it cannot parse, answered by `errorHandler` before the
+// auth gate; added to an operation's own 400 text.
+const UNPARSABLE_BODY_SENTENCE = "A body that is not valid JSON is refused with 400 as well.";
+
+// A response schema that also admits the plain `AiErrorResponse`.
+function admitPlainError(schema: Json): Json {
+  const anyOf = readProp(schema, "anyOf");
+  if (Array.isArray(anyOf) && anyOf.includes(ERROR_RESPONSE_REF)) {
+    return schema;
+  }
+  return { anyOf: [schema, ERROR_RESPONSE_REF] };
+}
+
 // Assemble the error half of an operation's `responses`. `hasBody` adds the
-// body-parser's 413, which cannot occur on a route that takes no body.
+// body-parser's 400 and 413, which cannot occur on a route that takes no body.
 function errorResponses(operationId: string, hasBody: boolean): Record<string, Json> {
   const spec = OPERATION_ERRORS[operationId] ?? {};
   const codes = new Set<string>([...ALWAYS_ERRORS, ...Object.keys(spec)]);
+  const parsesJson = hasBody && !UNPARSED_BODY_OPERATIONS.has(operationId);
   if (hasBody) {
     codes.add("413");
+  }
+  if (parsesJson) {
+    codes.add("400");
   }
   const responses: Record<string, Json> = {};
   for (const code of [...codes].sort()) {
     const override = spec[code];
-    const description = typeof override === "string" ? override : ERROR_DESCRIPTIONS[code];
+    const description =
+      typeof override !== "string"
+        ? ERROR_DESCRIPTIONS[code]
+        : code === "400" && parsesJson
+          ? `${override} ${UNPARSABLE_BODY_SENTENCE}`
+          : override;
     const envelopes = OPERATION_ERROR_SCHEMAS[operationId];
-    responses[code] = jsonResponse(
-      description as string,
-      envelopes?.[code] ?? envelopes?.["*"] ?? ERROR_RESPONSE_REF,
-    );
+    const own = envelopes?.[code] ?? envelopes?.["*"];
+    // The parser's 400 is the plain `{ error }`, whatever envelope the operation's own 400 has.
+    const envelope = code === "400" && parsesJson && own !== undefined ? admitPlainError(own) : own;
+    // The parser's own 413 is plain text (`errorHandler`); a route that refuses a size itself
+    // declares its envelope, and one that also parses JSON keeps the parser's text beside it.
+    responses[code] =
+      code === "413" && envelope === undefined
+        ? tooLargeResponse(description as string)
+        : code === "413" && parsesJson
+          ? tooLargeOrJsonResponse(description as string, envelope ?? ERROR_RESPONSE_REF)
+          : jsonResponse(description as string, envelope ?? ERROR_RESPONSE_REF);
   }
   return responses;
 }
@@ -1284,13 +1428,16 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
       "An OpenAI Chat Completions request, forwarded to the provider as sent. The shape " +
       "is the provider's, not this API's, so consult the provider's own reference. The " +
       "credentials come from the profile in the path and must not be sent here; the profile's " +
-      "model is used when the body names none, and a `model` in the body takes precedence.",
+      "model is used when the body names none, and a `model` in the body takes precedence. " +
+      "For a profile of the ONLYOFFICE provider the service adds `metadata` and, to a " +
+      "streaming body, prompt-cache breakpoints.",
   },
   aiOpenaiImagesGenerations: {
     description:
       "An OpenAI image-generation request, forwarded to the provider as sent once its documented " +
       "fields pass a type check. The shape is the provider's, not this API's, and the credentials " +
-      "come from the profile in the path.",
+      "come from the profile in the path. For a profile of the ONLYOFFICE provider the service " +
+      "adds `metadata` to a JSON body.",
   },
   aiSettingsSetUser: {
     description:
@@ -1406,9 +1553,6 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "The assistant's reply as one message, or a newline-delimited stream of chat events when " +
     "`isStream` was set. Nothing was persisted.",
 
-  aiProjectsGetModel: "The project's model, or `null` for the portal default.",
-  aiProjectsSetModel: "The project's model after the change.",
-
   aiAssignmentsResolveForAction: "The profile that will serve the action.",
   aiAssignmentsTryResolveForAction:
     "The profile that will serve the action, or an empty result when none is configured.",
@@ -1462,6 +1606,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiSkillsGenerate:
     "The skill's title, its name and the whole Markdown file, frontmatter included; nothing is saved.",
   aiSkillsCreate: "The ID and the title of the new skill file.",
+  aiSettingsGetPluginAgent: "Whether the caller is offered the plugin agent, as `{ available }`.",
   aiTemplatesList: "The agents, skill sets and knowledge bases of the catalog.",
   aiTemplatesInstall:
     "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",
@@ -1485,11 +1630,14 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiPreferencesSetToolPermissionMode: "Confirms the preference was stored.",
 
   aiProfilesCreate:
-    "Whether the profile was created, with it in `profile`. A refusal is reported in `error` " +
-    "rather than as a status.",
-  aiProfilesUpdate: "Whether the profile was updated, with the stored profile in `profile`.",
+    "The created profile in `profile`, by its listed fields and its `key`, with `success: true`. A refusal answers 400 with " +
+    "`success: false` and the reason in `error`.",
+  aiProfilesUpdate:
+    "The profile as sent, by its listed fields and its `key`, in `profile`, with `success: true`. A refusal answers 400 with " +
+    "`success: false` and the reason in `error`.",
   aiProfilesDelete: "Confirms the request was accepted, whether or not a profile was deleted.",
-  aiProfilesList: "The portal's profiles, with their keys and headers stripped.",
+  aiProfilesList:
+    "The portal's profiles by their listed fields; `key` is present for a portal administrator only.",
   aiProfilesGetById: "The profile, with its key and headers stripped.",
   aiProfilesListModels: "The models the profile's provider currently offers.",
   aiProfilesListProviderModels: "The models the endpoint offers for the supplied credentials.",
@@ -1597,6 +1745,56 @@ const PROVIDER_RELAY_SCHEMA: Json = {
 // operations do not return what their engine method returns - the controller wraps
 // it, replaces it, or relays somebody else's body - so the shape is declared here
 // and wins over the generated one. Every entry was read off the controller.
+const DOCUMENT_AGENT_ENVELOPE_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    response: {
+      type: "object",
+      description: "The document agent settings of the portal.",
+      additionalProperties: true,
+    },
+    count: {
+      type: "integer",
+      description: "Envelope field from the internal service.",
+      examples: [1],
+    },
+    status: {
+      type: "integer",
+      description: "Envelope status flag from the internal service.",
+      examples: [0],
+    },
+    statusCode: {
+      type: "integer",
+      description: "HTTP status the internal service answered with.",
+      examples: [200],
+    },
+  },
+  required: ["response", "count", "status", "statusCode"],
+  additionalProperties: true,
+};
+
+// What this service writes into a chat stream that failed after its headers were sent: the
+// last line of the stream, in place of the engine's own closing event. The reason stays in the
+// server log.
+export const STREAM_ERROR_EVENT_COMPONENT = "AiStreamErrorEvent";
+const STREAM_ERROR_EVENT_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    type: {
+      type: "string",
+      const: "error",
+      description: "Marks the line as the failure of the stream.",
+    },
+    message: {
+      type: "string",
+      description: "A generic text; it never carries the cause.",
+      examples: ["stream error"],
+    },
+  },
+  required: ["type", "message"],
+  additionalProperties: false,
+};
+
 const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
   // `get-all-assignments` answers one of two shapes, chosen by `expand=profile`.
   // The generated union is an `anyOf`; the two are exclusive (the expanded one
@@ -1740,6 +1938,10 @@ const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
     additionalProperties: true,
   },
 
+  // Relayed from the .NET service with `raw: true`: the DocSpace envelope with the settings.
+  aiSettingsGetDocumentAgent: DOCUMENT_AGENT_ENVELOPE_SCHEMA,
+  aiSettingsSetDocumentAgent: DOCUMENT_AGENT_ENVELOPE_SCHEMA,
+
   aiOpenaiChatCompletions: PROVIDER_RELAY_SCHEMA,
   aiOpenaiImagesGenerations: PROVIDER_RELAY_SCHEMA,
   aiWebSearchPassthroughSearch: PROVIDER_RELAY_SCHEMA,
@@ -1818,6 +2020,59 @@ const IMPORT_REFUSAL_SCHEMA: Json = { $ref: "#/components/schemas/AiImportResult
 const PROFILE_OR_PLAIN_ERROR_SCHEMA: Json = {
   anyOf: [{ $ref: "#/components/schemas/AiProfileMutationResult" }, ERROR_RESPONSE_REF],
 };
+// The refusal of a round in an AI project whose model is gone: `code` lets the client tell it
+// from any other 409.
+const PROJECT_MODEL_ERROR_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    error: {
+      type: "string",
+      description: "The reason, ready to be shown to the caller.",
+      examples: ["The model of this AI project is not available"],
+    },
+    code: {
+      type: "string",
+      description: "`projectModelUnavailable` for this refusal.",
+      examples: ["projectModelUnavailable"],
+    },
+  },
+  required: ["error"],
+  additionalProperties: false,
+};
+const PROJECT_MODEL_ERRORS: Readonly<Record<string, Json>> = { "409": PROJECT_MODEL_ERROR_SCHEMA };
+
+// A metadata route that could read none of the content says which entries it left out.
+const SKIPPED_CONTENT_ERROR_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    error: {
+      type: "string",
+      description: "The reason, ready to be shown to the caller.",
+      examples: ["None of the selected files could be read as text"],
+    },
+    skipped: {
+      type: "array",
+      description: "The entries that were left out, each with the reason.",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string", description: "The id of the entry.", examples: ["42"] },
+          title: { type: "string", description: "Its title, when it was read." },
+          reason: {
+            type: "string",
+            description: "`unsupported`, `limit`, `forbidden`, `not_found`, `empty` or `failed`.",
+            examples: ["unsupported"],
+          },
+        },
+        required: ["id", "reason"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["error", "skipped"],
+  additionalProperties: false,
+};
+
 const WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA: Json = {
   anyOf: [{ $ref: "#/components/schemas/AiWebSearchMutationResult" }, ERROR_RESPONSE_REF],
 };
@@ -1852,11 +2107,87 @@ const MODEL_CALL_ERROR_SCHEMA: Json = {
   required: ["error", "code"],
   additionalProperties: false,
 };
+// A 502 of these routes is the model call's failure, or the plain relay of a DocSpace service
+// that failed before the model was called.
 const MODEL_CALL_ERRORS: Readonly<Record<string, Json>> = {
   "402": MODEL_CALL_ERROR_SCHEMA,
   "429": MODEL_CALL_ERROR_SCHEMA,
-  "502": MODEL_CALL_ERROR_SCHEMA,
+  "502": { anyOf: [MODEL_CALL_ERROR_SCHEMA, ERROR_RESPONSE_REF] },
   "504": MODEL_CALL_ERROR_SCHEMA,
+};
+// A 422 names the entries left out when content could not be read, and is a plain refusal when
+// there was nothing to work on.
+const META_ERRORS: Readonly<Record<string, Json>> = {
+  ...MODEL_CALL_ERRORS,
+  "422": { anyOf: [SKIPPED_CONTENT_ERROR_SCHEMA, ERROR_RESPONSE_REF] },
+};
+
+// A room a template install made, as `skillSets`, `knowledgeBases` and the success answer name it.
+const INSTALLED_ROOM_SCHEMA: Json = {
+  type: "object",
+  description: "A room the installation made.",
+  properties: {
+    templateId: {
+      type: "string",
+      description: "The id of the template the room was made from.",
+      examples: ["skill-sets/contract-review"],
+    },
+    id: { type: "string", description: "The ID of the new room.", examples: ["101"] },
+    title: { type: "string", description: "The title the room was created with." },
+  },
+  required: ["templateId", "id", "title"],
+  additionalProperties: false,
+};
+
+// A template install whose step failed after the first room was made, or whose creation of a
+// room (the first included) got an answer that leaves the room unknown, keeps that step's status
+// and names the rooms that exist and the one that may (`templatesController.install`); a
+// failure before that answers the plain `AiErrorResponse`.
+const TEMPLATE_INSTALL_INCOMPLETE_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    error: {
+      type: "string",
+      description: "The reason phrase of the step that failed, as a plain refusal carries it.",
+      examples: ["Internal Server Error"],
+    },
+    skillSets: {
+      type: "array",
+      description: "The Instructions rooms made before the failure, for skill sets.",
+      items: INSTALLED_ROOM_SCHEMA,
+    },
+    knowledgeBases: {
+      type: "array",
+      description: "The Knowledge rooms made before the failure, for knowledge bases.",
+      items: INSTALLED_ROOM_SCHEMA,
+    },
+    agent: {
+      ...INSTALLED_ROOM_SCHEMA,
+      description: "The agent's room, present when it was made and linking it to its rooms failed.",
+    },
+    unconfirmed: {
+      type: "object",
+      description:
+        "The room whose creation got an answer that does not say whether it was made (a timeout, a dropped connection, a 5xx, a 2xx that names no room). It may exist in the portal under this title; its id is not known.",
+      properties: {
+        templateId: { type: "string", description: "The template the room was asked for." },
+        title: { type: "string", description: "The title the room was asked with." },
+      },
+      required: ["templateId", "title"],
+      additionalProperties: false,
+    },
+    warning: {
+      type: "string",
+      description:
+        "`installIncomplete`: the rooms listed exist and were not undone, and the `unconfirmed` room may exist.",
+      enum: ["installIncomplete"],
+    },
+  },
+  required: ["error", "skillSets", "knowledgeBases", "warning"],
+  additionalProperties: false,
+};
+const TEMPLATE_INSTALL_ERROR_SCHEMA: Json = {
+  anyOf: [TEMPLATE_INSTALL_INCOMPLETE_SCHEMA, ERROR_RESPONSE_REF],
 };
 
 // operationId -> status code -> schema, with `*` standing for every code of that
@@ -1882,7 +2213,11 @@ const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, J
     "404": PROMPT_REFUSAL_SCHEMA,
     "409": PROMPT_REFUSAL_SCHEMA,
   },
-  aiPromptsCreateFolder: { "400": FOLDER_REFUSAL_SCHEMA, "409": FOLDER_REFUSAL_SCHEMA },
+  aiPromptsCreateFolder: {
+    "400": FOLDER_REFUSAL_SCHEMA,
+    "404": FOLDER_REFUSAL_SCHEMA,
+    "409": FOLDER_REFUSAL_SCHEMA,
+  },
   aiPromptsRenameFolder: {
     "400": FOLDER_REFUSAL_SCHEMA,
     "404": FOLDER_REFUSAL_SCHEMA,
@@ -1890,9 +2225,27 @@ const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, J
   },
   aiPromptsImportBundle: { "400": IMPORT_REFUSAL_SCHEMA, "409": IMPORT_REFUSAL_SCHEMA },
   aiWebSearchConfigure: { "400": WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA },
-  aiMetaGenerate: MODEL_CALL_ERRORS,
-  aiMetaFill: MODEL_CALL_ERRORS,
+  aiMetaGenerate: META_ERRORS,
+  aiMetaFill: META_ERRORS,
   aiSkillsGenerate: MODEL_CALL_ERRORS,
+  aiSendWithStream: PROJECT_MODEL_ERRORS,
+  aiSendWithStreamOpenAI: PROJECT_MODEL_ERRORS,
+  aiRegenerateStream: PROJECT_MODEL_ERRORS,
+  aiApproveToolCall: PROJECT_MODEL_ERRORS,
+  aiDenyToolCall: PROJECT_MODEL_ERRORS,
+  aiSend: PROJECT_MODEL_ERRORS,
+  aiTemplatesInstall: {
+    "400": TEMPLATE_INSTALL_ERROR_SCHEMA,
+    "402": TEMPLATE_INSTALL_ERROR_SCHEMA,
+    "403": TEMPLATE_INSTALL_ERROR_SCHEMA,
+    "404": TEMPLATE_INSTALL_ERROR_SCHEMA,
+    "413": TEMPLATE_INSTALL_ERROR_SCHEMA,
+    "500": TEMPLATE_INSTALL_ERROR_SCHEMA,
+    "502": TEMPLATE_INSTALL_ERROR_SCHEMA,
+    "503": TEMPLATE_INSTALL_ERROR_SCHEMA,
+  },
+  aiWebSearchPassthroughSearch: { "400": FIELD_OR_PLAIN_ERROR_SCHEMA },
+  aiWebSearchPassthroughContents: { "400": FIELD_OR_PLAIN_ERROR_SCHEMA },
 };
 
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {
@@ -1902,9 +2255,19 @@ function responseFor(operations: OperationSchemaLookup, operationId: string): Js
   if (streaming && schema !== undefined) {
     // The schema types a single streamed item; the media type frames the
     // stream. (A JSON `content` block would misrepresent the wire format.)
+    // An NDJSON stream of chat events may end with this service's own error line.
+    const item: Json =
+      streaming.mediaType === "application/x-ndjson"
+        ? {
+            anyOf: [
+              schema as Json,
+              { $ref: `#/components/schemas/${STREAM_ERROR_EVENT_COMPONENT}` },
+            ],
+          }
+        : (schema as Json);
     return {
       description: streaming.description,
-      content: { [streaming.mediaType]: { schema: schema as Json } },
+      content: { [streaming.mediaType]: { schema: item } },
     };
   }
   const description = SUCCESS_DESCRIPTIONS[operationId] ?? "Success.";
@@ -2290,7 +2653,11 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
       },
       // Shared named types referenced by the inlined operation schemas, plus
       // the request bodies promoted to `<OperationId>Request`.
-      schemas: { ...sharedSchemas, ...requestComponents } as Json,
+      schemas: {
+        ...sharedSchemas,
+        ...requestComponents,
+        [STREAM_ERROR_EVENT_COMPONENT]: STREAM_ERROR_EVENT_SCHEMA,
+      } as Json,
     },
   };
 }

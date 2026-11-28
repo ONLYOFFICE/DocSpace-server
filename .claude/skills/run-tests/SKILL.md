@@ -89,3 +89,20 @@ per checkout). An older commit binds the fixed ports, logs to the shared `Logs/t
 whole `Data/test` of its base when it ends, the storage of a run next to it included: run such a
 baseline after the other run, not alongside it. If the list of failures matches the baseline
 name-by-name, it is a flake, not a regression.
+
+## The AI chat service (vitest)
+
+The Node service `common/ASC.AI.Chat` has unit tests of its own. They are not part of
+`dotnet test ASC.Tests.slnx` and need no AppHost, only `yarn install --immutable` once:
+
+```bash
+cd common/ASC.AI.Chat
+yarn test                                                    # all of them
+yarn vitest run app/storage/__tests__/roomSkills.test.ts     # one file
+yarn vitest run app/controllers -t "without their headers"   # by test name
+yarn check                                                   # typecheck, lint, format:check, tests
+```
+
+A test of this service that needs the real .NET services is not a vitest test: it lives in
+`products/ASC.AI/ASC.AI.Tests`, whose AppHost starts the service. Which suite proves what:
+`.claude/rules/ts-ai-tests.md` §1.

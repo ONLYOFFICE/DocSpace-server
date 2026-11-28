@@ -1,37 +1,41 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { DocspaceFolderInfo, DocspaceFileInfo, SourceMeta } from "./storage/docspaceFilesApi.js";
+import type {
+  DocspaceFolderInfo,
+  DocspaceFileInfo,
+  SourceMeta,
+} from "./storage/docspaceFilesApi.js";
 import type { ChatContextSnapshot } from "./storage/chatContextSnapshot.js";
 
 export type ForwardedHeaders = Record<string, string>;
@@ -64,6 +68,9 @@ export interface RequestContext {
   // DTO cannot change within one request, so the second reader joins the
   // first fetch (see `getFolderInfoOnce`).
   folderInfoCache?: Map<string, Promise<DocspaceFolderInfo | undefined>>;
+  // Whether the caller administers the portal, once a read of this request has said so (see
+  // `pluginAgentTools`). Unset until a read succeeds: a failed read is never remembered.
+  portalAdmin?: boolean;
   // In-flight `GET /files/file/{id}` reads, keyed by file id — the file-side
   // twin of `folderInfoCache` (see `getFileInfoOnce`). Kept apart because
   // files and folders have independent id spaces.
@@ -95,6 +102,8 @@ export interface RequestContext {
   // results are kept among the thread's artifacts; the thread slice of the
   // chat-context snapshot cannot say it once the round has touched the thread.
   roundThreadId?: string;
+  /** The signal of the round's reply: aborted when the client stops it before it ended. */
+  roundSignal?: AbortSignal;
   // Attachment ref ids of the current user message, captured before the
   // engine runs so an in-round tool call can hand the attached files on.
   roundAttachmentIds?: string[];
@@ -143,6 +152,43 @@ export interface DocumentAgentSetting {
   filesUrl?: string;
 }
 
+// The plugin agent (`ai.pluginAgent` in the shared `appsettings.json`): a sub-agent of this
+// service that builds a DocSpace plugin in a sandbox somebody else provides. Absent or without
+// the sandbox's URL and token, its tools are not offered.
+export interface PluginAgentSetting {
+  /** The sandbox gateway and the bearer token every route of it wants. */
+  sandboxUrl?: string;
+  sandboxToken?: string;
+  taskTimeoutSeconds?: number;
+  maxToolCalls?: number;
+  maxConcurrentTasks?: number;
+  /** The lifetime a sandbox is created and renewed with. */
+  sandboxTtlSeconds?: number;
+  /** This service as a sandbox reaches it; naming it turns the package registry route on. */
+  serviceUrl?: string;
+  /** The npm registry the route forwards to; the public one by default. Read only with `serviceUrl`. */
+  registryUrl?: string;
+  /** Where fetched package archives are kept, and the most they may take together, in MiB. */
+  cacheDir?: string;
+  cacheMaxMb?: number;
+}
+
+// The sandbox of the chat itself (`ai.sandbox` in the shared `appsettings.json`): a sandbox of
+// the gateway the plugin agent uses, one per user, that the chat's model runs commands
+// in. Absent or without the gateway's URL and token, its tools are not offered.
+export interface ChatSandboxSetting {
+  // `unknown`: the block is read as it stands in the file, and `getChatSandbox` reports a
+  // field of the wrong type instead of trusting it.
+  /** The sandbox gateway and the bearer token every route of it wants: two texts. */
+  url?: unknown;
+  token?: unknown;
+  /**
+   * How long a sandbox is kept after a tool call, before the longest command timeout is added:
+   * a whole number of seconds.
+   */
+  idleTtlSeconds?: unknown;
+}
+
 // Automatic history compaction (`ai.compaction` in the shared
 // `appsettings.json`): the library folds a thread that nears its model's
 // context window into a summary message before the round. On by default.
@@ -166,6 +212,8 @@ export interface RootConfig {
   ai?: {
     mcp?: McpServerSetting[];
     documentAgent?: DocumentAgentSetting;
+    pluginAgent?: PluginAgentSetting;
+    sandbox?: ChatSandboxSetting;
     compaction?: CompactionSetting;
   };
 }
