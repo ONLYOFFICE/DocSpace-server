@@ -93,7 +93,8 @@ public class OFormRequestManager(
 
     /// <summary>
     /// How long the availability check waits for the gallery: below the 5-second lock timeout of this process's cache,
-    /// so the readers of this process that arrive meanwhile wait for this check instead of starting their own.
+    /// so the readers of this process that arrive meanwhile wait for this check instead of starting their own
+    /// (<c>IsAvailableAsync_ReadersDuringACheck_WaitForItAndShareItsAnswer</c>).
     /// </summary>
     public static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(4);
 
@@ -218,7 +219,7 @@ public class OFormRequestManager(
         {
             if (await IsFirstFailureOfIntervalAsync("status"))
             {
-                logger.WarningOFormGalleryStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
+                logger.WarningOFormGalleryStatus(WithoutQuery(response.RequestMessage?.RequestUri), (int)response.StatusCode);
             }
 
             throw GalleryUnavailable();
@@ -349,7 +350,8 @@ public class OFormRequestManager(
     /// <exception cref="JsonException">The answer is not JSON, the page of a proxy.</exception>
     private async Task<OFromRequestData> ReadListAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
-        var uri = response.RequestMessage?.RequestUri;
+        // Without its query and user info, like every gallery address in the log
+        var uri = WithoutQuery(response.RequestMessage?.RequestUri);
 
         if (response.Content.Headers.ContentLength > MaxListSize)
         {
@@ -396,8 +398,9 @@ public class OFormRequestManager(
     /// answered before: for a day after the gallery last answered, then a failed check means "unavailable". The time of
     /// that answer is kept in the cached value, since every failed check stores the entry again and would otherwise
     /// keep it for as long as the checks keep failing. The known "available" may be another process's, read from the
-    /// distributed cache, also when this process holds an expired "unavailable" of its own; the reader of a check
-    /// slower than the 200 ms wait still gets that "unavailable" until the check ends. Without a distributed cache
+    /// distributed cache, also when this process holds an expired "unavailable" of its own. Within its 10 minutes the
+    /// reader gets that "available" at once; past them, kept by the fail-safe, the reader of a check slower than the
+    /// 200 ms wait gets the local "unavailable" until the check ends. Without a distributed cache
     /// (Redis off), a restart forgets it. With nothing known, a failed check means "unavailable" for up to 1 minute,
     /// kept by this process only, so one process that cannot reach the gallery never hides it from the others. A "true"
     /// another process writes ends it earlier, when its notification arrives through the backplane, also one that
@@ -512,8 +515,7 @@ public class OFormRequestManager(
 
     /// <summary>
     /// The cached answer of the availability check: whether the gallery answered with its template list, and when the
-    /// check got this answer, after the request to the gallery. The key holds this record, not the bare flag of the earlier versions, so an entry they
-    /// wrote is never read as one.
+    /// check got this answer, after the request to the gallery.
     /// </summary>
     public sealed record AvailabilityAnswer(bool Available, DateTimeOffset AnsweredAt);
 
@@ -530,7 +532,10 @@ public class OFormRequestManager(
         }
         catch (Exception e) when (IsGalleryFailure(e))
         {
-            logger.WarningOFormGalleryProbeFailed(e);
+            if (await IsFirstFailureOfIntervalAsync("probe-failed"))
+            {
+                logger.WarningOFormGalleryProbeFailed(e);
+            }
 
             return false;
         }
@@ -538,7 +543,10 @@ public class OFormRequestManager(
         {
             // Not a failure of the gallery, yet the check has to answer: with nothing known, a 500 of the endpoint would
             // replace "unavailable", and a known "available" is kept by the check either way
-            logger.ErrorOFormGalleryProbeError(e);
+            if (await IsFirstFailureOfIntervalAsync("probe-error"))
+            {
+                logger.ErrorOFormGalleryProbeError(e);
+            }
 
             return false;
         }
@@ -557,7 +565,10 @@ public class OFormRequestManager(
         using var response = await httpClient.GetAsync($"{GetListUrl()}?pagination[pageSize]=1&fields[0]=updatedAt", HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            logger.WarningOFormGalleryProbeStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
+            if (await IsFirstFailureOfIntervalAsync("probe-status"))
+            {
+                logger.WarningOFormGalleryProbeStatus(WithoutQuery(response.RequestMessage?.RequestUri), (int)response.StatusCode);
+            }
 
             return false;
         }

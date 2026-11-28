@@ -93,14 +93,14 @@ after the last answer while the cache holds it (bug 78009).
 #### Scenario: No gallery configured
 
 - **WHEN** no gallery is configured
-- **THEN** the call returns `false` without a check, and nothing is cached
+- **THEN** the call returns `false`
 
 #### Scenario: Check fails with nothing known
 
 - **WHEN** the gallery answers with an error status, with a page that is not the list, not in time, drops the connection, cannot be reached, the check fails for a reason other than the gallery, or the check runs past the hard timeout of the cache
 - **THEN** the call returns `false`
 - **AND** that `false` stays with the process that checked, for up to a minute: another process of the installation asks the gallery itself
-- **AND** after that minute, while a new check takes longer than 200 ms, the call returns the expired `false`; it does so also when another process has since got `true`, until the check ends
+- **AND** after that minute, while a new check takes longer than 200 ms, the call returns the expired `false`; it does so also when another process got `true` more than 10 minutes ago, until the check ends
 
 #### Scenario: Check fails with available known
 

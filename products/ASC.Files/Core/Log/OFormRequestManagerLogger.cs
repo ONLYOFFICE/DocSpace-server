@@ -37,10 +37,10 @@ namespace ASC.Files.Core.Log;
 internal static partial class OFormRequestManagerLogger
 {
     [LoggerMessage(LogLevel.Warning, "The template gallery answered {status} to {uri}")]
-    public static partial void WarningOFormGalleryStatus(this ILogger<OFormRequestManager> logger, Uri uri, int status);
+    public static partial void WarningOFormGalleryStatus(this ILogger<OFormRequestManager> logger, string uri, int status);
 
     [LoggerMessage(LogLevel.Warning, "The template gallery answered {uri} without its template list")]
-    public static partial void WarningOFormGalleryNoList(this ILogger<OFormRequestManager> logger, Uri uri);
+    public static partial void WarningOFormGalleryNoList(this ILogger<OFormRequestManager> logger, string uri);
 
     [LoggerMessage(LogLevel.Warning, "The template gallery answered {status} for the file {url}")]
     public static partial void WarningOFormGalleryFileStatus(this ILogger<OFormRequestManager> logger, string url, int status);
@@ -52,7 +52,7 @@ internal static partial class OFormRequestManagerLogger
     public static partial void WarningOFormGalleryFileTooLarge(this ILogger<OFormRequestManager> logger, string url, long maxSize);
 
     [LoggerMessage(LogLevel.Warning, "The template gallery answered {uri} with more than {maxSize} bytes")]
-    public static partial void WarningOFormGalleryAnswerTooLarge(this ILogger<OFormRequestManager> logger, Uri uri, long maxSize);
+    public static partial void WarningOFormGalleryAnswerTooLarge(this ILogger<OFormRequestManager> logger, string uri, long maxSize);
 
     [LoggerMessage(LogLevel.Warning, "The address of the template gallery is not an http or https address: {domain}")]
     public static partial void WarningOFormGalleryAddress(this ILogger<OFormRequestManager> logger, string domain);
@@ -67,7 +67,7 @@ internal static partial class OFormRequestManagerLogger
     public static partial void ErrorOFormGalleryDownloadFailed(this ILogger<OFormRequestManager> logger, Exception exception);
 
     [LoggerMessage(LogLevel.Warning, "The check of the template gallery got {status} from {uri}")]
-    public static partial void WarningOFormGalleryProbeStatus(this ILogger<OFormRequestManager> logger, Uri uri, int status);
+    public static partial void WarningOFormGalleryProbeStatus(this ILogger<OFormRequestManager> logger, string uri, int status);
 
     [LoggerMessage(LogLevel.Warning, "The check of the template gallery could not reach it or read its answer")]
     public static partial void WarningOFormGalleryProbeFailed(this ILogger<OFormRequestManager> logger, Exception exception);

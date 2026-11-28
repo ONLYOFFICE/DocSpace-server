@@ -1526,6 +1526,136 @@ public sealed class OFormRequestManagerTests : IDisposable
         gallery.CallCount.Should().Be(3);
     }
 
+    [Fact]
+    public async Task Get_JustUnderHalfOfNinetySevenRequestsFailed_LeavesTheCircuitClosed()
+    {
+        // 49 answered requests (24 creations with their files, a list answering 403), then 16 creations whose 3
+        // requests each fail: the last failure makes 48 of 97, about 0.495, so a failure ratio of exactly one half
+        // leaves the circuit closed and the next creation still asks the gallery; a ratio of 0.49 would open it there
+        var phase = 0;
+        var gallery = Gallery(request => Volatile.Read(ref phase) switch
+        {
+            0 => IsFile(request) ? new StubResponse(HttpStatusCode.OK, Pdf) : StubResponse.Json(HttpStatusCode.OK, ListWithFile()),
+            1 => new StubResponse(HttpStatusCode.Forbidden),
+            _ => new StubResponse(HttpStatusCode.ServiceUnavailable)
+        });
+        var manager = CreateManager(gallery.Url);
+
+        for (var i = 0; i < 24; i++)
+        {
+            await using (await manager.Get(1, ".pdf"))
+            {
+            }
+        }
+
+        Volatile.Write(ref phase, 1);
+        await AssertGalleryUnavailableAsync(manager);
+        Volatile.Write(ref phase, 2);
+        for (var i = 0; i < 16; i++)
+        {
+            await AssertGalleryUnavailableAsync(manager);
+        }
+
+        var asked = gallery.CallCount;
+
+        await AssertGalleryUnavailableAsync(manager);
+
+        asked.Should().Be(97);
+        gallery.CallCount.Should().BeGreaterThan(asked);
+    }
+
+    [Fact]
+    public async Task Get_GalleryAddressWithUserInfo_LogsTheListAddressWithoutIt()
+    {
+        // A configured address with a password in it reaches the gallery; a warning of the manager about the list
+        // names the address without that password
+        var logs = new RecordingLoggerProvider();
+        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.Forbidden));
+        var manager = CreateManager(gallery.Url.Replace("http://", "http://user:secret@", StringComparison.Ordinal), loggerProvider: logs);
+
+        await AssertGalleryUnavailableAsync(manager);
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+
+        var managerWarnings = logs.Entries.Where(entry => entry.Category == typeof(OFormRequestManager).FullName && entry.Level == LogLevel.Warning).ToList();
+        managerWarnings.Should().HaveCount(2);
+        managerWarnings.Should().NotContain(entry => entry.Message.Contains("secret", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_CheckKeepsFailing_LogsTheFailureOncePerKind()
+    {
+        // The check of a gallery that keeps refusing runs again every minute in every process: its warning is logged
+        // on the first failed check, not on each, and a failure of another kind is logged at once
+        var logs = new RecordingLoggerProvider();
+        var noList = false;
+        var gallery = Gallery(_ => Volatile.Read(ref noList)
+            ? StubResponse.Json(HttpStatusCode.OK, """{"error":"not the list"}""")
+            : new StubResponse(HttpStatusCode.Forbidden));
+        var manager = CreateManager(gallery.Url, loggerProvider: logs);
+        var key = AvailabilityCacheKey(gallery);
+        var token = TestContext.Current.CancellationToken;
+
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+        await _cache.ExpireAsync(key, token: token);
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+
+        Volatile.Write(ref noList, true);
+        await _cache.ExpireAsync(key, token: token);
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+        await _cache.ExpireAsync(key, token: token);
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+
+        gallery.CallCount.Should().Be(4);
+        var managerWarnings = logs.Entries.Where(entry => entry.Category == typeof(OFormRequestManager).FullName && entry.Level == LogLevel.Warning).ToList();
+        managerWarnings.Count(entry => Regex.IsMatch(entry.Message, @"^The check of the template gallery got 403 from http\S+$")).Should().Be(1);
+        managerWarnings.Count(entry => Regex.IsMatch(entry.Message, @"^The template gallery answered http\S+ without its template list$")).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_ReadersDuringACheck_WaitForItAndShareItsAnswer()
+    {
+        // Readers that arrive while a check runs, with nothing known, wait for that check under the lock of the cache
+        // instead of starting their own
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List).After(TimeSpan.FromSeconds(1)));
+        var manager = CreateManager(gallery.Url);
+
+        var answers = await Task.WhenAll(Enumerable.Range(0, 5).Select(_ => manager.IsAvailableAsync()));
+
+        answers.Should().AllBeEquivalentTo(true);
+        gallery.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_SlowCheckWithLocalFalseAndAFreshTrueOfAnotherNode_ReaderGetsTheTrue()
+    {
+        // A node holds its own expired "unavailable", and another node's "available" is still fresh in the distributed
+        // cache, within its 10 minutes. The reader does not wait for a check: the cache answers the distributed
+        // "available"
+        var distributed = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        using var first = CreateNodeCache(distributed);
+        using var second = CreateNodeCache(distributed);
+        var slow = false;
+        var gallery = Gallery(_ => Volatile.Read(ref slow)
+            ? new StubResponse(HttpStatusCode.BadGateway).After(TimeSpan.FromSeconds(3))
+            : new StubResponse(HttpStatusCode.BadGateway));
+        var firstManager = CreateManager(gallery.Url, cache: first);
+        var key = AvailabilityCacheKey(gallery);
+        var token = TestContext.Current.CancellationToken;
+
+        (await firstManager.IsAvailableAsync()).Should().BeFalse();
+
+        await second.SetAsync(key, new OFormRequestManager.AvailabilityAnswer(true, DateTimeOffset.UtcNow), options => options
+            .SetDuration(TimeSpan.FromMinutes(10))
+            .SetFailSafe(true, TimeSpan.FromDays(1)), token);
+        await first.ExpireAsync(key, options => options.SkipDistributedCacheWrite = true, token);
+        Volatile.Write(ref slow, true);
+
+        var watch = Stopwatch.StartNew();
+        (await firstManager.IsAvailableAsync()).Should().BeTrue();
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
+        gallery.CallCount.Should().Be(1);
+    }
+
     private static string AvailabilityCacheKey(HttpStub gallery)
     {
         return OFormRequestManager.GetAvailabilityCacheKey(gallery.Url + GalleryPath);
@@ -1848,20 +1978,20 @@ public sealed class OFormRequestManagerTests : IDisposable
     /// </summary>
     private sealed class RecordingLoggerProvider : ILoggerProvider
     {
-        private readonly ConcurrentQueue<(LogLevel Level, string Message)> _entries = new();
+        private readonly ConcurrentQueue<(LogLevel Level, string Message, string Category)> _entries = new();
 
-        public IReadOnlyCollection<(LogLevel Level, string Message)> Entries => _entries.ToArray();
+        public IReadOnlyCollection<(LogLevel Level, string Message, string Category)> Entries => _entries.ToArray();
 
         public ILogger CreateLogger(string categoryName)
         {
-            return new Logger(_entries);
+            return new Logger(_entries, categoryName);
         }
 
         public void Dispose()
         {
         }
 
-        private sealed class Logger(ConcurrentQueue<(LogLevel Level, string Message)> entries) : ILogger
+        private sealed class Logger(ConcurrentQueue<(LogLevel Level, string Message, string Category)> entries, string category) : ILogger
         {
             public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
@@ -1869,7 +1999,7 @@ public sealed class OFormRequestManagerTests : IDisposable
 
             public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
             {
-                entries.Enqueue((logLevel, formatter(state, exception)));
+                entries.Enqueue((logLevel, formatter(state, exception), category));
             }
         }
     }

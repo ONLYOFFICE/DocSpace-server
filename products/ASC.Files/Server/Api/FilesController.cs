@@ -321,8 +321,8 @@ public abstract class FilesController<T>(
     /// changes a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. It adds DOCX to a title
     /// without an extension. It keeps an unknown extension and the few formats that the portal stores as they are. With
     /// `enableExternalExt=true`, the call keeps the extension of `title` in lower case and does not change the format.
-    /// If `templateId` is set, the call copies that file, which the caller must be able to read. Otherwise, `formId`
-    /// copies a template from the template gallery. Without both, the call uses the blank template of the format in the
+    /// If `templateId` is set, the call copies that file, which the caller must be able to read. A numeric `templateId`
+    /// is set even when it is 0. Otherwise, `formId` copies a template from the template gallery. Without both, the call uses the blank template of the format in the
     /// caller's language. Requires the right to create files in the folder. Other callers get 403. The call changes
     /// data. Do not repeat it. Each call creates another file. The call returns 403 in the Rooms root, the archive, and
     /// the template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable `templateId`
@@ -1322,7 +1322,7 @@ public class FilesControllerCommon(
     /// format. The portal changes a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. A title
     /// without an extension gets DOCX. The portal keeps an unknown extension and a few other formats. If
     /// `enableExternalExt` is true, the portal keeps the extension of the title in lower case. If `templateId` is set,
-    /// the portal copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that
+    /// the portal copies that file and ignores `formId`. A numeric `templateId` is set even when it is 0. Otherwise, a nonzero `formId` makes the portal copy that
     /// template from the template gallery. If neither is set, the portal uses its blank template for the format and the
     /// language of the caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any
     /// signed-in user can call it, except a guest. A guest who has My documents gets 403. The call changes data. Do not

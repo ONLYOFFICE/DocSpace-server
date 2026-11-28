@@ -51,7 +51,7 @@ public class TemplateGalleryController(OFormRequestManager oFormRequestManager) 
     /// cache, each server process keeps its own answers, and a restart forgets them. With nothing known, a failed check
     /// returns `false`. The server process that checked keeps that `false` for up to 1 minute. After 200 ms of waiting
     /// for a refresh, the call can return an expired answer of the last day. A process may then return its own
-    /// `false` while another got `true`. The request to the gallery times out after 4 seconds.
+    /// `false` while another process got `true` more than 10 minutes ago. The request to the gallery times out after 4 seconds.
     /// Without a configured gallery, the call returns `false`. The answer is not a promise that a template can be
     /// created. The server counts the requests of the downloads to each gallery host over 30 seconds. A request fails
     /// if it cannot connect or times out. It also fails on a server error, Request Timeout, or Too Many Requests. The
